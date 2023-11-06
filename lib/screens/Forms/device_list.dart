@@ -952,6 +952,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                                   {
                                                     widget.usedNodeList[siteIndex].removeWhere((node) => node.userDeviceListId == widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId);
                                                     _showSnackBar(data["message"]);
+
                                                     setState(() {
                                                       selectedNodeList.clear();
                                                       checkboxValueNode = false;

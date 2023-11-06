@@ -33,16 +33,13 @@ class MqttService {
     _initMqtt();
   }
 
-  //kamaraj
-
   Future<void> _initMqtt() async
   {
     mqttClient.logging(on: false);
     mqttClient.port = 9001;//web
     mqttClient.keepAlivePeriod = 60;
     mqttClient.onSubscribed = onSubscribed;
-    mqttClient.onDisconnected = onDisconnected;
-    mqttClient.autoReconnect = true;
+    mqttClient.autoReconnect = false;
 
     try {
       await _mqttClient.connect();
@@ -52,20 +49,24 @@ class MqttService {
     }
   }
 
-  Future<void> onDisconnected() async {
+  void onDisconnected() {
     print('MqttService Disconnected');
-    _mqttClient.resubscribeOnAutoReconnect;
+    Future.delayed(const Duration(seconds: 5), () {
+      print('Attempting to reconnect...');
+      mqttClient.connect();
+    });
   }
 
-  void subscribeToTopic(String topic, BuildContext contact)
+  void subscribeToTopic(String topic, BuildContext context)
   {
-    if (mqttClient.connectionStatus?.state == MqttConnectionState.connected)
-    {
+    if (mqttClient.connectionStatus?.state == MqttConnectionState.connected) {
       mqttClient.subscribe(topic, MqttQos.atLeastOnce);
-      _listenMqtt(contact);
+      _listenMqtt(context);
     } else {
       print('MQTT client is not connected. Cannot subscribe to the topic.');
+      // Add additional logging or error handling here if needed
     }
+
   }
 
   void onSubscribed(String? topic) {

@@ -5,7 +5,7 @@ import 'package:oro_irrigation_new/screens/Forms/create_account.dart';
 import 'package:oro_irrigation_new/screens/product_inventory.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../constants/mqtt_manager.dart';
+import '../constants/mqtt_web_client.dart';
 import 'Customer/customer_home.dart';
 import 'my_preference.dart';
 import 'product_entry.dart';
@@ -65,7 +65,7 @@ class DashBoardMainState extends State<DashBoardMain> with TickerProviderStateMi
   @override
   void initState() {
     super.initState();
-    MqttService().mqttClient;
+    MqttWebClient().main();
     _executeSharedPreferences();
   }
 
@@ -82,7 +82,7 @@ class DashBoardMainState extends State<DashBoardMain> with TickerProviderStateMi
     });
 
     Future.delayed(const Duration(milliseconds: 500), () async {
-      MqttService().subscribeToTopic('tweet/$userMobileNo', context);
+      MqttWebClient().onSubscribed('tweet/$userMobileNo');
     });
 
   }

@@ -6,8 +6,8 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../../Models/create_json_file.dart';
 import '../../../constants/http_service.dart';
-import '../../../constants/mqtt_manager.dart';
 import '../../../constants/mqtt_service.dart';
+import '../../../constants/mqtt_web_client.dart';
 import '../../../state_management/config_maker_provider.dart';
 
 
@@ -82,7 +82,7 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
               ]
             });
 
-            MqttService().publishMessage('AppToFirmware/${widget.imeiNo}', payLoad);
+            MqttWebClient().publishMessage('AppToFirmware/${widget.imeiNo}', payLoad);
 
           }catch(e){
             print(e.toString());

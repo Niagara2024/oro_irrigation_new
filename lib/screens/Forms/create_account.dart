@@ -3,17 +3,13 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
-import 'package:oro_irrigation_new/screens/dash_board.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Models/country_list.dart';
 import '../../Models/state_list.dart';
-import '../../constants/CounterBloc.dart';
 import '../../constants/http_service.dart';
-import '../../constants/mqtt_manager.dart';
-import '../../constants/mqtt_service.dart';
+import '../../constants/mqtt_web_client.dart';
 import '../../constants/theme.dart';
-import '../home_page.dart';
 
 class CreateAccount extends StatefulWidget {
   const CreateAccount({Key? key}) : super(key: key);
@@ -419,7 +415,7 @@ class _CreateAccountState extends State<CreateAccount> {
                                       var data = jsonDecode(response.body);
                                       if(data["code"]==200)
                                       {
-                                        MqttService().publishMessage('tweet/$userMobileNo', 'updateCustomerAccount');
+                                        MqttWebClient().publishMessage('tweet/$userMobileNo', 'updateCustomerAccount');
                                         if(mounted){
                                           Navigator.pop(context);
                                         }

@@ -15,7 +15,7 @@ import '../../Models/model_added_nodes.dart';
 import '../../Models/node_model.dart';
 import '../../Models/product_stock.dart';
 import '../../constants/http_service.dart';
-import '../../constants/mqtt_manager.dart';
+import '../../constants/mqtt_web_client.dart';
 import '../../state_management/config_maker_provider.dart';
 
 enum SampleItem { itemOne, itemTwo, itemThree }
@@ -74,6 +74,13 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   @override
   void dispose() {
     _tabCont.dispose();
+
+    for (int i=0; i < customerSiteList.length; i++) {
+      Future.delayed(const Duration(milliseconds: 100), () async {
+        MqttWebClient().unsubscribeFromTopic('FirmwareToApp/${customerSiteList[i].deviceId}');
+      });
+    }
+
     super.dispose();
   }
 
@@ -164,7 +171,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
           customerSiteList.add(ProductListWithNode.fromJson(cntList[i]));
 
           Future.delayed(const Duration(milliseconds: 100), () async {
-            MqttService().subscribeToTopic('FirmwareToApp/${customerSiteList[i].deviceId}', context);
+            MqttWebClient().onSubscribed('FirmwareToApp/${customerSiteList[i].deviceId}');
           });
 
           final nodeList = cntList[i]['nodeList'] as List;
@@ -1025,7 +1032,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                         ]
                                       });
 
-                                      MqttService().publishMessage('AppToFirmware/${widget.customerSiteList[siteIndex].deviceId}', payLoadFinal.toString());
+                                      MqttWebClient().publishMessage('AppToFirmware/${widget.customerSiteList[siteIndex].deviceId}', payLoadFinal);
 
                                       final response = await HttpService().putRequest("updateUserDeviceNodeList", body);
                                       if(response.statusCode == 200)

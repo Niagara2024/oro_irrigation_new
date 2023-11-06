@@ -23,7 +23,6 @@ class _PreferencesScreenState extends State<PreferencesScreen> with SingleTicker
   late TabController _tabController;
   final HttpService httpService = HttpService();
   bool isScreenSizeLarge = false;
- // final MqttService mqttService = MqttService();
 
   @override
   void initState() {

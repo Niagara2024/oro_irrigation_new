@@ -195,25 +195,45 @@ class ProductInventoryState extends State<ProductInventory> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ActionChip(
-                  tooltip: 'Category\nModel\nManufacture date\nSales person',
-                  avatar: Icon(Icons.sort, color: myTheme.primaryColor),
-                  label: const Text('Sort By'),
-                  backgroundColor: Colors.white,
-                  elevation: 6.0,
-                  shadowColor: Colors.grey[60],
-                  padding: const EdgeInsets.all(5.0),
-                  onPressed: (){},
-                ),
-                const SizedBox(width: 10,),
-                ActionChip(
                   avatar: Icon(Icons.filter_alt_outlined, color: myTheme.primaryColor),
                   label: const Text('Filter'),
-                  tooltip: 'Filter By\nSearch',
+                  tooltip: 'By\nCategory\nModel\nManufacture date\nSales person\nSearch',
                   backgroundColor: Colors.white,
                   elevation: 6.0,
                   shadowColor: Colors.grey[60],
                   padding: const EdgeInsets.all(5.0),
-                  onPressed: (){},
+                  onPressed: (){
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Container(
+                          height: 300,
+                          width: 500,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)), // Adjust the value for corner radius
+                          ),
+                          child: const Column(
+                            children: [
+                              SizedBox(height: 10,),
+                              Text(
+                                'Filter By',
+                              ),
+                              Divider(),
+                              Text(
+                                'This is a Popover!',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                              Text(
+                                'This is a Popover!',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
                 const SizedBox(width: 10,),
                 ActionChip(

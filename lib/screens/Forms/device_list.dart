@@ -724,6 +724,8 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                                     child: const Text('CANCEL'),
                                                     onPressed: () {
                                                       setState(() {
+                                                        selectedNodeList.clear();
+                                                        checkboxValueNode = false;
                                                         Navigator.pop(context);
                                                       });
                                                     },
@@ -731,7 +733,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                                   MaterialButton(
                                                     color: Colors.green,
                                                     textColor: Colors.white,
-                                                    child: const Text('CREATE'),
+                                                    child: const Text('ADD'),
                                                     onPressed: () async
                                                     {
                                                       List<int> oldNodeListRN = [];
@@ -803,6 +805,9 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                                         else{
                                                         }
                                                       }
+
+                                                      print(selectedNodeList);
+
                                                       if(selectedNodeList.isNotEmpty)
                                                       {
                                                         Map<String, dynamic> body = {
@@ -1031,6 +1036,8 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                           {"101": stringWithoutSpace},
                                         ]
                                       });
+
+                                      print(body);
 
                                       MqttWebClient().publishMessage('AppToFirmware/${widget.customerSiteList[siteIndex].deviceId}', payLoadFinal);
 

@@ -51,7 +51,7 @@ class MqttWebClient {
     /// an example of a specific one below.
     final connMess = MqttConnectMessage()
         .withClientIdentifier('Mqtt_MyClientUniqueId')
-        .withWillTopic('willtopic') // If you set this you must set a will message
+        .withWillTopic('will-topic') // If you set this you must set a will message
         .withWillMessage('My Will message')
         .startClean() // Non persistent session for testing
         .withWillQos(MqttQos.atLeastOnce);
@@ -89,16 +89,14 @@ class MqttWebClient {
     /// notifications of published updates to each subscribed topic.
     client.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
       final recMess = c![0].payload as MqttPublishMessage;
-      final pt =
-      MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+      final pt =  MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
 
       /// The above may seem a little convoluted for users only interested in the
       /// payload, some users however may be interested in the received publish message,
       /// lets not constrain ourselves yet until the package has been in the wild
       /// for a while.
       /// The payload is a byte buffer, this will be specific to the topic
-      print(
-          'EXAMPLE::Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
+      print('EXAMPLE::Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
       print('');
     });
 
@@ -106,8 +104,7 @@ class MqttWebClient {
     /// handshake which is Qos dependant. Any message received on this stream has completed its
     /// publishing handshake with the broker.
     client.published!.listen((MqttPublishMessage message) {
-      print(
-          'EXAMPLE::Published notification:: topic is ${message.variableHeader!.topicName}, with Qos ${message.header!.qos}');
+      print('EXAMPLE::Published notification:: topic is ${message.variableHeader!.topicName}, with Qos ${message.header!.qos}');
     });
 
     /// Lets publish to our topic
@@ -149,7 +146,6 @@ class MqttWebClient {
     client.publishMessage(topic, MqttQos.exactlyOnce, builder.payload!);
   }
 
-
   /// The subscribed callback
   void onSubscribed(String topic) {
     print('EXAMPLE::Subscription confirmed for topic $topic');
@@ -160,12 +156,14 @@ class MqttWebClient {
   }
 
   /// The unsolicited disconnect callback
-  void onDisconnected() {
+  Future<void> onDisconnected() async {
     print('EXAMPLE::OnDisconnected client callback - Client disconnection');
-    if (client.connectionStatus!.disconnectionOrigin ==
-        MqttDisconnectionOrigin.solicited) {
+    if (client.connectionStatus!.disconnectionOrigin == MqttDisconnectionOrigin.solicited) {
       print('EXAMPLE::OnDisconnected callback is solicited, this is correct');
     }
+    //main();
+
+     // Uncomment this line to automatically reconnect
   }
 
   /// The successful connect callback
@@ -174,7 +172,7 @@ class MqttWebClient {
   }
 
   /// Pong callback
-  void pong() {
+  Future<void> pong() async {
     print('EXAMPLE::Ping response client callback invoked');
   }
 }

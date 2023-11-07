@@ -254,6 +254,7 @@ class _DashboardWideState extends State<DashboardWide> {
             labelType: NavigationRailLabelType.all,
             leading: Center(
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   CircleAvatar(
                     radius: 35,

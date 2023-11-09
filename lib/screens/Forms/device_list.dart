@@ -25,7 +25,8 @@ class DeviceList extends StatefulWidget {
   final int customerID, userID, userType;
   final String userName;
   final List<ProductStockModel> productStockList;
-  const DeviceList({super.key, required this.customerID, required this.userName, required this.userID, required this.userType, required this.productStockList});
+  final void Function(String) callback;
+  const DeviceList({super.key, required this.customerID, required this.userName, required this.userID, required this.userType, required this.productStockList, required this.callback});
 
   @override
   State<DeviceList> createState() => _DeviceListState();
@@ -38,7 +39,6 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   SampleItem? selectedMenu;
 
   Map<String, dynamic> productSalesList = {};
-  List<dynamic> salesList = [];
   bool checkboxValue = false;
 
   List<CustomerProductModel> customerProductList = <CustomerProductModel>[];
@@ -59,7 +59,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   final TextEditingController _textFieldSiteDisc = TextEditingController();
 
   final List<InterfaceModel> interfaceType = <InterfaceModel>[];
-
+  List<int> selectedProduct = [];
 
   @override
   void initState() {
@@ -69,6 +69,11 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
     _tabCont = TabController(length: configList.length, vsync: this);
     selectedRadioTile = 0;
     getCustomerType();
+
+    selectedProduct.clear();
+    for(int i=0; i<widget.productStockList.length; i++){
+      selectedProduct.add(0);
+    }
   }
 
   @override
@@ -101,6 +106,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
     getNodeStockList();
     getCustomerSite();
     getNodeInterfaceTypes();
+
   }
 
   Future<void> getMyAllProduct() async
@@ -250,14 +256,20 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
         title: Text(widget.userName),
         actions: [
         PopupMenuButton(
-          tooltip: 'Add Product',
-          child: const CircleAvatar(backgroundColor: Colors.black, child: Icon(Icons.add_box_outlined, color: Colors.white,)),
+          tooltip: _tabCont.index==0 ?'Add Product' : 'Create site',
+          child: const Icon(Icons.add_circle_outline, color: Colors.white,),
           itemBuilder: (context) {
-            return _tabCont.index==0 ? List.generate(widget.productStockList.length+1 ,(index) {
-              if(widget.productStockList.length == index)
-              {
+            return _tabCont.index==0 ?
+            List.generate(widget.productStockList.length+1 ,(index) {
+
+              if(widget.productStockList.isEmpty){
+                return const PopupMenuItem(
+                  child: Text('No stock available to add in the site'),
+                );
+              }
+              else if(widget.productStockList.length == index){
                 return PopupMenuItem(
-                  child : Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       MaterialButton(
@@ -276,6 +288,15 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                         textColor: Colors.white,
                         child: const Text('ADD'),
                         onPressed: () async {
+                          List<dynamic> salesList = [];
+                          for(int i=0; i<selectedProduct.length; i++)
+                          {
+                            if(selectedProduct[i]==1){
+                              Map<String, String> myMap = {"productId": widget.productStockList[i].productId.toString(), 'categoryName': widget.productStockList[i].categoryName};
+                              salesList.add(myMap);
+                            }
+                          }
+
                           if(salesList.isNotEmpty)
                           {
                             Map<String, dynamic> body = {
@@ -299,11 +320,14 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                 setState(() {
                                   salesList.clear();
                                   checkboxValue=false;
+                                  getNodeStockList();
+                                  widget.callback('reloadStock');
                                 });
 
                                 if(mounted){
                                   Navigator.pop(context);
                                 }
+
                                 getMyAllProduct();
                                 getMasterProduct();
                               }
@@ -313,29 +337,29 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                               }
                             }
                           }
+
                         },
                       ),
                     ],
                   ),
                 );
               }
+
               return PopupMenuItem(
                 child: StatefulBuilder(
                   builder: (BuildContext context,
                       void Function(void Function()) setState) {
                     return CheckboxListTile(
                       title: Text(widget.productStockList[index].categoryName),
-                      subtitle: Text('${widget.productStockList[index].imeiNo}'),
+                      subtitle: Text(widget.productStockList[index].imeiNo),
                       value: checkboxValue,
                       onChanged:(bool? value) { setState(() {
                         checkboxValue = value!;
                         if(value){
-                          Map<String, String> myMap = {"productId": widget.productStockList[index].productId.toString(), 'categoryName': widget.productStockList[index].categoryName};
-                          salesList.add(myMap);
+                          selectedProduct[index] = 1;
                         }else{
-                          salesList.removeAt(index);
+                          selectedProduct[index] = 0;
                         }
-
                       });},
                     );
                   },
@@ -369,7 +393,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                         child: const Text('CREATE'),
                         onPressed: () async {
                           Navigator.pop(context);
-                          _displayTextInputDialog(context, myMasterControllerList[selectedRadioTile].categoryName,
+                          _displayCustomerSiteDialog(context, myMasterControllerList[selectedRadioTile].categoryName,
                               myMasterControllerList[selectedRadioTile].model,
                               myMasterControllerList[selectedRadioTile].imeiNo.toString());
                         },
@@ -431,7 +455,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
     );
   }
 
-  Future<void> _displayTextInputDialog(BuildContext context, String ctrl_name, String ctrl_model, String ctrl_iemi) async {
+  Future<void> _displayCustomerSiteDialog(BuildContext context, String ctrlName, String ctrlModel, String ctrlIemi) async {
     return showDialog(
         context: context,
         builder: (context) {
@@ -445,8 +469,8 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                   children: <Widget>[
                     ListTile(
                       leading: const CircleAvatar(),
-                      title: Text(ctrl_name),
-                      subtitle: Text('$ctrl_model\n$ctrl_iemi'),
+                      title: Text(ctrlName),
+                      subtitle: Text('$ctrlModel\n$ctrlIemi'),
                     ),
                     TextFormField(
                       controller: _textFieldSiteName,
@@ -552,10 +576,11 @@ class CustomerSalesPage extends StatefulWidget
 class _CustomerSalesPageState extends State<CustomerSalesPage> {
 
   bool checkboxValueNode = false;
-  List<dynamic> selectedNodeList = [];
   final List<String> _interfaceInterval = ['0 Sec', '5 Sec', '10 Sec', '20 Sec', '30 Sec', '45 Sec','1 minute','5 minutes','10 minutes','30 minutes','1 hour']; // Option 2
   SampleItem? selectedMenu;
   List<CustomerListMDL> myCustomerChildList = <CustomerListMDL>[];
+
+  List<int> nodeStockSelection = [];
 
   @override
   void initState() {
@@ -563,22 +588,25 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
     if(widget.label.toString()=='Customer'){
       getCustomerChildList();
     }
+
   }
 
   Future<void> getCustomerChildList() async
   {
     Map<String, Object> body = {"userType" : widget.userType+1, "userId" : widget.customerID};
     final response = await HttpService().postRequest("getUserList", body);
-    print(body);
     if (response.statusCode == 200)
     {
       myCustomerChildList.clear();
       var data = jsonDecode(response.body);
-      final cntList = data["data"] as List;
-
-      for (int i=0; i < cntList.length; i++) {
-        myCustomerChildList.add(CustomerListMDL.fromJson(cntList[i]));
+      if(data["code"]==200)
+      {
+        final cntList = data["data"] as List;
+        for (int i=0; i < cntList.length; i++) {
+          myCustomerChildList.add(CustomerListMDL.fromJson(cntList[i]));
+        }
       }
+
 
       setState(() {
       });
@@ -670,6 +698,12 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
     }
     else if(widget.label.toString()=='Site Config')
     {
+      nodeStockSelection.clear();
+      for(int i=0; i<widget.nodeStockList.length; i++){
+        nodeStockSelection.add(0);
+      }
+      print(nodeStockSelection.length);
+
       return  ListView.builder(
           shrinkWrap: true,
           scrollDirection: Axis.horizontal,
@@ -707,6 +741,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                       tooltip: 'Add node list',
                                       child: Center(child: Icon(Icons.add_card, color: myTheme.primaryColor,)),
                                       itemBuilder: (context) {
+
                                         return List.generate(widget.nodeStockList.length+1 ,(nodeIndex) {
                                           if(widget.nodeStockList.isEmpty){
                                             return const PopupMenuItem(
@@ -724,7 +759,6 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                                     child: const Text('CANCEL'),
                                                     onPressed: () {
                                                       setState(() {
-                                                        selectedNodeList.clear();
                                                         checkboxValueNode = false;
                                                         Navigator.pop(context);
                                                       });
@@ -736,52 +770,74 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                                     child: const Text('ADD'),
                                                     onPressed: () async
                                                     {
-                                                      List<int> oldNodeListRN = [];
+                                                      List<int> oldNodeListRfNo = [];
                                                       int refNo = 0;
-                                                      String rnUpdatedNode = '';
+                                                      String refNoUpdatingNode = '';
 
-                                                      for(int j = 0; j < selectedNodeList.length; j++)
+                                                      List<dynamic> selectedNodeList = [];
+                                                      for(int i=0; i<nodeStockSelection.length; i++)
                                                       {
-                                                        if(rnUpdatedNode != selectedNodeList[j]['categoryName'])
-                                                        {
-                                                          rnUpdatedNode = selectedNodeList[j]['categoryName'];
-                                                          var contain = widget.usedNodeList[siteIndex].where((element) => element.categoryName == rnUpdatedNode);
-                                                          if (contain.isNotEmpty)
-                                                          {
-                                                            for(int i = 0; i < widget.usedNodeList[siteIndex].length; i++)
-                                                            {
-                                                              if(widget.usedNodeList[siteIndex][i].categoryName == rnUpdatedNode)
-                                                              {
-                                                                oldNodeListRN.add(widget.usedNodeList[siteIndex][i].referenceNumber);
-                                                                refNo = refNo + 1;
-                                                              }
-                                                            }
+                                                        if(nodeStockSelection[i]==1){
+                                                          Map<String, dynamic> myMap = {"productId": widget.nodeStockList[i].productId.toString(), 'categoryName': widget.nodeStockList[i].categoryName, 'referenceNumber': 0};
+                                                          selectedNodeList.add(myMap);
+                                                        }
+                                                      }
 
-                                                            List missingRN = missingArray(oldNodeListRN);
-                                                            if(missingRN.isNotEmpty)
+                                                      if(selectedNodeList.isNotEmpty)
+                                                      {
+                                                        for(int i = 0; i < selectedNodeList.length; i++)
+                                                        {
+                                                          if(refNoUpdatingNode != selectedNodeList[i]['categoryName'])
+                                                          {
+                                                            refNoUpdatingNode = selectedNodeList[i]['categoryName'];
+                                                            var contain = widget.usedNodeList[siteIndex].where((element) => element.categoryName == refNoUpdatingNode);
+                                                            if (contain.isNotEmpty)
                                                             {
-                                                              refNo = 0;
-                                                              for(int k = 0; k < selectedNodeList.length; k++)
+                                                              for(int j = 0; j < widget.usedNodeList[siteIndex].length; j++)
                                                               {
-                                                                if(missingRN.isNotEmpty)
+                                                                if(widget.usedNodeList[siteIndex][j].categoryName == refNoUpdatingNode)
                                                                 {
-                                                                  if(widget.usedNodeList[siteIndex][k].categoryName == selectedNodeList[k]['categoryName'])
+                                                                  oldNodeListRfNo.add(widget.usedNodeList[siteIndex][j].referenceNumber);
+                                                                }
+                                                              }
+                                                              List missingRN = missingArray(oldNodeListRfNo);
+                                                              if(missingRN.isNotEmpty)
+                                                              {
+                                                                refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
+                                                                for(int k = 0; k < selectedNodeList.length; k++)
+                                                                {
+                                                                  if(missingRN.isNotEmpty)
                                                                   {
-                                                                    refNo = missingRN[0];
+                                                                    if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
+                                                                    {
+                                                                      selectedNodeList[k]['referenceNumber'] = missingRN[0];
+                                                                      missingRN.removeAt(0);
+                                                                    }
+                                                                  }else{
+                                                                    refNo = refNo+1;
                                                                     selectedNodeList[k]['referenceNumber'] = refNo;
-                                                                    missingRN.removeAt(0);
                                                                   }
-                                                                }else{
-                                                                  refNo = refNo+2;
-                                                                  selectedNodeList[k]['referenceNumber'] = refNo;
+                                                                }
+                                                              }
+                                                              else
+                                                              {
+                                                                refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
+                                                                for(int k = 0; k < selectedNodeList.length; k++)
+                                                                {
+                                                                  if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
+                                                                  {
+                                                                    refNo = refNo+1;
+                                                                    selectedNodeList[k]['referenceNumber'] = refNo;
+                                                                  }
                                                                 }
                                                               }
                                                             }
                                                             else
                                                             {
+                                                              refNo = 0;
                                                               for(int k = 0; k < selectedNodeList.length; k++)
                                                               {
-                                                                if(widget.usedNodeList[siteIndex][k].categoryName == selectedNodeList[k]['categoryName'])
+                                                                if(refNoUpdatingNode == selectedNodeList[k]['categoryName'])
                                                                 {
                                                                   refNo = refNo+1;
                                                                   selectedNodeList[k]['referenceNumber'] = refNo;
@@ -789,58 +845,49 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                                               }
                                                             }
                                                           }
-                                                          else
+                                                          else{
+                                                          }
+                                                        }
+
+                                                        //print(selectedNodeList);
+
+                                                        if(selectedNodeList.isNotEmpty)
+                                                        {
+                                                          Map<String, dynamic> body = {
+                                                            "userId": widget.customerID,
+                                                            "dealerId": widget.userID,
+                                                            "masterId": widget.customerSiteList[siteIndex].userDeviceListId,
+                                                            "groupId": widget.customerSiteList[siteIndex].groupId,
+                                                            "products": selectedNodeList,
+                                                            "createUser": widget.userID,
+                                                          };
+
+                                                          final response = await HttpService().postRequest("createUserDeviceListWithMaster", body);
+                                                          print(response.body);
+                                                          if(response.statusCode == 200)
                                                           {
-                                                            refNo = 0;
-                                                            for(int k = 0; k < selectedNodeList.length; k++)
+                                                            var data = jsonDecode(response.body);
+                                                            if(data["code"]==200)
                                                             {
-                                                              if(rnUpdatedNode == selectedNodeList[k]['categoryName'])
-                                                              {
-                                                                refNo = refNo+1;
-                                                                selectedNodeList[k]['referenceNumber'] = refNo;
-                                                              }
+                                                              setState(() {
+                                                                selectedNodeList.clear();
+                                                                nodeStockSelection.clear();
+                                                                checkboxValueNode = false;
+                                                              });
+
+                                                              widget.getCustomerSite();
+                                                              widget.getNodeStockList();
+                                                              Navigator.pop(context);
+                                                            }
+                                                            else{
+                                                              //_showSnackBar(data["message"]);
+                                                              //_showAlertDialog('Warning', data["message"]);
                                                             }
                                                           }
                                                         }
-                                                        else{
-                                                        }
+
                                                       }
 
-                                                      print(selectedNodeList);
-
-                                                      if(selectedNodeList.isNotEmpty)
-                                                      {
-                                                        Map<String, dynamic> body = {
-                                                          "userId": widget.customerID,
-                                                          "dealerId": widget.userID,
-                                                          "masterId": widget.customerSiteList[siteIndex].userDeviceListId,
-                                                          "groupId": widget.customerSiteList[siteIndex].groupId,
-                                                          "products": selectedNodeList,
-                                                          "createUser": widget.userID,
-                                                        };
-
-                                                        final response = await HttpService().postRequest("createUserDeviceListWithMaster", body);
-                                                        print(response.body);
-                                                        if(response.statusCode == 200)
-                                                        {
-                                                          var data = jsonDecode(response.body);
-                                                          if(data["code"]==200)
-                                                          {
-                                                            setState(() {
-                                                              selectedNodeList.clear();
-                                                              checkboxValueNode = false;
-                                                            });
-
-                                                            widget.getCustomerSite();
-                                                            widget.getNodeStockList();
-                                                            Navigator.pop(context);
-                                                          }
-                                                          else{
-                                                            //_showSnackBar(data["message"]);
-                                                            //_showAlertDialog('Warning', data["message"]);
-                                                          }
-                                                        }
-                                                      }
                                                     },
                                                   ),
                                                 ],
@@ -857,12 +904,11 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                                   onChanged:(bool? value) { setState(() {
                                                     checkboxValueNode = value!;
                                                     if(value){
-                                                      Map<String, dynamic> myMap = {"productId": widget.nodeStockList[nodeIndex].productId.toString(), 'categoryName': widget.nodeStockList[nodeIndex].categoryName, 'referenceNumber': 0};
-                                                      selectedNodeList.add(myMap);
+                                                      nodeStockSelection[nodeIndex] = 1;
                                                     }else{
-                                                      selectedNodeList.removeAt(nodeIndex);
+                                                      nodeStockSelection[nodeIndex] = 0;
                                                     }
-                                                    print(selectedNodeList);
+
                                                   });},
                                                 );
                                               },
@@ -966,7 +1012,6 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                                     _showSnackBar(data["message"]);
 
                                                     setState(() {
-                                                      selectedNodeList.clear();
                                                       checkboxValueNode = false;
                                                     });
                                                     widget.getNodeStockList();

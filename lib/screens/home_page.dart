@@ -34,6 +34,13 @@ class HomePageState extends State<HomePage>
   int userId = 0;
   bool isHovering = false;
 
+  void callbackFunction(String message)
+  {
+    if(message=='reloadStock'){
+      getProductStock();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +60,7 @@ class HomePageState extends State<HomePage>
 
   Future<void> getProductStock() async
   {
+    print('call back');
     Map<String, dynamic> body = {};
     if(userType==1){
       body = {"fromUserId" : null, "toUserId" : null};
@@ -60,21 +68,22 @@ class HomePageState extends State<HomePage>
       body = {"fromUserId" : null, "toUserId" : userId};
     }
 
-    print(body);
-
     final response = await HttpService().postRequest("getProductStock", body);
     if (response.statusCode == 200)
     {
       productStockList.clear();
       var data = jsonDecode(response.body);
-      final cntList = data["data"] as List;
-
-      for (int i=0; i < cntList.length; i++) {
-        productStockList.add(ProductStockModel.fromJson(cntList[i]));
+      if(data["code"]==200)
+      {
+        final cntList = data["data"] as List;
+        for (int i=0; i < cntList.length; i++) {
+          productStockList.add(ProductStockModel.fromJson(cntList[i]));
+        }
       }
 
       setState(() {
       });
+
     }
     else{
       //_showSnackBar(response.body);
@@ -90,14 +99,17 @@ class HomePageState extends State<HomePage>
     {
       myCustomerList.clear();
       var data = jsonDecode(response.body);
-      final cntList = data["data"] as List;
-
-      for (int i=0; i < cntList.length; i++) {
-        myCustomerList.add(CustomerListMDL.fromJson(cntList[i]));
+      if(data["code"]==200)
+      {
+        final cntList = data["data"] as List;
+        for (int i=0; i < cntList.length; i++) {
+          myCustomerList.add(CustomerListMDL.fromJson(cntList[i]));
+        }
       }
 
       setState(() {
       });
+
     }
     else{
       //_showSnackBar(response.body);
@@ -506,7 +518,7 @@ class HomePageState extends State<HomePage>
                                                   children: List.generate(myCustomerList.length, (index) {
                                                     return InkWell(
                                                       onTap: () {
-                                                        Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: myCustomerList[index].userId, userName: myCustomerList[index].userName, userID: userId, userType: userType, productStockList: productStockList,)),).then((_) => getProductStock());
+                                                        Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: myCustomerList[index].userId, userName: myCustomerList[index].userName, userID: userId, userType: userType, productStockList: productStockList, callback: callbackFunction,)),);
                                                       }, // Handle your callback
                                                       child: Container(
                                                         margin: const EdgeInsets.all(5),

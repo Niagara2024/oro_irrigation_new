@@ -65,7 +65,7 @@ class DashBoardMainState extends State<DashBoardMain> with TickerProviderStateMi
   @override
   void initState() {
     super.initState();
-    MqttWebClient().main();
+    MqttWebClient().init();
     _executeSharedPreferences();
   }
 

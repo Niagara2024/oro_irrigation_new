@@ -24,10 +24,18 @@ class ProductInventoryState extends State<ProductInventory> {
   List<ProductListModel> productInventoryList = [];
   SampleItem? selectedMenu;
 
+  List<dynamic> jsonDataByCategory = [];
+  List<dynamic> jsonDataByModel = [];
+  int totalProduct = 0;
+  int totalCategory = 0;
+  int totalModel = 0;
+  int outOfStockModel = 0;
+
   @override
   void initState() {
     super.initState();
     getUserInfo();
+    fetchFilterData();
   }
 
   Future<void> getUserInfo() async {
@@ -36,19 +44,39 @@ class ProductInventoryState extends State<ProductInventory> {
       userID = prefs.getString('userId') ?? "";
       userType = int.parse(prefs.getString('userType') ?? "");
     });
-    getProductList();
+    getProductList(1, 30);
+
   }
 
-  Future<void> getProductList() async {
-    final body = userType == 1 ? {"fromUserId": null, "toUserId": null} : {"fromUserId": null, "toUserId": userID};
+  Future<void> getProductList(int set, int limit) async {
+    final body = userType == 1 ? {"fromUserId": null, "toUserId": null, "set":set, "limit":limit} : {"fromUserId": null, "toUserId": userID, "set":set, "limit":limit};
+    print(body);
     final response = await HttpService().postRequest("getProduct", body);
     if (response.statusCode == 200) {
       setState(() {
-        productInventoryList = (jsonDecode(response.body)["data"] as List).map((data)
-        => ProductListModel.fromJson(data)).toList();
+        totalProduct = jsonDecode(response.body)["data"]["totalProduct"];
+        totalCategory = jsonDecode(response.body)["data"]["totalCategory"];
+        totalModel = jsonDecode(response.body)["data"]["totalModel"];
+        outOfStockModel = jsonDecode(response.body)["data"]["outOfStockModel"];
+        productInventoryList = (jsonDecode(response.body)["data"]["product"] as List).map((data) => ProductListModel.fromJson(data)).toList();
       });
     }else {
       //_showSnackBar(response.body);
+    }
+  }
+
+  Future<void> fetchFilterData() async {
+    final response = await HttpService().postRequest("getFilterCategoryAndModel", {});
+
+    if (response.statusCode == 200) {
+      final jsonDCode =json.decode(response.body)["data"];
+
+      setState(() {
+        jsonDataByCategory = jsonDCode['category'];
+        jsonDataByModel = jsonDCode['model'];
+      });
+    } else {
+      throw Exception('Failed to load data');
     }
   }
 
@@ -169,7 +197,8 @@ class ProductInventoryState extends State<ProductInventory> {
     );
   }
 
-  Widget buildAdminHeader() {
+  Widget buildAdminHeader()
+  {
     return Column(
       children: [
         // ... (rest of the admin header code)
@@ -194,6 +223,16 @@ class ProductInventoryState extends State<ProductInventory> {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                const SizedBox(width: 10,),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width-650,
+                  child: const TextField(
+                    decoration: InputDecoration(
+                      labelText: 'Search',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 20,),
                 ActionChip(
                   avatar: Icon(Icons.filter_alt_outlined, color: myTheme.primaryColor),
                   label: const Text('Filter'),
@@ -207,26 +246,120 @@ class ProductInventoryState extends State<ProductInventory> {
                       context: context,
                       builder: (BuildContext context) {
                         return Container(
-                          height: 300,
+                          height: 600,
                           width: 500,
                           decoration: const BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)), // Adjust the value for corner radius
                           ),
-                          child: const Column(
+                          child: Column(
                             children: [
-                              SizedBox(height: 10,),
-                              Text(
-                                'Filter By',
+                              Container(height: 35,
+                                decoration: BoxDecoration(
+                                  color: myTheme.primaryColor,
+                                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)), // Adjust the value for corner radius
+                                ),
+                                child: const Center(
+                                  child: Text('Filter By',style: TextStyle(color: Colors.white),),
+                                ),
                               ),
-                              Divider(),
-                              Text(
-                                'This is a Popover!',
-                                style: TextStyle(fontSize: 20),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: SearchAnchor(
+                                  viewHintText: 'Search by IMEi Number',
+                                    builder: (BuildContext context, SearchController controller) {
+                                      return SearchBar(
+                                        hintText: 'Search by IMEi Number',
+                                        controller: controller,
+                                        padding: const MaterialStatePropertyAll<EdgeInsets>(
+                                            EdgeInsets.symmetric(horizontal: 10.0)),
+                                        onTap: () {
+                                          controller.openView();
+                                        },
+                                        onChanged: (_) {
+                                          controller.openView();
+                                        },
+                                        leading: const Icon(Icons.search),
+                                      );
+                                    }, suggestionsBuilder:
+                                    (BuildContext context, SearchController controller)
+                                    {
+                                    return List<ListTile>.generate(10, (int index) {
+                                    final String item = '55488855256697$index';
+                                    return ListTile(
+                                      title: Text(item),
+                                      onTap: () {
+                                        setState(() {
+                                          controller.closeView(item);
+                                        });
+                                      },
+                                    );
+                                  });
+                                }),
                               ),
-                              Text(
-                                'This is a Popover!',
-                                style: TextStyle(fontSize: 20),
+                              Expanded(
+                                  child: SingleChildScrollView(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'Category',
+                                          ),
+                                          const Divider(),
+                                          Wrap(
+                                            spacing: 10.0,
+                                            runSpacing: 5.0,
+                                            children: List.generate(jsonDataByCategory.length, (index) {
+                                              return ChoiceChip(
+                                                label: Text('${jsonDataByCategory[index]['categoryName']}'),
+                                                selected: true,
+                                                selectedColor: Colors.amber,
+                                                onSelected: (bool selected) {
+                                                  //selectItem(index, subtitle.isEmpty ? title : subtitle,selectionModelProvider);
+                                                },
+                                              );
+                                            }),
+                                          ),
+                                          const SizedBox(height: 10,),
+                                          const Text('Model',),
+                                          const Divider(),
+                                          Wrap(
+                                            spacing: 10.0,
+                                            runSpacing: 7.0,
+                                            children: List.generate(jsonDataByModel.length, (index) {
+                                              return ChoiceChip(
+                                                label: Text('${jsonDataByModel[index]['categoryName']}- ${jsonDataByModel[index]['modelName']}'),
+                                                selected: false,
+                                                selectedColor: Colors.amber,
+                                                onSelected: (bool selected) {
+                                                  //selectItem(index, subtitle.isEmpty ? title : subtitle,selectionModelProvider);
+                                                },
+                                              );
+                                            }),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                              ),
+                              Container(height: 45,
+                                color: myTheme.primaryColor,
+                                child: Center(
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      TextButton(onPressed: () {Navigator.pop(context);}, child: const Text('Done',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      ),),
+                                      const SizedBox(width: 10,)
+                                    ],
+                                  ),
+                                ),
                               ),
                             ],
                           ),
@@ -249,7 +382,7 @@ class ProductInventoryState extends State<ProductInventory> {
                     context: context,
                     builder: (context) => const AlertDialog(
                     content: AddProduct(),
-                    )).then((value) => getProductList());
+                    )).then((value) => getProductList(1, 30));
                   },
                 ),
               ],
@@ -332,8 +465,8 @@ class ProductInventoryState extends State<ProductInventory> {
   }
 
   Widget buildSummaryRow() {
-    const List<String> list = <String>['10', '20', '30', '40', '50'];
-    String dropdownValue = list.first;
+    //const List<String> list = <String>['10', '20', '30', '40', '50'];
+    //String dropdownValue = list.first;
     return Container(
       padding: const EdgeInsets.only(right: 20, left: 20, top: 5),
       decoration: BoxDecoration(
@@ -345,27 +478,27 @@ class ProductInventoryState extends State<ProductInventory> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Column(children: [
+            Text('Total Category', style: TextStyle(fontSize: 13)),
+            Text('$totalCategory',style: TextStyle(fontSize: 17)),
+          ],),
+          Column(children: [
             Text("Total Products", style: TextStyle(fontSize: 13)),
-            Text("23", style: TextStyle(fontSize: 17)),
+            Text('$totalModel', style: TextStyle(fontSize: 17)),
           ],),
           Column(children: [
             Text("Out of stock", style: TextStyle(fontSize: 13)),
-            Text("10",style: TextStyle(fontSize: 17)),
+            Text('$outOfStockModel',style: TextStyle(fontSize: 17)),
           ],),
           Column(children: [
             Text("Total Items", style: TextStyle(fontSize: 13)),
-            Text('${productInventoryList.length}', style: TextStyle(fontSize: 17)),
-          ],),
-          Column(children: [
-            Text("Categories", style: TextStyle(fontSize: 13)),
-            Text("7",style: TextStyle(fontSize: 17)),
+            Text('$totalProduct', style: TextStyle(fontSize: 17)),
           ],),
           SizedBox(
             width: 350,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const Text('Per page  ='),
+               /* const Text('Per page  ='),
                 const SizedBox(width: 5,),
                 DropdownButton<String>(
                   value: dropdownValue,
@@ -387,12 +520,14 @@ class ProductInventoryState extends State<ProductInventory> {
                     );
                   }).toList(),
                 ),
-                const SizedBox(width: 20,),
+                const SizedBox(width: 20,),*/
                 const Text('1-10 of 2000'),
                 const SizedBox(width: 5,),
                 IconButton(tooltip:'Previous page', onPressed:() {}, icon: const Icon(Icons.arrow_left)),
                 const SizedBox(width: 5,),
-                IconButton(tooltip:'Next page',onPressed:() {}, icon: const Icon(Icons.arrow_right))
+                IconButton(tooltip:'Next page',onPressed:() {}, icon: const Icon(Icons.arrow_right)),
+                const SizedBox(width: 10,),
+                IconButton(tooltip:'Settings',onPressed:() {}, icon: const Icon(Icons.settings_outlined))
               ],
             ),
           ),

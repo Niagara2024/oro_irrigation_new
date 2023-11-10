@@ -13,7 +13,8 @@ import '../../constants/http_service.dart';
 import '../product_inventory.dart';
 
 class AddProduct extends StatefulWidget {
-  const AddProduct({Key? key}) : super(key: key);
+  const AddProduct({Key? key, required this.callback}) : super(key: key);
+  final void Function(String) callback;
 
   @override
   State<AddProduct> createState() => _AddProductState();
@@ -191,11 +192,12 @@ class _AddProductState extends State<AddProduct> {
                       return null;
                     },
                     controller: ctrlIMI,
-                    decoration: InputDecoration(
-                      icon: const Icon(CupertinoIcons.number_square),
-                      errorText: vldErrorIMI ? 'Enter IMEI Number' : null,
-                      labelText: 'IMEI Number',
-                      border: const OutlineInputBorder(),
+                    maxLength: 20,
+                    decoration: const InputDecoration(
+                      counterText: '',
+                      icon: Icon(CupertinoIcons.number_square),
+                      labelText: 'Enter product imei number',
+                      border: OutlineInputBorder(),
                       contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                     ),
                   ),
@@ -226,7 +228,9 @@ class _AddProductState extends State<AddProduct> {
                         return 'Please fill out this field';
                       }
                     },
+                    maxLength: 2,
                     decoration: InputDecoration(
+                      counterText: '',
                       icon: const Icon(Icons.calendar_view_month),
                       errorText: vldErrorWrr ? 'Enter warranty months' : null,
                       labelText: 'warranty months',
@@ -330,7 +334,11 @@ class _AddProductState extends State<AddProduct> {
 
                                 //_showAlertDialog('Message', data["message"]);
                                 //ProductInventoryState().callBackAddProduct();
-                                Navigator.pop(context);
+                                widget.callback('reloadStock');
+                                if(mounted){
+                                  Navigator.pop(context);
+                                }
+
 
                                // _showSnackBar(data["message"]);
                                 /*showDdError = false;

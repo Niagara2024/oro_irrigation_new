@@ -26,17 +26,24 @@ class ProductInventoryState extends State<ProductInventory> {
 
   List<dynamic> jsonDataByCategory = [];
   List<dynamic> jsonDataByModel = [];
+  String selectedChipCat = '', selectedChipModel = '', searchedChipName = '';
+  bool searchActive = false;
+
   int totalProduct = 0;
   int totalCategory = 0;
   int totalModel = 0;
   int outOfStockModel = 0;
 
+  String jsonOptions = '';
+  late Map<String, dynamic> jsonDataMap;
+
+
   @override
   void initState() {
     super.initState();
     getUserInfo();
-    fetchFilterData();
   }
+
 
   Future<void> getUserInfo() async {
     final prefs = await SharedPreferences.getInstance();
@@ -45,12 +52,11 @@ class ProductInventoryState extends State<ProductInventory> {
       userType = int.parse(prefs.getString('userType') ?? "");
     });
     getProductList(1, 30);
-
+    fetchFilterData();
   }
 
   Future<void> getProductList(int set, int limit) async {
     final body = userType == 1 ? {"fromUserId": null, "toUserId": null, "set":set, "limit":limit} : {"fromUserId": null, "toUserId": userID, "set":set, "limit":limit};
-    print(body);
     final response = await HttpService().postRequest("getProduct", body);
     if (response.statusCode == 200) {
       setState(() {
@@ -65,20 +71,23 @@ class ProductInventoryState extends State<ProductInventory> {
     }
   }
 
-  Future<void> fetchFilterData() async {
-    final response = await HttpService().postRequest("getFilterCategoryAndModel", {});
-
+  Future<void> fetchFilterData() async
+  {
+    final body = userType == 1 ? {"fromUserId": null, "toUserId": null} : {"fromUserId": null, "toUserId": userID};
+    final response = await HttpService().postRequest("getFilterCategoryModelAndImei", body);
     if (response.statusCode == 200) {
-      final jsonDCode =json.decode(response.body)["data"];
+      final jsonDCode = json.decode(response.body)["data"];
 
       setState(() {
-        jsonDataByCategory = jsonDCode['category'];
-        jsonDataByModel = jsonDCode['model'];
+        jsonDataMap = json.decode(response.body);
+        //jsonDataByCategory = jsonDCode['category'];
+        //jsonDataByModel = jsonDCode['model'];
       });
     } else {
       throw Exception('Failed to load data');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -223,190 +232,147 @@ class ProductInventoryState extends State<ProductInventory> {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(width: 10,),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width-650,
-                  child: const TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Search',
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 20,),
-                ActionChip(
-                  avatar: Icon(Icons.filter_alt_outlined, color: myTheme.primaryColor),
-                  label: const Text('Filter'),
-                  tooltip: 'By\nCategory\nModel\nManufacture date\nSales person\nSearch',
-                  backgroundColor: Colors.white,
-                  elevation: 6.0,
-                  shadowColor: Colors.grey[60],
-                  padding: const EdgeInsets.all(5.0),
-                  onPressed: (){
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return Container(
-                          height: 600,
-                          width: 500,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)), // Adjust the value for corner radius
-                          ),
-                          child: Column(
-                            children: [
-                              Container(height: 35,
-                                decoration: BoxDecoration(
-                                  color: myTheme.primaryColor,
-                                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)), // Adjust the value for corner radius
-                                ),
-                                child: const Center(
-                                  child: Text('Filter By',style: TextStyle(color: Colors.white),),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: SearchAnchor(
-                                  viewHintText: 'Search by IMEi Number',
-                                    builder: (BuildContext context, SearchController controller) {
-                                      return SearchBar(
-                                        hintText: 'Search by IMEi Number',
-                                        controller: controller,
-                                        padding: const MaterialStatePropertyAll<EdgeInsets>(
-                                            EdgeInsets.symmetric(horizontal: 10.0)),
-                                        onTap: () {
-                                          controller.openView();
-                                        },
-                                        onChanged: (_) {
-                                          controller.openView();
-                                        },
-                                        leading: const Icon(Icons.search),
-                                      );
-                                    }, suggestionsBuilder:
-                                    (BuildContext context, SearchController controller)
-                                    {
-                                    return List<ListTile>.generate(10, (int index) {
-                                    final String item = '55488855256697$index';
-                                    return ListTile(
-                                      title: Text(item),
-                                      onTap: () {
-                                        setState(() {
-                                          controller.closeView(item);
-                                        });
-                                      },
-                                    );
-                                  });
-                                }),
-                              ),
-                              Expanded(
-                                  child: SingleChildScrollView(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          const Text(
-                                            'Category',
-                                          ),
-                                          const Divider(),
-                                          Wrap(
-                                            spacing: 10.0,
-                                            runSpacing: 5.0,
-                                            children: List.generate(jsonDataByCategory.length, (index) {
-                                              return ChoiceChip(
-                                                label: Text('${jsonDataByCategory[index]['categoryName']}'),
-                                                selected: true,
-                                                selectedColor: Colors.amber,
-                                                onSelected: (bool selected) {
-                                                  //selectItem(index, subtitle.isEmpty ? title : subtitle,selectionModelProvider);
-                                                },
-                                              );
-                                            }),
-                                          ),
-                                          const SizedBox(height: 10,),
-                                          const Text('Model',),
-                                          const Divider(),
-                                          Wrap(
-                                            spacing: 10.0,
-                                            runSpacing: 7.0,
-                                            children: List.generate(jsonDataByModel.length, (index) {
-                                              return ChoiceChip(
-                                                label: Text('${jsonDataByModel[index]['categoryName']}- ${jsonDataByModel[index]['modelName']}'),
-                                                selected: false,
-                                                selectedColor: Colors.amber,
-                                                onSelected: (bool selected) {
-                                                  //selectItem(index, subtitle.isEmpty ? title : subtitle,selectionModelProvider);
-                                                },
-                                              );
-                                            }),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                              ),
-                              Container(height: 45,
-                                color: myTheme.primaryColor,
-                                child: Center(
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      TextButton(onPressed: () {Navigator.pop(context);}, child: const Text('Done',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                        ),
-                                      ),),
-                                      const SizedBox(width: 10,)
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                PopupMenuButton<dynamic>(
+                  icon: const Icon(Icons.filter_alt_outlined),
+                  tooltip: 'filter by category or model',
+                  itemBuilder: (BuildContext context) {
+
+                    setState(() {
+                      searchActive = false;
+                    });
+
+                    List<PopupMenuEntry<dynamic>> menuItems = [];
+                    menuItems.add(
+                      const PopupMenuItem<dynamic>(
+                        enabled: false,
+                        child: Text("Category"),
+                      ),
                     );
+
+                    List<dynamic> categoryItems = jsonDataMap['data']['category'];
+                    menuItems.addAll(
+                      categoryItems.map((dynamic item) {
+                        return PopupMenuItem<dynamic>(
+                          value: item,
+                          child: Text(item['categoryName']),
+                        );
+                      }),
+                    );
+
+                    menuItems.add(
+                      const PopupMenuItem<dynamic>(
+                        enabled: false,
+                        child: Text("Model"),
+                      ),
+                    );
+
+                    List<dynamic> modelItems = jsonDataMap['data']['model'];
+                    menuItems.addAll(
+                      modelItems.map((dynamic item) {
+                        return PopupMenuItem<dynamic>(
+                          value: item,
+                          child: Text('${item['categoryName']} - ${item['modelName']}'),
+                        );
+                      }),
+                    );
+
+                    return menuItems;
+                  },
+                  onSelected: (dynamic selectedItem) {
+                    if (selectedItem is Map<String, dynamic>) {
+                      if (selectedItem.containsKey('categoryName') && selectedItem.containsKey('modelName')) {
+                        setState(() {
+                          searchedChipName = '${selectedItem['categoryName']} - ${selectedItem['modelName']}';
+                        });
+
+                      } else {
+                        setState(() {
+                          searchedChipName = '${selectedItem['categoryName']}';
+                        });
+                      }
+                    }
                   },
                 ),
                 const SizedBox(width: 10,),
-                ActionChip(
-                  tooltip: 'Add new stock\nto Inventory panel',
-                  avatar: Icon(Icons.add, color: myTheme.primaryColor),
-                  label: const Text('Product Stock'),
-                  backgroundColor: Colors.white,
-                  elevation: 6.0,
-                  shadowColor: Colors.grey[60],
-                  padding: const EdgeInsets.all(5.0),
-                  onPressed: () async {
-                    await showDialog<void>(
-                    context: context,
-                    builder: (context) => const AlertDialog(
-                    content: AddProduct(),
-                    )).then((value) => getProductList(1, 30));
+                IconButton(
+                  icon: const Icon(Icons.search),
+                  tooltip: 'search by imei number',
+                  onPressed: () {
+                    setState(() {
+                      searchActive = true;
+                      searchedChipName = '';
+                    });
                   },
-                ),
+                )
               ],
             ),
           ),
         ),
         SizedBox(height: 2, child: Container(color: Colors.grey.shade200,)),
-        /*Container(
-          decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(10.0),
-                topRight: Radius.circular(10.0),
-              )
-          ),
-          height: 44,
-          child: ListTile(
-            trailing:  Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-              ],
+        searchActive ? Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SearchAnchor(
+              viewHintText: 'Search by IMEi Number',
+              builder: (BuildContext context, SearchController controller) {
+                return SearchBar(
+                  hintText: 'Search by IMEi Number',
+                  controller: controller,
+                  padding: const MaterialStatePropertyAll<EdgeInsets>(
+                      EdgeInsets.symmetric(horizontal: 10.0)),
+                  onTap: () {
+                    controller.openView();
+                  },
+                  onChanged: (_) {
+                    controller.openView();
+                  },
+                  leading: const Icon(Icons.search),
+                  trailing: <Widget>[
+                    Tooltip(
+                      message: 'Close',
+                      child: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            searchActive = false;
+                          });
+                        },
+                        icon: const Icon(Icons.close),
+                      ),
+                    )
+                  ],
+                );
+              }, suggestionsBuilder:
+              (BuildContext context, SearchController controller)
+          {
+            return List<ListTile>.generate(10, (int index) {
+              final String item = '55488855256697$index';
+              return ListTile(
+                title: Text(item),
+                onTap: () {
+                  setState(() {
+                    controller.closeView(item);
+                  });
+                },
+              );
+            });
+          }),
+        ) : searchedChipName == ''? const SizedBox() : Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 5, left: 5),
+              child: Chip(
+                  backgroundColor: Colors.yellow,
+                  label: Text('filter By $searchedChipName'),
+                  onDeleted: (){
+                    setState(() {
+                      searchedChipName = '';
+                      selectedChipCat = '';
+                      selectedChipModel = '';
+                    });
+                  }),
             ),
-          ),
-        ),*/
+          ],
+        ),
       ],
     );
   }
@@ -478,20 +444,20 @@ class ProductInventoryState extends State<ProductInventory> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Column(children: [
-            Text('Total Category', style: TextStyle(fontSize: 13)),
+            const Text('Total Category', style: TextStyle(fontSize: 13)),
             Text('$totalCategory',style: TextStyle(fontSize: 17)),
           ],),
           Column(children: [
-            Text("Total Products", style: TextStyle(fontSize: 13)),
+            const Text("Total Products", style: TextStyle(fontSize: 13)),
             Text('$totalModel', style: TextStyle(fontSize: 17)),
           ],),
           Column(children: [
-            Text("Out of stock", style: TextStyle(fontSize: 13)),
+            const Text("Out of stock", style: TextStyle(fontSize: 13)),
             Text('$outOfStockModel',style: TextStyle(fontSize: 17)),
           ],),
           Column(children: [
-            Text("Total Items", style: TextStyle(fontSize: 13)),
-            Text('$totalProduct', style: TextStyle(fontSize: 17)),
+            const Text("Total Items", style: TextStyle(fontSize: 13)),
+            Text('$totalProduct', style: const TextStyle(fontSize: 17)),
           ],),
           SizedBox(
             width: 350,

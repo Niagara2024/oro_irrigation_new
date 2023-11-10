@@ -78,6 +78,7 @@ flutter:
   assets:
      - assets/images/otp_illustrator.png
      - assets/images/login_illustrator.png
+     - assets/images/no_data.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

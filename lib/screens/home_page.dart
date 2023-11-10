@@ -10,6 +10,7 @@ import '../Models/product_stock.dart';
 import '../constants/http_service.dart';
 import '../constants/theme.dart';
 import '../state_management/mqtt_message_provider.dart';
+import 'Forms/add_product.dart';
 import 'Forms/device_list.dart';
 
 enum Calendar { day, week, month, year }
@@ -442,8 +443,17 @@ class HomePageState extends State<HomePage>
                                                   ),
                                                 ),
                                                 child: ListTile(
-                                                  title: const Text('Product Stock', style: TextStyle(fontSize: 20, color: Colors.black),),
-                                                  trailing: Text('${productStockList.length}', style: const TextStyle(fontSize: 20, color: Colors.black, fontWeight: FontWeight.bold),),
+                                                  title: Text('Product Stock(${productStockList.length})', style: TextStyle(fontSize: 20, color: Colors.black),),
+                                                  trailing : ElevatedButton.icon(
+                                                    onPressed: () async {
+                                                      await showDialog<void>(
+                                                        context: context,
+                                                        builder: (context) => AlertDialog(
+                                                            content: AddProduct(callback: callbackFunction)),);
+                                                    },
+                                                    icon: const Icon(Icons.add_circle),
+                                                    label: const Text('New stock'),
+                                                  ),
                                                 ),
                                               ),
                                               Expanded(

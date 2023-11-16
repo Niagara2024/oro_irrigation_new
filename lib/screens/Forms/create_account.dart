@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -164,6 +165,9 @@ class _CreateAccountState extends State<CreateAccount> {
                       labelText: 'Customer Name',
                       icon: Icon(Icons.person_outline),
                     ),
+                    inputFormatters: [
+                      CapitalizeFirstLetterFormatter(),
+                    ],
                   ),
                   const SizedBox(height: 13,),
                   InternationalPhoneNumberInput(
@@ -212,7 +216,6 @@ class _CreateAccountState extends State<CreateAccount> {
                     keyboardType:
                     const TextInputType.numberWithOptions(signed: true, decimal: true),
                     onSaved: (PhoneNumber number) {
-                      print('On Saved: $number');
                       dialCode = number.dialCode.toString();
                     },
                   ),
@@ -298,6 +301,9 @@ class _CreateAccountState extends State<CreateAccount> {
                       labelText: 'Customer City',
                       icon: Icon(Icons.location_city),
                     ),
+                    inputFormatters: [
+                      CapitalizeFirstLetterFormatter(),
+                    ],
                   ),
                   const SizedBox(height: 13,),
                   TextFormField(
@@ -313,6 +319,9 @@ class _CreateAccountState extends State<CreateAccount> {
                       labelText: 'Address line 1',
                       icon: Icon(Icons.linear_scale_rounded),
                     ),
+                    inputFormatters: [
+                      CapitalizeFirstLetterFormatter(),
+                    ],
                   ),
                   const SizedBox(height: 13,),
                   TextFormField(
@@ -328,6 +337,9 @@ class _CreateAccountState extends State<CreateAccount> {
                       labelText: 'Address line 2',
                       icon: Icon(Icons.linear_scale_rounded),
                     ),
+                    inputFormatters: [
+                      CapitalizeFirstLetterFormatter(),
+                    ],
                   ),
                   const SizedBox(height: 13,),
                   TextFormField(
@@ -343,6 +355,9 @@ class _CreateAccountState extends State<CreateAccount> {
                       labelText: 'Address line 3',
                       icon: Icon(Icons.linear_scale_rounded),
                     ),
+                    inputFormatters: [
+                      CapitalizeFirstLetterFormatter(),
+                    ],
                   ),
                   const SizedBox(height: 13,),
                   TextFormField(
@@ -353,11 +368,17 @@ class _CreateAccountState extends State<CreateAccount> {
                       }
                     },
                     decoration: const InputDecoration(
+                      counterText: '',
                       contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                       border: OutlineInputBorder(),
                       labelText: 'Postal code',
                       icon: Icon(Icons.local_post_office_outlined),
                     ),
+                    keyboardType: TextInputType.number,
+                    maxLength: 10,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                    ],
                   ),
                   const SizedBox(height: 20,),
                   SizedBox(
@@ -463,6 +484,22 @@ class _CreateAccountState extends State<CreateAccount> {
         ],
       ),
     );
+  }
+}
+
+class CapitalizeFirstLetterFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue,
+      TextEditingValue newValue,
+      ) {
+    if (newValue.text.isNotEmpty) {
+      return TextEditingValue(
+        text: newValue.text[0].toUpperCase() + newValue.text.substring(1),
+        selection: newValue.selection,
+      );
+    }
+    return newValue;
   }
 }
 

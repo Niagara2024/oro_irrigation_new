@@ -443,13 +443,14 @@ class HomePageState extends State<HomePage>
                                                   ),
                                                 ),
                                                 child: ListTile(
-                                                  title: Text('Product Stock(${productStockList.length})', style: TextStyle(fontSize: 20, color: Colors.black),),
+                                                  title: Text('Product Stock(${productStockList.length})', style: const TextStyle(fontSize: 20, color: Colors.black),),
                                                   trailing : userType==1?ElevatedButton.icon(
                                                     onPressed: () async {
-                                                      await showDialog<void>(
+                                                      /*await showDialog<void>(
                                                         context: context,
                                                         builder: (context) => AlertDialog(
-                                                            content: AddProduct(callback: callbackFunction)),);
+                                                            content: AddProduct(callback: callbackFunction)),);*/
+                                                      Navigator.push(context, MaterialPageRoute(builder: (context) =>  AddProduct(callback: callbackFunction,)),);
                                                     },
                                                     icon: const Icon(Icons.add_circle),
                                                     label: const Text('New stock'),

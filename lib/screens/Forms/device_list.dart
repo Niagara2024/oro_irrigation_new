@@ -737,7 +737,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(widget.customerSiteList[siteIndex].groupName, style: TextStyle(fontSize: 20, fontWeight: FontWeight.normal,),),
+                                    Text(widget.customerSiteList[siteIndex].groupName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal,),),
                                     PopupMenuButton(
                                       elevation: 10,
                                       tooltip: 'Add node list',
@@ -1003,6 +1003,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                                   "controllerId": widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId,
                                                   "modifyUser": widget.userID,
                                                 };
+                                                print(body);
 
                                                 final response = await HttpService().putRequest("removeNodeInMaster", body);
                                                 if(response.statusCode == 200)

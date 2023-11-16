@@ -185,7 +185,7 @@ class _DashboardWideState extends State<DashboardWide> {
           {
               await showDialog<void>(
                 context: context,
-                builder: (context) => AlertDialog(
+                builder: (context) => const AlertDialog(
                   content: CreateAccount(),
                 ));
 
@@ -220,7 +220,7 @@ class _DashboardWideState extends State<DashboardWide> {
           {
             await showDialog<void>(
                 context: context,
-                builder: (context) => AlertDialog(
+                builder: (context) => const AlertDialog(
                   content: CreateAccount(),
                 ));
 

@@ -9,7 +9,7 @@ class ProductListModel
     this.deviceId = '',
     this.productDescription = '',
     this.dateOfManufacturing = '',
-    this.warrentyMonths = 0,
+    this.warrantyMonths = 0,
     this.productStatus = 0,
     this.communicationMode = 0,
     this.latestBuyer = '',
@@ -17,7 +17,7 @@ class ProductListModel
   });
 
 
-  int productId, categoryId, modelId, productStatus, communicationMode, warrentyMonths;
+  int productId, categoryId, modelId, productStatus, communicationMode, warrantyMonths;
   String categoryName, modelName, productDescription, dateOfManufacturing, latestBuyer,deviceId, active;
 
   factory ProductListModel.fromJson(Map<String, dynamic> json) => ProductListModel(
@@ -29,7 +29,7 @@ class ProductListModel
     deviceId: json['deviceId'],
     productDescription: json['productDescription'],
     dateOfManufacturing: json['dateOfManufacturing'],
-    warrentyMonths: json['warrentyMonths'],
+    warrantyMonths: json['warrantyMonths'],
     productStatus: json['productStatus'],
     communicationMode: json['communicationMode'],
     latestBuyer: json['latestBuyer'],
@@ -45,7 +45,7 @@ class ProductListModel
     'deviceId': deviceId,
     'productDescription': productDescription,
     'dateOfManufacturing': dateOfManufacturing,
-    'warrentyMonths': warrentyMonths,
+    'warrantyMonths': warrantyMonths,
     'productStatus': productStatus,
     'communicationMode': communicationMode,
     'latestBuyer': latestBuyer,

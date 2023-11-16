@@ -201,7 +201,7 @@ class ProductInventoryState extends State<ProductInventory> {
                             DataCell(Text(filterProductInventoryList[index].modelName)),
                             DataCell(Text('${filterProductInventoryList[index].deviceId}')),
                             DataCell(Center(child: Text(filterProductInventoryList[index].dateOfManufacturing))),
-                            DataCell(Center(child: Text('${filterProductInventoryList[index].warrentyMonths}'))),
+                            DataCell(Center(child: Text('${filterProductInventoryList[index].warrantyMonths}'))),
                             DataCell(Center(child: userType==filterProductInventoryList[index].productStatus? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('In Stock')],):
                             const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active')],))),
                             DataCell(Center(child: widget.userName==filterProductInventoryList[index].latestBuyer? Text('-'):Text(filterProductInventoryList[index].latestBuyer))),
@@ -234,13 +234,13 @@ class ProductInventoryState extends State<ProductInventory> {
                             DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}'))),
                             DataCell(Text(productInventoryList[index].categoryName)),
                             DataCell(Text(productInventoryList[index].modelName)),
-                            DataCell(Text('${productInventoryList[index].deviceId}')),
+                            DataCell(Text(productInventoryList[index].deviceId)),
                             DataCell(Center(child: Text(productInventoryList[index].dateOfManufacturing))),
-                            DataCell(Center(child: Text('${productInventoryList[index].warrentyMonths}'))),
+                            DataCell(Center(child: Text('${productInventoryList[index].warrantyMonths}'))),
                             DataCell(Center(child: userType==productInventoryList[index].productStatus? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('In Stock')],):
                             const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active')],))),
                             DataCell(Center(child: widget.userName==productInventoryList[index].latestBuyer? Text('-'):Text(productInventoryList[index].latestBuyer))),
-                            DataCell(Center(child: Text('25-09-2023'))),
+                            const DataCell(Center(child: Text('25-09-2023'))),
                             DataCell(Center(child: PopupMenuButton<SampleItem>(
                               initialValue: selectedMenu,
                               // Callback that sets the selected popup menu item.
@@ -443,7 +443,7 @@ class ProductInventoryState extends State<ProductInventory> {
               padding: const EdgeInsets.only(top: 5, left: 5),
               child: Chip(
                   backgroundColor: Colors.yellow,
-                  label: Text('filter By $searchedChipName'),
+                  label: Text('filtered By $searchedChipName'),
                   onDeleted: (){
                     setState(() {
                       searchedChipName = '';

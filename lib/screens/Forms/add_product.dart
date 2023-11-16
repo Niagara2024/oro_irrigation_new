@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -196,7 +197,7 @@ class _AddProductState extends State<AddProduct> {
                     decoration: const InputDecoration(
                       counterText: '',
                       icon: Icon(CupertinoIcons.number_square),
-                      labelText: 'Enter product imei number',
+                      labelText: 'Enter IMEi number',
                       border: OutlineInputBorder(),
                       contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                     ),
@@ -210,6 +211,7 @@ class _AddProductState extends State<AddProduct> {
                       if(value==null || value.isEmpty){
                         return 'Please fill out this field';
                       }
+                      return null;
                     },
                     decoration: InputDecoration(
                       icon: const Icon(Icons.add_moderator_outlined),
@@ -229,6 +231,9 @@ class _AddProductState extends State<AddProduct> {
                       }
                     },
                     maxLength: 2,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
                     decoration: InputDecoration(
                       counterText: '',
                       icon: const Icon(Icons.calendar_view_month),

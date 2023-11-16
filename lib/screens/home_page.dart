@@ -444,7 +444,7 @@ class HomePageState extends State<HomePage>
                                                 ),
                                                 child: ListTile(
                                                   title: Text('Product Stock(${productStockList.length})', style: TextStyle(fontSize: 20, color: Colors.black),),
-                                                  trailing : ElevatedButton.icon(
+                                                  trailing : userType==1?ElevatedButton.icon(
                                                     onPressed: () async {
                                                       await showDialog<void>(
                                                         context: context,
@@ -453,7 +453,7 @@ class HomePageState extends State<HomePage>
                                                     },
                                                     icon: const Icon(Icons.add_circle),
                                                     label: const Text('New stock'),
-                                                  ),
+                                                  ): null,
                                                 ),
                                               ),
                                               Expanded(
@@ -465,7 +465,7 @@ class HomePageState extends State<HomePage>
                                                       bottomRight: Radius.circular(10),
                                                     ),
                                                   ),
-                                                  child: DataTable2(
+                                                  child: productStockList.isNotEmpty ? DataTable2(
                                                       columnSpacing: 12,
                                                       horizontalMargin: 12,
                                                       minWidth: 580,
@@ -500,7 +500,9 @@ class HomePageState extends State<HomePage>
                                                         DataCell(Text('${productStockList[index].imeiNo}')),
                                                         DataCell(Text(productStockList[index].dtOfMnf)),
                                                         DataCell(Center(child: Text('${productStockList[index].warranty}'))),
-                                                      ]))),
+                                                      ]))) : const Center(
+                                                    child: Text('SOLD OUT', style: TextStyle(fontSize: 20),),
+                                                  ),
                                                 ),
                                               ),
                                             ],

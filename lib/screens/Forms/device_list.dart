@@ -702,7 +702,6 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
       for(int i=0; i<widget.nodeStockList.length; i++){
         nodeStockSelection.add(0);
       }
-      print(nodeStockSelection.length);
 
       return  ListView.builder(
           shrinkWrap: true,
@@ -712,23 +711,26 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
             return InkWell(
               child: Card(
                 key: ValueKey([siteIndex]),
-                elevation: 1,
+                elevation: 5,
                 color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0), // Set the corner radius here
+                ),
                 margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                 child: Padding(
-                    padding: const EdgeInsets.all(0),
+                    padding: const EdgeInsets.all(5),
                     child: Container(
                         width:500,
                         decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5),
-                        color: Colors.white,
+                        color: Colors.transparent,
                       ),
                         child: Column(
                           children: [
                             Container(height: 50,
                               decoration: const BoxDecoration(
                                 borderRadius: BorderRadius.only(topLeft: Radius.circular(5), topRight: Radius.circular(5)),
-                                color: Colors.white,
+                                color: Colors.transparent,
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.only(right: 20, left: 20),
@@ -1057,11 +1059,11 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
 
                                       for(int i=0; i<widget.usedNodeList[siteIndex].length; i++){
 
-                                        String paddedNumber = widget.usedNodeList[siteIndex][i].deviceId.toString().padLeft(20, '0');
+                                        //String paddedNumber = widget.usedNodeList[siteIndex][i].deviceId.toString().padLeft(20, '0');
                                         String formattedTime = convertToHHmmss(widget.usedNodeList[siteIndex][i].interfaceInterval);
 
                                         payLoad.add('${i+2},${widget.usedNodeList[siteIndex][i].categoryName},${widget.usedNodeList[siteIndex][i].categoryId},'
-                                            '${widget.usedNodeList[siteIndex][i].referenceNumber},$paddedNumber,'
+                                            '${widget.usedNodeList[siteIndex][i].referenceNumber},${widget.usedNodeList[siteIndex][i].deviceId},'
                                             '${widget.usedNodeList[siteIndex][i].interfaceTypeId},$formattedTime;');
                                       }
 
@@ -1146,6 +1148,42 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
 
     return Center(child: Text('Page of ${widget.label}'));
   }
+
+  Widget buildCard(String title) {
+    return Container(
+      width: 150, // Set a fixed width for each card
+      margin: EdgeInsets.all(8),
+      child: Card(
+        child: Column(
+          children: [
+            ListTile(
+              title: Text(title),
+              subtitle: Text('Subtitle for $title'),
+              leading: Icon(Icons.credit_card),
+            ),
+            Container(
+              height: 80, // Set a fixed height for the content inside the card
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: 5, // Number of items in the horizontal list
+                itemBuilder: (context, index) {
+                  return Container(
+                    width: 80, // Set a fixed width for each item in the horizontal list
+                    margin: EdgeInsets.all(8),
+                    color: Colors.blue,
+                    child: Center(
+                      child: Text('Item $index'),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(

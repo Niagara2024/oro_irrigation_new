@@ -158,7 +158,7 @@ class _AddProductState extends State<AddProduct> {
                                 minWidth: 600,
                                 dataRowHeight: 40.0,
                                 headingRowHeight: 40,
-                                headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
+                                headingRowColor: MaterialStateProperty.all<Color>(myTheme.primaryColor.withOpacity(0.1)),
                                 columns: const [
                                   DataColumn2(
                                       label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),

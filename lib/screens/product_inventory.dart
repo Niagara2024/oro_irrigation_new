@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Models/product_inventrory_model.dart';
 import '../constants/http_service.dart';
@@ -44,6 +45,8 @@ class ProductInventoryState extends State<ProductInventory> {
   String jsonOptions = '';
   late Map<String, dynamic> jsonDataMap;
 
+  bool visibleLoading = false;
+
 
   @override
   void initState() {
@@ -53,6 +56,7 @@ class ProductInventoryState extends State<ProductInventory> {
 
 
   Future<void> getUserInfo() async {
+    indicatorViewShow();
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       userID = prefs.getString('userId') ?? "";
@@ -78,12 +82,16 @@ class ProductInventoryState extends State<ProductInventory> {
 
           isNextButtonEnabled = productInventoryList.length >= limit;
           isPreviousButtonEnabled = currentSet > 1;
+          indicatorViewHide();
         });
 
       }
 
+      indicatorViewHide();
+
     }else {
       //_showSnackBar(response.body);
+      indicatorViewHide();
     }
   }
 
@@ -125,10 +133,18 @@ class ProductInventoryState extends State<ProductInventory> {
   }
 
 
-
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final mediaQuery = MediaQuery.of(context);
+    return visibleLoading? Visibility(
+      visible: visibleLoading,
+      child: Container(
+        padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 100, 0, mediaQuery.size.width/2 - 100, 0),
+        child: const LoadingIndicator(
+          indicatorType: Indicator.ballPulse,
+        ),
+      ),
+    ) : Container(
       color: Colors.blueGrey.shade50,
       padding: const EdgeInsets.all(10),
       child: Column(
@@ -282,7 +298,6 @@ class ProductInventoryState extends State<ProductInventory> {
   {
     return Column(
       children: [
-        // ... (rest of the admin header code)
         Container(
           decoration: const BoxDecoration(
               color: Colors.white,
@@ -568,6 +583,18 @@ class ProductInventoryState extends State<ProductInventory> {
 
   void _onPreviousButtonPressed() {
     getProductList(currentSet = currentSet-1, batchSize);
+  }
+
+  void indicatorViewShow() {
+    setState(() {
+      visibleLoading = true;
+    });
+  }
+
+  void indicatorViewHide() {
+    setState(() {
+      visibleLoading = false;
+    });
   }
 
 }

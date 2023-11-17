@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'dart:html';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 
 import '../Models/language.dart';
@@ -20,10 +23,17 @@ class _MyPreferenceState extends State<MyPreference>
   final List<LanguageList> languageList = <LanguageList>[];
   String _mySelection = 'English';
 
+  ImagePicker picker = ImagePicker();
+  XFile? image;
+
   @override
   void initState() {
     super.initState();
     getLanguage();
+  }
+
+  _getFromGallery() async {
+    image = await picker.pickImage(source: ImageSource.gallery);
   }
 
   Future<void> getLanguage() async
@@ -102,14 +112,43 @@ class _MyPreferenceState extends State<MyPreference>
                                     ),
                                     child: Row(
                                       children: [
-                                        const Flexible(
+                                        Flexible(
                                           flex :1,
                                           child: Padding(
-                                            padding: EdgeInsets.all(15.0),
+                                            padding: const EdgeInsets.all(10.0),
                                             child: Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                CircleAvatar(radius: 50),
+
+                                                Stack(
+                                                  children: [
+                                                    Center(
+                                                      child: CircleAvatar(
+                                                        radius: 60.0,
+                                                        //backgroundImage: image == null? AssetImage('assets/your_image.png') : File(image!.path),
+                                                      ),
+                                                    ),
+                                                    // Positioned button in the bottom-right corner
+                                                    Positioned(
+                                                      bottom: 10.0,
+                                                      right: 50.0,
+                                                      child: GestureDetector(
+                                                        onTap: () async {
+                                                          print('Button tapped!');
+                                                          //_getFromGallery();
+                                                        },
+                                                        child: const CircleAvatar(
+                                                          radius: 20.0,
+                                                          backgroundColor: Colors.blue,
+                                                          child: Icon(
+                                                            Icons.add,
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                               ],
                                             ),
                                           ),

@@ -514,8 +514,8 @@ class _OTPViewWideState extends State<OTPViewWide>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("ⓒ Powerd by Niagara Automation", style: myTheme.textTheme.titleSmall),
-                    Text("Version : 1.0.1", style: myTheme.textTheme.titleSmall),
+                    Text("  ⓒ Powerd by Niagara Automation", style: myTheme.textTheme.titleSmall),
+                    Text("Version : 1.0.1  ", style: myTheme.textTheme.titleSmall),
                   ],
                 ),
               )

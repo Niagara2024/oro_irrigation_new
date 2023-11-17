@@ -23,7 +23,7 @@ final ThemeData myTheme = ThemeData(
   textTheme: const TextTheme(
     titleLarge: TextStyle(fontSize: 22, color: textColorBlack),
     titleMedium: TextStyle(fontSize: 15, color: textColorBlack),
-    titleSmall: TextStyle(fontSize: 12, color: textColorBlack, fontWeight: FontWeight.normal),
+    titleSmall: TextStyle(fontSize: 12, color: textColorBlack),
 
     bodyMedium : TextStyle(fontSize: 13, color: textColorBlack, fontWeight: FontWeight.bold),
     bodySmall : TextStyle(fontSize: 12, color: textColorBlack, fontWeight: FontWeight.bold),

@@ -26,7 +26,6 @@ class _CreateAccountState extends State<CreateAccount> {
   String userMobileNo = '0';
 
   final _formKey = GlobalKey<FormState>();
-  bool clearSuffixIcon = false;
 
   final TextEditingController _cusNameController = TextEditingController();
   final TextEditingController _cusMobileNoController = TextEditingController();
@@ -181,24 +180,13 @@ class _CreateAccountState extends State<CreateAccount> {
                       border: const OutlineInputBorder(),
                       icon: const Icon(Icons.phone_outlined),
                       labelText: 'Phone Number',
-                      suffixIcon: IconButton(icon: Icon(clearSuffixIcon ? Icons.clear : null, color: myTheme.primaryColor,),
+                      suffixIcon: IconButton(icon: Icon(Icons.clear, color: myTheme.primaryColor,),
                           onPressed: () {
                             _cusMobileNoController.clear();
-                            setState(() {
-                              clearSuffixIcon = false;
-                            });
                           }),
                     ),
                     onInputChanged: (PhoneNumber number) {
-                      if(number.phoneNumber!.length > 5){
-                        setState(() {
-                          clearSuffixIcon = true;
-                        });
-                      }else{
-                        setState(() {
-                          clearSuffixIcon = false;
-                        });
-                      }
+
                     },
 
                     selectorConfig: const SelectorConfig(

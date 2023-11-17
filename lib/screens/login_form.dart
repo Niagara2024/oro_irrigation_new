@@ -14,7 +14,6 @@ bool _isObscure = true;
 bool _isLoginWithPassword = true;
 bool isValid = false;
 bool visibleLoading = false;
-bool clearSuffixIcon = false;
 bool _validate = false;
 
 String strTitle = 'ORO DRIP IRRIGATION';
@@ -131,7 +130,7 @@ class _NarrowOtpViewState extends State<NarrowOtpView> {
                             SizedBox(height: 50,
                               child: InternationalPhoneNumberInput(
                                 onInputChanged: (PhoneNumber number) {
-                                  //print(number.phoneNumber);
+                                  print(number.phoneNumber);
                                 },
                                 selectorConfig: const SelectorConfig(
                                   selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
@@ -365,7 +364,10 @@ class _OTPViewWideState extends State<OTPViewWide>
                                   SizedBox(height: 170, child: Image.asset('assets/images/login_illustrator.png', height: 170, width: 170,),),
                                   Text(strTitle, style: myTheme.textTheme.titleLarge),
                                   const SizedBox(height: 2,),
-                                  Text(strSubTitle, style: myTheme.textTheme.titleSmall),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 5, right: 5, bottom: 5),
+                                    child: Text(strSubTitle, style: myTheme.textTheme.titleSmall,),
+                                  ),
                                   const SizedBox(height: 15,),
                                   SizedBox(height: 50,
                                     child: InternationalPhoneNumberInput(
@@ -373,26 +375,14 @@ class _OTPViewWideState extends State<OTPViewWide>
                                         border: const OutlineInputBorder(),
                                         icon: const Icon(Icons.phone_outlined),
                                         labelText: 'Phone Number',
-                                        suffixIcon: IconButton(icon: Icon(clearSuffixIcon ? Icons.clear : null, color: Colors.red,),
+                                        suffixIcon: IconButton(icon: const Icon(Icons.clear, color: Colors.red,),
                                             onPressed: () {
                                               _mobileNoController.clear();
-                                              setState(() {
-                                                clearSuffixIcon = false;
-                                              });
                                             }),
                                       ),
                                       onInputChanged: (PhoneNumber number) {
-                                        if(number.phoneNumber!.length > 5){
-                                          setState(() {
-                                            clearSuffixIcon = true;
-                                          });
-                                        }else{
-                                          setState(() {
-                                            clearSuffixIcon = false;
-                                          });
-                                        }
+                                        print(number);
                                       },
-
                                       selectorConfig: const SelectorConfig(
                                         selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
                                         setSelectorButtonAsPrefixIcon: true,

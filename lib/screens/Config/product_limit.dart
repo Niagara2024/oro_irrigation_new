@@ -177,25 +177,21 @@ class _ProductLimitsState extends State<ProductLimits> {
                                           ),
                                           onTap: () {
                                             currentTxtFldVal = int.parse(myControllers[index].text);
+                                            print(currentTxtFldVal);
                                           },
                                           onChanged: (input) async {
                                             await Future.delayed(const Duration(milliseconds: 50));
                                             setState(() {
-                                              if(widget.nodeCount < filledRelayCount + int.parse(myControllers[index].text) - currentTxtFldVal)
-                                              {
-                                                myControllers[index].text = '$currentTxtFldVal';
-                                                _showSnackBar('Limit reached');
-                                              }
-                                              else{
-                                                filledRelayCount = 0;
-                                                for (int i=0; i < productLimits.length; i++) {
-                                                  if(myControllers[i].text==''){
-                                                    filledRelayCount = filledRelayCount + 0;
-                                                  }else{
-                                                    filledRelayCount = filledRelayCount + int.parse(myControllers[i].text);
-                                                  }
+                                              String crTvVal = myControllers[index].text;
+                                              if (widget.nodeCount < filledRelayCount + int.parse(myControllers[index].text.isEmpty ? '0' : myControllers[index].text) - currentTxtFldVal) {
+                                                if (crTvVal.isNotEmpty) {
+                                                  myControllers[index].text = crTvVal.substring(0, crTvVal.length - 1);
                                                 }
+                                                _showSnackBar('Limit reached');
+                                              } else {
+                                                filledRelayCount = myControllers.fold<int>(0,(sum, controller) => sum + (int.tryParse(controller.text) ?? 0),);
                                               }
+
                                             });
                                           },
                                         ),

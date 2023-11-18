@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/screens/Forms/create_account.dart';
 import 'package:oro_irrigation_new/screens/product_inventory.dart';
+import 'package:oro_irrigation_new/screens/web_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/mqtt_web_client.dart';
@@ -346,7 +347,7 @@ class _DashboardWideState extends State<DashboardWide> {
             widget.userType =='3'? CustomerHome(customerID: widget.userID,): const HomePage() :
             _selectedIndex == 1 ?
             ProductInventory(userName: widget.userName) :
-            const MyPreference(userID: 1,),
+            _selectedIndex == 2 ? const MyPreference(userID: 1,) : const MyWebView(),
           ),
         ],
       ),

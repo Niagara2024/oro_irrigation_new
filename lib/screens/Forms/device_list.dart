@@ -17,6 +17,7 @@ import '../../Models/product_stock.dart';
 import '../../constants/http_service.dart';
 import '../../constants/mqtt_web_client.dart';
 import '../../state_management/config_maker_provider.dart';
+import '../Config/product_limit.dart';
 
 enum SampleItem { itemOne, itemTwo, itemThree }
 enum MasterController {gem1, gem2, gem3, gem4, gem5, gem6, gem7, gem8, gem9, gem10,}
@@ -576,7 +577,7 @@ class CustomerSalesPage extends StatefulWidget
 class _CustomerSalesPageState extends State<CustomerSalesPage> {
 
   bool checkboxValueNode = false;
-  final List<String> _interfaceInterval = ['0 Sec', '5 Sec', '10 Sec', '20 Sec', '30 Sec', '45 Sec','1 Min','5 Min','10 Min','30 Min','1 hr']; // Option 2
+  final List<String> _interfaceInterval = ['0 sec', '5 sec', '10 sec', '20 sec', '30 sec', '45 sec','1 min','5 min','10 min','30 min','1 hr']; // Option 2
   SampleItem? selectedMenu;
   List<CustomerListMDL> myCustomerChildList = <CustomerListMDL>[];
 
@@ -619,7 +620,6 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
   @override
   Widget build(BuildContext context)
   {
-    var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
     if(widget.label.toString()=='Product List')
     {
       return  Container(
@@ -703,6 +703,505 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
         nodeStockSelection.add(0);
       }
 
+      return DefaultTabController(
+        length: widget.customerSiteList.length, // Number of tabs
+        child: Column(
+          children: [
+            TabBar(
+              indicatorColor: const Color.fromARGB(255, 175, 73, 73),
+              isScrollable: true,
+              tabs: [
+                for (var i = 0; i < widget.customerSiteList.length; i++)
+                  Tab(text: widget.customerSiteList[i].groupName,),
+              ],
+              onTap: (value) {
+              },
+            ),
+            const SizedBox(height: 10.0),
+            SizedBox(
+              height: MediaQuery.sizeOf(context).height-164,
+              child: TabBarView(
+                children: [
+                  for (int siteIndex = 0; siteIndex < widget.customerSiteList.length; siteIndex++)
+                    Column(
+                      children: [
+                        const SizedBox(height: 3,),
+                        const CircleAvatar(radius: 42,),
+                        const SizedBox(height: 5,),
+                        Text(widget.customerSiteList[siteIndex].categoryName,style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                        //Text(widget.customerSiteList[siteIndex].productDescription, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
+                        const SizedBox(height: 5,),
+                        Text('IMEi Number : ${widget.customerSiteList[siteIndex].deviceId.toString()}', style: const TextStyle(fontWeight: FontWeight.normal),),
+                        Text('Model Name  : ${widget.customerSiteList[siteIndex].modelName}', style: const TextStyle(fontWeight: FontWeight.normal),),
+                        Padding(
+                          padding: const EdgeInsets.all(5),
+                          child: Container(
+                            height: 50,
+                            decoration: BoxDecoration(
+                              borderRadius: const BorderRadius.all(Radius.circular(5)),
+                              color: Colors.grey.shade300,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 15, left: 15),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(''),
+                                  PopupMenuButton(
+                                    elevation: 10,
+                                    tooltip: 'Add node list',
+                                    child: Center(child: Icon(Icons.add, color: myTheme.primaryColor,)),
+                                    itemBuilder: (context) {
+
+                                      return List.generate(widget.nodeStockList.length+1 ,(nodeIndex) {
+                                        if(widget.nodeStockList.isEmpty){
+                                          return const PopupMenuItem(
+                                            child: Text('No node available to add in this site'),
+                                          );
+                                        }
+                                        else if(widget.nodeStockList.length == nodeIndex){
+                                          return PopupMenuItem(
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                              children: [
+                                                MaterialButton(
+                                                  color: Colors.red,
+                                                  textColor: Colors.white,
+                                                  child: const Text('CANCEL'),
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      checkboxValueNode = false;
+                                                      Navigator.pop(context);
+                                                    });
+                                                  },
+                                                ),
+                                                MaterialButton(
+                                                  color: Colors.green,
+                                                  textColor: Colors.white,
+                                                  child: const Text('ADD'),
+                                                  onPressed: () async
+                                                  {
+                                                    List<int> oldNodeListRfNo = [];
+                                                    int refNo = 0;
+                                                    String refNoUpdatingNode = '';
+
+                                                    List<dynamic> selectedNodeList = [];
+                                                    for(int i=0; i<nodeStockSelection.length; i++)
+                                                    {
+                                                      if(nodeStockSelection[i]==1){
+                                                        Map<String, dynamic> myMap = {"productId": widget.nodeStockList[i].productId.toString(), 'categoryName': widget.nodeStockList[i].categoryName, 'referenceNumber': 0};
+                                                        selectedNodeList.add(myMap);
+                                                      }
+                                                    }
+
+                                                    if(selectedNodeList.isNotEmpty)
+                                                    {
+                                                      for(int i = 0; i < selectedNodeList.length; i++)
+                                                      {
+                                                        if(refNoUpdatingNode != selectedNodeList[i]['categoryName'])
+                                                        {
+                                                          refNoUpdatingNode = selectedNodeList[i]['categoryName'];
+                                                          var contain = widget.usedNodeList[siteIndex].where((element) => element.categoryName == refNoUpdatingNode);
+                                                          if (contain.isNotEmpty)
+                                                          {
+                                                            for(int j = 0; j < widget.usedNodeList[siteIndex].length; j++)
+                                                            {
+                                                              if(widget.usedNodeList[siteIndex][j].categoryName == refNoUpdatingNode)
+                                                              {
+                                                                oldNodeListRfNo.add(widget.usedNodeList[siteIndex][j].referenceNumber);
+                                                              }
+                                                            }
+                                                            List missingRN = missingArray(oldNodeListRfNo);
+                                                            if(missingRN.isNotEmpty)
+                                                            {
+                                                              refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
+                                                              for(int k = 0; k < selectedNodeList.length; k++)
+                                                              {
+                                                                if(missingRN.isNotEmpty)
+                                                                {
+                                                                  if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
+                                                                  {
+                                                                    selectedNodeList[k]['referenceNumber'] = missingRN[0];
+                                                                    missingRN.removeAt(0);
+                                                                  }
+                                                                }else{
+                                                                  refNo = refNo+1;
+                                                                  selectedNodeList[k]['referenceNumber'] = refNo;
+                                                                }
+                                                              }
+                                                            }
+                                                            else
+                                                            {
+                                                              refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
+                                                              for(int k = 0; k < selectedNodeList.length; k++)
+                                                              {
+                                                                if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
+                                                                {
+                                                                  refNo = refNo+1;
+                                                                  selectedNodeList[k]['referenceNumber'] = refNo;
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                          else
+                                                          {
+                                                            refNo = 0;
+                                                            for(int k = 0; k < selectedNodeList.length; k++)
+                                                            {
+                                                              if(refNoUpdatingNode == selectedNodeList[k]['categoryName'])
+                                                              {
+                                                                refNo = refNo+1;
+                                                                selectedNodeList[k]['referenceNumber'] = refNo;
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                        else{
+                                                        }
+                                                      }
+
+                                                      //print(selectedNodeList);
+
+                                                      if(selectedNodeList.isNotEmpty)
+                                                      {
+                                                        Map<String, dynamic> body = {
+                                                          "userId": widget.customerID,
+                                                          "dealerId": widget.userID,
+                                                          "masterId": widget.customerSiteList[siteIndex].userDeviceListId,
+                                                          "groupId": widget.customerSiteList[siteIndex].groupId,
+                                                          "products": selectedNodeList,
+                                                          "createUser": widget.userID,
+                                                        };
+
+                                                        final response = await HttpService().postRequest("createUserDeviceListWithMaster", body);
+                                                        print(response.body);
+                                                        if(response.statusCode == 200)
+                                                        {
+                                                          var data = jsonDecode(response.body);
+                                                          if(data["code"]==200)
+                                                          {
+                                                            setState(() {
+                                                              selectedNodeList.clear();
+                                                              nodeStockSelection.clear();
+                                                              checkboxValueNode = false;
+                                                            });
+
+                                                            widget.getCustomerSite();
+                                                            widget.getNodeStockList();
+                                                            Navigator.pop(context);
+                                                          }
+                                                          else{
+                                                            //_showSnackBar(data["message"]);
+                                                            //_showAlertDialog('Warning', data["message"]);
+                                                          }
+                                                        }
+                                                      }
+
+                                                    }
+
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }
+                                        return PopupMenuItem(
+                                          child: StatefulBuilder(
+                                            builder: (BuildContext context, void Function(void Function()) setState) {
+                                              return CheckboxListTile(
+                                                title: Text(widget.nodeStockList[nodeIndex].categoryName),
+                                                subtitle: Text('${widget.nodeStockList[nodeIndex].imeiNo}'),
+                                                value: checkboxValueNode,
+                                                onChanged:(bool? value) { setState(() {
+                                                  checkboxValueNode = value!;
+                                                  if(value){
+                                                    nodeStockSelection[nodeIndex] = 1;
+                                                  }else{
+                                                    nodeStockSelection[nodeIndex] = 0;
+                                                  }
+
+                                                });},
+                                              );
+                                            },
+                                          ),
+                                        );
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8, left: 8),
+                            child: GridView.builder(
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 7,
+                                crossAxisSpacing: 5.0,
+                                mainAxisSpacing: 5.0,
+                              ),
+                              itemCount: widget.usedNodeList[siteIndex].length,
+                              itemBuilder: (BuildContext context, int siteNodeIndex) {
+                                return Card(
+                                  elevation: 5.0,
+                                  color: Colors.white,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      ListTile(
+                                        leading: const CircleAvatar(radius: 20,),
+                                        trailing: IconButton(onPressed: () async {
+                                          Map<String, dynamic> body = {
+                                            "userId": widget.customerID,
+                                            "controllerId": widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId,
+                                            "modifyUser": widget.userID,
+                                          };
+
+                                          final response = await HttpService().putRequest("removeNodeInMaster", body);
+                                          if(response.statusCode == 200)
+                                          {
+                                            var data = jsonDecode(response.body);
+                                            if(data["code"]==200)
+                                            {
+                                              widget.usedNodeList[siteIndex].removeWhere((node) => node.userDeviceListId == widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId);
+                                              _showSnackBar(data["message"]);
+
+                                              setState(() {
+                                                checkboxValueNode = false;
+                                              });
+                                              widget.getNodeStockList();
+                                            }
+                                            else{
+                                              _showSnackBar(data["message"]);
+                                            }
+                                          }
+
+                                        }, icon: const Icon(Icons.delete_outline, color: Colors.red,)),
+                                      ),
+                                      Text(widget.usedNodeList[siteIndex][siteNodeIndex].categoryName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
+                                      Text(widget.usedNodeList[siteIndex][siteNodeIndex].modelName, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
+                                      Text(widget.usedNodeList[siteIndex][siteNodeIndex].deviceId, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
+                                      ListTile(
+                                        title: DropdownButton(
+                                          value: widget.usedNodeList[siteIndex][siteNodeIndex].interface,
+                                          style: const TextStyle(fontSize: 12),
+                                          onChanged: (newValue) {
+                                            setState(() {
+                                              widget.usedNodeList[siteIndex][siteNodeIndex].interface = newValue!;
+                                              int index = widget.interfaceType.indexWhere((model) => model.interface == newValue);
+                                              widget.usedNodeList[siteIndex][siteNodeIndex].interfaceTypeId = widget.interfaceType[index].interfaceTypeId;
+                                            });
+                                          },
+                                          items: widget.interfaceType.map((interface) {
+                                            return DropdownMenuItem(
+                                              value: interface.interface,
+                                              child: Text(interface.interface, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                            );
+                                          }).toList(),
+                                        ),
+                                        trailing: DropdownButton(
+                                          value: widget.usedNodeList[siteIndex][siteNodeIndex].interfaceInterval,
+                                          style: const TextStyle(fontSize: 12),
+                                          onChanged: (newValue) {
+                                            setState(() {
+                                              widget.usedNodeList[siteIndex][siteNodeIndex].interfaceInterval = newValue!;
+                                            });
+                                          },
+                                          items: _interfaceInterval.map((interface) {
+                                            return DropdownMenuItem(
+                                              value: interface,
+                                              child: Text(interface, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          /*child: ListView.builder(
+                              scrollDirection: Axis.vertical,
+                              itemCount: widget.usedNodeList[siteIndex].length,
+                              itemBuilder: (context, siteNodeIndex) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(left: 5),
+                                  child: ListTile(
+                                    title: Text(widget.usedNodeList[siteIndex][siteNodeIndex].categoryName),
+                                    subtitle: Text('${widget.usedNodeList[siteIndex][siteNodeIndex].modelName}\n'
+                                        'IMEi : ${widget.usedNodeList[siteIndex][siteNodeIndex].deviceId}',
+                                      style: const TextStyle(fontWeight: FontWeight.normal),),
+                                    leading: const CircleAvatar(radius: 20),
+                                    trailing: Wrap(
+                                      spacing: 12, // space between two icons
+                                      children: <Widget>[
+                                        DropdownButton(
+                                          value: widget.usedNodeList[siteIndex][siteNodeIndex].interface,
+                                          onChanged: (newValue) {
+                                            setState(() {
+                                              widget.usedNodeList[siteIndex][siteNodeIndex].interface = newValue!;
+                                              int index = widget.interfaceType.indexWhere((model) => model.interface == newValue);
+                                              widget.usedNodeList[siteIndex][siteNodeIndex].interfaceTypeId = widget.interfaceType[index].interfaceTypeId;
+                                            });
+                                          },
+                                          items: widget.interfaceType.map((interface) {
+                                            return DropdownMenuItem(
+                                              value: interface.interface,
+                                              child: Text(interface.interface, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                            );
+                                          }).toList(),
+                                        ), // icon-1
+                                        DropdownButton(
+                                          value: widget.usedNodeList[siteIndex][siteNodeIndex].interfaceInterval,
+                                          onChanged: (newValue) {
+                                            setState(() {
+                                              widget.usedNodeList[siteIndex][siteNodeIndex].interfaceInterval = newValue!;
+                                            });
+                                          },
+                                          items: _interfaceInterval.map((interface) {
+                                            return DropdownMenuItem(
+                                              value: interface,
+                                              child: Text(interface, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                            );
+                                          }).toList(),
+                                        ),
+                                        IconButton(onPressed: () async {
+                                          print(widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId);
+
+                                          Map<String, dynamic> body = {
+                                            "userId": widget.customerID,
+                                            "controllerId": widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId,
+                                            "modifyUser": widget.userID,
+                                          };
+                                          print(body);
+
+                                          final response = await HttpService().putRequest("removeNodeInMaster", body);
+                                          if(response.statusCode == 200)
+                                          {
+                                            var data = jsonDecode(response.body);
+                                            if(data["code"]==200)
+                                            {
+                                              widget.usedNodeList[siteIndex].removeWhere((node) => node.userDeviceListId == widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId);
+                                              _showSnackBar(data["message"]);
+
+                                              setState(() {
+                                                checkboxValueNode = false;
+                                              });
+                                              widget.getNodeStockList();
+                                            }
+                                            else{
+                                              _showSnackBar(data["message"]);
+                                            }
+                                          }
+
+                                        }, icon: const Icon(Icons.delete_outline, color: Colors.red,))// icon-2
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }),*/
+                        ),
+                        Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.only(bottomRight: Radius.circular(5), bottomLeft: Radius.circular(5)),
+                            color: myTheme.primaryColor.withOpacity(0.2),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(
+                                  tooltip : 'Send to target',
+                                  onPressed: () async {
+                                    List<dynamic> updatedInterface = [];
+                                    for(int i=0; i<widget.usedNodeList[siteIndex].length; i++){
+                                      Map<String, dynamic> myMap = {"productId": widget.usedNodeList[siteIndex][i].productId,
+                                        'interfaceTypeId': widget.usedNodeList[siteIndex][i].interfaceTypeId, 'interfaceInterval': widget.usedNodeList[siteIndex][i].interfaceInterval};
+                                      updatedInterface.add(myMap);
+                                    }
+                                    Map<String, dynamic> body = {
+                                      "userId": widget.customerID,
+                                      "products": updatedInterface,
+                                      "modifyUser": widget.userID,
+                                    };
+
+                                    List<dynamic> payLoad = [];
+                                    payLoad.add('${1},${widget.customerSiteList[siteIndex].categoryName},${'1'}, ${'1'}, ${widget.customerSiteList[siteIndex].deviceId.toString()},'
+                                        '${'1'},${"00:00:30"};');
+
+                                    for(int i=0; i<widget.usedNodeList[siteIndex].length; i++){
+
+                                      //String paddedNumber = widget.usedNodeList[siteIndex][i].deviceId.toString().padLeft(20, '0');
+                                      String formattedTime = convertToHHmmss(widget.usedNodeList[siteIndex][i].interfaceInterval);
+
+                                      payLoad.add('${i+2},${widget.usedNodeList[siteIndex][i].categoryName},${widget.usedNodeList[siteIndex][i].categoryId},'
+                                          '${widget.usedNodeList[siteIndex][i].referenceNumber},${widget.usedNodeList[siteIndex][i].deviceId},'
+                                          '${widget.usedNodeList[siteIndex][i].interfaceTypeId},$formattedTime;');
+                                    }
+
+                                    String inputString = payLoad.toString();
+                                    List<String> parts = inputString.split(';');
+                                    String resultString = parts.map((part) {return part.replaceFirst(',', '');
+                                    }).join(';');
+
+                                    String resultStringFinal = resultString.replaceAll('[', '').replaceAll(']', '');
+                                    String modifiedString = resultStringFinal.replaceAll(', ', ',');
+                                    String modifiedStringFinal = '${modifiedString.substring(0, 1)},${modifiedString.substring(1)}';
+                                    String stringWithoutSpace = modifiedStringFinal.replaceAll('; ', ';');
+                                    //print(stringWithoutSpace);
+
+                                    String payLoadFinal = jsonEncode({
+                                      "100": [
+                                        {"101": stringWithoutSpace},
+                                      ]
+                                    });
+
+                                    print(body);
+
+                                    MqttWebClient().publishMessage('AppToFirmware/${widget.customerSiteList[siteIndex].deviceId}', payLoadFinal);
+
+                                    final response = await HttpService().putRequest("updateUserDeviceNodeList", body);
+                                    if(response.statusCode == 200)
+                                    {
+                                      var data = jsonDecode(response.body);
+                                      if(data["code"]==200)
+                                      {
+                                        updatedInterface.clear();
+                                        _showSnackBar(data["message"]);
+                                      }
+                                      else{
+                                        _showSnackBar(data["message"]);
+                                      }
+                                    }
+                                  },
+                                  icon: const Icon(Icons.send)),
+                              const SizedBox(width: 10,),
+                              IconButton(
+                                  tooltip : 'Product Limit',
+                                  onPressed: () async {
+                                    int relayCnt = 0;
+                                    for(int i=0; i<widget.usedNodeList[siteIndex].length; i++){
+                                      relayCnt = relayCnt + widget.usedNodeList[siteIndex][i].relayCount;
+                                    }
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  ProductLimits(userID: widget.userID, customerID: widget.customerID, userType: 2, siteID: widget.customerSiteList[siteIndex].groupId, nodeCount: relayCnt, siteName: widget.customerSiteList[siteIndex].groupName, userDeviceListId: widget.customerSiteList[siteIndex].userDeviceListId, deviceId: widget.customerSiteList[siteIndex].deviceId,)),);
+                                  },
+                                  icon: const Icon(Icons.list_alt)),
+                              const SizedBox(width: 20,),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+
       return  ListView.builder(
           shrinkWrap: true,
           scrollDirection: Axis.horizontal,
@@ -716,481 +1215,478 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15.0), // Set the corner radius here
                 ),
-                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                child: Padding(
-                    padding: const EdgeInsets.all(01),
-                    child: Container(
-                        width : 400,
-                        decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.white,
-                      ),
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 5,),
-                            const CircleAvatar(radius: 45,),
-                            const SizedBox(height: 5,),
-                            Text(widget.customerSiteList[siteIndex].categoryName,style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                            Text(widget.customerSiteList[siteIndex].productDescription, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
-                            const SizedBox(height: 5,),
-                            Text('IMEi Number : ${widget.customerSiteList[siteIndex].deviceId.toString()}', style: const TextStyle(fontWeight: FontWeight.normal),),
-                            Text('Model Name  : ${widget.customerSiteList[siteIndex].modelName}', style: const TextStyle(fontWeight: FontWeight.normal),),
-                            Padding(
-                              padding: const EdgeInsets.all(5),
-                              child: Container(
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  borderRadius: const BorderRadius.all(Radius.circular(5)),
-                                  color: Colors.grey.shade300,
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: 10, left: 10),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(widget.customerSiteList[siteIndex].groupName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal,),),
-                                      PopupMenuButton(
-                                        elevation: 10,
-                                        tooltip: 'Add node list',
-                                        child: Center(child: Icon(Icons.add_card, color: myTheme.primaryColor,)),
-                                        itemBuilder: (context) {
-
-                                          return List.generate(widget.nodeStockList.length+1 ,(nodeIndex) {
-                                            if(widget.nodeStockList.isEmpty){
-                                              return const PopupMenuItem(
-                                                child: Text('No node available to add in this site'),
-                                              );
-                                            }
-                                            else if(widget.nodeStockList.length == nodeIndex){
-                                              return PopupMenuItem(
-                                                child: Row(
-                                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                                  children: [
-                                                    MaterialButton(
-                                                      color: Colors.red,
-                                                      textColor: Colors.white,
-                                                      child: const Text('CANCEL'),
-                                                      onPressed: () {
-                                                        setState(() {
-                                                          checkboxValueNode = false;
-                                                          Navigator.pop(context);
-                                                        });
-                                                      },
-                                                    ),
-                                                    MaterialButton(
-                                                      color: Colors.green,
-                                                      textColor: Colors.white,
-                                                      child: const Text('ADD'),
-                                                      onPressed: () async
-                                                      {
-                                                        List<int> oldNodeListRfNo = [];
-                                                        int refNo = 0;
-                                                        String refNoUpdatingNode = '';
-
-                                                        List<dynamic> selectedNodeList = [];
-                                                        for(int i=0; i<nodeStockSelection.length; i++)
-                                                        {
-                                                          if(nodeStockSelection[i]==1){
-                                                            Map<String, dynamic> myMap = {"productId": widget.nodeStockList[i].productId.toString(), 'categoryName': widget.nodeStockList[i].categoryName, 'referenceNumber': 0};
-                                                            selectedNodeList.add(myMap);
-                                                          }
-                                                        }
-
-                                                        if(selectedNodeList.isNotEmpty)
-                                                        {
-                                                          for(int i = 0; i < selectedNodeList.length; i++)
-                                                          {
-                                                            if(refNoUpdatingNode != selectedNodeList[i]['categoryName'])
-                                                            {
-                                                              refNoUpdatingNode = selectedNodeList[i]['categoryName'];
-                                                              var contain = widget.usedNodeList[siteIndex].where((element) => element.categoryName == refNoUpdatingNode);
-                                                              if (contain.isNotEmpty)
-                                                              {
-                                                                for(int j = 0; j < widget.usedNodeList[siteIndex].length; j++)
-                                                                {
-                                                                  if(widget.usedNodeList[siteIndex][j].categoryName == refNoUpdatingNode)
-                                                                  {
-                                                                    oldNodeListRfNo.add(widget.usedNodeList[siteIndex][j].referenceNumber);
-                                                                  }
-                                                                }
-                                                                List missingRN = missingArray(oldNodeListRfNo);
-                                                                if(missingRN.isNotEmpty)
-                                                                {
-                                                                  refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
-                                                                  for(int k = 0; k < selectedNodeList.length; k++)
-                                                                  {
-                                                                    if(missingRN.isNotEmpty)
-                                                                    {
-                                                                      if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
-                                                                      {
-                                                                        selectedNodeList[k]['referenceNumber'] = missingRN[0];
-                                                                        missingRN.removeAt(0);
-                                                                      }
-                                                                    }else{
-                                                                      refNo = refNo+1;
-                                                                      selectedNodeList[k]['referenceNumber'] = refNo;
-                                                                    }
-                                                                  }
-                                                                }
-                                                                else
-                                                                {
-                                                                  refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
-                                                                  for(int k = 0; k < selectedNodeList.length; k++)
-                                                                  {
-                                                                    if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
-                                                                    {
-                                                                      refNo = refNo+1;
-                                                                      selectedNodeList[k]['referenceNumber'] = refNo;
-                                                                    }
-                                                                  }
-                                                                }
-                                                              }
-                                                              else
-                                                              {
-                                                                refNo = 0;
-                                                                for(int k = 0; k < selectedNodeList.length; k++)
-                                                                {
-                                                                  if(refNoUpdatingNode == selectedNodeList[k]['categoryName'])
-                                                                  {
-                                                                    refNo = refNo+1;
-                                                                    selectedNodeList[k]['referenceNumber'] = refNo;
-                                                                  }
-                                                                }
-                                                              }
-                                                            }
-                                                            else{
-                                                            }
-                                                          }
-
-                                                          //print(selectedNodeList);
-
-                                                          if(selectedNodeList.isNotEmpty)
-                                                          {
-                                                            Map<String, dynamic> body = {
-                                                              "userId": widget.customerID,
-                                                              "dealerId": widget.userID,
-                                                              "masterId": widget.customerSiteList[siteIndex].userDeviceListId,
-                                                              "groupId": widget.customerSiteList[siteIndex].groupId,
-                                                              "products": selectedNodeList,
-                                                              "createUser": widget.userID,
-                                                            };
-
-                                                            final response = await HttpService().postRequest("createUserDeviceListWithMaster", body);
-                                                            print(response.body);
-                                                            if(response.statusCode == 200)
-                                                            {
-                                                              var data = jsonDecode(response.body);
-                                                              if(data["code"]==200)
-                                                              {
-                                                                setState(() {
-                                                                  selectedNodeList.clear();
-                                                                  nodeStockSelection.clear();
-                                                                  checkboxValueNode = false;
-                                                                });
-
-                                                                widget.getCustomerSite();
-                                                                widget.getNodeStockList();
-                                                                Navigator.pop(context);
-                                                              }
-                                                              else{
-                                                                //_showSnackBar(data["message"]);
-                                                                //_showAlertDialog('Warning', data["message"]);
-                                                              }
-                                                            }
-                                                          }
-
-                                                        }
-
-                                                      },
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
-                                            }
-                                            return PopupMenuItem(
-                                              child: StatefulBuilder(
-                                                builder: (BuildContext context, void Function(void Function()) setState) {
-                                                  return CheckboxListTile(
-                                                    title: Text(widget.nodeStockList[nodeIndex].categoryName),
-                                                    subtitle: Text('${widget.nodeStockList[nodeIndex].imeiNo}'),
-                                                    value: checkboxValueNode,
-                                                    onChanged:(bool? value) { setState(() {
-                                                      checkboxValueNode = value!;
-                                                      if(value){
-                                                        nodeStockSelection[nodeIndex] = 1;
-                                                      }else{
-                                                        nodeStockSelection[nodeIndex] = 0;
-                                                      }
-
-                                                    });},
-                                                  );
-                                                },
-                                              ),
-                                            );
-                                          });
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                margin: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                child: Container(
+                    width : 570,
+                    decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white,
+                  ),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 5,),
+                        const CircleAvatar(radius: 45,),
+                        const SizedBox(height: 5,),
+                        Text(widget.customerSiteList[siteIndex].categoryName,style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                        Text(widget.customerSiteList[siteIndex].productDescription, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
+                        const SizedBox(height: 5,),
+                        Text('IMEi Number : ${widget.customerSiteList[siteIndex].deviceId.toString()}', style: const TextStyle(fontWeight: FontWeight.normal),),
+                        Text('Model Name  : ${widget.customerSiteList[siteIndex].modelName}', style: const TextStyle(fontWeight: FontWeight.normal),),
+                        Padding(
+                          padding: const EdgeInsets.all(5),
+                          child: Container(
+                            height: 50,
+                            decoration: BoxDecoration(
+                              borderRadius: const BorderRadius.all(Radius.circular(5)),
+                              color: Colors.grey.shade300,
                             ),
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(5.0),
-                                child: GridView.builder(
-                                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    crossAxisSpacing: 8.0,
-                                    mainAxisSpacing: 8.0,
-                                  ),
-                                  itemCount: widget.usedNodeList[siteIndex].length,
-                                  itemBuilder: (BuildContext context, int siteNodeIndex) {
-                                    return Card(
-                                      elevation: 8.0,
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          ListTile(
-                                            leading: const CircleAvatar(radius: 20,),
-                                            trailing: IconButton(onPressed: () async {
-                                              Map<String, dynamic> body = {
-                                                "userId": widget.customerID,
-                                                "controllerId": widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId,
-                                                "modifyUser": widget.userID,
-                                              };
-                                              print(body);
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 15, left: 15),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(widget.customerSiteList[siteIndex].groupName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal,),),
+                                  PopupMenuButton(
+                                    elevation: 10,
+                                    tooltip: 'Add node list',
+                                    child: Center(child: Icon(Icons.add_card, color: myTheme.primaryColor,)),
+                                    itemBuilder: (context) {
 
-                                              final response = await HttpService().putRequest("removeNodeInMaster", body);
-                                              if(response.statusCode == 200)
-                                              {
-                                                var data = jsonDecode(response.body);
-                                                if(data["code"]==200)
-                                                {
-                                                  widget.usedNodeList[siteIndex].removeWhere((node) => node.userDeviceListId == widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId);
-                                                  _showSnackBar(data["message"]);
-
-                                                  setState(() {
-                                                    checkboxValueNode = false;
-                                                  });
-                                                  widget.getNodeStockList();
-                                                }
-                                                else{
-                                                  _showSnackBar(data["message"]);
-                                                }
-                                              }
-
-                                            }, icon: const Icon(Icons.delete_outline, color: Colors.red,)),
-                                          ),
-                                          Text(widget.usedNodeList[siteIndex][siteNodeIndex].categoryName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
-                                          Text(widget.usedNodeList[siteIndex][siteNodeIndex].modelName, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
-                                          Text(widget.usedNodeList[siteIndex][siteNodeIndex].deviceId, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
-                                          ListTile(
-                                            title: DropdownButton(
-                                              value: widget.usedNodeList[siteIndex][siteNodeIndex].interface,
-                                              style: const TextStyle(fontSize: 12),
-                                              onChanged: (newValue) {
-                                                setState(() {
-                                                  widget.usedNodeList[siteIndex][siteNodeIndex].interface = newValue!;
-                                                  int index = widget.interfaceType.indexWhere((model) => model.interface == newValue);
-                                                  widget.usedNodeList[siteIndex][siteNodeIndex].interfaceTypeId = widget.interfaceType[index].interfaceTypeId;
-                                                });
-                                              },
-                                              items: widget.interfaceType.map((interface) {
-                                                return DropdownMenuItem(
-                                                  value: interface.interface,
-                                                  child: Text(interface.interface, style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                );
-                                              }).toList(),
-                                            ),
-                                            trailing: DropdownButton(
-                                              value: widget.usedNodeList[siteIndex][siteNodeIndex].interfaceInterval,
-                                              style: const TextStyle(fontSize: 12),
-                                              onChanged: (newValue) {
-                                                setState(() {
-                                                  widget.usedNodeList[siteIndex][siteNodeIndex].interfaceInterval = newValue!;
-                                                });
-                                              },
-                                              items: _interfaceInterval.map((interface) {
-                                                return DropdownMenuItem(
-                                                  value: interface,
-                                                  child: Text(interface, style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                );
-                                              }).toList(),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                                /*child: ListView.builder(
-                                    scrollDirection: Axis.vertical,
-                                    itemCount: widget.usedNodeList[siteIndex].length,
-                                    itemBuilder: (context, siteNodeIndex) {
-                                      return Padding(
-                                        padding: const EdgeInsets.only(left: 5),
-                                        child: ListTile(
-                                          title: Text(widget.usedNodeList[siteIndex][siteNodeIndex].categoryName),
-                                          subtitle: Text('${widget.usedNodeList[siteIndex][siteNodeIndex].modelName}\n'
-                                              'IMEi : ${widget.usedNodeList[siteIndex][siteNodeIndex].deviceId}',
-                                            style: const TextStyle(fontWeight: FontWeight.normal),),
-                                          leading: const CircleAvatar(radius: 20),
-                                          trailing: Wrap(
-                                            spacing: 12, // space between two icons
-                                            children: <Widget>[
-                                              DropdownButton(
-                                                value: widget.usedNodeList[siteIndex][siteNodeIndex].interface,
-                                                onChanged: (newValue) {
-                                                  setState(() {
-                                                    widget.usedNodeList[siteIndex][siteNodeIndex].interface = newValue!;
-                                                    int index = widget.interfaceType.indexWhere((model) => model.interface == newValue);
-                                                    widget.usedNodeList[siteIndex][siteNodeIndex].interfaceTypeId = widget.interfaceType[index].interfaceTypeId;
-                                                  });
-                                                },
-                                                items: widget.interfaceType.map((interface) {
-                                                  return DropdownMenuItem(
-                                                    value: interface.interface,
-                                                    child: Text(interface.interface, style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                  );
-                                                }).toList(),
-                                              ), // icon-1
-                                              DropdownButton(
-                                                value: widget.usedNodeList[siteIndex][siteNodeIndex].interfaceInterval,
-                                                onChanged: (newValue) {
-                                                  setState(() {
-                                                    widget.usedNodeList[siteIndex][siteNodeIndex].interfaceInterval = newValue!;
-                                                  });
-                                                },
-                                                items: _interfaceInterval.map((interface) {
-                                                  return DropdownMenuItem(
-                                                    value: interface,
-                                                    child: Text(interface, style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                  );
-                                                }).toList(),
-                                              ),
-                                              IconButton(onPressed: () async {
-                                                print(widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId);
-
-                                                Map<String, dynamic> body = {
-                                                  "userId": widget.customerID,
-                                                  "controllerId": widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId,
-                                                  "modifyUser": widget.userID,
-                                                };
-                                                print(body);
-
-                                                final response = await HttpService().putRequest("removeNodeInMaster", body);
-                                                if(response.statusCode == 200)
-                                                {
-                                                  var data = jsonDecode(response.body);
-                                                  if(data["code"]==200)
-                                                  {
-                                                    widget.usedNodeList[siteIndex].removeWhere((node) => node.userDeviceListId == widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId);
-                                                    _showSnackBar(data["message"]);
-
+                                      return List.generate(widget.nodeStockList.length+1 ,(nodeIndex) {
+                                        if(widget.nodeStockList.isEmpty){
+                                          return const PopupMenuItem(
+                                            child: Text('No node available to add in this site'),
+                                          );
+                                        }
+                                        else if(widget.nodeStockList.length == nodeIndex){
+                                          return PopupMenuItem(
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                              children: [
+                                                MaterialButton(
+                                                  color: Colors.red,
+                                                  textColor: Colors.white,
+                                                  child: const Text('CANCEL'),
+                                                  onPressed: () {
                                                     setState(() {
                                                       checkboxValueNode = false;
+                                                      Navigator.pop(context);
                                                     });
-                                                    widget.getNodeStockList();
-                                                  }
-                                                  else{
-                                                    _showSnackBar(data["message"]);
-                                                  }
-                                                }
+                                                  },
+                                                ),
+                                                MaterialButton(
+                                                  color: Colors.green,
+                                                  textColor: Colors.white,
+                                                  child: const Text('ADD'),
+                                                  onPressed: () async
+                                                  {
+                                                    List<int> oldNodeListRfNo = [];
+                                                    int refNo = 0;
+                                                    String refNoUpdatingNode = '';
 
-                                              }, icon: const Icon(Icons.delete_outline, color: Colors.red,))// icon-2
-                                            ],
+                                                    List<dynamic> selectedNodeList = [];
+                                                    for(int i=0; i<nodeStockSelection.length; i++)
+                                                    {
+                                                      if(nodeStockSelection[i]==1){
+                                                        Map<String, dynamic> myMap = {"productId": widget.nodeStockList[i].productId.toString(), 'categoryName': widget.nodeStockList[i].categoryName, 'referenceNumber': 0};
+                                                        selectedNodeList.add(myMap);
+                                                      }
+                                                    }
+
+                                                    if(selectedNodeList.isNotEmpty)
+                                                    {
+                                                      for(int i = 0; i < selectedNodeList.length; i++)
+                                                      {
+                                                        if(refNoUpdatingNode != selectedNodeList[i]['categoryName'])
+                                                        {
+                                                          refNoUpdatingNode = selectedNodeList[i]['categoryName'];
+                                                          var contain = widget.usedNodeList[siteIndex].where((element) => element.categoryName == refNoUpdatingNode);
+                                                          if (contain.isNotEmpty)
+                                                          {
+                                                            for(int j = 0; j < widget.usedNodeList[siteIndex].length; j++)
+                                                            {
+                                                              if(widget.usedNodeList[siteIndex][j].categoryName == refNoUpdatingNode)
+                                                              {
+                                                                oldNodeListRfNo.add(widget.usedNodeList[siteIndex][j].referenceNumber);
+                                                              }
+                                                            }
+                                                            List missingRN = missingArray(oldNodeListRfNo);
+                                                            if(missingRN.isNotEmpty)
+                                                            {
+                                                              refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
+                                                              for(int k = 0; k < selectedNodeList.length; k++)
+                                                              {
+                                                                if(missingRN.isNotEmpty)
+                                                                {
+                                                                  if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
+                                                                  {
+                                                                    selectedNodeList[k]['referenceNumber'] = missingRN[0];
+                                                                    missingRN.removeAt(0);
+                                                                  }
+                                                                }else{
+                                                                  refNo = refNo+1;
+                                                                  selectedNodeList[k]['referenceNumber'] = refNo;
+                                                                }
+                                                              }
+                                                            }
+                                                            else
+                                                            {
+                                                              refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
+                                                              for(int k = 0; k < selectedNodeList.length; k++)
+                                                              {
+                                                                if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
+                                                                {
+                                                                  refNo = refNo+1;
+                                                                  selectedNodeList[k]['referenceNumber'] = refNo;
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                          else
+                                                          {
+                                                            refNo = 0;
+                                                            for(int k = 0; k < selectedNodeList.length; k++)
+                                                            {
+                                                              if(refNoUpdatingNode == selectedNodeList[k]['categoryName'])
+                                                              {
+                                                                refNo = refNo+1;
+                                                                selectedNodeList[k]['referenceNumber'] = refNo;
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                        else{
+                                                        }
+                                                      }
+
+                                                      //print(selectedNodeList);
+
+                                                      if(selectedNodeList.isNotEmpty)
+                                                      {
+                                                        Map<String, dynamic> body = {
+                                                          "userId": widget.customerID,
+                                                          "dealerId": widget.userID,
+                                                          "masterId": widget.customerSiteList[siteIndex].userDeviceListId,
+                                                          "groupId": widget.customerSiteList[siteIndex].groupId,
+                                                          "products": selectedNodeList,
+                                                          "createUser": widget.userID,
+                                                        };
+
+                                                        final response = await HttpService().postRequest("createUserDeviceListWithMaster", body);
+                                                        print(response.body);
+                                                        if(response.statusCode == 200)
+                                                        {
+                                                          var data = jsonDecode(response.body);
+                                                          if(data["code"]==200)
+                                                          {
+                                                            setState(() {
+                                                              selectedNodeList.clear();
+                                                              nodeStockSelection.clear();
+                                                              checkboxValueNode = false;
+                                                            });
+
+                                                            widget.getCustomerSite();
+                                                            widget.getNodeStockList();
+                                                            Navigator.pop(context);
+                                                          }
+                                                          else{
+                                                            //_showSnackBar(data["message"]);
+                                                            //_showAlertDialog('Warning', data["message"]);
+                                                          }
+                                                        }
+                                                      }
+
+                                                    }
+
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }
+                                        return PopupMenuItem(
+                                          child: StatefulBuilder(
+                                            builder: (BuildContext context, void Function(void Function()) setState) {
+                                              return CheckboxListTile(
+                                                title: Text(widget.nodeStockList[nodeIndex].categoryName),
+                                                subtitle: Text('${widget.nodeStockList[nodeIndex].imeiNo}'),
+                                                value: checkboxValueNode,
+                                                onChanged:(bool? value) { setState(() {
+                                                  checkboxValueNode = value!;
+                                                  if(value){
+                                                    nodeStockSelection[nodeIndex] = 1;
+                                                  }else{
+                                                    nodeStockSelection[nodeIndex] = 0;
+                                                  }
+
+                                                });},
+                                              );
+                                            },
                                           ),
-                                        ),
-                                      );
-                                    }),*/
-                            ),
-                            Container(
-                              height: 45,
-                              decoration: const BoxDecoration(
-                                borderRadius: BorderRadius.only(bottomRight: Radius.circular(5), bottomLeft: Radius.circular(5)),
-                                color: Colors.transparent,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  TextButton.icon(
-                                    onPressed: () async {
-                                      List<dynamic> updatedInterface = [];
-                                      for(int i=0; i<widget.usedNodeList[siteIndex].length; i++){
-                                        Map<String, dynamic> myMap = {"productId": widget.usedNodeList[siteIndex][i].productId,
-                                          'interfaceTypeId': widget.usedNodeList[siteIndex][i].interfaceTypeId, 'interfaceInterval': widget.usedNodeList[siteIndex][i].interfaceInterval};
-                                        updatedInterface.add(myMap);
-                                      }
-                                      Map<String, dynamic> body = {
-                                        "userId": widget.customerID,
-                                        "products": updatedInterface,
-                                        "modifyUser": widget.userID,
-                                      };
-
-                                      List<dynamic> payLoad = [];
-                                      payLoad.add('${1},${widget.customerSiteList[siteIndex].categoryName},${'1'}, ${'1'}, ${widget.customerSiteList[siteIndex].deviceId.toString()},'
-                                          '${'1'},${"00:00:30"};');
-
-                                      for(int i=0; i<widget.usedNodeList[siteIndex].length; i++){
-
-                                        //String paddedNumber = widget.usedNodeList[siteIndex][i].deviceId.toString().padLeft(20, '0');
-                                        String formattedTime = convertToHHmmss(widget.usedNodeList[siteIndex][i].interfaceInterval);
-
-                                        payLoad.add('${i+2},${widget.usedNodeList[siteIndex][i].categoryName},${widget.usedNodeList[siteIndex][i].categoryId},'
-                                            '${widget.usedNodeList[siteIndex][i].referenceNumber},${widget.usedNodeList[siteIndex][i].deviceId},'
-                                            '${widget.usedNodeList[siteIndex][i].interfaceTypeId},$formattedTime;');
-                                      }
-
-                                      String inputString = payLoad.toString();
-                                      List<String> parts = inputString.split(';');
-                                      String resultString = parts.map((part) {return part.replaceFirst(',', '');
-                                      }).join(';');
-
-                                      String resultStringFinal = resultString.replaceAll('[', '').replaceAll(']', '');
-                                      String modifiedString = resultStringFinal.replaceAll(', ', ',');
-                                      String modifiedStringFinal = '${modifiedString.substring(0, 1)},${modifiedString.substring(1)}';
-                                      String stringWithoutSpace = modifiedStringFinal.replaceAll('; ', ';');
-                                      //print(stringWithoutSpace);
-
-                                      String payLoadFinal = jsonEncode({
-                                        "100": [
-                                          {"101": stringWithoutSpace},
-                                        ]
+                                        );
                                       });
-
-                                      print(body);
-
-                                      MqttWebClient().publishMessage('AppToFirmware/${widget.customerSiteList[siteIndex].deviceId}', payLoadFinal);
-
-                                      final response = await HttpService().putRequest("updateUserDeviceNodeList", body);
-                                      if(response.statusCode == 200)
-                                      {
-                                        var data = jsonDecode(response.body);
-                                        if(data["code"]==200)
-                                        {
-                                          updatedInterface.clear();
-                                          _showSnackBar(data["message"]);
-                                        }
-                                        else{
-                                          _showSnackBar(data["message"]);
-                                        }
-                                      }
                                     },
-                                    label: const Text('Send to Target'),
-                                    icon: const Icon(
-                                      Icons.save_as_outlined,
-                                      color: Colors.white,
-                                    ),
                                   ),
-                                  const SizedBox(width: 20,)
                                 ],
                               ),
                             ),
-                          ],
+                          ),
                         ),
-                    )
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8, left: 8),
+                            child: GridView.builder(
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                crossAxisSpacing: 5.0,
+                                mainAxisSpacing: 5.0,
+                              ),
+                              itemCount: widget.usedNodeList[siteIndex].length,
+                              itemBuilder: (BuildContext context, int siteNodeIndex) {
+                                return Card(
+                                  elevation: 5.0,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      ListTile(
+                                        leading: const CircleAvatar(radius: 20,),
+                                        trailing: IconButton(onPressed: () async {
+                                          Map<String, dynamic> body = {
+                                            "userId": widget.customerID,
+                                            "controllerId": widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId,
+                                            "modifyUser": widget.userID,
+                                          };
+                                          print(body);
+
+                                          final response = await HttpService().putRequest("removeNodeInMaster", body);
+                                          if(response.statusCode == 200)
+                                          {
+                                            var data = jsonDecode(response.body);
+                                            if(data["code"]==200)
+                                            {
+                                              widget.usedNodeList[siteIndex].removeWhere((node) => node.userDeviceListId == widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId);
+                                              _showSnackBar(data["message"]);
+
+                                              setState(() {
+                                                checkboxValueNode = false;
+                                              });
+                                              widget.getNodeStockList();
+                                            }
+                                            else{
+                                              _showSnackBar(data["message"]);
+                                            }
+                                          }
+
+                                        }, icon: const Icon(Icons.delete_outline, color: Colors.red,)),
+                                      ),
+                                      Text(widget.usedNodeList[siteIndex][siteNodeIndex].categoryName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
+                                      Text(widget.usedNodeList[siteIndex][siteNodeIndex].modelName, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
+                                      Text(widget.usedNodeList[siteIndex][siteNodeIndex].deviceId, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
+                                      ListTile(
+                                        title: DropdownButton(
+                                          value: widget.usedNodeList[siteIndex][siteNodeIndex].interface,
+                                          style: const TextStyle(fontSize: 12),
+                                          onChanged: (newValue) {
+                                            setState(() {
+                                              widget.usedNodeList[siteIndex][siteNodeIndex].interface = newValue!;
+                                              int index = widget.interfaceType.indexWhere((model) => model.interface == newValue);
+                                              widget.usedNodeList[siteIndex][siteNodeIndex].interfaceTypeId = widget.interfaceType[index].interfaceTypeId;
+                                            });
+                                          },
+                                          items: widget.interfaceType.map((interface) {
+                                            return DropdownMenuItem(
+                                              value: interface.interface,
+                                              child: Text(interface.interface, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                            );
+                                          }).toList(),
+                                        ),
+                                        trailing: DropdownButton(
+                                          value: widget.usedNodeList[siteIndex][siteNodeIndex].interfaceInterval,
+                                          style: const TextStyle(fontSize: 12),
+                                          onChanged: (newValue) {
+                                            setState(() {
+                                              widget.usedNodeList[siteIndex][siteNodeIndex].interfaceInterval = newValue!;
+                                            });
+                                          },
+                                          items: _interfaceInterval.map((interface) {
+                                            return DropdownMenuItem(
+                                              value: interface,
+                                              child: Text(interface, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                            /*child: ListView.builder(
+                                scrollDirection: Axis.vertical,
+                                itemCount: widget.usedNodeList[siteIndex].length,
+                                itemBuilder: (context, siteNodeIndex) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(left: 5),
+                                    child: ListTile(
+                                      title: Text(widget.usedNodeList[siteIndex][siteNodeIndex].categoryName),
+                                      subtitle: Text('${widget.usedNodeList[siteIndex][siteNodeIndex].modelName}\n'
+                                          'IMEi : ${widget.usedNodeList[siteIndex][siteNodeIndex].deviceId}',
+                                        style: const TextStyle(fontWeight: FontWeight.normal),),
+                                      leading: const CircleAvatar(radius: 20),
+                                      trailing: Wrap(
+                                        spacing: 12, // space between two icons
+                                        children: <Widget>[
+                                          DropdownButton(
+                                            value: widget.usedNodeList[siteIndex][siteNodeIndex].interface,
+                                            onChanged: (newValue) {
+                                              setState(() {
+                                                widget.usedNodeList[siteIndex][siteNodeIndex].interface = newValue!;
+                                                int index = widget.interfaceType.indexWhere((model) => model.interface == newValue);
+                                                widget.usedNodeList[siteIndex][siteNodeIndex].interfaceTypeId = widget.interfaceType[index].interfaceTypeId;
+                                              });
+                                            },
+                                            items: widget.interfaceType.map((interface) {
+                                              return DropdownMenuItem(
+                                                value: interface.interface,
+                                                child: Text(interface.interface, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                              );
+                                            }).toList(),
+                                          ), // icon-1
+                                          DropdownButton(
+                                            value: widget.usedNodeList[siteIndex][siteNodeIndex].interfaceInterval,
+                                            onChanged: (newValue) {
+                                              setState(() {
+                                                widget.usedNodeList[siteIndex][siteNodeIndex].interfaceInterval = newValue!;
+                                              });
+                                            },
+                                            items: _interfaceInterval.map((interface) {
+                                              return DropdownMenuItem(
+                                                value: interface,
+                                                child: Text(interface, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                              );
+                                            }).toList(),
+                                          ),
+                                          IconButton(onPressed: () async {
+                                            print(widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId);
+
+                                            Map<String, dynamic> body = {
+                                              "userId": widget.customerID,
+                                              "controllerId": widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId,
+                                              "modifyUser": widget.userID,
+                                            };
+                                            print(body);
+
+                                            final response = await HttpService().putRequest("removeNodeInMaster", body);
+                                            if(response.statusCode == 200)
+                                            {
+                                              var data = jsonDecode(response.body);
+                                              if(data["code"]==200)
+                                              {
+                                                widget.usedNodeList[siteIndex].removeWhere((node) => node.userDeviceListId == widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId);
+                                                _showSnackBar(data["message"]);
+
+                                                setState(() {
+                                                  checkboxValueNode = false;
+                                                });
+                                                widget.getNodeStockList();
+                                              }
+                                              else{
+                                                _showSnackBar(data["message"]);
+                                              }
+                                            }
+
+                                          }, icon: const Icon(Icons.delete_outline, color: Colors.red,))// icon-2
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }),*/
+                        ),
+                        Container(
+                          height: 45,
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.only(bottomRight: Radius.circular(5), bottomLeft: Radius.circular(5)),
+                            color: Colors.transparent,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              TextButton.icon(
+                                onPressed: () async {
+                                  List<dynamic> updatedInterface = [];
+                                  for(int i=0; i<widget.usedNodeList[siteIndex].length; i++){
+                                    Map<String, dynamic> myMap = {"productId": widget.usedNodeList[siteIndex][i].productId,
+                                      'interfaceTypeId': widget.usedNodeList[siteIndex][i].interfaceTypeId, 'interfaceInterval': widget.usedNodeList[siteIndex][i].interfaceInterval};
+                                    updatedInterface.add(myMap);
+                                  }
+                                  Map<String, dynamic> body = {
+                                    "userId": widget.customerID,
+                                    "products": updatedInterface,
+                                    "modifyUser": widget.userID,
+                                  };
+
+                                  List<dynamic> payLoad = [];
+                                  payLoad.add('${1},${widget.customerSiteList[siteIndex].categoryName},${'1'}, ${'1'}, ${widget.customerSiteList[siteIndex].deviceId.toString()},'
+                                      '${'1'},${"00:00:30"};');
+
+                                  for(int i=0; i<widget.usedNodeList[siteIndex].length; i++){
+
+                                    //String paddedNumber = widget.usedNodeList[siteIndex][i].deviceId.toString().padLeft(20, '0');
+                                    String formattedTime = convertToHHmmss(widget.usedNodeList[siteIndex][i].interfaceInterval);
+
+                                    payLoad.add('${i+2},${widget.usedNodeList[siteIndex][i].categoryName},${widget.usedNodeList[siteIndex][i].categoryId},'
+                                        '${widget.usedNodeList[siteIndex][i].referenceNumber},${widget.usedNodeList[siteIndex][i].deviceId},'
+                                        '${widget.usedNodeList[siteIndex][i].interfaceTypeId},$formattedTime;');
+                                  }
+
+                                  String inputString = payLoad.toString();
+                                  List<String> parts = inputString.split(';');
+                                  String resultString = parts.map((part) {return part.replaceFirst(',', '');
+                                  }).join(';');
+
+                                  String resultStringFinal = resultString.replaceAll('[', '').replaceAll(']', '');
+                                  String modifiedString = resultStringFinal.replaceAll(', ', ',');
+                                  String modifiedStringFinal = '${modifiedString.substring(0, 1)},${modifiedString.substring(1)}';
+                                  String stringWithoutSpace = modifiedStringFinal.replaceAll('; ', ';');
+                                  //print(stringWithoutSpace);
+
+                                  String payLoadFinal = jsonEncode({
+                                    "100": [
+                                      {"101": stringWithoutSpace},
+                                    ]
+                                  });
+
+                                  print(body);
+
+                                  MqttWebClient().publishMessage('AppToFirmware/${widget.customerSiteList[siteIndex].deviceId}', payLoadFinal);
+
+                                  final response = await HttpService().putRequest("updateUserDeviceNodeList", body);
+                                  if(response.statusCode == 200)
+                                  {
+                                    var data = jsonDecode(response.body);
+                                    if(data["code"]==200)
+                                    {
+                                      updatedInterface.clear();
+                                      _showSnackBar(data["message"]);
+                                    }
+                                    else{
+                                      _showSnackBar(data["message"]);
+                                    }
+                                  }
+                                },
+                                label: const Text('Send to Target'),
+                                icon: const Icon(
+                                  Icons.save_as_outlined,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(width: 20,)
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                 ),
               ),
               onTap: (){
@@ -1198,8 +1694,8 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                 for(int i=0; i<widget.usedNodeList[siteIndex].length; i++){
                   relayCnt = relayCnt + widget.usedNodeList[siteIndex][i].relayCount;
                 }
-                configPvd.clearConfig();
-                Navigator.push(context, MaterialPageRoute(builder: (context) =>  ConfigScreen(userID: widget.userID, customerID: widget.customerID, siteName: widget.customerSiteList[siteIndex].groupName, siteID: widget.customerSiteList[siteIndex].groupId, nodeCount: relayCnt, controllerId: widget.customerSiteList[siteIndex].userDeviceListId, imeiNumber:'${widget.customerSiteList[siteIndex].deviceId}',)),);
+                //configPvd.clearConfig();
+                Navigator.push(context, MaterialPageRoute(builder: (context) =>  ConfigScreen(userID: widget.userID, customerID: widget.customerID, siteName: widget.customerSiteList[siteIndex].groupName, siteID: widget.customerSiteList[siteIndex].groupId, controllerId: widget.customerSiteList[siteIndex].userDeviceListId, imeiNumber:'${widget.customerSiteList[siteIndex].deviceId}',)),);
               },
             );
           });
@@ -1290,13 +1786,13 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
 
     int seconds;
     switch (unit) {
-      case 'Sec':
+      case 'sec':
         seconds = quantity;
         break;
-      case 'minutes'||'minute':
+      case 'min':
         seconds = quantity * 60;
         break;
-      case 'hour':
+      case 'hr':
         seconds = quantity * 3600;
         break;
       default:

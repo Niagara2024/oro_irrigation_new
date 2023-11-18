@@ -4,14 +4,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:provider/provider.dart';
 
 import '../../Models/product_limit.dart';
 import '../../constants/http_service.dart';
 import '../../constants/theme.dart';
+import '../../state_management/config_maker_provider.dart';
+import 'config_screen.dart';
 
 class ProductLimits extends StatefulWidget {
-  const ProductLimits({Key? key, required this.userID,  required this.customerID, required this.userType, required this.siteID, required this.nodeCount}) : super(key: key);
-  final int userID, customerID, userType, siteID, nodeCount;
+  const ProductLimits({Key? key, required this.userID,  required this.customerID, required this.userType, required this.siteID, required this.nodeCount, required this.siteName, required this.userDeviceListId, required this.deviceId}) : super(key: key);
+  final int userID, customerID, userType, siteID, nodeCount, userDeviceListId;
+  final String siteName, deviceId;
 
 
   @override
@@ -107,142 +111,154 @@ class _ProductLimitsState extends State<ProductLimits> {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    return visibleLoading? Visibility(
-      visible: visibleLoading,
-      child: Container(
-        padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 30, 0, mediaQuery.size.width/2 - 30, 0),
-        child: const LoadingIndicator(
-          indicatorType: Indicator.ballPulse,
-        ),
+    var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('${widget.siteName} - Product Limit'),
       ),
-    ) :
-    Container(
-      color:  Colors.blueGrey.shade50,
-      child: Column(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  Expanded(
-                      child: GridView.builder(
-                        itemCount: productLimits.length,
-                        itemBuilder: (context, index) {
-                          return Container(
-                            margin: const EdgeInsetsDirectional.all(5.0),
-                            decoration:  BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: myTheme.primaryColor.withOpacity(0.5),
-                                  blurRadius: 2,
-                                  offset: const Offset(2, 2), // Shadow position
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              children: <Widget>[
-                                Expanded (
-                                  flex:1,
-                                  child : Container(
-                                    constraints: const BoxConstraints.expand(),
-                                    decoration: BoxDecoration(
-                                      color: myTheme.primaryColor.withOpacity(0.2),
-                                      borderRadius: const BorderRadius.only(topLeft: Radius.circular(5.0), bottomLeft: Radius.circular(5.0)),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: CircleAvatar(
-                                        backgroundColor: myTheme.primaryColor.withOpacity(0.5),
-                                        child: Icon(Icons.reset_tv, color: Colors.white,),
+      body: visibleLoading? Center(
+        child: Visibility(
+          visible: visibleLoading,
+          child: Container(
+            padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 30, 0, mediaQuery.size.width/2 - 30, 0),
+            child: const LoadingIndicator(
+              indicatorType: Indicator.ballPulse,
+            ),
+          ),
+        ),
+      ) : Container(
+        color:  Colors.blueGrey.shade50,
+        child: Column(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Expanded(
+                        child: GridView.builder(
+                          itemCount: productLimits.length,
+                          itemBuilder: (context, index) {
+                            return Container(
+                              margin: const EdgeInsetsDirectional.all(5.0),
+                              decoration:  BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: myTheme.primaryColor.withOpacity(0.5),
+                                    blurRadius: 2,
+                                    offset: const Offset(2, 2), // Shadow position
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                children: <Widget>[
+                                  Expanded (
+                                    flex:1,
+                                    child : Container(
+                                      constraints: const BoxConstraints.expand(),
+                                      decoration: BoxDecoration(
+                                        color: myTheme.primaryColor.withOpacity(0.2),
+                                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(5.0), bottomLeft: Radius.circular(5.0)),
                                       ),
-                                    ),
-                                  ),),
-                                Expanded(
-                                  flex :2,
-                                  child: Column(
-                                    children: <Widget>[
-                                      Padding(
-                                        padding: const EdgeInsets.only(left: 10, right: 10),
-                                        child: TextField(
-                                          controller: myControllers[index],
-                                          keyboardType: TextInputType.number,
-                                          inputFormatters: <TextInputFormatter>[
-                                            FilteringTextInputFormatter.digitsOnly
-                                          ],
-                                          decoration: InputDecoration(
-                                              labelText: productLimits[index].product,
-                                          ),
-                                          onTap: () {
-                                            currentTxtFldVal = int.parse(myControllers[index].text);
-                                            print(currentTxtFldVal);
-                                          },
-                                          onChanged: (input) async {
-                                            await Future.delayed(const Duration(milliseconds: 50));
-                                            setState(() {
-                                              String crTvVal = myControllers[index].text;
-                                              if (widget.nodeCount < filledRelayCount + int.parse(myControllers[index].text.isEmpty ? '0' : myControllers[index].text) - currentTxtFldVal) {
-                                                if (crTvVal.isNotEmpty) {
-                                                  myControllers[index].text = crTvVal.substring(0, crTvVal.length - 1);
-                                                }
-                                                _showSnackBar('Limit reached');
-                                              } else {
-                                                filledRelayCount = myControllers.fold<int>(0,(sum, controller) => sum + (int.tryParse(controller.text) ?? 0),);
-                                              }
-
-                                            });
-                                          },
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: CircleAvatar(
+                                          backgroundColor: myTheme.primaryColor.withOpacity(0.5),
+                                          child: Icon(Icons.reset_tv, color: Colors.white,),
                                         ),
                                       ),
-                                    ],
-                                  ),)
-                              ],
-                            ),
-                          );
-                        },
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: mediaQuery.size.width > 1200 ? 6 : 4,
-                          childAspectRatio: mediaQuery.size.width / 460,
-                        ),
-                      )
-                  ),
+                                    ),),
+                                  Expanded(
+                                    flex :2,
+                                    child: Column(
+                                      children: <Widget>[
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 10, right: 10),
+                                          child: TextField(
+                                            controller: myControllers[index],
+                                            keyboardType: TextInputType.number,
+                                            inputFormatters: <TextInputFormatter>[
+                                              FilteringTextInputFormatter.digitsOnly
+                                            ],
+                                            decoration: InputDecoration(
+                                              labelText: productLimits[index].product,
+                                            ),
+                                            onTap: () {
+                                              currentTxtFldVal = int.parse(myControllers[index].text);
+                                              print(currentTxtFldVal);
+                                            },
+                                            onChanged: (input) async {
+                                              await Future.delayed(const Duration(milliseconds: 50));
+                                              setState(() {
+                                                String crTvVal = myControllers[index].text;
+                                                if (widget.nodeCount < filledRelayCount + int.parse(myControllers[index].text.isEmpty ? '0' : myControllers[index].text) - currentTxtFldVal) {
+                                                  if (crTvVal.isNotEmpty) {
+                                                    myControllers[index].text = crTvVal.substring(0, crTvVal.length - 1);
+                                                  }
+                                                  _showSnackBar('Limit reached');
+                                                } else {
+                                                  filledRelayCount = myControllers.fold<int>(0,(sum, controller) => sum + (int.tryParse(controller.text) ?? 0),);
+                                                }
+
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),)
+                                ],
+                              ),
+                            );
+                          },
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: mediaQuery.size.width > 1200 ? 6 : 4,
+                            childAspectRatio: mediaQuery.size.width / 460,
+                          ),
+                        )
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              height: 60,
+              color: Colors.white,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  const Text('Relay Total :'),
+                  const SizedBox(width: 10,),
+                  Text('${widget.nodeCount}', style: const TextStyle(fontSize: 17),),
+                  const SizedBox(width: 20,),
+                  const Text('Remaining :'),
+                  const SizedBox(width: 10,),
+                  Text('${widget.nodeCount - filledRelayCount}', style: const TextStyle(fontSize: 17),),
+                  const SizedBox(width: 20,),
+                  IconButton(
+                      tooltip : 'Save changes',
+                      onPressed: () async {
+                        updateProductLimit();
+                      },
+                      icon: const Icon(Icons.save_as_outlined)),
+                  const SizedBox(width: 10,),
+                  IconButton(
+                      tooltip : 'Config',
+                      onPressed: () async {
+                        configPvd.clearConfig();
+                        Navigator.push(context, MaterialPageRoute(builder: (context) =>  ConfigScreen(userID: widget.userID, customerID: widget.customerID, siteName: widget.siteName, siteID: widget.siteID, controllerId: widget.userDeviceListId, imeiNumber: widget.deviceId,)),);
+                      },
+                      icon: const Icon(Icons.account_tree_rounded)),
+                  const SizedBox(width: 20,)
                 ],
               ),
             ),
-          ),
-          Container(
-            height: 60,
-            color: Colors.white,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                const Text('Relay Total :'),
-                const SizedBox(width: 10,),
-                Text('${widget.nodeCount}', style: const TextStyle(fontSize: 17),),
-                const SizedBox(width: 20,),
-                const Text('Remaining :'),
-                const SizedBox(width: 10,),
-                Text('${widget.nodeCount - filledRelayCount}', style: const TextStyle(fontSize: 17),),
-                const SizedBox(width: 20,),
-                TextButton.icon(
-                  onPressed: () {
-                    updateProductLimit();
-                  },
-                  label: const Text('Save'),
-                  icon: Icon(
-                    Icons.save_as_outlined,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(width: 20,)
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+
   }
 
   void _showSnackBar(String message) {

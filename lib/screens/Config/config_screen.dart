@@ -11,8 +11,8 @@ import 'names_form.dart';
 
 
 class ConfigScreen extends StatefulWidget {
-  const ConfigScreen({Key? key, required this.userID, required this.customerID, required this.siteID, required this.siteName, required this.nodeCount,required  this.controllerId, required this.imeiNumber,}) : super(key: key);
-  final int userID, customerID, siteID, nodeCount, controllerId;
+  const ConfigScreen({Key? key, required this.userID, required this.customerID, required this.siteID, required this.siteName, required  this.controllerId, required this.imeiNumber,}) : super(key: key);
+  final int userID, customerID, siteID, controllerId;
   final String siteName, imeiNumber;
 
   @override
@@ -21,7 +21,7 @@ class ConfigScreen extends StatefulWidget {
 
 class _ConfigScreenState extends State<ConfigScreen> with SingleTickerProviderStateMixin
 {
-  static List<Object> configList = ['Product Limits','Config maker', 'Names', 'Preferences','Constant', 'Dealer definition', 'Data acquisition','Geography'];
+  static List<Object> configList = ['Config maker', 'Names', 'Preferences','Constant', 'Dealer definition', 'Data acquisition','Geography'];
   final _configTabs = List.generate(configList.length, (index) => configList[index]);
   late final TabController _tabCont;
 
@@ -44,8 +44,7 @@ class _ConfigScreenState extends State<ConfigScreen> with SingleTickerProviderSt
           unselectedLabelColor: Colors.white.withOpacity(0.4),
           tabs: [
             ..._configTabs.map((label) => Tab(
-                icon: label =='Product Limits'? const Icon(Icons.developer_board_rounded) :
-                label =='Preferences'? const Icon(Icons.settings_outlined):
+                icon: label =='Preferences'? const Icon(Icons.settings_outlined):
                 label =='Constant'? const Icon(Icons.menu_open):
                 label =='Dealer definition'? const Icon(Icons.perm_identity_outlined) :
                 label =='Data acquisition'? const Icon(Icons.dataset_linked_outlined):
@@ -62,7 +61,7 @@ class _ConfigScreenState extends State<ConfigScreen> with SingleTickerProviderSt
         controller: _tabCont,
         children: [
           ..._configTabs.map((label) => ConfigPage(
-              label: label.toString(), userID: widget.userID, customerID: widget.customerID, siteID: widget.siteID, nodeCount: widget.nodeCount, controllerId: widget.controllerId, imeiNumber: widget.imeiNumber,
+              label: label.toString(), userID: widget.userID, customerID: widget.customerID, siteID: widget.siteID, controllerId: widget.controllerId, imeiNumber: widget.imeiNumber,
             ),
           ),
         ],
@@ -73,16 +72,14 @@ class _ConfigScreenState extends State<ConfigScreen> with SingleTickerProviderSt
 
 class ConfigPage extends StatelessWidget
 {
-  const ConfigPage({Key? key, required this.label, required this.userID, required this.customerID, required this.siteID, required this.nodeCount, required this.controllerId, required this.imeiNumber}) : super(key: key);
+  const ConfigPage({Key? key, required this.label, required this.userID, required this.customerID, required this.siteID, required this.controllerId, required this.imeiNumber}) : super(key: key);
   final String label, imeiNumber;
-  final int userID, customerID, siteID, nodeCount, controllerId;
+  final int userID, customerID, siteID, controllerId;
 
   @override
   Widget build(BuildContext context)
   {
-    if(label.toString()=='Product Limits'){
-      return ProductLimits(userID: userID, customerID: customerID, userType: 2, siteID: controllerId, nodeCount: nodeCount,);
-    }else if(label.toString()=='Names'){
+   if(label.toString()=='Names'){
       return Names(userID: userID,  customerID: customerID, groupID: controllerId);
     }else if(label.toString()=='Dealer definition'){
       return DealerDefinitionInConfig(userID: userID,  customerID: customerID, groupID: controllerId);

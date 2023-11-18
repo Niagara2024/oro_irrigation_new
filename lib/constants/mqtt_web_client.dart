@@ -17,7 +17,7 @@ class MqttWebClient {
 
       client.logging(on: false);
       client.setProtocolV311();
-      client.keepAlivePeriod = 20;
+      client.keepAlivePeriod = 60;
       client.connectTimeoutPeriod = 5000; // milliseconds
       client.port = 9001;
       //client.autoReconnect = true;
@@ -97,8 +97,6 @@ class MqttWebClient {
   void unsubscribeFromTopic(String topic) {
     print('Un Subscription confirmed for topic $topic');
   }
-
-
 
   void onAutoReconnect() {
     print('onAutoReconnect client callback - Client auto reconnection sequence will start');

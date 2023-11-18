@@ -157,7 +157,7 @@ class ProductInventoryState extends State<ProductInventory> {
               ),
               child: Column(
                 children: [
-                  userType == 1 ? buildAdminHeader() : buildUserHeader(),
+                  userType == 1 || userType == 2 ? buildAdminHeader() : buildUserHeader(),
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.only(right: 5, left: 5, top: 5),
@@ -316,7 +316,7 @@ class ProductInventoryState extends State<ProductInventory> {
                 ],
               ),
             ),
-            trailing: Row(
+            trailing: totalProduct > 50 ? Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 PopupMenuButton<dynamic>(
@@ -394,7 +394,7 @@ class ProductInventoryState extends State<ProductInventory> {
                   },
                 )
               ],
-            ),
+            ) : null,
           ),
         ),
         SizedBox(height: 2, child: Container(color: Colors.grey.shade200,)),
@@ -490,36 +490,10 @@ class ProductInventoryState extends State<ProductInventory> {
             title: RichText(
               text: const TextSpan(
                 children: <TextSpan>[
-                  TextSpan(text: 'Product ', style: TextStyle(fontSize: 20, color: Colors.black)),
-                  TextSpan(text: 'Inventory', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 21)),
+                  TextSpan(text: 'My ', style: TextStyle(fontSize: 20, color: Colors.black)),
+                  TextSpan(text: 'Product', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 21)),
                 ],
               ),
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ActionChip(
-                  tooltip: 'Category\nModel\nManufacture date\nSales person',
-                  avatar: Icon(Icons.sort, color: myTheme.primaryColor),
-                  label: const Text('Sort By'),
-                  backgroundColor: Colors.white,
-                  elevation: 6.0,
-                  shadowColor: Colors.grey[60],
-                  padding: const EdgeInsets.all(5.0),
-                  onPressed: (){},
-                ),
-                const SizedBox(width: 10,),
-                ActionChip(
-                  tooltip: 'By Search',
-                  avatar: Icon(Icons.filter_alt_outlined, color: myTheme.primaryColor),
-                  label: const Text('Filter'),
-                  backgroundColor: Colors.white,
-                  elevation: 6.0,
-                  shadowColor: Colors.grey[60],
-                  padding: const EdgeInsets.all(5.0),
-                  onPressed: (){},
-                ),
-              ],
             ),
           ),
         ),

@@ -1,13 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:oro_irrigation_new/screens/Config/Constant/constant_tab_bar_view.dart';
-import 'package:oro_irrigation_new/screens/Config/config_maker/config_maker.dart';
 import 'DataAc/data_acquisition_main.dart';
 import 'Preference/preference_main_screen.dart';
-import 'product_limit.dart';
 import 'dealer_definition_config.dart';
 import 'names_form.dart';
-
 
 
 class ConfigScreen extends StatefulWidget {
@@ -21,7 +18,7 @@ class ConfigScreen extends StatefulWidget {
 
 class _ConfigScreenState extends State<ConfigScreen> with SingleTickerProviderStateMixin
 {
-  static List<Object> configList = ['Config maker', 'Names', 'Preferences','Constant', 'Dealer definition', 'Data acquisition','Geography'];
+  static List<Object> configList = ['Names', 'Preferences','Constant', 'Dealer definition', 'Data acquisition','Geography'];
   final _configTabs = List.generate(configList.length, (index) => configList[index]);
   late final TabController _tabCont;
 
@@ -33,6 +30,52 @@ class _ConfigScreenState extends State<ConfigScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(
+          child: Column(
+            children: [
+              DefaultTabController(
+                length: configList.length, // Number of tabs
+                child: Column(
+                  children: [
+                    TabBar(
+                      controller: _tabCont,
+                      isScrollable: true,
+                      tabs: [
+                        ..._configTabs.map((label) => Tab(
+                          icon: label =='Preferences'? const Icon(Icons.settings_outlined):
+                          label =='Constant'? const Icon(Icons.menu_open):
+                          label =='Dealer definition'? const Icon(Icons.perm_identity_outlined) :
+                          label =='Data acquisition'? const Icon(Icons.dataset_linked_outlined):
+                          label =='System'? const Icon(Icons.theaters_outlined):
+                          label =='Names'? const Icon(Icons.drive_file_rename_outline):const Icon(Icons.location_on_outlined),
+                          child: Text(label.toString(),),
+                        ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10.0),
+                    SizedBox(
+                      height: MediaQuery.sizeOf(context).height-330,
+                      child: TabBarView(
+                        controller: _tabCont,
+                        children: [
+                          ..._configTabs.map((label) => ConfigPage(
+                            label: label.toString(), userID: widget.userID, customerID: widget.customerID, siteID: widget.siteID, controllerId: widget.controllerId, imeiNumber: widget.imeiNumber,
+                          ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.siteName, style: const TextStyle(color: Colors.white),), backgroundColor: const Color(0xFF0D5D9A),
@@ -49,7 +92,6 @@ class _ConfigScreenState extends State<ConfigScreen> with SingleTickerProviderSt
                 label =='Dealer definition'? const Icon(Icons.perm_identity_outlined) :
                 label =='Data acquisition'? const Icon(Icons.dataset_linked_outlined):
                 label =='System'? const Icon(Icons.theaters_outlined):
-                label =='Config maker'? const Icon(Icons.cleaning_services):
                 label =='Names'? const Icon(Icons.drive_file_rename_outline):const Icon(Icons.location_on_outlined),
                 child: Text(label.toString(),),
               ),
@@ -83,29 +125,13 @@ class ConfigPage extends StatelessWidget
       return Names(userID: userID,  customerID: customerID, groupID: controllerId);
     }else if(label.toString()=='Dealer definition'){
       return DealerDefinitionInConfig(userID: userID,  customerID: customerID, groupID: controllerId);
-    }else if(label.toString()=='Config maker'){
-      return ConfigMakerScreen(userID: userID, customerID: customerID, siteID: controllerId, imeiNumber: imeiNumber,);
     }else if(label.toString()=='Preferences'){
       return PreferencesScreen(customerID: customerID, controllerID: controllerId, userID: userID,);
     }else if(label.toString()=='Data acquisition'){
       return DataAcquisitionMain(customerID: customerID, controllerID: controllerId, userId: userID,);
     }else if(label.toString()=='Constant'){
       return ConstantInConfig(userID: userID, customerID: customerID, siteID: controllerId);
-    }/*else if(label.toString()=='Object Type'){
-      return const AddObjectType();
-    }else if(label.toString()=='Interface type'){
-      return const AddInterfaceType();
-    }else if(label.toString()=='Global setting'){
-      return const AddGlobalSettings();
-    }else if(label.toString()=='Languages'){
-      return const AddLanguage();
-    }else if(label.toString()=='Settings category'){
-      return const AddSettingCategory();
-    }else if(label.toString()=='Unit type'){
-      return const AddUnitType();
-    }else if(label.toString()=='Widget Type'){
-      return const AddWidgetType();
-    }*/
+    }
 
     return Center(child: Text('Page of $label'));
   }

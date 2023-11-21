@@ -65,39 +65,32 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
   Widget build(BuildContext context)
   {
     return Container(
-      color:  Colors.blueGrey.shade50,
+      color:  Colors.white,
       child: Column(
         children: [
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
+            child: DefaultTabController(
+              length: widget.names.length, // Number of tabs
               child: Column(
                 children: [
-                  DefaultTabController(
-                    length: widget.names.length, // Number of tabs
-                    child: Column(
+                  TabBar(
+                    indicatorColor: const Color.fromARGB(255, 175, 73, 73),
+                    isScrollable: true,
+                    tabs: [
+                      for (var i = 0; i < widget.names.length; i++)
+                        Tab(text: widget.names[i].nameDescription,),
+                    ],
+                    onTap: (value) {
+                    },
+                  ),
+                  const SizedBox(height: 10.0),
+                  SizedBox(
+                    height: MediaQuery.sizeOf(context).height-440,
+                    child: TabBarView(
                       children: [
-                        TabBar(
-                          indicatorColor: const Color.fromARGB(255, 175, 73, 73),
-                          isScrollable: true,
-                          tabs: [
-                            for (var i = 0; i < widget.names.length; i++)
-                              Tab(text: widget.names[i].nameDescription,),
-                          ],
-                          onTap: (value) {
-                          },
-                        ),
-                        const SizedBox(height: 10.0),
-                        SizedBox(
-                          height: MediaQuery.sizeOf(context).height-265,
-                          child: TabBarView(
-                            children: [
-                              for (int i = 0; i < widget.names.length; i++)
-                                widget.names[i].userName!.isEmpty ? Container()
-                                    : buildTab(widget.names[i].userName!),
-                            ],
-                          ),
-                        ),
+                        for (int i = 0; i < widget.names.length; i++)
+                          widget.names[i].userName!.isEmpty ? Container()
+                              : buildTab(widget.names[i].userName!),
                       ],
                     ),
                   ),
@@ -106,7 +99,7 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
             ),
           ),
           Container(
-            height: 60,
+            height: 50,
             color: Colors.white,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,

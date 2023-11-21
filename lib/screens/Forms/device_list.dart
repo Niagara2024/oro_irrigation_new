@@ -19,7 +19,6 @@ import '../../constants/mqtt_web_client.dart';
 import '../../state_management/config_maker_provider.dart';
 import '../Config/product_limit.dart';
 
-enum SampleItem { itemOne, itemTwo, itemThree }
 enum MasterController {gem1, gem2, gem3, gem4, gem5, gem6, gem7, gem8, gem9, gem10,}
 
 class DeviceList extends StatefulWidget {
@@ -37,14 +36,11 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
 {
   final _formKey = GlobalKey<FormState>();
 
-  SampleItem? selectedMenu;
-
   Map<String, dynamic> productSalesList = {};
   bool checkboxValue = false;
 
   List<CustomerProductModel> customerProductList = <CustomerProductModel>[];
   List<ProductStockModel> myMasterControllerList = <ProductStockModel>[];
-  bool checkboxTick = false;
 
   List<ProductListWithNode> customerSiteList = <ProductListWithNode>[];
   List<ProductStockModel> nodeStockList = <ProductStockModel>[];
@@ -92,7 +88,6 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
 
   void resetPopop(){
     checkboxValue = false;
-    checkboxTick = false;
   }
 
   void removeProductStockById(int productId) {
@@ -251,6 +246,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context)
   {
+
     return Scaffold(
       backgroundColor: const Color(0xffefefef),
       appBar: AppBar(
@@ -259,10 +255,12 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
         PopupMenuButton(
           tooltip: _tabCont.index==0 ?'Add Product' : 'Create site',
           child: const Icon(Icons.add_circle_outline, color: Colors.white,),
+          onCanceled: () {
+            checkboxValue = false;
+          },
           itemBuilder: (context) {
             return _tabCont.index==0 ?
             List.generate(widget.productStockList.length+1 ,(index) {
-
               if(widget.productStockList.isEmpty){
                 return const PopupMenuItem(
                   child: Text('No stock available to add in the site'),
@@ -578,7 +576,6 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
 
   bool checkboxValueNode = false;
   final List<String> _interfaceInterval = ['0 sec', '5 sec', '10 sec', '20 sec', '30 sec', '45 sec','1 min','5 min','10 min','30 min','1 hr']; // Option 2
-  SampleItem? selectedMenu;
   List<CustomerListMDL> myCustomerChildList = <CustomerListMDL>[];
 
   List<int> nodeStockSelection = [];
@@ -639,27 +636,28 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
               columns: const [
                 DataColumn2(
                     label: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold),),
-                    fixedWidth: 70
+                    fixedWidth: 100
                 ),
                 DataColumn2(
                   label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold),),
+                  size: ColumnSize.M,
                 ),
                 DataColumn2(
                   label: Text('Model', style: TextStyle(fontWeight: FontWeight.bold),),
+                  size: ColumnSize.M,
                 ),
                 DataColumn2(
                   label: Text('IMEI', style: TextStyle(fontWeight: FontWeight.bold),),
+                  size: ColumnSize.M,
                 ),
                 DataColumn2(
                   label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold),),
+                  size: ColumnSize.M,
                 ),
                 DataColumn2(
+                  size: ColumnSize.M,
                   label: Text('Sales person', style: TextStyle(fontWeight: FontWeight.bold),),
                 ),
-                DataColumn2(
-                  label: Center(child: Text('Action', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
-                  fixedWidth: 50,
-                )
               ],
               rows: List<DataRow>.generate(widget.customerProductList.length, (index) => DataRow(cells: [
                 DataCell(Text('${index+1}')),
@@ -669,29 +667,6 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                 DataCell(Center(child: widget.userType+1 == widget.customerProductList[index].prdStatus? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free')],):
                 const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active')],))),
                 DataCell(widget.customerProductList[index].buyer == widget.userName? const Text('-') : Text(widget.customerProductList[index].buyer)),
-                DataCell(Center(child: PopupMenuButton<SampleItem>(
-                  initialValue: selectedMenu,
-                  // Callback that sets the selected popup menu item.
-                  onSelected: (SampleItem item) {
-                    setState(() {
-                      selectedMenu = item;
-                    });
-                  },
-                  itemBuilder: (BuildContext context) => <PopupMenuEntry<SampleItem>>[
-                    const PopupMenuItem<SampleItem>(
-                      value: SampleItem.itemOne,
-                      child: Text('Edit'),
-                    ),
-                    const PopupMenuItem<SampleItem>(
-                      value: SampleItem.itemTwo,
-                      child: Text('Delete'),
-                    ),
-                    const PopupMenuItem<SampleItem>(
-                      value: SampleItem.itemThree,
-                      child: Text('Replace'),
-                    ),
-                  ],
-                )))
               ]))),
         ),
       );
@@ -751,8 +726,10 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                     elevation: 10,
                                     tooltip: 'Add node list',
                                     child: Center(child: Icon(Icons.add, color: myTheme.primaryColor,)),
+                                    onCanceled: () {
+                                      checkboxValueNode = false;
+                                    },
                                     itemBuilder: (context) {
-
                                       return List.generate(widget.nodeStockList.length+1 ,(nodeIndex) {
                                         if(widget.nodeStockList.isEmpty){
                                           return const PopupMenuItem(

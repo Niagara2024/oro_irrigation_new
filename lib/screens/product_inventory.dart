@@ -2,13 +2,16 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Models/product_inventrory_model.dart';
+import '../Models/product_model.dart';
 import '../constants/http_service.dart';
 import '../constants/theme.dart';
 
-enum SampleItem { itemOne, itemTwo, itemThree}
+enum SampleItem { itemOne, itemTwo}
+enum ddReplace { itemOne}
 
 class ProductInventory extends StatefulWidget {
   const ProductInventory({Key? key, required this.userName}) : super(key: key);
@@ -47,10 +50,18 @@ class ProductInventoryState extends State<ProductInventory> {
 
   bool visibleLoading = false;
 
+  late List<DropdownMenuEntry<PrdModel>> selectedModel;
+  List<PrdModel> activeModelList = <PrdModel>[];
+  int sldModID = 0;
+  String mdlDis = 'Product Description';
+  PrdModel? initialSelectedModel;
+  int indexOfInitialSelection = 0;
+
 
   @override
   void initState() {
     super.initState();
+    selectedModel =  <DropdownMenuEntry<PrdModel>>[];
     getUserInfo();
   }
 
@@ -68,6 +79,7 @@ class ProductInventoryState extends State<ProductInventory> {
 
   Future<void> getProductList(int set, int limit) async {
     final body = userType == 1 ? {"fromUserId": null, "toUserId": null, "set":set, "limit":limit} : {"fromUserId": null, "toUserId": userID, "set":set, "limit":limit};
+    print(body);
     final response = await HttpService().postRequest("getProduct", body);
     if (response.statusCode == 200)
     {
@@ -215,16 +227,15 @@ class ProductInventoryState extends State<ProductInventory> {
                             DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}'))),
                             DataCell(Text(filterProductInventoryList[index].categoryName)),
                             DataCell(Text(filterProductInventoryList[index].modelName)),
-                            DataCell(Text('${filterProductInventoryList[index].deviceId}')),
+                            DataCell(Text(filterProductInventoryList[index].deviceId)),
                             DataCell(Center(child: Text(filterProductInventoryList[index].dateOfManufacturing))),
                             DataCell(Center(child: Text('${filterProductInventoryList[index].warrantyMonths}'))),
                             DataCell(Center(child: userType==filterProductInventoryList[index].productStatus? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('In Stock')],):
                             const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active')],))),
                             DataCell(Center(child: widget.userName==filterProductInventoryList[index].latestBuyer? Text('-'):Text(filterProductInventoryList[index].latestBuyer))),
-                            DataCell(Center(child: Text('25-09-2023'))),
+                            const DataCell(Center(child: Text('25-09-2023'))),
                             DataCell(Center(child: PopupMenuButton<SampleItem>(
                               initialValue: selectedMenu,
-                              // Callback that sets the selected popup menu item.
                               onSelected: (SampleItem item) {
                                 setState(() {
                                   selectedMenu = item;
@@ -233,14 +244,10 @@ class ProductInventoryState extends State<ProductInventory> {
                               itemBuilder: (BuildContext context) => <PopupMenuEntry<SampleItem>>[
                                 const PopupMenuItem<SampleItem>(
                                   value: SampleItem.itemOne,
-                                  child: Text('Edit'),
-                                ),
-                                const PopupMenuItem<SampleItem>(
-                                  value: SampleItem.itemTwo,
                                   child: Text('Delete'),
                                 ),
                                 const PopupMenuItem<SampleItem>(
-                                  value: SampleItem.itemThree,
+                                  value: SampleItem.itemTwo,
                                   child: Text('Replace'),
                                 ),
                               ],
@@ -257,6 +264,28 @@ class ProductInventoryState extends State<ProductInventory> {
                             const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active')],))),
                             DataCell(Center(child: widget.userName==productInventoryList[index].latestBuyer? Text('-'):Text(productInventoryList[index].latestBuyer))),
                             const DataCell(Center(child: Text('25-09-2023'))),
+                            userType == 1 ? DataCell(Center(child: IconButton(tooltip:'Edit product', onPressed: () {
+                              getModelByActiveList(context, productInventoryList[index].categoryId, productInventoryList[index].categoryName,
+                                  productInventoryList[index].modelName, productInventoryList[index].modelId, productInventoryList[index].deviceId,
+                                  productInventoryList[index].warrantyMonths, productInventoryList[index].productId);
+                              }, icon: const Icon(Icons.edit_outlined),))):
+                            DataCell(Center(child: IconButton(tooltip:'replace product',onPressed: () {  }, icon: const Icon(Icons.repeat),)))
+                            /*userType != productInventoryList[index].productStatus? DataCell(Center(child: PopupMenuButton<SampleItem>(
+                              initialValue: selectedMenu,
+                              // Callback that sets the selected popup menu item.
+                              onSelected: (SampleItem item) {
+                                setState(() {
+                                  selectedMenu = item;
+                                  _displayIMEiTextInputDialog(context, productInventoryList[index].deviceId, productInventoryList[index].buyerId);
+                                });
+                              },
+                              itemBuilder: (BuildContext context) => <PopupMenuEntry<SampleItem>>[
+                                const PopupMenuItem<SampleItem>(
+                                  value: SampleItem.itemOne,
+                                  child: Text('Replace'),
+                                ),
+                              ],
+                            ))):
                             DataCell(Center(child: PopupMenuButton<SampleItem>(
                               initialValue: selectedMenu,
                               // Callback that sets the selected popup menu item.
@@ -268,18 +297,14 @@ class ProductInventoryState extends State<ProductInventory> {
                               itemBuilder: (BuildContext context) => <PopupMenuEntry<SampleItem>>[
                                 const PopupMenuItem<SampleItem>(
                                   value: SampleItem.itemOne,
-                                  child: Text('Edit'),
-                                ),
-                                const PopupMenuItem<SampleItem>(
-                                  value: SampleItem.itemTwo,
                                   child: Text('Delete'),
                                 ),
                                 const PopupMenuItem<SampleItem>(
-                                  value: SampleItem.itemThree,
+                                  value: SampleItem.itemTwo,
                                   child: Text('Replace'),
                                 ),
                               ],
-                            )))
+                            )))*/
                           ])),
                       ),
                     ),
@@ -550,9 +575,188 @@ class ProductInventoryState extends State<ProductInventory> {
     );
   }
 
+
+  Future<void> _displayTextInputDialog(BuildContext context, int catId, String catName, String mdlName, int mdlId, String imeiNo, int warranty, int productId) async
+  {
+    int indexOfInitialSelection = activeModelList.indexWhere((model) => model.modelName == mdlName);
+
+    final formKey = GlobalKey<FormState>();
+    final TextEditingController textFieldModelList = TextEditingController();
+    final TextEditingController ctrlIMI = TextEditingController();
+    final TextEditingController ctrlWrM = TextEditingController();
+    ctrlIMI.text = imeiNo;
+    ctrlWrM.text = warranty.toString();
+
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Update Product Details'),
+            content: Stack(
+              clipBehavior: Clip.none,
+              children: <Widget>[
+                Form(
+                  key: formKey,
+                  child: SizedBox(
+                    height: 260,
+                    child: Column(
+                      children: [
+                        Text('Category : $catName'),
+                        const SizedBox(height: 15,),
+                        DropdownMenu<PrdModel>(
+                          controller: textFieldModelList,
+                          //errorText: vldErrorMDL ? 'Select model' : null,
+                          hintText: 'Model',
+                          width: 275,
+                          dropdownMenuEntries: selectedModel,
+                          initialSelection: initialSelectedModel = activeModelList[indexOfInitialSelection],
+                          inputDecorationTheme: const InputDecorationTheme(
+                            filled: true,
+                            contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                            border: OutlineInputBorder(),
+                          ),
+                          onSelected: (PrdModel? mdl) {
+                            setState(() {
+                              mdlId = mdl!.modelId;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 15,),
+                        TextFormField(
+                          validator: (value){
+                            if(value==null ||value.isEmpty){
+                              return 'Please fill out this field';
+                            }
+                            return null;
+                          },
+                          maxLength: 20,
+                          decoration: InputDecoration(
+                            counterText: '',
+                            labelText: 'IMEi number',
+                            border: const OutlineInputBorder(),
+                            filled: true,
+                            fillColor: Colors.grey.shade100,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              //valueText = value;
+                            });
+                          },
+                          controller: ctrlIMI,
+                        ),
+                        const SizedBox(height: 15,),
+                        TextFormField(
+                          controller: ctrlWrM,
+                          validator: (value){
+                            if(value==null || value.isEmpty){
+                              return 'Please fill out this field';
+                            }
+                          },
+                          maxLength: 2,
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          decoration: InputDecoration(
+                            counterText: '',
+                            filled: true,
+                            fillColor: Colors.grey.shade100,
+                            labelText: 'warranty months',
+                            suffixIcon: const Icon(Icons.close),
+                            border: const OutlineInputBorder(),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actions: <Widget>[
+              MaterialButton(
+                color: Colors.green,
+                textColor: Colors.white,
+                child: const Text('OK'),
+                onPressed: () async {
+                  if (formKey.currentState!.validate()){
+
+                    final body = {"productId": productId, "modelId": mdlId, "deviceId": ctrlIMI.text, "warrantyMonths": ctrlWrM.text, 'modifyUser': userID};
+                    print(body);
+                    final response = await HttpService().putRequest("updateProduct", body);
+                    print(response.body);
+                    if (response.statusCode == 200)
+                    {
+                      if(jsonDecode(response.body)["code"]==200)
+                      {
+                        setState(() {
+                          Navigator.pop(context);
+                          getProductList(currentSet, batchSize);
+                          _showSnackBar(jsonDecode(response.body)["message"]);
+                        });
+                      }else{
+                        Navigator.pop(context);
+                        _showSnackBar(jsonDecode(response.body)["message"]);
+                      }
+                    } else {
+                      throw Exception('Failed to load data');
+                    }
+                  }
+                  setState(() {
+                    //codeDialog = valueText;
+                    //Navigator.pop(context);
+                  });
+                },
+              ),
+            ],
+          );
+        });
+  }
+
+  Future<void> getModelByActiveList(BuildContext context, int catId, String catName, String mdlName, int mdlId, String imeiNo, int warranty, int productId) async
+  {
+    Map<String, Object> body = {
+      "categoryId" : catId.toString(),
+    };
+    final response = await HttpService().postRequest("getModelByCategoryId", body);
+    if (response.statusCode == 200)
+    {
+      activeModelList.clear();
+      selectedModel.clear();
+
+      var data = jsonDecode(response.body);
+      final cntList = data["data"] as List;
+
+      for (int i=0; i < cntList.length; i++) {
+        activeModelList.add(PrdModel.fromJson(cntList[i]));
+      }
+
+      selectedModel =  <DropdownMenuEntry<PrdModel>>[];
+      for (final PrdModel index in activeModelList) {
+        selectedModel.add(DropdownMenuEntry<PrdModel>(value: index, label: index.modelName));
+      }
+
+      setState(() {
+        selectedModel;
+        _displayTextInputDialog(context, catId, catName, mdlName, mdlId, imeiNo, warranty, productId);
+      });
+    }
+    else{
+      //_showSnackBar(response.body);
+    }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
   void _onNextButtonPressed() {
     getProductList(currentSet = currentSet+1, batchSize);
-
   }
 
   void _onPreviousButtonPressed() {

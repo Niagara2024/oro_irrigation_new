@@ -106,7 +106,6 @@ class _AddProductState extends State<AddProduct> {
       "categoryId" : catID.toString(),
     };
     final response = await HttpService().postRequest("getModelByCategoryId", body);
-    print(response);
     if (response.statusCode == 200)
     {
       activeModelList.clear();
@@ -252,7 +251,6 @@ class _AddProductState extends State<AddProduct> {
                                     else{
                                       _showSnackBar('Product Empty');
                                     }
-
                                   },
                                   label: const Text('Save to Inventory'),
                                   icon: const Icon(
@@ -356,7 +354,7 @@ class _AddProductState extends State<AddProduct> {
                                             border: const OutlineInputBorder(),
                                             filled: true,
                                             fillColor: Colors.grey.shade100,
-                                            contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                                            contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                                           ),
                                         ),
                                       ),

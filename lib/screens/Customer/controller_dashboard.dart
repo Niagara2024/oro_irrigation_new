@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/screens/Customer/conditionscreen.dart';
 
 import '../../constants/http_service.dart';
 
@@ -10,9 +11,9 @@ const List<String> list = <String>['Manual', 'Program 1', 'Program 2', 'Program 
 
 
 class ControllerDashboard extends StatefulWidget {
-  const ControllerDashboard({Key? key, required this.customerID, required this.siteID, required this.siteName, required this.controllerID}) : super(key: key);
+  const ControllerDashboard({Key? key, required this.customerID, required this.siteID, required this.siteName, required this.controllerID, required this.imeiNo}) : super(key: key);
   final int customerID, siteID, controllerID;
-  final String siteName;
+  final String siteName, imeiNo;
 
   @override
   State<ControllerDashboard> createState() => _ControllerDashboardState();
@@ -62,7 +63,7 @@ class _ControllerDashboardState extends State<ControllerDashboard>
   {
     List<int> myList = [data[0].sourcePump.length, data[0].irrigationPump.length, data[0].centralFilterSite.length, data[0].centralFertilizationSite.length];
     int maxValue = myList.reduce((max, current) => current > max ? current : max);
-print(maxValue);
+    print(maxValue);
 
     return Scaffold(
       backgroundColor: const Color(0xffefefef),
@@ -83,6 +84,11 @@ print(maxValue);
             onSelected: (MenuItems item) {
               setState(() {
                 selectedMenu = item;
+                if(item.index==3){
+                  print('condition selection');
+                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  ConditionScreen(userId: widget.customerID, controllerId: widget.controllerID, imeiNo: widget.imeiNo,)),);
+                }
+
               });
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<MenuItems>>[

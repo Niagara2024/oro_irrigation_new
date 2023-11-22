@@ -235,7 +235,7 @@ class _CustomerHomeState extends State<CustomerHome>
                 ),
               ),
               onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context) =>  ControllerDashboard(siteID: customerSiteList[siteIndex].groupId, siteName: customerSiteList[siteIndex].groupName, controllerID: customerSiteList[siteIndex].userDeviceListId, customerID: widget.customerID,)),);
+                Navigator.push(context, MaterialPageRoute(builder: (context) =>  ControllerDashboard(siteID: customerSiteList[siteIndex].groupId, siteName: customerSiteList[siteIndex].groupName, controllerID: customerSiteList[siteIndex].userDeviceListId, customerID: widget.customerID, imeiNo: customerSiteList[siteIndex].deviceId,)),);
               },
             );
           }),

@@ -57,7 +57,7 @@ class _ConfigScreenState extends State<ConfigScreen> with SingleTickerProviderSt
                     ),
                     const SizedBox(height: 10.0),
                     SizedBox(
-                      height: MediaQuery.sizeOf(context).height-330,
+                      height: MediaQuery.sizeOf(context).height-260,
                       child: TabBarView(
                         controller: _tabCont,
                         children: [
@@ -124,7 +124,7 @@ class ConfigPage extends StatelessWidget
    if(label.toString()=='Names'){
       return Names(userID: userID,  customerID: customerID, groupID: controllerId);
     }else if(label.toString()=='Dealer definition'){
-      return DealerDefinitionInConfig(userID: userID,  customerID: customerID, groupID: controllerId);
+      return DealerDefinitionInConfig(userID: userID,  customerID: customerID, groupID: controllerId, imeiNo: imeiNumber,);
     }else if(label.toString()=='Preferences'){
       return PreferencesScreen(customerID: customerID, controllerID: controllerId, userID: userID,);
     }else if(label.toString()=='Data acquisition'){

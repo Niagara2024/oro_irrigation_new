@@ -12,6 +12,7 @@ import '../../constants/theme.dart';
 import '../../state_management/config_maker_provider.dart';
 import 'config_maker/config_maker.dart';
 import 'config_screen.dart';
+import 'dealer_definition_config.dart';
 
 class ProductLimits extends StatefulWidget {
   const ProductLimits({Key? key, required this.userID,  required this.customerID, required this.userType, required this.siteID, required this.nodeCount, required this.siteName, required this.userDeviceListId, required this.deviceId}) : super(key: key);
@@ -303,6 +304,8 @@ class _ProductLimitsState extends State<ProductLimits> {
         onStepContinue: () {
           if(_currentStep==0){
             updateProductLimit();
+          }else if(_currentStep == 2){
+            //updateProductLimit();
           }
           _currentStep < 2 ? setState(() => _currentStep += 1) : null;
         },
@@ -310,7 +313,8 @@ class _ProductLimitsState extends State<ProductLimits> {
           _currentStep > 0 ? setState(() => _currentStep -= 1) : null;
         },
         controlsBuilder: (BuildContext context, ControlsDetails controlsDetails) {
-          return Row(
+          return _currentStep==2 ? Container(height: 0) :
+          Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Container(
@@ -335,9 +339,13 @@ class _ProductLimitsState extends State<ProductLimits> {
                 child: const Text('Cancel'),
               ) : const Text(''),
               const SizedBox(width: 16),
-              TextButton(
+              TextButton.icon(
                 onPressed: controlsDetails.onStepContinue,
-                child: const Text('Save & Continue'),
+                label: _currentStep==2 ? const Text('Save') : const Text('Save & Continue'),
+                icon: const Icon(
+                  Icons.save_as_outlined,
+                  color: Colors.white,
+                ),
               ),
             ],
           );
@@ -469,7 +477,7 @@ class _ProductLimitsState extends State<ProductLimits> {
           Step(
             title: const Text('Others'),
             content: Container(
-              height: mediaQuery.size.height-240,
+              height: mediaQuery.size.height-176,
               color:  Colors.white,
               child: ConfigScreen(userID: widget.userID, customerID: widget.customerID, siteName: widget.siteName, siteID: widget.siteID, controllerId: widget.userDeviceListId, imeiNumber: widget.deviceId,),
             ),

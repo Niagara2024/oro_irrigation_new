@@ -60,8 +60,8 @@ class DealerDefinition {
   final int widgetTypeId;
   final String parameter;
   final String description;
-  final String iconCodePoint;
-  final String iconFontFamily;
+  final String? iconCodePoint;
+  final String? iconFontFamily;
   final String dropdownValues;
   String value;
 

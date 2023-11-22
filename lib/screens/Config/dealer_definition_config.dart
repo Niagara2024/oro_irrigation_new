@@ -7,16 +7,19 @@ import 'package:oro_irrigation_new/constants/theme.dart';
 
 import '../../Models/dd_config.dart';
 import '../../constants/http_service.dart';
+import '../../constants/mqtt_web_client.dart';
 
 class DealerDefinitionInConfig extends StatefulWidget {
-  const DealerDefinitionInConfig({Key? key, required this.userID, required this.customerID, required this.groupID}) : super(key: key);
+  const DealerDefinitionInConfig({Key? key, required this.userID, required this.customerID, required this.groupID, required this.imeiNo}) : super(key: key);
   final int userID, customerID, groupID;
+  final String imeiNo;
 
   @override
-  State<DealerDefinitionInConfig> createState() => _DealerDefinitionInConfigState();
+  State<DealerDefinitionInConfig> createState() => DealerDefinitionInConfigState();
+
 }
 
-class _DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
+class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
 
   DataModelDDConfig data = DataModelDDConfig(categories: [], dealerDefinition: {});
   bool visibleLoading = false;
@@ -36,14 +39,16 @@ class _DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
     fetchData();
   }
 
+
   Future<void> fetchData() async
   {
     indicatorViewShow();
     await Future.delayed(const Duration(milliseconds: 500));
     Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.groupID};
-    final response =
-    await HttpService().postRequest("getUserDealerDefinition", body);
+    //print(body);
+    final response =   await HttpService().postRequest("getUserDealerDefinition", body);
     final jsonData = json.decode(response.body);
+    //print(jsonData);
     try {
       setState(() {
         data = DataModelDDConfig.fromJson(jsonData);
@@ -57,40 +62,45 @@ class _DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
   Widget wideLayout(DataModelDDConfig data, BuildContext context)
   {
     final mediaQuery = MediaQuery.of(context);
-
     return visibleLoading? Visibility(
       visible: visibleLoading,
       child: Container(
-        padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 30, 0, mediaQuery.size.width/2 - 30, 0),
+        padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 50, 0, mediaQuery.size.width/2 - 50, 0),
         child: const LoadingIndicator(
           indicatorType: Indicator.ballPulse,
         ),
       ),
     ) : Container(
-      color:  Colors.blueGrey.shade50,
+      color:  Colors.white,
       child: Column(
         children: [
           Expanded(
-            child: Container(
-              color: myTheme.primaryColor.withOpacity(0.1),
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: data.categories.length,
-                itemBuilder: (context, index) {
-                  final category = data.categories[index];
-                  return buildCategoryContainer(category, data);
-                },
-              ),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: data.categories.length,
+              itemBuilder: (context, index) {
+                final category = data.categories[index];
+                return buildCategoryContainer(category, data);
+              },
             ),
           ),
           Container(
-            height: 60,
+            height: 50,
             color: Colors.white,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton.icon(
                   onPressed: () async {
+                    print('saveDataFunction');
+                    String strPayload = Mqttdata(data);
+                    String payLoadFinal = jsonEncode({
+                      "500": [
+                        {"501": strPayload},
+                      ]
+                    });
+                    MqttWebClient().publishMessage('AppToFirmware/${widget.imeiNo}', payLoadFinal);
+
                     final sendData = jsonEncode(data.dealerDefinition);
                     Map<String, Object> body = {
                       "userId": widget.customerID,
@@ -126,19 +136,33 @@ class _DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
     );
   }
 
+  String Mqttdata(DataModelDDConfig dmConfig) {
+    String mqttFormatData = '';
+    for (var i = 0; i < dmConfig.categories.length; i++) {
+      int k = dmConfig.categories[i].categoryId;
+      for (var j = 0; j < dmConfig.dealerDefinition['$k']!.length; j++) {
+        mqttFormatData +=
+        '${dmConfig.dealerDefinition['$k']![j].dealerDefinitionId},$k,${dmConfig.dealerDefinition['$k']![j].value.isNotEmpty ? dmConfig.dealerDefinition['$k']![j].value : '0'};';
+      }
+    }
+    return mqttFormatData;
+  }
+
   Widget buildCategoryContainer(Category category, DataModelDDConfig data)
   {
     if(data.categories.isEmpty){
       return const Center(child: CircularProgressIndicator(),);
     }
     return Container(
-      width: 400.0,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.all(Radius.circular(10),
+      width: 350.0,
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Colors.grey,
+          width: 1.0,
         ),
+        borderRadius: const BorderRadius.all(Radius.circular(5)),
       ),
-      margin: const EdgeInsets.all(8.0),
+      margin: const EdgeInsets.all(5.0),
       child: Column(
         children: [
           buildFixedRow(category.categoryName),
@@ -151,14 +175,16 @@ class _DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
   }
 
   Widget buildFixedRow(String categoryName) {
-    return Container(
-      height: 40.0,
-      decoration: BoxDecoration(
-        color: myTheme.primaryColor.withOpacity(0.5),
-        borderRadius: const BorderRadius.only(topRight: Radius.circular(10), topLeft: Radius.circular(10)),
-      ),
-      child: Center(
-        child: Text(categoryName, style: const TextStyle(color: Colors.white)),
+    return SizedBox(
+      height: 45.0,
+      child: Column(
+        children: [
+          const SizedBox(height: 10,),
+          Center(
+            child: Text(categoryName, style: const TextStyle(color: Colors.black)),
+          ),
+          const Divider()
+        ],
       ),
     );
   }
@@ -193,13 +219,13 @@ class _DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
       children: [
         ListTile(
          // leading: Icon(IconData(iconcode, fontFamily: iconfontfamily)),
-          title: Text('${definition?.parameter}'),
-          subtitle: Text('${definition?.description}', style: const TextStyle(fontSize: 11)),
+          title: Text('${definition?.parameter}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),),
+          subtitle: Text('${definition?.description}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.normal)),
           trailing: DropdownButton(
             items: dropdownlist.map((String items) {
               return DropdownMenuItem(
                 value: items,
-                child: Container(padding: EdgeInsets.only(left: 10), child: Text(items)),
+                child: Container(padding: const EdgeInsets.only(left: 10), child: Text(items)),
               );
             }).toList(),
             onChanged: (value) {
@@ -219,8 +245,8 @@ class _DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
       children: [
         ListTile(
           //leading: Icon(IconData(iconcode, fontFamily: iconfontfamily)),
-          title: Text('${definition?.parameter}'),
-          subtitle: Text('${definition?.description}', style: const TextStyle(fontSize: 11)),
+          title: Text('${definition?.parameter}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),),
+          subtitle: Text('${definition?.description}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.normal)),
           trailing: SizedBox(
             width: 50,
             child: CustomTextField(
@@ -253,8 +279,8 @@ class _DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
       children: [
         ListTile(
           //leading: Icon(IconData(iconcode, fontFamily: iconfontfamily)),
-          title: Text('${definition?.parameter}'),
-          subtitle: Text('${definition?.description}', style: const TextStyle(fontSize: 11)),
+          title: Text('${definition?.parameter}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),),
+          subtitle: Text('${definition?.description}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.normal)),
           trailing: MySwitch(
             value: definition?.value == '1',
             onChanged: ((value) {

@@ -85,7 +85,7 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
                   ),
                   const SizedBox(height: 10.0),
                   SizedBox(
-                    height: MediaQuery.sizeOf(context).height-440,
+                    height: MediaQuery.sizeOf(context).height-370,
                     child: TabBarView(
                       children: [
                         for (int i = 0; i < widget.names.length; i++)
@@ -149,6 +149,9 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
           columnSpacing: 12,
           horizontalMargin: 12,
           minWidth: 580,
+          headingRowHeight: 40,
+          dataRowHeight: 40,
+          border: TableBorder.all(width: 1),
           columns: const [
             DataColumn2(
                 label: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold),),
@@ -188,6 +191,9 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
         columnSpacing: 12,
         horizontalMargin: 12,
         minWidth: 580,
+        headingRowHeight: 40,
+        dataRowHeight: 40,
+        border: TableBorder.all(width: 1),
         columns: const [
           DataColumn2(
               label: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold),),

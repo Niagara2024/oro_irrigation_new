@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/screens/Config/config_screen.dart';
 import 'package:provider/provider.dart';
@@ -114,6 +115,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
     {
       customerProductList.clear();
       var data = jsonDecode(response.body);
+      print(data);
       if(data["code"]==200)
       {
         final cntList = data["data"] as List;
@@ -633,30 +635,37 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
               columnSpacing: 12,
               horizontalMargin: 12,
               minWidth: 580,
-              columns: const [
-                DataColumn2(
+              columns: [
+                const DataColumn2(
                     label: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold),),
                     fixedWidth: 100
                 ),
-                DataColumn2(
+                const DataColumn2(
                   label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold),),
                   size: ColumnSize.M,
                 ),
-                DataColumn2(
+                const DataColumn2(
                   label: Text('Model', style: TextStyle(fontWeight: FontWeight.bold),),
                   size: ColumnSize.M,
                 ),
-                DataColumn2(
+                const DataColumn2(
                   label: Text('IMEI', style: TextStyle(fontWeight: FontWeight.bold),),
                   size: ColumnSize.M,
                 ),
                 DataColumn2(
-                  label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold),),
                   size: ColumnSize.M,
+                  label: Text(widget.userType==2 ? 'Site Name': 'Sales person', style: const TextStyle(fontWeight: FontWeight.bold),),
+                ),
+                const DataColumn2(
+                  label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold),),
+                ),
+                const DataColumn2(
+                  label: Text('Modify Date', style: TextStyle(fontWeight: FontWeight.bold),),
+                  fixedWidth: 100,
                 ),
                 DataColumn2(
-                  size: ColumnSize.M,
-                  label: Text('Sales person', style: TextStyle(fontWeight: FontWeight.bold),),
+                  label: const Text('Action', style: TextStyle(fontWeight: FontWeight.bold),),
+                  fixedWidth: widget.userType==2 ? 70 : 0,
                 ),
               ],
               rows: List<DataRow>.generate(widget.customerProductList.length, (index) => DataRow(cells: [
@@ -664,9 +673,13 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                 DataCell(Row(children: [const CircleAvatar(radius: 17, child: Icon(Icons.gas_meter_outlined),), const SizedBox(width: 10,), Text(widget.customerProductList[index].catName)],)),
                 DataCell(Text(widget.customerProductList[index].model)),
                 DataCell(Text('${widget.customerProductList[index].imei}')),
+                DataCell(widget.userType==2 ? Text(widget.customerProductList[index].groupName) : widget.customerProductList[index].buyer == widget.userName? const Text('-') : Text(widget.customerProductList[index].buyer)),
                 DataCell(Center(child: widget.userType+1 == widget.customerProductList[index].prdStatus? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free')],):
                 const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active')],))),
-                DataCell(widget.customerProductList[index].buyer == widget.userName? const Text('-') : Text(widget.customerProductList[index].buyer)),
+                DataCell(Text(DateFormat('dd-MM-yyyy').format(DateTime.parse(widget.customerProductList[index].lastModified)))),
+                widget.userType==2 ? DataCell(Center(child: IconButton(tooltip:'Delete product',onPressed: () {
+                 print('IconButton click');
+                }, icon: const Icon(Icons.delete_outline, color:  Colors.red,),))) : DataCell.empty,
               ]))),
         ),
       );

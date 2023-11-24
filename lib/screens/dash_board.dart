@@ -279,7 +279,7 @@ class _DashboardWideState extends State<DashboardWide> {
                       final prefs = await SharedPreferences.getInstance();
                       await prefs.remove('userId');
                       await prefs.remove('userName');
-                      await prefs.remove('mobileCountryCode');
+                      await prefs.remove('countryCode');
                       await prefs.remove('mobileNumber');
                       await prefs.remove('subscribeTopic');
 

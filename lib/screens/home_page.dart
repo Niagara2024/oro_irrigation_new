@@ -61,7 +61,6 @@ class HomePageState extends State<HomePage>
 
   Future<void> getProductStock() async
   {
-    print('call back');
     Map<String, dynamic> body = {};
     if(userType==1){
       body = {"fromUserId" : null, "toUserId" : null};

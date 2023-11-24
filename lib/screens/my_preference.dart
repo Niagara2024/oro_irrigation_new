@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Models/language.dart';
 import '../constants/http_service.dart';
@@ -26,10 +27,32 @@ class _MyPreferenceState extends State<MyPreference>
   ImagePicker picker = ImagePicker();
   XFile? image;
 
+  String countryCode = '', mobileNo = '', userName = '', emailId = '', password = '';
+  TextEditingController _controllerMblNo = TextEditingController();
+  TextEditingController _controllerUsrName = TextEditingController();
+  TextEditingController _controllerEmail = TextEditingController();
+  TextEditingController _controllerPwd = TextEditingController();
+
   @override
   void initState() {
     super.initState();
+    getUserInfo();
     getLanguage();
+  }
+
+  Future<void> getUserInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    countryCode = prefs.getString('countryCode')!;
+    mobileNo = prefs.getString('mobileNumber')!;
+    userName = prefs.getString('userName')!;
+    emailId = prefs.getString('email')!;
+    password = prefs.getString('password')!;
+
+    _controllerMblNo.text = '+$countryCode $mobileNo';
+    _controllerUsrName.text = userName;
+    _controllerEmail.text = emailId;
+    _controllerPwd.text = password;
+
   }
 
   _getFromGallery() async {
@@ -122,7 +145,7 @@ class _MyPreferenceState extends State<MyPreference>
 
                                                 Stack(
                                                   children: [
-                                                    Center(
+                                                    const Center(
                                                       child: CircleAvatar(
                                                         radius: 60.0,
                                                         //backgroundImage: image == null? AssetImage('assets/your_image.png') : File(image!.path),
@@ -165,6 +188,7 @@ class _MyPreferenceState extends State<MyPreference>
                                                 SizedBox(
                                                   height: 44,
                                                   child: TextField(
+                                                    controller: _controllerMblNo,
                                                     decoration: InputDecoration(
                                                       border: OutlineInputBorder(),
                                                       hintText: 'Enter Mobile Number',
@@ -177,6 +201,7 @@ class _MyPreferenceState extends State<MyPreference>
                                                 SizedBox(
                                                   height: 44,
                                                   child: TextField(
+                                                    controller: _controllerUsrName,
                                                     decoration: InputDecoration(
                                                       border: OutlineInputBorder(),
                                                       hintText: 'Enter Username',
@@ -189,6 +214,7 @@ class _MyPreferenceState extends State<MyPreference>
                                                 SizedBox(
                                                   height: 44,
                                                   child: TextField(
+                                                    controller: _controllerPwd,
                                                     decoration: InputDecoration(
                                                       border: OutlineInputBorder(),
                                                       hintText: 'Enter Password',
@@ -201,6 +227,7 @@ class _MyPreferenceState extends State<MyPreference>
                                                 SizedBox(
                                                   height: 44,
                                                   child: TextField(
+                                                    controller: _controllerEmail,
                                                     decoration: InputDecoration(
                                                       border: OutlineInputBorder(),
                                                       hintText: 'Enter Your Email',

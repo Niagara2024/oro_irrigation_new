@@ -471,6 +471,8 @@ class _OTPViewWideState extends State<OTPViewWide>
                                               await prefs.setString('userId', regDetails["userId"].toString());
                                               await prefs.setString('countryCode', regDetails["countryCode"].toString());
                                               await prefs.setString('mobileNumber', regDetails["mobileNumber"].toString());
+                                              await prefs.setString('password', regDetails["password"].toString());
+                                              await prefs.setString('email', regDetails["email"].toString());
 
                                              if (mounted){
                                                 Navigator.pushNamedAndRemoveUntil(context, '/dashboard', ModalRoute.withName('/dashboard'));

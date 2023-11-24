@@ -353,14 +353,18 @@ class _ProductLimitsState extends State<ProductLimits> {
         steps: [
           Step(
             title: const Text('Product Limit'),
-            content: visibleLoading? Center(
-              child: Visibility(
-                visible: visibleLoading,
-                child: Container(
-                  height: mediaQuery.size.height,
-                  padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 50, 0, mediaQuery.size.width/2 - 50, 0),
-                  child: const LoadingIndicator(
-                    indicatorType: Indicator.ballPulse,
+            content: visibleLoading? Container(
+              height: mediaQuery.size.height-240,
+              color:  Colors.white,
+              child: Center(
+                child: Visibility(
+                  visible: visibleLoading,
+                  child: Container(
+                    height: mediaQuery.size.height,
+                    padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 50, 0, mediaQuery.size.width/2 - 50, 0),
+                    child: const LoadingIndicator(
+                      indicatorType: Indicator.ballPulse,
+                    ),
                   ),
                 ),
               ),

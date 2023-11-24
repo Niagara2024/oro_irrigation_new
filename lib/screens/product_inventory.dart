@@ -7,6 +7,7 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Models/product_inventrory_model.dart';
 import '../Models/product_model.dart';
+import '../Models/product_stock.dart';
 import '../constants/http_service.dart';
 import '../constants/theme.dart';
 
@@ -22,6 +23,7 @@ class ProductInventory extends StatefulWidget {
 }
 
 class ProductInventoryState extends State<ProductInventory> {
+
   String userID = '0';
   int userType = 0;
   List<ProductListModel> productInventoryList = [];
@@ -58,13 +60,18 @@ class ProductInventoryState extends State<ProductInventory> {
   int indexOfInitialSelection = 0;
 
 
+  late List<DropdownMenuEntry<ProductStockModel>> ddCategoryList;
+  List<ProductStockModel> productStockList = <ProductStockModel>[];
+  String rplMdl = '-', rplImeiNo = '-';
+
+
   @override
   void initState() {
     super.initState();
+    ddCategoryList =  <DropdownMenuEntry<ProductStockModel>>[];
     selectedModel =  <DropdownMenuEntry<PrdModel>>[];
     getUserInfo();
   }
-
 
   Future<void> getUserInfo() async {
     indicatorViewShow();
@@ -75,6 +82,7 @@ class ProductInventoryState extends State<ProductInventory> {
     });
     getProductList(currentSet, batchSize);
     fetchCatModAndImeiData();
+    getProductStock();
   }
 
   Future<void> getProductList(int set, int limit) async {
@@ -128,7 +136,6 @@ class ProductInventoryState extends State<ProductInventory> {
   Future<void> fetchFilterData(dynamic categoryId, dynamic modelId, dynamic deviceId) async
   {
     final body = userType == 1 ? {"fromUserId": null, "toUserId": null, "categoryId": categoryId, "modelId": modelId, "deviceId": deviceId} : {"fromUserId": null, "toUserId": userID, "categoryId": categoryId, "modelId": modelId, "deviceId": deviceId};
-    print(body);
     final response = await HttpService().postRequest("getFilteredProduct", body);
     if (response.statusCode == 200)
     {
@@ -141,6 +148,38 @@ class ProductInventoryState extends State<ProductInventory> {
       }
     } else {
       throw Exception('Failed to load data');
+    }
+  }
+
+
+  Future<void> getProductStock() async
+  {
+    Map<String, dynamic> body = {"fromUserId" : null, "toUserId" : userID};
+    final response = await HttpService().postRequest("getProductStock", body);
+    if (response.statusCode == 200)
+    {
+      productStockList.clear();
+      var data = jsonDecode(response.body);
+      if(data["code"]==200)
+      {
+        final cntList = data["data"] as List;
+        for (int i=0; i < cntList.length; i++) {
+          productStockList.add(ProductStockModel.fromJson(cntList[i]));
+        }
+      }
+
+      ddCategoryList =  <DropdownMenuEntry<ProductStockModel>>[];
+      for (final ProductStockModel index in productStockList) {
+        ddCategoryList.add(DropdownMenuEntry<ProductStockModel>(value: index, label: index.categoryName));
+      }
+
+      setState(() {
+        ddCategoryList;
+      });
+
+    }
+    else{
+      //_showSnackBar(response.body);
     }
   }
 
@@ -269,7 +308,11 @@ class ProductInventoryState extends State<ProductInventory> {
                                   productInventoryList[index].modelName, productInventoryList[index].modelId, productInventoryList[index].deviceId,
                                   productInventoryList[index].warrantyMonths, productInventoryList[index].productId);
                               }, icon: const Icon(Icons.edit_outlined),))):
-                            DataCell(Center(child: IconButton(tooltip:'replace product',onPressed: () {  }, icon: const Icon(Icons.repeat),)))
+                            DataCell(Center(child: IconButton(tooltip:'replace product',onPressed: () {
+                              _displayReplaceProductDialog(context, productInventoryList[index].categoryId, productInventoryList[index].categoryName,
+                                  productInventoryList[index].modelName, productInventoryList[index].modelId, productInventoryList[index].deviceId,
+                                  productInventoryList[index].warrantyMonths, productInventoryList[index].productId, productInventoryList[index].buyerId);
+                            }, icon: const Icon(Icons.repeat),)))
                             /*userType != productInventoryList[index].productStatus? DataCell(Center(child: PopupMenuButton<SampleItem>(
                               initialValue: selectedMenu,
                               // Callback that sets the selected popup menu item.
@@ -576,7 +619,7 @@ class ProductInventoryState extends State<ProductInventory> {
   }
 
 
-  Future<void> _displayTextInputDialog(BuildContext context, int catId, String catName, String mdlName, int mdlId, String imeiNo, int warranty, int productId) async
+  Future<void> _displayEditProductDialog(BuildContext context, int catId, String catName, String mdlName, int mdlId, String imeiNo, int warranty, int productId) async
   {
     int indexOfInitialSelection = activeModelList.indexWhere((model) => model.modelName == mdlName);
 
@@ -679,8 +722,8 @@ class ProductInventoryState extends State<ProductInventory> {
                 textColor: Colors.white,
                 child: const Text('OK'),
                 onPressed: () async {
-                  if (formKey.currentState!.validate()){
-
+                  if (formKey.currentState!.validate())
+                  {
                     final body = {"productId": productId, "modelId": mdlId, "deviceId": ctrlIMI.text, "warrantyMonths": ctrlWrM.text, 'modifyUser': userID};
                     print(body);
                     final response = await HttpService().putRequest("updateProduct", body);
@@ -702,6 +745,111 @@ class ProductInventoryState extends State<ProductInventory> {
                       throw Exception('Failed to load data');
                     }
                   }
+                  setState(() {
+                    //codeDialog = valueText;
+                    //Navigator.pop(context);
+                  });
+                },
+              ),
+            ],
+          );
+        });
+  }
+
+  Future<void> _displayReplaceProductDialog(BuildContext context, int catId, String catName, String mdlName, int mdlId, String imeiNo, int warranty, int productId, int customerId) async
+  {
+    final TextEditingController dropdownCatList = TextEditingController();
+    TextEditingController txtEdControllerMdlName = TextEditingController();
+    TextEditingController txtEdControllerIMEi = TextEditingController();
+
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Replace Product           '),
+            content: Stack(
+              clipBehavior: Clip.none,
+              children: <Widget>[
+                SizedBox(
+                  height: 320,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('FROM'),
+                      const Divider(),
+                      Text('Category : $catName'),
+                      const SizedBox(height: 5,),
+                      Text('Model : $mdlName'),
+                      const SizedBox(height: 5,),
+                      Text('IMEI No : $imeiNo'),
+                      const Divider(),
+                      const Text('TO'),
+                      const SizedBox(height: 5,),
+                      DropdownMenu<ProductStockModel>(
+                        controller: dropdownCatList,
+                        hintText: 'Category',
+                        width: 270,
+                        //label: const Text('Category'),
+                        dropdownMenuEntries: ddCategoryList,
+                        inputDecorationTheme: const InputDecorationTheme(
+                          filled: false,
+                          contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                          border: OutlineInputBorder(),
+                        ),
+                        onSelected: (ProductStockModel? item) {
+                          setState(() {
+                            txtEdControllerMdlName.text = item!.model;
+                            txtEdControllerIMEi.text = item.imeiNo;
+                          });
+                        },
+                      ),
+                      TextField(
+                        enabled: false,
+                        controller: txtEdControllerMdlName,
+                        decoration: const InputDecoration(
+                          labelText: 'Model',
+                        ),
+                      ),
+                      TextField(
+                        enabled: false,
+                        controller: txtEdControllerIMEi,
+                        decoration: const InputDecoration(
+                          labelText: 'IMEI No',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: <Widget>[
+              MaterialButton(
+                color: Colors.green,
+                textColor: Colors.white,
+                child: const Text('Replace'),
+                onPressed: () async {
+                  final body = {"userId": customerId, "oldDeviceId": imeiNo, "newDeviceId": txtEdControllerIMEi.text, 'modifyUser': userID};
+                    print(body);
+                    final response = await HttpService().postRequest("replaceProduct", body);
+                    print(response.body);
+                    if (response.statusCode == 200)
+                    {
+                      if(jsonDecode(response.body)["code"]==200)
+                      {
+                        setState(() {
+                          Navigator.pop(context);
+                          getProductStock();
+                          getProductList(currentSet, batchSize);
+                          _showSnackBar(jsonDecode(response.body)["message"]);
+                        });
+                      }else{
+                        Navigator.pop(context);
+                        _showSnackBar(jsonDecode(response.body)["message"]);
+                      }
+                    } else {
+                      throw Exception('Failed to load data');
+                    }
+
                   setState(() {
                     //codeDialog = valueText;
                     //Navigator.pop(context);
@@ -738,7 +886,7 @@ class ProductInventoryState extends State<ProductInventory> {
 
       setState(() {
         selectedModel;
-        _displayTextInputDialog(context, catId, catName, mdlName, mdlId, imeiNo, warranty, productId);
+        _displayEditProductDialog(context, catId, catName, mdlName, mdlId, imeiNo, warranty, productId);
       });
     }
     else{

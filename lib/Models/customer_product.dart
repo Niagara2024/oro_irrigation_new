@@ -22,7 +22,7 @@ class CustomerProductModel
     model: json['model'],
     imei: json['imei'],
     buyer: json['buyer'],
-    groupName: json['groupName'],
+    groupName: json['groupName']??'',
     lastModified: json['lastModified'],
   );
 

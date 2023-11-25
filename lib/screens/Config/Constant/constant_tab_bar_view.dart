@@ -100,7 +100,7 @@ class _ConstantInConfigState extends State<ConstantInConfig>
             children: [
               Container(
                 width: double.infinity,
-                color: Color(0XFFF3F3F3),
+                //color: Color(0XFFF3F3F3),
                 child: TabBar(
                   indicatorColor: myTheme.primaryColor,
                   labelStyle: TextStyle(fontWeight: FontWeight.bold),

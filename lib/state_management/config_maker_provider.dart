@@ -888,6 +888,7 @@ class ConfigMakerProvider extends ChangeNotifier{
   }
 
   void centralDosingFunctionality(List<dynamic> list){
+    print('cd list : $list');
     switch (list[0]){
       case ('addCentralDosing') : {
         if(totalCentralDosing > 0 && totalInjector > 0){

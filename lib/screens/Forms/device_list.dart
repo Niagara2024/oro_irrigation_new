@@ -673,8 +673,48 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                 DataCell(Text(widget.customerProductList[index].model)),
                 DataCell(Text(widget.customerProductList[index].imei)),
                 DataCell(widget.userType==2 ? Text(widget.customerProductList[index].groupName) : widget.customerProductList[index].buyer == widget.userName? const Text('-') : Text(widget.customerProductList[index].buyer)),
-                DataCell(Center(child: widget.userType+1 == widget.customerProductList[index].prdStatus? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free')],):
-                const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active')],))),
+                DataCell(
+                    Center(
+                      child: widget.userType == 1? Row(
+                        children: [
+                          CircleAvatar(radius: 5,
+                            backgroundColor:
+                            widget.customerProductList[index].prdStatus==1? Colors.pink:
+                            widget.customerProductList[index].prdStatus==2? Colors.blue:
+                            widget.customerProductList[index].prdStatus==3? Colors.purple:
+                            widget.customerProductList[index].prdStatus==4? Colors.yellow:
+                            widget.customerProductList[index].prdStatus==5? Colors.deepOrangeAccent:
+                            Colors.green,
+                          ),
+                          const SizedBox(width: 5,),
+                          widget.customerProductList[index].prdStatus==1? const Text('In-Stock'):
+                          widget.customerProductList[index].prdStatus==2? const Text('Stock'):
+                          widget.customerProductList[index].prdStatus==3? const Text('Sold-Out'):
+                          widget.customerProductList[index].prdStatus==4? const Text('Pending'):
+                          widget.customerProductList[index].prdStatus==5? const Text('Installed'):
+                          const Text('Active'),
+                        ],
+                      ):
+                      Row(
+                        children: [
+                          CircleAvatar(radius: 5,
+                            backgroundColor:
+                            widget.customerProductList[index].prdStatus==1? Colors.pink:
+                            widget.customerProductList[index].prdStatus==2? Colors.purple:
+                            widget.customerProductList[index].prdStatus==3? Colors.yellow:
+                            widget.customerProductList[index].prdStatus==4? Colors.deepOrangeAccent:
+                            Colors.green,
+                          ),
+                          const SizedBox(width: 5,),
+                          widget.customerProductList[index].prdStatus==2? const Text('In-Stock'):
+                          widget.customerProductList[index].prdStatus==3? const Text('Sold-Out'):
+                          widget.customerProductList[index].prdStatus==4? const Text('Pending'):
+                          widget.customerProductList[index].prdStatus==5? const Text('Installed'):
+                          const Text('Active'),
+                        ],
+                      ),
+                    )
+                ),
                 DataCell(Text(DateFormat('dd-MM-yyyy').format(DateTime.parse(widget.customerProductList[index].lastModified)))),
                 widget.userType==2 ? DataCell(Center(child: IconButton(tooltip:'Delete product',onPressed: () {
                  print('IconButton click');

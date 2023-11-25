@@ -4,42 +4,58 @@ import 'dart:async';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_browser_client.dart';
 
+
 final client = MqttBrowserClient('ws://192.168.1.141', '');
 
 class MqttWebClient {
 
   Future<int> init() async
   {
-    if(client.connectionStatus!.state == MqttConnectionState.connected)
-    {
-      print('client Already connected');
-    }else{
+    client.setProtocolV311();
+    client.keepAlivePeriod = 20;
 
-      client.logging(on: false);
-      client.setProtocolV311();
-      client.keepAlivePeriod = 60;
-      client.connectTimeoutPeriod = 5000; // milliseconds
-      client.port = 9001;
-      //client.autoReconnect = true;
-      //client.resubscribeOnAutoReconnect = true;
-     // client.onAutoReconnect = onAutoReconnect;
-      //client.onAutoReconnected = onAutoReconnected;
-      client.onConnected = onConnected;
-      client.onSubscribed = onSubscribed;
+    client.connectTimeoutPeriod = 2000; // milliseconds
 
-      client.websocketProtocols = MqttClientConstants.protocolsSingleDefault;
+    client.port = 9001;
+    //client.onDisconnected = onDisconnected;
+    client.onConnected = onConnected;
+    client.onSubscribed = onSubscribed;
+    client.pongCallback = pong;
+    client.websocketProtocols = MqttClientConstants.protocolsSingleDefault;
+    final connMess = MqttConnectMessage()
+        .withClientIdentifier('')
+        .withWillTopic('willtopic')
+        .withWillMessage('My Will message')
+        .startClean()
+        .withWillQos(MqttQos.atLeastOnce);
+    print('EXAMPLE::Mosquitto client connecting....');
+    client.connectionMessage = connMess;
 
-      final connMess = MqttConnectMessage()
-          .withClientIdentifier('Mqtt_MyClientUniqueId')
-          .withWillTopic('will-topic') // If you set this you must set a will message
-          .withWillMessage('My Will message')
-          .startClean() // Non persistent session for testing
-          .withWillQos(MqttQos.atLeastOnce);
-      print('Mosquitto client connecting....');
-      client.connectionMessage = connMess;
-
-      connectMqtt();
+    try {
+      await client.connect();
+      print('yes it is connected');
+    } on Exception catch (e) {
+      print('EXAMPLE::client exception - $e');
+      client.disconnect();
     }
+
+    /// Check we are connected
+    if (client.connectionStatus!.state == MqttConnectionState.connected) {
+      print('EXAMPLE::Mosquitto client connected');
+    } else {
+      print('Mosquitto client connection failed - disconnecting, status is ${client.connectionStatus}');
+      client.disconnect();
+    }
+    client.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
+      final recMess = c![0].payload as MqttPublishMessage;
+      final pt =  MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+    });
+    client.published!.listen((MqttPublishMessage message) {
+      print('topic is ${message.variableHeader!.topicName}, with Qos ${message.header!.qos}');
+    });
+
+    await MqttUtilities.asyncSleep(60);
+    await MqttUtilities.asyncSleep(2);
 
     return 0;
   }

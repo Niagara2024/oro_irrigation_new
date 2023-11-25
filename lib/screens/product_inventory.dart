@@ -170,7 +170,7 @@ class ProductInventoryState extends State<ProductInventory> {
 
       ddCategoryList =  <DropdownMenuEntry<ProductStockModel>>[];
       for (final ProductStockModel index in productStockList) {
-        ddCategoryList.add(DropdownMenuEntry<ProductStockModel>(value: index, label: index.categoryName));
+        ddCategoryList.add(DropdownMenuEntry<ProductStockModel>(value: index, label: index.imeiNo));
       }
 
       setState(() {
@@ -299,8 +299,48 @@ class ProductInventoryState extends State<ProductInventory> {
                             DataCell(Text(productInventoryList[index].deviceId)),
                             DataCell(Center(child: Text(productInventoryList[index].dateOfManufacturing))),
                             DataCell(Center(child: Text('${productInventoryList[index].warrantyMonths}'))),
-                            DataCell(Center(child: userType==productInventoryList[index].productStatus? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('In Stock')],):
-                            const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active')],))),
+                            DataCell(
+                                Center(
+                                    child: userType == 1? Row(
+                                      children: [
+                                        CircleAvatar(radius: 5,
+                                          backgroundColor:
+                                          productInventoryList[index].productStatus==1? Colors.pink:
+                                          productInventoryList[index].productStatus==2? Colors.blue:
+                                          productInventoryList[index].productStatus==3? Colors.purple:
+                                          productInventoryList[index].productStatus==4? Colors.yellow:
+                                          productInventoryList[index].productStatus==5? Colors.deepOrangeAccent:
+                                          Colors.green,
+                                        ),
+                                        const SizedBox(width: 5,),
+                                        productInventoryList[index].productStatus==1? const Text('In-Stock'):
+                                        productInventoryList[index].productStatus==2? const Text('Stock'):
+                                        productInventoryList[index].productStatus==3? const Text('Sold-Out'):
+                                        productInventoryList[index].productStatus==4? const Text('Pending'):
+                                        productInventoryList[index].productStatus==5? const Text('Installed'):
+                                        const Text('Active'),
+                                      ],
+                                    ):
+                                    Row(
+                                      children: [
+                                        CircleAvatar(radius: 5,
+                                          backgroundColor:
+                                          productInventoryList[index].productStatus==1? Colors.pink:
+                                          productInventoryList[index].productStatus==2? Colors.purple:
+                                          productInventoryList[index].productStatus==3? Colors.yellow:
+                                          productInventoryList[index].productStatus==4? Colors.deepOrangeAccent:
+                                          Colors.green,
+                                        ),
+                                        const SizedBox(width: 5,),
+                                        productInventoryList[index].productStatus==2? const Text('In-Stock'):
+                                        productInventoryList[index].productStatus==3? const Text('Sold-Out'):
+                                        productInventoryList[index].productStatus==4? const Text('Pending'):
+                                        productInventoryList[index].productStatus==5? const Text('Installed'):
+                                        const Text('Active'),
+                                      ],
+                                    ),
+                                )
+                            ),
                             DataCell(Center(child: widget.userName==productInventoryList[index].latestBuyer? Text('-'):Text(productInventoryList[index].latestBuyer))),
                             const DataCell(Center(child: Text('25-09-2023'))),
                             userType == 1 ? DataCell(Center(child: IconButton(tooltip:'Edit product', onPressed: () {
@@ -787,7 +827,7 @@ class ProductInventoryState extends State<ProductInventory> {
                       const SizedBox(height: 5,),
                       DropdownMenu<ProductStockModel>(
                         controller: dropdownCatList,
-                        hintText: 'Category',
+                        hintText: 'IMEi Number',
                         width: 270,
                         //label: const Text('Category'),
                         dropdownMenuEntries: ddCategoryList,
@@ -798,8 +838,8 @@ class ProductInventoryState extends State<ProductInventory> {
                         ),
                         onSelected: (ProductStockModel? item) {
                           setState(() {
-                            txtEdControllerMdlName.text = item!.model;
-                            txtEdControllerIMEi.text = item.imeiNo;
+                            txtEdControllerMdlName.text = item!.categoryName;
+                            txtEdControllerIMEi.text = item.model;
                           });
                         },
                       ),
@@ -807,14 +847,14 @@ class ProductInventoryState extends State<ProductInventory> {
                         enabled: false,
                         controller: txtEdControllerMdlName,
                         decoration: const InputDecoration(
-                          labelText: 'Model',
+                          labelText: 'Category',
                         ),
                       ),
                       TextField(
                         enabled: false,
                         controller: txtEdControllerIMEi,
                         decoration: const InputDecoration(
-                          labelText: 'IMEI No',
+                          labelText: 'Model',
                         ),
                       ),
                     ],

@@ -44,8 +44,7 @@ class _DataAcquisitionMainState extends State<DataAcquisitionMain> with SingleTi
       return LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             final isScreenSizeLarge = constraints.maxWidth >= 565;
-
-            final List<IconData> tabIcons= [Icons.leak_add, Icons.invert_colors, Icons.terrain];
+            final List<IconData> tabIcons= [Icons.leak_add, Icons.electric_meter_outlined, Icons.terrain];
             return DefaultTabController(
               length: dataProvider.dataModel!.data.length,
               child: Scaffold(

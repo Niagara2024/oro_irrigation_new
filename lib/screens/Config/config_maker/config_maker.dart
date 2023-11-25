@@ -86,7 +86,7 @@ class _ConfigMakerScreenState extends State<ConfigMakerScreen> with SingleTicker
                 children: [
                   Container(
                     width: double.infinity,
-                    color: Color(0XFFF3F3F3),
+                    //color: Color(0XFFF3F3F3),
                     child: TabBar(
                         controller: controller,
                         indicatorColor: myTheme.primaryColor,
@@ -125,7 +125,7 @@ class _ConfigMakerScreenState extends State<ConfigMakerScreen> with SingleTicker
           ),
         );
       }else{
-        return const ConfigMakerForWeb();
+        return  ConfigMakerForWeb(userID: widget.userID, customerID: widget.customerID, siteId: widget.siteID,);
       }
     },);
   }

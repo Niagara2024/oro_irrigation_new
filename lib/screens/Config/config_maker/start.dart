@@ -21,7 +21,7 @@ class _StartPageConfigMakerState extends State<StartPageConfigMaker> {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      color: Color(0xFFF3F3F3),
+      //color: Color(0xFFF3F3F3),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

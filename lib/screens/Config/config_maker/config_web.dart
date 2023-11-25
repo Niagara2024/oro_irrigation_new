@@ -19,7 +19,8 @@ import 'mapping_of_inputs.dart';
 import 'mapping_of_outputs.dart';
 
 class ConfigMakerForWeb extends StatefulWidget {
-  const ConfigMakerForWeb({super.key});
+  const ConfigMakerForWeb({super.key, required this.userID, required this.customerID, required this.siteId});
+  final int userID, siteId, customerID;
 
   @override
   State<ConfigMakerForWeb> createState() => _ConfigMakerForWebState();
@@ -64,7 +65,7 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
         return  MappingOfInputsTable(configPvd: configPvd,);
       }
       case (11):{
-        return  FinishPageConfigMaker();
+        return  FinishPageConfigMaker(userID: widget.userID, customerID: widget.customerID, siteId: widget.siteId,);
       }
       default : {
         Container();
@@ -79,12 +80,13 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
       return Scaffold(
         backgroundColor: Colors.white,
         floatingActionButton: SizedBox(
-          width: 150,
+          width: 100,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              FloatingActionButton(
+              FloatingActionButton.small(
                 heroTag: 'btn 1',
+                tooltip: 'Previous',
                 backgroundColor: selectedTab == 0 ? Colors.white54 : Colors.white,
                 onPressed: selectedTab == 0
                     ? null
@@ -95,17 +97,13 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
                     });
                   }
                 },
-                child: Text(
-                  'Back',
-                  style: TextStyle(
-                    color: selectedTab == 0 ? Colors.white : Colors.black,
-                  ),
-                ),
+                child: const Icon(Icons.arrow_back_outlined),
               ),
-              FloatingActionButton(
+              FloatingActionButton.small(
                 heroTag: 'btn 2',
+                tooltip: 'Next',
                 // backgroundColor: selectedTab == 11 ? Colors.white54 : myTheme1.colorScheme.primary,
-                backgroundColor: selectedTab == 11 ? Colors.white54 : Colors.blueGrey,
+                backgroundColor: selectedTab == 11 ? Colors.white54 : Colors.white,
                 onPressed: selectedTab == 11
                     ? null
                     : () {
@@ -115,7 +113,7 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
                     });
                   }
                 },
-                child: Text('Next'),
+                child: const Icon(Icons.arrow_forward_outlined),
               ),
             ],
           ),
@@ -127,7 +125,7 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
             child: Row(
               children: [
                 SizedBox(
-                  width: constrainst.maxWidth < 1200 ? 250 : 300,
+                  width: 220,
                   height: double.infinity,
                   child: SingleChildScrollView(
                     child: Column(
@@ -160,7 +158,7 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
                                 child: Container(
                                   height: 45,
                                   decoration: BoxDecoration(
-                                    color: hoverTab == i ||selectedTab == i ? Colors.blueGrey : null,
+                                    color: hoverTab == i ||selectedTab == i ? myTheme.primaryColor.withOpacity(0.5) : null,
                                   ),
                                   // padding: EdgeInsets.all(10),
                                   margin: EdgeInsets.symmetric(vertical: 2),

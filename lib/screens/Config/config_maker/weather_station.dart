@@ -15,7 +15,7 @@ class _WeatherStationConfigState extends State<WeatherStationConfig> {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       return Container(
-        color: Color(0xFFF3F3F3),
+        //color: Color(0xFFF3F3F3),
         child: Column(
           children: [
             SizedBox(height: 5,),
@@ -34,7 +34,7 @@ class _WeatherStationConfigState extends State<WeatherStationConfig> {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                    color: Color(0XFFF3F3F3),
+                    //color: Color(0XFFF3F3F3),
                     borderRadius: BorderRadius.circular(10)
                 ),
                 width: double.infinity,

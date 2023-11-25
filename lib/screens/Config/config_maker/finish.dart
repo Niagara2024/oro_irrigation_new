@@ -9,7 +9,8 @@ import '../../../state_management/config_maker_provider.dart';
 
 
 class FinishPageConfigMaker extends StatefulWidget {
-  const FinishPageConfigMaker({super.key});
+  const FinishPageConfigMaker({super.key, required this.userID, required this.customerID, required this.siteId});
+  final int userID, siteId, customerID;
 
   @override
   State<FinishPageConfigMaker> createState() => _FinishPageConfigMakerState();
@@ -19,10 +20,9 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
   @override
   Widget build(BuildContext context) {
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
-    // var mqttPvd = Provider.of<MqttProvider>(context, listen: true);
 
     return Container(
-      color: Color(0xFFF3F3F3),
+      //color: Color(0xFFF3F3F3),
       child: Center(
         child: ElevatedButton(
           onPressed: ()async{
@@ -30,9 +30,9 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
             configPvd.sendData();
             HttpService service = HttpService();
               var response = await service.postRequest('createUserConfigMaker', {
-                "userId" : 21,
-                "createUser" : 21,
-                "controllerId" : 10,
+                "userId" : widget.customerID,
+                "createUser" : widget.userID,
+                "controllerId" : widget.siteId,
                 "productLimit" : {
                   'totalWaterSource' : configPvd.totalWaterSource,
                   'totalWaterMeter' : configPvd.totalWaterMeter,

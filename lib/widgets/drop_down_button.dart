@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../state_management/config_maker_provider.dart';
-import '../state_management/constant_provider.dart';
-
+import '../../../state_management/config_maker_provider.dart';
+import '../../../state_management/constant_provider.dart';
 
 
 class MyDropDown extends StatefulWidget {
@@ -29,7 +28,6 @@ class _MyDropDownState extends State<MyDropDown> {
 
   @override
   Widget build(BuildContext context) {
-    //var deviceListPvd = Provider.of<DeviceListProvider>(context, listen: true);
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
     var constantPvd = Provider.of<ConstantProvider>(context,listen: true);
     return Container(
@@ -37,7 +35,7 @@ class _MyDropDownState extends State<MyDropDown> {
       child: Center(
         child: DropdownButton(
           focusColor: Colors.transparent,
-        style: TextStyle(fontWeight: FontWeight.normal),
+        //style: ioText,
           value: widget.initialValue,
           underline: Container(),
           items: widget.itemList.map((dynamic items) {
@@ -51,8 +49,12 @@ class _MyDropDownState extends State<MyDropDown> {
           // After selecting the desired option,it will
           // change button value to selected value
           onChanged: (dynamic newValue) {
-             if(widget.pvdName == 'editWaterSource_sp'){
+            if(widget.pvdName == 'editWaterSource_sp'){
               configPvd.sourcePumpFunctionality(['editWaterSource_sp',widget.index,newValue!]);
+            }else if(widget.pvdName == 'editRelayCount_sp'){
+              configPvd.sourcePumpFunctionality(['editRelayCount_sp',widget.index,newValue!]);
+            }else if(widget.pvdName == 'editRelayCount_ip'){
+              configPvd.irrigationPumpFunctionality(['editRelayCount_ip',widget.index,newValue!]);
             }else if(widget.pvdName == 'editCentralDosing'){
               configPvd.irrigationLinesFunctionality(['editCentralDosing',widget.index,newValue!]);
             }else if(widget.pvdName == 'editCentralFiltration'){
@@ -82,75 +84,38 @@ class _MyDropDownState extends State<MyDropDown> {
             }else if(widget.pvdName == 'editDropDownValue'){
               print('venky');
               constantPvd.editDropDownValue(newValue!);
-            }
-             else{
+            }else{
               var forWhat = widget.pvdName.split('/');
-              if(forWhat[0] == 'm_o_valve'){
-                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]), int.parse(forWhat[5]),newValue]);
-              }else if(forWhat[0] == 'm_o_main_valve'){
-                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]), int.parse(forWhat[5]),newValue]);
-              }else if(forWhat[0] == 'm_o_injector'){
-                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]), int.parse(forWhat[5]),newValue]);
-              }else if(forWhat[0] == 'm_o_Booster'){
-                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]), int.parse(forWhat[5]),newValue]);
-              }else if(forWhat[0] == 'm_o_filter'){
-                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]), int.parse(forWhat[5]),newValue]);
-              }else if(forWhat[0] == 'm_o_D_valve'){
-                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]),newValue]);
-              }else if(forWhat[0] == 'm_o_CD_injector'){
-                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]),int.parse(forWhat[5]),newValue]);
-              }else if(forWhat[0] == 'm_o_CD_booster'){
-                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]),int.parse(forWhat[5]),newValue]);
-              }else if(forWhat[0] == 'm_o_CD_agitator'){
-                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]),int.parse(forWhat[5]),newValue]);
-              }else if(forWhat[0] == 'm_o_CF_filter'){
-                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]),int.parse(forWhat[5]),newValue]);
-              }else if(forWhat[0] == 'm_o_CF_D_valve'){
-                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]),newValue]);
-              }else if(forWhat[0] == 'm_o_SP'){
-                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]),newValue]);
-              }else if(forWhat[0] == 'm_o_IP'){
-                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]),newValue]);
-              }else if(forWhat[0] == 'm_o_fan'){
-                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), int.parse(forWhat[2]), newValue]);
-              }else if(forWhat[0] == 'm_o_fogger'){
-                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), int.parse(forWhat[2]), newValue]);
-              }else if(forWhat[0] == 'm_o_agitator'){
-                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), int.parse(forWhat[2]), newValue]);
-              }else if(forWhat[0] == 'm_i_pressure_sensor'){
-                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]),newValue]);
-              }else if(forWhat[0] == 'm_i_water_meter'){
-                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]),newValue]);
-              }else if(forWhat[0] == 'm_i_ORO_sense'){
-                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]), int.parse(forWhat[5]),newValue]);
-              }else if(forWhat[0] == 'm_i_dosing_meter'){
-                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]), int.parse(forWhat[5]),newValue]);
-              }else if(forWhat[0] == 'm_i_D_pressure_sensor'){
-                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]),newValue]);
-              }else if(forWhat[0] == 'm_i_D_pressure_sensor_out'){
-                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]),newValue]);
-              }else if(forWhat[0] == 'm_i_CD_dosing_meter'){
-                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]), int.parse(forWhat[5]),newValue]);
-              }else if(forWhat[0] == 'm_i_CF_P_sensor'){
-                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]),newValue]);
-              }else if(forWhat[0] == 'm_i_CF_P_sensor_out'){
-                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]),newValue]);
-              }else if(forWhat[0] == 'm_i_sp_wm'){
-                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]),newValue]);
-              }else if(forWhat[0] == 'm_i_ip_wm'){
-                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], forWhat[3], int.parse(forWhat[4]),newValue]);
-              }else if(forWhat[0] == 'm_i_analog_sensor'){
-                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), int.parse(forWhat[2]), newValue]);
-              }else if(forWhat[0] == 'm_i_contacts'){
-                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), int.parse(forWhat[2]), newValue]);
-              }else if(forWhat[0] == 'm_i_ph_sensor'){
-                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), int.parse(forWhat[2]), newValue]);
-              }else if(forWhat[0] == 'm_i_ec_sensor'){
-                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), int.parse(forWhat[2]), newValue]);
-              }else if(forWhat[0] == 'm_i_moisture_sensor'){
-                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), int.parse(forWhat[2]), newValue]);
+              if(forWhat[0] == 'm_o_line'){
+                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+              }else if(forWhat[0] == 'm_i_line'){
+                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+              }else if(forWhat[0] == 'm_o_localDosing'){
+                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+              }else if(forWhat[0] == 'm_i_localDosing'){
+                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+              }else if(forWhat[0] == 'm_o_localFiltration'){
+                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+              }else if(forWhat[0] == 'm_i_localFiltration'){
+                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+              }else if(forWhat[0] == 'm_o_centralDosing'){
+                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+              }else if(forWhat[0] == 'm_i_centralDosing'){
+                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+              }else if(forWhat[0] == 'm_o_centralFiltration'){
+                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+              }else if(forWhat[0] == 'm_i_centralFiltration'){
+                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+              }else if(forWhat[0] == 'm_o_sourcePump'){
+                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+              }else if(forWhat[0] == 'm_i_sourcePump'){
+                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+              }else if(forWhat[0] == 'm_o_irrigationPump'){
+                configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+              }else if(forWhat[0] == 'm_i_irrigationPump'){
+                configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
               }else if(forWhat[0] == 'fertilizer_injector_mode'){
-                //constantPvd.fertilizerFunctionality([forWhat[0], int.parse(forWhat[1]), int.parse(forWhat[2]),int.parse(forWhat[3]), newValue]);
+                constantPvd.fertilizerFunctionality([forWhat[0], int.parse(forWhat[1]), int.parse(forWhat[2]),int.parse(forWhat[3]), newValue]);
               }
             }
           },

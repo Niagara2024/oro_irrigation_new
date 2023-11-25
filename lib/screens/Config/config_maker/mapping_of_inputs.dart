@@ -24,7 +24,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
     return LayoutBuilder(builder: (context,constrainst){
       var width = constrainst.maxWidth;
       return Container(
-        color: Color(0xFFF3F3F3),
+        //color: Color(0xFFF3F3F3),
         child: Column(
           children: [
             Container(

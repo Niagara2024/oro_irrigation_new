@@ -25,7 +25,7 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraint){
       var width = constraint.maxWidth;
       return Container(
-        color: Color(0xFFF3F3F3),
+        //color: Color(0xFFF3F3F3),
         width: double.infinity,
         height: double.infinity,
         padding: EdgeInsets.all(5.0),

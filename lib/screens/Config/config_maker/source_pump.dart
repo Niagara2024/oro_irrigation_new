@@ -1,8 +1,7 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
-import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../../../state_management/config_maker_provider.dart';
 import '../../../widgets/drop_down_button.dart';
@@ -23,14 +22,14 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraint){
       var width = constraint.maxWidth;
       return Container(
-        color: Color(0xFFF3F3F3),
+        //color: Color(0xFFF3F3F3),
         width: double.infinity,
         height: double.infinity,
-        padding: EdgeInsets.only(left: 5,right: 5),
+        padding: const EdgeInsets.only(left: 5, right: 5),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 5,),
+            //SizedBox(height: 5,),
             configButtons(
                 selectFunction: (value){
                   setState(() {
@@ -63,363 +62,116 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                 multipleSelection: configPvd.sourcePumpSelectAll,
                 addBatchButtonFunction: () {  }
             ),
-            Container(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Source',style: TextStyle(color: Colors.white),),
-                          Text('Pump(${configPvd.totalSourcePump})',style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                        border: Border(
-                          top: BorderSide(width: 1),
-                          bottom: BorderSide(width: 1),
-                          right: BorderSide(width: 1),
-                          left: BorderSide(width: 1),
-                        )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-
-                          )
-                      ),
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Water',style: TextStyle(color: Colors.white),),
-                          Text('Source(6)',style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Water',style: TextStyle(color: Colors.white),),
-                          Text('Meter(${configPvd.totalWaterMeter})',style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('ORO',style: TextStyle(color: Colors.white),),
-                          Text('pump',style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Relay',style: TextStyle(color: Colors.white),),
-                          Text('count',style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Top',style: TextStyle(color: Colors.white),),
-                          Text('tank(high)',style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Top',style: TextStyle(color: Colors.white),),
-                          Text('tank(low)',style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Sump',style: TextStyle(color: Colors.white),),
-                          Text('tank(high)',style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Sump',style: TextStyle(color: Colors.white),),
-                          Text('tank(low)',style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-
-                ],
-              ),
-            ),
             Expanded(
-              child: ListView.builder(
-                controller: scrollController,
-                itemCount: configPvd.sourcePumpUpdated.length,
-                  itemBuilder: (BuildContext context, int index){
-                    return Container(
-                      decoration: BoxDecoration(
-                        border: Border(bottom: BorderSide(width: 1)),
-                        color: Colors.white70,
-                      ),
-                      margin: index == configPvd.sourcePumpUpdated.length - 1 ? EdgeInsets.only(bottom: 60) : null,
-                      // color: index % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50,
-                      width: width-20,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1))
-                              ),
-                              width: double.infinity,
-                              height: 60,
-                              child: Center(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    if(configPvd.sourcePumpSelection == true || configPvd.sourcePumpSelectAll == true)
-                                      Checkbox(
-                                          value: configPvd.sourcePumpUpdated[index]['selection'] == 'select' ? true : false,
-                                          onChanged: (value){
-                                            configPvd.sourcePumpFunctionality(['selectSourcePump',index,value]);
-                                          }),
-                                    Text('${index + 1}'),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Container(
-                                decoration: BoxDecoration(
-                                    border: Border(right: BorderSide(width: 1))
-                                ),
-                              width: double.infinity,
-                              height: 60,
-                              child: MyDropDown(initialValue: configPvd.sourcePumpUpdated[index]['waterSource'], itemList: configPvd.waterSource, pvdName: 'editWaterSource_sp', index: index)
-                            ),
-                          ),
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  border: Border(right: BorderSide(width: 1))
-                              ),
-                              width: double.infinity,
-                              height: 60,
-                              child: (configPvd.totalWaterMeter == 0 && configPvd.sourcePumpUpdated[index]['waterMeter'].isEmpty) ?
-                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
-                              Checkbox(
-                                  value: configPvd.sourcePumpUpdated[index]['waterMeter'].isEmpty ? false : true,
-                                  onChanged: (value){
-                                    configPvd.sourcePumpFunctionality(['editWaterMeter',index,value]);
-                                  }),
-                            ),
-                          ),
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  border: Border(right: BorderSide(width: 1))
-                              ),
-                              width: double.infinity,
-                              height: 60,
-                              child: Checkbox(
-                                  value: configPvd.sourcePumpUpdated[index]['oro_pump'],
-                                  onChanged: (value){
-                                    configPvd.sourcePumpFunctionality(['editOroPump',index,value]);
-                                  }),
-                            ),
-                          ),
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  border: Border(right: BorderSide(width: 1))
-                              ),
-                              width: double.infinity,
-                              height: 60,
-                              child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
-                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
-                              MyDropDown(initialValue: configPvd.sourcePumpUpdated[index]['relayCount'], itemList: ['1','2','3','4'], pvdName: 'editRelayCount_sp', index: index)
-                            ),
-                          ),
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  border: Border(right: BorderSide(width: 1))
-                              ),
-                              width: double.infinity,
-                              height: 60,
-                              child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
-                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
-                              Checkbox(
-                                  value: configPvd.sourcePumpUpdated[index]['TopTankHigh'].isEmpty ? false : true,
-                                  onChanged: (value){
-                                    configPvd.sourcePumpFunctionality(['editTopTankHigh',index,value]);
-                                  }),
-                            ),
-                          ),
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  border: Border(right: BorderSide(width: 1))
-                              ),
-                              width: double.infinity,
-                              height: 60,
-                              child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
-                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
-                              Checkbox(
-                                  value: configPvd.sourcePumpUpdated[index]['TopTankLow'].isEmpty ? false : true,
-                                  onChanged: (value){
-                                    configPvd.sourcePumpFunctionality(['editTopTankLow',index,value]);
-                                  }),
-                            ),
-                          ),
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  border: Border(right: BorderSide(width: 1))
-                              ),
-                              width: double.infinity,
-                              height: 60,
-                              child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
-                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
-                              Checkbox(
-                                  value: configPvd.sourcePumpUpdated[index]['SumpTankHigh'].isEmpty ? false : true,
-                                  onChanged: (value){
-                                    configPvd.sourcePumpFunctionality(['editSumpTankHigh',index,value]);
-                                  }),
-                            ),
-                          ),
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  border: Border(right: BorderSide(width: 1))
-                              ),
-                              width: double.infinity,
-                              height: 60,
-                              child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
-                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
-                              Checkbox(
-                                  value: configPvd.sourcePumpUpdated[index]['SumpTankLow'].isEmpty ? false : true,
-                                  onChanged: (value){
-                                    configPvd.sourcePumpFunctionality(['editSumpTankLow',index,value]);
-                                  }),
-                            ),
-                          ),
-
-                        ],
-                      ),
-                    );
-                  }),
+              child: Padding(
+                padding:  const EdgeInsets.only(right: 5, left: 5, top: 5),
+                child: DataTable2(
+                  columnSpacing: 12,
+                  horizontalMargin: 12,
+                  minWidth: 1100,
+                  dataRowHeight: 40.0,
+                  headingRowHeight: 50,
+                  headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
+                  border: TableBorder.all(color: Colors.grey),
+                  columns: [
+                    DataColumn2(
+                        label: Text('Source pump(${configPvd.totalSourcePump})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
+                        size: ColumnSize.M
+                    ),
+                    const DataColumn2(
+                        label: Text('Water Source(6)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
+                        size: ColumnSize.M
+                    ),
+                    DataColumn2(
+                      label: Text('Water Meter(${configPvd.totalWaterMeter})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
+                      size: ColumnSize.M,
+                    ),
+                    const DataColumn2(
+                      label: Center(child: Text('ORO Pump', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
+                      size: ColumnSize.M,
+                    ),
+                    const DataColumn2(
+                      label: Center(child: Text('Relay Count', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
+                      size: ColumnSize.M,
+                    ),
+                    const DataColumn2(
+                      label: Center(child: Text('Top tank(high)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
+                      size: ColumnSize.M,
+                    ),
+                    const DataColumn2(
+                      label: Center(child: Text('Top tank(low)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
+                      size: ColumnSize.M,
+                    ),
+                    const DataColumn2(
+                      label: Center(child: Text('Sump tank(high)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
+                      size: ColumnSize.M,
+                    ),
+                    const DataColumn2(
+                      label: Center(child: Text('Sump tank(low)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
+                      size: ColumnSize.M,
+                    ),
+                  ],
+                  rows: List<DataRow>.generate(configPvd.sourcePumpUpdated.length, (index) => DataRow(cells: [
+                    DataCell(Center(child: Text('${index + 1}'))),
+                    DataCell(Center(child: MyDropDown(initialValue: configPvd.sourcePumpUpdated[index]['waterSource'], itemList: configPvd.waterSource, pvdName: 'editWaterSource_sp', index: index))),
+                    DataCell((configPvd.totalWaterMeter == 0 && configPvd.sourcePumpUpdated[index]['waterMeter'].isEmpty) ?
+                    const Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                    Center(
+                      child: Checkbox(
+                          value: configPvd.sourcePumpUpdated[index]['waterMeter'].isEmpty ? false : true,
+                          onChanged: (value){
+                            configPvd.sourcePumpFunctionality(['editWaterMeter',index,value]);
+                          }),
+                    )),
+                    DataCell(Center(
+                      child: Checkbox(
+                          value: configPvd.sourcePumpUpdated[index]['oro_pump'],
+                          onChanged: (value){
+                            configPvd.sourcePumpFunctionality(['editOroPump',index,value]);
+                          }),
+                    )),
+                    DataCell(Center(child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
+                    const Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                    Center(child: MyDropDown(initialValue: configPvd.sourcePumpUpdated[index]['relayCount'], itemList: ['1','2','3','4'], pvdName: 'editRelayCount_sp', index: index)))),
+                    DataCell(Center(child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
+                    const Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                    Center(
+                      child: Checkbox(
+                          value: configPvd.sourcePumpUpdated[index]['TopTankHigh'].isEmpty ? false : true,
+                          onChanged: (value){
+                            configPvd.sourcePumpFunctionality(['editTopTankHigh',index,value]);
+                          }),
+                    ))),
+                    DataCell(Center(child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
+                    const Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                    Center(
+                      child: Checkbox(
+                          value: configPvd.sourcePumpUpdated[index]['TopTankLow'].isEmpty ? false : true,
+                          onChanged: (value){
+                            configPvd.sourcePumpFunctionality(['editTopTankLow',index,value]);
+                          }),
+                    ))),
+                    DataCell(Center(child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
+                    const Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                    Center(
+                      child: Checkbox(
+                          value: configPvd.sourcePumpUpdated[index]['SumpTankHigh'].isEmpty ? false : true,
+                          onChanged: (value){
+                            configPvd.sourcePumpFunctionality(['editSumpTankHigh',index,value]);
+                          }),
+                    ))),
+                    DataCell(Center(child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
+                    const Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                    Center(
+                      child: Checkbox(
+                          value: configPvd.sourcePumpUpdated[index]['SumpTankLow'].isEmpty ? false : true,
+                          onChanged: (value){
+                            configPvd.sourcePumpFunctionality(['editSumpTankLow',index,value]);
+                          }),
+                    ))),
+                  ])),
+                ),
+              ),
             ),
           ],
         ),
@@ -428,8 +180,7 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
   }
 }
 
-Widget configButtons(
-    {
+Widget configButtons({
       required Function(bool?) selectFunction,
       required Function(bool?) selectAllFunction,
       required VoidCallback cancelButtonFunction,
@@ -442,7 +193,7 @@ Widget configButtons(
       bool? local
 }){
   return Container(
-    height: 60,
+    height: 50,
     color: Colors.white,
     child: Center(
       child: Row(

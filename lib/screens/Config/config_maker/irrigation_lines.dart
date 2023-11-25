@@ -46,7 +46,7 @@ class _IrrigationLineTableState extends State<IrrigationLineTable> {
   Widget build(BuildContext context) {
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
     return Container(
-      color: Color(0xFFF3F3F3),
+      //color: Color(0xFFF3F3F3),
       child: Column(
         children: [
           Container(

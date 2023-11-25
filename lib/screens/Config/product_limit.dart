@@ -49,6 +49,9 @@ class _ProductLimitsState extends State<ProductLimits> {
 
   @override
   void dispose() {
+    var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
+    configPvd.clearConfig();
+
     for (var c in myControllers) {
       c.dispose();
     }
@@ -283,6 +286,19 @@ class _ProductLimitsState extends State<ProductLimits> {
     }
   }
 
+  Future<void> getConfigData()  async {
+    var configPvd = Provider.of<ConfigMakerProvider>(context, listen: false);
+    HttpService service = HttpService();
+    try{
+      var response = await service.postRequest('getUserConfigMaker', {'userId' : widget.customerID, 'controllerId' : widget.siteID});
+      var jsonData = jsonDecode(response.body);
+      print('jsonData : ${jsonData['data']}');
+      configPvd.fetchAll(jsonData['data']);
+    }catch(e){
+      print(e.toString());
+    }
+  }
+
 
   @override
   Widget build(BuildContext context)
@@ -298,12 +314,19 @@ class _ProductLimitsState extends State<ProductLimits> {
         physics: const ScrollPhysics(),
         currentStep: _currentStep,
         connectorThickness: 2,
+        connectorColor: MaterialStateProperty.resolveWith<Color>(
+              (Set<MaterialState> states) {
+            return Colors.white70;
+          },
+        ),
+        elevation: 5.0,
         onStepTapped: (step) {
           setState(() => _currentStep = step);
         },
         onStepContinue: () {
           if(_currentStep==0){
             updateProductLimit();
+            getConfigData();
           }else if(_currentStep == 2){
             //updateProductLimit();
           }
@@ -311,6 +334,15 @@ class _ProductLimitsState extends State<ProductLimits> {
         },
         onStepCancel: () {
           _currentStep > 0 ? setState(() => _currentStep -= 1) : null;
+        },
+        stepIconBuilder: (context, stepState) {
+          if (stepState == StepState.editing) {
+            return Icon(Icons.edit_outlined, color: myTheme.primaryColor); // Custom icon for completed step
+          } else if (stepState == StepState.complete) {
+            return const Icon(Icons.check, color: Colors.green); // Custom icon for disabled step
+          } else {
+            return const Icon(Icons.block, color: Colors.grey); // Custom icon for other steps
+          }
         },
         controlsBuilder: (BuildContext context, ControlsDetails controlsDetails) {
           return _currentStep==2 ? Container(height: 0) :

@@ -23,7 +23,7 @@ class ProductListWithNode
     dealerId: json['dealerId'],
     productId: json['productId'],
     groupId: json['groupId'],
-    groupName: json['groupName'],
+    groupName: json['groupName']??'',
     categoryName: json['categoryName'],
     deviceId: json['deviceId'],
     productDescription: json['productDescription'],

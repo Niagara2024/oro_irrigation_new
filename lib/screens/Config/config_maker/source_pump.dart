@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-
+import 'package:linked_scroll_controller/linked_scroll_controller.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../../../state_management/config_maker_provider.dart';
-import '../../../constants/theme.dart';
 import '../../../widgets/drop_down_button.dart';
-
 
 class SourcePumpTable extends StatefulWidget {
   const SourcePumpTable({super.key});
@@ -24,106 +23,47 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraint){
       var width = constraint.maxWidth;
       return Container(
-        margin: (MediaQuery.of(context).orientation == Orientation.portrait ||  kIsWeb ) ? null : EdgeInsets.only(right: 70),
+        color: Color(0xFFF3F3F3),
         width: double.infinity,
         height: double.infinity,
-        padding: EdgeInsets.only(left: 10,right: 10),
+        padding: EdgeInsets.only(left: 5,right: 5),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(height: 5,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                if(configPvd.sourcePumpSelection == false)
-                  Row(
-                    children: [
-                      Checkbox(
-                          value: configPvd.sourcePumpSelection,
-                          onChanged: (value){
-                            setState(() {
-                              configPvd.sourcePumpFunctionality(['editsourcePumpSelection',value]);
-                            });
-                          }
-                      ),
-                      Text('Select')
-                    ],
-                  )
-                else
-                  Row(
-                    children: [
-                      IconButton(
-                          onPressed: (){
-                            configPvd.sourcePumpFunctionality(['editsourcePumpSelection',false]);
-                            configPvd.cancelSelection();
-                      }, icon: Icon(Icons.cancel_outlined)),
-                      Text('${configPvd.selection}')
-                    ],
-                  ),
-                if(configPvd.sourcePumpSelection == false)
-                  IconButton(
-                    color: Colors.black,
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.yellow)
-                    ),
-                    highlightColor: myTheme.primaryColor,
-                    onPressed: (){
-                      configPvd.sourcePumpFunctionality(['addSourcePump']);
-                      scrollController.animateTo(
-                        scrollController.position.maxScrollExtent,
-                        duration: Duration(milliseconds: 500), // Adjust the duration as needed
-                        curve: Curves.easeInOut, // Adjust the curve as needed
-                      );
-                    },
-                    icon: Icon(Icons.add),
-                  ),
-                if(configPvd.sourcePumpSelection == false)
-                  IconButton(
-                    splashColor: Colors.grey,
-                    color: Colors.black,
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.yellow)
-                    ),
-                    highlightColor: myTheme.primaryColor,
-                      onPressed: (){
-
-                      },
-                      icon: Icon(Icons.batch_prediction),
-                  ),
-
-                if(configPvd.sourcePumpSelection == true)
-                  IconButton(
-                    color: Colors.black,
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.yellow)
-                    ),
-                    highlightColor: myTheme.primaryColor,
-                    onPressed: (){
-                      configPvd.sourcePumpFunctionality(['deleteSourcePump']);
-                      configPvd.cancelSelection();
-                    },
-                    icon: Icon(Icons.delete_forever),
-                  ),
-                if(configPvd.sourcePumpSelection == true)
-                  Row(
-                  children: [
-                    Checkbox(
-                        value: configPvd.sourcePumpSelectAll,
-                        onChanged: (value){
-                          setState(() {
-                            configPvd.sourcePumpFunctionality(['editsourcePumpSelectAll',value]);
-                          });
-                        }
-                    ),
-                    Text('All')
-                  ],
-                ),
-
-              ],
+            configButtons(
+                selectFunction: (value){
+                  setState(() {
+                    configPvd.sourcePumpFunctionality(['editsourcePumpSelection',value]);
+                  });
+                },
+                selectAllFunction: (value){
+                  setState(() {
+                    configPvd.sourcePumpFunctionality(['editsourcePumpSelectAll',value]);
+                  });
+                },
+                cancelButtonFunction: (){
+                  configPvd.sourcePumpFunctionality(['editsourcePumpSelection',false]);
+                  configPvd.cancelSelection();
+                },
+                addButtonFunction: (){
+                  configPvd.sourcePumpFunctionality(['addSourcePump']);
+                  scrollController.animateTo(
+                    scrollController.position.maxScrollExtent,
+                    duration: Duration(milliseconds: 500), // Adjust the duration as needed
+                    curve: Curves.easeInOut, // Adjust the curve as needed
+                  );
+                },
+                deleteButtonFunction: (){
+                  configPvd.sourcePumpFunctionality(['deleteSourcePump']);
+                  configPvd.cancelSelection();
+                },
+                selectionCount: configPvd.selection,
+                singleSelection: configPvd.sourcePumpSelection,
+                multipleSelection: configPvd.sourcePumpSelectAll,
+                addBatchButtonFunction: () {  }
             ),
-            SizedBox(height: 5,),
             Container(
-              width: width-20,
               child: Row(
                 children: [
                   Expanded(
@@ -138,12 +78,27 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: myTheme.primaryColor
+                          color: Colors.blueGrey,
+                        border: Border(
+                          top: BorderSide(width: 1),
+                          bottom: BorderSide(width: 1),
+                          right: BorderSide(width: 1),
+                          left: BorderSide(width: 1),
+                        )
                       ),
                     ),
                   ),
                   Expanded(
                     child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+
+                          )
+                      ),
                       width: double.infinity,
                       height: 60,
                       child: Column(
@@ -152,9 +107,6 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                           Text('Water',style: TextStyle(color: Colors.white),),
                           Text('Source(6)',style: TextStyle(color: Colors.white)),
                         ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: myTheme.primaryColor
                       ),
                     ),
                   ),
@@ -170,7 +122,138 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: myTheme.primaryColor
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('ORO',style: TextStyle(color: Colors.white),),
+                          Text('pump',style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Relay',style: TextStyle(color: Colors.white),),
+                          Text('count',style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Top',style: TextStyle(color: Colors.white),),
+                          Text('tank(high)',style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Top',style: TextStyle(color: Colors.white),),
+                          Text('tank(low)',style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Sump',style: TextStyle(color: Colors.white),),
+                          Text('tank(high)',style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Sump',style: TextStyle(color: Colors.white),),
+                          Text('tank(low)',style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
                       ),
                     ),
                   ),
@@ -181,16 +264,23 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
             Expanded(
               child: ListView.builder(
                 controller: scrollController,
-                itemCount: configPvd.sourcePump.length,
+                itemCount: configPvd.sourcePumpUpdated.length,
                   itemBuilder: (BuildContext context, int index){
                     return Container(
-                      margin: index == configPvd.sourcePump.length - 1 ? EdgeInsets.only(bottom: 60) : null,
-                      color: index % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50,
+                      decoration: BoxDecoration(
+                        border: Border(bottom: BorderSide(width: 1)),
+                        color: Colors.white70,
+                      ),
+                      margin: index == configPvd.sourcePumpUpdated.length - 1 ? EdgeInsets.only(bottom: 60) : null,
+                      // color: index % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50,
                       width: width-20,
                       child: Row(
                         children: [
                           Expanded(
                             child: Container(
+                              decoration: BoxDecoration(
+                                border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1))
+                              ),
                               width: double.infinity,
                               height: 60,
                               child: Center(
@@ -199,7 +289,7 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                                   children: [
                                     if(configPvd.sourcePumpSelection == true || configPvd.sourcePumpSelectAll == true)
                                       Checkbox(
-                                          value: configPvd.sourcePump[index][2] == 'select' ? true : false,
+                                          value: configPvd.sourcePumpUpdated[index]['selection'] == 'select' ? true : false,
                                           onChanged: (value){
                                             configPvd.sourcePumpFunctionality(['selectSourcePump',index,value]);
                                           }),
@@ -211,21 +301,117 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                           ),
                           Expanded(
                             child: Container(
+                                decoration: BoxDecoration(
+                                    border: Border(right: BorderSide(width: 1))
+                                ),
                               width: double.infinity,
                               height: 60,
-                              child: MyDropDown(initialValue: configPvd.sourcePump[index][0], itemList: configPvd.waterSource, pvdName: 'editWaterSource_sp', index: index)
+                              child: MyDropDown(initialValue: configPvd.sourcePumpUpdated[index]['waterSource'], itemList: configPvd.waterSource, pvdName: 'editWaterSource_sp', index: index)
                             ),
                           ),
                           Expanded(
                             child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1))
+                              ),
                               width: double.infinity,
                               height: 60,
-                              child: (configPvd.totalWaterMeter == 0 && configPvd.sourcePump[index][1] == false) ?
+                              child: (configPvd.totalWaterMeter == 0 && configPvd.sourcePumpUpdated[index]['waterMeter'].isEmpty) ?
                               Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
                               Checkbox(
-                                  value: configPvd.sourcePump[index][1],
+                                  value: configPvd.sourcePumpUpdated[index]['waterMeter'].isEmpty ? false : true,
                                   onChanged: (value){
                                     configPvd.sourcePumpFunctionality(['editWaterMeter',index,value]);
+                                  }),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1))
+                              ),
+                              width: double.infinity,
+                              height: 60,
+                              child: Checkbox(
+                                  value: configPvd.sourcePumpUpdated[index]['oro_pump'],
+                                  onChanged: (value){
+                                    configPvd.sourcePumpFunctionality(['editOroPump',index,value]);
+                                  }),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1))
+                              ),
+                              width: double.infinity,
+                              height: 60,
+                              child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
+                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                              MyDropDown(initialValue: configPvd.sourcePumpUpdated[index]['relayCount'], itemList: ['1','2','3','4'], pvdName: 'editRelayCount_sp', index: index)
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1))
+                              ),
+                              width: double.infinity,
+                              height: 60,
+                              child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
+                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                              Checkbox(
+                                  value: configPvd.sourcePumpUpdated[index]['TopTankHigh'].isEmpty ? false : true,
+                                  onChanged: (value){
+                                    configPvd.sourcePumpFunctionality(['editTopTankHigh',index,value]);
+                                  }),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1))
+                              ),
+                              width: double.infinity,
+                              height: 60,
+                              child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
+                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                              Checkbox(
+                                  value: configPvd.sourcePumpUpdated[index]['TopTankLow'].isEmpty ? false : true,
+                                  onChanged: (value){
+                                    configPvd.sourcePumpFunctionality(['editTopTankLow',index,value]);
+                                  }),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1))
+                              ),
+                              width: double.infinity,
+                              height: 60,
+                              child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
+                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                              Checkbox(
+                                  value: configPvd.sourcePumpUpdated[index]['SumpTankHigh'].isEmpty ? false : true,
+                                  onChanged: (value){
+                                    configPvd.sourcePumpFunctionality(['editSumpTankHigh',index,value]);
+                                  }),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1))
+                              ),
+                              width: double.infinity,
+                              height: 60,
+                              child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
+                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                              Checkbox(
+                                  value: configPvd.sourcePumpUpdated[index]['SumpTankLow'].isEmpty ? false : true,
+                                  onChanged: (value){
+                                    configPvd.sourcePumpFunctionality(['editSumpTankLow',index,value]);
                                   }),
                             ),
                           ),
@@ -240,4 +426,93 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
       );
     });
   }
+}
+
+Widget configButtons(
+    {
+      required Function(bool?) selectFunction,
+      required Function(bool?) selectAllFunction,
+      required VoidCallback cancelButtonFunction,
+      required VoidCallback addButtonFunction,
+      required VoidCallback deleteButtonFunction,
+      required VoidCallback addBatchButtonFunction,
+      required int selectionCount,
+      required bool singleSelection,
+      required bool multipleSelection,
+      bool? local
+}){
+  return Container(
+    height: 60,
+    color: Colors.white,
+    child: Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          if(singleSelection == false)
+            Row(
+              children: [
+                Checkbox(
+                    value: singleSelection,
+                    onChanged: selectFunction,
+                ),
+                Text('Select')
+              ],
+            )
+          else
+            Row(
+              children: [
+                IconButton(
+                    onPressed: cancelButtonFunction, icon: Icon(Icons.cancel_outlined)),
+                Text('${selectionCount}')
+              ],
+            ),
+          if(local == null)
+            if(singleSelection == false)
+              IconButton(
+                color: Colors.black,
+                style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.green)
+                ),
+                highlightColor: myTheme.primaryColor,
+                onPressed: addButtonFunction,
+                icon: Icon(Icons.add,color: Colors.white,),
+              ),
+          if(local == null)
+            if(singleSelection == false)
+              IconButton(
+                splashColor: Colors.grey,
+                color: Colors.black,
+                style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.blueGrey)
+                ),
+                highlightColor: myTheme.primaryColor,
+                onPressed: addBatchButtonFunction,
+                icon: Icon(Icons.batch_prediction,color: Colors.white,),
+              ),
+
+          if(singleSelection == true)
+            IconButton(
+              color: Colors.black,
+              style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.red)
+              ),
+              highlightColor: myTheme.primaryColor,
+              onPressed: deleteButtonFunction,
+              icon: Icon(Icons.delete_forever,color: Colors.white,),
+            ),
+          if(singleSelection == true)
+            Row(
+              children: [
+                Checkbox(
+                    value: multipleSelection,
+                    onChanged: selectAllFunction
+                ),
+                Text('All')
+              ],
+            ),
+
+        ],
+      ),
+    ),
+  );
 }

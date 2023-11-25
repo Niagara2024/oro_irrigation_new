@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/screens/Config/config_maker/source_pump.dart';
 import 'package:provider/provider.dart';
 
 import '../../../state_management/config_maker_provider.dart';
-import '../../../constants/theme.dart';
+import '../../../widgets/text_form_field_for_config_flexible.dart';
 
 
 
@@ -16,84 +18,52 @@ class LocalDosingTable extends StatefulWidget {
 
 class _LocalDosingTableState extends State<LocalDosingTable> {
   ScrollController scrollController = ScrollController();
-  bool selectButton = false;
+
   @override
   Widget build(BuildContext context) {
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraint){
       var width = constraint.maxWidth;
       return Container(
-        margin: (MediaQuery.of(context).orientation == Orientation.portrait ||  kIsWeb ) ? null : EdgeInsets.only(right: 70),
+        color: Color(0xFFF3F3F3),
         width: double.infinity,
         height: double.infinity,
-        padding: EdgeInsets.all(10.0),
+        padding: EdgeInsets.all(5.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                if(configPvd.l_dosingSelection == false)
-                  Row(
-                    children: [
-                      Checkbox(
-                          value: configPvd.l_dosingSelection,
-                          onChanged: (value){
-                            setState(() {
-                              configPvd.localDosingFunctionality(['edit_l_DosingSelection',value]);
-                            });
-                          }
-                      ),
-                      Text('Select')
-                    ],
-                  )
-                else
-                  Row(
-                    children: [
-                      IconButton(
-                          onPressed: (){
-                            configPvd.localDosingFunctionality(['edit_l_DosingSelection',false]);
-                            configPvd.localDosingFunctionality(['edit_l_DosingSelectAll',false]);
-                            configPvd.cancelSelection();
-                          }, icon: Icon(Icons.cancel_outlined)),
-                      Text('${configPvd.selection}')
-                    ],
-                  ),
-                if(configPvd.l_dosingSelection == true)
-                  IconButton(
-                    color: Colors.black,
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.orange)
-                    ),
-                    highlightColor: myTheme.primaryColor,
-                    onPressed: (){
-                      configPvd.localDosingFunctionality(['edit_l_DosingSelection',false]);
-                      configPvd.localDosingFunctionality(['edit_l_DosingSelection',false]);
-                      configPvd.localDosingFunctionality(['deleteLocalDosing']);
-                      configPvd.cancelSelection();
-                    },
-                    icon: Icon(Icons.delete_forever),
-                  ),
-                // if(configPvd.l_dosingSelectAll == true)
-                //   Row(
-                //     children: [
-                //       Checkbox(
-                //           value: configPvd.l_dosingSelectAll,
-                //           onChanged: (value){
-                //             setState(() {
-                //               configPvd.localDosingFunctionality(['edit_l_DosingSelectAll',value]);
-                //             });
-                //           }
-                //       ),
-                //       Text('All')
-                //     ],
-                //   ),
+            configButtons(
+              local: true,
+              selectFunction: (value){
+                setState(() {
+                  configPvd.localDosingFunctionality(['edit_l_DosingSelection',value]);
+                });
+              },
+              selectAllFunction: (value){
+                setState(() {
+                  configPvd.localDosingFunctionality(['edit_l_DosingSelectAll',value]);
+                });
+              },
+              cancelButtonFunction: (){
+                configPvd.localDosingFunctionality(['edit_l_DosingSelectAll',false]);
+                configPvd.localDosingFunctionality(['edit_l_DosingSelection',false]);
+                configPvd.cancelSelection();
+              },
+              addBatchButtonFunction: (){
 
-              ],
+              },
+              addButtonFunction: (){
+              },
+              deleteButtonFunction: (){
+                configPvd.localDosingFunctionality(['edit_l_DosingSelection',false]);
+                configPvd.localDosingFunctionality(['deleteLocalDosing']);
+                configPvd.cancelSelection();
+              },
+              selectionCount: configPvd.selection,
+              singleSelection: configPvd.l_dosingSelection,
+              multipleSelection: configPvd.l_dosingSelectAll,
             ),
-            SizedBox(height: 5,),
             Container(
-              width: width-20,
               child: Row(
                 children: [
                   Expanded(
@@ -103,11 +73,82 @@ class _LocalDosingTableState extends State<LocalDosingTable> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Line',style: TextStyle(color: Colors.white),),
+                          Text('#',style: TextStyle(color: Colors.white),),
+                          // Text('(${configPvd.totalCentralDosing})',style: TextStyle(color: Colors.white),),
                         ],
                       ),
                       decoration: BoxDecoration(
-                        color: myTheme.primaryColor,
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                            left: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
+
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Booster',style: TextStyle(color: Colors.white),),
+                          Text('(${configPvd.totalBooster})',style: TextStyle(color: Colors.white),),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Ec',style: TextStyle(color: Colors.white),),
+                          Text('(${configPvd.totalEcSensor})',style: TextStyle(color: Colors.white),),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Ph',style: TextStyle(color: Colors.white),),
+                          Text('(${configPvd.totalPhSensor})',style: TextStyle(color: Colors.white),),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
                       ),
                     ),
                   ),
@@ -123,7 +164,12 @@ class _LocalDosingTableState extends State<LocalDosingTable> {
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: myTheme.primaryColor
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
                       ),
                     ),
                   ),
@@ -139,7 +185,12 @@ class _LocalDosingTableState extends State<LocalDosingTable> {
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: myTheme.primaryColor
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
                       ),
                     ),
                   ),
@@ -150,15 +201,21 @@ class _LocalDosingTableState extends State<LocalDosingTable> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Booster',style: TextStyle(color: Colors.white),),
-                          Text('(${configPvd.totalBooster})',style: TextStyle(color: Colors.white),),
+                          Text('Which',style: TextStyle(color: Colors.white),),
+                          Text('Bp',style: TextStyle(color: Colors.white)),
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: myTheme.primaryColor
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
                       ),
                     ),
                   ),
+
 
                 ],
               ),
@@ -166,20 +223,22 @@ class _LocalDosingTableState extends State<LocalDosingTable> {
             Expanded(
               child: ListView.builder(
                   controller: scrollController,
-                  itemCount: configPvd.localDosing.length,
+                  itemCount: configPvd.localDosingUpdated.length,
                   itemBuilder: (BuildContext context, int index){
                     return Container(
                       decoration: BoxDecoration(
-                          color: myTheme.primaryColor,
-                          border: Border(bottom: BorderSide(width: 0.5,color: Colors.white))
+                          color: index % 2 == 0 ? Colors.white : Color(0XFFF3F3F3),
+                          border: Border(bottom: BorderSide(width: 1))
                       ),
-                      margin: index == configPvd.localDosing.length - 1 ? EdgeInsets.only(bottom: 60) : null,
-
-                      width: width-20,
+                      margin: index == configPvd.localDosingUpdated.length - 1 ? EdgeInsets.only(bottom: 60) : null,
                       child: Row(
                         children: [
                           Expanded(
                             child: Container(
+                              decoration: BoxDecoration(
+                                border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1)),
+                              ),
+                              height: (configPvd.localDosingUpdated[index]['injector'].length) * 60,
                               width: double.infinity,
                               child: Center(
                                 child: Row(
@@ -189,11 +248,11 @@ class _LocalDosingTableState extends State<LocalDosingTable> {
                                       Checkbox(
                                           fillColor: MaterialStateProperty.all(Colors.white),
                                           checkColor: myTheme.primaryColor,
-                                          value: configPvd.localDosing[index][configPvd.localDosing[index].length - 1][0] == 'select' ? true : false,
+                                          value: configPvd.localDosingUpdated[index]['selection'] == 'select' ? true : false,
                                           onChanged: (value){
                                             configPvd.localDosingFunctionality(['selectLocalDosing',index]);
                                           }),
-                                    Text('${configPvd.localDosing[index][configPvd.localDosing[index].length - 1][1]}',style: TextStyle(color: Colors.white),),
+                                    Text('${configPvd.localDosingUpdated[index]['line']}',style: TextStyle(color: Colors.black),),
                                   ],
                                 ),
                               ),
@@ -201,14 +260,81 @@ class _LocalDosingTableState extends State<LocalDosingTable> {
                           ),
                           Expanded(
                             child: Container(
-                                color: index % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50,
+                                decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1)),
+                                ),
+                                height: (configPvd.localDosingUpdated[index]['injector'].length) * 60,
+                                width: double.infinity,
+                                child : configPvd.totalBooster == 0 && configPvd.localDosingUpdated[index]['boosterPump'] == '' ?
+                                Container(
+                                  padding: EdgeInsets.all(5),
+                                  width: 80,
+                                  height: 60,
+                                  child: Center(
+                                    child: Text('N/A',style: TextStyle(fontSize: 12)),
+                                  ),
+                                ) : Center(
+                                  child: TextFieldForFlexibleConfig(index: index, initialValue: '${configPvd.localDosingUpdated[index]['boosterPump']}', config: configPvd, purpose: 'localDosingFunctionality/editBoosterPump',),
+                                )
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1)),
+                                ),
+                                height: (configPvd.localDosingUpdated[index]['injector'].length) * 60,
+                                width: double.infinity,
+                                child : configPvd.totalEcSensor == 0 && configPvd.localDosingUpdated[index]['ec'] == '' ?
+                                Container(
+                                  padding: EdgeInsets.all(5),
+                                  width: 80,
+                                  height: 60,
+                                  child: Center(
+                                    child: Text('N/A',style: TextStyle(fontSize: 12)),
+                                  ),
+                                ) : Center(
+                                    child: TextFieldForFlexibleConfig(index: index, initialValue: '${configPvd.localDosingUpdated[index]['ec']}', config: configPvd, purpose: 'localDosingFunctionality/editEcSensor',)
+                                )
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1)),
+                                ),
+                                height: (configPvd.localDosingUpdated[index]['injector'].length) * 60,
+                                width: double.infinity,
+                                child : configPvd.totalPhSensor == 0 && configPvd.localDosingUpdated[index]['ph'] == '' ?
+                                Container(
+                                  padding: EdgeInsets.all(5),
+                                  width: 80,
+                                  height: 60,
+                                  child: Center(
+                                    child: Text('N/A',style: TextStyle(fontSize: 12)),
+                                  ),
+                                ) : Center(
+                                    child: TextFieldForFlexibleConfig(index: index, initialValue: '${configPvd.localDosingUpdated[index]['ph']}', config: configPvd, purpose: 'localDosingFunctionality/editPhSensor',)
+                                )
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                                decoration: BoxDecoration(
+                                    border: Border(right: BorderSide(width: 1))
+                                ),
                                 width: double.infinity,
                                 child: Column(
                                   children: [
-                                    for(var i = 0; i< configPvd.localDosing[index].length - 1;i ++)
+                                    for(var i = 0; i< configPvd.localDosingUpdated[index]['injector'].length;i ++)
                                       Container(
-                                        child: Center(child: Text('${configPvd.localDosing[index][i][0]}')),
+                                        child: Center(child: Text('${i+1}')),
                                         height: 60,
+                                        decoration:  BoxDecoration(
+                                            border: Border(
+                                                bottom: BorderSide(width: i == configPvd.localDosingUpdated[index]['injector'].length - 1 ? 0 : 1)
+                                            )
+                                        ),
                                       )
                                   ],
                                 )
@@ -216,17 +342,25 @@ class _LocalDosingTableState extends State<LocalDosingTable> {
                           ),
                           Expanded(
                             child: Container(
-                                color: index % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50,
+                                decoration: BoxDecoration(
+                                    border: Border(right: BorderSide(width: 1))
+                                ),
                                 width: double.infinity,
                                 child: Column(
                                   children: [
-                                    for(var i = 0; i< configPvd.localDosing[index].length - 1;i ++)
+                                    for(var i = 0; i< configPvd.localDosingUpdated[index]['injector'].length;i ++)
                                       Container(
+                                        width: double.infinity,
+                                        decoration:  BoxDecoration(
+                                            border: Border(
+                                                bottom: BorderSide(width: i == configPvd.localDosingUpdated[index]['injector'].length - 1 ? 0 : 1)
+                                            )
+                                        ),
                                         height: 60,
-                                        child: (configPvd.totalDosingMeter == 0 && configPvd.localDosing[index][i][1] == false) ?
+                                        child: (configPvd.totalDosingMeter == 0 && configPvd.localDosingUpdated[index]['injector'][i]['dosingMeter'].isEmpty) ?
                                         Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
                                         Checkbox(
-                                            value: configPvd.localDosing[index][i][1],
+                                            value: configPvd.localDosingUpdated[index]['injector'][i]['dosingMeter'].isEmpty ? false : true,
                                             onChanged: (value){
                                               configPvd.localDosingFunctionality(['editDosingMeter',index,i,value]);
                                             }),
@@ -237,25 +371,76 @@ class _LocalDosingTableState extends State<LocalDosingTable> {
                           ),
                           Expanded(
                             child: Container(
-                                color: index % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50,
+                                decoration: BoxDecoration(
+                                    border: Border(right: BorderSide(width: 1))
+                                ),
                                 width: double.infinity,
                                 child: Column(
                                   children: [
-                                    for(var i = 0; i< configPvd.localDosing[index].length - 1;i ++)
+                                    for(var i = 0; i< configPvd.localDosingUpdated[index]['injector'].length;i ++)
                                       Container(
+                                        width: double.infinity,
+                                        decoration:  BoxDecoration(
+                                            border: Border(
+                                                bottom: BorderSide(width: i == configPvd.localDosingUpdated[index]['injector'].length - 1 ? 0 : 1)
+                                            )
+                                        ),
                                         height: 60,
-                                        child: (configPvd.totalBooster == 0 && configPvd.localDosing[index][i][2] == false) ?
-                                        Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
-                                        Checkbox(
-                                            value: configPvd.localDosing[index][i][2],
-                                            onChanged: (value){
-                                              configPvd.localDosingFunctionality(['editBoosterPump',index,i,value]);
-                                            }),
+                                        child: Center(
+                                          child: DropdownButton(
+                                              focusColor: Colors.transparent,
+                                              //style: ioText,
+                                              value: configPvd.localDosingUpdated[index]['injector'][i]['Which_Booster_Pump'],
+                                              underline: Container(),
+                                              items: giveBoosterSelection(configPvd.localDosingUpdated[index]['boosterConnection'].length,configPvd).map((String items) {
+                                                return DropdownMenuItem(
+                                                  value: items,
+                                                  child: Container(
+                                                      child: Text(items,style: TextStyle(fontSize: 11,color: Colors.black),)
+                                                  ),
+                                                );
+                                              }).toList(),
+                                              // After selecting the desired option,it will
+                                              // change button value to selected value
+                                              onChanged: (newValue) {
+                                                configPvd.localDosingFunctionality(['boosterSelectionForInjector',index,i,newValue]);
+                                              }
+                                          ),
+                                        ),
                                       ),
                                   ],
                                 )
                             ),
                           ),
+                          // Expanded(
+                          //   child: Container(
+                          //       decoration: BoxDecoration(
+                          //           border: Border(right: BorderSide(width: 1))
+                          //       ),
+                          //       width: double.infinity,
+                          //       child: Column(
+                          //         children: [
+                          //           for(var i = 0; i< configPvd.centralDosing[index].length - 1;i ++)
+                          //             Container(
+                          //               width: double.infinity,
+                          //               decoration:  BoxDecoration(
+                          //                   border: Border(
+                          //                       bottom: BorderSide(width: i == configPvd.centralDosing[index].length - 2 ? 0 : 1)
+                          //                   )
+                          //               ),
+                          //               height: 60,
+                          //               child: (configPvd.totalBooster == 0 && configPvd.centralDosing[index][i][2] == false) ?
+                          //               Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                          //               Checkbox(
+                          //                   value: configPvd.centralDosing[index][i][2],
+                          //                   onChanged: (value){
+                          //                     configPvd.centralDosingFunctionality(['editBooster',index,i,value]);
+                          //                   }),
+                          //             ),
+                          //         ],
+                          //       )
+                          //   ),
+                          // ),
                         ],
                       ),
                     );
@@ -266,215 +451,12 @@ class _LocalDosingTableState extends State<LocalDosingTable> {
       );
     });
   }
-  // Widget build(BuildContext context) {
-  //   var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
-  //   return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraint){
-  //     var width = constraint.maxWidth;
-  //     return Container(
-  //       margin: MediaQuery.of(context).orientation == Orientation.portrait ? null : EdgeInsets.only(right: 70),
-  //       width: double.infinity,
-  //       height: double.infinity,
-  //       padding: EdgeInsets.all(10.0),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.center,
-  //         children: [
-  //           Row(
-  //             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  //             children: [
-  //               if(configPvd.l_dosingSelection == false)
-  //                 Row(
-  //                   children: [
-  //                     Checkbox(
-  //                         value: configPvd.l_dosingSelection,
-  //                         onChanged: (value){
-  //                           setState(() {
-  //                             configPvd.localDosingFunctionality(['edit_l_DosingSelection',value]);
-  //                           });
-  //                         }
-  //                     ),
-  //                     Text('Select')
-  //                   ],
-  //                 )
-  //               else
-  //                 Row(
-  //                   children: [
-  //                     IconButton(
-  //                         onPressed: (){
-  //                           configPvd.localDosingFunctionality(['edit_l_DosingSelection',false]);
-  //                           configPvd.localDosingFunctionality(['edit_l_DosingSelectAll',false]);
-  //                           configPvd.cancelSelection();
-  //                         }, icon: Icon(Icons.cancel_outlined)),
-  //                     Text('${configPvd.selection}')
-  //                   ],
-  //                 ),
-  //               if(configPvd.l_dosingSelection == true)
-  //                 IconButton(
-  //                   color: Colors.black,
-  //                   style: ButtonStyle(
-  //                       backgroundColor: MaterialStateProperty.all(liteYellow)
-  //                   ),
-  //                   highlightColor: myTheme.primaryColor,
-  //                   onPressed: (){
-  //                     configPvd.localDosingFunctionality(['edit_l_DosingSelection',false]);
-  //                     configPvd.localDosingFunctionality(['edit_l_DosingSelection',false]);
-  //                     configPvd.localDosingFunctionality(['deleteLocalDosing']);
-  //                     configPvd.cancelSelection();
-  //                   },
-  //                   icon: Icon(Icons.delete_forever),
-  //                 ),
-  //               if(configPvd.l_dosingSelectAll == true)
-  //                 Row(
-  //                   children: [
-  //                     Checkbox(
-  //                         value: configPvd.l_dosingSelectAll,
-  //                         onChanged: (value){
-  //                           setState(() {
-  //                             configPvd.localDosingFunctionality(['edit_l_DosingSelectAll',value]);
-  //                           });
-  //                         }
-  //                     ),
-  //                     Text('All')
-  //                   ],
-  //                 ),
-  //
-  //             ],
-  //           ),
-  //           Container(
-  //             width: width-20,
-  //             child: Row(
-  //               children: [
-  //                 Expanded(
-  //                   child: Container(
-  //                     width: double.infinity,
-  //                     height: 60,
-  //                     child: Center(
-  //                       child: Text('#',style: TextStyle(color: Colors.white),),
-  //                     ),
-  //                     decoration: BoxDecoration(
-  //                         color: myTheme.primaryColor
-  //                     ),
-  //                   ),
-  //                 ),
-  //                 Expanded(
-  //                   child: Container(
-  //                     width: double.infinity,
-  //                     height: 60,
-  //                     child: Column(
-  //                       children: [
-  //                         Text('Injector',style: TextStyle(color: Colors.white),),
-  //                         Text('(${configPvd.totalInjector})',style: TextStyle(color: Colors.white),),
-  //                       ],
-  //                     ),
-  //                     decoration: BoxDecoration(
-  //                         color: myTheme.primaryColor
-  //                     ),
-  //                   ),
-  //                 ),
-  //                 Expanded(
-  //                   child: Container(
-  //                     width: double.infinity,
-  //                     height: 60,
-  //                     child: Column(
-  //                       mainAxisAlignment: MainAxisAlignment.center,
-  //                       children: [
-  //                         Text('Dosing',style: TextStyle(color: Colors.white),),
-  //                         Text('Meter(${configPvd.totalDosingMeter})',style: TextStyle(color: Colors.white),),
-  //                       ],
-  //                     ),
-  //                     decoration: BoxDecoration(
-  //                         color: myTheme.primaryColor
-  //                     ),
-  //                   ),
-  //                 ),
-  //                 Expanded(
-  //                   child: Container(
-  //                     width: double.infinity,
-  //                     height: 60,
-  //                     child: Column(
-  //                       mainAxisAlignment: MainAxisAlignment.center,
-  //                       children: [
-  //                         Text('Booster',style: TextStyle(color: Colors.white),),
-  //                         Text('Pump(${configPvd.totalBooster})',style: TextStyle(color: Colors.white),),
-  //                       ],
-  //                     ),
-  //                     decoration: BoxDecoration(
-  //                         color: myTheme.primaryColor
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //           Expanded(
-  //             child: ListView.builder(
-  //               controller: scrollController,
-  //                 itemCount: configPvd.localDosing.length,
-  //                 itemBuilder: (BuildContext context, int index){
-  //                   return Container(
-  //                     margin: index == configPvd.localDosing.length - 1 ? EdgeInsets.only(bottom: 60) : null,
-  //                     color: index % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50,
-  //                     width: width-20,
-  //                     child: Row(
-  //                       children: [
-  //                         Expanded(
-  //                           child: Container(
-  //                             width: double.infinity,
-  //                             height: 60,
-  //                             child: Center(
-  //                               child: Row(
-  //                                 mainAxisAlignment: MainAxisAlignment.center,
-  //                                 children: [
-  //                                   if(configPvd.l_dosingSelection == true)
-  //                                     Checkbox(
-  //                                         value: configPvd.localDosing[index][4] == 'select' ? true : false,
-  //                                         onChanged: (value){
-  //                                           configPvd.localDosingFunctionality(['selectLocalDosing',index,value]);
-  //                                         }),
-  //                                   Text('${configPvd.localDosing[index][0]}'),
-  //                                 ],
-  //                               ),
-  //                             ),
-  //                           ),
-  //                         ),
-  //                         Expanded(
-  //                           child: Container(
-  //                             width: double.infinity,
-  //                             height: 60,
-  //                             child: Center(
-  //                               child: Text('${configPvd.localDosing[index][1]}'),
-  //                             ),
-  //                           ),
-  //                         ),
-  //                         Expanded(
-  //                           child: Container(
-  //                             width: double.infinity,
-  //                             height: 60,
-  //                             child: Checkbox(
-  //                                 value: configPvd.localDosing[index][2],
-  //                                 onChanged: (value){
-  //                                   configPvd.localDosingFunctionality(['editDosingMeter',index,value]);
-  //                                 }),
-  //                           ),
-  //                         ),
-  //                         Expanded(
-  //                           child: Container(
-  //                             width: double.infinity,
-  //                             height: 60,
-  //                             child: Checkbox(
-  //                                 value: configPvd.localDosing[index][3],
-  //                                 onChanged: (value){
-  //                                   configPvd.localDosingFunctionality(['editBoosterPump',index,value]);
-  //                                 }),
-  //                           ),
-  //                         ),
-  //                       ],
-  //                     ),
-  //                   );
-  //                 }),
-  //           ),
-  //         ],
-  //       ),
-  //     );
-  //   });
-  // }
+
+  List<String> giveBoosterSelection(int count,ConfigMakerProvider configPvd){
+    var list = ['-'];
+    for(var i = 0; i< count;i++){
+      list.add('BP ${i+1}');
+    }
+    return list;
+  }
 }

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:oro_irrigation_new/screens/Config/config_maker/source_pump.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../../../state_management/config_maker_provider.dart';
-import '../../../constants/theme.dart';
+import '../../../widgets/drop_down_button.dart';
 
 
 
@@ -24,105 +25,47 @@ class _IrrigationPumpTableState extends State<IrrigationPumpTable> {
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraint){
       var width = constraint.maxWidth;
       return Container(
-        margin: (MediaQuery.of(context).orientation == Orientation.portrait ||  kIsWeb ) ? null : EdgeInsets.only(right: 70),
+        color: Color(0xFFF3F3F3),
         width: double.infinity,
         height: double.infinity,
-        padding: EdgeInsets.all(10.0),
+        padding: EdgeInsets.symmetric(horizontal: 5),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                if(configPvd.irrigationPumpSelection == false)
-                  Row(
-                    children: [
-                      Checkbox(
-                          value: configPvd.irrigationPumpSelection,
-                          onChanged: (value){
-                            setState(() {
-                              configPvd.irrigationPumpFunctionality(['editIrrigationPumpSelection',value]);
-                            });
-                          }
-                      ),
-                      Text('Select')
-                    ],
-                  )
-                else
-                  Row(
-                    children: [
-                      IconButton(
-                          onPressed: (){
-                            configPvd.irrigationPumpFunctionality(['editIrrigationPumpSelection',false]);
-                            configPvd.cancelSelection();
-                          }, icon: Icon(Icons.cancel_outlined)),
-                      Text('${configPvd.selection}')
-                    ],
-                  ),
-                if(configPvd.irrigationPumpSelection == false)
-                  IconButton(
-                    color: Colors.black,
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.amber)
-                    ),
-                    highlightColor: myTheme.primaryColor,
-                    onPressed: (){
-                      configPvd.irrigationPumpFunctionality(['addIrrigationPump']);
-                      scrollController.animateTo(
-                        scrollController.position.maxScrollExtent,
-                        duration: Duration(milliseconds: 500), // Adjust the duration as needed
-                        curve: Curves.easeInOut, // Adjust the curve as needed
-                      );
-                    },
-                    icon: Icon(Icons.add),
-                  ),
-                if(configPvd.irrigationPumpSelection == false)
-                  IconButton(
-                    splashColor: Colors.grey,
-                    color: Colors.black,
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.amber)
-                    ),
-                    highlightColor: myTheme.primaryColor,
-                    onPressed: (){
-
-                    },
-                    icon: Icon(Icons.batch_prediction),
-                  ),
-
-                if(configPvd.irrigationPumpSelection == true)
-                  IconButton(
-                    color: Colors.black,
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.amber)
-                    ),
-                    highlightColor: myTheme.primaryColor,
-                    onPressed: (){
-                      configPvd.irrigationPumpFunctionality(['deleteIrrigationPump']);
-                      configPvd.cancelSelection();
-                    },
-                    icon: Icon(Icons.delete_forever),
-                  ),
-                if(configPvd.irrigationPumpSelection == true)
-                  Row(
-                    children: [
-                      Checkbox(
-                          value: configPvd.irrigationPumpSelectAll,
-                          onChanged: (value){
-                            setState(() {
-                              configPvd.irrigationPumpFunctionality(['editIrrigationPumpSelectAll',value]);
-                            });
-                          }
-                      ),
-                      Text('All')
-                    ],
-                  ),
-
-              ],
-            ),
             SizedBox(height: 5,),
+            configButtons(
+                selectFunction: (value){
+                  setState(() {
+                    configPvd.irrigationPumpFunctionality(['editIrrigationPumpSelection',value]);
+                  });
+                },
+                selectAllFunction: (value){
+                  setState(() {
+                    configPvd.irrigationPumpFunctionality(['editIrrigationPumpSelectAll',value]);
+                  });
+                },
+                cancelButtonFunction: (){
+                  configPvd.irrigationPumpFunctionality(['editIrrigationPumpSelection',false]);
+                  configPvd.cancelSelection();
+                },
+                addButtonFunction: (){
+                  configPvd.irrigationPumpFunctionality(['addIrrigationPump']);
+                  scrollController.animateTo(
+                    scrollController.position.maxScrollExtent,
+                    duration: Duration(milliseconds: 500), // Adjust the duration as needed
+                    curve: Curves.easeInOut, // Adjust the curve as needed
+                  );
+                },
+                deleteButtonFunction: (){
+                  configPvd.irrigationPumpFunctionality(['deleteIrrigationPump']);
+                  configPvd.cancelSelection();
+                },
+                addBatchButtonFunction: () {  },
+                selectionCount: configPvd.selection,
+                singleSelection: configPvd.irrigationPumpSelection,
+                multipleSelection: configPvd.irrigationPumpSelectAll
+            ),
             Container(
-              width: width-20,
               child: Row(
                 children: [
                   Expanded(
@@ -137,7 +80,13 @@ class _IrrigationPumpTableState extends State<IrrigationPumpTable> {
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: myTheme.primaryColor
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                            left: BorderSide(width: 1),
+                          )
                       ),
                     ),
                   ),
@@ -153,7 +102,138 @@ class _IrrigationPumpTableState extends State<IrrigationPumpTable> {
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: myTheme.primaryColor
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('ORO',style: TextStyle(color: Colors.white),),
+                          Text('pump',style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Relay',style: TextStyle(color: Colors.white),),
+                          Text('count',style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Top',style: TextStyle(color: Colors.white),),
+                          Text('tank(high)',style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Top',style: TextStyle(color: Colors.white),),
+                          Text('tank(low)',style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Sump',style: TextStyle(color: Colors.white),),
+                          Text('tank(high)',style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Sump',style: TextStyle(color: Colors.white),),
+                          Text('tank(low)',style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
                       ),
                     ),
                   ),
@@ -163,16 +243,23 @@ class _IrrigationPumpTableState extends State<IrrigationPumpTable> {
             Expanded(
               child: ListView.builder(
                 controller: scrollController,
-                  itemCount: configPvd.irrigationPump.length,
+                  itemCount: configPvd.irrigationPumpUpdated.length,
                   itemBuilder: (BuildContext context, int index){
                     return Container(
-                      margin: index == configPvd.irrigationPump.length - 1 ? EdgeInsets.only(bottom: 60) : null,
-                      color: index % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50,
+                      margin: index == configPvd.irrigationPumpUpdated.length - 1 ? EdgeInsets.only(bottom: 60) : null,
+                      decoration: BoxDecoration(
+                        border: Border(bottom: BorderSide(width: 1)),
+                        color: Colors.white70,
+
+                      ),
                       width: width-20,
                       child: Row(
                         children: [
                           Expanded(
                             child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1))
+                              ),
                               width: double.infinity,
                               height: 60,
                               child: Center(
@@ -181,7 +268,7 @@ class _IrrigationPumpTableState extends State<IrrigationPumpTable> {
                                   children: [
                                     if(configPvd.irrigationPumpSelection == true || configPvd.irrigationPumpSelectAll == true)
                                       Checkbox(
-                                          value: configPvd.irrigationPump[index][1][0] == 'select' ? true : false,
+                                          value: configPvd.irrigationPumpUpdated[index]['selection'] == 'select' ? true : false,
                                           onChanged: (value){
                                             configPvd.irrigationPumpFunctionality(['selectIrrigationPump',index]);
                                           }),
@@ -193,15 +280,108 @@ class _IrrigationPumpTableState extends State<IrrigationPumpTable> {
                           ),
                           Expanded(
                             child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1))
+                              ),
                                 width: double.infinity,
                                 height: 60,
-                                child: (configPvd.totalWaterMeter == 0 && configPvd.irrigationPump[index][0] == false) ?
+                                child: (configPvd.totalWaterMeter == 0 && configPvd.irrigationPumpUpdated[index]['waterMeter'].isEmpty) ?
                                     Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
                                     Checkbox(
-                                    value: configPvd.irrigationPump[index][0],
+                                    value: configPvd.irrigationPumpUpdated[index]['waterMeter'].isEmpty ? false : true,
                                     onChanged: (value){
                                       configPvd.irrigationPumpFunctionality(['editWaterMeter',index,value]);
                                     }),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1))
+                              ),
+                              width: double.infinity,
+                              height: 60,
+                              child: Checkbox(
+                                  value: configPvd.irrigationPumpUpdated[index]['oro_pump'],
+                                  onChanged: (value){
+                                    configPvd.irrigationPumpFunctionality(['editOroPump',index,value]);
+                                  }),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                                decoration: BoxDecoration(
+                                    border: Border(right: BorderSide(width: 1))
+                                ),
+                                width: double.infinity,
+                                height: 60,
+                                child: (configPvd.irrigationPumpUpdated[index]['oro_pump'] == false) ?
+                                Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                MyDropDown(initialValue: configPvd.irrigationPumpUpdated[index]['relayCount'], itemList: ['1','2','3','4'], pvdName: 'editRelayCount_ip', index: index)
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1))
+                              ),
+                              width: double.infinity,
+                              height: 60,
+                              child: (configPvd.irrigationPumpUpdated[index]['oro_pump'] == false) ?
+                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                              Checkbox(
+                                  value: configPvd.irrigationPumpUpdated[index]['TopTankHigh'].isEmpty ? false : true,
+                                  onChanged: (value){
+                                    configPvd.irrigationPumpFunctionality(['editTopTankHigh',index,value]);
+                                  }),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1))
+                              ),
+                              width: double.infinity,
+                              height: 60,
+                              child: (configPvd.irrigationPumpUpdated[index]['oro_pump'] == false) ?
+                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                              Checkbox(
+                                  value: configPvd.irrigationPumpUpdated[index]['TopTankLow'].isEmpty ? false : true,
+                                  onChanged: (value){
+                                    configPvd.irrigationPumpFunctionality(['editTopTankLow',index,value]);
+                                  }),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1))
+                              ),
+                              width: double.infinity,
+                              height: 60,
+                              child: (configPvd.irrigationPumpUpdated[index]['oro_pump'] == false) ?
+                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                              Checkbox(
+                                  value: configPvd.irrigationPumpUpdated[index]['SumpTankHigh'].isEmpty ? false : true,
+                                  onChanged: (value){
+                                    configPvd.irrigationPumpFunctionality(['editSumpTankHigh',index,value]);
+                                  }),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1))
+                              ),
+                              width: double.infinity,
+                              height: 60,
+                              child: (configPvd.irrigationPumpUpdated[index]['oro_pump'] == false) ?
+                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                              Checkbox(
+                                  value: configPvd.irrigationPumpUpdated[index]['SumpTankLow'].isEmpty ? false : true,
+                                  onChanged: (value){
+                                    configPvd.irrigationPumpFunctionality(['editSumpTankLow',index,value]);
+                                  }),
                             ),
                           ),
                         ],

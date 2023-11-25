@@ -20,59 +20,70 @@ class ConfigMakerProvider extends ChangeNotifier{
     ['Finish','',Icons.check_circle],
   ];
   dynamic oldData = {};
-  int totalWaterSource = 0;
-  int totalWaterMeter = 0;
-  int totalSourcePump = 0;
-  int totalIrrigationPump = 0;
-  int totalInjector = 0;
-  int totalDosingMeter = 0;
-  int totalBooster = 0;
-  int totalCentralDosing = 0;
-  int totalFilter = 0;
-  int total_D_s_valve = 0;
-  int total_p_sensor = 0;
-  int totalCentralFiltration = 0;
-  int totalValve = 0;
-  int totalMainValve = 0;
-  int totalIrrigationLine = 0;
-  int totalLocalFiltration = 0;
-  int totalLocalDosing = 0;
+  int totalWaterSource = 6;
+  int totalWaterMeter = 15;
+  int totalSourcePump = 6;
+  int totalIrrigationPump = 10;
+  int totalInjector = 16;
+  int totalDosingMeter = 10;
+  int totalBooster = 10;
+  int totalCentralDosing = 10;
+  int totalFilter = 20;
+  int total_D_s_valve = 4;
+  int total_p_sensor = 7;
+  int totalCentralFiltration = 11;
+  int totalValve = 40;
+  int totalMainValve = 10;
+  int totalIrrigationLine = 100;
+  int totalLocalFiltration = 10;
+  int totalLocalDosing = 10;
   int totalRTU = 0;
   int totalOroSwitch = 0;
   int totalOroSense = 0;
   int totalOroSmartRTU = 0;
-  List<String> i_o_types = ['-','A-I','D-I','P-I','RS485','12C'];
-  List<List<String>> totalAnalogSensor = [];
-  List<List<String>> totalContact = [];
-  List<List<String>> totalAgitator = [];
-  List<List<String>> totalPhSensor = [];
-  List<List<String>> totalEcSensor = [];
-  List<List<String>> totalMoistureSensor = [];
-  List<List<String>> totalFan = [];
-  List<List<String>> totalFogger = [];
-  List<dynamic> rtuForLine = [1,2,3,4,5,6,7];
-  List<dynamic> switchForLine = [1,2,3,4,5,6,7,8,9,10,11];
-  List<dynamic> OroSmartRtuForLine = [1,2,3,4,5];
-  List<dynamic> OroSenseForLine = [1,2,3,4,5,6,7,8,9,10,11,12];
-  List<dynamic> rtuForLine_others = [1,2,3,4,5,6,7];
-  List<dynamic> switchForLine_others = [1,2,3,4,5,6,7,8,9,10,11];
-  List<dynamic> OroSmartRtuForLine_others = [1,2,3,4,5];
-  List<dynamic> OroSenseForLine_others = [1,2,3,4,5,6,7,8,9,10,11,12];
+  int totalOroLevel = 0;
+  int totalOroPump = 0;
+  int totalOroExtend = 0;
+  List<dynamic> i_o_types = ['-','A-I','D-I','P-I','RS485','12C'];
+  List<dynamic> totalAnalogSensor = [];
+  List<dynamic> totalContact = [];
+  List<dynamic> totalAgitator = [];
+  int totalPhSensor = 0;
+  int totalEcSensor = 0;
+  int totalMoistureSensor = 0;
+  int totalLevelSensor = 0;
+  int totalFan = 0;
+  int totalFogger = 0;
+
+  List<dynamic> oRtu = [];
+  List<dynamic> oSrtu = [];
+  List<dynamic> oSwitch = [];
+  List<dynamic> oSense = [];
+  List<dynamic> oLevel = [];
+  List<dynamic> oPump = [];
+  List<dynamic> oExtend = [];
+  List<dynamic> rtuForLine = [];
+  List<dynamic> OroExtendForLine = [];
+  List<dynamic> switchForLine = [];
+  List<dynamic> OroSmartRtuForLine = [];
+  List<dynamic> OroSenseForLine = [];
+  List<dynamic> OroLevelForLine = [];
+  List<dynamic> rtuForLine_others = [];
+  List<dynamic> switchForLine_others = [];
+  List<dynamic> OroSmartRtuForLine_others = [];
+  List<dynamic> OroSenseForLine_others = [];
+  List<dynamic> OroLevelForLine_others = [];
   bool sourcePumpSelection = false;
   bool sourcePumpSelectAll = false;
-  List<String> waterSource = ['-','A', 'B', 'C', 'D', 'E', 'F'];
-  List<List<dynamic>> sourcePump = [];
-  List<List<dynamic>> irrigationPump = [];
-  List<List<List<dynamic>>> centralDosing = [];
-  List<List<dynamic>> centralFiltration = [];
-  List<Map<String,dynamic>> irrigationLines = [ ];
-  List<List<List<dynamic>>> localDosing = [];
-  List<List<dynamic>> localFiltration = [];
-  List<String> weatherStation = ['niagara ws'];
-  List<Map<String,dynamic>> mappingOfOutputs = [];
-  List<Map<String,dynamic>> mappingOfInputs = [];
-  List<Map<String,dynamic>> previousDataOfM_O = [];
-  List<Map<String,dynamic>> previousDataOfM_I = [];
+  List<dynamic> waterSource = ['-','A', 'B', 'C', 'D', 'E', 'F'];
+  List<dynamic> sourcePumpUpdated = [];
+  List<dynamic> irrigationPumpUpdated = [];
+  List<dynamic> centralDosingUpdated = [];
+  List<dynamic> centralFiltrationUpdated = [];
+  List<dynamic> irrigationLines = [ ];
+  List<dynamic> localDosingUpdated = [];
+  List<dynamic> localFiltrationUpdated = [];
+  List<dynamic> weatherStation = ['niagara ws'];
   bool irrigationPumpSelection = false;
   bool irrigationPumpSelectAll = false;
   bool c_dosingSelection = false;
@@ -87,22 +98,13 @@ class ConfigMakerProvider extends ChangeNotifier{
   bool irrigationSelection = false;
   bool irrigationSelectAll = false;
   bool loadIrrigationLine = false;
-  List<String> central_dosing_site_list = ['-',];
-  List<String> central_filtration_site_list = ['-',];
-  List<String> water_source_list = ['-',];
+  List<dynamic> central_dosing_site_list = ['-',];
+  List<dynamic> central_filtration_site_list = ['-',];
+  List<dynamic> irrigation_pump_list = ['-',];
+  List<dynamic> water_source_list = ['-',];
   List<dynamic> overAll = [];
   int selection = 0;
-  int autoIncrement = 0;
-  int C_D_autoIncrement = 0;
-  int C_F_autoIncrement = 0;
-  int P_autoIncrement = 0;
   int I_O_autoIncrement = 0;
-  int CD_channel_autoIncrement = 0;
-  List<Map<String,dynamic>> CD_for_MO = [];
-  List<Map<String, dynamic>> IP_MO = [];
-  List<Map<String,dynamic>> SP_MO = [];
-  List<Map<String,dynamic>> CF_for_MO = [];
-  String map_i_o = '';
 
   void clearConfig(){
     oldData = {};
@@ -127,38 +129,43 @@ class ConfigMakerProvider extends ChangeNotifier{
     totalOroSwitch = 0;
     totalOroSense = 0;
     totalOroSmartRTU = 0;
+    totalOroLevel = 0;
+    totalOroPump = 0;
+    totalOroExtend = 0;
     i_o_types = ['-','A-I','D-I','P-I','RS485','12C'];
     totalAnalogSensor = [];
     totalContact = [];
     totalAgitator = [];
-    totalPhSensor = [];
-    totalEcSensor = [];
-    totalMoistureSensor = [];
-    totalFan = [];
-    totalFogger = [];
-    rtuForLine = [1,2,3,4,5,6,7];
-    switchForLine = [1,2,3,4,5,6,7,8,9,10,11];
-    OroSmartRtuForLine = [1,2,3,4,5];
-    OroSenseForLine = [1,2,3,4,5,6,7,8,9,10,11,12];
-    rtuForLine_others = [1,2,3,4,5,6,7];
-    switchForLine_others = [1,2,3,4,5,6,7,8,9,10,11];
-    OroSmartRtuForLine_others = [1,2,3,4,5];
-    OroSenseForLine_others = [1,2,3,4,5,6,7,8,9,10,11,12];
+    totalPhSensor = 0;
+    totalEcSensor = 0;
+    totalMoistureSensor = 0;
+    totalLevelSensor = 0;
+    totalFan = 0;
+    totalFogger = 0;
+    oRtu = [];
+    oSrtu = [];
+    oSwitch = [];
+    oSense = [];
+    oLevel = [];
+    oPump = [];
+    oExtend = [];
+    rtuForLine = [];
+    OroExtendForLine = [];
+    switchForLine = [];
+    OroSmartRtuForLine = [];
+    OroSenseForLine = [];
+    OroLevelForLine = [];
     sourcePumpSelection = false;
     sourcePumpSelectAll = false;
     waterSource = ['-','A', 'B', 'C', 'D', 'E', 'F'];
-    sourcePump = [];
-    irrigationPump = [];
-    centralDosing = [];
-    centralFiltration = [];
-    irrigationLines = [ ];
-    localDosing = [];
-    localFiltration = [];
+    sourcePumpUpdated = [];
+    irrigationPumpUpdated = [];
+    centralDosingUpdated = [];
+    centralFiltrationUpdated = [];
+    List<Map<String,dynamic>> irrigationLines = [ ];
+    localDosingUpdated = [];
+    localFiltrationUpdated = [];
     weatherStation = ['niagara ws'];
-    mappingOfOutputs = [];
-    mappingOfInputs = [];
-    previousDataOfM_O = [];
-    previousDataOfM_I = [];
     irrigationPumpSelection = false;
     irrigationPumpSelectAll = false;
     c_dosingSelection = false;
@@ -172,181 +179,14 @@ class ConfigMakerProvider extends ChangeNotifier{
     centralFiltrationSelectAll = false;
     irrigationSelection = false;
     irrigationSelectAll = false;
-    loadIrrigationLine = false;
     central_dosing_site_list = ['-'];
     central_filtration_site_list = ['-'];
-    water_source_list = ['-',];
+    irrigation_pump_list = ['-'];
+    water_source_list = ['-'];
     overAll = [];
     selection = 0;
-    autoIncrement = 0;
-    C_D_autoIncrement = 0;
-    C_F_autoIncrement = 0;
-    P_autoIncrement = 0;
     I_O_autoIncrement = 0;
-    CD_channel_autoIncrement = 0;
-    CD_for_MO = [];
-    IP_MO = [];
-    SP_MO = [];
-    CF_for_MO = [];
-    map_i_o = '';
-    notifyListeners();
   }
-  void fetchAll(dynamic data){
-    for(var i in data.entries){
-      if(i.key == 'configMaker'){
-        if(i.value.length != 0){
-          var mydata = jsonDecode(i.value[0]['inputOutput']);
-          oldData = mydata;
-        }
-      }
-      if(i.key == 'referenceNo'){
-        print('siv : ${i.value}');
-        for(var j in i.value.entries){
-          print(j.key);
-          switch(j.key){
-            case ('ORO LEVEL'):{
-
-              break;
-            }
-            case ('ORO Sense'):{
-              OroSenseForLine = j.value;
-              totalOroSense = j.value.length;
-              OroSenseForLine_others = j.value;
-              break;
-            }
-            case ('ORO Extend'):{
-              break;
-            }
-            case ('ORO SWITCH'):{
-              switchForLine = j.value;
-              totalOroSwitch = j.value.length;
-              switchForLine_others = j.value;
-              break;
-            }
-            case ('ORO RTU'):{
-              rtuForLine = j.value;
-              totalRTU = j.value.length;
-              rtuForLine_others = j.value;
-              break;
-            }
-            case ('ORO SMART RTU'):{
-              OroSmartRtuForLine = j.value;
-              totalOroSmartRTU = j.value.length;
-              OroSmartRtuForLine_others = j.value;
-              break;
-            }
-            default : {
-              print('nothing');
-            }
-          }
-        }
-      }
-      if(i.key == 'productLimit'){
-        for(var j in i.value){
-          switch (j['product']){
-            case ('Irrigation lines') : {
-              totalIrrigationLine = j['quantity'];
-              break;
-            }
-            case ('Central dosing sites') : {
-              totalCentralDosing = j['quantity'];
-              break;
-            }
-            case ('Central filtration sites') : {
-              totalCentralFiltration = j['quantity'];
-              break;
-            }
-            case ('Valve') : {
-              totalValve = j['quantity'];
-              break;
-            }
-            case ('Main Valve') : {
-              totalMainValve = j['quantity'];
-              break;
-            }
-            case ('Source Pump') : {
-              totalSourcePump = j['quantity'];
-              break;
-            }
-            case ('Irrigation Pump') : {
-              totalIrrigationPump = j['quantity'];
-              break;
-            }
-            case ('Filters') : {
-              totalFilter = j['quantity'];
-              break;
-            }
-            case ('Dosing Channel') : {
-              totalInjector = j['quantity'];
-              break;
-            }
-            case ('Dosing Booster') : {
-              totalBooster = j['quantity'];
-              break;
-            }
-            case ('Analog Sensors') : {
-              for(var k = 0;k < j['quantity'];k++){
-                totalAnalogSensor.add(['Analog Sensor ${k+1}','-','-','-','-','${returnI_O_AutoIncrement()}']);
-              }
-              break;
-            }
-            case ('Contacts') : {
-              for(var k = 0;k < j['quantity'];k++){
-                totalContact.add(['Contact ${k+1}','-','-','-','-','${returnI_O_AutoIncrement()}']);
-              }
-              break;
-            }
-            case ('Agitator') : {
-              for(var k = 0;k < j['quantity'];k++){
-                totalAgitator.add(['Agitator ${k+1}','-','-','-','${returnI_O_AutoIncrement()}']);
-              }
-              break;
-            }
-            case ('pH sensor') : {
-              for(var k = 0;k < j['quantity'];k++){
-                totalPhSensor.add(['PH sensor ${k+1}','-','-','-','-','${returnI_O_AutoIncrement()}']);
-              }
-              break;
-            }
-            case ('Ec sensor') : {
-              for(var k = 0;k < j['quantity'];k++){
-                totalEcSensor.add(['EC sensor ${k+1}','-','-','-','-','${returnI_O_AutoIncrement()}']);
-              }
-              break;
-            }
-            case ('Fan') : {
-              for(var k = 0;k < j['quantity'];k++){
-                totalFan.add(['Fan ${k+1}','-','-','-','${returnI_O_AutoIncrement()}']);
-              }
-              break;
-            }
-            case ('Fogger') : {
-              for(var k = 0;k < j['quantity'];k++){
-                totalFogger.add(['Fogger ${k+1}','-','-','-','${returnI_O_AutoIncrement()}']);
-              }
-              break;
-            }
-            case ('Pressure sensor') : {
-              total_p_sensor = j['quantity'];
-              break;
-            }
-            case ('Dosing meter') : {
-              totalDosingMeter = j['quantity'];
-              break;
-            }
-            case ('Water Meter') : {
-              totalWaterMeter = j['quantity'];
-              break;
-            }
-          }
-        }
-      }
-    }
-    notifyListeners();
-  }
-
-
-  // int I_P_autoIncrement = 0;
   int initialIndex = 0;
   void editInitialIndex(int index){
     initialIndex = index;
@@ -357,43 +197,9 @@ class ConfigMakerProvider extends ChangeNotifier{
     selection = 0;
     notifyListeners();
   }
-  int returnCD_channel_autoIncrement(){
-    CD_channel_autoIncrement += 1;
-    int val = CD_channel_autoIncrement;
-    notifyListeners();
-    return val;
-  }
-
-  void editLoadIL(bool value){
-    Future.delayed(Duration(seconds: 1), () {
-      loadIrrigationLine = value;
-      notifyListeners();
-    });
-  }
-  void serialNumber(String title,int val){
-    switch (title){
-      case('sourcePump') : {
-        P_autoIncrement = val;
-        break;
-      }
-      case('irrigationPump') : {
-        P_autoIncrement = val;
-        break;
-      }
-      case('CentralFiltration') : {
-        C_F_autoIncrement = val;
-        break;
-      }
-      case('CentralDosing') : {
-        C_D_autoIncrement = val;
-        break;
-      }
-    }
-    notifyListeners();
-  }
   void refreshCentralDosingList(){
     central_dosing_site_list = ['-'];
-    for(var i = 0;i < centralDosing.length; i++){
+    for(var i = 0;i < centralDosingUpdated.length; i++){
       central_dosing_site_list.add('${i + 1}');
     }
     for(var i = 0;i < irrigationLines.length;i++){
@@ -405,7 +211,7 @@ class ConfigMakerProvider extends ChangeNotifier{
   }
   void refreshCentralFiltrationList(){
     central_filtration_site_list = ['-'];
-    for(var i = 0;i < centralFiltration.length; i++){
+    for(var i = 0;i < centralFiltrationUpdated.length; i++){
       central_filtration_site_list.add('${i + 1}');
     }
     for(var i = 0;i < irrigationLines.length;i++){
@@ -415,6 +221,19 @@ class ConfigMakerProvider extends ChangeNotifier{
     }
     notifyListeners();
   }
+  void refreshIrrigationPumpList(){
+    irrigation_pump_list = ['-'];
+    for(var i = 0;i < irrigationPumpUpdated.length; i++){
+      irrigation_pump_list.add('${i + 1}');
+    }
+    for(var i = 0;i < irrigationLines.length;i++){
+      if(!irrigation_pump_list.contains(irrigationLines[i]['irrigationPump'])){
+        irrigationLines[i]['irrigationPump'] = '-';
+      }
+    }
+    notifyListeners();
+  }
+
   int returnI_O_AutoIncrement(){
     I_O_autoIncrement += 1;
     int val = I_O_autoIncrement;
@@ -424,11 +243,31 @@ class ConfigMakerProvider extends ChangeNotifier{
 
   void sourcePumpFunctionality(List<dynamic> list){
     switch (list[0]){
+      case ('addSourcePump') : {
+        if(totalSourcePump > 0){
+          sourcePumpUpdated.add({
+            'sNo' : returnI_O_AutoIncrement(),
+            'pumpConnection' : {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : '-',
+              'rfNo' : '-',
+              'output' : '-',
+              'current_selection' : '-',
+            },
+            'oro_pump' : false,
+            'selection' : 'unselect',
+            'waterSource' : '-',
+            'waterMeter' : {},
+          });
+          totalSourcePump = totalSourcePump - 1;
+        }
+        break;
+      }
       case ('editsourcePumpSelection') : {
         sourcePumpSelection = list[1];
         if(list[1] == true){
-          for(var i = 0;i < sourcePump.length;i ++){
-            sourcePump[i][2] = 'unselect';
+          for(var i = 0;i < sourcePumpUpdated.length;i ++){
+            sourcePumpUpdated[i]['selection'] = 'unselect';
           }
         }
         break;
@@ -437,28 +276,31 @@ class ConfigMakerProvider extends ChangeNotifier{
         sourcePumpSelectAll = list[1];
         if(list[1] == true){
           selection = 0;
-          for(var i = 0;i < sourcePump.length;i ++){
+          for(var i = 0;i < sourcePumpUpdated.length;i ++){
             selection = selection + 1;
-            sourcePump[i][2] = 'select';
+            sourcePumpUpdated[i]['selection'] = 'select';
           }
         }else{
           selection = 0;
-          for(var i = 0;i < sourcePump.length;i ++){
-            sourcePump[i][2] = 'unselect';
+          for(var i = 0;i < sourcePumpUpdated.length;i ++){
+            sourcePumpUpdated[i]['selection'] = 'unselect';
           }
         }
         break;
       }
       case ('editWaterMeter') : {
         if(totalWaterMeter > 0){
-          for(var i in SP_MO){
-            for(var j in i.entries){
-              if(j.key == '${sourcePump[list[1]][3]}'){
-                j.value['water_meter'][0] = list[2];
-              }
-            }
+          if(list[2] == true){
+            sourcePumpUpdated[list[1]]['waterMeter'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : '-',
+              'rfNo' : '-',
+              'input' : '-',
+              'input_type' : '-',
+            };
+          }else{
+            sourcePumpUpdated[list[1]]['waterMeter'] = {};
           }
-          sourcePump[list[1]][1] = list[2];
           if(list[2] == true){
             totalWaterMeter = totalWaterMeter - 1;
           }else{
@@ -468,57 +310,240 @@ class ConfigMakerProvider extends ChangeNotifier{
         }
         if(totalWaterMeter == 0){
           if(list[2] == false){
-            sourcePump[list[1]][1] = list[2];
+            sourcePumpUpdated[list[1]]['waterMeter'] = {};
             totalWaterMeter = totalWaterMeter + 1;
           }
         }
         break;
       }
-      case ('addSourcePump') : {
-        if(totalSourcePump > 0){
-          P_autoIncrement += 1;
-          sourcePump.add(['-', false,'unselect', P_autoIncrement]);
-          SP_MO.add({
-            '${P_autoIncrement}' : {
-              'pump' : ['1','-','-','-','${returnI_O_AutoIncrement()}'],
-              'water_meter' : [false,'-','-','-','-','${returnI_O_AutoIncrement()}'],
-            }
-          });
-          totalSourcePump = totalSourcePump - 1;
+      case ('editTopTankHigh') : {
+        if(list[2] == true){
+          sourcePumpUpdated[list[1]]['TopTankHigh'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'ORO PUMP',
+            'rfNo' : sourcePumpUpdated[list[1]]['on']['rfNo'],
+            'input' : '-',
+            'input_type' : '-',
+          };
+
+        }else{
+          sourcePumpUpdated[list[1]]['TopTankHigh'] = {};
         }
         break;
       }
+      case ('editTopTankLow') : {
+        if(list[2] == true){
+          sourcePumpUpdated[list[1]]['TopTankLow'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'ORO PUMP',
+            'rfNo' : sourcePumpUpdated[list[1]]['on']['rfNo'],
+            'input' : '-',
+            'input_type' : '-',
+          };
+
+        }else{
+          sourcePumpUpdated[list[1]]['TopTankLow'] = {};
+        }
+        break;
+      }
+      case ('editSumpTankHigh') : {
+        if(list[2] == true){
+          sourcePumpUpdated[list[1]]['SumpTankHigh'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'ORO PUMP',
+            'rfNo' : sourcePumpUpdated[list[1]]['on']['rfNo'],
+            'input' : '-',
+            'input_type' : '-',
+          };
+
+        }else{
+          sourcePumpUpdated[list[1]]['SumpTankHigh'] = {};
+        }
+        break;
+      }
+      case ('editSumpTankLow') : {
+        if(list[2] == true){
+          sourcePumpUpdated[list[1]]['SumpTankLow'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'ORO PUMP',
+            'rfNo' : sourcePumpUpdated[list[1]]['on']['rfNo'],
+            'input' : '-',
+            'input_type' : '-',
+          };
+
+        }else{
+          sourcePumpUpdated[list[1]]['SumpTankLow'] = {};
+        }
+        break;
+      }
+      case ('editRelayCount_sp') : {
+        if(list[2] == '1'){
+          sourcePumpUpdated[list[1]].remove('off');
+          sourcePumpUpdated[list[1]].remove('scr');
+          sourcePumpUpdated[list[1]].remove('ecr');
+        }
+        else if(list[2] == '2'){
+          if(sourcePumpUpdated[list[1]]['off'] == null){
+            sourcePumpUpdated[list[1]]['off'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : 'ORO PUMP',
+              'rfNo' : sourcePumpUpdated[list[1]]['on']['rfNo'],
+              'output' : '-',
+              'output_type' : '1',
+              'current_selection' : '-',
+            };
+          }
+          sourcePumpUpdated[list[1]].remove('scr');
+          sourcePumpUpdated[list[1]].remove('ecr');
+        }
+        else if(list[2] == '3'){
+          if(sourcePumpUpdated[list[1]]['off'] == null){
+            sourcePumpUpdated[list[1]]['off'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : 'ORO PUMP',
+              'rfNo' : sourcePumpUpdated[list[1]]['on']['rfNo'],
+              'output' : '-',
+              'output_type' : '1',
+              'current_selection' : '-',
+            };
+          }
+          if(sourcePumpUpdated[list[1]]['scr'] == null){
+            sourcePumpUpdated[list[1]]['scr'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : 'ORO PUMP',
+              'rfNo' : sourcePumpUpdated[list[1]]['on']['rfNo'],
+              'output' : '-',
+              'output_type' : '1',
+              'current_selection' : '-',
+            };
+            sourcePumpUpdated[list[1]].remove('ecr');
+          }
+        }
+        else if(list[2] == '4'){
+          if(sourcePumpUpdated[list[1]]['off'] == null){
+            sourcePumpUpdated[list[1]]['off'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : 'ORO PUMP',
+              'rfNo' : sourcePumpUpdated[list[1]]['on']['rfNo'],
+              'output' : '-',
+              'output_type' : '1',
+              'current_selection' : '-',
+            };
+          }
+          if(sourcePumpUpdated[list[1]]['scr'] == null){
+            sourcePumpUpdated[list[1]]['scr'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : 'ORO PUMP',
+              'rfNo' : sourcePumpUpdated[list[1]]['on']['rfNo'],
+              'output' : '-',
+              'output_type' : '1',
+              'current_selection' : '-',
+            };
+          }
+          if(sourcePumpUpdated[list[1]]['ecr'] == null){
+            sourcePumpUpdated[list[1]]['ecr'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : 'ORO PUMP',
+              'rfNo' : sourcePumpUpdated[list[1]]['on']['rfNo'],
+              'output' : '-',
+              'output_type' : '1',
+              'current_selection' : '-',
+            };
+          }
+        }
+        sourcePumpUpdated[list[1]]['relayCount'] = list[2];
+        break;
+      }
+      case ('editOroPump') : {
+        if(list[2] == true){
+          sourcePumpUpdated[list[1]].remove('pumpConnection');
+          sourcePumpUpdated[list[1]]['relayCount'] = '1';
+          sourcePumpUpdated[list[1]]['TopTankHigh'] = {};
+          sourcePumpUpdated[list[1]]['TopTankLow'] = {};
+          sourcePumpUpdated[list[1]]['SumpTankHigh'] = {};
+          sourcePumpUpdated[list[1]]['SumpTankLow'] = {};
+          sourcePumpUpdated[list[1]]['relayCount'] = '1';
+          sourcePumpUpdated[list[1]]['on'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'ORO PUMP',
+            'rfNo' : '-',
+            'output' : '-',
+            'output_type' : '1',
+            'current_selection' : '-',
+          };
+          sourcePumpUpdated[list[1]]['c1'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'ORO PUMP',
+            'rfNo' : '${sourcePumpUpdated[list[1]]['on']['rfNo']}',
+            'input' : '-',
+            'input_type' : '-',
+          };
+          sourcePumpUpdated[list[1]]['c2'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'ORO PUMP',
+            'rfNo' : '${sourcePumpUpdated[list[1]]['on']['rfNo']}',
+            'input' : '-',
+            'input_type' : '-',
+          };
+          sourcePumpUpdated[list[1]]['c3'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'ORO PUMP',
+            'rfNo' : '${sourcePumpUpdated[list[1]]['on']['rfNo']}',
+            'input' : '-',
+            'input_type' : '-',
+          };
+        }else{
+          sourcePumpUpdated[list[1]]['pumpConnection'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : '-',
+            'rfNo' : '-',
+            'output' : '-',
+            'output_type' : '1',
+            'current_selection' : '-',
+          };
+          sourcePumpUpdated[list[1]].remove('TopTankHigh');
+          sourcePumpUpdated[list[1]].remove('TopTankLow');
+          sourcePumpUpdated[list[1]].remove('SumpTankHigh');
+          sourcePumpUpdated[list[1]].remove('SumpTankLow');
+          sourcePumpUpdated[list[1]].remove('on');
+          sourcePumpUpdated[list[1]].remove('off');
+          sourcePumpUpdated[list[1]].remove('scr');
+          sourcePumpUpdated[list[1]].remove('ecr');
+          sourcePumpUpdated[list[1]].remove('c1');
+          sourcePumpUpdated[list[1]].remove('c2');
+          sourcePumpUpdated[list[1]].remove('c3');
+        }
+        sourcePumpUpdated[list[1]]['oro_pump'] = list[2];
+        break;
+      }
       case ('editWaterSource_sp') : {
-        sourcePump[list[1]][0] = list[2];
+        sourcePumpUpdated[list[1]]['waterSource'] = list[2];
         break;
       }
       case ('selectSourcePump') : {
         if(list[2] == true){
-          sourcePump[list[1]][2] = 'select';
+          sourcePumpUpdated[list[1]]['selection'] = 'select';
           selection = selection + 1;
         }else{
-          sourcePump[list[1]][2] = 'unselect';
+          sourcePumpUpdated[list[1]]['selection'] = 'unselect';
           selection = selection - 1;
         }
         break;
       }
       case ('deleteSourcePump') : {
-        var SP_MO_copy = List.from(SP_MO);
-        for(var i = sourcePump.length -1 ; i >= 0; i--){
-          if(sourcePump[i][2] == 'select'){
-            for(var j in SP_MO_copy){
-              for(var k in j.entries){
-                if(k.key == '${sourcePump[i][3]}'){
-                  SP_MO.remove(j);
-                }
-              }
-            }
-            if(sourcePump[i][1] == true){
+        List<Map<String, dynamic>> selectedPumps = [];
+        for (var i = sourcePumpUpdated.length - 1; i >= 0; i--) {
+          if (sourcePumpUpdated[i]['selection'] == 'select') {
+            selectedPumps.add(sourcePumpUpdated[i]);
+
+            if (sourcePumpUpdated[i]['waterMeter'].isNotEmpty) {
               totalWaterMeter = totalWaterMeter + 1;
             }
-            sourcePump.removeAt(i);
             totalSourcePump = totalSourcePump + 1;
           }
+        }
+        for (var selectedPump in selectedPumps) {
+          sourcePumpUpdated.remove(selectedPump);
         }
         sourcePumpSelectAll = false;
         sourcePumpSelection = false;
@@ -528,19 +553,26 @@ class ConfigMakerProvider extends ChangeNotifier{
         break;
       }
     }
+    print(jsonEncode(sourcePumpUpdated));
+
     notifyListeners();
   }
   void irrigationPumpFunctionality(List<dynamic> list){
     switch (list[0]){
       case 'addIrrigationPump': {
         if(totalIrrigationPump > 0){
-          P_autoIncrement += 1;
-          irrigationPump.add([false, ['unselect',P_autoIncrement]]);
-          IP_MO.add({
-            '${P_autoIncrement}' : {
-              'pump' : ['1','-','-','-','${returnI_O_AutoIncrement()}'],
-              'water_meter' : [false,'-','-','-','-','${returnI_O_AutoIncrement()}']
-            }
+          irrigationPumpUpdated.add({
+            'sNo' : returnI_O_AutoIncrement(),
+            'pumpConnection' : {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : '-',
+              'rfNo' : '-',
+              'output' : '-',
+              'current_selection' : '-',
+            },
+            'oro_pump' : false,
+            'selection' : 'unselect',
+            'waterMeter' : {},
           });
           totalIrrigationPump = totalIrrigationPump - 1;
         }
@@ -549,8 +581,8 @@ class ConfigMakerProvider extends ChangeNotifier{
       case 'editIrrigationPumpSelection' : {
         irrigationPumpSelection = list[1];
         if(list[1] == true){
-          for(var i = 0;i < irrigationPump.length;i ++){
-            irrigationPump[i][1][0] = 'unselect';
+          for(var i = 0;i < irrigationPumpUpdated.length;i ++){
+            irrigationPumpUpdated[i]['selection'] = 'unselect';
           }
         }
         break;
@@ -559,13 +591,13 @@ class ConfigMakerProvider extends ChangeNotifier{
         irrigationPumpSelectAll = list[1];
         if(list[1] == true){
           selection = 0;
-          for(var i = 0;i < irrigationPump.length;i ++){
-            irrigationPump[i][1][0] = 'select';
+          for(var i = 0;i < irrigationPumpUpdated.length;i ++){
+            irrigationPumpUpdated[i]['selection'] = 'select';
             selection += 1;
           }
         }else{
-          for(var i = 0;i < irrigationPump.length;i ++){
-            irrigationPump[i][1][0] = 'unselect';
+          for(var i = 0;i < irrigationPumpUpdated.length;i ++){
+            irrigationPumpUpdated[i]['selection'] = 'unselect';
             selection = 0;
           }
         }
@@ -573,14 +605,17 @@ class ConfigMakerProvider extends ChangeNotifier{
       }
       case 'editWaterMeter' : {
         if(totalWaterMeter > 0){
-          for(var i in IP_MO){
-            for(var j in i.entries){
-              if(j.key == '${irrigationPump[list[1]][1][1]}'){
-                j.value['water_meter'][0] = list[2];
-              }
-            }
+          if(list[2] == true){
+            irrigationPumpUpdated[list[1]]['waterMeter'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : '-',
+              'rfNo' : '-',
+              'input' : '-',
+              'input_type' : '-',
+            };
+          }else{
+            irrigationPumpUpdated[list[1]]['waterMeter'] = {};
           }
-          irrigationPump[list[1]][0] = list[2];
           if(list[2] == true){
             totalWaterMeter = totalWaterMeter - 1;
           }else{
@@ -590,110 +625,313 @@ class ConfigMakerProvider extends ChangeNotifier{
         }
         if(totalWaterMeter == 0){
           if(list[2] == false){
-            irrigationPump[list[1]][0] = list[2];
+            irrigationPumpUpdated[list[1]]['waterMeter'] = {};
             totalWaterMeter = totalWaterMeter + 1;
           }
         }
         break;
       }
       case 'selectIrrigationPump' : {
-        if(irrigationPump[list[1]][1][0] == 'select'){
-          irrigationPump[list[1]][1][0] = 'unselect';
+        if(irrigationPumpUpdated[list[1]]['selection'] == 'select'){
+          irrigationPumpUpdated[list[1]]['selection'] = 'unselect';
           selection -= 1;
         }else{
-          irrigationPump[list[1]][1][0] = 'select';
+          irrigationPumpUpdated[list[1]]['selection'] = 'select';
           selection += 1;
         }
         break;
       }
       case 'deleteIrrigationPump' : {
-        var IP_MO_copy = List.from(IP_MO);
-        for(var i = irrigationPump.length -1 ; i >= 0; i--){
-          if(irrigationPump[i][1][0] == 'select'){
-            for(var j in IP_MO_copy){
-              for(var k in j.entries){
-                if(k.key == '${irrigationPump[i][1][1]}'){
-                  IP_MO.remove(j);
-                }
-              }
-            }
-            if(irrigationPump[i][0] == true){
+        List<Map<String, dynamic>> selectedPumps = [];
+        for (var i = irrigationPumpUpdated.length - 1; i >= 0; i--) {
+          if (irrigationPumpUpdated[i]['selection'] == 'select') {
+            selectedPumps.add(irrigationPumpUpdated[i]);
+
+            if (irrigationPumpUpdated[i]['waterMeter'].isNotEmpty) {
               totalWaterMeter = totalWaterMeter + 1;
             }
-            for(var j in irrigationLines){
-              if(j['irrigationPump'] == '${i + 1}'){
-                j['irrigationPump'] = '-';
-              }
-            }
-            irrigationPump.removeAt(i);
             totalIrrigationPump = totalIrrigationPump + 1;
           }
         }
+        for (var selectedPump in selectedPumps) {
+          irrigationPumpUpdated.remove(selectedPump);
+        }
         irrigationPumpSelection = false;
         irrigationPumpSelectAll = false;
+        refreshIrrigationPumpList();
+        break;
+      }
+      case ('editTopTankHigh') : {
+        if(list[2] == true){
+          irrigationPumpUpdated[list[1]]['TopTankHigh'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' :  'ORO PUMP',
+            'rfNo' : irrigationPumpUpdated[list[1]]['on']['rfNo'],
+            'input' : '-',
+            'input_type' : '-',
+          };
+
+        }else{
+          irrigationPumpUpdated[list[1]]['TopTankHigh'] = {};
+        }
+        break;
+      }
+      case ('editTopTankLow') : {
+        if(list[2] == true){
+          irrigationPumpUpdated[list[1]]['TopTankLow'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' :  'ORO PUMP',
+            'rfNo' : irrigationPumpUpdated[list[1]]['on']['rfNo'],
+            'input' : '-',
+            'input_type' : '-',
+          };
+
+        }else{
+          irrigationPumpUpdated[list[1]]['TopTankLow'] = {};
+        }
+        break;
+      }
+      case ('editSumpTankHigh') : {
+        if(list[2] == true){
+          irrigationPumpUpdated[list[1]]['SumpTankHigh'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' :  'ORO PUMP',
+            'rfNo' : irrigationPumpUpdated[list[1]]['on']['rfNo'],
+            'input' : '-',
+            'input_type' : '-',
+          };
+
+        }else{
+          irrigationPumpUpdated[list[1]]['SumpTankHigh'] = {};
+        }
+        break;
+      }
+      case ('editSumpTankLow') : {
+        if(list[2] == true){
+          irrigationPumpUpdated[list[1]]['SumpTankLow'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' :  'ORO PUMP',
+            'rfNo' : irrigationPumpUpdated[list[1]]['on']['rfNo'],
+            'input' : '-',
+            'input_type' : '-',
+          };
+
+        }else{
+          irrigationPumpUpdated[list[1]]['SumpTankLow'] = {};
+        }
+        break;
+      }
+      case ('editRelayCount_ip') : {
+        if(list[2] == '1'){
+          irrigationPumpUpdated[list[1]].remove('off');
+          irrigationPumpUpdated[list[1]].remove('scr');
+          irrigationPumpUpdated[list[1]].remove('ecr');
+        }
+        else if(list[2] == '2'){
+          if(irrigationPumpUpdated[list[1]]['off'] == null){
+            irrigationPumpUpdated[list[1]]['off'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : 'ORO PUMP',
+              'rfNo' : irrigationPumpUpdated[list[1]]['on']['rfNo'],
+              'output' : '-',
+              'output_type' : '1',
+              'current_selection' : '-',
+            };
+          }
+          irrigationPumpUpdated[list[1]].remove('scr');
+          irrigationPumpUpdated[list[1]].remove('ecr');
+        }
+        else if(list[2] == '3'){
+          if(irrigationPumpUpdated[list[1]]['off'] == null){
+            irrigationPumpUpdated[list[1]]['off'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : 'ORO PUMP',
+              'rfNo' : irrigationPumpUpdated[list[1]]['on']['rfNo'],
+              'output' : '-',
+              'output_type' : '1',
+              'current_selection' : '-',
+            };
+          }
+          if(irrigationPumpUpdated[list[1]]['scr'] == null){
+            irrigationPumpUpdated[list[1]]['scr'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : 'ORO PUMP',
+              'rfNo' : irrigationPumpUpdated[list[1]]['on']['rfNo'],
+              'output' : '-',
+              'output_type' : '1',
+              'current_selection' : '-',
+            };
+            irrigationPumpUpdated[list[1]].remove('ecr');
+          }
+        }
+        else if(list[2] == '4'){
+          if(irrigationPumpUpdated[list[1]]['off'] == null){
+            irrigationPumpUpdated[list[1]]['off'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : 'ORO PUMP',
+              'rfNo' : irrigationPumpUpdated[list[1]]['on']['rfNo'],
+              'output' : '-',
+              'output_type' : '1',
+              'current_selection' : '-',
+            };
+          }
+          if(irrigationPumpUpdated[list[1]]['scr'] == null){
+            irrigationPumpUpdated[list[1]]['scr'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : 'ORO PUMP',
+              'rfNo' : irrigationPumpUpdated[list[1]]['on']['rfNo'],
+              'output' : '-',
+              'output_type' : '1',
+              'current_selection' : '-',
+            };
+          }
+          if(irrigationPumpUpdated[list[1]]['ecr'] == null){
+            irrigationPumpUpdated[list[1]]['ecr'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : 'ORO PUMP',
+              'rfNo' : irrigationPumpUpdated[list[1]]['on']['rfNo'],
+              'output' : '-',
+              'output_type' : '1',
+              'current_selection' : '-',
+            };
+          }
+        }
+        irrigationPumpUpdated[list[1]]['relayCount'] = list[2];
+        break;
+      }
+      case ('editOroPump') : {
+        if(list[2] == true){
+          irrigationPumpUpdated[list[1]].remove('pumpConnection');
+          irrigationPumpUpdated[list[1]]['relayCount'] = '1';
+          irrigationPumpUpdated[list[1]]['TopTankHigh'] = {};
+          irrigationPumpUpdated[list[1]]['TopTankLow'] = {};
+          irrigationPumpUpdated[list[1]]['SumpTankHigh'] = {};
+          irrigationPumpUpdated[list[1]]['SumpTankLow'] = {};
+          irrigationPumpUpdated[list[1]]['relayCount'] = '1';
+          irrigationPumpUpdated[list[1]]['on'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'ORO PUMP',
+            'rfNo' : '-',
+            'output' : '-',
+            'output_type' : '1',
+            'current_selection' : '-',
+          };
+          irrigationPumpUpdated[list[1]]['c1'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'ORO PUMP',
+            'rfNo' : '${irrigationPumpUpdated[list[1]]['on']['rfNo']}',
+            'input' : '-',
+            'input_type' : '-',
+          };
+          irrigationPumpUpdated[list[1]]['c2'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'ORO PUMP',
+            'rfNo' : '${irrigationPumpUpdated[list[1]]['on']['rfNo']}',
+            'input' : '-',
+            'input_type' : '-',
+          };
+          irrigationPumpUpdated[list[1]]['c3'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'ORO PUMP',
+            'rfNo' : '${irrigationPumpUpdated[list[1]]['on']['rfNo']}',
+            'input' : '-',
+            'input_type' : '-',
+          };
+        }else{
+          irrigationPumpUpdated[list[1]]['pumpConnection'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : '-',
+            'rfNo' : '-',
+            'output' : '-',
+            'output_type' : '1',
+            'current_selection' : '-',
+          };
+          irrigationPumpUpdated[list[1]].remove('TopTankHigh');
+          irrigationPumpUpdated[list[1]].remove('TopTankLow');
+          irrigationPumpUpdated[list[1]].remove('SumpTankHigh');
+          irrigationPumpUpdated[list[1]].remove('SumpTankLow');
+          irrigationPumpUpdated[list[1]].remove('on');
+          irrigationPumpUpdated[list[1]].remove('off');
+          irrigationPumpUpdated[list[1]].remove('scr');
+          irrigationPumpUpdated[list[1]].remove('ecr');
+          irrigationPumpUpdated[list[1]].remove('c1');
+          irrigationPumpUpdated[list[1]].remove('c2');
+          irrigationPumpUpdated[list[1]].remove('c3');
+        }
+        irrigationPumpUpdated[list[1]]['oro_pump'] = list[2];
         break;
       }
       default : {
         break;
       }
     }
+    refreshIrrigationPumpList();
+    print(irrigationPumpUpdated);
     notifyListeners();
 
+  }
+  List<Map<String,dynamic>> addBatchInjector(int count){
+    List<Map<String,dynamic>> injector = [];
+    for(var i = 0;i < count;i++){
+      injector.add({
+        'sNo' : returnI_O_AutoIncrement(),
+        'Which_Booster_Pump' : '-',
+        'rtu' : '-',
+        'rfNo' : '-',
+        'output' : '-',
+        'output_type' : '1',
+        'dosingMeter' : {},
+      });
+      totalInjector = totalInjector - 1;
+    }
+    return injector;
   }
 
   void centralDosingFunctionality(List<dynamic> list){
     switch (list[0]){
       case ('addCentralDosing') : {
         if(totalCentralDosing > 0 && totalInjector > 0){
-          C_D_autoIncrement += 1;
-          var channelSI = returnCD_channel_autoIncrement();
-          centralDosing.add([[1,false,false,'${channelSI}'],['unselect',C_D_autoIncrement]]);
-          CD_for_MO.add({
-            '${C_D_autoIncrement}' : {
-              'injector' : [['1','-','-','-','${channelSI}','${returnI_O_AutoIncrement()}']],
-              'dosing_meter' : [[false,'-','-','-','-','${channelSI}','${returnI_O_AutoIncrement()}']],
-              'booster' : [[false,'-','-','-','${channelSI}','${returnI_O_AutoIncrement()}']],
-            }
+          centralDosingUpdated.add({
+            'sNo' : returnI_O_AutoIncrement(),
+            'selection' : 'unselect',
+            'injector' : [{
+              'sNo' : returnI_O_AutoIncrement(),
+              'Which_Booster_Pump' : '-',
+              'rtu' : '-',
+              'rfNo' : '-',
+              'output' : '-',
+              'output_type' : '1',
+              'dosingMeter' : {},
+            }],
+            'boosterPump' : '',
+            'boosterConnection' : [],
+            'ec' : '',
+            'ecConnection' : [],
+            'ph' : '',
+            'phConnection' : []
           });
           totalCentralDosing = totalCentralDosing - 1;
           totalInjector = totalInjector - 1;
-          refreshCentralDosingList();
+          // refreshCentralDosingList();
         }
         break;
       }
       case ('addBatch_CD') : {
+        print('list : ${list}');
         if(totalCentralDosing > 0 && totalInjector > 0){
           for(var i = 0;i < list[1];i++){
             totalCentralDosing -= 1;
-            List<List<dynamic>> myList = [];
-            List<List<dynamic>> injector = [];
-            List<List<dynamic>> d_meter = [];
-            List<List<dynamic>> booster = [];
-            C_D_autoIncrement += 1;
-            for(var j = 0;j < list[2];j++){
-              totalInjector = totalInjector - 1;
-              if(list[3] == true){
-                totalDosingMeter = totalDosingMeter - 1;
-              }
-              if(list[4] == true){
-                totalBooster = totalBooster - 1;
-              }
-              var channelAI = returnCD_channel_autoIncrement();
-              myList.add([j+1,list[3],list[4],'${channelAI}']);
-              injector.add(['${j+1}','-','-','-','${channelAI}','${returnI_O_AutoIncrement()}']);
-              d_meter.add([list[3],'-','-','-','-','${channelAI}','${returnI_O_AutoIncrement()}']);
-              booster.add([list[4],'-','-','-','${channelAI}','${returnI_O_AutoIncrement()}']);
-            }
-            myList.add(['unselect',C_D_autoIncrement]);
-            CD_for_MO.add({
-              '${C_D_autoIncrement}' : {
-                'injector' : injector,
-                'dosing_meter' : d_meter,
-                'booster' : booster,
-              }
+            centralDosingUpdated.add({
+              'sNo' : returnI_O_AutoIncrement(),
+              'selection' : 'unselect',
+              'injector' : addBatchInjector(list[2]),
+              'boosterPump' : '',
+              'boosterConnection' : [],
+              'ec' : '',
+              'ecConnection' : [],
+              'ph' : '',
+              'phConnection' : []
             });
-            centralDosing.add(myList);
-            refreshCentralDosingList();
           }
         }
         break;
@@ -706,13 +944,13 @@ class ConfigMakerProvider extends ChangeNotifier{
         c_dosingSelectAll = list[1];
         if(list[1] == true){
           selection = 0;
-          for(var i = 0;i < centralDosing.length;i ++){
-            centralDosing[i][centralDosing[i].length - 1] = ['select'];
+          for(var i = 0;i < centralDosingUpdated.length;i ++){
+            centralDosingUpdated[i]['selection'] = 'select';
             selection += 1;
           }
         }else{
-          for(var i = 0;i < centralDosing.length;i ++){
-            centralDosing[i][centralDosing[i].length - 1] = ['unselect'];
+          for(var i = 0;i < centralDosingUpdated.length;i ++){
+            centralDosingUpdated[i]['selection'] = 'unselect';
             selection = 0;
           }
         }
@@ -720,99 +958,228 @@ class ConfigMakerProvider extends ChangeNotifier{
       }
       case ('editDosingMeter') : {
         if(totalDosingMeter > 0){
-          for(var i in CD_for_MO){
-            for(var j in i.entries){
-              if(j.key == '${centralDosing[list[1]][centralDosing[list[1]].length - 1][1]}'){
-                j.value['dosing_meter'][list[2]][0] = list[3];
-              }
-            }
-          }
-          centralDosing[list[1]][list[2]][1] = list[3];
           if(list[3] == true){
+            centralDosingUpdated[list[1]]['injector'][list[2]]['dosingMeter'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : '-',
+              'rfNo' : '-',
+              'input' : '-',
+              'input_type' : '-',
+            };
             totalDosingMeter = totalDosingMeter - 1;
           }else{
+            centralDosingUpdated[list[1]]['injector'][list[2]]['dosingMeter'] = {};
             totalDosingMeter = totalDosingMeter + 1;
           }
         }
         if(totalDosingMeter == 0){
           if(list[3] == false){
-            centralDosing[list[1]][list[2]][1] = list[3];
+            centralDosingUpdated[list[1]]['injector'][list[2]]['dosingMeter'] = {};
             totalDosingMeter = totalDosingMeter + 1;
           }
         }
         break;
       }
-      case ('editChannelNumber') : {
-        centralDosing[list[1]][list[2]][3] = list[3];
-        break;
-      }
-      case ('editBooster') : {
-        if(totalBooster > 0){
-          for(var i in CD_for_MO){
-            for(var j in i.entries){
-              if(j.key == '${centralDosing[list[1]][centralDosing[list[1]].length - 1][1]}'){
-                j.value['booster'][list[2]][0] = list[3];
-              }
-            }
-          }
-          centralDosing[list[1]][list[2]][2] = list[3];
-          if(list[3] == true){
-            totalBooster = totalBooster - 1;
-          }else{
-            totalBooster = totalBooster + 1;
-          }
-        }
-        if(totalBooster == 0){
-          if(list[3] == false){
-            centralDosing[list[1]][list[2]][2] = list[3];
-            totalBooster = totalBooster + 1;
-          }
-        }
-        break;
-      }
       case ('selectCentralDosing') : {
-        if(centralDosing[list[1]][centralDosing[list[1]].length - 1][0] == 'unselect'){
-          centralDosing[list[1]][centralDosing[list[1]].length - 1][0] = 'select';
+        if(centralDosingUpdated[list[1]]['selection'] == 'unselect'){
+          centralDosingUpdated[list[1]]['selection'] = 'select';
           selection += 1;
         }else{
-          centralDosing[list[1]][centralDosing[list[1]].length - 1][0] = 'unselect';
+          centralDosingUpdated[list[1]]['selection'] = 'unselect';
           selection -= 1;
         }
         break;
       }
       case ('deleteCentralDosing') : {
-        var CD_for_MO_copy = List.from(CD_for_MO);
-        for(var i = centralDosing.length - 1; i >= 0; i--){
-          if(centralDosing[i][centralDosing[i].length - 1][0] == 'select'){
-            for(var j in CD_for_MO_copy) { // Iterate over the copy
-              for (var k in j.entries) {
-                if (k.key == '${centralDosing[i][centralDosing[i].length - 1][1]}') {
-                  CD_for_MO.remove(j); // Modify the original list
+        List<Map<String, dynamic>> selectedSite = [];
+        for (var i = centralDosingUpdated.length - 1; i >= 0; i--) {
+          if (centralDosingUpdated[i]['selection'] == 'select') {
+            selectedSite.add(centralDosingUpdated[i]);
+          }
+        }
+        for (var cdSite in selectedSite) {
+          totalInjector = totalInjector + cdSite['injector'].length as int;
+          totalBooster = totalBooster + cdSite['boosterConnection'].length as int;
+          totalEcSensor = totalEcSensor + cdSite['ecConnection'].length as int;
+          totalPhSensor = totalPhSensor + cdSite['phConnection'].length as int;
+          for(var i in cdSite['injector']){
+            if(i['dosingMeter'].isNotEmpty){
+              totalDosingMeter = totalDosingMeter + 1;
+            }
+          }
+          centralDosingUpdated.remove(cdSite);
+          totalCentralDosing = totalCentralDosing + 1;
+
+        }
+        refreshCentralDosingList();
+        break;
+      }
+      case ('editBoosterPumpSelection'):{
+        if(centralDosingUpdated[list[1]]['boosterPump'] == ''){
+          centralDosingUpdated[list[1]]['boosterConnection'] = [];
+          for(var inj = 0;inj < centralDosingUpdated[list[1]]['injector'].length;inj++){
+            centralDosingUpdated[list[1]]['injector'][inj]['Which_Booster_Pump'] = '-';
+          }
+        }else{
+          if(int.parse(centralDosingUpdated[list[1]]['boosterPump']) > centralDosingUpdated[list[1]]['boosterConnection'].length){
+            int count = (int.parse(centralDosingUpdated[list[1]]['boosterPump'])- centralDosingUpdated[list[1]]['boosterConnection'].length) as int;
+            for(var i = 0; i < count;i++){
+              centralDosingUpdated[list[1]]['boosterConnection'].add({
+                'sNo' : returnI_O_AutoIncrement(),
+                'rtu' : '-',
+                'rfNo' : '-',
+                'output' : '-',
+                'output_type' : '1',
+              });
+            }
+          }else{
+            int count = (centralDosingUpdated[list[1]]['boosterConnection'].length - int.parse(centralDosingUpdated[list[1]]['boosterPump']));
+            for(var i = 0; i < count;i++){
+              for(var inj = 0;inj < centralDosingUpdated[list[1]]['injector'].length;inj++){
+                if(centralDosingUpdated[list[1]]['injector'][inj]['Which_Booster_Pump'].contains('${centralDosingUpdated[list[1]]['boosterConnection'].length}')){
+                  centralDosingUpdated[list[1]]['injector'][inj]['Which_Booster_Pump'] = '-';
                 }
               }
+              centralDosingUpdated[list[1]]['boosterConnection'].removeLast();
             }
-            for(var j = 0; j< centralDosing[i].length;j++){
-              if(j != centralDosing[i].length - 1){
-                if(centralDosing[i][j][1] == true){
-                  totalDosingMeter = totalDosingMeter + 1;
-                }
-                if(centralDosing[i][j][2] == true){
-                  totalBooster = totalBooster + 1;
-                }
-              }
-            }
-            centralDosing.removeAt(i);
-            totalCentralDosing = totalCentralDosing + 1;
-            totalInjector = totalInjector + 1;
-            refreshCentralDosingList();
           }
         }
         break;
       }
+      case ('editEcSelection'):{
+        if(centralDosingUpdated[list[1]]['ec'] == ''){
+          centralDosingUpdated[list[1]]['ecConnection'] = [];
+        }else{
+          if(int.parse(centralDosingUpdated[list[1]]['ec']) > centralDosingUpdated[list[1]]['ecConnection'].length){
+            int count = (int.parse(centralDosingUpdated[list[1]]['ec'])- centralDosingUpdated[list[1]]['ecConnection'].length) as int;
+            for(var i = 0; i < count;i++){
+              centralDosingUpdated[list[1]]['ecConnection'].add({
+                'sNo' : returnI_O_AutoIncrement(),
+                'rtu' : '-',
+                'rfNo' : '-',
+                'input' : '-',
+                'input_type' : '-',
+              });
+            }
+          }else{
+            int count = (centralDosingUpdated[list[1]]['ecConnection'].length - int.parse(centralDosingUpdated[list[1]]['ec']));
+            for(var i = 0; i < count;i++){
+              centralDosingUpdated[list[1]]['ecConnection'].removeLast();
+            }
+          }
+        }
+        break;
+      }
+      case ('editPhSelection'):{
+        if(centralDosingUpdated[list[1]]['ph'] == ''){
+          centralDosingUpdated[list[1]]['phConnection'] = [];
+        }else{
+          if(int.parse(centralDosingUpdated[list[1]]['ph']) > centralDosingUpdated[list[1]]['phConnection'].length){
+            int count = (int.parse(centralDosingUpdated[list[1]]['ph'])- centralDosingUpdated[list[1]]['phConnection'].length) as int;
+            for(var i = 0; i < count;i++){
+              centralDosingUpdated[list[1]]['phConnection'].add({
+                'sNo' : returnI_O_AutoIncrement(),
+                'rtu' : '-',
+                'rfNo' : '-',
+                'input' : '-',
+                'input_type' : '-',
+              });
+            }
+          }else{
+            int count = (centralDosingUpdated[list[1]]['phConnection'].length - int.parse(centralDosingUpdated[list[1]]['ph']));
+            for(var i = 0; i < count;i++){
+              centralDosingUpdated[list[1]]['phConnection'].removeLast();
+            }
+          }
+        }
+        break;
+      }
+      case ('editBoosterPump'): {
+        if(totalBooster > -1){
+          if(centralDosingUpdated[list[1]]['boosterPump'] != ''){
+            totalBooster = totalBooster + int.parse(centralDosingUpdated[list[1]]['boosterPump']);
+            if(list[2] == ''){
+              totalBooster = totalBooster - 0;
+            }else{
+              if(list[2] == '0'){
+                totalBooster = totalBooster - 1;
+              }else{
+                totalBooster = totalBooster - int.parse(list[2]);
+              }
+
+            }
+          }else{
+            if(list[2] == '0'){
+              totalBooster = totalBooster - 1;
+            }else{
+              totalBooster = totalBooster - int.parse(list[2]);
+            }
+          }
+          centralDosingUpdated[list[1]]['boosterPump'] = list[2];
+        }
+        break;
+      }
+      case ('boosterSelectionForInjector'): {
+        centralDosingUpdated[list[1]]['injector'][list[2]]['Which_Booster_Pump'] = list[3];
+        break;
+      }
+      case ('editEcSensor'): {
+        if(totalEcSensor > -1){
+          if(centralDosingUpdated[list[1]]['ec'] != ''){
+            totalEcSensor = totalEcSensor + int.parse(centralDosingUpdated[list[1]]['ec']);
+            if(list[2] == ''){
+              totalEcSensor = totalEcSensor - 0;
+            }else{
+              if(list[2] == '0'){
+                totalEcSensor = totalEcSensor - 1;
+              }else{
+                totalEcSensor = totalEcSensor - int.parse(list[2]);
+              }
+
+            }
+          }else{
+            if(list[2] == '0'){
+              totalEcSensor = totalEcSensor - 1;
+            }else{
+              totalEcSensor = totalEcSensor - int.parse(list[2]);
+            }
+          }
+          centralDosingUpdated[list[1]]['ec'] = list[2];
+        }
+        break;
+      }
+      case ('editPhSensor'): {
+        if(totalPhSensor > -1){
+          if(centralDosingUpdated[list[1]]['ph'] != ''){
+            totalPhSensor = totalPhSensor + int.parse(centralDosingUpdated[list[1]]['ph']);
+            if(list[2] == ''){
+              totalPhSensor = totalPhSensor - 0;
+            }else{
+              if(list[2] == '0'){
+                totalPhSensor = totalPhSensor - 1;
+              }else{
+                totalPhSensor = totalPhSensor - int.parse(list[2]);
+              }
+
+            }
+          }else{
+            if(list[2] == '0'){
+              totalPhSensor = totalPhSensor - 1;
+            }else{
+              totalPhSensor = totalPhSensor - int.parse(list[2]);
+            }
+          }
+          centralDosingUpdated[list[1]]['ph'] = list[2];
+        }
+        break;
+      }
+
       default : {
         break;
       }
     }
+    refreshCentralDosingList();
+    print(jsonEncode(centralDosingUpdated));
     notifyListeners();
 
   }
@@ -820,19 +1187,26 @@ class ConfigMakerProvider extends ChangeNotifier{
     switch (list[0]){
       case ('addCentralFiltration') : {
         if(totalCentralFiltration > 0 && totalFilter > 0){
-          C_F_autoIncrement += 1;
-          CF_for_MO.add({
-            '${C_F_autoIncrement}' : {
-              'filter' : [['1','-','-','-','${returnI_O_AutoIncrement()}']],
-              'D_S_valve' : [false,'-','-','-','${returnI_O_AutoIncrement()}'],
-              'P_sensor' : [false,'-','-','-','-','${returnI_O_AutoIncrement()}'],
-              'P_sensor_out' : [false,'-','-','-','-','${returnI_O_AutoIncrement()}']
+          centralFiltrationUpdated.add(
+            {
+              'sNo' : returnI_O_AutoIncrement(),
+              'selection' : 'unselect',
+              'filter' : '1',
+              'filterConnection' : [{
+                'sNo' : returnI_O_AutoIncrement(),
+                'rtu' : '-',
+                'rfNo' : '-',
+                'output' : '-',
+                'output_type' : '1',
+              }],
+              'dv' : {},
+              'pressureIn' : {},
+              'pressureOut' : {},
             }
-          });
-          centralFiltration.add(['1',false,false,false,['unselect',C_F_autoIncrement]]);
+          );
           totalCentralFiltration = totalCentralFiltration - 1;
           totalFilter = totalFilter - 1;
-          refreshCentralFiltrationList();
+          // refreshCentralFiltrationList();
         }
         break;
       }
@@ -847,20 +1221,20 @@ class ConfigMakerProvider extends ChangeNotifier{
       case ('centralFiltrationSelectAll') : {
         centralFiltrationSelectAll = list[1];
         if(list[1] == true){
-          for(var i = 0;i < centralFiltration.length;i ++){
-            centralFiltration[i][4][0] = 'select';
+          for(var i = 0;i < centralFiltrationUpdated.length;i ++){
+            centralFiltrationUpdated[i]['selection'] = 'select';
           }
         }else{
-          for(var i = 0;i < centralFiltration.length;i ++){
-            centralFiltration[i][4][0] = 'unselect';
+          for(var i = 0;i < centralFiltrationUpdated.length;i ++){
+            centralFiltrationUpdated[i]['selection'] = 'unselect';
           }
         }
         break;
       }
-      case ('editFilters') : {
+      case ('editFilter') : {
         if(totalFilter > -1){
-          if(centralFiltration[list[1]][0] != ''){
-            totalFilter = totalFilter + int.parse(centralFiltration[list[1]][0]);
+          if(centralFiltrationUpdated[list[1]]['filter'] != ''){
+            totalFilter = totalFilter + int.parse(centralFiltrationUpdated[list[1]]['filter']);
             if(list[2] == ''){
               totalFilter = totalFilter - 0;
             }else{
@@ -878,27 +1252,29 @@ class ConfigMakerProvider extends ChangeNotifier{
               totalFilter = totalFilter - int.parse(list[2]);
             }
           }
-          centralFiltration[list[1]][0] = list[2];
-          if(list[2] != ''){
-            List<List<String>> myList = [];
-            for(var i in CF_for_MO){
-              for(var j in i.entries){
-                if(j.key == '${centralFiltration[list[1]][4][1]}'){
-                  if(j.value['filter'].length > int.parse(list[2])){
-                    for(var k = 0;k < int.parse(list[2]);k++){
-                      myList.add(j.value['filter'][k]);
-                    }
-                    j.value['filter'] = myList;
-                  }else{
-                    for(var k = 0;k < int.parse(list[2]) - j.value['filter'].length;k++){
-                      myList.add(['${j.value['filter'].length + k + 1}','-','-','-','${returnI_O_AutoIncrement()}']);
-                    }
-                    for(var i in myList){
-                      j.value['filter'].add(i);
-                    }
-                  }
-                }
-              }
+          centralFiltrationUpdated[list[1]]['filter'] = list[2];
+        }
+        break;
+      }
+      case ('editFilterSelection'):{
+        if(centralFiltrationUpdated[list[1]]['filter'] == ''){
+          centralFiltrationUpdated[list[1]]['filterConnection'] = [];
+        }else{
+          if(int.parse(centralFiltrationUpdated[list[1]]['filter']) > centralFiltrationUpdated[list[1]]['filterConnection'].length){
+            int count = (int.parse(centralFiltrationUpdated[list[1]]['filter'])- centralFiltrationUpdated[list[1]]['filterConnection'].length) as int;
+            for(var i = 0; i < count;i++){
+              centralFiltrationUpdated[list[1]]['filterConnection'].add({
+                'sNo' : returnI_O_AutoIncrement(),
+                'rtu' : '-',
+                'rfNo' : '-',
+                'output' : '-',
+                'output_type' : '1',
+              });
+            }
+          }else{
+            int count = (centralFiltrationUpdated[list[1]]['filterConnection'].length - int.parse(centralFiltrationUpdated[list[1]]['filter']));
+            for(var i = 0; i < count;i++){
+              centralFiltrationUpdated[list[1]]['filterConnection'].removeLast();
             }
           }
         }
@@ -906,24 +1282,24 @@ class ConfigMakerProvider extends ChangeNotifier{
       }
       case ('editDownStreamValve') : {
         if(total_D_s_valve > 0){
-          for(var i in CF_for_MO){
-            for(var j in i.entries){
-              if(j.key == '${centralFiltration[list[1]][4][1]}'){
-                j.value['D_S_valve'][0] = list[2];
-              }
-            }
-          }
-          centralFiltration[list[1]][1] = list[2];
           if(list[2] == true){
+            centralFiltrationUpdated[list[1]]['dv'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : '-',
+              'rfNo' : '-',
+              'output' : '-',
+              'output_type' : '1',
+            };
             total_D_s_valve = total_D_s_valve - 1;
           }else{
+            centralFiltrationUpdated[list[1]]['dv'] = {};
             total_D_s_valve = total_D_s_valve + 1;
           }
 
         }
         if(total_D_s_valve == 0){
           if(list[2] == false){
-            centralFiltration[list[1]][1] = list[2];
+            centralFiltrationUpdated[list[1]]['dv'] = {};
             total_D_s_valve = total_D_s_valve + 1;
           }
         }
@@ -931,24 +1307,24 @@ class ConfigMakerProvider extends ChangeNotifier{
       }
       case ('editPressureSensor') : {
         if(total_p_sensor > 0){
-          for(var i in CF_for_MO){
-            for(var j in i.entries){
-              if(j.key == '${centralFiltration[list[1]][4][1]}'){
-                j.value['P_sensor'][0] = list[2];
-              }
-            }
-          }
-          centralFiltration[list[1]][2] = list[2];
           if(list[2] == true){
+            centralFiltrationUpdated[list[1]]['pressureIn'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : '-',
+              'rfNo' : '-',
+              'input' : '-',
+              'input_type' : '-',
+            };
             total_p_sensor = total_p_sensor - 1;
           }else{
+            centralFiltrationUpdated[list[1]]['pressureIn'] = {};
             total_p_sensor = total_p_sensor + 1;
           }
 
         }
         if(total_p_sensor == 0){
           if(list[2] == false){
-            centralFiltration[list[1]][2] = list[2];
+            centralFiltrationUpdated[list[1]]['pressureIn'] = {};
             total_p_sensor = total_p_sensor + 1;
           }
         }
@@ -956,71 +1332,70 @@ class ConfigMakerProvider extends ChangeNotifier{
       }
       case ('editPressureSensor_out') : {
         if(total_p_sensor > 0){
-          for(var i in CF_for_MO){
-            for(var j in i.entries){
-              if(j.key == '${centralFiltration[list[1]][4][1]}'){
-                j.value['P_sensor_out'][0] = list[2];
-              }
-            }
-          }
-          centralFiltration[list[1]][3] = list[2];
           if(list[2] == true){
+            centralFiltrationUpdated[list[1]]['pressureOut'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : '-',
+              'rfNo' : '-',
+              'input' : '-',
+              'input_type' : '-',
+            };
             total_p_sensor = total_p_sensor - 1;
           }else{
+            centralFiltrationUpdated[list[1]]['pressureOut'] = {};
             total_p_sensor = total_p_sensor + 1;
           }
 
         }
         if(total_p_sensor == 0){
           if(list[2] == false){
-            centralFiltration[list[1]][3] = list[2];
+            centralFiltrationUpdated[list[1]]['pressureOut'] = {};
             total_p_sensor = total_p_sensor + 1;
           }
         }
         break;
       }
       case ('selectCentralFiltration') : {
-        if(centralFiltration[list[1]][4][0] == 'select'){
-          centralFiltration[list[1]][4][0] = 'unselect';
+        if(centralFiltrationUpdated[list[1]]['selection'] == 'select'){
+          centralFiltrationUpdated[list[1]]['selection'] = 'unselect';
         }else{
-          centralFiltration[list[1]][4][0] = 'select';
+          centralFiltrationUpdated[list[1]]['selection'] = 'select';
         }
         break;
       }
       case ('deleteCentralFiltration') : {
-        var CF_for_MO_copy = List.from(CF_for_MO);
-        for(var i = centralFiltration.length -1 ; i >= 0; i--){
-          if(centralFiltration[i][4][0] == 'select'){
-            for(var j in CF_for_MO_copy){
-              for(var k in j.entries){
-                if(k.key == '${centralFiltration[i][4][1]}'){
-                  CF_for_MO.remove(j);
-                }
-              }
-            }
-            if(centralFiltration[i][1] == true){
-              total_D_s_valve = total_D_s_valve + 1;
-            }
-            if(centralFiltration[i][2] == true){
-              total_p_sensor = total_p_sensor + 1;
-            }
-            if(centralFiltration[i][0] != ''){
-              totalFilter = totalFilter + int.parse(centralFiltration[i][0]);
-            }
-            centralFiltration.removeAt(i);
-            totalCentralFiltration = totalCentralFiltration + 1;
-            refreshCentralFiltrationList();
+        List<Map<String, dynamic>> selectedSite = [];
+        for (var i = centralFiltrationUpdated.length - 1; i >= 0; i--) {
+          if (centralFiltrationUpdated[i]['selection'] == 'select') {
+            selectedSite.add(centralFiltrationUpdated[i]);
           }
+        }
+        for (var cfSite in selectedSite) {
+          if(cfSite['dv'].isNotEmpty){
+            total_D_s_valve = total_D_s_valve + 1;
+          }
+          if(cfSite['pressureIn'].isNotEmpty){
+            total_p_sensor = total_p_sensor + 1;
+          }
+          if(cfSite['pressureOut'].isNotEmpty){
+            total_p_sensor = total_p_sensor + 1;
+          }
+          if(cfSite['filter'] != ''){
+            totalFilter = totalFilter + int.parse(cfSite['filter']);
+          }
+          centralFiltrationUpdated.remove(cfSite);
+          totalCentralFiltration = totalCentralFiltration + 1;
         }
         centralFiltrationSelectAll = false;
         centralFiltrationSelection = false;
-
         break;
       }
       default :{
         break;
       }
     }
+    refreshCentralFiltrationList();
+    print(jsonEncode(centralFiltrationUpdated));
     notifyListeners();
   }
 
@@ -1066,21 +1441,83 @@ class ConfigMakerProvider extends ChangeNotifier{
     }
     notifyListeners();
   }
+  void updateIfRefNoEmptyChild(List<dynamic> data,String rtu,List<dynamic> rf,List<dynamic> updatedRF){
+    for(var i in data){
+      if(rf.length == 0){
+        print('do first');
+        if(i['rtu'] == rtu){
+          i['rtu'] = '-';
+          i['rfNo'] = '-';
+          i['output'] = '-';
+        }
+      }else{
+        print('do second');
+        if(i['rtu'] == rtu){
+          if(!updatedRF.contains(i['rfNo'])){
+            i['rfNo'] = '-';
+            i['output'] = '-';
+          }
+        }
+      }
+    }
+  }
+  void updateIfRefNoEmpty(int line,String rtu,List<dynamic> rf){
+    var updatedRF = [];
+    for(var i in rf){
+      updatedRF.add('${i}');
+    }
+    updateIfRefNoEmptyChild(irrigationLines[line]['valveConnection'],rtu,rf,updatedRF);
+    updateIfRefNoEmptyChild(irrigationLines[line]['main_valveConnection'],rtu,rf,updatedRF);
+    updateIfRefNoEmptyChild(irrigationLines[line]['foggerConnection'],rtu,rf,updatedRF);
+    updateIfRefNoEmptyChild(irrigationLines[line]['fanConnection'],rtu,rf,updatedRF);
+    ld : for(var i = 0;i < localDosingUpdated.length;i++){
+      if(localDosingUpdated[i]['sNo'] == irrigationLines[line]['sNo']){
+        updateIfRefNoEmptyChild(localDosingUpdated[i]['injector'],rtu,rf,updatedRF);
+        updateIfRefNoEmptyChild(localDosingUpdated[i]['boosterConnection'],rtu,rf,updatedRF);
+        break ld;
+      }
+    }
+    lf : for(var i = 0;i < localFiltrationUpdated.length;i++){
+      if(localFiltrationUpdated[i]['sNo'] == irrigationLines[line]['sNo']){
+        updateIfRefNoEmptyChild(localFiltrationUpdated[i]['filterConnection'],rtu,rf,updatedRF);
+        localFiltrationUpdated[i]['dv'].isNotEmpty ? updateIfRefNoEmptyChild([localFiltrationUpdated[i]['dv']],rtu,rf,updatedRF) : print('dv empty');
+        break lf;
+      }
+    }
+  }
   void irrigationLinesFunctionality(List<dynamic> list){
     switch (list[0]){
       case ('addIrrigationLine'): {
         if(totalIrrigationLine > 0 && totalValve > 0){
-          autoIncrement += 1;
           irrigationLines.add({
             'valve' : '1',
+            'valveConnection' : [
+              {
+                'sNo' : returnI_O_AutoIncrement(),
+                'rtu' : '-',
+                'rfNo' : '-',
+                'output' : '-',
+                'output_type' : '1',
+              }
+            ],
             'main_valve' : '',
+            'main_valveConnection' : [],
+            'moistureSensor' : '',
+            'moistureSensorConnection' : [],
+            'levelSensor' : '',
+            'levelSensorConnection' : [],
+            'fogger' : '',
+            'foggerConnection' : [],
+            'fan' : '',
+            'fanConnection' : [],
             'Central_dosing_site' : '-',
             'Central_filtration_site' : '-',
             'Local_dosing_site' : false,
             'local_filtration_site' : false,
-            'pressure_sensor' : false,
+            'pressureIn' : {},
+            'pressureOut' : {},
             'irrigationPump' : '-',
-            'water_meter' : false,
+            'water_meter' : {},
             'ORO_Smart_RTU' : '',
             'RTU' : '',
             'ORO_switch' : '',
@@ -1091,7 +1528,7 @@ class ConfigMakerProvider extends ChangeNotifier{
             'myRTU' : [],
             'myOROswitch' : [],
             'myOROsense' : [],
-            'autoIncrement' : autoIncrement,
+            'sNo' : returnI_O_AutoIncrement(),
           },);
           totalIrrigationLine = totalIrrigationLine - 1;
           totalValve = totalValve - 1;
@@ -1099,7 +1536,7 @@ class ConfigMakerProvider extends ChangeNotifier{
         break;
       }
       case ('updateAI') : {
-        irrigationLines[list[1]]['autoIncrement'] = list[2];
+        irrigationLines[list[1]]['sNo'] = list[2];
         break;
       }
       case ('editIrrigationSelectAll') : {
@@ -1135,41 +1572,12 @@ class ConfigMakerProvider extends ChangeNotifier{
         break;
       }
       case 'deleteIrrigationLine': {
+        List<int> ld = [];
+        List<int> lf = [];
         irrigationSelection = false;
         irrigationSelectAll = false;
         for (var i = irrigationLines.length - 1; i >= 0; i--) {
           if (irrigationLines[i]['isSelected'] == 'select') {
-            if(irrigationLines[i]['Local_dosing_site'] == true){
-              totalInjector += 1;
-              for(var j = localDosing.length - 1;j >= 0;j--){
-                if(localDosing[j][localDosing[j].length -1][1] == i+1){
-                  for(var ld = 0; ld < localDosing[j].length - 1;ld++){
-                    if(localDosing[j][ld][1] == true){
-                      totalDosingMeter += 1;
-                    }
-                    if(localDosing[j][ld][2] == true){
-                      totalBooster += 1;
-                    }
-                  }
-                  localDosing.removeAt(j);
-                }
-
-              }
-            }
-            if(irrigationLines[i]['local_filtration_site'] == true){
-              totalFilter += 1;
-              for(var j = 0;j < localFiltration.length;j++){
-                if(localFiltration[j][0] == i+1){
-                  if(localFiltration[j][2] == true){
-                    total_D_s_valve += 1;
-                  }
-                  if(localFiltration[j][3] == true){
-                    total_p_sensor += 1;
-                  }
-                  localFiltration.removeAt(j);
-                }
-              }
-            }
             if(irrigationLines[i]['myOroSmartRtu'].length != 0){
               for(var i in irrigationLines[i]['myOroSmartRtu']){
                 OroSmartRtuForLine.add(i);
@@ -1200,9 +1608,49 @@ class ConfigMakerProvider extends ChangeNotifier{
             if(irrigationLines[i]['ORO_sense'].length != 0){
               totalOroSense = totalOroSense + int.parse(irrigationLines[i]['ORO_sense']);
             }
+            total_p_sensor = total_p_sensor + (irrigationLines[i]['pressureIn'].isEmpty ? 0 : 1);
+            total_p_sensor = total_p_sensor + (irrigationLines[i]['pressureOut'].isEmpty ? 0 : 1);
+            totalWaterMeter = totalWaterMeter + (irrigationLines[i]['water_meter'].isEmpty ? 0 : 1);
+            totalMainValve = totalMainValve + irrigationLines[i]['main_valveConnection'].length as int;
+            totalMoistureSensor = totalMoistureSensor + irrigationLines[i]['moistureSensorConnection'].length as int;
+            totalLevelSensor = totalLevelSensor + irrigationLines[i]['levelSensorConnection'].length as int;
+            totalFogger = totalFogger + irrigationLines[i]['foggerConnection'].length as int;
+            totalFan = totalFan + irrigationLines[i]['fanConnection'].length as int;
             totalValve = totalValve + int.parse(irrigationLines[i]['valve']);
             totalIrrigationLine = totalIrrigationLine + 1;
+            ld.add(irrigationLines[i]['sNo']);
+            lf.add(irrigationLines[i]['sNo']);
             irrigationLines.removeAt(i);
+          }
+        }
+        for(var i in ld){
+          localDosingFunctionality(['deleteLocalDosingFromLine',i]);
+        }
+        for(var i in lf){
+          localFiltrationFunctionality(['deleteLocalFiltrationFromLine',i]);
+        }
+        break;
+      }
+      case ('editValveConnection'):{
+        if(irrigationLines[list[1]]['valve'] == ''){
+          irrigationLines[list[1]]['valveConnection'] = [];
+        }else{
+          if(int.parse(irrigationLines[list[1]]['valve']) > irrigationLines[list[1]]['valveConnection'].length){
+            int count = (int.parse(irrigationLines[list[1]]['valve'])- irrigationLines[list[1]]['valveConnection'].length) as int;
+            for(var i = 0; i < count;i++){
+              irrigationLines[list[1]]['valveConnection'].add({
+                'sNo' : returnI_O_AutoIncrement(),
+                'rtu' : '-',
+                'rfNo' : '-',
+                'output' : '-',
+                'output_type' : '1',
+              });
+            }
+          }else{
+            int count = (irrigationLines[list[1]]['valveConnection'].length - int.parse(irrigationLines[list[1]]['valve']));
+            for(var i = 0; i < count;i++){
+              irrigationLines[list[1]]['valveConnection'].removeLast();
+            }
           }
         }
         break;
@@ -1230,7 +1678,30 @@ class ConfigMakerProvider extends ChangeNotifier{
           }
           irrigationLines[list[1]]['valve'] = list[2];
         }
-        print('function finished for valve');
+        break;
+      }
+      case ('editMainValveConnection'):{
+        if(irrigationLines[list[1]]['main_valve'] == ''){
+          irrigationLines[list[1]]['main_valveConnection'] = [];
+        }else{
+          if(int.parse(irrigationLines[list[1]]['main_valve']) > irrigationLines[list[1]]['main_valveConnection'].length){
+            int count = (int.parse(irrigationLines[list[1]]['main_valve'])- irrigationLines[list[1]]['main_valveConnection'].length) as int;
+            for(var i = 0; i < count;i++){
+              irrigationLines[list[1]]['main_valveConnection'].add({
+                'sNo' : returnI_O_AutoIncrement(),
+                'rtu' : '-',
+                'rfNo' : '-',
+                'output' : '-',
+                'output_type' : '-',
+              });
+            }
+          }else{
+            int count = (irrigationLines[list[1]]['main_valveConnection'].length - int.parse(irrigationLines[list[1]]['main_valve']));
+            for(var i = 0; i < count;i++){
+              irrigationLines[list[1]]['main_valveConnection'].removeLast();
+            }
+          }
+        }
         break;
       }
       case ('editMainValve'): {
@@ -1255,6 +1726,202 @@ class ConfigMakerProvider extends ChangeNotifier{
             }
           }
           irrigationLines[list[1]]['main_valve'] = list[2];
+        }
+        break;
+      }
+      case ('editMoistureSensorConnection'):{
+        if(irrigationLines[list[1]]['moistureSensor'] == ''){
+          irrigationLines[list[1]]['moistureSensorConnection'] = [];
+        }else{
+          if(int.parse(irrigationLines[list[1]]['moistureSensor']) > irrigationLines[list[1]]['moistureSensorConnection'].length){
+            int count = (int.parse(irrigationLines[list[1]]['moistureSensor'])- irrigationLines[list[1]]['moistureSensorConnection'].length) as int;
+            for(var i = 0; i < count;i++){
+              irrigationLines[list[1]]['moistureSensorConnection'].add({
+                'sNo' : returnI_O_AutoIncrement(),
+                'rtu' : '-',
+                'rfNo' : '-',
+                'input' : '-',
+                'input_type' : '-',
+              });
+            }
+          }else{
+            int count = (irrigationLines[list[1]]['moistureSensorConnection'].length - int.parse(irrigationLines[list[1]]['moistureSensor']));
+            for(var i = 0; i < count;i++){
+              irrigationLines[list[1]]['moistureSensorConnection'].removeLast();
+            }
+          }
+        }
+        break;
+      }
+      case ('editMoistureSensor'): {
+        if(totalMoistureSensor > -1){
+          if(irrigationLines[list[1]]['moistureSensor'] != ''){
+            totalMoistureSensor = totalMoistureSensor + int.parse(irrigationLines[list[1]]['moistureSensor']);
+            if(list[2] == ''){
+              totalMoistureSensor = totalMoistureSensor - 0;
+            }else{
+              if(list[2] == '0'){
+                totalMoistureSensor = totalMoistureSensor - 1;
+              }else{
+                totalMoistureSensor = totalMoistureSensor - int.parse(list[2]);
+              }
+
+            }
+          }else{
+            if(list[2] == '0'){
+              totalMoistureSensor = totalMoistureSensor - 1;
+            }else{
+              totalMoistureSensor = totalMoistureSensor - int.parse(list[2]);
+            }
+          }
+          irrigationLines[list[1]]['moistureSensor'] = list[2];
+        }
+        break;
+      }
+      case ('editLevelSensorConnection'):{
+        if(irrigationLines[list[1]]['levelSensor'] == ''){
+          irrigationLines[list[1]]['levelSensorConnection'] = [];
+        }else{
+          if(int.parse(irrigationLines[list[1]]['levelSensor']) > irrigationLines[list[1]]['levelSensorConnection'].length){
+            int count = (int.parse(irrigationLines[list[1]]['levelSensor'])- irrigationLines[list[1]]['levelSensorConnection'].length) as int;
+            for(var i = 0; i < count;i++){
+              irrigationLines[list[1]]['levelSensorConnection'].add({
+                'sNo' : returnI_O_AutoIncrement(),
+                'rtu' : '-',
+                'rfNo' : '-',
+                'input' : '-',
+                'input_type' : '-',
+              });
+            }
+          }else{
+            int count = (irrigationLines[list[1]]['levelSensorConnection'].length - int.parse(irrigationLines[list[1]]['levelSensor']));
+            for(var i = 0; i < count;i++){
+              irrigationLines[list[1]]['levelSensorConnection'].removeLast();
+            }
+          }
+        }
+        break;
+      }
+      case ('editLevelSensor'): {
+        if(totalLevelSensor > -1){
+          if(irrigationLines[list[1]]['levelSensor'] != ''){
+            totalLevelSensor = totalLevelSensor + int.parse(irrigationLines[list[1]]['levelSensor']);
+            if(list[2] == ''){
+              totalLevelSensor = totalLevelSensor - 0;
+            }else{
+              if(list[2] == '0'){
+                totalLevelSensor = totalLevelSensor - 1;
+              }else{
+                totalLevelSensor = totalLevelSensor - int.parse(list[2]);
+              }
+
+            }
+          }else{
+            if(list[2] == '0'){
+              totalLevelSensor = totalLevelSensor - 1;
+            }else{
+              totalLevelSensor = totalLevelSensor - int.parse(list[2]);
+            }
+          }
+          irrigationLines[list[1]]['levelSensor'] = list[2];
+        }
+        break;
+      }
+      case ('editFoggerConnection'):{
+        if(irrigationLines[list[1]]['fogger'] == ''){
+          irrigationLines[list[1]]['foggerConnection'] = [];
+        }else{
+          if(int.parse(irrigationLines[list[1]]['fogger']) > irrigationLines[list[1]]['foggerConnection'].length){
+            int count = (int.parse(irrigationLines[list[1]]['fogger'])- irrigationLines[list[1]]['foggerConnection'].length) as int;
+            for(var i = 0; i < count;i++){
+              irrigationLines[list[1]]['foggerConnection'].add({
+                'sNo' : returnI_O_AutoIncrement(),
+                'rtu' : '-',
+                'rfNo' : '-',
+                'output' : '-',
+                'output_type' : '-',
+              });
+            }
+          }else{
+            int count = (irrigationLines[list[1]]['foggerConnection'].length - int.parse(irrigationLines[list[1]]['fogger']));
+            for(var i = 0; i < count;i++){
+              irrigationLines[list[1]]['foggerConnection'].removeLast();
+            }
+          }
+        }
+        break;
+      }
+      case ('editFogger'): {
+        if(totalFogger > -1){
+          if(irrigationLines[list[1]]['fogger'] != ''){
+            totalFogger = totalFogger + int.parse(irrigationLines[list[1]]['fogger']);
+            if(list[2] == ''){
+              totalFogger = totalFogger - 0;
+            }else{
+              if(list[2] == '0'){
+                totalFogger = totalFogger - 1;
+              }else{
+                totalFogger = totalFogger - int.parse(list[2]);
+              }
+
+            }
+          }else{
+            if(list[2] == '0'){
+              totalFogger = totalFogger - 1;
+            }else{
+              totalFogger = totalFogger - int.parse(list[2]);
+            }
+          }
+          irrigationLines[list[1]]['fogger'] = list[2];
+        }
+        break;
+      }
+      case ('editFanConnection'):{
+        if(irrigationLines[list[1]]['fan'] == ''){
+          irrigationLines[list[1]]['fanConnection'] = [];
+        }else{
+          if(int.parse(irrigationLines[list[1]]['fan']) > irrigationLines[list[1]]['fanConnection'].length){
+            int count = (int.parse(irrigationLines[list[1]]['fan'])- irrigationLines[list[1]]['fanConnection'].length) as int;
+            for(var i = 0; i < count;i++){
+              irrigationLines[list[1]]['fanConnection'].add({
+                'sNo' : returnI_O_AutoIncrement(),
+                'rtu' : '-',
+                'rfNo' : '-',
+                'output' : '-',
+                'output_type' : '-',
+              });
+            }
+          }else{
+            int count = (irrigationLines[list[1]]['fanConnection'].length - int.parse(irrigationLines[list[1]]['fan']));
+            for(var i = 0; i < count;i++){
+              irrigationLines[list[1]]['fanConnection'].removeLast();
+            }
+          }
+        }
+        break;
+      }
+      case ('editFan'): {
+        if(totalFan > -1){
+          if(irrigationLines[list[1]]['fan'] != ''){
+            totalFan = totalFan + int.parse(irrigationLines[list[1]]['fan']);
+            if(list[2] == ''){
+              totalFan = totalFan - 0;
+            }else{
+              if(list[2] == '0'){
+                totalFan = totalFan - 1;
+              }else{
+                totalFan = totalFan - int.parse(list[2]);
+              }
+
+            }
+          }else{
+            if(list[2] == '0'){
+              totalFan = totalFan - 1;
+            }else{
+              totalFan = totalFan - int.parse(list[2]);
+            }
+          }
+          irrigationLines[list[1]]['fan'] = list[2];
         }
         break;
       }
@@ -1317,6 +1984,7 @@ class ConfigMakerProvider extends ChangeNotifier{
             }
           }
         }
+        updateIfRefNoEmpty(list[1],'ORO Smart RTU',irrigationLines[list[1]]['myOroSmartRtu']);
         break;
       }
       case ('editRTU'): {
@@ -1379,6 +2047,7 @@ class ConfigMakerProvider extends ChangeNotifier{
           }
         }
         ///////////////////////////////////////////////////////////////////////////////////////
+        updateIfRefNoEmpty(list[1],'ORO RTU',irrigationLines[list[1]]['myRTU']);
         break;
       }
       case ('editOroSwitch'): {
@@ -1442,6 +2111,7 @@ class ConfigMakerProvider extends ChangeNotifier{
             }
           }
         }
+        updateIfRefNoEmpty(list[1],'ORO Switch',irrigationLines[list[1]]['myOROswitch']);
         break;
       }
       case ('editOroSense'): {
@@ -1503,12 +2173,14 @@ class ConfigMakerProvider extends ChangeNotifier{
             }
           }
         }
+        updateIfRefNoEmpty(list[1],'ORO Sense',irrigationLines[list[1]]['myOROsense']);
         break;
       }
       case ('editLocalDosing'): {
+        print(list);
         irrigationLines[list[1]]['Local_dosing_site'] = list[2];
         if(list[2] == true){
-          localDosingFunctionality(['addLocalDosing',list[3],list[4],list[5],list[6],list[1]]);
+          localDosingFunctionality(['addLocalDosing',irrigationLines[list[1]]['sNo'],list[4],list[5],list[6]]);
         }else{
           localDosingFunctionality(['deleteLocalDosingFromLine',list[1]]);
         }
@@ -1517,25 +2189,57 @@ class ConfigMakerProvider extends ChangeNotifier{
       case ('editLocalFiltration'): {
         irrigationLines[list[1]]['local_filtration_site'] = list[2];
         if(list[2] == true){
-          localFiltrationFunctionality(['addFiltrationDosing',list[1]]);
+          localFiltrationFunctionality(['addFiltrationDosing',irrigationLines[list[1]]['sNo']]);
         }else{
-          localFiltrationFunctionality(['deleteLocalFiltrationFromLine',list[1]]);
+          localFiltrationFunctionality(['deleteLocalFiltrationFromLine',irrigationLines[list[1]]['sNo']]);
         }
         break;
       }
-      case ('editPressureSensor'): {
+      case ('editPressureSensorInConnection'): {
         if(total_p_sensor > 0){
-          irrigationLines[list[1]]['pressure_sensor'] = list[2];
           if(list[2] == true){
+            irrigationLines[list[1]]['pressureIn'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : '-',
+              'rfNo' : '-',
+              'input' : '-',
+              'input_type' : '-',
+            };
             total_p_sensor = total_p_sensor - 1;
           }else{
+            irrigationLines[list[1]]['pressureIn'] = {};
             total_p_sensor = total_p_sensor + 1;
           }
 
         }
         if(total_p_sensor == 0){
           if(list[2] == false){
-            irrigationLines[list[1]]['pressure_sensor'] = list[2];
+            irrigationLines[list[1]]['pressureIn'] = {};
+            total_p_sensor = total_p_sensor + 1;
+          }
+        }
+        break;
+      }
+      case ('editPressureSensorOutConnection'): {
+        if(total_p_sensor > 0){
+          if(list[2] == true){
+            irrigationLines[list[1]]['pressureOut'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : '-',
+              'rfNo' : '-',
+              'input' : '-',
+              'input_type' : '-',
+            };
+            total_p_sensor = total_p_sensor - 1;
+          }else{
+            irrigationLines[list[1]]['pressureOut'] = {};
+            total_p_sensor = total_p_sensor + 1;
+          }
+
+        }
+        if(total_p_sensor == 0){
+          if(list[2] == false){
+            irrigationLines[list[1]]['pressureOut'] = {};
             total_p_sensor = total_p_sensor + 1;
           }
         }
@@ -1555,60 +2259,62 @@ class ConfigMakerProvider extends ChangeNotifier{
       }
       case ('editWaterMeter'): {
         if(totalWaterMeter > 0){
-          irrigationLines[list[1]]['water_meter'] = list[2];
           if(list[2] == true){
+            irrigationLines[list[1]]['water_meter'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : '-',
+              'rfNo' : '-',
+              'input' : '-',
+              'input_type' : '-',
+            };
             totalWaterMeter = totalWaterMeter - 1;
           }else{
+            irrigationLines[list[1]]['water_meter'] = {};
             totalWaterMeter = totalWaterMeter + 1;
           }
 
         }
         if(totalWaterMeter == 0){
           if(list[2] == false){
-            irrigationLines[list[1]]['water_meter'] = list[2];
+            irrigationLines[list[1]]['water_meter'] = {};
             totalWaterMeter = totalWaterMeter + 1;
           }
         }
+
         break;
       }
     }
+    print(jsonEncode(irrigationLines));
     notifyListeners();
   }
-
+  int setLine(int autoIncrement){
+    print('ai : $autoIncrement');
+    int value = 0;
+    for(var i in irrigationLines){
+      if(i['sNo'] == autoIncrement){
+        value = irrigationLines.indexOf(i);
+      }
+    }
+    return value;
+  }
   void localDosingFunctionality(List<dynamic> list){
     switch (list[0]){
       case ('addLocalDosing'):{
         if(totalInjector > 0){
-          for(var i = 0;i < list[1];i++){
-            List<List<dynamic>> myList = [];
-            for(var j = 0;j < list[2];j++){
-              totalInjector = totalInjector - 1;
-              if(list[3] == true){
-                totalDosingMeter = totalDosingMeter - 1;
-              }
-              if(list[4] == true){
-                totalBooster = totalBooster - 1;
-              }
-              myList.add([j+1,list[3],list[4],'${returnCD_channel_autoIncrement()}']);
-            }
-            myList.add(['unselect',list[5]+1]);
-            localDosing.add(myList);
-          }
+          localDosingUpdated.add({
+            'line' : setLine(list[1]) + 1,
+            'sNo' : list[1],
+            'selection' : 'unselect',
+            'injector' : addBatchInjector(list[2]),
+            'boosterPump' : '',
+            'boosterConnection' : [],
+            'ec' : '',
+            'ecConnection' : [],
+            'ph' : '',
+            'phConnection' : []
+          });
         }
-        var myList = [];
-        List<List<List<dynamic>>> dummyLd = [];
-        for(var ld = 0;ld < localDosing.length;ld++){
-          myList.add(localDosing[ld][localDosing[ld].length -1][1]);
-        }
-        myList.sort();
-        for(var i in myList){
-          for(var ld = 0;ld < localDosing.length;ld++){
-            if(localDosing[ld][localDosing[ld].length -1][1] == i){
-              dummyLd.add(localDosing[ld]);
-            }
-          }
-        }
-        localDosing = dummyLd;
+        localDosingUpdated.sort((a, b) => a['line'].compareTo(b['line']));
         break;
       }
       case ('edit_l_DosingSelection'):{
@@ -1617,95 +2323,253 @@ class ConfigMakerProvider extends ChangeNotifier{
       }
       case ('edit_l_DosingSelectAll'):{
         l_dosingSelectAll = list[1];
+        for(var i in localDosingUpdated){
+          i['selection'] = list[1] == true ? 'select' : 'unselect';
+        }
         break;
       }
-      case ('editDosingMeter') :{
+      case ('editDosingMeter') : {
         if(totalDosingMeter > 0){
-          localDosing[list[1]][list[2]][1] = list[3];
           if(list[3] == true){
+            localDosingUpdated[list[1]]['injector'][list[2]]['dosingMeter'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : '-',
+              'rfNo' : '-',
+              'input' : '-',
+              'input_type' : '-',
+            };
             totalDosingMeter = totalDosingMeter - 1;
           }else{
+            localDosingUpdated[list[1]]['injector'][list[2]]['dosingMeter'] = {};
             totalDosingMeter = totalDosingMeter + 1;
           }
         }
         if(totalDosingMeter == 0){
           if(list[3] == false){
-            localDosing[list[1]][list[2]][1] = list[3];
+            localDosingUpdated[list[1]]['injector'][list[2]]['dosingMeter'] = {};
             totalDosingMeter = totalDosingMeter + 1;
           }
         }
         break;
       }
-      case ('editBoosterPump') :{
-        if(totalBooster > 0){
-          localDosing[list[1]][list[2]][2] = list[3];
-          if(list[3] == true){
-            totalBooster = totalBooster - 1;
-          }else{
-            totalBooster = totalBooster + 1;
-          }
-        }
-        if(totalBooster == 0){
-          if(list[3] == false){
-            localDosing[list[1]][list[2]][2] = list[3];
-            totalBooster = totalBooster + 1;
-          }
-        }
-        break;
-      }
-      case ('editChannelNumber') :{
-        localDosing[list[1]][list[2]][3] = list[3];
-        break;
-      }
-      case ('selectLocalDosing') :{
-        if(localDosing[list[1]][localDosing[list[1]].length - 1][0] == 'unselect'){
-          localDosing[list[1]][localDosing[list[1]].length - 1][0] = 'select';
+      case ('selectLocalDosing') : {
+        if(localDosingUpdated[list[1]]['selection'] == 'unselect'){
+          localDosingUpdated[list[1]]['selection'] = 'select';
           selection += 1;
         }else{
-          localDosing[list[1]][localDosing[list[1]].length - 1][0] = 'unselect';
+          localDosingUpdated[list[1]]['selection'] = 'unselect';
           selection -= 1;
         }
         break;
       }
       case ('deleteLocalDosing') : {
-        selection = 0;
-        for(var i = localDosing.length - 1; i >= 0; i--){
-          if(localDosing[i][localDosing[i].length - 1][0] == 'select'){
-            for(var il = 0;il < irrigationLines.length;il++){
-              if(il + 1 == localDosing[i][localDosing[i].length - 1][1]){
-                irrigationLines[il]['Local_dosing_site'] = false;
-              }
+        List<Map<String, dynamic>> selectedSite = [];
+        for (var i = localDosingUpdated.length - 1; i >= 0; i--) {
+          if (localDosingUpdated[i]['selection'] == 'select') {
+            selectedSite.add(localDosingUpdated[i]);
+          }
+        }
+        for (var i in selectedSite) {
+          totalInjector = totalInjector + i['injector'].length as int;
+          totalBooster = totalBooster + i['boosterConnection'].length as int;
+          totalEcSensor = totalEcSensor + i['ecConnection'].length as int;
+          totalPhSensor = totalPhSensor + i['phConnection'].length as int;
+          for(var i in i['injector']){
+            if(i['dosingMeter'].isNotEmpty){
+              totalDosingMeter = totalDosingMeter + 1;
             }
-            for(var j = 0; j< localDosing[i].length;j++){
-              if(j != localDosing[i].length - 1){
-                if(localDosing[i][j][1] == true){
-                  totalDosingMeter = totalDosingMeter + 1;
-                }
-                if(localDosing[i][j][2] == true){
-                  totalBooster = totalBooster + 1;
+          }
+          for(var irr in irrigationLines){
+            if(irr['sNo'] == i['sNo']){
+              irr['Local_dosing_site'] = false;
+            }
+          }
+          localDosingUpdated.remove(i);
+        }
+        break;
+      }
+      case ('editBoosterPumpSelection'):{
+        if(localDosingUpdated[list[1]]['boosterPump'] == ''){
+          localDosingUpdated[list[1]]['boosterConnection'] = [];
+          for(var inj = 0;inj < localDosingUpdated[list[1]]['injector'].length;inj++){
+            localDosingUpdated[list[1]]['injector'][inj]['Which_Booster_Pump'] = '-';
+          }
+        }else{
+          if(int.parse(localDosingUpdated[list[1]]['boosterPump']) > localDosingUpdated[list[1]]['boosterConnection'].length){
+            int count = (int.parse(localDosingUpdated[list[1]]['boosterPump'])- localDosingUpdated[list[1]]['boosterConnection'].length) as int;
+            for(var i = 0; i < count;i++){
+              localDosingUpdated[list[1]]['boosterConnection'].add({
+                'sNo' : returnI_O_AutoIncrement(),
+                'rtu' : '-',
+                'rfNo' : '-',
+                'output' : '-',
+                'output_type' : '1',
+              });
+            }
+          }else{
+            int count = (localDosingUpdated[list[1]]['boosterConnection'].length - int.parse(localDosingUpdated[list[1]]['boosterPump']));
+            for(var i = 0; i < count;i++){
+              for(var inj = 0;inj < localDosingUpdated[list[1]]['injector'].length;inj++){
+                if(localDosingUpdated[list[1]]['injector'][inj]['Which_Booster_Pump'].contains('${localDosingUpdated[list[1]]['boosterConnection'].length}')){
+                  localDosingUpdated[list[1]]['injector'][inj]['Which_Booster_Pump'] = '-';
                 }
               }
+              localDosingUpdated[list[1]]['boosterConnection'].removeLast();
             }
-            localDosing.removeAt(i);
-            totalInjector = totalInjector + 1;
           }
         }
         break;
       }
+      case ('editEcSelection'):{
+        if(localDosingUpdated[list[1]]['ec'] == ''){
+          localDosingUpdated[list[1]]['ecConnection'] = [];
+        }else{
+          if(int.parse(localDosingUpdated[list[1]]['ec']) > localDosingUpdated[list[1]]['ecConnection'].length){
+            int count = (int.parse(localDosingUpdated[list[1]]['ec'])- localDosingUpdated[list[1]]['ecConnection'].length) as int;
+            for(var i = 0; i < count;i++){
+              localDosingUpdated[list[1]]['ecConnection'].add({
+                'sNo' : returnI_O_AutoIncrement(),
+                'rtu' : '-',
+                'rfNo' : '-',
+                'input' : '-',
+                'input_type' : '-',
+              });
+            }
+          }else{
+            int count = (localDosingUpdated[list[1]]['ecConnection'].length - int.parse(localDosingUpdated[list[1]]['ec']));
+            for(var i = 0; i < count;i++){
+              localDosingUpdated[list[1]]['ecConnection'].removeLast();
+            }
+          }
+        }
+        break;
+      }
+      case ('editPhSelection'):{
+        if(localDosingUpdated[list[1]]['ph'] == ''){
+          localDosingUpdated[list[1]]['phConnection'] = [];
+        }else{
+          if(int.parse(localDosingUpdated[list[1]]['ph']) > localDosingUpdated[list[1]]['phConnection'].length){
+            int count = (int.parse(localDosingUpdated[list[1]]['ph'])- localDosingUpdated[list[1]]['phConnection'].length) as int;
+            for(var i = 0; i < count;i++){
+              localDosingUpdated[list[1]]['phConnection'].add({
+                'sNo' : returnI_O_AutoIncrement(),
+                'rtu' : '-',
+                'rfNo' : '-',
+                'input' : '-',
+                'input_type' : '-',
+              });
+            }
+          }else{
+            int count = (localDosingUpdated[list[1]]['phConnection'].length - int.parse(localDosingUpdated[list[1]]['ph']));
+            for(var i = 0; i < count;i++){
+              localDosingUpdated[list[1]]['phConnection'].removeLast();
+            }
+          }
+        }
+        break;
+      }
+      case ('editBoosterPump'): {
+        if(totalBooster > -1){
+          if(localDosingUpdated[list[1]]['boosterPump'] != ''){
+            totalBooster = totalBooster + int.parse(localDosingUpdated[list[1]]['boosterPump']);
+            if(list[2] == ''){
+              totalBooster = totalBooster - 0;
+            }else{
+              if(list[2] == '0'){
+                totalBooster = totalBooster - 1;
+              }else{
+                totalBooster = totalBooster - int.parse(list[2]);
+              }
+
+            }
+          }else{
+            if(list[2] == '0'){
+              totalBooster = totalBooster - 1;
+            }else{
+              totalBooster = totalBooster - int.parse(list[2]);
+            }
+          }
+          localDosingUpdated[list[1]]['boosterPump'] = list[2];
+        }
+        break;
+      }
+      case ('boosterSelectionForInjector'): {
+        localDosingUpdated[list[1]]['injector'][list[2]]['Which_Booster_Pump'] = list[3];
+        break;
+      }
+      case ('editEcSensor'): {
+        if(totalEcSensor > -1){
+          if(localDosingUpdated[list[1]]['ec'] != ''){
+            totalEcSensor = totalEcSensor + int.parse(localDosingUpdated[list[1]]['ec']);
+            if(list[2] == ''){
+              totalEcSensor = totalEcSensor - 0;
+            }else{
+              if(list[2] == '0'){
+                totalEcSensor = totalEcSensor - 1;
+              }else{
+                totalEcSensor = totalEcSensor - int.parse(list[2]);
+              }
+
+            }
+          }else{
+            if(list[2] == '0'){
+              totalEcSensor = totalEcSensor - 1;
+            }else{
+              totalEcSensor = totalEcSensor - int.parse(list[2]);
+            }
+          }
+          localDosingUpdated[list[1]]['ec'] = list[2];
+        }
+        break;
+      }
+      case ('editPhSensor'): {
+        if(totalPhSensor > -1){
+          if(localDosingUpdated[list[1]]['ph'] != ''){
+            totalPhSensor = totalPhSensor + int.parse(localDosingUpdated[list[1]]['ph']);
+            if(list[2] == ''){
+              totalPhSensor = totalPhSensor - 0;
+            }else{
+              if(list[2] == '0'){
+                totalPhSensor = totalPhSensor - 1;
+              }else{
+                totalPhSensor = totalPhSensor - int.parse(list[2]);
+              }
+
+            }
+          }else{
+            if(list[2] == '0'){
+              totalPhSensor = totalPhSensor - 1;
+            }else{
+              totalPhSensor = totalPhSensor - int.parse(list[2]);
+            }
+          }
+          localDosingUpdated[list[1]]['ph'] = list[2];
+        }
+        break;
+      }
       case ('deleteLocalDosingFromLine') : {
-        for(var i = 0;i < localDosing.length;i++){
-          if(localDosing[i][localDosing[i].length - 1][1] == list[1]+1){
-            for(var j = 0; j< localDosing[i].length - 1;j++){
-              if(localDosing[i][j][1] == true){
+        List<Map<String,dynamic>> Deletelist = [];
+        for(var i = 0;i < localDosingUpdated.length;i++){
+          if(localDosingUpdated[i]['sNo'] == list[1]){
+            Deletelist.add(localDosingUpdated[i]);
+          }
+        }
+        for(var i in Deletelist){
+          if(localDosingUpdated.contains(i)){
+            totalInjector = totalInjector + i['injector'].length as int;
+            totalBooster = totalBooster + i['boosterConnection'].length as int;
+            totalEcSensor = totalEcSensor + i['ecConnection'].length as int;
+            totalPhSensor = totalPhSensor + i['phConnection'].length as int;
+            for(var i in i['injector']){
+              if(i['dosingMeter'].isNotEmpty){
                 totalDosingMeter = totalDosingMeter + 1;
               }
-              if(localDosing[i][j][2] == true){
-                totalBooster = totalBooster + 1;
-              }
             }
-            localDosing.removeAt(i);
-            totalInjector = totalInjector + 1;
+            localDosingUpdated.remove(i);
           }
+        }
+        for(var i in localDosingUpdated){
+          i['line'] = setLine(i['sNo']) + 1;
         }
         break;
       }
@@ -1717,11 +2581,30 @@ class ConfigMakerProvider extends ChangeNotifier{
   }
 
   void localFiltrationFunctionality(List<dynamic> list){
+    print(list);
     switch (list[0]){
       case ('addFiltrationDosing'):{
         totalFilter -= 1;
-        localFiltration.add([list[1] + 1,'1',false,false,false,'unselect']);
-        localFiltration.sort((a, b) => a[0].compareTo(b[0]));
+        localFiltrationUpdated.add(
+            {
+              'line' : setLine(list[1]) + 1,
+              'sNo' : list[1],
+              'selection' : 'unselect',
+              'filter' : '1',
+              'filterConnection' : [{
+                'sNo' : returnI_O_AutoIncrement(),
+                'rtu' : '-',
+                'rfNo' : '-',
+                'output' : '-',
+                'output_type' : '1',
+              }],
+              'dv' : {},
+              'pressureIn' : {},
+              'pressureOut' : {},
+            }
+        );
+        localFiltrationUpdated.sort((a, b) => a['line'].compareTo(b['line']));
+
         break;
       }
       case ('edit_l_filtrationSelection'):{
@@ -1734,8 +2617,8 @@ class ConfigMakerProvider extends ChangeNotifier{
       }
       case ('editFilter') :{
         if(totalFilter > -1){
-          if(localFiltration[list[1]][1] != ''){
-            totalFilter = totalFilter + int.parse(localFiltration[list[1]][1]);
+          if(localFiltrationUpdated[list[1]]['filter'] != ''){
+            totalFilter = totalFilter + int.parse(localFiltrationUpdated[list[1]]['filter']);
             if(list[2] == ''){
               totalFilter = totalFilter - 0;
             }else{
@@ -1753,968 +2636,634 @@ class ConfigMakerProvider extends ChangeNotifier{
               totalFilter = totalFilter - int.parse(list[2]);
             }
           }
-          localFiltration[list[1]][1] = list[2];
+          localFiltrationUpdated[list[1]]['filter'] = list[2];
         }
         break;
       }
-      case ('editDownStreamValve') :{
-        if(list[2] == true){
-          total_D_s_valve -= 1;
+      case ('editFilterSelection'):{
+        if(localFiltrationUpdated[list[1]]['filter'] == ''){
+          localFiltrationUpdated[list[1]]['filterConnection'] = [];
         }else{
-          total_D_s_valve += 1;
+          if(int.parse(localFiltrationUpdated[list[1]]['filter']) > localFiltrationUpdated[list[1]]['filterConnection'].length){
+            int count = (int.parse(localFiltrationUpdated[list[1]]['filter'])- localFiltrationUpdated[list[1]]['filterConnection'].length) as int;
+            for(var i = 0; i < count;i++){
+              localFiltrationUpdated[list[1]]['filterConnection'].add({
+                'sNo' : returnI_O_AutoIncrement(),
+                'rtu' : '-',
+                'rfNo' : '-',
+                'output' : '-',
+                'output_type' : '1',
+              });
+            }
+          }else{
+            int count = (localFiltrationUpdated[list[1]]['filterConnection'].length - int.parse(localFiltrationUpdated[list[1]]['filter']));
+            for(var i = 0; i < count;i++){
+              localFiltrationUpdated[list[1]]['filterConnection'].removeLast();
+            }
+          }
         }
-        localFiltration[list[1]][2] = list[2];
         break;
       }
-      case ('editDiffPressureSensor') :{
-        if(list[2] == true){
-          total_p_sensor -= 1;
-        }else{
-          total_p_sensor += 1;
+      case ('editDownStreamValve') : {
+        if(total_D_s_valve > 0){
+          if(list[2] == true){
+            localFiltrationUpdated[list[1]]['dv'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : '-',
+              'rfNo' : '-',
+              'output' : '-',
+              'output_type' : '1',
+            };
+            total_D_s_valve = total_D_s_valve - 1;
+          }else{
+            localFiltrationUpdated[list[1]]['dv'] = {};
+            total_D_s_valve = total_D_s_valve + 1;
+          }
+
         }
-        localFiltration[list[1]][3] = list[2];
+        if(total_D_s_valve == 0){
+          if(list[2] == false){
+            localFiltrationUpdated[list[1]]['dv'] = {};
+            total_D_s_valve = total_D_s_valve + 1;
+          }
+        }
         break;
       }
-      case ('editDiffPressureSensor_out') :{
-        if(list[2] == true){
-          total_p_sensor -= 1;
-        }else{
-          total_p_sensor += 1;
+      case ('editPressureSensor') : {
+        if(total_p_sensor > 0){
+          if(list[2] == true){
+            localFiltrationUpdated[list[1]]['pressureIn'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : '-',
+              'rfNo' : '-',
+              'input' : '-',
+              'input_type' : '-',
+            };
+            total_p_sensor = total_p_sensor - 1;
+          }else{
+            localFiltrationUpdated[list[1]]['pressureIn'] = {};
+            total_p_sensor = total_p_sensor + 1;
+          }
+
         }
-        localFiltration[list[1]][4] = list[2];
+        if(total_p_sensor == 0){
+          if(list[2] == false){
+            localFiltrationUpdated[list[1]]['pressureIn'] = {};
+            total_p_sensor = total_p_sensor + 1;
+          }
+        }
         break;
       }
-      case ('selectLocalFiltration') :{
-        if(localFiltration[list[1]][5] == 'select'){
-          localFiltration[list[1]][5] = 'unselect';
+      case ('editPressureSensor_out') : {
+        if(total_p_sensor > 0){
+          if(list[2] == true){
+            localFiltrationUpdated[list[1]]['pressureOut'] = {
+              'sNo' : returnI_O_AutoIncrement(),
+              'rtu' : '-',
+              'rfNo' : '-',
+              'input' : '-',
+              'input_type' : '-',
+            };
+            total_p_sensor = total_p_sensor - 1;
+          }else{
+            localFiltrationUpdated[list[1]]['pressureOut'] = {};
+            total_p_sensor = total_p_sensor + 1;
+          }
+
+        }
+        if(total_p_sensor == 0){
+          if(list[2] == false){
+            localFiltrationUpdated[list[1]]['pressureOut'] = {};
+            total_p_sensor = total_p_sensor + 1;
+          }
+        }
+        break;
+      }
+      case ('selectLocalFiltration') : {
+        if(localFiltrationUpdated[list[1]]['selection'] == 'select'){
+          localFiltrationUpdated[list[1]]['selection'] = 'unselect';
         }else{
-          localFiltration[list[1]][5] = 'select';
+          localFiltrationUpdated[list[1]]['selection'] = 'select';
         }
         break;
       }
       case ('deleteLocalFiltrationFromLine') : {
-        for(var i = 0;i < localFiltration.length;i++){
-          if(localFiltration[i][0] == list[1] + 1){
-            irrigationLines[localFiltration[i][0] - 1]['local_filtration_site'] = false;
-            localFiltration.removeAt(i);
-            totalFilter += 1;
+        List<Map<String,dynamic>> selectedSite = [];
+        for(var i in localFiltrationUpdated){
+          if(i['sNo'] == list[1]){
+            selectedSite.add(i);
           }
+        }
+        for(var i in selectedSite){
+          if(localFiltrationUpdated.contains(i)){
+            totalFilter += i['filterConnection'].length as int;
+            if(i['dv'].isNotEmpty){
+              total_D_s_valve += 1;
+            }
+            if(i['pressureIn'].isNotEmpty){
+              total_p_sensor += 1;
+            }
+            if(i['pressureOut'].isNotEmpty){
+              total_p_sensor += 1;
+            }
+            localFiltrationUpdated.remove(i);
+          }
+        }
+        print('lf: $localFiltrationUpdated');
+        for(var i in localFiltrationUpdated){
+         i['line'] = setLine(i['sNo']) + 1;
         }
         break;
       }
       case ('deleteLocalFiltration') : {
-        for(var i = localFiltration.length - 1; i >= 0; i--){
-          if(localFiltration[i][5] == 'select'){
-            irrigationLines[localFiltration[i][0] - 1]['local_filtration_site'] = false;
-            localFiltration.removeAt(i);
-            totalLocalFiltration = totalLocalFiltration + 1;
+        List<Map<String, dynamic>> selectedSite = [];
+        for (var i = localFiltrationUpdated.length - 1; i >= 0; i--) {
+          if (localFiltrationUpdated[i]['selection'] == 'select') {
+            selectedSite.add(localFiltrationUpdated[i]);
           }
         }
+        for (var cfSite in selectedSite) {
+          if(cfSite['dv'].isNotEmpty){
+            total_D_s_valve = total_D_s_valve + 1;
+          }
+          if(cfSite['pressureIn'].isNotEmpty){
+            total_p_sensor = total_p_sensor + 1;
+          }
+          if(cfSite['pressureOut'].isNotEmpty){
+            total_p_sensor = total_p_sensor + 1;
+          }
+          if(cfSite['filter'] != ''){
+            totalFilter = totalFilter + int.parse(cfSite['filter']);
+          }
+          for(var irr in irrigationLines){
+            if(irr['sNo'] == cfSite['sNo']){
+              irr['local_filtration_site'] = false;
+            }
+          }
+          localFiltrationUpdated.remove(cfSite);
+        }
+
+        l_filtrationSelectALL = false;
+        l_filtrationSelection = false;
+
         break;
       }
       default :{
         break;
       }
     }
+    print('localFiltration : $localFiltrationUpdated');
     notifyListeners();
-  }
-  void doDefaultOptionForMO(List<dynamic> list,String title){
-    switch(title){
-      case ('m_o_length_6'):{
-        if(list[5] == 1){
-          print('second time : ${list}');
-          print("previousDataOfM_O[list[1]][list[2]][list[3]][list[4]] ; ${previousDataOfM_O[list[1]]}");
-          if(previousDataOfM_O[list[1]][list[2]][list[3]][list[4]][list[5]] != list[6]){
-            previousDataOfM_O[list[1]][list[2]][list[3]][list[4]][2] = '-';
-            previousDataOfM_O[list[1]][list[2]][list[3]][list[4]][3] = '-';
-          }
-        }
-        if(list[5] == 2){
-          if(previousDataOfM_O[list[1]][list[2]][list[3]][list[4]][list[5]] != list[6]){
-            previousDataOfM_O[list[1]][list[2]][list[3]][list[4]][3] = '-';
-          }
-        }
-        break;
-      }
-      case ('m_o_length_5'):{
-        if(list[4] == 1){
-          if(previousDataOfM_O[list[1]][list[2]][list[3]][list[4]] != list[5]){
-            previousDataOfM_O[list[1]][list[2]][list[3]][2] = '-';
-            previousDataOfM_O[list[1]][list[2]][list[3]][3] = '-';
-          }
-        }
-        if(list[4] == 2){
-          if(previousDataOfM_O[list[1]][list[2]][list[3]][list[4]] != list[5]){
-            previousDataOfM_O[list[1]][list[2]][list[3]][3] = '-';
-          }
-        }
-        break;
-      }
-      case ('CD_for_MO_length_6'):{
-        if(list[5] == 1){
-          if(CD_for_MO[list[1]][list[2]][list[3]][list[4]][list[5]] != list[6]){
-            CD_for_MO[list[1]][list[2]][list[3]][list[4]][2] = '-';
-            CD_for_MO[list[1]][list[2]][list[3]][list[4]][3] = '-';
-          }
-        }
-        if(list[5] == 2){
-          if(CD_for_MO[list[1]][list[2]][list[3]][list[4]][list[5]] != list[6]){
-            CD_for_MO[list[1]][list[2]][list[3]][list[4]][3] = '-';
-          }
-        }
-        break;
-      }
-      case ('CF_for_MO_length_5'):{
-        if(list[4] == 1){
-          if(CF_for_MO[list[1]][list[2]][list[3]][list[4]] != list[5]){
-            CF_for_MO[list[1]][list[2]][list[3]][2] = '-';
-            CF_for_MO[list[1]][list[2]][list[3]][3] = '-';
-          }
-        }
-        if(list[4] == 2){
-          if(CF_for_MO[list[1]][list[2]][list[3]][list[4]] != list[5]){
-            CF_for_MO[list[1]][list[2]][list[3]][3] = '-';
-          }
-        }
-        break;
-      }
-      case ('CF_for_MO_length_6'):{
-        if(list[5] == 1){
-          if(CF_for_MO[list[1]][list[2]][list[3]][list[4]][list[5]] != list[6]){
-            CF_for_MO[list[1]][list[2]][list[3]][list[4]][2] = '-';
-            CF_for_MO[list[1]][list[2]][list[3]][list[4]][3] = '-';
-          }
-        }
-        if(list[5] == 2){
-          if(CF_for_MO[list[1]][list[2]][list[3]][list[4]][list[5]] != list[6]){
-            CF_for_MO[list[1]][list[2]][list[3]][list[4]][3] = '-';
-          }
-        }
-        break;
-      }
-      case ('SP_MO_length_5'):{
-        if(list[4] == 1){
-          if(SP_MO[list[1]][list[2]][list[3]][list[4]] != list[5]){
-            SP_MO[list[1]][list[2]][list[3]][2] = '-';
-            SP_MO[list[1]][list[2]][list[3]][3] = '-';
-          }
-        }
-        if(list[4] == 2){
-          if(SP_MO[list[1]][list[2]][list[3]][list[4]] != list[5]){
-            SP_MO[list[1]][list[2]][list[3]][3] = '-';
-          }
-        }
-        break;
-      }
-      case ('IP_MO_length_5'):{
-        if(list[4] == 1){
-          if(IP_MO[list[1]][list[2]][list[3]][list[4]] != list[5]){
-            IP_MO[list[1]][list[2]][list[3]][2] = '-';
-            IP_MO[list[1]][list[2]][list[3]][3] = '-';
-          }
-        }
-        if(list[4] == 2){
-          if(IP_MO[list[1]][list[2]][list[3]][list[4]] != list[5]){
-            IP_MO[list[1]][list[2]][list[3]][3] = '-';
-          }
-        }
-        break;
-      }
-    }
   }
   void mappingOfOutputsFunctionality(List<dynamic> list){
     switch (list[0]){
-      case ('m_o_valve'):{
-        print('${list}');
-        doDefaultOptionForMO(list,'m_o_length_6');
-        previousDataOfM_O[list[1]][list[2]][list[3]][list[4]][list[5]] = list[6];
-        break;
-      }
-      case ('m_o_main_valve'):{
-        doDefaultOptionForMO(list,'m_o_length_6');
-        previousDataOfM_O[list[1]][list[2]][list[3]][list[4]][list[5]] = list[6];
-        break;
-      }
-      case ('m_o_injector'):{
-        doDefaultOptionForMO(list,'m_o_length_6');
-        previousDataOfM_O[list[1]][list[2]][list[3]][list[4]][list[5]] = list[6];
-        break;
-      }
-      case ('m_o_Booster'):{
-        doDefaultOptionForMO(list,'m_o_length_6');
-        previousDataOfM_O[list[1]][list[2]][list[3]][list[4]][list[5]] = list[6];
-        break;
-      }
-
-      case ('m_o_filter'):{
-        doDefaultOptionForMO(list,'m_o_length_6');
-        previousDataOfM_O[list[1]][list[2]][list[3]][list[4]][list[5]] = list[6];
-        break;
-      }
-      case ('m_o_D_valve'):{
-        doDefaultOptionForMO(list,'m_o_length_5');
-        previousDataOfM_O[list[1]][list[2]][list[3]][list[4]] = list[5];
-        break;
-      }
-      case ('m_o_CD_injector'):{
-        doDefaultOptionForMO(list,'CD_for_MO_length_6');
-        CD_for_MO[list[1]][list[2]][list[3]][list[4]][list[5]] = list[6];
-        break;
-      }
-      case ('m_o_CD_booster'):{
-        doDefaultOptionForMO(list,'CD_for_MO_length_6');
-        CD_for_MO[list[1]][list[2]][list[3]][list[4]][list[5]] = list[6];
-        break;
-      }
-      case ('m_o_CD_agitator'):{
-        doDefaultOptionForMO(list,'CD_for_MO_length_6');
-        CD_for_MO[list[1]][list[2]][list[3]][list[4]][list[5]] = list[6];
-        break;
-      }
-      case ('m_o_CF_filter'):{
-        doDefaultOptionForMO(list,'CF_for_MO_length_6');
-        CF_for_MO[list[1]][list[2]][list[3]][list[4]][list[5]] = list[6];
-        break;
-      }
-      case ('m_o_CF_D_valve'):{
-        doDefaultOptionForMO(list,'CF_for_MO_length_5');
-        CF_for_MO[list[1]][list[2]][list[3]][list[4]] = list[5];
-        break;
-      }
-      case ('m_o_SP'):{
-        doDefaultOptionForMO(list,'SP_MO_length_5');
-        SP_MO[list[1]][list[2]][list[3]][list[4]] = list[5];
-        break;
-      }
-      case ('m_o_IP'):{
-        doDefaultOptionForMO(list,'IP_MO_length_5');
-        IP_MO[list[1]][list[2]][list[3]][list[4]] = list[5];
-        break;
-      }
-      case ('m_o_fan'):{
-        if(list[2] == 1){
-          if(totalFan[list[1]][list[2]] != list[3]){
-            totalFan[list[1]][2] = '-';
-            totalFan[list[1]][3] = '-';
+      case ('m_o_line'):{
+        if(list[4] == 'rtu'){
+          print('here');
+          if(irrigationLines[list[1]][list[2]][list[3]][list[4]] != list[5]){
+            irrigationLines[list[1]][list[2]][list[3]]['rfNo'] = '-';
+            irrigationLines[list[1]][list[2]][list[3]]['output'] = '-';
+          }
+        }else if(list[4] == 'rfNo'){
+          if(irrigationLines[list[1]][list[2]][list[3]][list[4]] != list[5]){
+            irrigationLines[list[1]][list[2]][list[3]]['output'] = '-';
           }
         }
-        if(list[2] == 2){
-          if(totalFan[list[1]][list[2]] != list[3]){
-            totalFan[list[1]][3] = '-';
-          }
-        }
-        totalFan[list[1]][list[2]] = list[3];
+        irrigationLines[list[1]][list[2]][list[3]][list[4]] = list[5];
         break;
       }
-      case ('m_o_fogger'):{
-        if(list[2] == 1){
-          if(totalFogger[list[1]][list[2]] != list[3]){
-            totalFogger[list[1]][2] = '-';
-            totalFogger[list[1]][3] = '-';
+      case ('m_o_localDosing'):{
+        if(list[4] == 'rtu'){
+          if(localDosingUpdated[list[1]][list[2]][list[3]][list[4]] != list[5]){
+            localDosingUpdated[list[1]][list[2]][list[3]]['rfNo'] = '-';
+            localDosingUpdated[list[1]][list[2]][list[3]]['output'] = '-';
           }
-        }
-        if(list[2] == 2){
-          if(totalFogger[list[1]][list[2]] != list[3]){
-            totalFogger[list[1]][3] = '-';
+        }else if(list[4] == 'rfNo'){
+          if(localDosingUpdated[list[1]][list[2]][list[3]][list[4]] != list[5]){
+            localDosingUpdated[list[1]][list[2]][list[3]]['output'] = '-';
           }
+        }else if(list[4] == 'output'){
         }
-        totalFogger[list[1]][list[2]] = list[3];
+        localDosingUpdated[list[1]][list[2]][list[3]][list[4]] = list[5];
         break;
       }
-      case ('m_o_agitator'):{
-        if(list[2] == 1){
-          if(totalAgitator[list[1]][list[2]] != list[3]){
-            totalAgitator[list[1]][2] = '-';
-            totalAgitator[list[1]][3] = '-';
+      case ('m_o_centralDosing'):{
+        if(list[4] == 'rtu'){
+          if(centralDosingUpdated[list[1]][list[2]][list[3]][list[4]] != list[5]){
+            centralDosingUpdated[list[1]][list[2]][list[3]]['rfNo'] = '-';
+            centralDosingUpdated[list[1]][list[2]][list[3]]['output'] = '-';
+          }
+        }else if(list[4] == 'rfNo'){
+          if(centralDosingUpdated[list[1]][list[2]][list[3]][list[4]] != list[5]){
+            centralDosingUpdated[list[1]][list[2]][list[3]]['output'] = '-';
+          }
+        }else if(list[4] == 'output'){
+        }
+        centralDosingUpdated[list[1]][list[2]][list[3]][list[4]] = list[5];
+        break;
+      }
+      case ('m_o_localFiltration'):{
+        print(list);
+        if(list[4] == 'rtu'){
+          if(list[3] == -1){
+            if(localFiltrationUpdated[list[1]][list[2]][list[4]] != list[5]){
+              localFiltrationUpdated[list[1]][list[2]]['rfNo'] = '-';
+              localFiltrationUpdated[list[1]][list[2]]['output'] = '-';
+            }
+          }else{
+            if(localFiltrationUpdated[list[1]][list[2]][list[3]][list[4]] != list[5]){
+              localFiltrationUpdated[list[1]][list[2]][list[3]]['rfNo'] = '-';
+              localFiltrationUpdated[list[1]][list[2]][list[3]]['output'] = '-';
+            }
+          }
+        }else if(list[4] == 'rfNo'){
+          if(list[3] == -1){
+            if(localFiltrationUpdated[list[1]][list[2]][list[4]] != list[5]){
+              localFiltrationUpdated[list[1]][list[2]]['output'] = '-';
+            }
+          }else{
+            if(localFiltrationUpdated[list[1]][list[2]][list[3]][list[4]] != list[5]){
+              localFiltrationUpdated[list[1]][list[2]][list[3]]['output'] = '-';
+            }
           }
         }
-        if(list[2] == 2){
-          if(totalAgitator[list[1]][list[2]] != list[3]){
-            totalAgitator[list[1]][3] = '-';
+        if(list[3] == -1){
+          localFiltrationUpdated[list[1]][list[2]][list[4]] = list[5];
+        }else{
+          localFiltrationUpdated[list[1]][list[2]][list[3]][list[4]] = list[5];
+        }
+        break;
+      }
+      case ('m_o_centralFiltration'):{
+        print(list);
+        if(list[4] == 'rtu'){
+          if(list[3] == -1){
+            if(centralFiltrationUpdated[list[1]][list[2]][list[4]] != list[5]){
+              centralFiltrationUpdated[list[1]][list[2]]['rfNo'] = '-';
+              centralFiltrationUpdated[list[1]][list[2]]['output'] = '-';
+            }
+          }else{
+            if(centralFiltrationUpdated[list[1]][list[2]][list[3]][list[4]] != list[5]){
+              centralFiltrationUpdated[list[1]][list[2]][list[3]]['rfNo'] = '-';
+              centralFiltrationUpdated[list[1]][list[2]][list[3]]['output'] = '-';
+            }
+          }
+        }else if(list[4] == 'rfNo'){
+          if(list[3] == -1){
+            if(centralFiltrationUpdated[list[1]][list[2]][list[4]] != list[5]){
+              centralFiltrationUpdated[list[1]][list[2]]['output'] = '-';
+            }
+          }else{
+            if(centralFiltrationUpdated[list[1]][list[2]][list[3]][list[4]] != list[5]){
+              centralFiltrationUpdated[list[1]][list[2]][list[3]]['output'] = '-';
+            }
           }
         }
-        totalAgitator[list[1]][list[2]] = list[3];
+        if(list[3] == -1){
+          centralFiltrationUpdated[list[1]][list[2]][list[4]] = list[5];
+        }else{
+          centralFiltrationUpdated[list[1]][list[2]][list[3]][list[4]] = list[5];
+        }
+        break;
+      }
+      case ('m_o_sourcePump'):{
+        print(list);
+        if(list[4] == 'rtu'){
+          if(sourcePumpUpdated[list[1]][list[2]][list[4]] != list[5]){
+            sourcePumpUpdated[list[1]][list[2]]['rfNo'] = '-';
+            sourcePumpUpdated[list[1]][list[2]]['output'] = '-';
+            sourcePumpUpdated[list[1]][list[2]]['current_selection'] = '-';
+          }
+        }else if(list[4] == 'rfNo'){
+          if(sourcePumpUpdated[list[1]][list[2]][list[4]] != list[5]){
+            if(sourcePumpUpdated[list[1]]['off'] != null){
+              print('came off');
+              sourcePumpUpdated[list[1]]['off']['rfNo'] = list[5];
+              sourcePumpUpdated[list[1]]['off']['output'] = '-';
+            }
+            if(sourcePumpUpdated[list[1]]['scr'] != null){
+              print('came scr');
+              sourcePumpUpdated[list[1]]['scr']['rfNo'] = list[5];
+              sourcePumpUpdated[list[1]]['scr']['output'] = '-';
+            }
+            if(sourcePumpUpdated[list[1]]['ecr'] != null){
+              print('came ecr');
+              sourcePumpUpdated[list[1]]['ecr']['rfNo'] = list[5];
+              sourcePumpUpdated[list[1]]['ecr']['output'] = '-';
+            }
+            if(sourcePumpUpdated[list[1]]['on'] != null){
+              print('came on');
+              sourcePumpUpdated[list[1]]['on']['rfNo'] = list[5];
+              sourcePumpUpdated[list[1]]['on']['output'] = '-';
+            }
+            if(sourcePumpUpdated[list[1]]['TopTankHigh'] != null){
+              if(sourcePumpUpdated[list[1]]['TopTankHigh'].isNotEmpty){
+                sourcePumpUpdated[list[1]]['TopTankHigh']['rfNo'] = list[5];
+                sourcePumpUpdated[list[1]]['TopTankHigh']['input'] = '-';
+              }
+            }
+            if(sourcePumpUpdated[list[1]]['TopTankLow'] != null){
+              if(sourcePumpUpdated[list[1]]['TopTankLow'].isNotEmpty){
+                sourcePumpUpdated[list[1]]['TopTankLow']['rfNo'] = list[5];
+                sourcePumpUpdated[list[1]]['TopTankLow']['input'] = '-';
+              }
+            }
+            if(sourcePumpUpdated[list[1]]['SumpTankHigh'] != null){
+              if(sourcePumpUpdated[list[1]]['SumpTankHigh'].isNotEmpty){
+                sourcePumpUpdated[list[1]]['SumpTankHigh']['rfNo'] = list[5];
+                sourcePumpUpdated[list[1]]['SumpTankHigh']['input'] = '-';
+              }
+            }
+            if(sourcePumpUpdated[list[1]]['SumpTankLow'] != null){
+              if(sourcePumpUpdated[list[1]]['SumpTankLow'].isNotEmpty){
+                sourcePumpUpdated[list[1]]['SumpTankLow']['rfNo'] = list[5];
+                sourcePumpUpdated[list[1]]['SumpTankLow']['input'] = '-';
+              }
+            }
+            if(sourcePumpUpdated[list[1]]['c1'] != null){
+              if(sourcePumpUpdated[list[1]]['c1'].isNotEmpty){
+                sourcePumpUpdated[list[1]]['c1']['rfNo'] = list[5];
+                sourcePumpUpdated[list[1]]['c1']['input'] = '-';
+              }
+            }
+            if(sourcePumpUpdated[list[1]]['c2'] != null){
+              if(sourcePumpUpdated[list[1]]['c2'].isNotEmpty){
+                sourcePumpUpdated[list[1]]['c2']['rfNo'] = list[5];
+                sourcePumpUpdated[list[1]]['c2']['input'] = '-';
+              }
+            }
+            if(sourcePumpUpdated[list[1]]['c3'] != null){
+              if(sourcePumpUpdated[list[1]]['c3'].isNotEmpty){
+                sourcePumpUpdated[list[1]]['c3']['rfNo'] = list[5];
+                sourcePumpUpdated[list[1]]['c3']['input'] = '-';
+              }
+            }
+            sourcePumpUpdated[list[1]][list[2]]['output'] = '-';
+          }
+        }
+        // else if(list[4] == 'output'){
+        //   sourcePumpUpdated[list[1]][list[2]]['current_selection'] = '-';
+        // }
+        sourcePumpUpdated[list[1]][list[2]][list[4]] = list[5];
+        print(sourcePumpUpdated);
+        break;
+      }
+      case ('m_o_irrigationPump'):{
+        print(list);
+        if(list[4] == 'rtu'){
+          if(irrigationPumpUpdated[list[1]][list[2]][list[4]] != list[5]){
+            irrigationPumpUpdated[list[1]][list[2]]['rfNo'] = '-';
+            irrigationPumpUpdated[list[1]][list[2]]['output'] = '-';
+            irrigationPumpUpdated[list[1]][list[2]]['current_selection'] = '-';
+          }
+        }else if(list[4] == 'rfNo'){
+          if(irrigationPumpUpdated[list[1]][list[2]][list[4]] != list[5]){
+            if(irrigationPumpUpdated[list[1]]['off'] != null){
+              print('came off');
+              irrigationPumpUpdated[list[1]]['off']['rfNo'] = list[5];
+              irrigationPumpUpdated[list[1]]['off']['output'] = '-';
+            }
+            if(irrigationPumpUpdated[list[1]]['scr'] != null){
+              print('came scr');
+              irrigationPumpUpdated[list[1]]['scr']['rfNo'] = list[5];
+              irrigationPumpUpdated[list[1]]['scr']['output'] = '-';
+            }
+            if(irrigationPumpUpdated[list[1]]['ecr'] != null){
+              print('came ecr');
+              irrigationPumpUpdated[list[1]]['ecr']['rfNo'] = list[5];
+              irrigationPumpUpdated[list[1]]['ecr']['output'] = '-';
+            }
+            if(irrigationPumpUpdated[list[1]]['on'] != null){
+              print('came on');
+              irrigationPumpUpdated[list[1]]['on']['rfNo'] = list[5];
+              irrigationPumpUpdated[list[1]]['on']['output'] = '-';
+            }
+            if(irrigationPumpUpdated[list[1]]['TopTankHigh'] != null){
+              if(irrigationPumpUpdated[list[1]]['TopTankHigh'].isNotEmpty){
+                irrigationPumpUpdated[list[1]]['TopTankHigh']['rfNo'] = list[5];
+                irrigationPumpUpdated[list[1]]['TopTankHigh']['input'] = '-';
+              }
+            }
+            if(irrigationPumpUpdated[list[1]]['TopTankLow'] != null){
+              if(irrigationPumpUpdated[list[1]]['TopTankLow'].isNotEmpty){
+                irrigationPumpUpdated[list[1]]['TopTankLow']['rfNo'] = list[5];
+                irrigationPumpUpdated[list[1]]['TopTankLow']['input'] = '-';
+              }
+            }
+            if(irrigationPumpUpdated[list[1]]['SumpTankHigh'] != null){
+              if(irrigationPumpUpdated[list[1]]['SumpTankHigh'].isNotEmpty){
+                irrigationPumpUpdated[list[1]]['SumpTankHigh']['rfNo'] = list[5];
+                irrigationPumpUpdated[list[1]]['SumpTankHigh']['input'] = '-';
+              }
+            }
+            if(irrigationPumpUpdated[list[1]]['SumpTankLow'] != null){
+              if(irrigationPumpUpdated[list[1]]['SumpTankLow'].isNotEmpty){
+                irrigationPumpUpdated[list[1]]['SumpTankLow']['rfNo'] = list[5];
+                irrigationPumpUpdated[list[1]]['SumpTankLow']['input'] = '-';
+              }
+            }
+            if(irrigationPumpUpdated[list[1]]['c1'] != null){
+              if(irrigationPumpUpdated[list[1]]['c1'].isNotEmpty){
+                irrigationPumpUpdated[list[1]]['c1']['rfNo'] = list[5];
+                irrigationPumpUpdated[list[1]]['c1']['input'] = '-';
+              }
+            }
+            if(irrigationPumpUpdated[list[1]]['c2'] != null){
+              if(irrigationPumpUpdated[list[1]]['c2'].isNotEmpty){
+                irrigationPumpUpdated[list[1]]['c2']['rfNo'] = list[5];
+                irrigationPumpUpdated[list[1]]['c2']['input'] = '-';
+              }
+            }
+            if(irrigationPumpUpdated[list[1]]['c3'] != null){
+              if(irrigationPumpUpdated[list[1]]['c3'].isNotEmpty){
+                irrigationPumpUpdated[list[1]]['c3']['rfNo'] = list[5];
+                irrigationPumpUpdated[list[1]]['c3']['input'] = '-';
+              }
+            }
+            irrigationPumpUpdated[list[1]][list[2]]['output'] = '-';
+          }
+        }
+        // else if(list[4] == 'output'){
+        //   irrigationPumpUpdated[list[1]][list[2]]['current_selection'] = '-';
+        // }
+        irrigationPumpUpdated[list[1]][list[2]][list[4]] = list[5];
+        print(irrigationPumpUpdated);
         break;
       }
     }
     notifyListeners();
-  }
-  void doDefaultOptionForMI(List<dynamic> list,String title){
-    switch(title){
-      case ('m_i_length_6'):{
-        if(list[5] == 1){
-          if(previousDataOfM_I[list[1]][list[2]][list[3]][list[4]][list[5]] != list[6]){
-            previousDataOfM_I[list[1]][list[2]][list[3]][list[4]][2] = '-';
-            previousDataOfM_I[list[1]][list[2]][list[3]][list[4]][3] = '-';
-          }
-        }
-        if(list[5] == 2){
-          if(previousDataOfM_I[list[1]][list[2]][list[3]][list[4]][list[5]] != list[6]){
-            previousDataOfM_I[list[1]][list[2]][list[3]][list[4]][3] = '-';
-          }
-        }
-        break;
-      }
-      case ('m_i_length_5'):{
-        if(list[4] == 1){
-          if(previousDataOfM_I[list[1]][list[2]][list[3]][list[4]] != list[5]){
-            previousDataOfM_I[list[1]][list[2]][list[3]][2] = '-';
-            previousDataOfM_I[list[1]][list[2]][list[3]][3] = '-';
-          }
-        }
-        if(list[4] == 2){
-          if(previousDataOfM_I[list[1]][list[2]][list[3]][list[4]] != list[5]){
-            previousDataOfM_I[list[1]][list[2]][list[3]][3] = '-';
-          }
-        }
-        break;
-      }
-    }
   }
   void mappingOfInputsFunctionality(List<dynamic> list){
     switch (list[0]){
-      case ('m_i_ORO_sense'):{
-        doDefaultOptionForMI(list,'m_i_length_6');
-        previousDataOfM_I[list[1]][list[2]][list[3]][list[4]][list[5]] = list[6];
-        break;
-      }
-      case ('m_i_pressure_sensor'):{
-        doDefaultOptionForMI(list,'m_i_length_5');
-        previousDataOfM_I[list[1]][list[2]][list[3]][list[4]] = list[5];
-        break;
-      }
-      case ('m_i_water_meter'):{
-        doDefaultOptionForMI(list,'m_i_length_5');
-        previousDataOfM_I[list[1]][list[2]][list[3]][list[4]] = list[5];
-        break;
-      }
-      case ('m_i_dosing_meter'):{
-        doDefaultOptionForMI(list,'m_i_length_6');
-        previousDataOfM_I[list[1]][list[2]][list[3]][list[4]][list[5]] = list[6];
-        break;
-      }
-      case ('m_i_D_pressure_sensor'):{
-        doDefaultOptionForMI(list,'m_i_length_5');
-        previousDataOfM_I[list[1]][list[2]][list[3]][list[4]] = list[5];
-        break;
-      }
-      case ('m_i_D_pressure_sensor_out'):{
-        doDefaultOptionForMI(list,'m_i_length_5');
-        previousDataOfM_I[list[1]][list[2]][list[3]][list[4]] = list[5];
-        break;
-      }
-      case ('m_i_CD_dosing_meter'):{
-        doDefaultOptionForMO(list,'CD_for_MO_length_6');
-        CD_for_MO[list[1]][list[2]][list[3]][list[4]][list[5]] = list[6];
-        break;
-      }
-      case ('m_i_CF_P_sensor'):{
-        doDefaultOptionForMO(list,'CF_for_MO_length_5');
-        CF_for_MO[list[1]][list[2]][list[3]][list[4]] = list[5];
-        break;
-      }
-      case ('m_i_CF_P_sensor_out'):{
-        doDefaultOptionForMO(list,'CF_for_MO_length_5');
-        CF_for_MO[list[1]][list[2]][list[3]][list[4]] = list[5];
-        break;
-      }
-      case ('m_i_sp_wm'):{
-        doDefaultOptionForMO(list,'SP_MO_length_5');
-        SP_MO[list[1]][list[2]][list[3]][list[4]] = list[5];
-        break;
-      }
-      case ('m_i_ip_wm'):{
-        doDefaultOptionForMO(list,'IP_MO_length_5');
-        IP_MO[list[1]][list[2]][list[3]][list[4]] = list[5];
-        break;
-      }
-      case ('m_i_analog_sensor'):{
-        if(list[2] == 1){
-          if(totalAnalogSensor[list[1]][list[2]] != list[3]){
-            totalAnalogSensor[list[1]][2] = '-';
-            totalAnalogSensor[list[1]][3] = '-';
-          }
-        }
-        if(list[2] == 2){
-          if(totalAnalogSensor[list[1]][list[2]] != list[3]){
-            totalAnalogSensor[list[1]][3] = '-';
-          }
-        }
-        totalAnalogSensor[list[1]][list[2]] = list[3];
-        break;
-      }
-      case ('m_i_contacts'):{
-        if(list[2] == 1){
-          if(totalContact[list[1]][list[2]] != list[3]){
-            totalContact[list[1]][2] = '-';
-            totalContact[list[1]][3] = '-';
-          }
-        }
-        if(list[2] == 2){
-          if(totalContact[list[1]][list[2]] != list[3]){
-            totalContact[list[1]][3] = '-';
-          }
-        }
-        totalContact[list[1]][list[2]] = list[3];
-        break;
-      }
-      case ('m_i_ph_sensor'):{
-        if(list[2] == 1){
-          if(totalPhSensor[list[1]][list[2]] != list[3]){
-            totalPhSensor[list[1]][2] = '-';
-            totalPhSensor[list[1]][3] = '-';
-          }
-        }
-        if(list[2] == 2){
-          if(totalPhSensor[list[1]][list[2]] != list[3]){
-            totalPhSensor[list[1]][3] = '-';
-          }
-        }
-        totalPhSensor[list[1]][list[2]] = list[3];
-        break;
-      }
-      case ('m_i_ec_sensor'):{
-        if(list[2] == 1){
-          if(totalEcSensor[list[1]][list[2]] != list[3]){
-            totalEcSensor[list[1]][2] = '-';
-            totalEcSensor[list[1]][3] = '-';
-          }
-        }
-        if(list[2] == 2){
-          if(totalEcSensor[list[1]][list[2]] != list[3]){
-            totalEcSensor[list[1]][3] = '-';
-          }
-        }
-        totalEcSensor[list[1]][list[2]] = list[3];
-        break;
-      }
-      case ('m_i_moisture_sensor'):{
-        if(list[2] == 1){
-          if(totalMoistureSensor[list[1]][list[2]] != list[3]){
-            totalMoistureSensor[list[1]][2] = '-';
-            totalMoistureSensor[list[1]][3] = '-';
-          }
-        }
-        if(list[2] == 2){
-          if(totalMoistureSensor[list[1]][list[2]] != list[3]){
-            totalMoistureSensor[list[1]][3] = '-';
-          }
-        }
-        totalMoistureSensor[list[1]][list[2]] = list[3];
-        break;
-      }
-    }
-    notifyListeners();
-  }
-  List<dynamic> getList(dynamic object,String title,String match,String autoIncrement){
-    var myList = [];
-    for(var a in object[title]){
-      var list = a[0].split(':');
-      var list1 = match.split(':');
-      if(list[1] == list1[1]){
-        for(var i in irrigationLines){
-          if(i['autoIncrement'].toString() == autoIncrement){
-            // for rtus
-            if(i['RTU'] == ''){
-              if(a[1] == 'ORO RTU'){
-                myList.add('-');
-              }else{
-                myList.add(a[1]);
-              }
-            }else if(i['ORO_switch'] == ''){
-              if(a[1] == 'ORO Switch'){
-                myList.add('-');
-              }else{
-                myList.add(a[1]);
-              }
-            }else if(i['ORO_Smart_RTU'] == ''){
-              if(a[1] == 'ORO Smart RTU'){
-                myList.add('-');
-              }else{
-                myList.add(a[1]);
-              }
-            }else if(i['ORO_sense'] == ''){
-              if(a[1] == 'ORO Sense'){
-                myList.add('-');
-              }else{
-                myList.add(a[1]);
-              }
-            }else{
-              myList.add(a[1]);
+      case ('m_i_line'):{
+        if(list[4] == 'rtu'){
+          if(list[3] == -1){
+            if(irrigationLines[list[1]][list[2]][list[4]] != list[5]){
+              irrigationLines[list[1]][list[2]]['rfNo'] = '-';
+              irrigationLines[list[1]][list[2]]['input'] = '-';
             }
-            //   for reference numbers
-            if(a[1] == 'ORO RTU'){
-              if(a[2] != '-'){
-                if(i['myRTU'].contains(int.parse(a[2]))){
-                  myList.add(a[2]);
-                }else{
-                  myList.add('-');
-                }
-              }else{
-                myList.add(a[2]);
-              }
-            }else if(a[1] == 'ORO Switch'){
-              if(a[2] != '-'){
-                if(i['myOROswitch'].contains(int.parse(a[2]))){
-                  myList.add(a[2]);
-                }else{
-                  myList.add('-');
-                }
-              }else{
-                myList.add(a[2]);
-              }
-            }else if(a[1] == 'ORO Smart RTU'){
-              if(a[2] != '-'){
-                if(i['myOroSmartRtu'].contains(int.parse(a[2]))){
-                  myList.add(a[2]);
-                }else{
-                  myList.add('-');
-                }
-              }else{
-                myList.add(a[2]);
-              }
-            }else if(a[1] == 'ORO Sense'){
-              if(a[2] != '-'){
-                if(i['myOROsense'].contains(int.parse(a[2]))){
-                  myList.add(a[2]);
-                }else{
-                  myList.add('-');
-                }
-              }else{
-                myList.add(a[2]);
-              }
-            }else{
-              myList.add(a[2]);
-            }
-
-          }
-        }
-        for(var ob = 3;ob < a.length;ob++){
-          myList.add(a[ob]);
-        }
-        break;
-      }
-    }
-    return myList;
-  }
-  List<dynamic> getList1(dynamic object,String title,String match,String autoIncrement){
-    var myList = [];
-    if(object[title].length == 0){
-    }else{
-      var list =  object[title][0].split(':');
-      var list1 = match.split(':');
-      if(list[1] == list1[1]){
-        for(var i in irrigationLines){
-          if(i['autoIncrement'].toString() == autoIncrement){
-            // for rtus
-            if(i['RTU'] == ''){
-              if(object[title][1]== 'ORO RTU'){
-                myList.add('-');
-              }else{
-                myList.add(object[title][1]);
-              }
-            }else if(i['ORO_switch'] == ''){
-              if(object[title][1] == 'ORO Switch'){
-                myList.add('-');
-              }else{
-                myList.add(object[title][1]);
-              }
-            }else if(i['ORO_Smart_RTU'] == ''){
-              if(object[title][1] == 'ORO Smart RTU'){
-                myList.add('-');
-              }else{
-                myList.add(object[title][1]);
-              }
-            }else if(i['ORO_sense'] == ''){
-              if(object[title][1] == 'ORO Sense'){
-                myList.add('-');
-              }else{
-                myList.add(object[title][1]);
-              }
-            }else{
-              myList.add(object[title][1]);
-            }
-            //   for reference numbers
-            if(object[title][1] == 'ORO RTU'){
-              if(object[title][2] != '-'){
-                if(i['myRTU'].contains(int.parse(object[title][2]))){
-                  myList.add(object[title][2]);
-                }else{
-                  myList.add('-');
-                }
-              }else{
-                myList.add(object[title][2]);
-              }
-            }else if(object[title][1] == 'ORO Switch'){
-              if(object[title][2] != '-'){
-                if(i['myOROswitch'].contains(int.parse(object[title][2]))){
-                  myList.add(object[title][2]);
-                }else{
-                  myList.add('-');
-                }
-              }else{
-                myList.add(object[title][2]);
-              }
-            }else if(object[title][1] == 'ORO Smart RTU'){
-              if(object[title][2] != '-'){
-                if(i['myOroSmartRtu'].contains(int.parse(object[title][2]))){
-                  myList.add(object[title][2]);
-                }else{
-                  myList.add('-');
-                }
-              }else{
-                myList.add(object[title][2]);
-              }
-            }else if(object[title][1] == 'ORO Sense'){
-              if(object[title][2] != '-'){
-                if(i['myOROsense'].contains(int.parse(object[title][2]))){
-                  myList.add(object[title][2]);
-                }else{
-                  myList.add('-');
-                }
-              }else{
-                myList.add(object[title][2]);
-              }
-            }else{
-              myList.add(object[title][2]);
-            }
-
-          }
-        }
-        for(var ob = 3;ob < object[title].length;ob++){
-          myList.add(object[title][ob]);
-        }
-      }
-    }
-    return myList;
-  }
-  List<dynamic> isThereOrNot(String match,String autoIncrement,String title){
-    var myList = [];
-    for(var i = 0;i < irrigationLines.length;i++){
-      previousDataOfM_O.forEach((element) {
-        if(element.containsKey('${autoIncrement}')){
-          var object = element.values.first;
-          switch(title){
-            case ('valve'):{
-              myList = getList(object,'valve',match,autoIncrement);
-              break;
-            }
-            case ('main_valve'):{
-              myList = getList(object,'main_valve',match,autoIncrement);
-              break;
-            }
-            case ('injector') : {
-              myList = getList(object,'injector',match,autoIncrement);
-              break;
-            }
-            case ('Booster') : {
-              myList = getList(object,'Booster',match,autoIncrement);
-              break;
-            }
-            case ('filter'):{
-              myList = getList(object,'filter',match,autoIncrement);
-              break;
-            }
-            case ('D_valve') : {
-              myList = getList1(object,'D_valve',match,autoIncrement);
-              break;
-            }
-          }
-
-        }
-      });
-    }
-    return myList;
-  }
-  List<dynamic> isThereOrNotforIO(String match,String autoIncrement,String title){
-    var myList = [];
-    for(var i = 0;i < irrigationLines.length;i++){
-      previousDataOfM_I.forEach((element) {
-        if(element.containsKey('${autoIncrement}')){
-          var object = element.values.first;
-          switch(title){
-            case ('pressure_sensor'):{
-              myList = getList1(object,'pressure_sensor',match,autoIncrement);
-              break;
-            }
-            case ('water_meter'):{
-              myList = getList1(object,'water_meter',match,autoIncrement);
-              break;
-            }
-            case ('ORO_sense'):{
-              myList = getList(object,'ORO_sense',match,autoIncrement);
-              break;
-            }
-            case ('dosing_meter'):{
-              myList = getList(object,'dosing_meter',match,autoIncrement);
-              break;
-            }
-            case ('D_pressure_sensor'):{
-              myList = getList1(object,'D_pressure_sensor',match,autoIncrement);
-              break;
-            }
-            case ('D_pressure_sensor_out'):{
-              myList = getList1(object,'D_pressure_sensor_out',match,autoIncrement);
-              break;
-            }
-          }
-
-        }
-      });
-    }
-    return myList;
-  }
-  void refreshMapOfOutputs(){
-    mappingOfOutputs = [];
-    overAll = [];
-    for(var i = 0;i < irrigationLines.length;i++){
-      mappingOfOutputs.add({
-        '${irrigationLines[i]['autoIncrement']}' : {
-          'valve' : [],
-          'main_valve' : [],
-          'injector' : [],
-          'Booster' : [],
-          'filter' : [],
-          'D_valve' : [],
-        }
-      });
-      for(var i1 = 0;i1 < int.parse(irrigationLines[i]['valve']);i1++){
-        if(previousDataOfM_O.length == 0){
-          mappingOfOutputs[i]['${irrigationLines[i]['autoIncrement']}']['valve'].add(
-              ['L ${i + 1} : V${i1+1}','-','-','-','${returnI_O_AutoIncrement()}']
-          );
-          overAll.add(['L ${i + 1} : V${i1+1}','-','-','-']);
-        }else{
-          var values = isThereOrNot('L ${i + 1} : V${i1+1}',irrigationLines[i]['autoIncrement'].toString(),'valve');
-          if(values.isEmpty){
-            mappingOfOutputs[i]['${irrigationLines[i]['autoIncrement']}']['valve'].add(
-                ['L ${i + 1} : V${i1+1}','-','-','-','${returnI_O_AutoIncrement()}']
-            );
-            overAll.add(['L ${i + 1} : V${i1+1}','-','-','-']);
           }else{
-            mappingOfOutputs[i]['${irrigationLines[i]['autoIncrement']}']['valve'].add(
-                ['L ${i + 1} : V${i1+1}',values[0],values[1],values[2],values[3]]
-            );
-            overAll.add(['L ${i + 1} : V${i1+1}',values[0],values[1],values[2]]);
+            if(irrigationLines[list[1]][list[2]][list[3]][list[4]] != list[5]){
+              irrigationLines[list[1]][list[2]][list[3]]['rfNo'] = '-';
+              irrigationLines[list[1]][list[2]][list[3]]['input'] = '-';
+            }
           }
-        }
-
-
-      }
-      for(var i2 = 0;i2 < int.parse(irrigationLines[i]['main_valve'] != '' ? irrigationLines[i]['main_valve'] : '0');i2++){
-        if(previousDataOfM_O.length == 0){
-          mappingOfOutputs[i]['${irrigationLines[i]['autoIncrement']}']['main_valve'].add(
-              ['L ${i + 1} : MV${i2+1}','-','-','-','${returnI_O_AutoIncrement()}']
-          );
-          overAll.add(['L ${i + 1} : MV${i2+1}','-','-','-']);
-        }else{
-          var values = isThereOrNot('L ${i + 1} : MV${i2+1}',irrigationLines[i]['autoIncrement'].toString(),'main_valve');
-          if(values.isEmpty){
-            mappingOfOutputs[i]['${irrigationLines[i]['autoIncrement']}']['main_valve'].add(
-                ['L ${i + 1} : MV${i2+1}','-','-','-','${returnI_O_AutoIncrement()}']
-            );
-            overAll.add( ['L ${i + 1} : MV${i2+1}','-','-','-']);
+        }else if(list[4] == 'rfNo'){
+          if(list[3] == -1){
+            if(irrigationLines[list[1]][list[2]][list[4]] != list[5]){
+              irrigationLines[list[1]][list[2]]['input'] = '-';
+            }
           }else{
-            mappingOfOutputs[i]['${irrigationLines[i]['autoIncrement']}']['main_valve'].add(
-                ['L ${i + 1} : MV${i2+1}',values[0],values[1],values[2],values[3]]
-            );
-            overAll.add( ['L ${i + 1} : MV${i2+1}',values[0],values[1],values[2]]);
+            if(irrigationLines[list[1]][list[2]][list[3]][list[4]] != list[5]){
+              irrigationLines[list[1]][list[2]][list[3]]['input'] = '-';
+            }
           }
         }
+        if(list[3] == -1){
+          irrigationLines[list[1]][list[2]][list[4]] = list[5];
+        }else{
+          irrigationLines[list[1]][list[2]][list[3]][list[4]] = list[5];
+        }
+        break;
       }
-      if(irrigationLines[i]['Local_dosing_site'] == true){
-        for(var ld = 0;ld < localDosing.length;ld++){
-          if(localDosing[ld][localDosing[ld].length - 1][1] == i + 1){
-            for(var k = 0;k < localDosing[ld].length - 1;k++){
-              if(previousDataOfM_O.length == 0){
-                mappingOfOutputs[i]['${irrigationLines[i]['autoIncrement']}']['injector'].add(['L ${i + 1} : injector${k+1}','-','-','-','${localDosing[ld][k][3]}','${returnI_O_AutoIncrement()}']);
-              }else{
-                var values = isThereOrNot('L ${i + 1} : injector${k+1}',irrigationLines[i]['autoIncrement'].toString(),'injector');
-                if(values.isEmpty){
-                  mappingOfOutputs[i]['${irrigationLines[i]['autoIncrement']}']['injector'].add(['L ${i + 1} : injector${k+1}','-','-','-','${localDosing[ld][k][3]}','${returnI_O_AutoIncrement()}']);
-                  overAll.add(['L ${i + 1} : injector${k+1}','-','-','-']);
-                }else{
-                  mappingOfOutputs[i]['${irrigationLines[i]['autoIncrement']}']['injector'].add(['L ${i + 1} : injector${k+1}',values[0],values[1],values[2],values[3],values[4]]);
-                  overAll.add(['L ${i + 1} : injector${k+1}',values[0],values[1],values[2],values[3]]);
-                }
-              }
+      case ('m_i_centralDosing'):{
+        if(list[4] == 'rtu'){
+          if(list[2].contains('-')){
+            if(centralDosingUpdated[list[1]][list[2].split('-')[0]][list[3]][list[2].split('-')[1]][list[4]] != list[5]){
+              centralDosingUpdated[list[1]][list[2].split('-')[0]][list[3]][list[2].split('-')[1]]['rfNo'] = '-';
+              centralDosingUpdated[list[1]][list[2].split('-')[0]][list[3]][list[2].split('-')[1]]['input'] = '-';
+            }
+          }else{
+            if(centralDosingUpdated[list[1]][list[2]][list[3]][list[4]] != list[5]){
+              centralDosingUpdated[list[1]][list[2]][list[3]]['rfNo'] = '-';
+              centralDosingUpdated[list[1]][list[2]][list[3]]['input'] = '-';
             }
           }
+        }else if(list[4] == 'rfNo'){
+          if(list[2].contains('-')){
+            if(centralDosingUpdated[list[1]][list[2].split('-')[0]][list[3]][list[2].split('-')[1]][list[4]] != list[5]){
+              centralDosingUpdated[list[1]][list[2].split('-')[0]][list[3]][list[2].split('-')[1]]['input'] = '-';
+            }
+          }else{
+            if(centralDosingUpdated[list[1]][list[2]][list[3]][list[4]] != list[5]){
+              centralDosingUpdated[list[1]][list[2]][list[3]]['input'] = '-';
+            }
+          }
+
         }
+        if(list[2].contains('-')){
+          centralDosingUpdated[list[1]][list[2].split('-')[0]][list[3]][list[2].split('-')[1]][list[4]] = list[5];
+        }else{
+          centralDosingUpdated[list[1]][list[2]][list[3]][list[4]] = list[5];
+        }
+        break;
       }
-      if(irrigationLines[i]['Local_dosing_site'] == true){
-        for(var ld = 0;ld < localDosing.length;ld++){
-          if(localDosing[ld][localDosing[ld].length - 1][1] == i + 1){
-            for(var k = 0;k < localDosing[ld].length - 1;k++){
-              var ai = returnI_O_AutoIncrement();
-              if(previousDataOfM_O.length == 0){
-                if(localDosing[ld][k][2] == true){
-                  mappingOfOutputs[i]['${irrigationLines[i]['autoIncrement']}']['Booster'].add(['L ${i + 1} : Booster${k+1}','-','-','-','${localDosing[ld][k][3]}','${ai}']);
-                }
-              }else{
-                if(localDosing[ld][k][2] == true){
-                  var values1 = isThereOrNot('L ${i + 1} : Booster${k+1}',irrigationLines[i]['autoIncrement'].toString(),'Booster');
-                  if(values1.isEmpty){
-                    mappingOfOutputs[i]['${irrigationLines[i]['autoIncrement']}']['Booster'].add(['L ${i + 1} : Booster${k+1}','-','-','-','${localDosing[ld][k][3]}','${ai}']);
-                    overAll.add(['L ${i + 1} : Booster${k+1}','-','-','-']);
-                  }else{
-                    mappingOfOutputs[i]['${irrigationLines[i]['autoIncrement']}']['Booster'].add(['L ${i + 1} : Booster${k+1}',values1[0],values1[1],values1[2],values1[3],values1[4]]);
-                    overAll.add(['L ${i + 1} : Booster${k+1}',values1[0],values1[1],values1[2]]);
-                  }
-                }
-              }
+      case ('m_i_localDosing'):{
+        if(list[4] == 'rtu'){
+          if(list[2].contains('-')){
+
+            if(localDosingUpdated[list[1]][list[2].split('-')[0]][list[3]][list[2].split('-')[1]][list[4]] != list[5]){
+              localDosingUpdated[list[1]][list[2].split('-')[0]][list[3]][list[2].split('-')[1]]['rfNo'] = '-';
+              localDosingUpdated[list[1]][list[2].split('-')[0]][list[3]][list[2].split('-')[1]]['input'] = '-';
+            }
+          }else{
+
+            if(localDosingUpdated[list[1]][list[2]][list[3]][list[4]] != list[5]){
+              localDosingUpdated[list[1]][list[2]][list[3]]['rfNo'] = '-';
+              localDosingUpdated[list[1]][list[2]][list[3]]['input'] = '-';
             }
           }
+        }else if(list[4] == 'rfNo'){
+          if(list[2].contains('-')){
+            if(localDosingUpdated[list[1]][list[2].split('-')[0]][list[3]][list[2].split('-')[1]][list[4]] != list[5]){
+              localDosingUpdated[list[1]][list[2].split('-')[0]][list[3]][list[2].split('-')[1]]['input'] = '-';
+            }
+          }else{
+            if(localDosingUpdated[list[1]][list[2]][list[3]][list[4]] != list[5]){
+              localDosingUpdated[list[1]][list[2]][list[3]]['input'] = '-';
+            }
+          }
+
         }
+        if(list[2].contains('-')){
+          localDosingUpdated[list[1]][list[2].split('-')[0]][list[3]][list[2].split('-')[1]][list[4]] = list[5];
+        }else{
+          localDosingUpdated[list[1]][list[2]][list[3]][list[4]] = list[5];
+        }
+        break;
       }
-      if(irrigationLines[i]['local_filtration_site'] == true){
-        for(var j in localFiltration){
-          if(j[0] == i + 1){
-            for(var k = 0;k < int.parse(j[1]);k++){
-              if(previousDataOfM_O.length == 0){
-                mappingOfOutputs[i]['${irrigationLines[i]['autoIncrement']}']['filter'].add(
-                    ['L ${i + 1} : filter${k+1}','-','-','-','${returnI_O_AutoIncrement()}']
-                );
-                overAll.add(['L ${i + 1} : filter${k+1}','-','-','-']);
-              }else{
-                var values = isThereOrNot('L ${i + 1} : filter${k+1}',irrigationLines[i]['autoIncrement'].toString(),'filter');
-                if(values.isEmpty){
-                  mappingOfOutputs[i]['${irrigationLines[i]['autoIncrement']}']['filter'].add(
-                      ['L ${i + 1} : filter${k+1}','-','-','-','${returnI_O_AutoIncrement()}']
-                  );
-                  overAll.add( ['L ${i + 1} : filter${k+1}','-','-','-']);
-                }
-                else{
-                  mappingOfOutputs[i]['${irrigationLines[i]['autoIncrement']}']['filter'].add(
-                      ['L ${i + 1} : filter${k+1}',values[0],values[1],values[2],values[3]]
-                  );
-                  overAll.add( ['L ${i + 1} : filter${k+1}',values[0],values[1],values[2]]);
-                }
-              }
-            }
-            if(j[2] == true){
-              if(previousDataOfM_O.length == 0){
-                mappingOfOutputs[i]['${irrigationLines[i]['autoIncrement']}']['D_valve'] = ['L ${i + 1} : D_valve','-','-','-','${returnI_O_AutoIncrement()}'];
-                overAll.add(['L ${i + 1} : D_valve','-','-','-']);
-              }else{
-                var values = isThereOrNot('L ${i + 1} : D_valve',irrigationLines[i]['autoIncrement'].toString(),'D_valve');
-                if(values.isEmpty){
-                  mappingOfOutputs[i]['${irrigationLines[i]['autoIncrement']}']['D_valve'] = ['L ${i + 1} : D_valve','-','-','-','${returnI_O_AutoIncrement()}'];
-                  overAll.add(['L ${i + 1} : D_valve','-','-','-']);
-                }else{
-                  mappingOfOutputs[i]['${irrigationLines[i]['autoIncrement']}']['D_valve'] = ['L ${i + 1} : D_valve',values[0],values[1],values[2],values[3]];
-                  overAll.add(['L ${i + 1} : D_valve',values[0],values[1],values[2]]);
-                }
-              }
-            }
-            break;
+      case ('m_i_sourcePump'):{
+        if(list[4] == 'rtu'){
+          if(sourcePumpUpdated[list[1]][list[2]][list[4]] != list[5]){
+            sourcePumpUpdated[list[1]][list[2]]['rfNo'] = '-';
+            sourcePumpUpdated[list[1]][list[2]]['input'] = '-';
+          }
+        }else if(list[4] == 'rfNo'){
+          if(sourcePumpUpdated[list[1]][list[2]][list[4]] != list[5]){
+            sourcePumpUpdated[list[1]][list[2]]['input'] = '-';
           }
         }
+        sourcePumpUpdated[list[1]][list[2]][list[4]] = list[5];
+        print(sourcePumpUpdated);
+        break;
+      }
+      case ('m_i_irrigationPump'):{
+        print(list);
+        if(list[4] == 'rtu'){
+          if(irrigationPumpUpdated[list[1]][list[2]][list[4]] != list[5]){
+            irrigationPumpUpdated[list[1]][list[2]]['rfNo'] = '-';
+            irrigationPumpUpdated[list[1]][list[2]]['input'] = '-';
+          }
+        }else if(list[4] == 'rfNo'){
+          if(irrigationPumpUpdated[list[1]][list[2]][list[4]] != list[5]){
+            irrigationPumpUpdated[list[1]][list[2]]['input'] = '-';
+          }
+        }
+        irrigationPumpUpdated[list[1]][list[2]][list[4]] = list[5];
+        print(irrigationPumpUpdated);
+        break;
+      }
+      case ('m_i_localFiltration'):{
+        if(list[4] == 'rtu'){
+          if(list[3] == -1){
+            if(localFiltrationUpdated[list[1]][list[2]][list[4]] != list[5]){
+              localFiltrationUpdated[list[1]][list[2]]['rfNo'] = '-';
+              localFiltrationUpdated[list[1]][list[2]]['input'] = '-';
+            }
+          }
+        }else if(list[4] == 'rfNo'){
+          if(list[3] == -1){
+            if(localFiltrationUpdated[list[1]][list[2]][list[4]] != list[5]){
+              localFiltrationUpdated[list[1]][list[2]]['input'] = '-';
+            }
+          }
+        }
+        if(list[3] == -1){
+          localFiltrationUpdated[list[1]][list[2]][list[4]] = list[5];
+        }
+        break;
+      }
+      case ('m_i_centralFiltration'):{
+        if(list[4] == 'rtu'){
+          if(list[3] == -1){
+            if(centralFiltrationUpdated[list[1]][list[2]][list[4]] != list[5]){
+              centralFiltrationUpdated[list[1]][list[2]]['rfNo'] = '-';
+              centralFiltrationUpdated[list[1]][list[2]]['input'] = '-';
+            }
+          }
+        }else if(list[4] == 'rfNo'){
+          if(list[3] == -1){
+            if(centralFiltrationUpdated[list[1]][list[2]][list[4]] != list[5]){
+              centralFiltrationUpdated[list[1]][list[2]]['input'] = '-';
+            }
+          }
+        }
+        if(list[3] == -1){
+          centralFiltrationUpdated[list[1]][list[2]][list[4]] = list[5];
+        }
+        break;
       }
     }
-    previousDataOfM_O = mappingOfOutputs;
-    notifyListeners();
-  }
-  var dummy = '';
-  void refreshMapOfInputs(){
-    mappingOfInputs = [];
-    for(var i = 0;i < irrigationLines.length;i++){
-      mappingOfInputs.add({
-        '${irrigationLines[i]['autoIncrement']}' : {
-          'pressure_sensor' : [],
-          'water_meter' : [],
-          'ORO_sense' : [],
-          'dosing_meter' : [],
-          'D_pressure_sensor' : [],
-          'D_pressure_sensor_out' : [],
-        }
-      });
-      if(irrigationLines[i]['pressure_sensor'] == true){
-        if(previousDataOfM_I.length == 0 ){
-          mappingOfInputs[i]['${irrigationLines[i]['autoIncrement']}']['pressure_sensor'] = ['L ${i + 1} : Pressure sensor','-','-','-','-','${returnI_O_AutoIncrement()}'];
-        }else{
-          var values = isThereOrNotforIO('L ${i + 1} : Pressure sensor',irrigationLines[i]['autoIncrement'].toString(),'pressure_sensor');
-          if(values.isEmpty){
-            mappingOfInputs[i]['${irrigationLines[i]['autoIncrement']}']['pressure_sensor'] = ['L ${i + 1} : Pressure sensor','-','-','-','-','${returnI_O_AutoIncrement()}'];
-          }else{
-            mappingOfInputs[i]['${irrigationLines[i]['autoIncrement']}']['pressure_sensor'] = ['L ${i + 1} : Pressure sensor',values[0],values[1],values[2],values[3],values[4]];
-          }
-        }
-      }
-      if(irrigationLines[i]['water_meter'] == true){
-        if(previousDataOfM_I.length == 0 ){
-          mappingOfInputs[i]['${irrigationLines[i]['autoIncrement']}']['water_meter'] = ['L ${i + 1} : water meter','-','-','-','-','${returnI_O_AutoIncrement()}'];
-        }else{
-          var values = isThereOrNotforIO('L ${i + 1} : water meter',irrigationLines[i]['autoIncrement'].toString(),'water_meter');
-          if(values.isEmpty){
-            mappingOfInputs[i]['${irrigationLines[i]['autoIncrement']}']['water_meter'] = ['L ${i + 1} : water meter','-','-','-','-','${returnI_O_AutoIncrement()}'];
-          }else{
-            mappingOfInputs[i]['${irrigationLines[i]['autoIncrement']}']['water_meter'] = ['L ${i + 1} : water meter',values[0],values[1],values[2],values[3],values[4]];
-          }
-        }
-      }
-      if(irrigationLines[i]['Local_dosing_site'] == true){
-        for(var j = 0;j < localDosing.length;j++){
-          if(localDosing[j][localDosing[j].length - 1][1] == i + 1){
-            for(var k = 0;k < localDosing[j].length - 1;k++){
-              if(previousDataOfM_I.length == 0){
-                if(localDosing[j][k][1] == true){
-                  mappingOfInputs[i]['${irrigationLines[i]['autoIncrement']}']['dosing_meter'].add(['L ${i + 1} : dosing_meter${k+1}','-','-','-','-','${localDosing[j][k][3]}','${returnI_O_AutoIncrement()}']);
-                }
-              }else{
-                if(localDosing[j][k][1] == true){
-                  var values1 = isThereOrNotforIO('L ${i + 1} : dosing_meter${k+1}',irrigationLines[i]['autoIncrement'].toString(),'dosing_meter');
-                  if(values1.isEmpty){
-                    mappingOfInputs[i]['${irrigationLines[i]['autoIncrement']}']['dosing_meter'].add(['L ${i + 1} : dosing_meter${k+1}','-','-','-','-','${localDosing[j][k][3]}','${returnI_O_AutoIncrement()}']);
-                  }else{
-                    mappingOfInputs[i]['${irrigationLines[i]['autoIncrement']}']['dosing_meter'].add(['L ${i + 1} : dosing_meter${k+1}',values1[0],values1[1],values1[2],values1[3],values1[4],values1[5]]);
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-      if(irrigationLines[i]['local_filtration_site'] == true){
-        for(var j in localFiltration){
-          if(j[0] == i + 1){
-            if(j[3] == true){
-              if(previousDataOfM_I.length == 0){
-                mappingOfInputs[i]['${irrigationLines[i]['autoIncrement']}']['D_pressure_sensor'] = ['L ${i + 1} : D_pressure_sensor','-','-','-','-','${returnI_O_AutoIncrement()}'];
-              }else{
-                var values = isThereOrNotforIO('L ${i + 1} : D_pressure_sensor',irrigationLines[i]['autoIncrement'].toString(),'D_pressure_sensor');
-                if(values.isEmpty){
-                  mappingOfInputs[i]['${irrigationLines[i]['autoIncrement']}']['D_pressure_sensor'] = ['L ${i + 1} : D_pressure_sensor','-','-','-','-','${returnI_O_AutoIncrement()}'];
-                }else{
-                  mappingOfInputs[i]['${irrigationLines[i]['autoIncrement']}']['D_pressure_sensor'] = ['L ${i + 1} : D_pressure_sensor',values[0],values[1],values[2],values[3],values[4]];
-                }
-              }
-            }
-            break;
-          }
-        }
-      }
-      if(irrigationLines[i]['local_filtration_site'] == true){
-        for(var j in localFiltration){
-          if(j[0] == i + 1){
-            if(j[4] == true){
-              if(previousDataOfM_I.length == 0){
-                mappingOfInputs[i]['${irrigationLines[i]['autoIncrement']}']['D_pressure_sensor_out'] = ['L ${i + 1} : D_pressure_sensor_out','-','-','-','-','${returnI_O_AutoIncrement()}'];
-              }else{
-                var values = isThereOrNotforIO('L ${i + 1} : D_pressure_sensor_out',irrigationLines[i]['autoIncrement'].toString(),'D_pressure_sensor_out');
-                if(values.isEmpty){
-                  mappingOfInputs[i]['${irrigationLines[i]['autoIncrement']}']['D_pressure_sensor_out'] = ['L ${i + 1} : D_pressure_sensor_out','-','-','-','-','${returnI_O_AutoIncrement()}'];
-                }else{
-                  mappingOfInputs[i]['${irrigationLines[i]['autoIncrement']}']['D_pressure_sensor_out'] = ['L ${i + 1} : D_pressure_sensor_out',values[0],values[1],values[2],values[3],values[4]];
-                }
-              }
-            }
-            break;
-          }
-        }
-      }
-    }
-    previousDataOfM_I = mappingOfInputs;
     notifyListeners();
   }
   String returnDeviceType(String title){
@@ -2737,959 +3286,1225 @@ class ConfigMakerProvider extends ChangeNotifier{
       return '0';
     }
   }
+
+  void fetchAll(dynamic data){
+    print(data.runtimeType);
+    for(var i in data.entries){
+      print('i.key : ${i.key}');
+      if(i.key == 'configMaker'){
+        oldData = i.value;
+        print('oldData : ${oldData}');
+        print('oldDatatype : ${oldData.runtimeType}');
+      }
+      if(i.key == 'referenceNo'){
+        for(var rf in i.value.entries){
+          if(rf.key == 'ORO LEVEL'){
+            OroLevelForLine = rf.value;
+            totalOroLevel = rf.value.length;
+            for(var i in rf.value){
+              oLevel.add('$i');
+            }
+          }else if(rf.key == 'ORO SMART RTU'){
+            OroSmartRtuForLine = rf.value;
+            totalOroSmartRTU = rf.value.length;
+            for(var i in rf.value){
+              oSrtu.add('$i');
+            }
+          }else if(rf.key == 'ORO SWITCH'){
+            switchForLine = rf.value;
+            totalOroSwitch = rf.value.length;
+            for(var i in rf.value){
+              oSwitch.add('$i');
+            }
+          }else if(rf.key == 'ORO RTU'){
+            rtuForLine = rf.value;
+            totalRTU = rf.value.length;
+            for(var i in rf.value){
+              oRtu.add('$i');
+            }
+          }else if(rf.key == 'ORO SENSE'){
+            OroSenseForLine = rf.value;
+            totalOroSense = rf.value.length;
+            for(var i in rf.value){
+              oSense.add('$i');
+            }
+          }else if(rf.key == 'ORO PUMP'){
+            totalOroPump= rf.value.length;
+            for(var i in rf.value){
+              oPump.add('$i');
+            }
+          }else if(rf.key == 'ORO EXTEND'){
+            OroExtendForLine = rf.value;
+            totalOroExtend= rf.value.length;
+            for(var i in rf.value){
+              oExtend.add('$i');
+            }
+          }
+        }
+      }
+      if(i.key == 'productLimit'){
+        for(var j in i.value){
+          switch (j['product']){
+            case ('Valve') : {
+              totalValve = j['quantity'];
+              print(totalValve);
+              break;
+            }
+            case ('Main Valve') : {
+              totalMainValve = j['quantity'];
+              break;
+            }
+            case ('Source Pump') : {
+              totalSourcePump = j['quantity'];
+              break;
+            }
+            case ('Irrigation Pump') : {
+              totalIrrigationPump = j['quantity'];
+              break;
+            }
+            case ('Filters') : {
+              totalFilter = j['quantity'];
+              break;
+            }
+            case ('Dosing Channel') : {
+              totalInjector = j['quantity'];
+              break;
+            }
+            case ('Dosing Booster') : {
+              totalBooster = j['quantity'];
+              break;
+            }
+            case ('Analog Sensors') : {
+              for(var k = 0;k < j['quantity'];k++){
+                print('ana $k');
+                totalAnalogSensor.add(['Analog Sensor ${k+1}','-','-','-','-','${returnI_O_AutoIncrement()}']);
+              }
+              break;
+            }
+            case ('Contacts') : {
+              for(var k = 0;k < j['quantity'];k++){
+                totalContact.add(['Contact ${k+1}','-','-','-','-','${returnI_O_AutoIncrement()}']);
+              }
+              break;
+            }
+            case ('Agitator') : {
+              for(var k = 0;k < j['quantity'];k++){
+                totalAgitator.add(['Agitator ${k+1}','-','-','-','${returnI_O_AutoIncrement()}']);
+              }
+              break;
+            }
+            case ('pH sensor') : {
+              totalPhSensor = j['quantity'];
+              break;
+            }
+            case ('Ec sensor') : {
+              totalEcSensor = j['quantity'];
+              break;
+            }
+            case ('Moisture sensor') : {
+              totalMoistureSensor = j['quantity'];
+              break;
+            }
+            case ('Level Sensor') : {
+              totalLevelSensor = j['quantity'];
+              break;
+            }
+            case ('Fan') : {
+              totalFan = j['quantity'];
+              break;
+            }
+            case ('Fogger') : {
+              totalFogger = j['quantity'];
+              break;
+            }
+            case ('Pressure sensor') : {
+              total_p_sensor = j['quantity'];
+              break;
+            }
+            case ('Dosing meter') : {
+              totalDosingMeter = j['quantity'];
+              break;
+            }
+            case ('Water Meter') : {
+              totalWaterMeter = j['quantity'];
+              break;
+            }
+          }
+        }
+      }
+    }
+    // print(rtuForLine);
+    // print(oRtu);
+    notifyListeners();
+  }
   String returnDeviceType_HW(String title){
     if(title == 'ORO Smart RTU'){
-      return '2';
-    }else if(title == 'ORO RTU'){
-      return '3';
-    }else if(title == 'ORO Switch'){
-      return '5';
-    }else if(title == 'ORO Sense'){
       return '7';
+    }else if(title == 'ORO RTU'){
+      return '8';
+    }else if(title == 'ORO Switch'){
+      return '9';
+    }else if(title == 'ORO Sense'){
+      return '10';
+    }else if(title == 'ORO Sense'){
+      return '3';
     }else{
+      return '-';
+    }
+  }
+
+  String convertStringForOutput(dynamic data){
+    String myData = '';
+    if(data != null){
+      if(data.isNotEmpty){
+        myData = '${data['sNo']},${returnDeviceType_HW(data['rtu'])},${data['rfNo']},${data['output']},1';
+      }
+    }
+    return myData;
+  }
+  String convertStringForOutputHW(dynamic data){
+    String myData = '';
+    if(data != null){
+      if(data.isNotEmpty){
+        myData = '${data['sNo']},${returnDeviceType_HW(data['rtu'])},${refOutCheck(data['rfNo'])},${refOutCheck(data['output'])},1';
+      }
+    }
+    return myData;
+  }
+  String convertStringForInput(dynamic data){
+    String myData = '';
+    if(data != null){
+      if(data.isNotEmpty){
+        myData = '${data['sNo']},${returnDeviceType_HW(data['rtu'])},${data['rfNo']},${data['input']},${data['input_type']}';
+      }
+    }
+    return myData;
+  }
+  String refOutCheck(String rfandOutput){
+    if(rfandOutput == '-'){
       return '0';
+    }else{
+      return rfandOutput;
+    }
+  }
+  String convertStringForInputHW(dynamic data){
+    String myData = '';
+    if(data != null){
+      if(data.isNotEmpty){
+        myData = '${data['sNo']},${returnDeviceType_HW(data['rtu'])},${refOutCheck(data['rfNo'])},${refOutCheck(data['input'])},${refOutCheck(data['input_type'])}';
+      }
+    }
+    return myData;
+  }
+
+  String insertHardwareData(String title,dynamic data,String io){
+    String myData = '';
+    if(data == null || data.isEmpty){
+      myData = '';
+    }else{
+      if(io == 'output'){
+        myData = '${title},${convertStringForOutputHW(data)}';
+      }else{
+        myData = '${title},${convertStringForInputHW(data)}';
+      }
+    }
+    return myData;
+  }
+  String putEnd(String data){
+    if(data == ''){
+      return '';
+    }else{
+      if(data[data.length - 1] != ';'){
+        return ';';
+      }else{
+        return '';
+      }
     }
   }
 
   dynamic sendData(){
-    map_i_o = '';
-    dynamic fullData = {
-      'output' : {
-
-      },
-      'input' : {
-
-      }
+    Map<String,dynamic> configData = {
+      '200' : [
+        {'201' : ''},
+        {'202' : ''},
+        {'203' : ''},
+        {'204' : ''},
+        {'205' : ''},
+        {'206' : ''},
+      ],
+      // 'output' : {
+      //
+      // },
+      // 'input' : {
+      //
+      // }
     };
-    for(var i = 0; i < mappingOfOutputs.length;i++){
-      fullData['output']['l${i+1}'] = {};
-      fullData['output']['l${i+1}']['AI'] = '';
-      for(var j in mappingOfOutputs[i].entries){
-        if(j.value['valve'].length != 0){
-          fullData['output']['l${i+1}']['v'] = '';
-          if(fullData['output']['l${i+1}']['AI'] == ''){
-            fullData['output']['l${i+1}']['AI'] = '${j.key}';
-          }
-          for(var k = 0;k < j.value['valve'].length;k++){
-            fullData['output']['l${i+1}']['v'] += '${k+1},${returnDeviceType(j.value['valve'][k][1])},${j.value['valve'][k][2]},${j.value['valve'][k][3]},${j.value['valve'][k][4]}${k == j.value['valve'].length - 1 ? '' : '|'}' ;
-            map_i_o += '${j.value['valve'][k][4]},VL.${i+1}.${k+1},${returnDeviceType_HW(j.value['valve'][k][1])},${numberORnot(j.value['valve'][k][2])},${numberORnot(j.value['valve'][k][3])},1;' ;
-          }
-        }
+    if(sourcePumpUpdated.length != 0){
+      for(var i = 0;i < sourcePumpUpdated.length;i++){
+        // configData['output']['SP${i+1}'] = {};
+        // configData['input']['SP${i+1}'] = {};
+        // configData['output']['SP${i+1}']['AI'] = '${sourcePumpUpdated[i]['sNo']}';
+        // configData['input']['SP${i+1}']['AI'] = '${sourcePumpUpdated[i]['sNo']}';
+        // configData['output']['SP${i+1}']['ws'] = sourcePumpUpdated[i]['waterSource'];
+        // if(sourcePumpUpdated[i]['pumpConnection'] != null){
+        //   if(sourcePumpUpdated[i]['pumpConnection'].isNotEmpty){
+        //     configData['output']['SP${i+1}']['pc'] = '${convertStringForOutput(sourcePumpUpdated[i]['pumpConnection'])}';
+        //   }
+        // }
+        // if(sourcePumpUpdated[i]['on'] != null){
+        //   if(sourcePumpUpdated[i]['on'].isNotEmpty){
+        //     configData['output']['SP${i+1}']['on'] = '${convertStringForOutput(sourcePumpUpdated[i]['on'])}';
+        //   }
+        // }
+        // if(sourcePumpUpdated[i]['off'] != null){
+        //   if(sourcePumpUpdated[i]['off'].isNotEmpty){
+        //     configData['output']['SP${i+1}']['off'] = '${convertStringForOutput(sourcePumpUpdated[i]['off'])}';
+        //   }
+        // }
+        // if(sourcePumpUpdated[i]['scr'] != null){
+        //   if(sourcePumpUpdated[i]['scr'].isNotEmpty){
+        //     configData['output']['SP${i+1}']['scr'] = '${convertStringForOutput(sourcePumpUpdated[i]['scr'])}';
+        //   }
+        // }
+        // if(sourcePumpUpdated[i]['ecr'] != null){
+        //   if(sourcePumpUpdated[i]['ecr'].isNotEmpty){
+        //     configData['output']['SP${i+1}']['ecr'] = '${convertStringForOutput(sourcePumpUpdated[i]['ecr'])}';
+        //   }
+        // }
+        // if(sourcePumpUpdated[i]['waterMeter'] != null){
+        //   if(sourcePumpUpdated[i]['waterMeter'].isNotEmpty){
+        //     configData['output']['SP${i+1}']['wm'] = '${convertStringForInput(sourcePumpUpdated[i]['waterMeter'])},${i+1}';
+        //   }
+        // }
+        // if(sourcePumpUpdated[i]['TopTankHigh'] != null){
+        //   if(sourcePumpUpdated[i]['TopTankHigh'].isNotEmpty){
+        //     configData['output']['SP${i+1}']['TTH'] = '${convertStringForInput(sourcePumpUpdated[i]['TopTankHigh'])}';
+        //   }
+        // }
+        // if(sourcePumpUpdated[i]['TopTankLow'] != null){
+        //   if(sourcePumpUpdated[i]['TopTankLow'].isNotEmpty){
+        //     configData['output']['SP${i+1}']['TTL'] = '${convertStringForInput(sourcePumpUpdated[i]['TopTankLow'])}';
+        //   }
+        // }
+        // if(sourcePumpUpdated[i]['SumpTankHigh'] != null){
+        //   if(sourcePumpUpdated[i]['SumpTankHigh'].isNotEmpty){
+        //     configData['output']['SP${i+1}']['STH'] = '${convertStringForInput(sourcePumpUpdated[i]['SumpTankHigh'])}';
+        //   }
+        // }
+        // if(sourcePumpUpdated[i]['SumpTankLow'] != null){
+        //   if(sourcePumpUpdated[i]['SumpTankLow'].isNotEmpty){
+        //     configData['output']['SP${i+1}']['STL'] = '${convertStringForInput(sourcePumpUpdated[i]['SumpTankLow'])}';
+        //   }
+        // }
+        // if(sourcePumpUpdated[i]['c1'] != null){
+        //   if(sourcePumpUpdated[i]['c1'].isNotEmpty){
+        //     configData['output']['SP${i+1}']['c1'] = '${convertStringForInput(sourcePumpUpdated[i]['c1'])}';
+        //   }
+        // }
+        // if(sourcePumpUpdated[i]['c2'] != null){
+        //   if(sourcePumpUpdated[i]['c2'].isNotEmpty){
+        //     configData['output']['SP${i+1}']['c2'] = '${convertStringForInput(sourcePumpUpdated[i]['c2'])}';
+        //   }
+        // }
+        // if(sourcePumpUpdated[i]['c3'] != null){
+        //   if(sourcePumpUpdated[i]['c3'].isNotEmpty){
+        //     configData['output']['SP${i+1}']['c3'] = '${convertStringForInput(sourcePumpUpdated[i]['c3'])}';
+        //   }
+        // }
+
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('SP.${i+1}',sourcePumpUpdated[i]['pumpConnection'],'output')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('SP.${i+1}.1',sourcePumpUpdated[i]['on'],'output')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('SP.${i+1}.2',sourcePumpUpdated[i]['off'],'output')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('SP.${i+1}.3',sourcePumpUpdated[i]['scr'],'output')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('SP.${i+1}.4',sourcePumpUpdated[i]['ecr'],'output')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('SW.${i+1}',sourcePumpUpdated[i]['waterMeter'],'input')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('SF.${i+1}.1',sourcePumpUpdated[i]['TopTankLow'],'input')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('SF.${i+1}.2',sourcePumpUpdated[i]['TopTankHigh'],'input')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('SF.${i+1}.3',sourcePumpUpdated[i]['SumpTankLow'],'input')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('SF.${i+1}.4',sourcePumpUpdated[i]['SumpTankHigh'],'input')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('SC.${i+1}.1',sourcePumpUpdated[i]['c1'],'input')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('SC.${i+1}.2',sourcePumpUpdated[i]['c2'],'input')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('SC.${i+1}.3',sourcePumpUpdated[i]['c3'],'input')}' ;
 
       }
-      for(var j in mappingOfOutputs[i].entries){
-        if(j.value['main_valve'].length != 0){
-          fullData['output']['l${i+1}']['mv'] = '';
-          for(var k = 0;k < j.value['main_valve'].length;k++){
-            fullData['output']['l${i+1}']['mv'] += '${k+1},${returnDeviceType(j.value['main_valve'][k][1])},${j.value['main_valve'][k][2]},${j.value['main_valve'][k][3]},${j.value['main_valve'][k][4]}${k == j.value['main_valve'].length - 1 ? '' : '|'}' ;
-            map_i_o += '${j.value['main_valve'][k][4]},MV.${i+1}.${k+1},${returnDeviceType_HW(j.value['main_valve'][k][1])},${numberORnot(j.value['main_valve'][k][2])},${numberORnot(j.value['main_valve'][k][3])},1;' ;
-          }
-        }
-      }
-      for(var j in mappingOfOutputs[i].entries){
-        if(j.value['injector'].length != 0){
-          fullData['output']['l${i+1}']['inj'] = '';
-          for(var k = 0;k < j.value['injector'].length;k++){
-            fullData['output']['l${i+1}']['inj'] += '${k+1},${returnDeviceType(j.value['injector'][k][1])},${j.value['injector'][k][2]},${j.value['injector'][k][3]},${j.value['injector'][k][4]},${j.value['injector'][k][5]}${k == j.value['injector'].length - 1 ? '' : '|'}' ;
-            map_i_o += '${j.value['injector'][k][5]},FC.${i+1}.2.${k+1},${returnDeviceType_HW(j.value['injector'][k][1])},${numberORnot(j.value['injector'][k][2])},${numberORnot(j.value['injector'][k][3])},1;' ;
-          }
-        }
-      }
-      for(var j in mappingOfOutputs[i].entries){
-        if(j.value['Booster'].length != 0){
-          fullData['output']['l${i+1}']['booster'] = '';
-          for(var k = 0;k < j.value['Booster'].length;k++){
-            var bstr = j.value['Booster'][k][0].split(':');
-            var bstrNo = bstr[1].split('Booster')[1];
-            fullData['output']['l${i+1}']['booster'] += '${bstrNo},${returnDeviceType(j.value['Booster'][k][1])},${j.value['Booster'][k][2]},${j.value['Booster'][k][3]},${j.value['Booster'][k][4]},${j.value['Booster'][k][5]}${k == j.value['Booster'].length - 1 ? '' : '|'}' ;
-            map_i_o += '${j.value['Booster'][k][5]},FB.${i+1}.2.${k+1},${returnDeviceType_HW(j.value['Booster'][k][1])},${numberORnot(j.value['Booster'][k][2])},${numberORnot(j.value['Booster'][k][3])},1;' ;
-          }
-        }
-      }
-      for(var j in mappingOfOutputs[i].entries){
-        if(j.value['filter'].length != 0){
-          fullData['output']['l${i+1}']['filt'] = '';
-          for(var k = 0;k < j.value['filter'].length;k++){
-            fullData['output']['l${i+1}']['filt'] += '${k+1},${returnDeviceType(j.value['filter'][k][1])},${j.value['filter'][k][2]},${j.value['filter'][k][3]},${j.value['filter'][k][4]}${k == j.value['filter'].length - 1 ? '' : '|'}' ;
-            map_i_o += '${j.value['filter'][k][4]},FL.${i+1}.2.${k+1},${returnDeviceType_HW(j.value['filter'][k][1])},${numberORnot(j.value['filter'][k][2])},${numberORnot(j.value['filter'][k][3])},1;' ;
+    }
+    if(irrigationPumpUpdated.length != 0){
+      // configData['output']['IP'] = '';
+      // configData['input']['IP'] = '';
+      for(var i = 0;i < irrigationPumpUpdated.length;i++){
+        // configData['output']['IP${i+1}'] = {};
+        // configData['input']['IP${i+1}'] = {};
+        // configData['output']['IP${i+1}']['AI'] = '${irrigationPumpUpdated[i]['sNo']}';
+        // configData['input']['IP${i+1}']['AI'] = '${irrigationPumpUpdated[i]['sNo']}';
+        // if(irrigationPumpUpdated[i]['pumpConnection'] != null){
+        //   if(irrigationPumpUpdated[i]['pumpConnection'].isNotEmpty){
+        //     configData['output']['IP${i+1}']['pc'] = '${convertStringForOutput(irrigationPumpUpdated[i]['pumpConnection'])}';
+        //   }
+        // }
+        // if(irrigationPumpUpdated[i]['on'] != null){
+        //   if(irrigationPumpUpdated[i]['on'].isNotEmpty){
+        //     configData['output']['IP${i+1}']['on'] = '${convertStringForOutput(irrigationPumpUpdated[i]['on'])}';
+        //   }
+        // }
+        // if(irrigationPumpUpdated[i]['off'] != null){
+        //   if(irrigationPumpUpdated[i]['off'].isNotEmpty){
+        //     configData['output']['IP${i+1}']['off'] = '${convertStringForOutput(irrigationPumpUpdated[i]['off'])}';
+        //   }
+        // }
+        // if(irrigationPumpUpdated[i]['scr'] != null){
+        //   if(irrigationPumpUpdated[i]['scr'].isNotEmpty){
+        //     configData['output']['IP${i+1}']['scr'] = '${convertStringForOutput(irrigationPumpUpdated[i]['scr'])}';
+        //   }
+        // }
+        // if(irrigationPumpUpdated[i]['ecr'] != null){
+        //   if(irrigationPumpUpdated[i]['ecr'].isNotEmpty){
+        //     configData['output']['IP${i+1}']['ecr'] = '${convertStringForOutput(irrigationPumpUpdated[i]['ecr'])}';
+        //   }
+        // }
+        // if(irrigationPumpUpdated[i]['waterMeter'] != null){
+        //   if(irrigationPumpUpdated[i]['waterMeter'].isNotEmpty){
+        //     configData['output']['IP${i+1}']['wm'] = '${convertStringForInput(irrigationPumpUpdated[i]['waterMeter'])},${i+1}';
+        //   }
+        // }
+        // if(irrigationPumpUpdated[i]['TopTankHigh'] != null){
+        //   if(irrigationPumpUpdated[i]['TopTankHigh'].isNotEmpty){
+        //     configData['output']['IP${i+1}']['TTH'] = '${convertStringForInput(irrigationPumpUpdated[i]['TopTankHigh'])}';
+        //   }
+        // }
+        // if(irrigationPumpUpdated[i]['TopTankLow'] != null){
+        //   if(irrigationPumpUpdated[i]['TopTankLow'].isNotEmpty){
+        //     configData['output']['IP${i+1}']['TTL'] = '${convertStringForInput(irrigationPumpUpdated[i]['TopTankLow'])}';
+        //   }
+        // }
+        // if(irrigationPumpUpdated[i]['SumpTankHigh'] != null){
+        //   if(irrigationPumpUpdated[i]['SumpTankHigh'].isNotEmpty){
+        //     configData['output']['IP${i+1}']['STH'] = '${convertStringForInput(irrigationPumpUpdated[i]['SumpTankHigh'])}';
+        //   }
+        // }
+        // if(irrigationPumpUpdated[i]['SumpTankLow'] != null){
+        //   if(irrigationPumpUpdated[i]['SumpTankLow'].isNotEmpty){
+        //     configData['output']['IP${i+1}']['STL'] = '${convertStringForInput(irrigationPumpUpdated[i]['SumpTankLow'])}';
+        //   }
+        // }
+        // if(irrigationPumpUpdated[i]['c1'] != null){
+        //   if(irrigationPumpUpdated[i]['c1'].isNotEmpty){
+        //     configData['output']['IP${i+1}']['c1'] = '${convertStringForInput(irrigationPumpUpdated[i]['c1'])}';
+        //   }
+        // }
+        // if(irrigationPumpUpdated[i]['c2'] != null){
+        //   if(irrigationPumpUpdated[i]['c2'].isNotEmpty){
+        //     configData['output']['IP${i+1}']['c2'] = '${convertStringForInput(irrigationPumpUpdated[i]['c2'])}';
+        //   }
+        // }
+        // if(irrigationPumpUpdated[i]['c3'] != null){
+        //   if(irrigationPumpUpdated[i]['c3'].isNotEmpty){
+        //     configData['output']['IP${i+1}']['c3'] = '${convertStringForInput(irrigationPumpUpdated[i]['c3'])}';
+        //   }
+        // }
 
-          }
-        }
+
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('IP.${i+1}',irrigationPumpUpdated[i]['pumpConnection'],'output')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('IP.${i+1}.1',irrigationPumpUpdated[i]['on'],'output')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('IP.${i+1}.2',irrigationPumpUpdated[i]['off'],'output')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('IP.${i+1}.3',irrigationPumpUpdated[i]['scr'],'output')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('IP.${i+1}.4',irrigationPumpUpdated[i]['ecr'],'output')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('IW.${i+1}',irrigationPumpUpdated[i]['waterMeter'],'input')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('IF.${i+1}.1',irrigationPumpUpdated[i]['TopTankLow'],'input')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('IF.${i+1}.2',irrigationPumpUpdated[i]['TopTankHigh'],'input')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('IF.${i+1}.3',irrigationPumpUpdated[i]['SumpTankLow'],'input')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('IF.${i+1}.4',irrigationPumpUpdated[i]['SumpTankHigh'],'input')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('IC.${i+1}.1',irrigationPumpUpdated[i]['c1'],'input')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('IC.${i+1}.2',irrigationPumpUpdated[i]['c2'],'input')}' ;
+        configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('IC.${i+1}.3',irrigationPumpUpdated[i]['c3'],'input')}' ;
       }
-      for(var j in mappingOfOutputs[i].entries){
-        if(j.value['D_valve'].length != 0){
-          fullData['output']['l${i+1}']['d_v'] = '';
-          fullData['output']['l${i+1}']['d_v'] += '1,${returnDeviceType(j.value['D_valve'][1])},${j.value['D_valve'][2]},${j.value['D_valve'][3]},${j.value['D_valve'][4]}' ;
-          map_i_o += '${j.value['D_valve'][4]},DS.${i+1}.2,${returnDeviceType_HW(j.value['D_valve'][1])},${numberORnot(j.value['D_valve'][2])},${numberORnot(j.value['D_valve'][3])},1;' ;
+    }
+    if(centralDosingUpdated != 0){
+      for(var i = 0;i < centralDosingUpdated.length;i++){
+        // configData['output']['CD${i + 1}'] = {};
+        // configData['input']['CD${i + 1}'] = {};
+        // configData['output']['CD${i + 1}']['AI'] = '${centralDosingUpdated[i]['sNo']}';
+        // configData['input']['CD${i + 1}']['AI'] = '${centralDosingUpdated[i]['sNo']}';
+        // configData['output']['CD${i + 1}']['booster'] = '';
+        // configData['output']['CD${i + 1}']['inj'] = '';
+        // configData['output']['CD${i + 1}']['wbp'] = '';
+        // configData['input']['CD${i + 1}']['EC'] = '';
+        // configData['input']['CD${i + 1}']['PH'] = '';
+        // configData['input']['CD${i + 1}']['d_meter'] = '';
+
+        for(var bp = 0;bp < centralDosingUpdated[i]['boosterConnection'].length;bp++){
+          // configData['output']['CD${i + 1}']['booster'] +=  '${convertStringForOutput(centralDosingUpdated[i]['boosterConnection'][bp])}${bp == centralDosingUpdated[i]['boosterConnection'].length - 1 ? '' : '|'}';
+          configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FB.1.${i+1}.${bp + 1}',centralDosingUpdated[i]['boosterConnection'][bp],'output')}' ;
+        }
+        for(var inj = 0;inj < centralDosingUpdated[i]['injector'].length;inj++){
+          // configData['output']['CD${i + 1}']['inj'] +=  '${convertStringForOutput(centralDosingUpdated[i]['injector'][inj])}${inj == centralDosingUpdated[i]['injector'].length - 1 ? '' : '|'}';
+          configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FC.1.${i+1}.${inj + 1}',centralDosingUpdated[i]['injector'][inj],'output')}' ;
+          if(centralDosingUpdated[i]['injector'][inj]['dosingMeter'].isNotEmpty){
+            // configData['input']['CD${i + 1}']['d_meter'] +=  '${convertStringForInput(centralDosingUpdated[i]['injector'][inj]['dosingMeter'])},${inj + 1}${inj == centralDosingUpdated[i]['injector'].length - 1 ? '' : '|'}';
+            configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FM.1.${i+1}.${inj + 1}',centralDosingUpdated[i]['injector'][inj]['dosingMeter'],'input')}' ;
+          }
+          // configData['output']['CD${i + 1}']['wbp'] +=  '${centralDosingUpdated[i]['injector'][inj]['Which_Booster_Pump']}${inj == centralDosingUpdated[i]['injector'].length - 1 ? '' : '|'}';
+        }
+        for(var bp = 0;bp < centralDosingUpdated[i]['ecConnection'].length;bp++){
+          // configData['input']['CD${i + 1}']['EC'] +=  '${convertStringForInput(centralDosingUpdated[i]['ecConnection'][bp])}${bp == centralDosingUpdated[i]['ecConnection'].length - 1 ? '' : '|'}';
+          configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('EC.1.${i+1}.${bp + 1}',centralDosingUpdated[i]['ecConnection'][bp],'input')}' ;
 
         }
-      }
-      for(var j in mappingOfOutputs[i].entries){
-        for(var irr = 0;irr < irrigationLines.length;irr++){
-          if(j.key == '${irrigationLines[irr]['autoIncrement']}'){
-            fullData['output']['l${i+1}']['RF'] = '';
-            fullData['output']['l${i+1}']['RF'] += "CD:${irrigationLines[irr]['Central_dosing_site']}+CF:${irrigationLines[irr]['Central_filtration_site']}+IP:${irrigationLines[irr]['irrigationPump']}+OSRTU:${irrigationLines[irr]['ORO_Smart_RTU']}${irrigationLines[irr]['myOroSmartRtu']}+ORTU:${irrigationLines[irr]['RTU']}${irrigationLines[irr]['myRTU']}+OSWTCH:${irrigationLines[irr]['ORO_switch']}${irrigationLines[irr]['myOROswitch']}+OSENSE:${irrigationLines[irr]['ORO_sense']}${irrigationLines[irr]['myOROsense']}";
-            break;
-          }
+        for(var bp = 0;bp < centralDosingUpdated[i]['phConnection'].length;bp++){
+          // configData['input']['CD${i + 1}']['PH'] +=  '${convertStringForInput(centralDosingUpdated[i]['phConnection'][bp])}${bp == centralDosingUpdated[i]['phConnection'].length - 1 ? '' : '|'}';
+          configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('PH.1.${i+1}.${bp + 1}',centralDosingUpdated[i]['phConnection'][bp],'input')}' ;
         }
       }
     }
-    for(var i = 0; i < mappingOfInputs.length;i++){
-      fullData['input']['l${i+1}'] = {};
-      fullData['input']['l${i+1}']['AI'] = '';
-      for(var j in mappingOfInputs[i].entries){
-        if(j.value['pressure_sensor'].length != 0){
-          if(fullData['input']['l${i+1}']['AI'] == ''){
-            fullData['input']['l${i+1}']['AI'] = j.key;
-          }
-          fullData['input']['l${i+1}']['PS'] = '';
-          fullData['input']['l${i+1}']['PS'] += '1,${returnDeviceType(j.value['pressure_sensor'][1])},${j.value['pressure_sensor'][2]},${j.value['pressure_sensor'][3]},${j.value['pressure_sensor'][4]},${j.value['pressure_sensor'][5]}' ;
-          map_i_o += '${j.value['pressure_sensor'][5]},PS.${i+1},${returnDeviceType_HW(j.value['pressure_sensor'][1])},${numberORnot(j.value['pressure_sensor'][2])},${numberORnot(j.value['pressure_sensor'][3])},${j.value['pressure_sensor'][4]};' ;
+    if(centralFiltrationUpdated != 0){
+      for(var i = 0;i < centralFiltrationUpdated.length;i++){
+        // configData['output']['CF${i + 1}'] = {};
+        // configData['input']['CF${i + 1}'] = {};
+        // configData['output']['CF${i + 1}']['AI'] = '${centralFiltrationUpdated[i]['sNo']}';
+        // configData['input']['CF${i + 1}']['AI'] = '${centralFiltrationUpdated[i]['sNo']}';
+        // configData['output']['CF${i + 1}']['filt'] = '';
+        for(var fl = 0;fl < centralFiltrationUpdated[i]['filterConnection'].length;fl++){
+          // configData['output']['CF${i + 1}']['filt'] +=  '${convertStringForOutput(centralFiltrationUpdated[i]['filterConnection'][fl])}${fl == centralFiltrationUpdated[i]['filterConnection'].length - 1 ? '' : '|'}';
+          configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FL.1.${i+1}.${fl + 1}',centralFiltrationUpdated[i]['filterConnection'][fl],'output')}' ;
+        }
+        if(centralFiltrationUpdated[i]['dv'].isNotEmpty){
+          // configData['output']['CF${i + 1}']['d_v'] = '';
+          // configData['output']['CF${i + 1}']['d_v'] += '${convertStringForOutput(centralFiltrationUpdated[i]['dv'])}' ;
+          configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('DV.1.${i+1}',centralFiltrationUpdated[i]['dv'],'output')}' ;
 
         }
-      }
-      for(var j in mappingOfInputs[i].entries){
-        if(j.value['water_meter'].length != 0){
-          if(fullData['input']['l${i+1}']['AI'] == ''){
-            fullData['input']['l${i+1}']['AI'] = j.key;
-          }
-          fullData['input']['l${i+1}']['wm'] = '';
-          fullData['input']['l${i+1}']['wm'] += '1,${returnDeviceType(j.value['water_meter'][1])},${j.value['water_meter'][2]},${j.value['water_meter'][3]},${j.value['water_meter'][4]},${j.value['water_meter'][5]}' ;
-          map_i_o += '${j.value['water_meter'][5]},LW.${i+1},${returnDeviceType_HW(j.value['water_meter'][1])},${numberORnot(j.value['water_meter'][2])},${numberORnot(j.value['water_meter'][3])},${j.value['water_meter'][4]};' ;
-
+        if(centralFiltrationUpdated[i]['pressureIn'].isNotEmpty){
+          // configData['input']['CF${i + 1}']['PS_IN'] = '';
+          // configData['input']['CF${i + 1}']['PS_IN'] += '${convertStringForInput(centralFiltrationUpdated[i]['pressureIn'])}' ;
+          configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FI.1.${i+1}',centralFiltrationUpdated[i]['pressureIn'],'input')}' ;
         }
-      }
-      for(var j in mappingOfInputs[i].entries){
-        if(j.value['dosing_meter'].length != 0){
-          if(fullData['input']['l${i+1}']['AI'] == ''){
-            fullData['input']['l${i+1}']['AI'] = j.key;
-          }
-          fullData['input']['l${i+1}']['d_meter'] = '';
-          for(var k = 0;k < j.value['dosing_meter'].length;k++){
-            var bstr = j.value['dosing_meter'][k][0].split(':');
-            var bstrNo = bstr[1].split('dosing_meter')[1];
-            fullData['input']['l${i+1}']['d_meter'] += '${bstrNo},${returnDeviceType(j.value['dosing_meter'][k][1])},${j.value['dosing_meter'][k][2]},${j.value['dosing_meter'][k][3]},${j.value['dosing_meter'][k][4]},${j.value['dosing_meter'][k][5]},${j.value['dosing_meter'][k][6]}${k == j.value['dosing_meter'].length - 1 ? '' : '|'}' ;
-            map_i_o += '${j.value['dosing_meter'][k][6]},FM.${i+1}.2.${k+1},${returnDeviceType_HW(j.value['dosing_meter'][k][1])},${numberORnot(j.value['dosing_meter'][k][2])},${numberORnot(j.value['dosing_meter'][k][3])},${j.value['dosing_meter'][k][4]};' ;
-          }
-        }
-      }
-      for(var j in mappingOfInputs[i].entries){
-        if(j.value['D_pressure_sensor'].length != 0){
-          if(fullData['input']['l${i+1}']['AI'] == ''){
-            fullData['input']['l${i+1}']['AI'] = j.key;
-          }
-          fullData['input']['l${i+1}']['PS_IN'] = '1,${returnDeviceType(j.value['D_pressure_sensor'][1])},${j.value['D_pressure_sensor'][2]},${j.value['D_pressure_sensor'][3]},${j.value['D_pressure_sensor'][4]},${j.value['D_pressure_sensor'][5]}' ;
-          map_i_o += '${j.value['D_pressure_sensor'][5]},PI.${i+1}.2.1,${returnDeviceType_HW(j.value['D_pressure_sensor'][1])},${numberORnot(j.value['D_pressure_sensor'][2])},${numberORnot(j.value['D_pressure_sensor'][3])},${j.value['D_pressure_sensor'][4]};' ;
-
-        }
-      }
-      for(var j in mappingOfInputs[i].entries){
-        if(j.value['D_pressure_sensor_out'].length != 0){
-          if(fullData['input']['l${i+1}']['AI'] == ''){
-            fullData['input']['l${i+1}']['AI'] = j.key;
-          }
-          fullData['input']['l${i+1}']['PS_OUT'] = '1,${returnDeviceType(j.value['D_pressure_sensor_out'][1])},${j.value['D_pressure_sensor_out'][2]},${j.value['D_pressure_sensor_out'][3]},${j.value['D_pressure_sensor_out'][4]},${j.value['D_pressure_sensor_out'][5]}' ;
-          map_i_o += '${j.value['D_pressure_sensor_out'][5]},PO.${i+1}.2.1,${returnDeviceType_HW(j.value['D_pressure_sensor_out'][1])},${numberORnot(j.value['D_pressure_sensor_out'][2])},${numberORnot(j.value['D_pressure_sensor_out'][3])},${j.value['D_pressure_sensor_out'][4]};' ;
+        if(centralFiltrationUpdated[i]['pressureOut'].isNotEmpty){
+          // configData['input']['CF${i + 1}']['PS_OUT'] = '';
+          // configData['input']['CF${i + 1}']['PS_OUT'] += '${convertStringForInput(centralFiltrationUpdated[i]['pressureOut'])}' ;
+          configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FO.1.${i+1}',centralFiltrationUpdated[i]['pressureOut'],'input')}' ;
         }
       }
     }
-    for(var i = 0;i < CD_for_MO.length;i++){
-      fullData['output']['CD${i+1}'] = {};
-      for(var j in CD_for_MO[i].entries){
-        fullData['output']['CD${i+1}']['inj'] = '';
-        fullData['output']['CD${i+1}']['AI'] = j.key;
-        for(var k = 0;k < j.value['injector'].length;k++){
-          fullData['output']['CD${i+1}']['inj'] += '${k+1},${returnDeviceType(j.value['injector'][k][1])},${j.value['injector'][k][2]},${j.value['injector'][k][3]},${j.value['injector'][k][4]},${j.value['injector'][k][5]}${k == j.value['injector'].length - 1 ? '' : '|'}' ;
-          map_i_o += '${j.value['injector'][k][5]},FC.${i+1}.1.${k+1},${returnDeviceType_HW(j.value['injector'][k][1])},${numberORnot(j.value['injector'][k][2])},${numberORnot(j.value['injector'][k][3])},1;' ;
+    if(irrigationLines != 0){
+      for(var i = 0;i < irrigationLines.length;i++){
+        // configData['output']['l${i + 1}'] = {};
+        // configData['input']['l${i + 1}'] = {};
+        // configData['output']['l${i + 1}']['AI'] = '${irrigationLines[i]['sNo']}';
+        // configData['input']['l${i + 1}']['AI'] = '${irrigationLines[i]['sNo']}';
+        // configData['output']['l${i + 1}']['v'] = '';
+        // configData['output']['l${i + 1}']['mv'] = '';
+        // configData['input']['l${i + 1}']['ms'] = '';
+        // configData['input']['l${i + 1}']['ls'] = '';
+        // configData['output']['l${i + 1}']['fg'] = '';
+        // configData['output']['l${i + 1}']['fn'] = '';
+        for(var il = 0;il < irrigationLines[i]['valveConnection'].length;il++){
+          // configData['output']['l${i + 1}']['v'] +=  '${convertStringForOutput(irrigationLines[i]['valveConnection'][il])}${il == irrigationLines[i]['valveConnection'].length - 1 ? '' : '|'}';
+          configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('VL.${i+1}.${il + 1}',irrigationLines[i]['valveConnection'][il],'output')}' ;
         }
-      }
-    }
-    for(var i = 0;i < CD_for_MO.length;i++){
-      bool anyOne = false;
-      for(var l in CD_for_MO[i].entries){
-        for(var k = 0;k < l.value['booster'].length;k++){
-          if(l.value['booster'][k][0] == true){
-            anyOne = true;
+        for(var il = 0;il < irrigationLines[i]['main_valveConnection'].length;il++){
+          // configData['output']['l${i + 1}']['mv'] +=  '${convertStringForOutput(irrigationLines[i]['main_valveConnection'][il])}${il == irrigationLines[i]['main_valveConnection'].length - 1 ? '' : '|'}';
+          configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('MV.${i+1}.${il + 1}',irrigationLines[i]['main_valveConnection'][il],'output')}' ;
+        }
+        for(var il = 0;il < irrigationLines[i]['moistureSensorConnection'].length;il++){
+          // configData['input']['l${i + 1}']['ms'] +=  '${convertStringForInput(irrigationLines[i]['moistureSensorConnection'][il])}${il == irrigationLines[i]['moistureSensorConnection'].length - 1 ? '' : '|'}';
+          configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('SM.${i+1}.${il + 1}',irrigationLines[i]['moistureSensorConnection'][il],'input')}' ;
+        }
+        for(var il = 0;il < irrigationLines[i]['levelSensorConnection'].length;il++){
+          // configData['input']['l${i + 1}']['ls'] +=  '${convertStringForInput(irrigationLines[i]['levelSensorConnection'][il])}${il == irrigationLines[i]['levelSensorConnection'].length - 1 ? '' : '|'}';
+          configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('LV.${i+1}.${il + 1}',irrigationLines[i]['levelSensorConnection'][il],'input')}' ;
+        }
+        for(var il = 0;il < irrigationLines[i]['foggerConnection'].length;il++){
+          // configData['output']['l${i + 1}']['fg'] +=  '${convertStringForOutput(irrigationLines[i]['foggerConnection'][il])}${il == irrigationLines[i]['foggerConnection'].length - 1 ? '' : '|'}';
+          configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FG.${i+1}.${il + 1}',irrigationLines[i]['foggerConnection'][il],'output')}' ;
+        }
+        for(var il = 0;il < irrigationLines[i]['fanConnection'].length;il++){
+          // configData['output']['l${i + 1}']['fn'] +=  '${convertStringForOutput(irrigationLines[i]['fanConnection'][il])}${il == irrigationLines[i]['fanConnection'].length - 1 ? '' : '|'}';
+          configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FN.${i+1}.${il + 1}',irrigationLines[i]['fanConnection'][il],'output')}' ;
+        }
+        if(irrigationLines[i]['pressureIn'].isNotEmpty){
+          // configData['input']['l${i + 1}']['PS_IN'] = '';
+          // configData['input']['l${i + 1}']['PS_IN'] += '${convertStringForInput(irrigationLines[i]['pressureIn'])}' ;
+          configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('LI.${i+1}',irrigationLines[i]['pressureIn'],'input')}' ;
+        }
+        if(irrigationLines[i]['pressureOut'].isNotEmpty){
+          // configData['input']['l${i + 1}']['PS_OUT'] = '';
+          // configData['input']['l${i + 1}']['PS_OUT'] += '${convertStringForInput(irrigationLines[i]['pressureOut'])}' ;
+          configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('LO.${i+1}',irrigationLines[i]['pressureOut'],'input')}' ;
+        }
+        if(irrigationLines[i]['water_meter'].isNotEmpty){
+          // configData['input']['l${i + 1}']['wm'] = '';
+          // configData['input']['l${i + 1}']['wm'] += '${convertStringForInput(irrigationLines[i]['water_meter'])}' ;
+          configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('LW.${i+1}',irrigationLines[i]['water_meter'],'input')}' ;
+        }
+        // configData['output']['l${i + 1}']['CD'] = '${irrigationLines[i]['Central_dosing_site']}';
+        // configData['output']['l${i + 1}']['CF'] = '${irrigationLines[i]['Central_filtration_site']}';
+        // configData['output']['l${i + 1}']['IP'] = '${irrigationLines[i]['irrigationPump']}';
+        // configData['output']['l${i + 1}']['OSR'] = '${irrigationLines[i]['myOroSmartRtu']}';
+        // configData['output']['l${i + 1}']['SR'] = '${irrigationLines[i]['myRTU']}';
+        // configData['output']['l${i + 1}']['OSWH'] = '${irrigationLines[i]['myOROswitch']}';
+        // configData['output']['l${i + 1}']['OS'] = '${irrigationLines[i]['myOROsense']}';
+        if(irrigationLines[i]['Local_dosing_site'] == true){
+          for(var ld = 0; ld < localDosingUpdated.length;ld++){
+            if(localDosingUpdated[ld]['sNo'] == irrigationLines[i]['sNo']){
+              // configData['output']['l${i + 1}']['booster'] = '';
+              // configData['output']['l${i + 1}']['inj'] = '';
+              // configData['output']['l${i + 1}']['wbp'] = '';
+              // configData['input']['l${i + 1}']['EC'] = '';
+              // configData['input']['l${i + 1}']['PH'] = '';
+              // configData['input']['l${i + 1}']['d_meter'] = '';
+              for(var bp = 0;bp < localDosingUpdated[ld]['boosterConnection'].length;bp++){
+                // configData['output']['l${i + 1}']['booster'] +=  '${convertStringForOutput(localDosingUpdated[ld]['boosterConnection'][bp])}${bp == localDosingUpdated[ld]['boosterConnection'].length - 1 ? '' : '|'}';
+                configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FB.2.${i+1}.${bp + 1}',localDosingUpdated[ld]['boosterConnection'][bp],'output')}' ;
+              }
+              for(var inj = 0;inj < localDosingUpdated[ld]['injector'].length;inj++){
+                // configData['output']['l${i + 1}']['inj'] +=  '${convertStringForOutput(localDosingUpdated[ld]['injector'][inj])}${inj == localDosingUpdated[ld]['injector'].length - 1 ? '' : '|'}';
+                configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FC.2.${i+1}.${inj + 1}',localDosingUpdated[ld]['injector'][inj],'output')}' ;
+                if(localDosingUpdated[ld]['injector'][inj]['dosingMeter'].isNotEmpty){
+                  // configData['input']['l${i + 1}']['d_meter'] +=  '${convertStringForInput(localDosingUpdated[ld]['injector'][inj]['dosingMeter'])}${inj+1}${inj == localDosingUpdated[ld]['injector'].length - 1 ? '' : '|'}';
+                  configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FM.2.${i+1}.${inj + 1}',localDosingUpdated[ld]['injector'][inj]['dosingMeter'],'input')}' ;
+                }
+                // configData['output']['l${i + 1}']['wbp'] +=  '${localDosingUpdated[ld]['injector'][inj]['Which_Booster_Pump']}${inj == localDosingUpdated[ld]['injector'].length - 1 ? '' : '|'}';
+              }
+              for(var bp = 0;bp < localDosingUpdated[ld]['ecConnection'].length;bp++){
+                // configData['input']['l${i + 1}']['EC'] +=  '${convertStringForInput(localDosingUpdated[ld]['ecConnection'][bp])}${bp == localDosingUpdated[ld]['ecConnection'].length - 1 ? '' : '|'}';
+                configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('EC.2.${i+1}.${bp + 1}',localDosingUpdated[ld]['ecConnection'][bp],'input')}' ;
+
+              }
+              for(var bp = 0;bp < localDosingUpdated[ld]['phConnection'].length;bp++){
+                // configData['input']['l${i + 1}']['PH'] +=  '${convertStringForInput(localDosingUpdated[ld]['phConnection'][bp])}${bp == localDosingUpdated[ld]['phConnection'].length - 1 ? '' : '|'}';
+                configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('PH.2.${i+1}.${bp + 1}',localDosingUpdated[ld]['phConnection'][bp],'input')}' ;
+              }
+            }
           }
         }
-      }
-      if(anyOne == true){
-        fullData['output']['CD${i+1}']['booster'] = '';
-        bool iamFirst = true;
-        for(var l in CD_for_MO[i].entries){
-          for(var k = 0;k < l.value['booster'].length;k++){
-            if(l.value['booster'][k][0] == true){
-              fullData['output']['CD${i+1}']['booster'] += '${iamFirst == false ? '|' : ''}${k+1},${returnDeviceType(l.value['booster'][k][1])},${l.value['booster'][k][2]},${l.value['booster'][k][3]},${l.value['booster'][k][4]},${l.value['booster'][k][5]}' ;
-              map_i_o += '${l.value['booster'][k][5]},FB.${i+1}.1.${k+1},${returnDeviceType_HW(l.value['booster'][k][1])},${numberORnot(l.value['booster'][k][2])},${numberORnot(l.value['booster'][k][3])},1;' ;
-              iamFirst = false;
+        if(irrigationLines[i]['local_filtration_site'] == true){
+          for(var lf = 0; lf < localFiltrationUpdated.length;lf++){
+            if(localFiltrationUpdated[lf]['sNo'] == irrigationLines[i]['sNo']){
+              // configData['output']['l${i + 1}']['filt'] = '';
+              for(var fl = 0;fl < localFiltrationUpdated[lf]['filterConnection'].length;fl++){
+                // configData['output']['l${i + 1}']['filt'] +=  '${convertStringForOutput(localFiltrationUpdated[lf]['filterConnection'][fl])}${fl == localFiltrationUpdated[lf]['filterConnection'].length - 1 ? '' : '|'}';
+                configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FL.2.${i+1}.${fl + 1}',localFiltrationUpdated[lf]['filterConnection'][fl],'output')}' ;
+              }
+              if(localFiltrationUpdated[lf]['dv'].isNotEmpty){
+                // configData['output']['l${i + 1}']['d_v'] = '';
+                // configData['output']['l${i + 1}']['d_v'] += '${convertStringForOutput(localFiltrationUpdated[lf]['dv'])}' ;
+                configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('DV.2.${i+1}',localFiltrationUpdated[lf]['dv'],'output')}' ;
+
+              }
+              if(localFiltrationUpdated[lf]['pressureIn'].isNotEmpty){
+                // configData['input']['l${i + 1}']['L_PS_IN'] = '';
+                // configData['input']['l${i + 1}']['L_PS_IN'] += '${convertStringForInput(localFiltrationUpdated[lf]['pressureIn'])}' ;
+                configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FI.2.${i+1}',localFiltrationUpdated[lf]['pressureIn'],'input')}' ;
+              }
+              if(localFiltrationUpdated[lf]['pressureOut'].isNotEmpty){
+                // configData['input']['l${i + 1}']['L_PS_OUT'] = '';
+                // configData['input']['l${i + 1}']['L_PS_OUT'] += '${convertStringForInput(localFiltrationUpdated[lf]['pressureOut'])}' ;
+                configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FO.2.${i+1}',localFiltrationUpdated[lf]['pressureOut'],'input')}' ;
+              }
             }
           }
         }
       }
     }
-    for(var i = 0;i < CF_for_MO.length;i++){
-      fullData['output']['CF${i+1}'] = {};
-      for(var j in CF_for_MO[i].entries){
-        fullData['output']['CF${i+1}']['AI'] = j.key;
-        fullData['output']['CF${i+1}']['filt'] = '';
-        for(var k = 0;k < j.value['filter'].length;k++){
-          fullData['output']['CF${i+1}']['filt'] += '${k+1},${returnDeviceType(j.value['filter'][k][1])},${j.value['filter'][k][2]},${j.value['filter'][k][3]},${j.value['filter'][k][4]}${k == j.value['filter'].length - 1 ? '' : '|'}' ;
-          map_i_o += '${j.value['filter'][k][4]},FL.${i+1}.1.${k+1},${returnDeviceType_HW(j.value['filter'][k][1])},${numberORnot(j.value['filter'][k][2])},${numberORnot(j.value['filter'][k][3])},1;' ;
+    print(sourcePumpUpdated);
+    print(jsonEncode(configData));
+    return configData;
+  }
 
-        }
-      }
-      for(var j in CF_for_MO[i].entries){
-        if(j.value['D_S_valve'][0] == true){
-          fullData['output']['CF${i+1}']['d_v'] = '';
-          fullData['output']['CF${i+1}']['d_v'] += '1,${returnDeviceType(j.value['D_S_valve'][1])},${j.value['D_S_valve'][2]},${j.value['D_S_valve'][3]},${j.value['D_S_valve'][4]}' ;
-          map_i_o += '${j.value['D_S_valve'][4]},DS.${i+1}.1,${returnDeviceType_HW(j.value['D_S_valve'][1])},${numberORnot(j.value['D_S_valve'][2])},${numberORnot(j.value['D_S_valve'][3])},1;' ;
-        }
-      }
-    }
-    if(SP_MO.length != 0){
-      fullData['output']['SP'] = '';
-      for(var i = 0;i < SP_MO.length;i++){
-        for(var j in SP_MO[i].entries){
-          String src = '';
-          for(var sp = 0;sp < sourcePump.length;sp++){
-            if(sp+1 == i+1){
-              src = sourcePump[sp][0];
-            }
-          }
-          fullData['output']['SP'] += '${i+1},${returnDeviceType(j.value['pump'][1])},${j.value['pump'][2]},${j.value['pump'][3]},${src},${j.key},${j.value['pump'][4]}${i == SP_MO.length - 1 ? '' : '|'}' ;
-          map_i_o += '${j.value['pump'][4]},SP.${i+1},${returnDeviceType_HW(j.value['pump'][1])},${numberORnot(j.value['pump'][2])},${numberORnot(j.value['pump'][3])},1;' ;
-
-        }
-
-      }
-    }
-    if(IP_MO.length != 0){
-      fullData['output']['IP'] = '';
-      for(var i = 0;i < IP_MO.length;i++){
-        for(var j in IP_MO[i].entries){
-          fullData['output']['IP'] += '${i+1},${returnDeviceType(j.value['pump'][1])},${j.value['pump'][2]},${j.value['pump'][3]},${j.key},${j.value['pump'][4]}${i == IP_MO.length - 1 ? '' : '|'}' ;
-          map_i_o += '${j.value['pump'][4]},IP.${i+1},${returnDeviceType_HW(j.value['pump'][1])},${numberORnot(j.value['pump'][2])},${numberORnot(j.value['pump'][3])},1;' ;
-
-        }
-
-      }
-    }
-    for(var i = 0;i < CD_for_MO.length;i++){
-      bool anyOne = false;
-      for(var j in CD_for_MO[i].entries){
-        for(var k = 0;k < j.value['dosing_meter'].length;k++){
-          if(j.value['dosing_meter'][k][0] == true){
-            anyOne = true;
-          }
-        }
-        if(anyOne == true){
-          fullData['input']['CD${i+1}'] = {};
-          fullData['input']['CD${i+1}']['AI'] = j.key;
-          fullData['input']['CD${i+1}']['d_meter'] = '';
-          bool iamFirst = true;
-          for(var k = 0;k < j.value['dosing_meter'].length;k++){
-            if(j.value['dosing_meter'][k][0] == true){
-              fullData['input']['CD${i+1}']['d_meter'] += '${iamFirst == false ? '|' : ''}${k+1},${returnDeviceType(j.value['dosing_meter'][k][1])},${j.value['dosing_meter'][k][2]},${j.value['dosing_meter'][k][3]},${j.value['dosing_meter'][k][4]},${j.value['dosing_meter'][k][5]},${j.value['dosing_meter'][k][6]}' ;
-              map_i_o += '${j.value['dosing_meter'][k][6]},FM.${i+1}.1.${k+1},${returnDeviceType_HW(j.value['dosing_meter'][k][1])},${numberORnot(j.value['dosing_meter'][k][2])},${numberORnot(j.value['dosing_meter'][k][3])},${j.value['dosing_meter'][k][4]};' ;
-              iamFirst = false;
-            }
-          }
-        }
-      }
-    }
-    for(var i = 0;i < CF_for_MO.length;i++){
-      for(var j in CF_for_MO[i].entries){
-        if(j.value['P_sensor'][0] == true || j.value['P_sensor_out'][0] == true){
-          fullData['input']['CF${i+1}'] = {};
-        }
-      }
-    }
-    for(var i = 0;i < CF_for_MO.length;i++){
-      for(var j in CF_for_MO[i].entries){
-
-        if(j.value['P_sensor'][0] == true){
-          fullData['input']['CF${i+1}']['AI'] = j.key;
-          fullData['input']['CF${i+1}']['PS_IN'] = '';
-          fullData['input']['CF${i+1}']['PS_IN'] += '1,${returnDeviceType(j.value['P_sensor'][1])},${j.value['P_sensor'][2]},${j.value['P_sensor'][3]},${j.value['P_sensor'][4]},${j.value['P_sensor'][5]}' ;
-          map_i_o += '${j.value['P_sensor'][5]},PI.${i+1},${returnDeviceType_HW(j.value['P_sensor'][1])},${numberORnot(j.value['P_sensor'][2])},${numberORnot(j.value['P_sensor'][3])},${j.value['P_sensor'][4]};' ;
-        }
-      }
-    }
-    for(var i = 0;i < CF_for_MO.length;i++){
-      for(var j in CF_for_MO[i].entries){
-        if(j.value['P_sensor_out'][0] == true){
-          fullData['input']['CF${i+1}']['AI'] = j.key;
-          fullData['input']['CF${i+1}']['PS_OUT'] = '';
-          fullData['input']['CF${i+1}']['PS_OUT'] += '1,${returnDeviceType(j.value['P_sensor_out'][1])},${j.value['P_sensor_out'][2]},${j.value['P_sensor_out'][3]},${j.value['P_sensor_out'][4]},${j.value['P_sensor_out'][5]}' ;
-          map_i_o += '${j.value['P_sensor_out'][5]},PO.${i+1},${returnDeviceType_HW(j.value['P_sensor_out'][1])},${numberORnot(j.value['P_sensor_out'][2])},${numberORnot(j.value['P_sensor_out'][3])},${j.value['P_sensor_out'][4]};' ;
-        }
-      }
-    }
-    if(SP_MO.length != 0){
-      var ipAnyOne = false;
-      for(var i = 0;i < SP_MO.length;i++){
-        for(var j in SP_MO[i].entries){
-          if(j.value['water_meter'][0] == true){
-            ipAnyOne = true;
-          }
-        }
-      }
-      if(ipAnyOne == true){
-        fullData['input']['SP/wm'] = '';
-        var wmList = [];
-        for(var i = 0;i < SP_MO.length;i++){
-          for(var j in SP_MO[i].entries){
-            if(j.value['water_meter'][0] == true){
-              wmList.add('${i+1},${returnDeviceType(j.value['water_meter'][1])},${j.value['water_meter'][2]},${j.value['water_meter'][3]},${j.value['water_meter'][4]},${j.key},${j.value['water_meter'][5]}');
-              map_i_o += '${j.value['water_meter'][5]},SW.${i+1},${returnDeviceType_HW(j.value['water_meter'][1])},${numberORnot(j.value['water_meter'][2])},${numberORnot(j.value['water_meter'][3])},${j.value['water_meter'][4]};' ;
-            }
-          }
-        }
-        for(var i = 0;i< wmList.length;i++){
-          fullData['input']['SP/wm'] += '${wmList[i]}${i == wmList.length - 1 ? '' : '|'}' ;
-        }
-      }
-    }
-    if(IP_MO.length != 0){
-      var ipAnyOne = false;
-      for(var i = 0;i < IP_MO.length;i++){
-        for(var j in IP_MO[i].entries){
-          if(j.value['water_meter'][0] == true){
-            ipAnyOne = true;
-          }
-        }
-      }
-      if(ipAnyOne == true){
-        fullData['input']['IP/wm'] = '';
-        var wmList = [];
-        for(var i = 0;i < IP_MO.length;i++){
-          for(var j in IP_MO[i].entries){
-            if(j.value['water_meter'][0] == true){
-              wmList.add('${i+1},${returnDeviceType(j.value['water_meter'][1])},${j.value['water_meter'][2]},${j.value['water_meter'][3]},${j.value['water_meter'][4]},${j.key},${j.value['water_meter'][5]}');
-              map_i_o += '${j.value['water_meter'][5]},IW.${i+1},${returnDeviceType_HW(j.value['water_meter'][1])},${numberORnot(j.value['water_meter'][2])},${numberORnot(j.value['water_meter'][3])},${j.value['water_meter'][4]};' ;
-            }
-          }
-        }
-        for(var i = 0;i< wmList.length;i++){
-          fullData['input']['IP/wm'] += '${wmList[i]}${i == wmList.length - 1 ? '' : '|'}' ;
-        }
-      }
-    }
-    if(totalAnalogSensor.length != 0){
-      fullData['input']['AS'] = '';
-      for(var i = 0;i < totalAnalogSensor.length;i++){
-        fullData['input']['AS'] += '${i+1},${returnDeviceType(totalAnalogSensor[i][1])},${totalAnalogSensor[i][2]},${totalAnalogSensor[i][3]},${totalAnalogSensor[i][4]},${totalAnalogSensor[i][5]}${i == totalAnalogSensor.length - 1 ? '' : '|'}' ;
-        map_i_o += '${totalAnalogSensor[i][5]},AS.${i+1},${returnDeviceType_HW(totalAnalogSensor[i][1])},${numberORnot(totalAnalogSensor[i][2])},${numberORnot(totalAnalogSensor[i][3])},${totalAnalogSensor[i][4]};' ;
-
-      }
-    }
-    if(totalContact.length != 0){
-      fullData['input']['CONT'] = '';
-      for(var i = 0;i < totalContact.length;i++){
-        fullData['input']['CONT'] += '${i+1},${returnDeviceType(totalContact[i][1])},${totalContact[i][2]},${totalContact[i][3]},${totalContact[i][4]},${totalContact[i][5]}${i == totalContact.length - 1 ? '' : '|'}' ;
-        map_i_o += '${totalContact[i][5]},CT.${i+1},${returnDeviceType_HW(totalContact[i][1])},${numberORnot(totalContact[i][2])},${numberORnot(totalContact[i][3])},${totalContact[i][4]};' ;
-
-      }
-    }
-    if(totalMoistureSensor.length != 0){
-      fullData['input']['M_Sensor'] = '';
-      for(var i = 0;i < totalMoistureSensor.length;i++){
-        fullData['input']['M_Sensor'] += '${i+1},${returnDeviceType(totalMoistureSensor[i][1])},${totalMoistureSensor[i][2]},${totalMoistureSensor[i][3]},${totalMoistureSensor[i][4]},${totalMoistureSensor[i][5]}${i == totalMoistureSensor.length - 1 ? '' : '|'}' ;
-        map_i_o += '${totalMoistureSensor[i][5]},SM.${i+1},${returnDeviceType_HW(totalMoistureSensor[i][1])},${numberORnot(totalMoistureSensor[i][2])},${numberORnot(totalMoistureSensor[i][3])},${totalMoistureSensor[i][4]};' ;
-
-      }
-    }
-    if(totalPhSensor.length != 0){
-      fullData['input']['PH_Sensor'] = '';
-      for(var i = 0;i < totalPhSensor.length;i++){
-        fullData['input']['PH_Sensor'] += '${i+1},${returnDeviceType(totalPhSensor[i][1])},${totalPhSensor[i][2]},${totalPhSensor[i][3]},${totalPhSensor[i][4]},${totalPhSensor[i][5]}${i == totalPhSensor.length - 1 ? '' : '|'}' ;
-        map_i_o += '${totalPhSensor[i][5]},PH.${i+1},${returnDeviceType_HW(totalPhSensor[i][1])},${numberORnot(totalPhSensor[i][2])},${numberORnot(totalPhSensor[i][3])},${totalPhSensor[i][4]};' ;
-
-      }
-    }
-    if(totalEcSensor.length != 0){
-      fullData['input']['EC_Sensor'] = '';
-      for(var i = 0;i < totalEcSensor.length;i++){
-        fullData['input']['EC_Sensor'] += '${i+1},${returnDeviceType(totalEcSensor[i][1])},${totalEcSensor[i][2]},${totalEcSensor[i][3]},${totalEcSensor[i][4]},${totalEcSensor[i][5]}${i == totalEcSensor.length - 1 ? '' : '|'}' ;
-        map_i_o += '${totalEcSensor[i][5]},EC.${i+1},${returnDeviceType_HW(totalEcSensor[i][1])},${numberORnot(totalEcSensor[i][2])},${numberORnot(totalEcSensor[i][3])},${totalEcSensor[i][4]};' ;
-
-      }
-    }
-    if(totalFan.length != 0){
-      fullData['output']['Fan'] = '';
-      for(var i = 0;i < totalFan.length;i++){
-        fullData['output']['Fan'] += '${i+1},${returnDeviceType(totalFan[i][1])},${totalFan[i][2]},${totalFan[i][3]},${totalFan[i][4]}${i == totalFan.length - 1 ? '' : '|'}' ;
-        map_i_o += '${totalFan[i][4]},FN.${i+1},${returnDeviceType_HW(totalFan[i][1])},${numberORnot(totalFan[i][2])},${numberORnot(totalFan[i][3])},1;' ;
-
-      }
-    }
-    if(totalFogger.length != 0){
-      fullData['output']['Fogger'] = '';
-      for(var i = 0;i < totalFogger.length;i++){
-        fullData['output']['Fogger'] += '${i+1},${returnDeviceType(totalFogger[i][1])},${totalFogger[i][2]},${totalFogger[i][3]},${totalFogger[i][4]}${i == totalFogger.length - 1 ? '' : '|'}' ;
-        map_i_o += '${totalFogger[i][4]},FG.${i+1},${returnDeviceType_HW(totalFogger[i][1])},${numberORnot(totalFogger[i][2])},${numberORnot(totalFogger[i][3])},1;' ;
-
-      }
-    }
-    if(totalAgitator.length != 0){
-      fullData['output']['Agitator'] = '';
-      for(var i = 0;i < totalAgitator.length;i++){
-        fullData['output']['Agitator'] += '${i+1},${returnDeviceType(totalAgitator[i][1])},${totalAgitator[i][2]},${totalAgitator[i][3]},${totalAgitator[i][4]}${i == totalAgitator.length - 1 ? '' : '|'}' ;
-        map_i_o += '${totalAgitator[i][4]},AG.${i+1},${returnDeviceType_HW(totalAgitator[i][1])},${numberORnot(totalAgitator[i][2])},${numberORnot(totalAgitator[i][3])},1;' ;
-      }
-    }
-    fullData['all_AI'] = {
-      'autoIncrement' : autoIncrement,
-      'C_D_autoIncrement' : C_D_autoIncrement,
-      'C_F_autoIncrement' : C_F_autoIncrement,
-      'P_autoIncrement' : P_autoIncrement,
-      'I_O_autoIncrement' : I_O_autoIncrement,
-      'CD_channel_autoIncrement' : CD_channel_autoIncrement,
+  dynamic changeOutputPayload(String data){
+    var split = data.split(',');
+    print('split : ${split}');
+    return {
+      'sNo' : int.parse(split[0]),
+      'rtu' : split[1],
+      'rfNo' : split[2],
+      'output' : split[3],
     };
-    print('output : ${jsonEncode(fullData['output'])}');
-    print('input : ${jsonEncode(fullData['input'])}');
-    // hardWarePayLoad();
+  }
+  dynamic changeInputPayload(String data){
+    var split = data.split(',');
+    print('split : ${split}');
+    return {
+      'sNo' : int.parse(split[0]),
+      'rtu' : split[1],
+      'rfNo' : split[2],
+      'input' : split[3],
+      'input_type' : split[4],
+    };
+  }
+  void fetchFromServer(){
+    totalWaterSource = oldData['productLimit']['totalWaterSource'];
+    totalWaterMeter = oldData['productLimit']['totalWaterMeter'];
+    totalSourcePump = oldData['productLimit']['totalSourcePump'];
+    totalIrrigationPump = oldData['productLimit']['totalIrrigationPump'];
+    totalInjector = oldData['productLimit']['totalIrrigationPump'];
+    totalDosingMeter = oldData['productLimit']['totalDosingMeter'];
+    totalBooster = oldData['productLimit']['totalBooster'];
+    totalCentralDosing = oldData['productLimit']['totalCentralDosing'];
+    totalFilter = oldData['productLimit']['totalFilter'];
+    total_D_s_valve = oldData['productLimit']['total_D_s_valve'];
+    total_p_sensor = oldData['productLimit']['total_p_sensor'];
+    totalCentralFiltration = oldData['productLimit']['totalCentralFiltration'];
+    totalValve = oldData['productLimit']['totalValve'];
+    totalMainValve = oldData['productLimit']['totalMainValve'];
+    totalIrrigationLine = oldData['productLimit']['totalIrrigationLine'];
+    totalLocalFiltration = oldData['productLimit']['totalLocalFiltration'];
+    totalLocalDosing = oldData['productLimit']['totalLocalDosing'];
+    totalRTU = oldData['productLimit']['totalRTU'];
+    totalOroSwitch = oldData['productLimit']['totalOroSwitch'];
+    totalOroSense = oldData['productLimit']['totalOroSense'];
+    totalOroSmartRTU = oldData['productLimit']['totalOroSmartRTU'];
+    totalOroLevel = oldData['productLimit']['totalOroLevel'];
+    totalOroPump = oldData['productLimit']['totalOroPump'];
+    totalOroExtend = oldData['productLimit']['totalOroExtend'];
+    i_o_types = oldData['productLimit']['i_o_types'];
+    totalAnalogSensor = oldData['productLimit']['totalAnalogSensor'];
+    totalContact = oldData['productLimit']['totalContact'];
+    totalAgitator = oldData['productLimit']['totalAgitator'];
+    totalPhSensor = oldData['productLimit']['totalPhSensor'];
+    totalEcSensor = oldData['productLimit']['totalEcSensor'];
+    totalMoistureSensor = oldData['productLimit']['totalMoistureSensor'];
+    totalLevelSensor = oldData['productLimit']['totalLevelSensor'];
+    totalFan = oldData['productLimit']['totalFan'];
+    totalFogger = oldData['productLimit']['totalFogger'];
+    oRtu = oldData['productLimit']['oRtu'];
+    oSrtu = oldData['productLimit']['oSrtu'];
+    oSwitch = oldData['productLimit']['oSwitch'];
+    oSense = oldData['productLimit']['oSense'];
+    oLevel = oldData['productLimit']['oLevel'];
+    oPump = oldData['productLimit']['oPump'];
+    oExtend = oldData['productLimit']['oExtend'];
+    rtuForLine = oldData['productLimit']['rtuForLine'];
+    OroExtendForLine = oldData['productLimit']['OroExtendForLine'];
+    switchForLine = oldData['productLimit']['switchForLine'];
+    OroSmartRtuForLine = oldData['productLimit']['OroSmartRtuForLine'];
+    OroSenseForLine = oldData['productLimit']['OroSenseForLine'];
+    OroLevelForLine = oldData['productLimit']['OroLevelForLine'];
+    waterSource = oldData['productLimit']['waterSource'];
+    weatherStation = oldData['productLimit']['weatherStation'];
+    central_dosing_site_list = oldData['productLimit']['central_dosing_site_list'];
+    central_filtration_site_list = oldData['productLimit']['central_filtration_site_list'];
+    irrigation_pump_list = oldData['productLimit']['irrigation_pump_list'];
+    water_source_list = oldData['productLimit']['water_source_list'];
+    I_O_autoIncrement = oldData['productLimit']['I_O_autoIncrement'];
+    sourcePumpUpdated = oldData['sourcePump'];
+    irrigationPumpUpdated = oldData['irrigationPump'];
+    centralDosingUpdated = oldData['centralFertilizer'];
+    centralFiltrationUpdated = oldData['centralFilter'];
+    irrigationLines = oldData['irrigationLine'];
+    localDosingUpdated = oldData['localFertilizer'];
+    localFiltrationUpdated = oldData['localFilter'];
     notifyListeners();
-    return fullData;
   }
 
-  void updateAI(dynamic list){
-    switch(list[0]){
-      case ('autoIncrement'):{
-        autoIncrement = list[1];
-        break;
-      }
-      case ('C_D_autoIncrement'):{
-        C_D_autoIncrement = list[1];
-        break;
-      }
-      case ('C_F_autoIncrement'):{
-        C_F_autoIncrement = list[1];
-        break;
-      }
-      case ('P_autoIncrement'):{
-        P_autoIncrement = list[1];
-        break;
-      }
-      case ('I_O_autoIncrement'):{
-        I_O_autoIncrement = list[1];
-        break;
-      }
-      case ('CD_channel_autoIncrement'):{
-        CD_channel_autoIncrement = list[1];
-        break;
-      }
-    }
-    notifyListeners();
-  }
-
-
-
-  var Sourcereturn ='';
-  String convertSourcepump(List<dynamic> sourcePump) {
-    for (var i = 0; i < sourcePump.length; i++) {
-      List<dynamic> innerList = sourcePump[i];
-      if (innerList.length >2){
-        String innerListsro = innerList[3].toString();
-        int innerListpositionint = i + 1;
-        String innerListposition = innerListpositionint.toString();
-        String innerListwm = innerList[1] == true ? "1" : "0";
-        Sourcereturn += "$innerListsro,1,$innerListposition,$innerListwm;";
-      }
-    }
-    return Sourcereturn;
-  }
-
-  String convertIrrigationpump(List<dynamic> irrigationPump) {
-    for (var i = 0; i < irrigationPump.length; i++) {
-      List<dynamic> innerList = irrigationPump[i];
-      String innerListsro = innerList[1][1].toString();
-      int innerListpositionint = i + 1;
-      String innerListposition = innerListpositionint.toString();
-      String innerListwm = innerList[0] == true ? "1" : "0";
-      Sourcereturn += "$innerListsro,2,$innerListposition,$innerListwm;";
-    }
-    return Sourcereturn;
-  }
-
-  String Dosingreturn = '';
-  String convertCentralDosing(List<dynamic> irrigationline) {
-    String value = '';
-    String linevalue;
-
-    for (var i = 0; i < irrigationline.length; i++) {
-      if (i == (irrigationline[i].length - 1)) {
-        linevalue = irrigationline[i][1].toString();
-      } else {
-        String srno = '';
-        String booster = '';
-        String fm = '';
-        String ch = '';
-        int j = 0;
-        value = '';
-        for (var j = 0; j < (irrigationline[i].length - 1); j++) {
-          srno = irrigationline[i][j][3].toString();
-          booster = irrigationline[i][j][2] == true ? "1" : "0";
-          fm = irrigationline[i][j][1] == true ? "1" : "0";
-          ch = irrigationline[i][j][0].toString();
-          j = j + 1;
-        }
-        value += '$srno,1.${j},$booster,1.${j}.$ch,$fm';
-      }
-
-      Dosingreturn += '$value;';
-    }
-    return Dosingreturn;
-  }
-
-  String convertlocalDosing(List<dynamic> irrigationline) {
-    String value = '';
-    String linevalue;
-
-    for (var i = 0; i < irrigationline.length; i++) {
-      if (i == (irrigationline[i].length - 1)) {
-        linevalue = irrigationline[i][1].toString();
-      } else {
-        String srno = '';
-        String booster = '';
-        String fm = '';
-        String ch = '';
-        int j = 0;
-        value = '';
-        for (var j = 0; j < (irrigationline[i].length - 1); j++) {
-          srno = irrigationline[i][j][3].toString();
-          booster = irrigationline[i][j][2] == true ? "1" : "0";
-          fm = irrigationline[i][j][1] == true ? "1" : "0";
-          ch = irrigationline[i][j][0].toString();
-          j = j + 1;
-        }
-        value += '$srno,2.${j},$booster,2.${j}.$ch,$fm';
-      }
-
-      Dosingreturn += '$value;';
-    }
-    return Dosingreturn;
-  }
-
-  String irrigationreturn = '';
-  String convertIrrigation(List<dynamic> irrigationline) {
-    for (var i = 0; i < irrigationline.length; i++) {
-      String autoIncrement = irrigationline[i]['autoIncrement'] == '-'
-          ? "0"
-          : irrigationline[i]['autoIncrement'].toString();
-      String valve = irrigationline[i]['valve'] == '-'
-          ? "0"
-          : irrigationline[i]['valve'].toString();
-      String main_valve1 = irrigationline[i]['main_valve'] == '-'
-          ? "0"
-          : irrigationline[i]['main_valve'].toString();
-      String main_valve = '${i + 1}.$main_valve1';
-      String Central_dosing_site =
-      irrigationline[i]['Central_dosing_site'] == '-'
-          ? "0"
-          : irrigationline[i]['Central_dosing_site'].toString();
-      String Central_filtration_site =
-      irrigationline[i]['Central_filtration_site'] == '-'
-          ? "0"
-          : irrigationline[i]['Central_filtration_site'].toString();
-      String Local_dosing_site =
-      irrigationline[i]['Local_dosing_site'] == true ? "1" : "0";
-      String local_filtration_site =
-      irrigationline[i]['local_filtration_site'] == true ? "1" : "0";
-      String pressure_sensor =
-      irrigationline[i]['pressure_sensor'] == true ? "1" : "0";
-      String irrigationPump = irrigationline[i]['irrigationPump'] == '-'
-          ? "0"
-          : irrigationline[i]['irrigationPump'].toString();
-      String water_meter = irrigationline[i]['water_meter'] == true ? "1" : "0";
-      String ORO_Smart_RTU = irrigationline[i]['ORO_Smart_RTU'] == '-'
-          ? "0"
-          : irrigationline[i]['ORO_Smart_RTU'].toString();
-      String RTU = irrigationline[i]['RTU'] == '-'
-          ? "0"
-          : irrigationline[i]['RTU'].toString();
-      String ORO_switch = irrigationline[i]['ORO_switch'] == '-'
-          ? "0"
-          : irrigationline[i]['ORO_switch'].toString();
-      String ORO_sense = irrigationline[i]['ORO_sense'] == '-'
-          ? "0"
-          : irrigationline[i]['ORO_sense'].toString();
-
-      irrigationreturn +=
-      "$autoIncrement,$valve,$main_valve,$Central_dosing_site,$Central_filtration_site,$Local_dosing_site,$local_filtration_site,$pressure_sensor,$irrigationPump,$water_meter,$ORO_Smart_RTU,$RTU,$ORO_switch,$ORO_sense,0;";
-    }
-    return irrigationreturn;
-  }
-  var Srofilder = 0;
-
-  String Filterreturn = '';
-  String convertcentralfilter(List<dynamic> sourcePump) {
-    if(sourcePump.length != 0){
-      for (var i = 0; i < sourcePump.length; i++) {
-        List<dynamic> innerList = sourcePump[i];
-        String fsite = innerList[3][1].toString();
-        String dwvalve = innerList[1] == true ? "1" : "0";
-        String dprs = innerList[2] == true ? "1" : "0";
-        int srno = i + 1;
-        Srofilder = i + 1;
-        Filterreturn += "$srno,1.$srno,$fsite,$dwvalve,$dprs;";
-      }
-    }
-    return Filterreturn;
-  }
-  String convertlocalfilter(List<dynamic> sourcePump) {
-    for (var i = 0; i < sourcePump.length; i++) {
-      List<dynamic> innerList = sourcePump[i];
-      if(innerList.length>0){
-        String fsite = innerList[0].toString();
-        String dwvalve = innerList[1] == true ? "1" : "0";
-        String dprs = innerList[2] == true ? "1" : "0";
-        int srno = Srofilder + i + 1;
-        int ival = i + 1;
-        Filterreturn += "$srno,2.$ival,$fsite,$dwvalve,$dprs;";
-      }
-    }
-    return Filterreturn;
-  }
-
-  String rtunum(String name) {
-    if (name == "Oro Gem") {
-      return '1';
-    } else if (name == "Oro Smart RTU") {
-      return '2';
-    } else if (name == "Oro RTU") {
-      return '3';
-    } else if (name == "Oro Pump") {
-      return '4';
-    } else if (name == "Oro Switch") {
-      return '5';
-    } else if (name == "Oro Level") {
-      return '6';
-    } else if (name == "Oro Sense") {
-      return '7';
-    } else if (name == "Oro Xtend") {
-      return '8';
-    } else if (name == "Oro Weather") {
-      return '9';
-    } else if (name == "Oro Gem Lite") {
-      return '10';
-    } else {
-      return '0';
-    }
-  }
-
-  String inputtypefun(String name) {
-    if (name == "A-I") {
-      return '2';
-    } else if (name == "D-I") {
-      return '3';
-    } else if (name == "P-I") {
-      return '4';
-    } else if (name == "RS485") {
-      return '5';
-    } else if (name == "12C") {
-      return '6';
-    } else {
-      return '0';
-    }
-  }
-  String ioreturn = '';
-
-  // String convertmapinputs(List<dynamic> minlist) {
-  //   String value = '';
-  //
-  //
-  //   List mapinnerlist = [
-  //     'pressure_sensor',
-  //     'water_meter',
-  //     'ORO_sense',
-  //     'dosing_meter',
-  //     'D_pressure_sensor'
-  //   ];
-  //   for (var irr = 0; irr < minlist.length; irr++) {
-  //
-  //     String srno = '';
-  //     String name = '';
-  //     String deviceno = '';
-  //     String rtu = '';
-  //     String relayio = '';
-  //     String inputtype = '';
-  //     for (var maiinr = 0; maiinr < mapinnerlist.length; maiinr++) {
-  //        value = '';
-  //       String maiinrname = mapinnerlist[maiinr];
-  //       List innerlist = minlist[irr]['${irr + 1}'][maiinrname];
-  //
-  //       if (maiinrname == 'D_pressure_sensor' ||
-  //           maiinrname == 'pressure_sensor' ||
-  //           maiinrname == 'water_meter') {
-  //         if (innerlist.length > 0) {
-  //           srno = innerlist[5] == '-' ? "0" : innerlist[5].toString();
-  //           // name = innerlist[0] == '-' ? "0" : innerlist[0].toString();
-  //           name = maiinrname == 'D_pressure_sensor' ? 'ds$maiinr' : maiinrname == 'pressure_sensor' ? 'ps$maiinr' : 'wm$maiinr';
-  //           deviceno = innerlist[1] == '-' ? "0" : innerlist[1].toString();
-  //           rtu = innerlist[2] == '-' ? "0" : innerlist[2].toString();
-  //           relayio = innerlist[3] == '-' ? "0" : innerlist[3].toString();
-  //           inputtype = innerlist[4] == '-' ? "0" : innerlist[4].toString();
-  //           String rtudevicenum = rtunum(deviceno);
-  //           String inputtypestr = inputtypefun(inputtype);
-  //           value += '$srno,$name,$rtudevicenum,$rtu,$relayio,$inputtypestr;';
-  //
-  //         }
-  //       } else {
-  //         if (innerlist.length > 0) {
-  //           for (var vsro = 0; vsro < innerlist.length; vsro++) {
-  //             if (maiinrname == 'dosing_meter') {
-  //               srno = innerlist[vsro][6] == '-'
-  //                   ? "0"
-  //                   : innerlist[vsro][6].toString();
-  //             } else {
-  //               srno = innerlist[vsro][5] == '-'
-  //                   ? "0"
-  //                   : innerlist[vsro][5].toString();
-  //               name = 'l${irr}dm${vsro}';
-  //             }
-  //             // name = innerlist[vsro][0] == '-'
-  //             //     ? "0"
-  //             //     : innerlist[vsro][0].toString();
-  //             deviceno = innerlist[vsro][1] == '-'
-  //                 ? "0"
-  //                 : innerlist[vsro][1].toString();
-  //             rtu = innerlist[vsro][2] == '-'
-  //                 ? "0"
-  //                 : innerlist[vsro][2].toString();
-  //             relayio = innerlist[vsro][3] == '-'
-  //                 ? "0"
-  //                 : innerlist[vsro][3].toString();
-  //             inputtype = innerlist[vsro][4] == '-'
-  //                 ? "0"
-  //                 : innerlist[vsro][4].toString();
-  //             String rtudevicenum = rtunum(deviceno);
-  //             String inputtypestr = inputtypefun(inputtype);
-  //              value += '$srno,$name,$rtudevicenum,$rtu,$relayio,$inputtypestr;';
-  //           }
-  //         }
-  //       }
-  //
-  //     }
-  //     ioreturn += '$value';
-  //   }
-  //
-  //
-  //   return ioreturn;
-  // }
-
-
-  String convertSP_MO(List<dynamic> sp) {
-    String s_p = '';
-    String i_p = '';
-    for (var i = 0; i < sp.length; i++) {
-      for (var j in sp[i].entries) {
-        s_p = '';
-        for (var k in j.value.entries) {
-          if (k.key == 'pump') {
-            s_p +=
-            '${k.value[4]},SP${i + 1},${k.value[1]},${k.value[2]},${k.value[3]}${i == sp.length - 1 ? '' : ';'}';
-          } else {
-            if(k.value[0] == true){
-              s_p +=
-              '${k.value[5]},WM${i + 1},${k.value[1]},${k.value[2]},${k.value[3]}${i == sp.length - 1 ? '' : ';'}';
+  void fetchData(){
+    for(var i in oldData['output'].entries){
+      if(i.key.contains('SP')){
+        for(var j in i.value.entries){
+          switch(j.key){
+            case('AI'):{
+              sourcePumpUpdated.add({
+                'sNo' : int.parse(j.value),
+                'selection' : 'unselect',
+              });
+              totalSourcePump -= 1;
+              break;
             }
-
+            case('ws'):{
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['waterSource'] = j.value;
+              break;
+            }
+            case('pc'):{
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['oro_pump'] = false;
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['pumpConnection'] = changeOutputPayload(j.value);
+              break;
+            }
+            case('on'):{
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['on'] = changeOutputPayload(j.value);
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['relayCount'] = '1';
+              break;
+            }
+            case('off'):{
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['off'] = changeOutputPayload(j.value);
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['relayCount'] = '2';
+              break;
+            }
+            case('scr'):{
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['scr'] = changeOutputPayload(j.value);
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['relayCount'] = '3';
+              break;
+            }
+            case('ecr'):{
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['ecr'] = changeOutputPayload(j.value);
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['relayCount'] = '4';
+              break;
+            }
+            case('wm'):{
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['waterMeter'] = changeInputPayload(j.value);
+              totalWaterMeter -= 1;
+              break;
+            }
+            case('STH'):{
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['SumpTankHigh'] = changeInputPayload(j.value);
+              break;
+            }
+            case('STL'):{
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['SumpTankLow'] = changeInputPayload(j.value);
+              break;
+            }
+            case('TTH'):{
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['TopTankHigh'] = changeInputPayload(j.value);
+              break;
+            }
+            case('TTL'):{
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['TopTankLow'] = changeInputPayload(j.value);
+              break;
+            }
+            case('c1'):{
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['oro_pump'] = true;
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['c1'] = changeInputPayload(j.value);
+              break;
+            }
+            case('c2'):{
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['c2'] = changeInputPayload(j.value);
+              break;
+            }
+            case('c3'):{
+              sourcePumpUpdated[int.parse(i.key.split('SP')[1]) - 1]['c3'] = changeInputPayload(j.value);
+              break;
+            }
           }
         }
-        ioreturn += s_p;
       }
-    }
-    return ioreturn;
-  }
-
-  String convertIP_MO(List<dynamic> sp) {
-    String s_p = '';
-    String i_p = '';
-    for (var i = 0; i < sp.length; i++) {
-      for (var j in sp[i].entries) {
-        s_p = '';
-        for (var k in j.value.entries) {
-          if (k.key == 'pump') {
-            s_p +=
-            '${k.value[4]},IP${i + 1},${k.value[1]},${k.value[2]},${k.value[3]}${i == sp.length - 1 ? '' : ';'}';
-          } else {
-            if(k.value[0] == true){
-              s_p +=
-              '${k.value[5]},WM${i + 1},${k.value[1]},${k.value[2]},${k.value[3]}${i == sp.length - 1 ? '' : ';'}';
+      else if(i.key.contains('IP')){
+        for(var j in i.value.entries){
+          switch(j.key){
+            case('AI'):{
+              sourcePumpUpdated.add({
+                'sNo' : int.parse(j.value),
+                'selection' : 'unselect',
+              });
+              totalSourcePump -= 1;
+              break;
             }
-
+            case('ws'):{
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['waterSource'] = j.value;
+              break;
+            }
+            case('pc'):{
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['oro_pump'] = false;
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['pumpConnection'] = changeOutputPayload(j.value);
+              break;
+            }
+            case('on'):{
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['on'] = changeOutputPayload(j.value);
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['relayCount'] = '1';
+              break;
+            }
+            case('off'):{
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['off'] = changeOutputPayload(j.value);
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['relayCount'] = '2';
+              break;
+            }
+            case('scr'):{
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['scr'] = changeOutputPayload(j.value);
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['relayCount'] = '3';
+              break;
+            }
+            case('ecr'):{
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['ecr'] = changeOutputPayload(j.value);
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['relayCount'] = '4';
+              break;
+            }
+            case('wm'):{
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['waterMeter'] = changeInputPayload(j.value);
+              totalWaterMeter -= 1;
+              break;
+            }
+            case('STH'):{
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['SumpTankHigh'] = changeInputPayload(j.value);
+              break;
+            }
+            case('STL'):{
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['SumpTankLow'] = changeInputPayload(j.value);
+              break;
+            }
+            case('TTH'):{
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['TopTankHigh'] = changeInputPayload(j.value);
+              break;
+            }
+            case('TTL'):{
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['TopTankLow'] = changeInputPayload(j.value);
+              break;
+            }
+            case('c1'):{
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['oro_pump'] = true;
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['c1'] = changeInputPayload(j.value);
+              break;
+            }
+            case('c2'):{
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['c2'] = changeInputPayload(j.value);
+              break;
+            }
+            case('c3'):{
+              sourcePumpUpdated[int.parse(i.key.split('IP')[1]) - 1]['c3'] = changeInputPayload(j.value);
+              break;
+            }
           }
         }
-        ioreturn += s_p;
       }
-    }
-    return ioreturn;
-  }
-
-  String convertCD_MO(List<dynamic> cd) {
-    String s_p = '';
-    for (var i = 0; i < cd.length; i++) {
-      for (var j in cd[i].entries) {
-        s_p = '';
-        String srno = '';
-        String name = '';
-        String deviceno = '';
-        String rtu = '';
-        String relayio = '';
-        String inputtype = '';
-        for (var k in j.value.entries) {
-          if (k.key == 'injector') {
-            for (var c = 0; c < k.value.length; c++) {
-              srno = k.value[c][5] == '-' ? "0" : k.value[c][5].toString();
-              name = 'INJ 1.${i+1}.${c+1}';
-              deviceno = k.value[c][1] == '-' ? "0" : k.value[c][1].toString();
-              rtu = k.value[c][2] == '-' ? "0" : k.value[c][2].toString();
-              relayio = k.value[c][3] == '-' ? "0" : k.value[c][3].toString();
-              String rtudevicenum = rtunum(deviceno);
-              s_p += '$srno,$name,$rtudevicenum,$rtu,$relayio,1;';
+      else if(i.key.contains('CD')){
+        for(var j in i.value.entries){
+          print(j.key);
+          switch(j.key){
+            case('AI'):{
+              print('cd came');
+              centralDosingUpdated.add({
+                'sNo' : int.parse(j.value),
+                'selection' : 'unselect',
+              });
+              totalCentralDosing -= 1;
+              break;
             }
-          } else if (k.key == 'booster') {
-            for (var c = 0; c < k.value.length; c++) {
-              if(k.value[c][0] == true){
-                srno = k.value[c][5] == '-' ? "0" : k.value[c][5].toString();
-                name = 'BP 1.${i+1}.${c+1}';
-                deviceno = k.value[c][1] == '-' ? "0" : k.value[c][1].toString();
-                rtu = k.value[c][2] == '-' ? "0" : k.value[c][2].toString();
-                relayio = k.value[c][3] == '-' ? "0" : k.value[c][3].toString();
-                String rtudevicenum = rtunum(deviceno);
-
-                s_p += '$srno,$name,$rtudevicenum,$rtu,$relayio,1;';
+            case('inj'):{
+              centralDosingUpdated[int.parse(i.key.split('CD')[1]) - 1]['injector'] = [];
+              var list = j.value.split('|');
+              for(var injector in list){
+                dynamic addWm = changeOutputPayload(injector);
+                addWm['dosingMeter'] = {};
+                centralDosingUpdated[int.parse(i.key.split('CD')[1]) - 1]['injector'].add(addWm);
+                totalInjector -= 1;
               }
-
+              break;
             }
-          } else {
-            for (var c = 0; c < k.value.length; c++) {
-              if(k.value[c][0] == true){
-                srno = k.value[c][6] == '-' ? "0" : k.value[c][6].toString();
-                name = 'DM 1.${i+1}.${c+1}';
-                deviceno = k.value[c][1] == '-' ? "0" : k.value[c][1].toString();
-                rtu = k.value[c][2] == '-' ? "0" : k.value[c][2].toString();
-                relayio = k.value[c][3] == '-' ? "0" : k.value[c][3].toString();
-                String rtudevicenum = rtunum(deviceno);
-
-                k.value[c][0] == true
-                    ? s_p += '$srno,$name,$rtudevicenum,$rtu,$relayio,1;'
-                    : '';
+            case('wbp'):{
+              if(j.value.contains('|')){
+                var list = j.value.split('|');
+                for(var injector = 0; injector < centralDosingUpdated[int.parse(i.key.split('CD')[1]) - 1]['injector'].length;injector++){
+                  centralDosingUpdated[int.parse(i.key.split('CD')[1]) - 1]['injector'][injector]['Which_Booster_Pump'] = list[injector];
+                }
+              }else{
+                centralDosingUpdated[int.parse(i.key.split('CD')[1]) - 1]['injector'][0]['Which_Booster_Pump'] = j.value;
               }
-
+              break;
+            }
+            case('booster'):{
+              centralDosingUpdated[int.parse(i.key.split('CD')[1]) - 1]['boosterConnection'] = [];
+              var list = j.value.split('|');
+              for(var bp in list){
+                centralDosingUpdated[int.parse(i.key.split('CD')[1]) - 1]['boosterConnection'].add(changeOutputPayload(bp));
+              }
+              centralDosingUpdated[int.parse(i.key.split('CD')[1]) - 1]['boosterPump'] = '${centralDosingUpdated[int.parse(i.key.split('CD')[1]) - 1]['boosterConnection'].length}';
+              totalBooster = totalBooster - centralDosingUpdated[int.parse(i.key.split('CD')[1]) - 1]['boosterConnection'].length as int;
+              break;
             }
           }
+          print(centralDosingUpdated);
         }
-        ioreturn += s_p;
       }
-    }
-    return ioreturn;
-  }
-
-  String convertCF_MO(List<dynamic> cd) {
-    String s_p = '';
-    for (var i = 0; i < cd.length; i++) {
-      for (var j in cd[i].entries) {
-        s_p = '';
-        String srno = '';
-        String name = '';
-        String deviceno = '';
-        String rtu = '';
-        String relayio = '';
-        String inputtype = '';
-        for (var k in j.value.entries) {
-          if (k.key == 'filter') {
-            for (var c = 0; c < k.value.length; c++) {
-              srno = k.value[c][4] == '-' ? "0" : k.value[c][4].toString();
-              name = 'filt ${i+1}.${c+1}';
-              deviceno = k.value[c][1] == '-' ? "0" : k.value[c][1].toString();
-              rtu = k.value[c][2] == '-' ? "0" : k.value[c][2].toString();
-              relayio = k.value[c][3] == '-' ? "0" : k.value[c][3].toString();
-
-              String rtudevicenum = rtunum(deviceno);
-
-              s_p += '$srno,$name,$rtudevicenum,$rtu,$relayio,1;';
+      else if(i.key.contains('CF')){
+        for(var j in i.value.entries){
+          print(j.key);
+          switch(j.key){
+            case('AI'):{
+              centralFiltrationUpdated.add({
+                'sNo' : int.parse(j.value),
+                'selection' : 'unselect',
+                'dv' : {},
+                'pressureIn' : {},
+                'pressureOut' : {},
+              });
+              totalCentralFiltration -= 1;
+              break;
             }
-          } else if (k.key == 'D_S_valve') {
-            if(k.value[0] == true){
-              srno = k.value[4] == '-' ? "0" : k.value[4].toString();
-              name = 'DS-${i+1}';
-              deviceno = k.value[1] == '-' ? "0" : k.value[1].toString();
-              rtu = k.value[2] == '-' ? "0" : k.value[2].toString();
-              relayio = k.value[3] == '-' ? "0" : k.value[3].toString();
-
-              String rtudevicenum = rtunum(deviceno);
-
-              k.value[0] == true
-                  ? s_p += '$srno,$name,$rtudevicenum,$rtu,$relayio,1;'
-                  : '';
+            case('filt'):{
+              centralFiltrationUpdated[int.parse(i.key.split('CF')[1]) - 1]['filterConnection'] = [];
+              var list = j.value.split('|');
+              for(var filter in list){
+                centralFiltrationUpdated[int.parse(i.key.split('CF')[1]) - 1]['filterConnection'].add(changeOutputPayload(filter));
+                totalFilter -= 1;
+              }
+              centralFiltrationUpdated[int.parse(i.key.split('CF')[1]) - 1]['filter'] = '${centralFiltrationUpdated[int.parse(i.key.split('CF')[1]) - 1]['filterConnection'].length}';
+              break;
             }
-
-          } else if (k.key == 'P_sensor') {
-            if(k.value[0] == true){
-              srno = k.value[5] == '-' ? "0" : k.value[5].toString();
-              name = 'PS-${i+1}';
-              deviceno = k.value[1] == '-' ? "0" : k.value[1].toString();
-              rtu = k.value[2] == '-' ? "0" : k.value[2].toString();
-              relayio = k.value[3] == '-' ? "0" : k.value[3].toString();
-              inputtype = k.value[4] == '-' ? "0" : k.value[4].toString();
-
-              String rtudevicenum = rtunum(deviceno);
-              String inputtypestr = inputtypefun(inputtype);
-
-              k.value[0] == true
-                  ? s_p +=
-              '$srno,$name,$rtudevicenum,$rtu,$relayio,$inputtypestr;'
-                  : '';
+            case('d_v'):{
+              centralFiltrationUpdated[int.parse(i.key.split('CF')[1]) - 1]['dv'] = changeOutputPayload(j.value);
+              total_D_s_valve -= 1;
+              break;
             }
           }
+          print(jsonEncode(centralFiltrationUpdated));
         }
-        ioreturn += s_p;
+      }
+      else if(i.key.contains('l')){
+        for(var j in i.value.entries){
+          print(j.key);
+          switch(j.key){
+            case('AI'):{
+              irrigationLines.add({
+                'valve' : '',
+                'valveConnection' : [],
+                'main_valve' : '',
+                'main_valveConnection' : [],
+                'moistureSensor' : '',
+                'moistureSensorConnection' : [],
+                'levelSensor' : '',
+                'levelSensorConnection' : [],
+                'fogger' : '',
+                'foggerConnection' : [],
+                'fan' : '',
+                'fanConnection' : [],
+                'Central_dosing_site' : '-',
+                'Central_filtration_site' : '-',
+                'Local_dosing_site' : false,
+                'local_filtration_site' : false,
+                'pressureIn' : {},
+                'pressureOut' : {},
+                'irrigationPump' : '-',
+                'water_meter' : {},
+                'ORO_Smart_RTU' : '',
+                'RTU' : '',
+                'ORO_switch' : '',
+                'ORO_sense' : '',
+                'isSelected' : 'unselect',
+                'myRTU_list' : ['-'],
+                'myOroSmartRtu' : [],
+                'myRTU' : [],
+                'myOROswitch' : [],
+                'myOROsense' : [],
+                'sNo' : int.parse(j.value),
+              });
+              totalIrrigationLine -= 1;
+              break;
+            }
+            case('v'):{
+              var list = j.value.split('|');
+              for(var valve in list){
+                irrigationLines[int.parse(i.key.split('l')[1]) - 1]['valveConnection'].add(changeOutputPayload(valve));
+                totalValve -= 1;
+              }
+              irrigationLines[int.parse(i.key.split('l')[1]) - 1]['valve'] = '${irrigationLines[int.parse(i.key.split('l')[1]) - 1]['valveConnection'].length}';
+              break;
+            }
+            case('mv'):{
+              var list = j.value.split('|');
+              for(var valve in list){
+                irrigationLines[int.parse(i.key.split('l')[1]) - 1]['main_valveConnection'].add(changeOutputPayload(valve));
+                totalMainValve -= 1;
+              }
+              irrigationLines[int.parse(i.key.split('l')[1]) - 1]['main_valve'] = '${irrigationLines[int.parse(i.key.split('l')[1]) - 1]['main_valveConnection'].length}';
+              break;
+            }
+            case('fg'):{
+              var list = j.value.split('|');
+              for(var valve in list){
+                irrigationLines[int.parse(i.key.split('l')[1]) - 1]['foggerConnection'].add(changeOutputPayload(valve));
+                totalFogger -= 1;
+              }
+              irrigationLines[int.parse(i.key.split('l')[1]) - 1]['fogger'] = '${irrigationLines[int.parse(i.key.split('l')[1]) - 1]['foggerConnection'].length}';
+              break;
+            }
+            case('fn'):{
+              var list = j.value.split('|');
+              for(var valve in list){
+                irrigationLines[int.parse(i.key.split('l')[1]) - 1]['fanConnection'].add(changeOutputPayload(valve));
+                totalFan -= 1;
+              }
+              irrigationLines[int.parse(i.key.split('l')[1]) - 1]['fan'] = '${irrigationLines[int.parse(i.key.split('l')[1]) - 1]['fanConnection'].length}';
+              break;
+            }
+            case('CD'):{
+              irrigationLines[int.parse(i.key.split('l')[1]) - 1]['Central_dosing_site'] = j.value;
+              break;
+            }
+            case('CF'):{
+              irrigationLines[int.parse(i.key.split('l')[1]) - 1]['Central_filtration_site'] = j.value;
+              break;
+            }
+            case('OSR'):{
+              irrigationLines[int.parse(i.key.split('l')[1]) - 1]['myOroSmartRtu'] = jsonDecode(j.value);
+              var removeList = [];
+              for(var rf in OroSmartRtuForLine){
+                if(jsonDecode(j.value).contains(i)){
+                  removeList.add(rf);
+                }
+              }
+              for(var rf in removeList){
+                if(OroSmartRtuForLine.contains(rf)){
+                  OroSmartRtuForLine.remove(rf);
+                }
+              }
+              break;
+            }
+            case('SR'):{
+              irrigationLines[int.parse(i.key.split('l')[1]) - 1]['myRTU'] = jsonDecode(j.value);
+              var removeList = [];
+              for(var rf in rtuForLine){
+                if(jsonDecode(j.value).contains(i)){
+                  removeList.add(rf);
+                }
+              }
+              for(var rf in removeList){
+                if(rtuForLine.contains(rf)){
+                  rtuForLine.remove(rf);
+                }
+              }
+              break;
+            }
+            case('OSWH'):{
+              irrigationLines[int.parse(i.key.split('l')[1]) - 1]['myOROswitch'] = jsonDecode(j.value);
+              var removeList = [];
+              for(var rf in switchForLine){
+                if(jsonDecode(j.value).contains(i)){
+                  removeList.add(rf);
+                }
+              }
+              for(var rf in removeList){
+                if(switchForLine.contains(rf)){
+                  switchForLine.remove(rf);
+                }
+              }
+              break;
+            }
+            case('OS'):{
+              irrigationLines[int.parse(i.key.split('l')[1]) - 1]['myOROsense'] = jsonDecode(j.value);
+              var removeList = [];
+              for(var rf in OroSenseForLine){
+                if(jsonDecode(j.value).contains(i)){
+                  removeList.add(rf);
+                }
+              }
+              for(var rf in removeList){
+                if(OroSenseForLine.contains(rf)){
+                  OroSenseForLine.remove(rf);
+                }
+              }
+              break;
+            }
+          //   case('filter'):{
+          //     localFiltrationUpdated.add({
+          //       'line' : i.key.split('l')[1],
+          //       'sNo' : ,
+          //       'selection' : 'unselect',
+          //       'filter' : '1',
+          //       'filterConnection' : [{
+          //       'sNo' : returnI_O_AutoIncrement(),
+          //       'rtu' : '-',
+          //       'rfNo' : '-',
+          //       'output' : '-',
+          //       'output_type' : '1',
+          //       }],
+          //       'dv' : {},
+          //       'pressureIn' : {},
+          //       'pressureOut' : {},
+          //     });
+          // // {
+          // // 'line' : setLine(list[1]) + 1,
+          // // 'sNo' : list[1],
+          // // 'selection' : 'unselect',
+          // // 'filter' : '1',
+          // // 'filterConnection' : [{
+          // // 'sNo' : returnI_O_AutoIncrement(),
+          // // 'rtu' : '-',
+          // // 'rfNo' : '-',
+          // // 'output' : '-',
+          // // 'output_type' : '1',
+          // // }],
+          // // 'dv' : {},
+          // // 'pressureIn' : {},
+          // // 'pressureOut' : {},
+          // // }
+          //     break;
+          //   }
+          }
+          print(jsonEncode(irrigationLines));
+        }
       }
     }
-    return ioreturn;
+    for(var i in oldData['input'].entries){
+      if(i.key.contains('CD')){
+        for(var j in i.value.entries){
+          print(j.key);
+          switch(j.key){
+            case('EC'):{
+              centralDosingUpdated[int.parse(i.key.split('CD')[1]) - 1]['ecConnection'] = [];
+              var list = j.value.split('|');
+              for(var ec in list){
+                centralDosingUpdated[int.parse(i.key.split('CD')[1]) - 1]['ecConnection'].add(changeInputPayload(ec));
+                totalEcSensor -= 1;
+              }
+              centralDosingUpdated[int.parse(i.key.split('CD')[1]) - 1]['ec'] = '${centralDosingUpdated[int.parse(i.key.split('CD')[1]) - 1]['ecConnection'].length}';
+              break;
+            }
+            case('PH'):{
+              centralDosingUpdated[int.parse(i.key.split('CD')[1]) - 1]['phConnection'] = [];
+              var list = j.value.split('|');
+              for(var ph in list){
+                centralDosingUpdated[int.parse(i.key.split('CD')[1]) - 1]['phConnection'].add(changeInputPayload(ph));
+                totalPhSensor -= 1;
+              }
+              centralDosingUpdated[int.parse(i.key.split('CD')[1]) - 1]['ph'] = '${centralDosingUpdated[int.parse(i.key.split('CD')[1]) - 1]['phConnection'].length}';
+              break;
+            }
+            case('d_meter'):{
+              var list = j.value.split('|');
+              for(var wm in list){
+                var wmList = wm.split(',');
+                centralDosingUpdated[int.parse(i.key.split('CD')[1]) - 1]['injector'][int.parse(wmList[wmList.length -1]) - 1]['dosingMeter'] = changeInputPayload(wm);
+                totalDosingMeter -= 1;
+              }
+              break;
+            }
+          }
+          print(jsonEncode(centralDosingUpdated));
+        }
+      }
+      else if(i.key.contains('CF')){
+        for(var j in i.value.entries){
+          print(j.key);
+          switch(j.key){
+            case('PS_IN'):{
+              centralFiltrationUpdated[int.parse(i.key.split('CF')[1]) - 1]['pressureIn'] = changeInputPayload(j.value);
+              total_p_sensor -= 1;
+              break;
+            }
+            case('PS_OUT'):{
+              centralFiltrationUpdated[int.parse(i.key.split('CF')[1]) - 1]['pressureOut'] = changeInputPayload(j.value);
+              total_p_sensor -= 1;
+              break;
+            }
+          }
+          print(jsonEncode(centralFiltrationUpdated));
+        }
+      }
+      else if(i.key.contains('l')){
+        for(var j in i.value.entries){
+          print(j.key);
+          switch(j.key){
+            case('ms'):{
+              var list = j.value.split('|');
+              for(var valve in list){
+                irrigationLines[int.parse(i.key.split('l')[1]) - 1]['moistureSensorConnection'].add(changeOutputPayload(valve));
+                totalMoistureSensor -= 1;
+              }
+              irrigationLines[int.parse(i.key.split('l')[1]) - 1]['moistureSensor'] = '${irrigationLines[int.parse(i.key.split('l')[1]) - 1]['moistureSensorConnection'].length}';
+              break;
+            }
+            case('ls'):{
+              var list = j.value.split('|');
+              for(var valve in list){
+                irrigationLines[int.parse(i.key.split('l')[1]) - 1]['levelSensorConnection'].add(changeOutputPayload(valve));
+                totalLevelSensor -= 1;
+              }
+              irrigationLines[int.parse(i.key.split('l')[1]) - 1]['levelSensor'] = '${irrigationLines[int.parse(i.key.split('l')[1]) - 1]['levelSensorConnection'].length}';
+              break;
+            }
+          }
+          print(jsonEncode(irrigationLines));
+        }
+      }
+
+    }
+    print(sourcePumpUpdated);
   }
-  dynamic my_payload = '';
-// void hardWarePayLoad(){
-//   // String payloadsp = convertSourcepump(sourcePump);
-//   // String payloadir = convertIrrigationpump(irrigationPump);
-//   //
-//   // String payloadirline = convertIrrigation(irrigationLines);
-//   //
-//   // String payloadcendosing = convertCentralDosing(centralDosing);
-//   //
-//   // String payloadlocdosing = convertlocalDosing(localDosing);
-//
-//   // String payloadcfilter = convertcentralfilter(centralFiltration);
-//
-//   // String payloadlocfilter = convertlocalfilter(localFiltration);
-//
-//   // String payloadmapip = convertmapinputs(mappingOfInputs);
-//
-//   // String payloadmapout = convertmappingoutput(mappingOfOutputs);
-//
-//   String payloadspmo = convertSP_MO(SP_MO);
-//
-//   String payloadipmo = convertIP_MO(IP_MO);
-//
-//   String payloadcdmo = convertCD_MO(CD_for_MO);
-//
-//   String payloadcfmo = convertCF_MO(CF_for_MO);
-//
-//   Map<String, List<dynamic>> payload = {
-//     '200': [
-//       {'201': payloadir},
-//       {'202': payloadirline},
-//       {'203': payloadlocdosing},
-//       {'204': ''},
-//       {'205': ''},
-//       {'206': map_i_o},
-//     ]
-//   };
-//   my_payload = payload;
-//   // print('my_payload   :${my_payload}');
-//   notifyListeners();
-// }
 
 }

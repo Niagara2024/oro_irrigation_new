@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:flutter/services.dart';
+import 'package:oro_irrigation_new/screens/Config/config_maker/source_pump.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -15,16 +16,8 @@ class CentralFiltrationTable extends StatefulWidget {
 }
 
 class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
-  bool selectButton = false;
   ScrollController scrollController = ScrollController();
-  FocusNode _focusNode = FocusNode();
-  TextEditingController _controller = TextEditingController();
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    _controller.text = '1';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,107 +25,50 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraint){
       var width = constraint.maxWidth;
       return Container(
-        margin: (MediaQuery.of(context).orientation == Orientation.portrait ||  kIsWeb ) ? null : EdgeInsets.only(right: 70),
+        color: Color(0xFFF3F3F3),
         width: double.infinity,
         height: double.infinity,
-        padding: EdgeInsets.all(10.0),
+        padding: EdgeInsets.all(5.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                if(configPvd.centralFiltrationSelection == false)
-                  Row(
-                    children: [
-                      Checkbox(
-                          value: configPvd.centralFiltrationSelection,
-                          onChanged: (value){
-                            setState(() {
-                              configPvd.centralFiltrationFunctionality(['centralFiltrationSelection',value]);
-                            });
-                          }
-                      ),
-                      Text('Select')
-                    ],
-                  )
-                else
-                  Row(
-                    children: [
-                      IconButton(
-                          onPressed: (){
-                            configPvd.centralFiltrationFunctionality(['centralFiltrationSelection',false]);
-                            configPvd.centralFiltrationFunctionality(['centralFiltrationSelectAll',false]);
-                            configPvd.cancelSelection();
-                          }, icon: Icon(Icons.cancel_outlined)),
-                      Text('${configPvd.selection}')
-                    ],
-                  ),
-                if(configPvd.centralFiltrationSelection == false)
-                  IconButton(
-                    color: Colors.black,
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.amber)
-                    ),
-                    highlightColor: myTheme.primaryColor,
-                    onPressed: (){
-                      configPvd.centralFiltrationFunctionality(['addCentralFiltration']);
-                      scrollController.animateTo(
-                        scrollController.position.maxScrollExtent,
-                        duration: Duration(milliseconds: 500), // Adjust the duration as needed
-                        curve: Curves.easeInOut, // Adjust the curve as needed
-                      );
-                    },
-                    icon: Icon(Icons.add),
-                  ),
-                if(configPvd.centralFiltrationSelection == false)
-                  IconButton(
-                    splashColor: Colors.grey,
-                    color: Colors.black,
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.amber)
-                    ),
-                    highlightColor: myTheme.primaryColor,
-                    onPressed: (){
+            configButtons(
+              selectFunction: (value){
+                setState(() {
+                  configPvd.centralFiltrationFunctionality(['centralFiltrationSelection',value]);
+                });
+              },
+              selectAllFunction: (value){
+                setState(() {
+                  configPvd.centralFiltrationFunctionality(['centralFiltrationSelectAll',value]);
+                });
+              },
+              cancelButtonFunction: (){
+                configPvd.centralFiltrationFunctionality(['centralFiltrationSelection',false]);
+                configPvd.centralFiltrationFunctionality(['centralFiltrationSelectAll',false]);
+                configPvd.cancelSelection();
+              },
+              addBatchButtonFunction: (){
 
-                    },
-                    icon: Icon(Icons.batch_prediction),
-                  ),
-
-                if(configPvd.centralFiltrationSelection == true)
-                  IconButton(
-                    color: Colors.black,
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.amber)
-                    ),
-                    highlightColor: myTheme.primaryColor,
-                    onPressed: (){
-                      configPvd.centralFiltrationFunctionality(['centralFiltrationSelection',false]);
-                      configPvd.centralFiltrationFunctionality(['deleteCentralFiltration']);
-                      configPvd.cancelSelection();
-                    },
-                    icon: Icon(Icons.delete_forever),
-                  ),
-                if(configPvd.centralFiltrationSelection == true)
-                  Row(
-                    children: [
-                      Checkbox(
-                          value: configPvd.centralFiltrationSelectAll,
-                          onChanged: (value){
-                            setState(() {
-                              configPvd.centralFiltrationFunctionality(['centralFiltrationSelectAll',value]);
-                            });
-                          }
-                      ),
-                      Text('All')
-                    ],
-                  ),
-
-              ],
+              },
+              addButtonFunction: (){
+                configPvd.centralFiltrationFunctionality(['addCentralFiltration']);
+                scrollController.animateTo(
+                  scrollController.position.maxScrollExtent,
+                  duration: Duration(milliseconds: 500), // Adjust the duration as needed
+                  curve: Curves.easeInOut, // Adjust the curve as needed
+                );
+              },
+              deleteButtonFunction: (){
+                configPvd.centralFiltrationFunctionality(['centralFiltrationSelection',false]);
+                configPvd.centralFiltrationFunctionality(['deleteCentralFiltration']);
+                configPvd.cancelSelection();
+              },
+              selectionCount: configPvd.selection,
+              singleSelection: configPvd.centralFiltrationSelection,
+              multipleSelection: configPvd.centralFiltrationSelectAll,
             ),
-            SizedBox(height: 5,),
             Container(
-              width: width-20,
               child: Row(
                 children: [
                   Container(
@@ -146,7 +82,13 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                       ],
                     ),
                     decoration: BoxDecoration(
-                        color: myTheme.primaryColor
+                        color: Colors.blueGrey,
+                        border: Border(
+                          top: BorderSide(width: 1),
+                          bottom: BorderSide(width: 1),
+                          right: BorderSide(width: 1),
+                          left: BorderSide(width: 1),
+                        )
                     ),
                   ),
                   Expanded(
@@ -161,7 +103,12 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: myTheme.primaryColor
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
                       ),
                     ),
                   ),
@@ -177,7 +124,12 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: myTheme.primaryColor
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
                       ),
                     ),
                   ),
@@ -193,7 +145,12 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: myTheme.primaryColor
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
                       ),
                     ),
                   ),
@@ -209,7 +166,12 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: myTheme.primaryColor
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
                       ),
                     ),
                   ),
@@ -220,15 +182,21 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
             Expanded(
               child: ListView.builder(
                 controller: scrollController,
-                  itemCount: configPvd.centralFiltration.length,
+                  itemCount: configPvd.centralFiltrationUpdated.length,
                   itemBuilder: (BuildContext context, int index){
                     return Container(
-                      margin: index == configPvd.centralFiltration.length - 1 ? EdgeInsets.only(bottom: 60) : null,
-                      color: index % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50,
+                      decoration: BoxDecoration(
+                        border: Border(bottom: BorderSide(width: 1)),
+                        color: Colors.white70,
+                      ),
+                      margin: index == configPvd.centralFiltrationUpdated.length - 1 ? EdgeInsets.only(bottom: 60) : null,
                       width: width-20,
                       child: Row(
                         children: [
                           Container(
+                            decoration: BoxDecoration(
+                                border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1))
+                            ),
                             width: 60,
                             height: 60,
                             child: Center(
@@ -237,7 +205,7 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                                 children: [
                                   if(configPvd.centralFiltrationSelection == true || configPvd.centralFiltrationSelectAll == true)
                                     Checkbox(
-                                        value: configPvd.centralFiltration[index][configPvd.centralFiltration[index].length - 1][0] == 'select' ? true : false,
+                                        value: configPvd.centralFiltrationUpdated[index]['selection'] == 'select' ? true : false,
                                         onChanged: (value){
                                           configPvd.centralFiltrationFunctionality(['selectCentralFiltration',index,value]);
                                         }),
@@ -248,21 +216,27 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                           ),
                           Expanded(
                             child: Container(
+                                decoration: BoxDecoration(
+                                    border: Border(right: BorderSide(width: 1))
+                                ),
                                 width: double.infinity,
                                 height: 60,
                                 child: Center(
-                                  child: TextFieldForConfig(index: index, initialValue: configPvd.centralFiltration[index][0],  purpose: 'centralFiltrationFunctionality', config: configPvd,),
+                                  child: TextFieldForConfig(index: index, initialValue: configPvd.centralFiltrationUpdated[index]['filter'], config: configPvd, purpose: 'centralFiltrationFunctionality',),
                                 )
                             ),
                           ),
                           Expanded(
                             child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1))
+                              ),
                               width: double.infinity,
                               height: 60,
-                              child: (configPvd.total_D_s_valve == 0 && configPvd.centralFiltration[index][1] == false) ?
+                              child: (configPvd.total_D_s_valve == 0 && configPvd.centralFiltrationUpdated[index]['dv'].isEmpty) ?
                               Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
                               Checkbox(
-                                  value: configPvd.centralFiltration[index][1],
+                                  value: configPvd.centralFiltrationUpdated[index]['dv'].isEmpty ? false : true,
                                   onChanged: (value){
                                     configPvd.centralFiltrationFunctionality(['editDownStreamValve',index,value]);
                                   }),
@@ -270,12 +244,15 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                           ),
                           Expanded(
                             child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1))
+                              ),
                               width: double.infinity,
                               height: 60,
-                              child: (configPvd.total_p_sensor == 0 && configPvd.centralFiltration[index][2] == false) ?
+                              child: (configPvd.total_p_sensor == 0 && configPvd.centralFiltrationUpdated[index]['pressureIn'].isEmpty) ?
                               Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
                               Checkbox(
-                                  value: configPvd.centralFiltration[index][2],
+                                  value: configPvd.centralFiltrationUpdated[index]['pressureIn'].isEmpty ? false : true,
                                   onChanged: (value){
                                   configPvd.centralFiltrationFunctionality(['editPressureSensor',index,value]);
                                   }),
@@ -283,12 +260,15 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                           ),
                           Expanded(
                             child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1))
+                              ),
                               width: double.infinity,
                               height: 60,
-                              child: (configPvd.total_p_sensor == 0 && configPvd.centralFiltration[index][3] == false) ?
+                              child: (configPvd.total_p_sensor == 0 && configPvd.centralFiltrationUpdated[index]['pressureOut'].isEmpty) ?
                               Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
                               Checkbox(
-                                  value: configPvd.centralFiltration[index][3],
+                                  value: configPvd.centralFiltrationUpdated[index]['pressureOut'].isEmpty ? false : true,
                                   onChanged: (value){
                                     configPvd.centralFiltrationFunctionality(['editPressureSensor_out',index,value]);
                                   }),

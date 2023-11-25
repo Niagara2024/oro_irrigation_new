@@ -443,16 +443,14 @@ class HomePageState extends State<HomePage>
                                                 ),
                                                 child: ListTile(
                                                   title: Text('Product Stock(${productStockList.length})', style: const TextStyle(fontSize: 20, color: Colors.black),),
-                                                  trailing : userType==1?ElevatedButton.icon(
-                                                    onPressed: () async {
-                                                      /*await showDialog<void>(
-                                                        context: context,
-                                                        builder: (context) => AlertDialog(
-                                                            content: AddProduct(callback: callbackFunction)),);*/
+                                                  trailing : userType==1 ? ActionChip(
+                                                    label: const Text('New Stock'),
+                                                    tooltip: 'Add new stock',
+                                                    //backgroundColor: myTheme.primaryColor,
+                                                    avatar: const Icon(Icons.add),
+                                                    onPressed: () {
                                                       Navigator.push(context, MaterialPageRoute(builder: (context) =>  AddProduct(callback: callbackFunction,)),);
                                                     },
-                                                    icon: const Icon(Icons.add_circle),
-                                                    label: const Text('New stock'),
                                                   ): null,
                                                 ),
                                               ),

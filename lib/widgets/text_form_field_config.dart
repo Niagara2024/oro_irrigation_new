@@ -5,11 +5,11 @@ import 'package:provider/provider.dart';
 import '../../state_management/config_maker_provider.dart';
 
 class TextFieldForConfig extends StatefulWidget {
-  final String initialValue;
-  final int index;
-  final ConfigMakerProvider config;
+  String initialValue;
+  int index;
+  ConfigMakerProvider config;
   final String purpose;
-  const TextFieldForConfig({super.key,required this.index,required this.initialValue, required this.config, required this.purpose});
+  TextFieldForConfig({super.key,required this.index,required this.initialValue,required this.config, required this.purpose});
 
   @override
   State<TextFieldForConfig> createState() => _TextFieldForConfigState();
@@ -35,20 +35,38 @@ class _TextFieldForConfigState extends State<TextFieldForConfig> {
           switch (widget.purpose){
             case ('centralFiltrationFunctionality') : {
               widget.config.centralFiltrationFunctionality(['editFilters',widget.index,'1']);
+              widget.config.centralFiltrationFunctionality(['editFilterSelection',widget.index]);
+              break;
+            }
+            case ('localFiltrationFunctionality') : {
+              widget.config.localFiltrationFunctionality(['editFilters',widget.index,'1']);
+              widget.config.localFiltrationFunctionality(['editFilterSelection',widget.index]);
               break;
             }
             case ('irrigationLinesFunctionality/valve') : {
               widget.config.irrigationLinesFunctionality(['editValve',widget.index,'1']);
-              break;
-            }
-            case ('localFiltration/filter') : {
-              widget.config.irrigationLinesFunctionality(['editValve',widget.index,'1']);
-              widget.config.localFiltrationFunctionality(['editFilter',widget.index,'1']);
+              widget.config.irrigationLinesFunctionality(['editValveConnection',widget.index]);
               break;
             }
           }
 
           myController.text = '1';
+        }else{
+          switch (widget.purpose){
+            case ('centralFiltrationFunctionality') : {
+              widget.config.centralFiltrationFunctionality(['editFilterSelection',widget.index]);
+              break;
+            }
+            case ('localFiltrationFunctionality') : {
+              widget.config.localFiltrationFunctionality(['editFilterSelection',widget.index]);
+              break;
+            }
+            case ('irrigationLinesFunctionality/valve') : {
+              widget.config.irrigationLinesFunctionality(['editValveConnection',widget.index]);
+              break;
+            }
+
+          }
         }
       }
       if(myFocus.hasFocus == true){
@@ -97,14 +115,14 @@ class _TextFieldForConfigState extends State<TextFieldForConfig> {
           }
           switch (widget.purpose){
             case ('centralFiltrationFunctionality') : {
-              var total = configPvd.totalFilter + int.parse(configPvd.centralFiltration[widget.index][0] == '' ? '0' : configPvd.centralFiltration[widget.index][0]);
+              var total = configPvd.totalFilter + int.parse(configPvd.centralFiltrationUpdated[widget.index]['filter'] == '' ? '0' : configPvd.centralFiltrationUpdated[widget.index]['filter']);
               total = total - int.parse(myController.text == '' ? '0' : myController.text);
               if(total < 0){
                 setState(() {
                   myController.text = (int.parse(myController.text) + total).toString();
                 });
               }
-              configPvd.centralFiltrationFunctionality(['editFilters',widget.index,myController.text]);
+              configPvd.centralFiltrationFunctionality(['editFilter',widget.index,myController.text]);
               break;
             }
             case ('irrigationLinesFunctionality/valve') : {
@@ -119,16 +137,16 @@ class _TextFieldForConfigState extends State<TextFieldForConfig> {
               print(myController.text);
               break;
             }
-            case ('localFiltration/filter') : {
-              var total = configPvd.totalFilter + int.parse(configPvd.localFiltration[widget.index][1] == '' ? '0' : configPvd.localFiltration[widget.index][1]);
+            case ('localFiltrationFunctionality') : {
+              var total = configPvd.totalFilter + int.parse(configPvd.localFiltrationUpdated[widget.index]['filter'] == '' ? '0' : configPvd.localFiltrationUpdated[widget.index]['filter']);
               total = total - int.parse(myController.text == '' ? '0' : myController.text);
               if(total < 0){
                 setState(() {
                   myController.text = (int.parse(myController.text) + total).toString();
                 });
               }
+              print('first');
               configPvd.localFiltrationFunctionality(['editFilter',widget.index,myController.text]);
-              print(myController.text);
               break;
             }
           }

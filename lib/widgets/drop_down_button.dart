@@ -10,7 +10,7 @@ class MyDropDown extends StatefulWidget {
   int index;
   String initialValue;
   String pvdName;
-  List<String> itemList;
+  List<dynamic> itemList;
 
   MyDropDown({super.key,
     required this.initialValue,
@@ -40,7 +40,7 @@ class _MyDropDownState extends State<MyDropDown> {
         style: TextStyle(fontWeight: FontWeight.normal),
           value: widget.initialValue,
           underline: Container(),
-          items: widget.itemList.map((String items) {
+          items: widget.itemList.map((dynamic items) {
             return DropdownMenuItem(
               value: items,
               child: Container(
@@ -50,7 +50,7 @@ class _MyDropDownState extends State<MyDropDown> {
           }).toList(),
           // After selecting the desired option,it will
           // change button value to selected value
-          onChanged: (String? newValue) {
+          onChanged: (dynamic newValue) {
              if(widget.pvdName == 'editWaterSource_sp'){
               configPvd.sourcePumpFunctionality(['editWaterSource_sp',widget.index,newValue!]);
             }else if(widget.pvdName == 'editCentralDosing'){

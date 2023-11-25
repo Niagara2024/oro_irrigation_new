@@ -354,7 +354,8 @@ class _ProductLimitsState extends State<ProductLimits> {
           Step(
             title: const Text('Product Limit'),
             content: visibleLoading? Container(
-              height: mediaQuery.size.height-240,
+              margin: const EdgeInsets.only(top: 0),
+              height: mediaQuery.size.height-230,
               color:  Colors.white,
               child: Center(
                 child: Visibility(
@@ -369,7 +370,7 @@ class _ProductLimitsState extends State<ProductLimits> {
                 ),
               ),
             ) : Container(
-              height: mediaQuery.size.height-240,
+              height: mediaQuery.size.height-230,
               color:  Colors.white,
               child: Column(
                 children: [
@@ -384,14 +385,11 @@ class _ProductLimitsState extends State<ProductLimits> {
                                   margin: const EdgeInsetsDirectional.all(5.0),
                                   decoration:  BoxDecoration(
                                     color: Colors.white,
+                                    border: Border.all(
+                                      color: Colors.black38, // Border color
+                                      width: 1.0,          // Border width
+                                    ),
                                     borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: myTheme.primaryColor.withOpacity(0.5),
-                                        blurRadius: 2,
-                                        offset: const Offset(2, 2), // Shadow position
-                                      ),
-                                    ],
                                   ),
                                   child: Row(
                                     children: <Widget>[
@@ -407,7 +405,7 @@ class _ProductLimitsState extends State<ProductLimits> {
                                             padding: const EdgeInsets.all(8.0),
                                             child: CircleAvatar(
                                               backgroundColor: myTheme.primaryColor.withOpacity(0.5),
-                                              child: Icon(Icons.reset_tv, color: Colors.white,),
+                                              child: const Icon(Icons.reset_tv, color: Colors.white,),
                                             ),
                                           ),
                                         ),),
@@ -471,7 +469,7 @@ class _ProductLimitsState extends State<ProductLimits> {
           Step(
             title: const Text('Config maker'),
             content: Container(
-              height: mediaQuery.size.height-240,
+              height: mediaQuery.size.height-230,
               color:  Colors.white,
               child: ConfigMakerScreen(userID: widget.userID, customerID: widget.customerID, siteID: widget.siteID, imeiNumber: widget.deviceId,),
             ),

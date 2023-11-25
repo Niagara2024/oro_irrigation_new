@@ -2,19 +2,14 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '../../../Models/create_json_file.dart';
 import '../../../constants/http_service.dart';
-import '../../../constants/mqtt_service.dart';
-import '../../../constants/mqtt_web_client.dart';
 import '../../../state_management/config_maker_provider.dart';
 
 
 class FinishPageConfigMaker extends StatefulWidget {
-  const FinishPageConfigMaker({super.key, required this.customerId, required this.controllerId, required this.userId, required this.imeiNo});
-  final int customerId, controllerId, userId;
-  final String imeiNo;
+  const FinishPageConfigMaker({super.key});
 
   @override
   State<FinishPageConfigMaker> createState() => _FinishPageConfigMakerState();
@@ -26,72 +21,97 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
     // var mqttPvd = Provider.of<MqttProvider>(context, listen: true);
 
-    return Center(
-      child: ElevatedButton(
-        onPressed: ()async{
-          // configPvd.hardWarePayLoad();
-          HttpService service = HttpService();
-          try{
-            /*print('sr : ${jsonEncode({
-              "userId" : widget.customerId,
-              "controllerId" : widget.controllerId,
-              // "pumps" : configPvd.my_payload['200'][0]['201'],
-              "pumps" : [],
-              // "irrigationLine" : configPvd.my_payload['200'][1]['202'],
-              "irrigationLine" : [],
-              // "dosing" : configPvd.my_payload['200'][2]['203'],
-              "dosing" : [],
-              // "backwash" : configPvd.my_payload['200'][3]['204'],
-              "backwash" : [],
-              // "weatherStation" : configPvd.my_payload['200'][4]['205'],
-              "weatherStation" : [],
-              // "inputOutput" : configPvd.my_payload['200'][5]['206'],
-              "inputOutput" : [],
-              "inputOutputSw" : configPvd.sendData(),
-              "createUser" : widget.userId,
-            })}');*/
-            var response = await service.postRequest('createUserConfigMaker', {
-              "userId" : widget.customerId,
-              "controllerId" : widget.controllerId,
-              // "pumps" : configPvd.my_payload['200'][0]['201'],
-              "pumps" : '',
-              // "irrigationLine" : configPvd.my_payload['200'][1]['202'],
-              "irrigationLine" : '',
-              // "dosing" : configPvd.my_payload['200'][2]['203'],
-              "dosing" : '',
-              // "backwash" : configPvd.my_payload['200'][3]['204'],
-              "backwash" : '',
-              // "weatherStation" : configPvd.my_payload['200'][4]['205'],
-              "weatherStation" : '',
-              // "inputOutput" : configPvd.my_payload['200'][5]['206'],
-              "inputOutput" : configPvd.map_i_o,
-              "inputOutputSw" : configPvd.sendData(),
-              "createUser" : widget.userId,
-            });
-            var jsonData = jsonDecode(response.body);
-            //print('jsonData : ${jsonData['code']}');
-
-            String payLoad = jsonEncode({
-              "200": [
-                {"201": ''},
-                {"202": ''},
-                {"203": ''},
-                {"204": ''},
-                {"205": ''},
-                {"206": configPvd.map_i_o},
-              ]
-            });
-
-            MqttWebClient().publishMessage('AppToFirmware/${widget.imeiNo}', payLoad);
-
-          }catch(e){
-            print(e.toString());
-          }
-          // configPvd.hardWarePayLoad();
-          // CreateJsonFile store = CreateJsonFile();
-          // store.writeDataInJsonFile('configFile', configPvd.sendData());
-        },
-        child: Text('Send'),
+    return Container(
+      color: Color(0xFFF3F3F3),
+      child: Center(
+        child: ElevatedButton(
+          onPressed: ()async{
+            try{
+            configPvd.sendData();
+            HttpService service = HttpService();
+              var response = await service.postRequest('createUserConfigMaker', {
+                "userId" : 21,
+                "createUser" : 21,
+                "controllerId" : 10,
+                "productLimit" : {
+                  'totalWaterSource' : configPvd.totalWaterSource,
+                  'totalWaterMeter' : configPvd.totalWaterMeter,
+                  'totalSourcePump' : configPvd.totalSourcePump,
+                  'totalIrrigationPump' : configPvd.totalIrrigationPump,
+                  'totalInjector' : configPvd.totalInjector,
+                  'totalDosingMeter' : configPvd.totalDosingMeter,
+                  'totalBooster' : configPvd.totalBooster,
+                  'totalCentralDosing' : configPvd.totalCentralDosing,
+                  'totalFilter' : configPvd.totalFilter,
+                  'total_D_s_valve' : configPvd.total_D_s_valve,
+                  'total_p_sensor' : configPvd.total_p_sensor,
+                  'totalCentralFiltration' : configPvd.totalCentralFiltration,
+                  'totalValve' : configPvd.totalValve,
+                  'totalMainValve' : configPvd.totalMainValve,
+                  'totalIrrigationLine' : configPvd.totalIrrigationLine,
+                  'totalLocalFiltration' : configPvd.totalLocalFiltration,
+                  'totalLocalDosing' : configPvd.totalLocalDosing,
+                  'totalRTU' : configPvd.totalRTU,
+                  'totalOroSwitch' : configPvd.totalOroSwitch,
+                  'totalOroSense' : configPvd.totalOroSense,
+                  'totalOroSmartRTU' : configPvd.totalOroSmartRTU,
+                  'totalOroLevel' : configPvd.totalOroLevel,
+                  'totalOroPump' : configPvd.totalOroPump,
+                  'totalOroExtend' : configPvd.totalOroExtend,
+                  'i_o_types' : configPvd.i_o_types,
+                  'totalAnalogSensor' : configPvd.totalAnalogSensor,
+                  'totalContact' : configPvd.totalContact,
+                  'totalAgitator' : configPvd.totalAgitator,
+                  'totalPhSensor' : configPvd.totalPhSensor,
+                  'totalEcSensor' : configPvd.totalEcSensor,
+                  'totalMoistureSensor' : configPvd.totalMoistureSensor,
+                  'totalLevelSensor' : configPvd.totalLevelSensor,
+                  'totalFan' : configPvd.totalFan,
+                  'totalFogger' : configPvd.totalFogger,
+                  'oRtu' : configPvd.oRtu,
+                  'oSrtu' : configPvd.oSrtu,
+                  'oSwitch' : configPvd.oSwitch,
+                  'oSense' : configPvd.oSense,
+                  'oLevel' : configPvd.oLevel,
+                  'oPump' : configPvd.oPump,
+                  'oExtend' : configPvd.oExtend,
+                  'rtuForLine' : configPvd.rtuForLine,
+                  'OroExtendForLine' : configPvd.OroExtendForLine,
+                  'switchForLine' : configPvd.switchForLine,
+                  'OroSmartRtuForLine' : configPvd.OroSmartRtuForLine,
+                  'OroSenseForLine' : configPvd.OroSenseForLine,
+                  'OroLevelForLine' : configPvd.OroLevelForLine,
+                  'waterSource' : configPvd.waterSource,
+                  'weatherStation' : configPvd.weatherStation,
+                  'central_dosing_site_list' : configPvd.central_dosing_site_list,
+                  'central_filtration_site_list' : configPvd.central_filtration_site_list,
+                  'irrigation_pump_list' : configPvd.irrigation_pump_list,
+                  'water_source_list' : configPvd.water_source_list,
+                  'I_O_autoIncrement' : configPvd.I_O_autoIncrement,
+                },
+                "sourcePump" : configPvd.sourcePumpUpdated,
+                "irrigationPump" : configPvd.irrigationPumpUpdated,
+                "centralFertilizer" : configPvd.centralDosingUpdated,
+                "centralFilter" : configPvd.centralFiltrationUpdated,
+                "irrigationLine" : configPvd.irrigationLines,
+                "localFertilizer" : configPvd.localDosingUpdated,
+                "localFilter" : configPvd.localFiltrationUpdated,
+                "weatherStation" : {},
+                "mappingOfOutput" : {},
+                "mappingOfInput" : {},
+                'hardware' : configPvd.sendData(),
+              });
+              print(configPvd.sendData());
+              var jsonData = jsonDecode(response.body);
+              print('jsonData : ${jsonData['code']}');
+            }catch(e){
+              print(e.toString());
+            }
+            CreateJsonFile store = CreateJsonFile();
+            // store.writeDataInJsonFile('configFile', configPvd.sendData());
+          },
+          child: Text('Send'),
+        ),
       ),
     );
   }

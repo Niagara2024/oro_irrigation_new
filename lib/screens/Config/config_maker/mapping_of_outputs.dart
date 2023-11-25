@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-
 import 'package:provider/provider.dart';
 
 import '../../../state_management/config_maker_provider.dart';
-import '../../../constants/theme.dart';
 import '../../../widgets/drop_down_button.dart';
 
 
@@ -22,54 +20,40 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    if (mounted) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        var configPvd = Provider.of<ConfigMakerProvider>(context, listen: false);
-        configPvd.refreshMapOfOutputs();
-
-      });
-    }
   }
   @override
   Widget build(BuildContext context) {
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
     return LayoutBuilder(builder: (context,constrainst){
       var width = constrainst.maxWidth;
-      return Column(
-        children: [
-          Container(
-            padding: EdgeInsets.all(10),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 60,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Obj',style: TextStyle(color: Colors.white),),
-                      ],
-                    ),
-                    decoration: BoxDecoration(
-                        color: myTheme.primaryColor
+      return Container(
+        color: Color(0xFFF3F3F3),
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.only(left: 5,right: 5,top: 5),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Obj',style: TextStyle(color: Colors.white),),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                            left: BorderSide(width: 1),
+                          )
+                      ),
                     ),
                   ),
-                ),
-                if(width < 400)
-                  Container(
-                    width: 150,
-                    height: 60,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('RTU',style: TextStyle(color: Colors.white),),
-                      ],
-                    ),
-                    decoration: BoxDecoration(
-                        color: myTheme.primaryColor
-                    ),
-                  )
-                else
                   Expanded(
                     child: Container(
                       width: double.infinity,
@@ -81,930 +65,1105 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: myTheme.primaryColor
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
                       ),
                     ),
                   ),
-                Expanded(
-                  child: Container(
-                    height: 60,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('R.no',style: TextStyle(color: Colors.white),),
-                      ],
-                    ),
-                    decoration: BoxDecoration(
-                        color: myTheme.primaryColor
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    height: 60,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('O/P',style: TextStyle(color: Colors.white),),
-                      ],
-                    ),
-                    decoration: BoxDecoration(
-                        color: myTheme.primaryColor
+                  Expanded(
+                    child: Container(
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('R.no',style: TextStyle(color: Colors.white),),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
                     ),
                   ),
-                ),
-
-              ],
-            ),
-          ),
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.only(left: 10,right: 10),
-              width: double.infinity,
-              height: double.infinity,
-              child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      for(var i = 0; i < configPvd.mappingOfOutputs.length;i++)
-                        for(var j in configPvd.mappingOfOutputs[i].entries)
-                          Container(
-                            width: double.infinity,
-                            child: Column(
-                              children: [
-                                Container(
-                                  width: double.infinity,
-                                  height: 30  ,
-                                  color: Colors.blue,
-                                  child: Center(child: Text('Irrigation line${i + 1}',style: TextStyle(color: Colors.white),),),
-                                ),
-                                for(var k = 0;k < j.value['valve'].length;k++)
-                                  Container(
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      color: colorsFind(j.value,j.value['valve'][k][0]),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Container(
-                                            child: Center(child: Text(j.value['valve'][k][0].split(':')[1])),
-                                          ),
-                                        ),
-                                        if(width < 400)
-                                          Container(
-                                            width: 150,
-                                            child: MyDropDown(initialValue: returnigListForRtu(j.key,configPvd,j.value['valve'][k][1])['initialValue'], itemList: returnigListForRtu(j.key,configPvd,j.value['valve'][k][1])['list'], pvdName: 'm_o_valve/${i}/${j.key}/valve/${k}/1', index: -1,),
-                                          )
-                                        else
-                                          Expanded(
-                                            child: MyDropDown(initialValue: returnigListForRtu(j.key,configPvd,j.value['valve'][k][1])['initialValue'], itemList: returnigListForRtu(j.key,configPvd,j.value['valve'][k][1])['list'], pvdName: 'm_o_valve/${i}/${j.key}/valve/${k}/1', index: -1,),
-                                          ),
-                                        Expanded(
-                                          child: MyDropDown(initialValue: returnigListForRfNo(j.key,configPvd,[j.value['valve'][k][1],j.value['valve'][k][2]])['initialValue'], itemList: returnigListForRfNo(j.key,configPvd,[j.value['valve'][k][1],j.value['valve'][k][2]])['list'], pvdName: 'm_o_valve/${i}/${j.key}/valve/${k}/2', index: -1,),
-                                        ),
-                                        Expanded(
-                                          child: MyDropDown(initialValue: returnigListForOutput(j.key,configPvd,[ j.value['valve'][k][0], j.value['valve'][k][1],j.value['valve'][k][2],j.value['valve'][k][3] ])['initialValue'], itemList: returnigListForOutput(j.key,configPvd, [j.value['valve'][k][0], j.value['valve'][k][1], j.value['valve'][k][2], j.value['valve'][k][3] ])['list'], pvdName: 'm_o_valve/${i}/${j.key}/valve/${k}/3', index: -1,),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                for(var k = 0;k < j.value['main_valve'].length;k++)
-                                  Container(
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      color: colorsFind(j.value,j.value['main_valve'][k][0]),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Container(
-                                            child: Center(child: Text(j.value['main_valve'][k][0].split(':')[1])),
-                                          ),
-                                        ),
-                                        if(width < 400)
-                                          Container(
-                                            width: 150,
-                                            child: MyDropDown(initialValue: returnigListForRtu(j.key,configPvd,j.value['main_valve'][k][1])['initialValue'], itemList: returnigListForRtu(j.key,configPvd,j.value['main_valve'][k][1])['list'], pvdName: 'm_o_main_valve/${i}/${j.key}/main_valve/${k}/1', index: -1,),
-                                          )
-                                        else
-                                          Expanded(
-                                            child: MyDropDown(initialValue: returnigListForRtu(j.key,configPvd,j.value['main_valve'][k][1])['initialValue'], itemList: returnigListForRtu(j.key,configPvd,j.value['main_valve'][k][1])['list'], pvdName: 'm_o_main_valve/${i}/${j.key}/main_valve/${k}/1', index: -1,),
-                                          ),
-                                        Expanded(
-                                          child: MyDropDown(initialValue: returnigListForRfNo(j.key,configPvd,[j.value['main_valve'][k][1],j.value['main_valve'][k][2]])['initialValue'], itemList: returnigListForRfNo(j.key,configPvd,[j.value['main_valve'][k][1],j.value['main_valve'][k][2]])['list'], pvdName: 'm_o_main_valve/${i}/${j.key}/main_valve/${k}/2', index: -1,),
-                                        ),
-                                        Expanded(
-                                          child: MyDropDown(initialValue: returnigListForOutput(j.key,configPvd,[ j.value['main_valve'][k][0], j.value['main_valve'][k][1],j.value['main_valve'][k][2],j.value['main_valve'][k][3] ])['initialValue'], itemList: returnigListForOutput(j.key,configPvd, [j.value['main_valve'][k][0], j.value['main_valve'][k][1], j.value['main_valve'][k][2], j.value['main_valve'][k][3] ])['list'], pvdName: 'm_o_main_valve/${i}/${j.key}/main_valve/${k}/3', index: -1,),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                for(var k = 0;k < j.value['injector'].length;k++)
-                                  Container(
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      color: colorsFind(j.value,j.value['injector'][k][0]),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Container(
-                                            child: Center(child: Text('inj${k+1}')),
-                                            // child: Center(child: Text('${j.value['injector'][k][0]}')),
-                                          ),
-                                        ),
-                                        if(width < 400)
-                                          Container(
-                                            width: 150,
-                                            child: MyDropDown(initialValue: returnigListForRtu(j.key,configPvd,j.value['injector'][k][1])['initialValue'], itemList: returnigListForRtu(j.key,configPvd,j.value['injector'][k][1])['list'], pvdName: 'm_o_injector/${i}/${j.key}/injector/${k}/1', index: -1,),
-                                          )
-                                        else
-                                          Expanded(
-                                            child: MyDropDown(initialValue: returnigListForRtu(j.key,configPvd,j.value['injector'][k][1])['initialValue'], itemList: returnigListForRtu(j.key,configPvd,j.value['injector'][k][1])['list'], pvdName: 'm_o_injector/${i}/${j.key}/injector/${k}/1', index: -1,),
-                                          ),
-                                        Expanded(
-                                          child: MyDropDown(initialValue: returnigListForRfNo(j.key,configPvd,[j.value['injector'][k][1],j.value['injector'][k][2]])['initialValue'], itemList: returnigListForRfNo(j.key,configPvd,[j.value['injector'][k][1],j.value['injector'][k][2]])['list'], pvdName: 'm_o_injector/${i}/${j.key}/injector/${k}/2', index: -1,),
-                                        ),
-                                        Expanded(
-                                          child: MyDropDown(initialValue: returnigListForOutput(j.key,configPvd,[ j.value['injector'][k][0], j.value['injector'][k][1],j.value['injector'][k][2],j.value['injector'][k][3] ])['initialValue'], itemList: returnigListForOutput(j.key,configPvd, [j.value['injector'][k][0], j.value['injector'][k][1], j.value['injector'][k][2], j.value['injector'][k][3] ])['list'], pvdName: 'm_o_injector/${i}/${j.key}/injector/${k}/3', index: -1,),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                for(var k = 0;k < j.value['Booster'].length;k++)
-                                  Container(
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      color: colorsFind(j.value,j.value['Booster'][k][0]),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Container(
-                                            child: Center(child: Text('Bstr${k+1}')),
-                                            // child: Center(child: Text('${j.value['injector'][k][0]}')),
-                                          ),
-                                        ),
-                                        if(width < 400)
-                                          Container(
-                                            width: 150,
-                                            child: MyDropDown(initialValue: returnigListForRtu(j.key,configPvd,j.value['Booster'][k][1])['initialValue'], itemList: returnigListForRtu(j.key,configPvd,j.value['Booster'][k][1])['list'], pvdName: 'm_o_Booster/${i}/${j.key}/Booster/${k}/1', index: -1,),
-                                          )
-                                        else
-                                          Expanded(
-                                            child: MyDropDown(initialValue: returnigListForRtu(j.key,configPvd,j.value['Booster'][k][1])['initialValue'], itemList: returnigListForRtu(j.key,configPvd,j.value['Booster'][k][1])['list'], pvdName: 'm_o_Booster/${i}/${j.key}/Booster/${k}/1', index: -1,),
-                                          ),
-                                        Expanded(
-                                          child: MyDropDown(initialValue: returnigListForRfNo(j.key,configPvd,[j.value['Booster'][k][1],j.value['Booster'][k][2]])['initialValue'], itemList: returnigListForRfNo(j.key,configPvd,[j.value['Booster'][k][1],j.value['Booster'][k][2]])['list'], pvdName: 'm_o_Booster/${i}/${j.key}/Booster/${k}/2', index: -1,),
-                                        ),
-                                        Expanded(
-                                          child: MyDropDown(initialValue: returnigListForOutput(j.key,configPvd,[ j.value['Booster'][k][0], j.value['Booster'][k][1],j.value['Booster'][k][2],j.value['Booster'][k][3] ])['initialValue'], itemList: returnigListForOutput(j.key,configPvd, [j.value['Booster'][k][0], j.value['Booster'][k][1], j.value['Booster'][k][2], j.value['Booster'][k][3] ])['list'], pvdName: 'm_o_Booster/${i}/${j.key}/Booster/${k}/3', index: -1,),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                for(var k = 0;k < j.value['filter'].length;k++)
-                                  Container(
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      color: colorsFind(j.value,j.value['filter'][k][0]),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Container(
-                                            child: Center(child: Text(j.value['filter'][k][0].split(':')[1])),
-                                          ),
-                                        ),
-                                        if(width < 400)
-                                          Container(
-                                            width: 150,
-                                            child: MyDropDown(initialValue: returnigListForRtu(j.key,configPvd,j.value['filter'][k][1])['initialValue'], itemList: returnigListForRtu(j.key,configPvd,j.value['filter'][k][1])['list'], pvdName: 'm_o_filter/${i}/${j.key}/filter/${k}/1', index: -1,),
-                                          )
-                                        else
-                                          Expanded(
-                                            child: MyDropDown(initialValue: returnigListForRtu(j.key,configPvd,j.value['filter'][k][1])['initialValue'], itemList: returnigListForRtu(j.key,configPvd,j.value['filter'][k][1])['list'], pvdName: 'm_o_filter/${i}/${j.key}/filter/${k}/1', index: -1,),
-                                          ),
-                                        Expanded(
-                                          child: MyDropDown(initialValue: returnigListForRfNo(j.key,configPvd,[j.value['filter'][k][1],j.value['filter'][k][2]])['initialValue'], itemList: returnigListForRfNo(j.key,configPvd,[j.value['filter'][k][1],j.value['filter'][k][2]])['list'], pvdName: 'm_o_filter/${i}/${j.key}/filter/${k}/2', index: -1,),
-                                        ),
-                                        Expanded(
-                                          child: MyDropDown(initialValue: returnigListForOutput(j.key,configPvd,[ j.value['filter'][k][0], j.value['filter'][k][1],j.value['filter'][k][2],j.value['filter'][k][3] ])['initialValue'], itemList: returnigListForOutput(j.key,configPvd, [j.value['filter'][k][0], j.value['filter'][k][1], j.value['filter'][k][2], j.value['filter'][k][3] ])['list'], pvdName: 'm_o_filter/${i}/${j.key}/filter/${k}/3', index: -1,),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                j.value['D_valve'].length == 0 ? Container() : Container(
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    color: colorsFind(j.value,j.value['D_valve'][0]),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Container(
-                                          child: Center(child: Text('D_V')),
-                                        ),
-                                      ),
-                                      if(width < 400)
-                                        Container(
-                                          width: 150,
-                                          child: MyDropDown(initialValue: returnigListForRtu(j.key,configPvd,j.value['D_valve'][1])['initialValue'], itemList: returnigListForRtu(j.key,configPvd,j.value['D_valve'][1])['list'], pvdName: 'm_o_D_valve/${i}/${j.key}/D_valve/1', index: -1,),
-                                        )
-                                      else
-                                        Expanded(
-                                          child: MyDropDown(initialValue: returnigListForRtu(j.key,configPvd,j.value['D_valve'][1])['initialValue'], itemList: returnigListForRtu(j.key,configPvd,j.value['D_valve'][1])['list'], pvdName: 'm_o_D_valve/${i}/${j.key}/D_valve/1', index: -1,),
-                                        ),
-                                      Expanded(
-                                        child: MyDropDown(initialValue: returnigListForRfNo(j.key,configPvd,[j.value['D_valve'][1],j.value['D_valve'][2]])['initialValue'], itemList: returnigListForRfNo(j.key,configPvd,[j.value['D_valve'][1],j.value['D_valve'][2]])['list'], pvdName: 'm_o_D_valve/${i}/${j.key}/D_valve/2', index: -1,),
-                                      ),
-                                      Expanded(
-                                        child: MyDropDown(initialValue: returnigListForOutput(j.key,configPvd,[ j.value['D_valve'][0], j.value['D_valve'][1],j.value['D_valve'][2],j.value['D_valve'][3] ])['initialValue'], itemList: returnigListForOutput(j.key,configPvd, [j.value['D_valve'][0], j.value['D_valve'][1], j.value['D_valve'][2], j.value['D_valve'][3] ])['list'], pvdName: 'm_o_D_valve/${i}/${j.key}/D_valve/3', index: -1,),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-
-                              ],
-                            ),
-                          ),
-                      for(var i = 0;i < configPvd.CD_for_MO.length;i++)
-                        for(var j in configPvd.CD_for_MO[i].entries)
-                          Container(
-                            width: double.infinity,
-                            child: Column(
-                              children: [
-                                Container(
-                                  width: double.infinity,
-                                  height: 30  ,
-                                  color: Colors.blue,
-                                  child: Center(child: Text('Central Dosing Site ${i + 1}',style: TextStyle(color: Colors.white),),),
-                                ),
-                                for(var k = 0;k < j.value['injector'].length;k++)
-                                  Container(
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      color: colorsFindForCD(j.value,'inj${k}'),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Container(
-                                            child: Center(child: Text('injector${j.value['injector'][k][0]}')),
-                                          ),
-                                        ),
-                                        if(width < 400)
-                                          Container(
-                                            width: 150,
-                                            child: MyDropDown(initialValue: j.value['injector'][k][1], itemList: getRTUs(configPvd), pvdName: 'm_o_CD_injector/${i}/${j.key}/injector/${k}/1', index: -1,),
-                                          )
-                                        else
-                                          Expanded(
-                                            child: MyDropDown(initialValue: j.value['injector'][k][1], itemList: getRTUs(configPvd), pvdName: 'm_o_CD_injector/${i}/${j.key}/injector/${k}/1', index: -1,),
-                                          ),
-                                        Expanded(
-                                          child: MyDropDown(initialValue: j.value['injector'][k][2], itemList: getRFnos(configPvd,j.value['injector'][k][1]), pvdName: 'm_o_CD_injector/${i}/${j.key}/injector/${k}/2', index: -1,),
-                                        ),
-                                        Expanded(
-                                          child: MyDropDown(initialValue: returnigListForOutput(j.key,configPvd,[ j.value['injector'][k][4], j.value['injector'][k][1],j.value['injector'][k][2],j.value['injector'][k][3] ])['initialValue'], itemList: returnigListForOutput(j.key,configPvd,[ j.value['injector'][k][4], j.value['injector'][k][1],j.value['injector'][k][2],j.value['injector'][k][3] ])['list'], pvdName: 'm_o_CD_injector/${i}/${j.key}/injector/${k}/3', index: -1,),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                for(var k = 0;k < j.value['booster'].length;k++)
-                                  if(j.value['booster'][k][0] == true)
-                                    Container(
-                                    height: 50,
-                                      decoration: BoxDecoration(
-                                        color: colorsFindForCD(j.value,'bp${k}'),
-                                      ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Container(
-                                            child: Center(child: Text('booster${k + 1}')),
-                                          ),
-                                        ),
-                                        if(width < 400)
-                                          Container(
-                                            width: 150,
-                                            child: MyDropDown(initialValue: j.value['booster'][k][1], itemList: getRTUs(configPvd), pvdName: 'm_o_CD_booster/${i}/${j.key}/booster/${k}/1', index: -1,),
-                                          )
-                                        else
-                                          Expanded(
-                                            child: MyDropDown(initialValue: j.value['booster'][k][1], itemList: getRTUs(configPvd), pvdName: 'm_o_CD_booster/${i}/${j.key}/booster/${k}/1', index: -1,),
-                                          ),
-                                        Expanded(
-                                          child: MyDropDown(initialValue: j.value['booster'][k][2], itemList: getRFnos(configPvd,j.value['booster'][k][1]), pvdName: 'm_o_CD_booster/${i}/${j.key}/booster/${k}/2', index: -1,),
-                                        ),
-                                        Expanded(
-                                          child: MyDropDown(initialValue: returnigListForOutput(j.key,configPvd,[ j.value['booster'][k][4], j.value['booster'][k][1],j.value['booster'][k][2],j.value['booster'][k][3] ])['initialValue'], itemList: returnigListForOutput(j.key,configPvd,[ j.value['booster'][k][4], j.value['booster'][k][1],j.value['booster'][k][2],j.value['booster'][k][3] ])['list'], pvdName: 'm_o_CD_booster/${i}/${j.key}/booster/${k}/3', index: -1,),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                      for(var i = 0;i < configPvd.CF_for_MO.length;i++)
-                        for(var j in configPvd.CF_for_MO[i].entries)
-                          Container(
-                            width: double.infinity,
-                            child: Column(
-                              children: [
-                                Container(
-                                  width: double.infinity,
-                                  height: 30  ,
-                                  color: Colors.blue,
-                                  child: Center(child: Text('Central Filtration Site ${i + 1}',style: TextStyle(color: Colors.white),),),
-                                ),
-                                for(var k = 0;k < j.value['filter'].length;k++)
-                                  Container(
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      color: colorsFindForCF(j.value,'filt${k}'),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Container(
-                                            child: Center(child: Text('filter${j.value['filter'][k][0]}')),
-                                          ),
-                                        ),
-                                        if(width < 400)
-                                          Container(
-                                            width: 150,
-                                            child: MyDropDown(initialValue: j.value['filter'][k][1], itemList: getRTUs(configPvd), pvdName: 'm_o_CF_filter/${i}/${j.key}/filter/${k}/1', index: -1,),
-                                          )
-                                        else
-                                          Expanded(
-                                            child: MyDropDown(initialValue: j.value['filter'][k][1], itemList: getRTUs(configPvd), pvdName: 'm_o_CF_filter/${i}/${j.key}/filter/${k}/1', index: -1,),
-                                          ),
-                                        Expanded(
-                                          child: MyDropDown(initialValue: j.value['filter'][k][2], itemList: getRFnos(configPvd,j.value['filter'][k][1]), pvdName: 'm_o_CF_filter/${i}/${j.key}/filter/${k}/2', index: -1,),
-                                        ),
-                                        Expanded(
-                                          child: MyDropDown(initialValue: returnigListForOutput(j.key,configPvd,[ j.value['filter'][k][4], j.value['filter'][k][1],j.value['filter'][k][2],j.value['filter'][k][3] ])['initialValue'], itemList: returnigListForOutput(j.key,configPvd,[ j.value['filter'][k][4], j.value['filter'][k][1],j.value['filter'][k][2],j.value['filter'][k][3] ])['list'], pvdName: 'm_o_CF_filter/${i}/${j.key}/filter/${k}/3', index: -1,),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                j.value['D_S_valve'].length == 0 || j.value['D_S_valve'][0] == false ? Container() : Container(
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    color: colorsFindForCF(j.value,'d_v1'),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Container(
-                                          child: Center(child: Text('DV')),
-                                        ),
-                                      ),
-                                      if(width < 400)
-                                        Container(
-                                          width: 150,
-                                          child: MyDropDown(initialValue: j.value['D_S_valve'][1], itemList: getRTUs(configPvd), pvdName: 'm_o_CF_D_valve/${i}/${j.key}/D_S_valve/1', index: -1,),
-                                        )
-                                      else
-                                        Expanded(
-                                          child: MyDropDown(initialValue: j.value['D_S_valve'][1], itemList: getRTUs(configPvd), pvdName: 'm_o_CF_D_valve/${i}/${j.key}/D_S_valve/1', index: -1,),
-                                        ),
-                                      Expanded(
-                                        child: MyDropDown(initialValue: j.value['D_S_valve'][2], itemList: getRFnos(configPvd,j.value['D_S_valve'][1]), pvdName: 'm_o_CF_D_valve/${i}/${j.key}/D_S_valve/2', index: -1,),
-                                      ),
-                                      Expanded(
-                                          child: MyDropDown(initialValue: returnigListForOutput(j.key,configPvd,[ j.value['D_S_valve'][4], j.value['D_S_valve'][1],j.value['D_S_valve'][2],j.value['D_S_valve'][3] ])['initialValue'], itemList: returnigListForOutput(j.key,configPvd,[ j.value['D_S_valve'][4], j.value['D_S_valve'][1],j.value['D_S_valve'][2],j.value['D_S_valve'][3] ])['list'], pvdName: 'm_o_CF_D_valve/${i}/${j.key}/D_S_valve/3', index: -1,),
-                                      ),
-
-                                    ],
-                                  ),
-                                ),
-
-
-                              ],
-                            ),
-                          ),
-                      configPvd.SP_MO.length == 0 ? Container() : Container(
-                        width: double.infinity,
-                        height: 30  ,
-                        color: Colors.blue,
-                        child: Center(child: Text('Source Pumps',style: TextStyle(color: Colors.white),),),
+                  Expanded(
+                    child: Container(
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('O/P',style: TextStyle(color: Colors.white),),
+                        ],
                       ),
-                      for(var i = 0;i < configPvd.SP_MO.length;i++)
-                        for(var j in configPvd.SP_MO[i].entries)
-                          Container(
-                            width: double.infinity,
-                            child: Column(
-                              children: [
-                                j.value['pump'].length == 0 ? Container() : Container(
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    color: i % 2 == 0 ? Colors.blue.shade50 : Colors.blue.shade100,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Container(
-                                          child: Center(child: Text('Pump ${i+1}')),
-                                        ),
-                                      ),
-                                      if(width < 400)
-                                        Container(
-                                          width: 150,
-                                          child: MyDropDown(initialValue: j.value['pump'][1], itemList: getRTUs(configPvd), pvdName: 'm_o_SP/${i}/${j.key}/pump/1', index: -1,),
-                                        )
-                                      else
-                                        Expanded(
-                                          child: MyDropDown(initialValue: j.value['pump'][1], itemList: getRTUs(configPvd), pvdName: 'm_o_SP/${i}/${j.key}/pump/1', index: -1,),
-                                        ),
-                                      Expanded(
-                                        child: MyDropDown(initialValue: j.value['pump'][2], itemList: getRFnos(configPvd,j.value['pump'][1]), pvdName: 'm_o_SP/${i}/${j.key}/pump/2', index: -1,),
-                                      ),
-                                      Expanded(
-                                        child: MyDropDown(initialValue: returnigListForOutput(j.key,configPvd,[ j.value['pump'][4], j.value['pump'][1],j.value['pump'][2],j.value['pump'][3] ])['initialValue'], itemList: returnigListForOutput(j.key,configPvd,[ j.value['pump'][4], j.value['pump'][1],j.value['pump'][2],j.value['pump'][3] ])['list'], pvdName: 'm_o_SP/${i}/${j.key}/pump/3', index: -1,),
-                                      ),
-
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                      configPvd.IP_MO.length == 0 ? Container() :Container(
-                        width: double.infinity,
-                        height: 30  ,
-                        color: Colors.blue,
-                        child: Center(child: Text('Irrigation Pumps',style: TextStyle(color: Colors.white),),),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
                       ),
-                      for(var i = 0;i < configPvd.IP_MO.length;i++)
-                        for(var j in configPvd.IP_MO[i].entries)
-                          Container(
-                            width: double.infinity,
-                            child: Column(
-                              children: [
-                                j.value['pump'].length == 0 ? Container() : Container(
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    color: i % 2 == 0 ? Colors.blue.shade50 : Colors.blue.shade100,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Container(
-                                          child: Center(child: Text('Pump ${i+1}')),
-                                        ),
-                                      ),
-                                      if(width < 400)
-                                        Container(
-                                          width: 150,
-                                          child: MyDropDown(initialValue: j.value['pump'][1], itemList: getRTUs(configPvd), pvdName: 'm_o_IP/${i}/${j.key}/pump/1', index: -1,),
-                                        )
-                                      else
-                                        Expanded(
-                                          child: MyDropDown(initialValue: j.value['pump'][1], itemList: getRTUs(configPvd), pvdName: 'm_o_IP/${i}/${j.key}/pump/1', index: -1,),
-                                        ),
-                                      Expanded(
-                                        child: MyDropDown(initialValue: j.value['pump'][2], itemList: getRFnos(configPvd,j.value['pump'][1]), pvdName: 'm_o_IP/${i}/${j.key}/pump/2', index: -1,),
-                                      ),
-                                      Expanded(
-                                        child: MyDropDown(initialValue: returnigListForOutput(j.key,configPvd,[ j.value['pump'][4], j.value['pump'][1],j.value['pump'][2],j.value['pump'][3] ])['initialValue'], itemList: returnigListForOutput(j.key,configPvd,[ j.value['pump'][4], j.value['pump'][1],j.value['pump'][2],j.value['pump'][3] ])['list'], pvdName: 'm_o_IP/${i}/${j.key}/pump/3', index: -1,),
-                                      ),
-
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                      configPvd.totalFan.length == 0 ? Container() : Container(
-                        width: double.infinity,
-                        height: 30  ,
-                        color: Colors.blue,
-                        child: Center(child: Text('Fan',style: TextStyle(color: Colors.white),),),
-                      ),
-                      for(var i = 0;i < configPvd.totalFan.length;i++)
-                        Container(
-                          width: double.infinity,
-                          child: Column(
-                            children: [
-                              Container(
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: i % 2 == 0 ? Colors.blue.shade50 : Colors.blue.shade100,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        child: Center(child: Text('Fan${i+1}',style: width < 400 ? TextStyle(fontWeight: FontWeight.normal) : null,)),
-                                      ),
-                                    ),
-                                    if(width < 400)
-                                      Container(
-                                        width: 150,
-                                        child: MyDropDown(initialValue: configPvd.totalFan[i][1], itemList: getRTUs(configPvd), pvdName: 'm_o_fan/${i}/1', index: -1,),
-                                      )
-                                    else
-                                      Expanded(
-                                        child: MyDropDown(initialValue: configPvd.totalFan[i][1], itemList: getRTUs(configPvd), pvdName: 'm_o_fan/${i}/1', index: -1,),
-                                      ),
-                                    Expanded(
-                                      child: MyDropDown(initialValue: configPvd.totalFan[i][2], itemList: getRFnos(configPvd,configPvd.totalFan[i][1]), pvdName: 'm_o_fan/${i}/2', index: -1,),
-                                    ),
-                                    Expanded(
-                                      child: MyDropDown(initialValue: returnigListForOutput('',configPvd,[configPvd.totalFan[i][configPvd.totalFan[i].length - 1], configPvd.totalFan[i][1], configPvd.totalFan[i][2], configPvd.totalFan[i][3]])['initialValue'], itemList: returnigListForOutput('1',configPvd,[configPvd.totalFan[i][configPvd.totalFan[i].length - 1], configPvd.totalFan[i][1],configPvd.totalFan[i][2],configPvd.totalFan[i][3]])['list'], pvdName: 'm_o_fan/${i}/3', index: -1,),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      configPvd.totalAgitator.length == 0 ? Container() : Container(
-                        width: double.infinity,
-                        height: 30  ,
-                        color: Colors.blue,
-                        child: Center(child: Text('Agitator',style: TextStyle(color: Colors.white),),),
-                      ),
-                      for(var i = 0;i < configPvd.totalAgitator.length;i++)
-                        Container(
-                          width: double.infinity,
-                          child: Column(
-                            children: [
-                              Container(
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: i % 2 == 0 ? Colors.blue.shade50 : Colors.blue.shade100,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        child: Center(child: Text('Agitator ${i+1}',style: width < 400 ? TextStyle(fontWeight: FontWeight.normal) : null,)),
-                                      ),
-                                    ),
-                                    if(width < 400)
-                                      Container(
-                                        width: 150,
-                                        child: MyDropDown(initialValue: configPvd.totalAgitator[i][1], itemList: getRTUs(configPvd), pvdName: 'm_o_agitator/${i}/1', index: -1,),
-                                      )
-                                    else
-                                      Expanded(
-                                        child: MyDropDown(initialValue: configPvd.totalAgitator[i][1], itemList: getRTUs(configPvd), pvdName: 'm_o_agitator/${i}/1', index: -1,),
-                                      ),
-                                    Expanded(
-                                      child: MyDropDown(initialValue: configPvd.totalAgitator[i][2], itemList: getRFnos(configPvd,configPvd.totalAgitator[i][1]), pvdName: 'm_o_agitator/${i}/2', index: -1,),
-                                    ),
-                                    Expanded(
-                                      child: MyDropDown(initialValue: returnigListForOutput('',configPvd,[configPvd.totalAgitator[i][configPvd.totalAgitator[i].length - 1], configPvd.totalAgitator[i][1], configPvd.totalAgitator[i][2], configPvd.totalAgitator[i][3]])['initialValue'], itemList: returnigListForOutput('1',configPvd,[configPvd.totalAgitator[i][configPvd.totalAgitator[i].length - 1], configPvd.totalAgitator[i][1],configPvd.totalAgitator[i][2],configPvd.totalAgitator[i][3]])['list'], pvdName: 'm_o_agitator/${i}/3', index: -1,),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      configPvd.totalFogger.length == 0 ? Container() : Container(
-                        width: double.infinity,
-                        height: 30  ,
-                        color: Colors.blue,
-                        child: Center(child: Text('Fogger',style: TextStyle(color: Colors.white),),),
-                      ),
-                      for(var i = 0;i < configPvd.totalFogger.length;i++)
-                        Container(
-                          width: double.infinity,
-                          child: Column(
-                            children: [
-                              Container(
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: i % 2 == 0 ? Colors.blue.shade50 : Colors.blue.shade100,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        child: Center(child: Text('Fogger ${i+1}',style: width < 400 ? TextStyle(fontWeight: FontWeight.normal) : null,)),
-                                      ),
-                                    ),
-                                    if(width < 400)
-                                      Container(
-                                        width: 150,
-                                        child: MyDropDown(initialValue: configPvd.totalFogger[i][1], itemList: getRTUs(configPvd), pvdName: 'm_o_fogger/${i}/1', index: -1,),
-                                      )
-                                    else
-                                      Expanded(
-                                        child: MyDropDown(initialValue: configPvd.totalFogger[i][1], itemList: getRTUs(configPvd), pvdName: 'm_o_fogger/${i}/1', index: -1,),
-                                      ),
-                                    Expanded(
-                                      child: MyDropDown(initialValue: configPvd.totalFogger[i][2], itemList: getRFnos(configPvd,configPvd.totalFogger[i][1]), pvdName: 'm_o_fogger/${i}/2', index: -1,),
-                                    ),
-                                    Expanded(
-                                      child: MyDropDown(initialValue: returnigListForOutput('',configPvd,[configPvd.totalFogger[i][configPvd.totalFogger[i].length - 1], configPvd.totalFogger[i][1], configPvd.totalFogger[i][2], configPvd.totalFogger[i][3]])['initialValue'], itemList: returnigListForOutput('1',configPvd,[configPvd.totalFogger[i][configPvd.totalFogger[i].length - 1], configPvd.totalFogger[i][1],configPvd.totalFogger[i][2],configPvd.totalFogger[i][3]])['list'], pvdName: 'm_o_fogger/${i}/3', index: -1,),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                    ],
+                    ),
                   ),
+                ],
               ),
             ),
-          )
-        ],
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.only(left: 5,right: 5),
+                width: double.infinity,
+                height: double.infinity,
+                child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Column(
+                          children: getIrrigationLine(irrigationLine(configPvd),configPvd),
+                        ),
+                        Column(
+                          children: getCentralDosing(centralDosing(configPvd),configPvd),
+                        ),
+                        Column(
+                          children: getCentralFiltration(centralFiltration(configPvd),configPvd),
+                        ),
+                        Column(
+                          children: getSourcePump(sourcePump(configPvd),configPvd),
+                        ),
+                        Column(
+                          children: getIrrigationPump(irrigationPump(configPvd),configPvd),
+                        ),
+                        SizedBox(height: 150,),
+                      ],
+                    ),
+                ),
+              ),
+            )
+          ],
+        ),
       );
     });
 
   }
-  Map<String,dynamic> returnigListForRtu(String autoIncrement,ConfigMakerProvider configPvd,String value){
-    List<String> list = [];
-    String myValue = '';
-    for(var i in configPvd.irrigationLines){
-      if(i['autoIncrement'].toString() == autoIncrement){
-        list = i['myRTU_list'];
-      }
-      if(!list.contains(value)){
-        myValue = '-';
-      }else{
-        myValue = value;
+  List<Widget> getIrrigationLine(List<Map<String,dynamic>> myList,ConfigMakerProvider configPvd){
+    List<Widget> widgetList = [];
+    for(var i = 0;i < myList.length;i++){
+      widgetList.add(
+          Container(
+            width: double.infinity,
+            height: 40,
+            child: Center(
+              child: Text('${myList[i]['name']}',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),),
+            ),
+          )
+      );
+      for(var j = 0;j < myList[i]['map'].length;j++){
+        widgetList.add(
+            Container(
+              width: double.infinity,
+              height: 40,
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(width: 1)),
+                color: j % 2 == 0 ? Colors.white : Colors.white70,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(child: Text('${myList[i]['map'][j]['name']} ${myList[i]['map'][j]['count'] == -1 ? 1 : myList[i]['map'][j]['count'] + 1}')),
+                      )
+                  ),
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: configPvd.irrigationLines[myList[i]['map'][j]['line']]['myRTU_list'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                        ),
+                      )
+                  ),
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(
+                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['rfNo']}', itemList: getrefNo(i,configPvd,'${myList[i]['map'][j]['rtu']}'), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rfNo', index: -1),
+                        ),
+                      )
+                  ),
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(
+                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['output']}', itemList: getOutPut(configPvd,'${myList[i]['map'][j]['rtu']}','${myList[i]['map'][j]['rfNo']}','${myList[i]['map'][j]['output']}',myList[i]['map'][j]['count']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/output', index: -1),
+                        ),
+                      )
+                  ),
+                ],
+              ),
+            )
+        );
       }
     }
-    return {'initialValue' : myValue,'list' : list};
+    return widgetList;
   }
-  Map<String,dynamic> returnigListForRfNo(String autoIncrement,ConfigMakerProvider configPvd,List<String> valueList){
-    List<String> list = ['-'];
-    String myValue = '';
-    for(var i in configPvd.irrigationLines){
-      if(i['autoIncrement'].toString() == autoIncrement){
-        if(valueList[0] == 'ORO RTU'){
-          for(var i in i['myRTU']){
-            list.add(i.toString());
-          }
-        }else if(valueList[0] == 'ORO Switch'){
-          for(var i in i['myOROswitch']){
-            list.add(i.toString());
-          }
-        }else if(valueList[0] == 'ORO Smart RTU'){
-          for(var i in i['myOroSmartRtu']){
-            list.add(i.toString());
-          }
-        }else if(valueList[0] == 'ORO Sense'){
-          for(var i in i['myOROsense']){
-            list.add(i.toString());
-          }
-        }
-      }
-      if(!list.contains(valueList[1])){
-        myValue = '-';
-      }else{
-        myValue = valueList[1];
+  List<Widget> getCentralDosing(List<Map<String,dynamic>> myList,ConfigMakerProvider configPvd){
+    List<Widget> widgetList = [];
+    for(var i = 0;i < myList.length;i++){
+      widgetList.add(
+          Container(
+            width: double.infinity,
+            height: 40,
+            child: Center(
+              child: Text('${myList[i]['name']}',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),),
+            ),
+          )
+      );
+      for(var j = 0;j < myList[i]['map'].length;j++){
+        widgetList.add(
+            Container(
+              width: double.infinity,
+              height: 40,
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(width: 1)),
+                color: j % 2 == 0 ? Colors.yellow.shade50 : Colors.yellow.shade100,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(child: Text('${myList[i]['map'][j]['name']} ${myList[i]['map'][j]['count'] == -1 ? 1 : myList[i]['map'][j]['count'] + 1}')),
+                      )
+                  ),
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: ['-','ORO RTU','ORO Smart RTU','ORO Switch'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                        ),
+                      )
+                  ),
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(
+                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['rfNo']}', itemList: getrefNoForOthers(configPvd,'${myList[i]['map'][j]['rtu']}'), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rfNo', index: -1),
+                        ),
+                      )
+                  ),
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(
+                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['output']}', itemList: getOutPut(configPvd,'${myList[i]['map'][j]['rtu']}','${myList[i]['map'][j]['rfNo']}','${myList[i]['map'][j]['output']}',myList[i]['map'][j]['count']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/output', index: -1),
+                        ),
+                      )
+                  ),
+                ],
+              ),
+            )
+        );
       }
     }
-    return {'initialValue' : myValue,'list' : list};
+    return widgetList;
   }
-  Map<String,dynamic> returnigListForOutput(String autoIncrement,ConfigMakerProvider configPvd,List<String> valueList){
-    List<String> list = ['-'];
-    List<dynamic> overall = [];
-    List<dynamic> overall_for_others = [];
-    List<dynamic> overall_for_extra = [];
+  List<Widget> getCentralFiltration(List<Map<String,dynamic>> myList,ConfigMakerProvider configPvd){
+    List<Widget> widgetList = [];
+    for(var i = 0;i < myList.length;i++){
+      widgetList.add(
+          Container(
+            width: double.infinity,
+            height: 40,
+            child: Center(
+              child: Text('${myList[i]['name']}',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),),
+            ),
+          )
+      );
+      for(var j = 0;j < myList[i]['map'].length;j++){
+        widgetList.add(
+            Container(
+              width: double.infinity,
+              height: 40,
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(width: 1)),
+                color: j % 2 == 0 ? Colors.green.shade50 : Colors.green.shade100,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(child: Text('${myList[i]['map'][j]['name']} ${myList[i]['map'][j]['count'] == -1 ? 1 : myList[i]['map'][j]['count'] + 1}')),
+                      )
+                  ),
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: ['-','ORO RTU','ORO Smart RTU','ORO Switch'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                        ),
+                      )
+                  ),
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(
+                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['rfNo']}', itemList: getrefNoForOthers(configPvd,'${myList[i]['map'][j]['rtu']}'), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rfNo', index: -1),
+                        ),
+                      )
+                  ),
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(
+                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['output']}', itemList: getOutPut(configPvd,'${myList[i]['map'][j]['rtu']}','${myList[i]['map'][j]['rfNo']}','${myList[i]['map'][j]['output']}',myList[i]['map'][j]['count']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/output', index: -1),
+                        ),
+                      )
+                  ),
 
-    String myValue = '-';
-    if(valueList[1] == 'ORO Smart RTU'){
-      if(valueList[2] != '-'){
-        for(var i = 0;i < 16;i++){
-          list.add('${i + 1}');
-        }
-      }
-    }else if(valueList[1] == 'ORO RTU'){
-      for(var i = 0;i < 8;i++){
-        list.add('${i + 1}');
-      }
-    }else if(valueList[1] == 'ORO Switch'){
-      for(var i = 0;i < 4;i++){
-        list.add('${i + 1}');
-      }
-    }else if(valueList[1] == 'ORO Sense'){
-      for(var i = 0;i < 4;i++){
-        list.add('${i + 1}');
+                ],
+              ),
+            )
+        );
       }
     }
-    for(var i in configPvd.CD_for_MO){
-      for(var j in i.entries){
-        for(var k in j.value['injector']){
-          overall_for_others.add(k);
-        }
-        for(var k in j.value['booster']){
-          overall_for_others.add(k);
-        }
-
-      }
-    }
-    for(var i in configPvd.CF_for_MO){
-      for(var j in i.entries){
-        for(var k in j.value['filter']){
-          overall_for_others.add(k);
-        }
-        if(j.value['D_S_valve'].length != 0){
-          overall_for_others.add(j.value['D_S_valve']);
-        }
-      }
-    }
-    for(var i in configPvd.SP_MO){
-      for(var j in i.entries){
-        if(j.value['pump'].length != 0){
-          overall_for_others.add(j.value['pump']);
-        }
-      }
-    }
-    for(var i in configPvd.IP_MO){
-      for(var j in i.entries){
-        if(j.value['pump'].length != 0){
-          overall_for_others.add(j.value['pump']);
-        }
-      }
-    }
-
-    for(var i in configPvd.previousDataOfM_O){
-      for(var j in i.entries){
-        for(var k in j.value['valve']){
-          overall.add(k);
-        }
-        for(var k in j.value['main_valve']){
-          overall.add(k);
-        }
-        for(var k in j.value['filter']){
-          overall.add(k);
-        }
-        for(var k in j.value['injector']){
-          overall.add(k);
-        }
-        for(var k in j.value['Booster']){
-          overall.add(k);
-        }
-        if(j.value['D_valve'].length != 0){
-          overall.add(j.value['D_valve']);
-        }
-      }
-    }
-    for(var i in configPvd.totalFan){
-      overall_for_extra.add(i);
-    }
-    for(var i in configPvd.totalFogger){
-      overall_for_extra.add(i);
-    }
-    for(var i in configPvd.totalAgitator){
-      overall_for_extra.add(i);
-    }
-    for(var i in overall){
-      if(i[0] != valueList[0] && i[1] != '-' && i[1] == valueList[1] && i[2] == valueList[2] && i[2] != '-' && i[3] != '-' ){
-        list.remove('${i[3]}');
-
-      }
-    }
-    for(var i in overall_for_others){
-      if(i[4] != valueList[0] && i[1] != '-' && i[1] == valueList[1] && i[2] == valueList[2] && i[2] != '-' && i[3] != '-' ){
-        list.remove('${i[3]}');
-      }
-    }
-    for(var i in overall_for_extra){
-      if(i[i.length - 1] != valueList[0] && i[1] != '-' && i[1] == valueList[1] && i[2] == valueList[2] && i[2] != '-' && i[3] != '-' ){
-        list.remove('${i[3]}');
-      }
-    }
-    myValue = valueList[3];
-    return {'initialValue' : myValue,'list' : list};
+    return widgetList;
   }
-  List<String> getRTUs(ConfigMakerProvider configPvd){
-    List<String> list = ['-'];
-    if(configPvd.rtuForLine_others.length != 0){
-      list.add('ORO RTU');
+  List<Widget> getSourcePump(List<Map<String,dynamic>> myList,ConfigMakerProvider configPvd){
+    List<Widget> widgetList = [];
+    for(var i = 0;i < myList.length;i++){
+      widgetList.add(
+          Container(
+            width: double.infinity,
+            height: 40,
+            child: Center(
+              child: Text('${myList[i]['name']}',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),),
+            ),
+          )
+      );
+      for(var j = 0;j < myList[i]['map'].length;j++){
+        widgetList.add(
+            Container(
+              width: double.infinity,
+              height: 40,
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(width: 1)),
+                color: j % 2 == 0 ? Colors.lightGreen.shade50 : Colors.lightGreen.shade100,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(child: Text('${myList[i]['map'][j]['name']} ${myList[i]['map'][j]['count'] == -1 ? '' : myList[i]['map'][j]['count'] + 1}')),
+                      )
+                  ),
+                  if(myList[i]['map'][j]['oroPump'] == true)
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(
+                            child: Text('${myList[i]['map'][j]['rtu']}',style: TextStyle(fontSize: 11),),
+                          ),
+                        )
+                    )
+                  else
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(
+                              child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: myList[i]['map'][j]['oroPump'] == false ? ['-','ORO RTU','ORO Smart RTU','ORO Switch'] : ['-','ORO PUMP'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                          ),
+                        )
+                    ),
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(
+                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['rfNo']}', itemList: getrefNoForOthers(configPvd,'${myList[i]['map'][j]['rtu']}'), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rfNo', index: -1),
+                        ),
+                      )
+                  ),
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(
+                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['output']}', itemList: getOutPut(configPvd,'${myList[i]['map'][j]['rtu']}','${myList[i]['map'][j]['rfNo']}','${myList[i]['map'][j]['output']}',myList[i]['map'][j]['count']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/output', index: -1),
+                        ),
+                      )
+                  ),
+
+                ],
+              ),
+            )
+        );
+      }
     }
-    if(configPvd.switchForLine_others.length != 0){
-      list.add('ORO Switch');
-    }
-    if(configPvd.OroSmartRtuForLine_others.length != 0){
-      list.add('ORO Smart RTU');
-    }
-    if(configPvd.OroSenseForLine_others != 0){
-      list.add('ORO Sense');
-    }
-    return list;
+    return widgetList;
   }
-  List<String> getRFnos(ConfigMakerProvider configPvd,String title){
-    List<String> list = ['-'];
-    if(title == 'ORO RTU'){
-      for(var i in configPvd.rtuForLine_others){
-        list.add('${i}');
+  List<Widget> getIrrigationPump(List<Map<String,dynamic>> myList,ConfigMakerProvider configPvd){
+    List<Widget> widgetList = [];
+    for(var i = 0;i < myList.length;i++){
+      widgetList.add(
+          Container(
+            width: double.infinity,
+            height: 40,
+            child: Center(
+              child: Text('${myList[i]['name']}',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),),
+            ),
+          )
+      );
+      for(var j = 0;j < myList[i]['map'].length;j++){
+        widgetList.add(
+            Container(
+              width: double.infinity,
+              height: 40,
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(width: 1)),
+                color: j % 2 == 0 ? Colors.brown.shade50 : Colors.brown.shade100,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(child: Text('${myList[i]['map'][j]['name']} ${myList[i]['map'][j]['count'] == -1 ? '' : myList[i]['map'][j]['count'] + 1}')),
+                      )
+                  ),
+                  if(myList[i]['map'][j]['oroPump'] == true)
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(
+                            child: Text('${myList[i]['map'][j]['rtu']}',style: TextStyle(fontSize: 11),),
+                          ),
+                        )
+                    )
+                  else
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(
+                              child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: myList[i]['map'][j]['oroPump'] == false ? ['-','ORO RTU','ORO Smart RTU','ORO Switch'] : ['-','ORO PUMP'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                          ),
+                        )
+                    ),
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(
+                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['rfNo']}', itemList: getrefNoForOthers(configPvd,'${myList[i]['map'][j]['rtu']}'), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rfNo', index: -1),
+                        ),
+                      )
+                  ),
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(
+                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['output']}', itemList: getOutPut(configPvd,'${myList[i]['map'][j]['rtu']}','${myList[i]['map'][j]['rfNo']}','${myList[i]['map'][j]['output']}',myList[i]['map'][j]['count']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/output', index: -1),
+                        ),
+                      )
+                  ),
+
+                ],
+              ),
+            )
+        );
+      }
+    }
+    return widgetList;
+  }
+  List<String> getrefNoForOthers(ConfigMakerProvider configPvd,String title){
+    List<String> myList = ['-'];
+    if(title == 'ORO Smart RTU'){
+      var list = configPvd.oSrtu;
+      for(var i in list){
+        myList.add('$i');
       }
     }else if(title == 'ORO Switch'){
-      for(var i in configPvd.switchForLine_others){
-        list.add('${i}');
-      }
-    }else if(title == 'ORO Smart RTU'){
-      for(var i in configPvd.OroSmartRtuForLine_others){
-        list.add('${i}');
+      var list = configPvd.oSwitch;
+      for(var i in list){
+        myList.add('$i');
       }
     }else if(title == 'ORO Sense'){
-      for(var i in configPvd.OroSenseForLine_others){
-        list.add('${i}');
+      var list = configPvd.oSense;
+      for(var i in list){
+        myList.add('$i');
+      }
+    }else if(title == 'ORO RTU'){
+      var list = configPvd.oRtu;
+      for(var i in list){
+        myList.add('$i');
+      }
+    }else if(title == 'ORO PUMP'){
+      var list = configPvd.oPump;
+      for(var i in list){
+        myList.add('$i');
+      }
+    }
+    return myList;
+  }
+  List<String> getrefNo(int line,ConfigMakerProvider configPvd,String title){
+    List<String> myList = ['-'];
+    if(title == 'ORO Smart RTU'){
+      for(var i in configPvd.irrigationLines[line]['myOroSmartRtu']){
+        myList.add('${i}');
+      }
+    }else if(title == 'ORO Switch'){
+      for(var i in configPvd.irrigationLines[line]['myOROswitch']){
+        myList.add('${i}');
+      }
+    }else if(title == 'ORO Sense'){
+      for(var i in configPvd.irrigationLines[line]['myOROsense']){
+        myList.add('${i}');
+      }
+    }else if(title == 'ORO RTU'){
+      for(var i in configPvd.irrigationLines[line]['myRTU']){
+        myList.add('${i}');
+      }
+    }
+
+    return myList;
+  }
+  List<String> filterOutPut(List<dynamic> data,String rtu,String rf,String output){
+    List<String> list = [];
+    for(var i in data){
+      if((i['rtu'] == rtu) && (i['rfNo'] == rf)){
+        if(i['output'] != '-' && output != i['output']){
+          list.add(i['output']);
+        }
       }
     }
     return list;
   }
-  Color colorsFind(Map<String,dynamic> object,String title){
-    var myList = [];
-    for(var i in object.entries){
-      if(i.key == 'valve'){
-        if(i.value.length!= 0){
-          myList.addAll(i.value);
-        }
-
-      }
-      if(i.key == 'main_valve'){
-        if(i.value.length!= 0){
-          myList.addAll(i.value);
-        }
-
-      }
-      if(i.key == 'injector'){
-        if(i.value.length!= 0){
-          myList.addAll(i.value);
-        }
-
-      }
-      if(i.key == 'Booster'){
-        if(i.value.length!= 0){
-          myList.addAll(i.value);
-        }
-      }
-      if(i.key == 'filter'){
-        if(i.value.length!= 0){
-          myList.addAll(i.value);
-        }
-      }
-      if(i.key == 'D_valve'){
-        if(i.value.length!= 0){
-          myList.add(i.value);
-        }
-      }
-
-    }
-    for(var i = 0;i < myList.length;i++){
-      if(myList[i][0] == title){
-        if(i % 2 == 0){
-          return Colors.blue.shade50;
-        }else{
-          return Colors.blue.shade100;
+  List<String> filterCt(List<dynamic> data,String rtu,String rf,String ct){
+    List<String> list = [];
+    for(var i in data){
+      if((i['rtu'] == rtu) && (i['rfNo'] == rf)){
+        if(i['current_selection'] != '-' && ct != i['current_selection']){
+          list.add(i['current_selection']);
         }
       }
     }
-    return Colors.white;
+    return list;
   }
-  Color colorsFindForCD(Map<String,dynamic> object,String title){
-    var myList = [];
-    for(var k = 0;k < object['injector'].length;k++){
-      myList.add('inj${k}');
-    }
-    for(var k = 0;k < object['injector'].length;k++){
-      if(object['booster'][k][0] == true){
-        myList.add('bp${k}');
+
+  List<String> getOutPut(ConfigMakerProvider configPvd,String rtu, String rf, String output,int index) {
+    print('getOutPut function');
+    print('rtu : $rtu');
+    print('rf : $rf');
+    print('output : $output');
+    List<String> myList = [];
+    List<String> filterList = [];
+    if(rtu == 'ORO RTU'){
+      for(var i = 0;i < 8;i++){
+        myList.add('${i+1}');
+      }
+    }else if(rtu == 'ORO PUMP'){
+      for(var i = 0;i < 4;i++){
+        myList.add('${i+1}');
+      }
+    }else if(rtu == 'ORO Smart RTU'){
+      for(var i = 0;i < 16;i++){
+        myList.add('${i+1}');
+      }
+    }else if(rtu == 'ORO Switch'){
+      for(var i = 0;i < 4;i++){
+        myList.add('${i+1}');
+      }
+    }else if(rtu == 'ORO Sense'){
+      for(var i = 0;i < 4;i++){
+        myList.add('${i+1}');
       }
     }
-    for(var i = 0;i < myList.length;i++){
-      if(myList[i] == title){
-        if(i % 2 == 0){
-          return Colors.blue.shade50;
+    if(rtu != '-' && rf != '-'){
+      for(var i in configPvd.sourcePumpUpdated){
+        if(i['oro_pump'] == true){
+          if(i['on'] != null){
+            filterList.addAll(filterOutPut([i['on']],rtu,rf,output));
+          }
+          if(i['off'] != null){
+            filterList.addAll(filterOutPut([i['off']],rtu,rf,output));
+          }
+          if(i['scr'] != null){
+            filterList.addAll(filterOutPut([i['scr']],rtu,rf,output));
+          }
+          if(i['ecr'] != null){
+            filterList.addAll(filterOutPut([i['ecr']],rtu,rf,output));
+          }
         }else{
-          return Colors.blue.shade100;
+          if(i['pumpConnection'] != null){
+            filterList.addAll(filterOutPut([i['pumpConnection']],rtu,rf,output));
+          }
         }
       }
+      for(var i in configPvd.irrigationPumpUpdated){
+        if(i['oro_pump'] == true){
+          if(i['on'] != null){
+            filterList.addAll(filterOutPut([i['on']],rtu,rf,output));
+          }
+          if(i['off'] != null){
+            filterList.addAll(filterOutPut([i['off']],rtu,rf,output));
+          }
+          if(i['scr'] != null){
+            filterList.addAll(filterOutPut([i['scr']],rtu,rf,output));
+          }
+          if(i['ecr'] != null){
+            filterList.addAll(filterOutPut([i['ecr']],rtu,rf,output));
+          }
+        }else{
+          if(i['pumpConnection'] != null){
+            filterList.addAll(filterOutPut([i['pumpConnection']],rtu,rf,output));
+          }
+        }
+      }
+      for(var i in configPvd.centralFiltrationUpdated){
+        filterList.addAll(filterOutPut(i['filterConnection'],rtu,rf,output));
+        filterList.addAll(filterOutPut([i['dv']],rtu,rf,output));
+      }
+      for(var i in configPvd.centralDosingUpdated){
+        filterList.addAll(filterOutPut(i['injector'],rtu,rf,output));
+        filterList.addAll(filterOutPut(i['boosterConnection'],rtu,rf,output));
+      }
+      for(var i in configPvd.irrigationLines){
+        filterList.addAll(filterOutPut(i['valveConnection'],rtu,rf,output));
+        filterList.addAll(filterOutPut(i['main_valveConnection'],rtu,rf,output));
+        filterList.addAll(filterOutPut(i['foggerConnection'],rtu,rf,output));
+        filterList.addAll(filterOutPut(i['fanConnection'],rtu,rf,output));
+      }
+      for(var i in configPvd.localFiltrationUpdated){
+        filterList.addAll(filterOutPut(i['filterConnection'],rtu,rf,output));
+        filterList.addAll(filterOutPut([i['dv']],rtu,rf,output));
+      }
+      for(var i in configPvd.localDosingUpdated){
+        filterList.addAll(filterOutPut(i['injector'],rtu,rf,output));
+        filterList.addAll(filterOutPut(i['boosterConnection'],rtu,rf,output));
+      }
     }
-    return Colors.white;
+    for(var i in filterList){
+      if(myList.contains(i)){
+        myList.remove(i);
+      }
+    }
+    myList.insert(0, '-');
+    print('getOutPut finished');
+    return myList;
   }
-  Color colorsFindForCF(Map<String,dynamic> object,String title){
-    var myList = [];
-    for(var k = 0;k < object['filter'].length;k++){
-      myList.add('filt${k}');
+  List<Map<String,dynamic>> irrigationLine(ConfigMakerProvider configPvd){
+    List<Map<String,dynamic>> myList = [];
+    for(var i = 0;i < configPvd.irrigationLines.length;i++){
+      myList.add(
+          {
+            'name' : 'Irrigation Line ${i+1}',
+            'map' : [],
+          }
+      );
+      for(var valve = 0;valve < configPvd.irrigationLines[i]['valveConnection'].length;valve++){
+        myList[i]['map'].add(
+            {
+              'name' : 'valve',
+              'type' : 'm_o_line',
+              'line' : i,
+              'count' : valve,
+              'connection' : 'valveConnection',
+              'sNo' :  configPvd.irrigationLines[i]['valveConnection'][valve]['sNo'],
+              'rtu' :  configPvd.irrigationLines[i]['valveConnection'][valve]['rtu'],
+              'rfNo' : configPvd.irrigationLines[i]['valveConnection'][valve]['rfNo'],
+              'output' : configPvd.irrigationLines[i]['valveConnection'][valve]['output'],
+              'c-type' : 'N/A'
+            }
+        );
+      }
+      for(var mainValve = 0;mainValve < configPvd.irrigationLines[i]['main_valveConnection'].length;mainValve++){
+        myList[i]['map'].add(
+            {
+              'name' : 'mainValve',
+              'type' : 'm_o_line',
+              'line' : i,
+              'count' : mainValve,
+              'connection' : 'main_valveConnection',
+              'sNo' :  configPvd.irrigationLines[i]['main_valveConnection'][mainValve]['sNo'],
+              'rtu' :  configPvd.irrigationLines[i]['main_valveConnection'][mainValve]['rtu'],
+              'rfNo' : configPvd.irrigationLines[i]['main_valveConnection'][mainValve]['rfNo'],
+              'output' : configPvd.irrigationLines[i]['main_valveConnection'][mainValve]['output'],
+              'c-type' : 'N/A'
+            }
+        );
+      }
+      for(var fogger = 0;fogger < configPvd.irrigationLines[i]['foggerConnection'].length;fogger++){
+        myList[i]['map'].add(
+            {
+              'name' : 'fogger',
+              'type' : 'm_o_line',
+              'line' : i,
+              'count' : fogger,
+              'connection' : 'foggerConnection',
+              'sNo' :  configPvd.irrigationLines[i]['foggerConnection'][fogger]['sNo'],
+              'rtu' :  configPvd.irrigationLines[i]['foggerConnection'][fogger]['rtu'],
+              'rfNo' : configPvd.irrigationLines[i]['foggerConnection'][fogger]['rfNo'],
+              'output' : configPvd.irrigationLines[i]['foggerConnection'][fogger]['output'],
+              'c-type' : 'N/A'
+            }
+        );
+      }
+      for(var fan = 0;fan < configPvd.irrigationLines[i]['fanConnection'].length;fan++){
+        myList[i]['map'].add(
+            {
+              'name' : 'fan',
+              'type' : 'm_o_line',
+              'line' : i,
+              'count' : fan,
+              'connection' : 'fanConnection',
+              'sNo' :  configPvd.irrigationLines[i]['fanConnection'][fan]['sNo'],
+              'rtu' :  configPvd.irrigationLines[i]['fanConnection'][fan]['rtu'],
+              'rfNo' : configPvd.irrigationLines[i]['fanConnection'][fan]['rfNo'],
+              'output' : configPvd.irrigationLines[i]['fanConnection'][fan]['output'],
+              'c-type' : 'N/A'
+            }
+        );
+      }
+      if(configPvd.irrigationLines[i]['Local_dosing_site'] == true){
+        localDosing : for(var ld = 0;ld < configPvd.localDosingUpdated.length;ld++){
+          if(configPvd.localDosingUpdated[ld]['lineAutoIncrement'] == configPvd.irrigationLines[i]['autoIncrement']){
+            for(var injector = 0;injector < configPvd.localDosingUpdated[ld]['injector'].length;injector++){
+              myList[i]['map'].add(
+                  {
+                    'name' : 'injector',
+                    'type' : 'm_o_localDosing',
+                    'line' : i,
+                    'count' : injector,
+                    'connection' : 'injector',
+                    'sNo' :  configPvd.localDosingUpdated[i]['injector'][injector]['sNo'],
+                    'rtu' :  configPvd.localDosingUpdated[i]['injector'][injector]['rtu'],
+                    'rfNo' : configPvd.localDosingUpdated[i]['injector'][injector]['rfNo'],
+                    'output' : configPvd.localDosingUpdated[i]['injector'][injector]['output'],
+                    'c-type' : 'N/A'
+                  }
+              );
+            }
+            for(var boosterPump = 0;boosterPump < configPvd.localDosingUpdated[ld]['boosterConnection'].length;boosterPump++){
+              myList[i]['map'].add(
+                  {
+                    'name' : 'Booster',
+                    'type' : 'm_o_localDosing',
+                    'line' : i,
+                    'count' : boosterPump,
+                    'connection' : 'boosterConnection',
+                    'sNo' :  configPvd.localDosingUpdated[i]['boosterConnection'][boosterPump]['sNo'],
+                    'rtu' :  configPvd.localDosingUpdated[i]['boosterConnection'][boosterPump]['rtu'],
+                    'rfNo' : configPvd.localDosingUpdated[i]['boosterConnection'][boosterPump]['rfNo'],
+                    'output' : configPvd.localDosingUpdated[i]['boosterConnection'][boosterPump]['output'],
+                    'c-type' : 'N/A'
+                  }
+              );
+            }
+            break localDosing;
+          }
+        }
+      }
+      if(configPvd.irrigationLines[i]['local_filtration_site'] == true){
+        localFiltration : for(var ld = 0;ld < configPvd.localFiltrationUpdated.length;ld++){
+          if(configPvd.localFiltrationUpdated[ld]['lineAutoIncrement'] == configPvd.irrigationLines[i]['autoIncrement']){
+            for(var filter = 0;filter < configPvd.localFiltrationUpdated[ld]['filterConnection'].length;filter++){
+              myList[i]['map'].add(
+                  {
+                    'name' : 'filter',
+                    'type' : 'm_o_localFiltration',
+                    'line' : i,
+                    'count' : filter,
+                    'connection' : 'filterConnection',
+                    'sNo' :  configPvd.localFiltrationUpdated[i]['filterConnection'][filter]['sNo'],
+                    'rtu' :  configPvd.localFiltrationUpdated[i]['filterConnection'][filter]['rtu'],
+                    'rfNo' : configPvd.localFiltrationUpdated[i]['filterConnection'][filter]['rfNo'],
+                    'output' : configPvd.localFiltrationUpdated[i]['filterConnection'][filter]['output'],
+                    'c-type' : 'N/A'
+                  }
+              );
+            }
+            if(configPvd.localFiltrationUpdated[ld]['dv'].isNotEmpty){
+              myList[i]['map'].add(
+                  {
+                    'name' : 'd_valve',
+                    'type' : 'm_o_localFiltration',
+                    'line' : i,
+                    'count' : -1,
+                    'connection' : 'dv',
+                    'sNo' :  configPvd.localFiltrationUpdated[i]['dv']['sNo'],
+                    'rtu' :  configPvd.localFiltrationUpdated[i]['dv']['rtu'],
+                    'rfNo' : configPvd.localFiltrationUpdated[i]['dv']['rfNo'],
+                    'output' : configPvd.localFiltrationUpdated[i]['dv']['output'],
+                    'c-type' : 'N/A'
+                  }
+              );
+            }
+
+            break localFiltration;
+          }
+        }
+      }
+
     }
-    if(object['D_S_valve'][0] == true){
-      myList.add('d_v1');
+    return myList;
+  }
+  List<Map<String,dynamic>> centralDosing(ConfigMakerProvider configPvd){
+    List<Map<String,dynamic>> myList = [];
+    for(var i = 0;i < configPvd.centralDosingUpdated.length;i++){
+      myList.add(
+          {
+            'name' : 'Central Dosing Site ${i+1}',
+            'map' : [],
+          }
+      );
+      for(var injector = 0;injector < configPvd.centralDosingUpdated[i]['injector'].length;injector++){
+        myList[i]['map'].add(
+            {
+              'name' : 'injector',
+              'type' : 'm_o_centralDosing',
+              'site' : i,
+              'count' : injector,
+              'connection' : 'injector',
+              'sNo' :  configPvd.centralDosingUpdated[i]['injector'][injector]['sNo'],
+              'rtu' :  configPvd.centralDosingUpdated[i]['injector'][injector]['rtu'],
+              'rfNo' : configPvd.centralDosingUpdated[i]['injector'][injector]['rfNo'],
+              'output' : configPvd.centralDosingUpdated[i]['injector'][injector]['output'],
+              'c-type' : 'N/A'
+            }
+        );
+      }
+      for(var boosterPump = 0;boosterPump < configPvd.centralDosingUpdated[i]['boosterConnection'].length;boosterPump++){
+        myList[i]['map'].add(
+            {
+              'name' : 'Booster',
+              'type' : 'm_o_centralDosing',
+              'line' : i,
+              'count' : boosterPump,
+              'connection' : 'boosterConnection',
+              'sNo' :  configPvd.centralDosingUpdated[i]['boosterConnection'][boosterPump]['sNo'],
+              'rtu' :  configPvd.centralDosingUpdated[i]['boosterConnection'][boosterPump]['rtu'],
+              'rfNo' : configPvd.centralDosingUpdated[i]['boosterConnection'][boosterPump]['rfNo'],
+              'output' : configPvd.centralDosingUpdated[i]['boosterConnection'][boosterPump]['output'],
+              'c-type' : 'N/A'
+            }
+        );
+      }
     }
-    for(var i = 0;i < myList.length;i++){
-      if(myList[i] == title){
-        if(i % 2 == 0){
-          return Colors.blue.shade50;
-        }else{
-          return Colors.blue.shade100;
+    return myList;
+  }
+  List<Map<String,dynamic>> centralFiltration(ConfigMakerProvider configPvd){
+    List<Map<String,dynamic>> myList = [];
+    for(var i = 0;i < configPvd.centralFiltrationUpdated.length;i++){
+      myList.add(
+          {
+            'name' : 'Central Filtration Site ${i+1}',
+            'map' : [],
+          }
+      );
+      for(var filter = 0;filter < configPvd.centralFiltrationUpdated[i]['filterConnection'].length;filter++){
+        myList[i]['map'].add(
+            {
+              'name' : 'filter',
+              'type' : 'm_o_centralFiltration',
+              'line' : i,
+              'count' : filter,
+              'connection' : 'filterConnection',
+              'sNo' :  configPvd.centralFiltrationUpdated[i]['filterConnection'][filter]['sNo'],
+              'rtu' :  configPvd.centralFiltrationUpdated[i]['filterConnection'][filter]['rtu'],
+              'rfNo' : configPvd.centralFiltrationUpdated[i]['filterConnection'][filter]['rfNo'],
+              'output' : configPvd.centralFiltrationUpdated[i]['filterConnection'][filter]['output'],
+              'c-type' : 'N/A'
+            }
+        );
+      }
+      if(configPvd.centralFiltrationUpdated[i]['dv'].isNotEmpty){
+        myList[i]['map'].add(
+            {
+              'name' : 'd_valve',
+              'type' : 'm_o_centralFiltration',
+              'line' : i,
+              'count' : -1,
+              'connection' : 'dv',
+              'sNo' :  configPvd.centralFiltrationUpdated[i]['dv']['sNo'],
+              'rtu' :  configPvd.centralFiltrationUpdated[i]['dv']['rtu'],
+              'rfNo' : configPvd.centralFiltrationUpdated[i]['dv']['rfNo'],
+              'output' : configPvd.centralFiltrationUpdated[i]['dv']['output'],
+              'c-type' : 'N/A'
+            }
+        );
+      }
+    }
+    return myList;
+  }
+  List<Map<String,dynamic>> sourcePump(ConfigMakerProvider configPvd){
+    List<Map<String,dynamic>> myList = [];
+    for(var i = 0;i < configPvd.sourcePumpUpdated.length;i++){
+      myList.add(
+          {
+            'name' : 'Source Pump ${i+1}',
+            'map' : [],
+          }
+      );
+      if(configPvd.sourcePumpUpdated[i]['oro_pump'] == false){
+        myList[i]['map'].add(
+            {
+              'oroPump' : configPvd.sourcePumpUpdated[i]['oro_pump'] == true ? true : false,
+              'name' : 'pump',
+              'type' : 'm_o_sourcePump',
+              'pump' : i,
+              'count' : -1,
+              'connection' : 'pumpConnection',
+              'sNo' :  configPvd.sourcePumpUpdated[i]['pumpConnection']['sNo'],
+              'rtu' :  configPvd.sourcePumpUpdated[i]['pumpConnection']['rtu'],
+              'rfNo' : configPvd.sourcePumpUpdated[i]['pumpConnection']['rfNo'],
+              'output' : configPvd.sourcePumpUpdated[i]['pumpConnection']['output'],
+              'c-type' : configPvd.sourcePumpUpdated[i]['pumpConnection']['current_selection']
+            }
+        );
+      }
+
+      if(configPvd.sourcePumpUpdated[i]['oro_pump'] == true){
+        if(configPvd.sourcePumpUpdated[i]['on'] != null){
+          myList[i]['map'].add(
+              {
+                'oroPump' : configPvd.sourcePumpUpdated[i]['oro_pump'] == true ? true : false,
+                'name' : 'on',
+                'type' : 'm_o_sourcePump',
+                'pump' : i,
+                'count' : -1,
+                'connection' : 'on',
+                'sNo' :  configPvd.sourcePumpUpdated[i]['on']['sNo'],
+                'rtu' :  configPvd.sourcePumpUpdated[i]['on']['rtu'],
+                'rfNo' : configPvd.sourcePumpUpdated[i]['on']['rfNo'],
+                'output' : configPvd.sourcePumpUpdated[i]['on']['output'],
+                'c-type' : configPvd.sourcePumpUpdated[i]['on']['current_selection']
+              }
+          );
+        }
+        if(configPvd.sourcePumpUpdated[i]['off'] != null){
+          myList[i]['map'].add(
+              {
+                'oroPump' : configPvd.sourcePumpUpdated[i]['oro_pump'] == true ? true : false,
+                'name' : 'off',
+                'type' : 'm_o_sourcePump',
+                'pump' : i,
+                'count' : -1,
+                'connection' : 'off',
+                'sNo' :  configPvd.sourcePumpUpdated[i]['off']['sNo'],
+                'rtu' :  configPvd.sourcePumpUpdated[i]['off']['rtu'],
+                'rfNo' : configPvd.sourcePumpUpdated[i]['off']['rfNo'],
+                'output' : configPvd.sourcePumpUpdated[i]['off']['output'],
+                'c-type' : configPvd.sourcePumpUpdated[i]['off']['current_selection']
+              }
+          );
+        }
+        if(configPvd.sourcePumpUpdated[i]['scr'] != null){
+          myList[i]['map'].add(
+              {
+                'oroPump' : configPvd.sourcePumpUpdated[i]['oro_pump'] == true ? true : false,
+                'name' : 'scr',
+                'type' : 'm_o_sourcePump',
+                'pump' : i,
+                'count' : -1,
+                'connection' : 'scr',
+                'sNo' :  configPvd.sourcePumpUpdated[i]['scr']['sNo'],
+                'rtu' :  configPvd.sourcePumpUpdated[i]['scr']['rtu'],
+                'rfNo' : configPvd.sourcePumpUpdated[i]['scr']['rfNo'],
+                'output' : configPvd.sourcePumpUpdated[i]['scr']['output'],
+                'c-type' : configPvd.sourcePumpUpdated[i]['scr']['current_selection']
+              }
+          );
+        }
+        if(configPvd.sourcePumpUpdated[i]['ecr'] != null){
+          myList[i]['map'].add(
+              {
+                'oroPump' : configPvd.sourcePumpUpdated[i]['oro_pump'] == true ? true : false,
+                'name' : 'ecr',
+                'type' : 'm_o_sourcePump',
+                'pump' : i,
+                'count' : -1,
+                'connection' : 'ecr',
+                'sNo' :  configPvd.sourcePumpUpdated[i]['ecr']['sNo'],
+                'rtu' :  configPvd.sourcePumpUpdated[i]['ecr']['rtu'],
+                'rfNo' : configPvd.sourcePumpUpdated[i]['ecr']['rfNo'],
+                'output' : configPvd.sourcePumpUpdated[i]['ecr']['output'],
+                'c-type' : configPvd.sourcePumpUpdated[i]['ecr']['current_selection']
+              }
+          );
         }
       }
     }
-    return Colors.white;
+    return myList;
+  }
+  List<Map<String,dynamic>> irrigationPump(ConfigMakerProvider configPvd){
+    List<Map<String,dynamic>> myList = [];
+    for(var i = 0;i < configPvd.irrigationPumpUpdated.length;i++){
+      myList.add(
+          {
+            'name' : 'Irrigation Pump ${i+1}',
+            'map' : [],
+          }
+      );
+      if(configPvd.irrigationPumpUpdated[i]['oro_pump'] == false){
+        myList[i]['map'].add(
+            {
+              'oroPump' : configPvd.irrigationPumpUpdated[i]['oro_pump'] == true ? true : false,
+              'name' : 'pump',
+              'type' : 'm_o_irrigationPump',
+              'pump' : i,
+              'count' : -1,
+              'connection' : 'pumpConnection',
+              'sNo' :  configPvd.irrigationPumpUpdated[i]['pumpConnection']['sNo'],
+              'rtu' :  configPvd.irrigationPumpUpdated[i]['pumpConnection']['rtu'],
+              'rfNo' : configPvd.irrigationPumpUpdated[i]['pumpConnection']['rfNo'],
+              'output' : configPvd.irrigationPumpUpdated[i]['pumpConnection']['output'],
+              'c-type' : configPvd.irrigationPumpUpdated[i]['pumpConnection']['current_selection']
+            }
+        );
+      }
+
+      if(configPvd.irrigationPumpUpdated[i]['oro_pump'] == true){
+        if(configPvd.irrigationPumpUpdated[i]['on'] != null){
+          myList[i]['map'].add(
+              {
+                'oroPump' : configPvd.irrigationPumpUpdated[i]['oro_pump'] == true ? true : false,
+                'name' : 'on',
+                'type' : 'm_o_irrigationPump',
+                'pump' : i,
+                'count' : -1,
+                'connection' : 'on',
+                'sNo' :  configPvd.irrigationPumpUpdated[i]['on']['sNo'],
+                'rtu' :  configPvd.irrigationPumpUpdated[i]['on']['rtu'],
+                'rfNo' : configPvd.irrigationPumpUpdated[i]['on']['rfNo'],
+                'output' : configPvd.irrigationPumpUpdated[i]['on']['output'],
+                'c-type' : configPvd.irrigationPumpUpdated[i]['on']['current_selection']
+              }
+          );
+        }
+        if(configPvd.irrigationPumpUpdated[i]['off'] != null){
+          myList[i]['map'].add(
+              {
+                'oroPump' : configPvd.irrigationPumpUpdated[i]['oro_pump'] == true ? true : false,
+                'name' : 'off',
+                'type' : 'm_o_irrigationPump',
+                'pump' : i,
+                'count' : -1,
+                'connection' : 'off',
+                'sNo' :  configPvd.irrigationPumpUpdated[i]['off']['sNo'],
+                'rtu' :  configPvd.irrigationPumpUpdated[i]['off']['rtu'],
+                'rfNo' : configPvd.irrigationPumpUpdated[i]['off']['rfNo'],
+                'output' : configPvd.irrigationPumpUpdated[i]['off']['output'],
+                'c-type' : configPvd.irrigationPumpUpdated[i]['off']['current_selection']
+              }
+          );
+        }
+        if(configPvd.irrigationPumpUpdated[i]['scr'] != null){
+          myList[i]['map'].add(
+              {
+                'oroPump' : configPvd.irrigationPumpUpdated[i]['oro_pump'] == true ? true : false,
+                'name' : 'scr',
+                'type' : 'm_o_irrigationPump',
+                'pump' : i,
+                'count' : -1,
+                'connection' : 'scr',
+                'sNo' :  configPvd.irrigationPumpUpdated[i]['scr']['sNo'],
+                'rtu' :  configPvd.irrigationPumpUpdated[i]['scr']['rtu'],
+                'rfNo' : configPvd.irrigationPumpUpdated[i]['scr']['rfNo'],
+                'output' : configPvd.irrigationPumpUpdated[i]['scr']['output'],
+                'c-type' : configPvd.irrigationPumpUpdated[i]['scr']['current_selection']
+              }
+          );
+        }
+        if(configPvd.irrigationPumpUpdated[i]['ecr'] != null){
+          myList[i]['map'].add(
+              {
+                'oroPump' : configPvd.irrigationPumpUpdated[i]['oro_pump'] == true ? true : false,
+                'name' : 'ecr',
+                'type' : 'm_o_irrigationPump',
+                'pump' : i,
+                'count' : -1,
+                'connection' : 'ecr',
+                'sNo' :  configPvd.irrigationPumpUpdated[i]['ecr']['sNo'],
+                'rtu' :  configPvd.irrigationPumpUpdated[i]['ecr']['rtu'],
+                'rfNo' : configPvd.irrigationPumpUpdated[i]['ecr']['rfNo'],
+                'output' : configPvd.irrigationPumpUpdated[i]['ecr']['output'],
+                'c-type' : configPvd.irrigationPumpUpdated[i]['ecr']['current_selection']
+              }
+          );
+        }
+      }
+    }
+    return myList;
   }
 
 }

@@ -158,11 +158,11 @@ class _CreateAccountState extends State<CreateAccount> {
                         return 'Please fill out this field';
                       }
                     },
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                      border: OutlineInputBorder(),
-                      labelText: 'Customer Name',
-                      icon: Icon(Icons.person_outline),
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                      border: const OutlineInputBorder(),
+                      labelText: userType=='1'? 'Dealer Name':'Customer Name',
+                      icon: const Icon(Icons.person_outline),
                     ),
                     inputFormatters: [
                       CapitalizeFirstLetterFormatter(),
@@ -215,11 +215,11 @@ class _CreateAccountState extends State<CreateAccount> {
                         return 'Please fill out this field';
                       }
                     },
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                      border: OutlineInputBorder(),
-                      labelText: 'Customer Email',
-                      icon: Icon(Icons.email_outlined),
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                      border: const OutlineInputBorder(),
+                      labelText: userType=='1'? 'Dealer Email':'Customer Email',
+                      icon: const Icon(Icons.email_outlined),
                     ),
                   ),
                   const SizedBox(height: 13,),
@@ -283,11 +283,11 @@ class _CreateAccountState extends State<CreateAccount> {
                         return 'Please fill out this field';
                       }
                     },
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                      border: OutlineInputBorder(),
-                      labelText: 'Customer City',
-                      icon: Icon(Icons.location_city),
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                      border: const OutlineInputBorder(),
+                      labelText: userType=='1'? 'Dealer City':'Customer City',
+                      icon: const Icon(Icons.location_city),
                     ),
                     inputFormatters: [
                       CapitalizeFirstLetterFormatter(),

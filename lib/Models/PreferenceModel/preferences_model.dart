@@ -2,7 +2,7 @@ class GeneralData {
   String userName;
   String categoryName;
   String controllerName;
-  int deviceId;
+  String deviceId;
 
   GeneralData({
     required this.userName,

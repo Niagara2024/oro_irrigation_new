@@ -15,6 +15,7 @@ class StartPageConfigMaker extends StatefulWidget {
 class _StartPageConfigMakerState extends State<StartPageConfigMaker> {
   bool isHovered = false;
   bool isHovered1 = false;
+
   @override
   Widget build(BuildContext context) {
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
@@ -66,36 +67,6 @@ class _StartPageConfigMakerState extends State<StartPageConfigMaker> {
         ],
       ),
     );
-    // return Container(
-    //   color: Color(0XFFF3F3F3),
-    //   width: double.infinity,
-    //   child: GridView.builder(
-    //       padding: EdgeInsets.all(10),
-    //       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 6,mainAxisSpacing: 10,crossAxisSpacing: 10),
-    //       itemCount: 2,
-    //       itemBuilder: (context, index){
-    //         return GestureDetector(
-    //           child: Container(
-    //             decoration: BoxDecoration(
-    //                 borderRadius: BorderRadius.circular(20),
-    //                 color: Colors.white
-    //             ),
-    //             child: Column(
-    //               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    //               children: [
-    //                 SizedBox(width: 100,
-    //                   height: 100,
-    //                   child: Image.asset(returnTitleAndImage(index)[1]),
-    //                 ),
-    //                 Text('${returnTitleAndImage(index)[0]}',style: TextStyle(fontSize: 20),)
-    //               ],
-    //             ),
-    //           ),
-    //         );
-    //       }
-    //
-    //   ),
-    // );
   }
 
   List<String> returnTitleAndImage(int index){

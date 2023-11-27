@@ -25,6 +25,11 @@ class _NamesState extends State<Names>  with TickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
+    print('User ID:${widget.userID}');
+    print('groupID ID:${widget.groupID}');
+    print('customerID ID:${widget.customerID}');
+    //print(_namesList);
+
     return MyContainerWithTabs(names: _namesList, userID: widget.userID, groupID: widget.groupID, customerID: widget.customerID,);
   }
 
@@ -32,8 +37,9 @@ class _NamesState extends State<Names>  with TickerProviderStateMixin
     final response = await HttpService().postRequest("getUserName", {"userId": widget.customerID, "controllerId": widget.groupID});
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      _namesList = List.from(data["data"]).map((item) => NamesModel.fromJson(item)).toList();
-      setState(() {});
+      setState(() {
+        _namesList = List.from(data["data"]).map((item) => NamesModel.fromJson(item)).toList();
+      });
     } else {
       _showSnackBar(response.body);
     }
@@ -78,19 +84,19 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
                     isScrollable: true,
                     tabs: [
                       for (var i = 0; i < widget.names.length; i++)
-                        Tab(text: widget.names[i].nameDescription,),
+                        Tab(text: widget.names[i].nameDescription ?? '',),
                     ],
                     onTap: (value) {
                     },
                   ),
                   const SizedBox(height: 10.0),
                   SizedBox(
-                    height: MediaQuery.sizeOf(context).height-370,
+                    height: MediaQuery.sizeOf(context).height-300,
                     child: TabBarView(
                       children: [
                         for (int i = 0; i < widget.names.length; i++)
-                          widget.names[i].userName!.isEmpty ? Container()
-                              : buildTab(widget.names[i].userName!),
+                          widget.names[i].userName != null && widget.names.isNotEmpty? buildTab(widget.names[i].userName!)
+                              : const Center(child: Text('No Record found')),
                       ],
                     ),
                   ),
@@ -143,34 +149,88 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
 
   Widget buildTab(List<dynamic> nameList)
   {
-    if(nameList[0]['location'] == '')
-    {
-      return DataTable2(
-          columnSpacing: 12,
-          horizontalMargin: 12,
-          minWidth: 580,
-          headingRowHeight: 40,
-          dataRowHeight: 40,
-          border: TableBorder.all(width: 1),
-          columns: const [
-            DataColumn2(
-                label: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold),),
-                size: ColumnSize.M
-            ),
-            DataColumn2(
-                label: Text('Id', style: TextStyle(fontWeight: FontWeight.bold),),
-                size: ColumnSize.M
-            ),
-            DataColumn2(
-                label: Text('Name', style: TextStyle(fontWeight: FontWeight.bold),),
-                size: ColumnSize.L
-            ),
-          ],
-          rows: List<DataRow>.generate(nameList.length, (index) => DataRow(cells: [
-            DataCell(Text('${index+1}')),
-            DataCell(Text(nameList[index]['id'])),
-            DataCell(
-              TextFormField(
+    if (nameList.isNotEmpty && nameList[0].containsKey('location')) {
+      if(nameList[0]['location'] == '')
+      {
+        return Padding(
+          padding: const EdgeInsets.only(right: 10, left: 10),
+          child: DataTable2(
+              columnSpacing: 12,
+              horizontalMargin: 12,
+              minWidth: 600,
+              headingRowHeight: 40,
+              dataRowHeight: 40,
+              headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
+              border: TableBorder.all(width: 1),
+              columns: const [
+                DataColumn2(
+                    label: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold),),
+                    size: ColumnSize.M
+                ),
+                DataColumn2(
+                    label: Text('Id', style: TextStyle(fontWeight: FontWeight.bold),),
+                    size: ColumnSize.M
+                ),
+                DataColumn2(
+                    label: Text('Name', style: TextStyle(fontWeight: FontWeight.bold),),
+                    size: ColumnSize.L
+                ),
+              ],
+              rows: List<DataRow>.generate(nameList.length, (index) => DataRow(cells: [
+                DataCell(Text('${index+1}')),
+                DataCell(Text(nameList[index]['id'])),
+                DataCell(
+                  TextFormField(
+                    initialValue: nameList[index]['name'],
+                    onChanged: (val){
+                      setState(() {
+                        nameList[index]['name'] = val;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: myTheme.primaryColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ]))),
+        );
+      }
+      return Padding(
+        padding: const EdgeInsets.only(right: 10, left: 10),
+        child: DataTable2(
+            columnSpacing: 12,
+            horizontalMargin: 12,
+            minWidth: 580,
+            headingRowHeight: 40,
+            dataRowHeight: 40,
+            headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
+            border: TableBorder.all(width: 1),
+            columns: const [
+              DataColumn2(
+                  label: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold),),
+                  size: ColumnSize.M
+              ),
+              DataColumn2(
+                  label: Text('Id', style: TextStyle(fontWeight: FontWeight.bold),),
+                  size: ColumnSize.M
+              ),
+              DataColumn2(
+                  label: Text('Location', style: TextStyle(fontWeight: FontWeight.bold),),
+                  size: ColumnSize.L
+              ),
+              DataColumn2(
+                  label: Text('Name', style: TextStyle(fontWeight: FontWeight.bold),),
+                  size: ColumnSize.L
+              ),
+            ],
+            rows: List<DataRow>.generate(nameList.length, (index) => DataRow(cells: [
+              DataCell(Text('${index+1}')),
+              DataCell(Text(nameList[index]['id'])),
+              DataCell(Text(nameList[index]['location'])),
+              DataCell(TextFormField(
                 initialValue: nameList[index]['name'],
                 onChanged: (val){
                   setState(() {
@@ -183,56 +243,12 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
                     ),
                   ),
                 ),
-            ),
-            ),
-          ])));
+              ),),
+            ]))),
+      );
+    } else {
+      return const Center(child: Text('No Record found'));
     }
-    return DataTable2(
-        columnSpacing: 12,
-        horizontalMargin: 12,
-        minWidth: 580,
-        headingRowHeight: 40,
-        dataRowHeight: 40,
-        border: TableBorder.all(width: 1),
-        columns: const [
-          DataColumn2(
-              label: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold),),
-              size: ColumnSize.M
-          ),
-          DataColumn2(
-            label: Text('Id', style: TextStyle(fontWeight: FontWeight.bold),),
-            size: ColumnSize.M
-          ),
-          DataColumn2(
-              label: Text('Location', style: TextStyle(fontWeight: FontWeight.bold),),
-              size: ColumnSize.L
-          ),
-          DataColumn2(
-            label: Text('Name', style: TextStyle(fontWeight: FontWeight.bold),),
-              size: ColumnSize.L
-          ),
-
-        ],
-        rows: List<DataRow>.generate(nameList.length, (index) => DataRow(cells: [
-          DataCell(Text('${index+1}')),
-          DataCell(Text(nameList[index]['id'])),
-          DataCell(Text(nameList[index]['location'])),
-          DataCell(TextFormField(
-            initialValue: nameList[index]['name'],
-            onChanged: (val){
-              setState(() {
-                nameList[index]['name'] = val;
-              });
-            },
-            decoration: InputDecoration(
-              focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: myTheme.primaryColor,
-                ),
-              ),
-            ),
-          ),),
-        ])));
-
   }
 
   void _showSnackBar(String message) {

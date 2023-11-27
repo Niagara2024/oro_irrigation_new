@@ -82,6 +82,7 @@ class HomePageState extends State<HomePage>
       }
 
       setState(() {
+        productStockList;
       });
 
     }
@@ -520,7 +521,7 @@ class HomePageState extends State<HomePage>
                                                 Container(
                                                   height: 44,
                                                   color: Colors.white,
-                                                  child: const ListTile(title: Text('Members', style: TextStyle(fontSize: 20, color: Colors.black),),trailing: Text('View all', style: TextStyle(color: Colors.blue),),),
+                                                  child: ListTile(title: Text(userType==1 ?'Dealer':'Customer', style: TextStyle(fontSize: 20, color: Colors.black),),trailing: Text('View all', style: TextStyle(color: Colors.blue),),),
                                                 ),
                                                 Expanded(child: GridView.count(
                                                   childAspectRatio : 1.0,

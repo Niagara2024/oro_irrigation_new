@@ -175,15 +175,15 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
   }
 
   Widget buildFixedRow(String categoryName) {
-    return SizedBox(
+    return Container(
       height: 45.0,
+      color: myTheme.primaryColor.withOpacity(0.3),
       child: Column(
         children: [
           const SizedBox(height: 10,),
           Center(
             child: Text(categoryName, style: const TextStyle(color: Colors.black)),
           ),
-          const Divider()
         ],
       ),
     );

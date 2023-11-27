@@ -182,7 +182,7 @@ class _DashboardWideState extends State<DashboardWide> {
       AppBar(
         title: Text (appBarTitle),
         actions: _selectedIndex==0?[
-          IconButton(tooltip: 'Create customer account', icon: const Icon(Icons.person_add_outlined), color: Colors.white, onPressed: () async
+          IconButton(tooltip: 'Create Dealer account', icon: const Icon(Icons.person_add_outlined), color: Colors.white, onPressed: () async
           {
               await showDialog<void>(
                 context: context,

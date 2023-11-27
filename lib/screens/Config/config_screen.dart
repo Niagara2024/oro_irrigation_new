@@ -22,6 +22,8 @@ class _ConfigScreenState extends State<ConfigScreen> with SingleTickerProviderSt
   final _configTabs = List.generate(configList.length, (index) => configList[index]);
   late final TabController _tabCont;
 
+  int nvRSelection = 0;
+
   @override
   void initState() {
     _tabCont = TabController(length: configList.length, vsync: this);
@@ -30,6 +32,61 @@ class _ConfigScreenState extends State<ConfigScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    return Row(
+      children: [
+        NavigationRail(
+          selectedIndex: nvRSelection,
+          onDestinationSelected: (int index) {
+            // Handle item selection
+            setState(() {
+              nvRSelection = index;
+            });
+
+          },
+          labelType: NavigationRailLabelType.all,
+          destinations: const [
+            NavigationRailDestination(
+              icon: Icon(Icons.drive_file_rename_outline),
+              label: Text('Names'),
+            ),
+            NavigationRailDestination(
+              icon: Icon(Icons.settings_outlined),
+              label: Text('Preferences'),
+            ),
+            NavigationRailDestination(
+              icon: Icon(Icons.menu_open),
+              label: Text('Constant'),
+            ),
+            NavigationRailDestination(
+              icon: Icon(Icons.perm_identity_outlined),
+              label: Text('Dealer definition'),
+            ),
+            NavigationRailDestination(
+              icon: Icon(Icons.dataset_linked_outlined),
+              label: Text('Data acquisition'),
+            ),
+            NavigationRailDestination(
+              icon: Icon(Icons.location_on_outlined),
+              label: Text('Geography'),
+            ),
+          ],
+        ),
+        const VerticalDivider(thickness: 1, width: 1),
+        Expanded(
+          child: Center(
+            child: nvRSelection == 0 ?
+            Names(userID: widget.userID,  customerID: widget.customerID, groupID: widget.controllerId):
+            nvRSelection == 1 ?
+            PreferencesScreen(customerID: widget.customerID, controllerID: widget.controllerId, userID: widget.userID,):
+            nvRSelection == 2 ?
+            ConstantInConfig(userID: widget.userID, customerID: widget.customerID, siteID: widget.controllerId):
+            nvRSelection == 3 ?
+            DealerDefinitionInConfig(userID: widget.userID,  customerID: widget.customerID, groupID: widget.siteID, imeiNo: widget.imeiNumber,):
+            DataAcquisitionMain(customerID: widget.customerID, controllerID: widget.controllerId, userId: widget.userID,),
+          ),
+        ),
+      ],
+    );
     return Column(
       children: [
         Expanded(

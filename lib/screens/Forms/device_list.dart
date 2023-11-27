@@ -744,317 +744,334 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
               onTap: (value) {
               },
             ),
-            const SizedBox(height: 10.0),
+            const SizedBox(height: 5.0),
             SizedBox(
-              height: MediaQuery.sizeOf(context).height-164,
+              height: MediaQuery.sizeOf(context).height-160,
               child: TabBarView(
                 children: [
                   for (int siteIndex = 0; siteIndex < widget.customerSiteList.length; siteIndex++)
                     Column(
                       children: [
-                        const CircleAvatar(radius: 42,),
-                        const SizedBox(height: 5,),
-                        Text(widget.customerSiteList[siteIndex].categoryName,style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                        Text('IMEi Number : ${widget.customerSiteList[siteIndex].deviceId.toString()}', style: const TextStyle(fontWeight: FontWeight.normal),),
-                        Text('Model Name  : ${widget.customerSiteList[siteIndex].modelName}', style: const TextStyle(fontWeight: FontWeight.normal),),
-                        Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: Container(
-                            height: 50,
-                            decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.all(Radius.circular(5)),
-                              color: Colors.grey.shade300,
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 15, left: 15),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text(''),
-                                  PopupMenuButton(
-                                    elevation: 10,
-                                    tooltip: 'Add node list',
-                                    child: Center(child: Icon(Icons.add, color: myTheme.primaryColor,)),
-                                    onCanceled: () {
-                                      checkboxValueNode = false;
-                                    },
-                                    itemBuilder: (context) {
-                                      return List.generate(widget.nodeStockList.length+1 ,(nodeIndex) {
-                                        if(widget.nodeStockList.isEmpty){
-                                          return const PopupMenuItem(
-                                            child: Text('No node available to add in this site'),
-                                          );
-                                        }
-                                        else if(widget.nodeStockList.length == nodeIndex){
-                                          return PopupMenuItem(
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                              children: [
-                                                MaterialButton(
-                                                  color: Colors.red,
-                                                  textColor: Colors.white,
-                                                  child: const Text('CANCEL'),
-                                                  onPressed: () {
+                        Expanded(
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 300,
+                                child: Column(
+                                  children: [
+                                    const SizedBox(height: 10,),
+                                    const CircleAvatar(radius: 42,),
+                                    const SizedBox(height: 5,),
+                                    Text(widget.customerSiteList[siteIndex].categoryName,style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                                    Text('IMEi Number : ${widget.customerSiteList[siteIndex].deviceId.toString()}', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                    Text('Model Name  : ${widget.customerSiteList[siteIndex].modelName}', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                    Padding(
+                                      padding: const EdgeInsets.all(5),
+                                      child: Container(
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          borderRadius: const BorderRadius.all(Radius.circular(5)),
+                                          color: Colors.grey.shade300,
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(right: 15, left: 15),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              const Text('Add Node list to your site'),
+                                              PopupMenuButton(
+                                                elevation: 10,
+                                                tooltip: 'Add node list',
+                                                child: Center(child: Icon(Icons.add, color: myTheme.primaryColor,)),
+                                                onCanceled: () {
+                                                  checkboxValueNode = false;
+                                                },
+                                                itemBuilder: (context) {
+                                                  return List.generate(widget.nodeStockList.length+1 ,(nodeIndex) {
+                                                    if(widget.nodeStockList.isEmpty){
+                                                      return const PopupMenuItem(
+                                                        child: Text('No node available to add in this site'),
+                                                      );
+                                                    }
+                                                    else if(widget.nodeStockList.length == nodeIndex){
+                                                      return PopupMenuItem(
+                                                        child: Row(
+                                                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                          children: [
+                                                            MaterialButton(
+                                                              color: Colors.red,
+                                                              textColor: Colors.white,
+                                                              child: const Text('CANCEL'),
+                                                              onPressed: () {
+                                                                setState(() {
+                                                                  checkboxValueNode = false;
+                                                                  Navigator.pop(context);
+                                                                });
+                                                              },
+                                                            ),
+                                                            MaterialButton(
+                                                              color: Colors.green,
+                                                              textColor: Colors.white,
+                                                              child: const Text('ADD'),
+                                                              onPressed: () async
+                                                              {
+                                                                List<int> oldNodeListRfNo = [];
+                                                                int refNo = 0;
+                                                                String refNoUpdatingNode = '';
+
+                                                                List<dynamic> selectedNodeList = [];
+                                                                for(int i=0; i<nodeStockSelection.length; i++)
+                                                                {
+                                                                  if(nodeStockSelection[i]==1){
+                                                                    Map<String, dynamic> myMap = {"productId": widget.nodeStockList[i].productId.toString(), 'categoryName': widget.nodeStockList[i].categoryName, 'referenceNumber': 0};
+                                                                    selectedNodeList.add(myMap);
+                                                                  }
+                                                                }
+
+                                                                if(selectedNodeList.isNotEmpty)
+                                                                {
+                                                                  for(int i = 0; i < selectedNodeList.length; i++)
+                                                                  {
+                                                                    if(refNoUpdatingNode != selectedNodeList[i]['categoryName'])
+                                                                    {
+                                                                      refNoUpdatingNode = selectedNodeList[i]['categoryName'];
+                                                                      var contain = widget.usedNodeList[siteIndex].where((element) => element.categoryName == refNoUpdatingNode);
+                                                                      if (contain.isNotEmpty)
+                                                                      {
+                                                                        for(int j = 0; j < widget.usedNodeList[siteIndex].length; j++)
+                                                                        {
+                                                                          if(widget.usedNodeList[siteIndex][j].categoryName == refNoUpdatingNode)
+                                                                          {
+                                                                            oldNodeListRfNo.add(widget.usedNodeList[siteIndex][j].referenceNumber);
+                                                                          }
+                                                                        }
+                                                                        List missingRN = missingArray(oldNodeListRfNo);
+                                                                        if(missingRN.isNotEmpty)
+                                                                        {
+                                                                          refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
+                                                                          for(int k = 0; k < selectedNodeList.length; k++)
+                                                                          {
+                                                                            if(missingRN.isNotEmpty)
+                                                                            {
+                                                                              if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
+                                                                              {
+                                                                                selectedNodeList[k]['referenceNumber'] = missingRN[0];
+                                                                                missingRN.removeAt(0);
+                                                                              }
+                                                                            }else{
+                                                                              refNo = refNo+1;
+                                                                              selectedNodeList[k]['referenceNumber'] = refNo;
+                                                                            }
+                                                                          }
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                          refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
+                                                                          for(int k = 0; k < selectedNodeList.length; k++)
+                                                                          {
+                                                                            if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
+                                                                            {
+                                                                              refNo = refNo+1;
+                                                                              selectedNodeList[k]['referenceNumber'] = refNo;
+                                                                            }
+                                                                          }
+                                                                        }
+                                                                      }
+                                                                      else
+                                                                      {
+                                                                        refNo = 0;
+                                                                        for(int k = 0; k < selectedNodeList.length; k++)
+                                                                        {
+                                                                          if(refNoUpdatingNode == selectedNodeList[k]['categoryName'])
+                                                                          {
+                                                                            refNo = refNo+1;
+                                                                            selectedNodeList[k]['referenceNumber'] = refNo;
+                                                                          }
+                                                                        }
+                                                                      }
+                                                                    }
+                                                                    else{
+                                                                    }
+                                                                  }
+
+                                                                  //print(selectedNodeList);
+
+                                                                  if(selectedNodeList.isNotEmpty)
+                                                                  {
+                                                                    Map<String, dynamic> body = {
+                                                                      "userId": widget.customerID,
+                                                                      "dealerId": widget.userID,
+                                                                      "masterId": widget.customerSiteList[siteIndex].userDeviceListId,
+                                                                      "groupId": widget.customerSiteList[siteIndex].groupId,
+                                                                      "products": selectedNodeList,
+                                                                      "createUser": widget.userID,
+                                                                    };
+
+                                                                    final response = await HttpService().postRequest("createUserDeviceListWithMaster", body);
+                                                                    print(response.body);
+                                                                    if(response.statusCode == 200)
+                                                                    {
+                                                                      var data = jsonDecode(response.body);
+                                                                      if(data["code"]==200)
+                                                                      {
+                                                                        setState(() {
+                                                                          selectedNodeList.clear();
+                                                                          nodeStockSelection.clear();
+                                                                          checkboxValueNode = false;
+                                                                        });
+
+                                                                        widget.getCustomerSite();
+                                                                        widget.getNodeStockList();
+                                                                        Navigator.pop(context);
+                                                                      }
+                                                                      else{
+                                                                        //_showSnackBar(data["message"]);
+                                                                        //_showAlertDialog('Warning', data["message"]);
+                                                                      }
+                                                                    }
+                                                                  }
+
+                                                                }
+
+                                                              },
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      );
+                                                    }
+                                                    return PopupMenuItem(
+                                                      child: StatefulBuilder(
+                                                        builder: (BuildContext context, void Function(void Function()) setState) {
+                                                          return CheckboxListTile(
+                                                            title: Text(widget.nodeStockList[nodeIndex].categoryName),
+                                                            subtitle: Text('${widget.nodeStockList[nodeIndex].imeiNo}'),
+                                                            value: checkboxValueNode,
+                                                            onChanged:(bool? value) { setState(() {
+                                                              checkboxValueNode = value!;
+                                                              if(value){
+                                                                nodeStockSelection[nodeIndex] = 1;
+                                                              }else{
+                                                                nodeStockSelection[nodeIndex] = 0;
+                                                              }
+
+                                                            });},
+                                                          );
+                                                        },
+                                                      ),
+                                                    );
+                                                  });
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const VerticalDivider(),
+                              Expanded(
+                                flex: 1,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: GridView.builder(
+                                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 5,
+                                      crossAxisSpacing: 5.0,
+                                      mainAxisSpacing: 5.0,
+                                    ),
+                                    itemCount: widget.usedNodeList[siteIndex].length,
+                                    itemBuilder: (BuildContext context, int siteNodeIndex) {
+                                      return Card(
+                                        elevation: 5.0,
+                                        color: Colors.white,
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            ListTile(
+                                              leading: const CircleAvatar(radius: 20,),
+                                              trailing: IconButton(onPressed: () async {
+                                                Map<String, dynamic> body = {
+                                                  "userId": widget.customerID,
+                                                  "controllerId": widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId,
+                                                  "modifyUser": widget.userID,
+                                                  "productId": widget.usedNodeList[siteIndex][siteNodeIndex].productId,
+                                                };
+
+                                                final response = await HttpService().putRequest("removeNodeInMaster", body);
+                                                if(response.statusCode == 200)
+                                                {
+                                                  var data = jsonDecode(response.body);
+                                                  if(data["code"]==200)
+                                                  {
+                                                    widget.usedNodeList[siteIndex].removeWhere((node) => node.userDeviceListId == widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId);
+                                                    _showSnackBar(data["message"]);
+
                                                     setState(() {
                                                       checkboxValueNode = false;
-                                                      Navigator.pop(context);
                                                     });
-                                                  },
-                                                ),
-                                                MaterialButton(
-                                                  color: Colors.green,
-                                                  textColor: Colors.white,
-                                                  child: const Text('ADD'),
-                                                  onPressed: () async
-                                                  {
-                                                    List<int> oldNodeListRfNo = [];
-                                                    int refNo = 0;
-                                                    String refNoUpdatingNode = '';
-
-                                                    List<dynamic> selectedNodeList = [];
-                                                    for(int i=0; i<nodeStockSelection.length; i++)
-                                                    {
-                                                      if(nodeStockSelection[i]==1){
-                                                        Map<String, dynamic> myMap = {"productId": widget.nodeStockList[i].productId.toString(), 'categoryName': widget.nodeStockList[i].categoryName, 'referenceNumber': 0};
-                                                        selectedNodeList.add(myMap);
-                                                      }
-                                                    }
-
-                                                    if(selectedNodeList.isNotEmpty)
-                                                    {
-                                                      for(int i = 0; i < selectedNodeList.length; i++)
-                                                      {
-                                                        if(refNoUpdatingNode != selectedNodeList[i]['categoryName'])
-                                                        {
-                                                          refNoUpdatingNode = selectedNodeList[i]['categoryName'];
-                                                          var contain = widget.usedNodeList[siteIndex].where((element) => element.categoryName == refNoUpdatingNode);
-                                                          if (contain.isNotEmpty)
-                                                          {
-                                                            for(int j = 0; j < widget.usedNodeList[siteIndex].length; j++)
-                                                            {
-                                                              if(widget.usedNodeList[siteIndex][j].categoryName == refNoUpdatingNode)
-                                                              {
-                                                                oldNodeListRfNo.add(widget.usedNodeList[siteIndex][j].referenceNumber);
-                                                              }
-                                                            }
-                                                            List missingRN = missingArray(oldNodeListRfNo);
-                                                            if(missingRN.isNotEmpty)
-                                                            {
-                                                              refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
-                                                              for(int k = 0; k < selectedNodeList.length; k++)
-                                                              {
-                                                                if(missingRN.isNotEmpty)
-                                                                {
-                                                                  if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
-                                                                  {
-                                                                    selectedNodeList[k]['referenceNumber'] = missingRN[0];
-                                                                    missingRN.removeAt(0);
-                                                                  }
-                                                                }else{
-                                                                  refNo = refNo+1;
-                                                                  selectedNodeList[k]['referenceNumber'] = refNo;
-                                                                }
-                                                              }
-                                                            }
-                                                            else
-                                                            {
-                                                              refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
-                                                              for(int k = 0; k < selectedNodeList.length; k++)
-                                                              {
-                                                                if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
-                                                                {
-                                                                  refNo = refNo+1;
-                                                                  selectedNodeList[k]['referenceNumber'] = refNo;
-                                                                }
-                                                              }
-                                                            }
-                                                          }
-                                                          else
-                                                          {
-                                                            refNo = 0;
-                                                            for(int k = 0; k < selectedNodeList.length; k++)
-                                                            {
-                                                              if(refNoUpdatingNode == selectedNodeList[k]['categoryName'])
-                                                              {
-                                                                refNo = refNo+1;
-                                                                selectedNodeList[k]['referenceNumber'] = refNo;
-                                                              }
-                                                            }
-                                                          }
-                                                        }
-                                                        else{
-                                                        }
-                                                      }
-
-                                                      //print(selectedNodeList);
-
-                                                      if(selectedNodeList.isNotEmpty)
-                                                      {
-                                                        Map<String, dynamic> body = {
-                                                          "userId": widget.customerID,
-                                                          "dealerId": widget.userID,
-                                                          "masterId": widget.customerSiteList[siteIndex].userDeviceListId,
-                                                          "groupId": widget.customerSiteList[siteIndex].groupId,
-                                                          "products": selectedNodeList,
-                                                          "createUser": widget.userID,
-                                                        };
-
-                                                        final response = await HttpService().postRequest("createUserDeviceListWithMaster", body);
-                                                        print(response.body);
-                                                        if(response.statusCode == 200)
-                                                        {
-                                                          var data = jsonDecode(response.body);
-                                                          if(data["code"]==200)
-                                                          {
-                                                            setState(() {
-                                                              selectedNodeList.clear();
-                                                              nodeStockSelection.clear();
-                                                              checkboxValueNode = false;
-                                                            });
-
-                                                            widget.getCustomerSite();
-                                                            widget.getNodeStockList();
-                                                            Navigator.pop(context);
-                                                          }
-                                                          else{
-                                                            //_showSnackBar(data["message"]);
-                                                            //_showAlertDialog('Warning', data["message"]);
-                                                          }
-                                                        }
-                                                      }
-
-                                                    }
-
-                                                  },
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        }
-                                        return PopupMenuItem(
-                                          child: StatefulBuilder(
-                                            builder: (BuildContext context, void Function(void Function()) setState) {
-                                              return CheckboxListTile(
-                                                title: Text(widget.nodeStockList[nodeIndex].categoryName),
-                                                subtitle: Text('${widget.nodeStockList[nodeIndex].imeiNo}'),
-                                                value: checkboxValueNode,
-                                                onChanged:(bool? value) { setState(() {
-                                                  checkboxValueNode = value!;
-                                                  if(value){
-                                                    nodeStockSelection[nodeIndex] = 1;
-                                                  }else{
-                                                    nodeStockSelection[nodeIndex] = 0;
+                                                    widget.getNodeStockList();
                                                   }
+                                                  else{
+                                                    _showSnackBar(data["message"]);
+                                                  }
+                                                }
 
-                                                });},
-                                              );
-                                            },
-                                          ),
-                                        );
-                                      });
+                                              }, icon: const Icon(Icons.delete_outline, color: Colors.red,)),
+                                            ),
+                                            Text(widget.usedNodeList[siteIndex][siteNodeIndex].categoryName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
+                                            Text(widget.usedNodeList[siteIndex][siteNodeIndex].modelName, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
+                                            Text(widget.usedNodeList[siteIndex][siteNodeIndex].deviceId, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
+                                            ListTile(
+                                              title: DropdownButton(
+                                                value: widget.usedNodeList[siteIndex][siteNodeIndex].interface,
+                                                style: const TextStyle(fontSize: 12),
+                                                onChanged: (newValue) {
+                                                  setState(() {
+                                                    widget.usedNodeList[siteIndex][siteNodeIndex].interface = newValue!;
+                                                    int index = widget.interfaceType.indexWhere((model) => model.interface == newValue);
+                                                    widget.usedNodeList[siteIndex][siteNodeIndex].interfaceTypeId = widget.interfaceType[index].interfaceTypeId;
+                                                  });
+                                                },
+                                                items: widget.interfaceType.map((interface) {
+                                                  return DropdownMenuItem(
+                                                    value: interface.interface,
+                                                    child: Text(interface.interface, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                  );
+                                                }).toList(),
+                                              ),
+                                              trailing: DropdownButton(
+                                                value: widget.usedNodeList[siteIndex][siteNodeIndex].interfaceInterval ?? '0 sec',
+                                                style: const TextStyle(fontSize: 12),
+                                                onChanged: (newValue) {
+                                                  setState(() {
+                                                    widget.usedNodeList[siteIndex][siteNodeIndex].interfaceInterval = newValue!;
+                                                  });
+                                                },
+                                                items: _interfaceInterval.map((interface) {
+                                                  return DropdownMenuItem(
+                                                    value: interface,
+                                                    child: Text(interface, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                  );
+                                                }).toList(),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
                                     },
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 8, left: 8),
-                            child: GridView.builder(
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 7,
-                                crossAxisSpacing: 5.0,
-                                mainAxisSpacing: 5.0,
-                              ),
-                              itemCount: widget.usedNodeList[siteIndex].length,
-                              itemBuilder: (BuildContext context, int siteNodeIndex) {
-                                return Card(
-                                  elevation: 5.0,
-                                  color: Colors.white,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      ListTile(
-                                        leading: const CircleAvatar(radius: 20,),
-                                        trailing: IconButton(onPressed: () async {
-                                          Map<String, dynamic> body = {
-                                            "userId": widget.customerID,
-                                            "controllerId": widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId,
-                                            "modifyUser": widget.userID,
-                                          };
-
-                                          final response = await HttpService().putRequest("removeNodeInMaster", body);
-                                          if(response.statusCode == 200)
-                                          {
-                                            var data = jsonDecode(response.body);
-                                            if(data["code"]==200)
-                                            {
-                                              widget.usedNodeList[siteIndex].removeWhere((node) => node.userDeviceListId == widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId);
-                                              _showSnackBar(data["message"]);
-
-                                              setState(() {
-                                                checkboxValueNode = false;
-                                              });
-                                              widget.getNodeStockList();
-                                            }
-                                            else{
-                                              _showSnackBar(data["message"]);
-                                            }
-                                          }
-
-                                        }, icon: const Icon(Icons.delete_outline, color: Colors.red,)),
-                                      ),
-                                      Text(widget.usedNodeList[siteIndex][siteNodeIndex].categoryName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
-                                      Text(widget.usedNodeList[siteIndex][siteNodeIndex].modelName, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
-                                      Text(widget.usedNodeList[siteIndex][siteNodeIndex].deviceId, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
-                                      ListTile(
-                                        title: DropdownButton(
-                                          value: widget.usedNodeList[siteIndex][siteNodeIndex].interface,
-                                          style: const TextStyle(fontSize: 12),
-                                          onChanged: (newValue) {
-                                            setState(() {
-                                              widget.usedNodeList[siteIndex][siteNodeIndex].interface = newValue!;
-                                              int index = widget.interfaceType.indexWhere((model) => model.interface == newValue);
-                                              widget.usedNodeList[siteIndex][siteNodeIndex].interfaceTypeId = widget.interfaceType[index].interfaceTypeId;
-                                            });
-                                          },
-                                          items: widget.interfaceType.map((interface) {
-                                            return DropdownMenuItem(
-                                              value: interface.interface,
-                                              child: Text(interface.interface, style: const TextStyle(fontWeight: FontWeight.normal),),
-                                            );
-                                          }).toList(),
-                                        ),
-                                        trailing: DropdownButton(
-                                          value: widget.usedNodeList[siteIndex][siteNodeIndex].interfaceInterval ?? '0 sec',
-                                          style: const TextStyle(fontSize: 12),
-                                          onChanged: (newValue) {
-                                            setState(() {
-                                              widget.usedNodeList[siteIndex][siteNodeIndex].interfaceInterval = newValue!;
-                                            });
-                                          },
-                                          items: _interfaceInterval.map((interface) {
-                                            return DropdownMenuItem(
-                                              value: interface,
-                                              child: Text(interface, style: const TextStyle(fontWeight: FontWeight.normal),),
-                                            );
-                                          }).toList(),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
+                            ],
                           ),
                         ),
                         Container(
                           height: 50,
                           decoration: BoxDecoration(
                             borderRadius: const BorderRadius.only(bottomRight: Radius.circular(5), bottomLeft: Radius.circular(5)),
-                            color: myTheme.primaryColor.withOpacity(0.2),
+                            color: Colors.white,
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,

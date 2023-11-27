@@ -49,7 +49,8 @@ class _ProductLimitsState extends State<ProductLimits> {
 
   @override
   void dispose() {
-    var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
+    print('dispose');
+    var configPvd = Provider.of<ConfigMakerProvider>(context, listen: false);
     configPvd.clearConfig();
 
     for (var c in myControllers) {
@@ -268,11 +269,10 @@ class _ProductLimitsState extends State<ProductLimits> {
 
     Map<String, dynamic> body = {
       "userId": widget.customerID,
-      "controllerId": widget.siteID,
+      "controllerId": widget.userDeviceListId,
       "productLimit": productLimits,
       "createUser": widget.userID,
     };
-    print(body);
     final response = await HttpService().postRequest("createUserProductLimit", body);
     if(response.statusCode == 200)
     {

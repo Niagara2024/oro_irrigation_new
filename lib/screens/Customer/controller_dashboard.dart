@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/screens/Customer/conditionscreen.dart';
 
@@ -24,6 +25,7 @@ class _ControllerDashboardState extends State<ControllerDashboard>
   MenuItems? selectedMenu;
   String dropdownValue = list.first;
   late List<DashboardData> data = [];
+  bool visibleLoading = false;
 
   @override
   void initState() {
@@ -33,6 +35,7 @@ class _ControllerDashboardState extends State<ControllerDashboard>
 
   Future<void> getControllerDashboardDetails() async
   {
+    indicatorViewShow();
     try {
       data = await fetchData();
       setState(() {
@@ -46,10 +49,11 @@ class _ControllerDashboardState extends State<ControllerDashboard>
   Future<List<DashboardData>> fetchData() async
   {
     Map<String, Object> body = {"userId" : widget.customerID, "controllerId" : widget.controllerID};
-    print(body);
     final response = await HttpService().postRequest("getCustomerDashboard", body);
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
+      //print(jsonResponse);
+      indicatorViewHide();
       return (jsonResponse['data'] as List<dynamic>)
           .map((item) => DashboardData.fromJson(item))
           .toList();
@@ -61,9 +65,22 @@ class _ControllerDashboardState extends State<ControllerDashboard>
   @override
   Widget build(BuildContext context)
   {
-    List<int> myList = [data[0].sourcePump.length, data[0].irrigationPump.length, data[0].centralFilterSite.length, data[0].centralFertilizationSite.length];
+    /*List<int> myList = [data[0].sourcePump.length, data[0].irrigationPump.length, data[0].centralFilterSite.length, data[0].centralFertilizationSite.length];
     int maxValue = myList.reduce((max, current) => current > max ? current : max);
-    print(maxValue);
+
+    Map<String, int> locationCounts = {};
+    for (var valve in data[0].valve) {
+      String location = valve.location;
+      locationCounts[location] = (locationCounts[location] ?? 0) + 1;
+    }
+
+    int maxCount = 0;
+    locationCounts.forEach((location, count) {
+      if (count > maxCount) {
+        maxCount = count;
+      }
+    });*/
+    final mediaQuery = MediaQuery.of(context);
 
     return Scaffold(
       backgroundColor: const Color(0xffefefef),
@@ -72,6 +89,7 @@ class _ControllerDashboardState extends State<ControllerDashboard>
         actions: [
           IconButton(tooltip: 'Refresh', icon: const Icon(Icons.refresh), color: Colors.white, onPressed: () async
           {
+            getControllerDashboardDetails();
           }),
           const SizedBox(width: 10,),
           IconButton(tooltip: 'Settings', icon: const Icon(Icons.settings_outlined), color: Colors.white, onPressed: () async
@@ -113,122 +131,100 @@ class _ControllerDashboardState extends State<ControllerDashboard>
           const SizedBox(width: 20,),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          color: Colors.white,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
+      body: visibleLoading? Center(
+        child: Visibility(
+          visible: visibleLoading,
+          child: Container(
+            padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 25, 0, mediaQuery.size.width/2 - 25, 0),
+            child: const LoadingIndicator(
+              indicatorType: Indicator.ballPulse,
+            ),
+          ),
+        ),
+      ) :
+      Column(
+        children: [
+          Container(
+            color: Colors.white,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    DropdownButton<String>(
-                      value: dropdownValue,
-                      icon: const Icon(Icons.arrow_drop_down),
-                      elevation: 16,
-                      underline: Container(
-                        height: 2,
-                        color: myTheme.primaryColor,
-                      ),
-                      onChanged: (String? value) {
-                        // This is called when the user selects an item.
-                        setState(() {
-                          dropdownValue = value!;
-                        });
-                      },
-                      items: list.map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(width: 10,)
-                  ],
+                DropdownButton<String>(
+                  value: dropdownValue,
+                  icon: const Icon(Icons.arrow_drop_down),
+                  elevation: 16,
+                  underline: Container(
+                    height: 2,
+                    color: myTheme.primaryColor,
+                  ),
+                  onChanged: (String? value) {
+                    // This is called when the user selects an item.
+                    setState(() {
+                      dropdownValue = value!;
+                    });
+                  },
+                  items: list.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
                 ),
-                const Divider(),
-                SizedBox(
-                  height: maxValue*120,
-                  width: double.infinity,
-                  child: Row(
-                    children: [
-                      Flexible(
-                        flex: 1,
-                        child: Column(
-                          children: [
-                            const Text('Source Pump'),
-                            const Divider(),
-                            SizedBox(
-                              height: maxValue*100,
-                              child: DisplaySourcePump(sourcePump: data[0].sourcePump,),
-                            ),
-                          ],
-                        ),
+                const SizedBox(width: 10,)
+              ],
+            ),
+          ),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 100,
+                            child: DisplaySourcePump(sourcePump: data[0].sourcePump,),
+                          ),
+                          const Divider(),
+                          SizedBox(
+                            height: 100,
+                            child: DisplayIrrigationPump(irrigationPump: data[0].irrigationPump,),
+                          ),
+                          const Divider(),
+                          SizedBox(
+                            height: 100,
+                            child: DisplayCentralFilterSite(centralFilterSite: data[0].centralFilterSite,),
+                          ),
+                          const Divider(),
+                          SizedBox(
+                            height: 100,
+                            child: DisplayCentralFertilizationSite(centralFertilizationSite: data[0].centralFertilizationSite,),
+                          ),
+                          const Divider(),
+                          SizedBox(
+                            height: 100,
+                            child: DisplayMainValve(mainValve: data[0].mainValve,),
+                          ),
+                        ],
                       ),
-                      const VerticalDivider(),
-                      Flexible(
-                        flex: 1,
-                        child: Column(
-                          children: [
-                            const Text('Irrigation Pump'),
-                            const Divider(),
-                            SizedBox(
-                              height: maxValue*100,
-                              child: DisplayIrrigationPump(irrigationPump: data[0].irrigationPump,),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const VerticalDivider(),
-                      Flexible(
-                        flex: 1,
-                        child: Column(
-                          children: [
-                            const Text('Central Filter Site'),
-                            const Divider(),
-                            SizedBox(
-                              height: maxValue*100,
-                              child: DisplayCentralFilterSite(centralFilterSite: data[0].centralFilterSite,),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const VerticalDivider(),
-                      Flexible(
-                        flex: 1,
-                        child: Column(
-                          children: [
-                            const Text('Central Fertilization Site'),
-                            const Divider(),
-                            SizedBox(
-                              height: maxValue*100,
-                              child: DisplayCentralFertilizationSite(centralFertilizationSite: data[0].centralFertilizationSite,),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-                const Divider(),
-                SizedBox(
-                  width: double.infinity,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        height: MediaQuery.sizeOf(context).height-252,
-                        child: DisplayIrrigationLine(irrigationLine: data[0].irrigationLine, valves: data[0].valve,),
-                      ),
-                    ],
+                const VerticalDivider(),
+                Expanded(
+                  flex: 1,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: DisplayIrrigationLine(irrigationLine: data[0].irrigationLine, valves: data[0].valve,),
                   ),
                 ),
               ],
             ),
           ),
-        ),
+        ],
       ),
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
@@ -237,7 +233,6 @@ class _ControllerDashboardState extends State<ControllerDashboard>
           padding: const EdgeInsets.only(left: 10, right: 10),
           child: Row(
             children: [
-              // Like button
               IconButton(
                   tooltip: 'list view',
                   onPressed: () {
@@ -251,7 +246,6 @@ class _ControllerDashboardState extends State<ControllerDashboard>
               const SizedBox(
                 width: 10,
               ),
-              // Dislike button
               IconButton(
                   tooltip: 'mapview',
                   onPressed: () {
@@ -265,8 +259,6 @@ class _ControllerDashboardState extends State<ControllerDashboard>
               const SizedBox(
                 width: 10,
               ),
-              // Comment button
-              // Bookmark/Save button
               Expanded(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -321,6 +313,18 @@ class _ControllerDashboardState extends State<ControllerDashboard>
     );
   }
 
+  void indicatorViewShow() {
+    setState(() {
+      visibleLoading = true;
+    });
+  }
+
+  void indicatorViewHide() {
+    setState(() {
+      visibleLoading = false;
+    });
+  }
+
 }
 
 class DisplaySourcePump extends StatelessWidget
@@ -331,7 +335,7 @@ class DisplaySourcePump extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      scrollDirection: Axis.vertical, // Set the direction to horizontal
+      scrollDirection: Axis.horizontal,
       itemCount: sourcePump.length,
       itemBuilder: (context, index) {
         return Padding(
@@ -357,7 +361,7 @@ class DisplayIrrigationPump extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      scrollDirection: Axis.vertical, // Set the direction to horizontal
+      scrollDirection: Axis.horizontal, // Set the direction to horizontal
       itemCount: irrigationPump.length,
       itemBuilder: (context, index) {
         return Padding(
@@ -383,7 +387,7 @@ class DisplayCentralFertilizationSite extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      scrollDirection: Axis.vertical, // Set the direction to horizontal
+      scrollDirection: Axis.horizontal, // Set the direction to horizontal
       itemCount: centralFertilizationSite.length,
       itemBuilder: (context, index) {
         return Padding(
@@ -409,7 +413,7 @@ class DisplayCentralFilterSite extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      scrollDirection: Axis.vertical, // Set the direction to horizontal
+      scrollDirection: Axis.horizontal, // Set the direction to horizontal
       itemCount: centralFilterSite.length,
       itemBuilder: (context, index) {
         return Padding(
@@ -427,6 +431,33 @@ class DisplayCentralFilterSite extends StatelessWidget
   }
 }
 
+class DisplayMainValve extends StatelessWidget
+{
+  const DisplayMainValve({super.key, required this.mainValve});
+  final List<MainValve> mainValve;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      scrollDirection: Axis.horizontal, // Set the direction to horizontal
+      itemCount: mainValve.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            children: [
+              const CircleAvatar(child: Icon(Icons.account_balance_outlined),),
+              Text(mainValve[index].name, style: const TextStyle(fontWeight: FontWeight.normal),),
+              Text(mainValve[index].id, style: const TextStyle(fontWeight: FontWeight.normal),),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+
 class DisplayIrrigationLine extends StatelessWidget
 {
   const DisplayIrrigationLine({super.key, required this.irrigationLine, required this.valves});
@@ -436,93 +467,52 @@ class DisplayIrrigationLine extends StatelessWidget
   @override
   Widget build(BuildContext context)
   {
+    Map<String, List<Valve>> groupedValves = groupValvesByLocation(valves);
+
     return ListView.builder(
-      scrollDirection: Axis.horizontal,
-      itemCount: irrigationLine.length,
-      shrinkWrap: true,
+      itemCount: groupedValves.keys.length,
       itemBuilder: (context, index) {
+        String location = groupedValves.keys.elementAt(index);
+        List<Valve> locationValves = groupedValves[location]!;
 
-        List<Map<String, dynamic>> valvesMapList = valves.map((valve) => valve.toJson())
-            .where((valveMap) => valveMap['location'] == irrigationLine[index].id).toList();
-
-        return Row(
+        return  Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              width: 450,
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  children: [
-                    Text(irrigationLine[index].name),
-                    const Divider(),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: valvesMapList.length,
-                      itemBuilder: (context, itemIndex) {
-                        Map<String, dynamic> item = valvesMapList[itemIndex];
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            height: 70,
-                            decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.all(Radius.circular(10)), //here
-                              color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Colors.grey,
-                                      offset: Offset(0, -3),
-                                      blurRadius: 3.0)
-                                ],
-                            )
-                          ),
-                        );
-                        return Card(
-                          color: Colors.white,
-                          child: ListTile(
-                            leading: Wrap(
-                              spacing: 10, // space between two icons
-                              children: <Widget>[
-                                Container(
-                                  width: 7,
-                                  height: 50,
-                                  color: Colors.red,
-                                ),
-                                const CircleAvatar(child: Icon(Icons.vaccines),),
-                              ],
-                            ),
-                            title: Text(item['name']),
-                            subtitle: Text(item['location']),
-                            trailing: const Wrap(
-                              spacing: 12, // space between two icons
-                              children: <Widget>[
-                                Column(children: [
-                                  Text('Set Time', style: TextStyle(fontWeight: FontWeight.bold),),
-                                  Text('00:10:00'),
-                                ],),
-                                VerticalDivider(), // icon-1
-                                Column(children: [
-                                  Text('Remaining Time', style: TextStyle(fontWeight: FontWeight.bold),),
-                                  Text('00:03:00'),
-                                ],),
-                                Icon(Icons.timelapse_outlined),// icon-2
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Location: $location',
+                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
             ),
-            const VerticalDivider(),
+            // Display the valves for the current location
+            for (var valve in locationValves)
+              Card(
+                elevation: 5,
+                child: ListTile(
+                  title: Text(valve.id),
+                  subtitle: Text(valve.name),
+                ),
+              ),
           ],
         );
       },
     );
+
+  }
+
+  Map<String, List<Valve>> groupValvesByLocation(List<Valve> valves) {
+    Map<String, List<Valve>> groupedValves = {};
+    for (var valve in valves) {
+      if (!groupedValves.containsKey(valve.location)) {
+        groupedValves[valve.location] = [];
+      }
+      groupedValves[valve.location]!.add(valve);
+    }
+    return groupedValves;
   }
 }
+
 
 class DisplayValve extends StatelessWidget
 {
@@ -574,32 +564,25 @@ class DashboardData
     return DashboardData(
       sourcePump: (json['sourcePump'] as List<dynamic>?)
           ?.map((item) => SourcePump.fromJson(item as Map<String, dynamic>))
-          .toList() ??
-          [],
+          .toList() ?? [],
       irrigationPump: (json['irrigationPump'] as List<dynamic>?)
           ?.map((item) => IrrigationPump.fromJson(item as Map<String, dynamic>))
-          .toList() ??
-          [],
+          .toList() ?? [],
       centralFilterSite: (json['centralFilterSite'] as List<dynamic>?)
           ?.map((item) => CentralFilterSite.fromJson(item as Map<String, dynamic>))
-          .toList() ??
-          [],
+          .toList() ?? [],
       centralFertilizationSite: (json['centralFertilizationSite'] as List<dynamic>?)
           ?.map((item) => CentralFertilizationSite.fromJson(item as Map<String, dynamic>))
-          .toList() ??
-          [],
+          .toList() ?? [],
       irrigationLine: (json['irrigationLine'] as List<dynamic>?)
           ?.map((item) => IrrigationLine.fromJson(item as Map<String, dynamic>))
-          .toList() ??
-          [],
+          .toList() ?? [],
       valve: (json['valve'] as List<dynamic>?)
           ?.map((item) => Valve.fromJson(item as Map<String, dynamic>))
-          .toList() ??
-          [],
+          .toList() ?? [],
       mainValve: (json['mainValve'] as List<dynamic>?)
           ?.map((item) => MainValve.fromJson(item as Map<String, dynamic>))
-          .toList() ??
-          [],
+          .toList() ?? [],
       // Add other fields here.
     );
   }

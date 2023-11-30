@@ -41,6 +41,12 @@ class _ProductLimitsState extends State<ProductLimits> {
   @override
   void initState() {
     super.initState();
+    if(mounted){
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        var configPvd = Provider.of<ConfigMakerProvider>(context, listen: false);
+        configPvd.clearConfig();
+      });
+    }
     getProductLimits();
   }
 
@@ -51,13 +57,6 @@ class _ProductLimitsState extends State<ProductLimits> {
     for (var c in myControllers) {
       c.dispose();
     }
-
-    /*if(mounted){
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        var configPvd = Provider.of<ConfigMakerProvider>(context, listen: false);
-        configPvd.clearConfig();
-      });
-    }*/
 
     super.dispose();
   }

@@ -168,7 +168,7 @@ class ConfigMakerProvider extends ChangeNotifier{
     irrigationPumpUpdated = [];
     centralDosingUpdated = [];
     centralFiltrationUpdated = [];
-    List<Map<String,dynamic>> irrigationLines = [ ];
+    irrigationLines = [ ];
     localDosingUpdated = [];
     localFiltrationUpdated = [];
     weatherStation = ['niagara ws'];
@@ -3710,6 +3710,18 @@ class ConfigMakerProvider extends ChangeNotifier{
             }
             case ('Irrigation Pump') : {
               totalIrrigationPump = j['quantity'];
+              break;
+            }
+            case ('Irrigation lines') : {
+              totalIrrigationLine = j['quantity'];
+              break;
+            }
+            case ('Central dosing sites') : {
+              totalCentralDosing = j['quantity'];
+              break;
+            }
+            case ('Central filtration sites') : {
+              totalCentralFiltration = j['quantity'];
               break;
             }
             case ('Filters') : {

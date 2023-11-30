@@ -47,7 +47,7 @@ class _ConditionsScreenState extends State<ConditionsScreen> {
                       ? conditionsProvider.sampleConditions!.condition[conditionTypeIndex].value['name'] : 'Tap to select condition'}',),
                   leading: CircleAvatar(
                     backgroundColor: Theme.of(context).colorScheme.secondary,
-                    child: Icon(IconData(int.parse(iconCode), fontFamily: iconFontFamily), color: Colors.black,),
+                    //child: Icon(IconData(int.parse(iconCode), fontFamily: iconFontFamily), color: Colors.black,),
                   ),
                   trailing: Checkbox(
                     value: selected,

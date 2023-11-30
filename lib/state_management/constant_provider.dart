@@ -216,6 +216,16 @@ class ConstantProvider extends ChangeNotifier{
     }
   }
   void fetchSettings(dynamic data){
+    irrigationLineUpdated = [];
+    mainValveUpdated = [];
+    valveUpdated = [];
+    waterMeterUpdated = [];
+    fertilizerUpdated = [];
+    ecPhUpdated = [];
+    analogSensorUpdated = [];
+    moistureSensorUpdated = [];
+    levelSensorUpdated = [];
+    filterUpdated = [];
     setting['line'] = {};
     for(var il in data['line']){
       setting['line']['${il['sNo']}'] = il;

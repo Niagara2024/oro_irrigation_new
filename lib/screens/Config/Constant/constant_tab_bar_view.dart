@@ -29,23 +29,44 @@ class ConstantInConfig extends StatefulWidget {
 }
 
 class _ConstantInConfigState extends State<ConstantInConfig> {
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getUserConstant();
+  }
+
+  Future<void> getUserConstant() async {
+    var constantPvd = Provider.of<ConstantProvider>(context,listen: false);
+    HttpService service = HttpService();
+    try{
+      var response = await service.postRequest('getUserConstant', {'userId' : widget.customerId,'controllerId' : widget.controllerId});
+      var jsonData = jsonDecode(response.body);
+      print('jsonData : ${jsonEncode(jsonData)}');
+      if(jsonData['data']['isNewConfig'] == '0'){
+        constantPvd.fetchSettings(jsonData['data']['constant']);
+      }
+      constantPvd.fetchAll(jsonData['data']);
+    }catch(e){
+      print(e.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var overAllPvd = Provider.of<OverAllUse>(context,listen: true);
     var constantPvd = Provider.of<ConstantProvider>(context,listen: true);
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Constant'),
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: ()async{
           constantPvd.sendDataToHW();
           HttpService service = HttpService();
           try{
             var response = await service.postRequest('createUserConstant', {
-              'userId' : overAllPvd.userId,
-              'controllerId' : overAllPvd.controllerId,
-              'createUser' : overAllPvd.createUser,
+              'userId' : widget.customerId,
+              'controllerId' : widget.controllerId,
+              'createUser' : widget.userId,
               'general' : '',
               'line' : constantPvd.irrigationLineUpdated,
               // 'line' : [],

@@ -5,6 +5,7 @@ import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/screens/Config/config_maker/source_pump.dart';
 import 'package:provider/provider.dart';
+import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 
 import '../../../state_management/config_maker_provider.dart';
 import '../../../widgets/drop_down_button.dart';
@@ -46,11 +47,11 @@ class _IrrigationLineTableState extends State<IrrigationLineTable> {
   Widget build(BuildContext context) {
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
     return Container(
-      //color: Color(0xFFF3F3F3),
+      color: Color(0xFFF3F3F3),
       child: Column(
         children: [
           Container(
-            padding: EdgeInsets.only(left: 5,right: 5,top: 5),
+            padding: EdgeInsets.only(left: 5,right: 5),
             child: configButtons(
               selectFunction: (value){
                 setState(() {
@@ -67,6 +68,15 @@ class _IrrigationLineTableState extends State<IrrigationLineTable> {
               },
               addBatchButtonFunction: (){
 
+              },
+              reOrderFunction: (){
+                List<int> list1 = [];
+                for(var i = 0;i < configPvd.irrigationLines.length;i++){
+                  list1.add(i+1);
+                }
+                showDialog(context: context, builder: (BuildContext context){
+                  return ReOrderInIL(list: list1);
+                });
               },
               addButtonFunction: (){
                 configPvd.irrigationLinesFunctionality(['addIrrigationLine']);
@@ -131,30 +141,33 @@ class _IrrigationLineTableState extends State<IrrigationLineTable> {
                               child: Column(
                                 children: [
                                   for(var i = 0;i < configPvd.irrigationLines.length; i++)
-                                    Container(
-                                      decoration: BoxDecoration(
-                                          color: Colors.blueGrey,
-                                          border: Border(
-                                            bottom: BorderSide(width: 1),
-                                            left: BorderSide(width: 1),
-                                            right: BorderSide(width: 1),
-                                          )
-                                      ),
-                                      width: 60,
-                                      height: 61,
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          if(configPvd.irrigationSelection == true || configPvd.irrigationSelectAll == true)
-                                            Checkbox(
-                                                fillColor: MaterialStateProperty.all(Colors.white),
-                                                checkColor: myTheme.primaryColor,
-                                                value: configPvd.irrigationLines[i]['isSelected'] == 'select' ? true : false,
-                                                onChanged: (value){
-                                                  configPvd.irrigationLinesFunctionality(['selectIrrigationLine',i,value]);
-                                                }),
-                                          Center(child: Text('${i + 1}',style: TextStyle(fontSize: 12,color: Colors.white))),
-                                        ],
+                                    Visibility(
+                                      visible : configPvd.irrigationLines[i]['deleted'] == true ? false : true,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                            color: Colors.blueGrey,
+                                            border: Border(
+                                              bottom: BorderSide(width: 1),
+                                              left: BorderSide(width: 1),
+                                              right: BorderSide(width: 1),
+                                            )
+                                        ),
+                                        width: 60,
+                                        height: 61,
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            if(configPvd.irrigationSelection == true || configPvd.irrigationSelectAll == true)
+                                              Checkbox(
+                                                  fillColor: MaterialStateProperty.all(Colors.white),
+                                                  checkColor: myTheme.primaryColor,
+                                                  value: configPvd.irrigationLines[i]['isSelected'] == 'select' ? true : false,
+                                                  onChanged: (value){
+                                                    configPvd.irrigationLinesFunctionality(['selectIrrigationLine',i,value]);
+                                                  }),
+                                            Center(child: Text('${i + 1}',style: TextStyle(fontSize: 12,color: Colors.white))),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                 ],
@@ -516,6 +529,25 @@ class _IrrigationLineTableState extends State<IrrigationLineTable> {
                                     ],
                                   ),
                                 ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                      color: Colors.blueGrey,
+                                      border: Border(
+                                        top: BorderSide(width: 1),
+                                        bottom: BorderSide(width: 1),
+                                        right: BorderSide(width: 1),
+                                      )
+                                  ),
+                                  padding: EdgeInsets.only(top: 8),
+                                  width: 90,
+                                  height: 60,
+                                  child: Column(
+                                    children: [
+                                      Text('ORO',style: TextStyle(fontSize: 14, color: Colors.white),),
+                                      Text('Level(${configPvd.totalOroLevel})',style: TextStyle(fontSize: 14, color: Colors.white),),
+                                    ],
+                                  ),
+                                ),
 
                               ],
                             ),
@@ -534,314 +566,337 @@ class _IrrigationLineTableState extends State<IrrigationLineTable> {
                                   child: Column(
                                     children: [
                                       for(var i = 0;i < configPvd.irrigationLines.length; i++)
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            border: Border(bottom: BorderSide(width: 1)),
-                                            color: i % 2 == 0 ? Colors.white : Color(0XFFF3F3F3),
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
-                                                ),
+                                        Visibility(
+                                          visible : configPvd.irrigationLines[i]['deleted'] == true ? false : true,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              border: Border(bottom: BorderSide(width: 1)),
+                                              color: i % 2 == 0 ? Colors.white : Color(0XFFF3F3F3),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
                                                   padding: EdgeInsets.all(5),
                                                   width: 80,
                                                   height: 60,
-                                                child: TextFieldForConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['valve']}', config: configPvd, purpose: 'irrigationLinesFunctionality/valve',),
-                                              ),
-                                              configPvd.totalMainValve == 0 && configPvd.irrigationLines[i]['main_valve'] == '' ?
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
+                                                  child: TextFieldForConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['valve']}', config: configPvd, purpose: 'irrigationLinesFunctionality/valve',),
                                                 ),
-                                                padding: EdgeInsets.all(5),
-                                                width: 80,
-                                                height: 60,
-                                                child: Center(
-                                                  child: Text('N/A',style: TextStyle(fontSize: 12)),
-                                                ),
-                                              ) : Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
-                                                ),
+                                                configPvd.totalMainValve == 0 && configPvd.irrigationLines[i]['main_valve'] == '' ?
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
                                                   padding: EdgeInsets.all(5),
                                                   width: 80,
                                                   height: 60,
-                                                child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['main_valve']}', config: configPvd, purpose: 'irrigationLinesFunctionality/mainValve',),
-                                              ),
-                                              configPvd.totalMoistureSensor == 0 && configPvd.irrigationLines[i]['moistureSensor'] == '' ?
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
+                                                  child: Center(
+                                                    child: Text('N/A',style: TextStyle(fontSize: 12)),
+                                                  ),
+                                                ) : Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.all(5),
+                                                  width: 80,
+                                                  height: 60,
+                                                  child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['main_valve']}', config: configPvd, purpose: 'irrigationLinesFunctionality/mainValve',),
                                                 ),
-                                                padding: EdgeInsets.all(5),
-                                                width: 80,
-                                                height: 60,
-                                                child: Center(
-                                                  child: Text('N/A',style: TextStyle(fontSize: 12)),
+                                                configPvd.totalMoistureSensor == 0 && configPvd.irrigationLines[i]['moistureSensor'] == '' ?
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.all(5),
+                                                  width: 80,
+                                                  height: 60,
+                                                  child: Center(
+                                                    child: Text('N/A',style: TextStyle(fontSize: 12)),
+                                                  ),
+                                                ) : Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.all(5),
+                                                  width: 80,
+                                                  height: 60,
+                                                  child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['moistureSensor']}', config: configPvd, purpose: 'irrigationLinesFunctionality/moistureSensor',),
                                                 ),
-                                              ) : Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
+                                                configPvd.totalLevelSensor == 0 && configPvd.irrigationLines[i]['levelSensor'] == '' ?
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.all(5),
+                                                  width: 80,
+                                                  height: 60,
+                                                  child: Center(
+                                                    child: Text('N/A',style: TextStyle(fontSize: 12)),
+                                                  ),
+                                                ) : Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.all(5),
+                                                  width: 80,
+                                                  height: 60,
+                                                  child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['levelSensor']}', config: configPvd, purpose: 'irrigationLinesFunctionality/levelSensor',),
                                                 ),
-                                                padding: EdgeInsets.all(5),
-                                                width: 80,
-                                                height: 60,
-                                                child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['moistureSensor']}', config: configPvd, purpose: 'irrigationLinesFunctionality/moistureSensor',),
-                                              ),
-                                              configPvd.totalLevelSensor == 0 && configPvd.irrigationLines[i]['levelSensor'] == '' ?
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
+                                                configPvd.totalFogger == 0 && configPvd.irrigationLines[i]['fogger'] == '' ?
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.all(5),
+                                                  width: 80,
+                                                  height: 60,
+                                                  child: Center(
+                                                    child: Text('N/A',style: TextStyle(fontSize: 12)),
+                                                  ),
+                                                ) : Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.all(5),
+                                                  width: 80,
+                                                  height: 60,
+                                                  child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['fogger']}', config: configPvd, purpose: 'irrigationLinesFunctionality/fogger',),
                                                 ),
-                                                padding: EdgeInsets.all(5),
-                                                width: 80,
-                                                height: 60,
-                                                child: Center(
-                                                  child: Text('N/A',style: TextStyle(fontSize: 12)),
+                                                configPvd.totalFan == 0 && configPvd.irrigationLines[i]['fan'] == '' ?
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.all(5),
+                                                  width: 80,
+                                                  height: 60,
+                                                  child: Center(
+                                                    child: Text('N/A',style: TextStyle(fontSize: 12)),
+                                                  ),
+                                                ) : Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.all(5),
+                                                  width: 80,
+                                                  height: 60,
+                                                  child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['fan']}', config: configPvd, purpose: 'irrigationLinesFunctionality/fan',),
                                                 ),
-                                              ) : Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
+                                                Container(
+                                                    decoration: BoxDecoration(
+                                                      border: Border(right: BorderSide(width: 1)),
+                                                    ),
+                                                    padding: EdgeInsets.symmetric(horizontal: 5),
+                                                    width: 80,
+                                                    height: 60,
+                                                    child: MyDropDown(initialValue: configPvd.irrigationLines[i]['Central_dosing_site'], itemList: configPvd.central_dosing_site_list , pvdName: 'editCentralDosing', index: i)
                                                 ),
-                                                padding: EdgeInsets.all(5),
-                                                width: 80,
-                                                height: 60,
-                                                child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['levelSensor']}', config: configPvd, purpose: 'irrigationLinesFunctionality/levelSensor',),
-                                              ),
-                                              configPvd.totalFogger == 0 && configPvd.irrigationLines[i]['fogger'] == '' ?
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
+                                                Container(
+                                                    decoration: BoxDecoration(
+                                                      border: Border(right: BorderSide(width: 1)),
+                                                    ),
+                                                    padding: EdgeInsets.symmetric(horizontal: 5),
+                                                    width: 80,
+                                                    height: 60,
+                                                    child: MyDropDown(initialValue: configPvd.irrigationLines[i]['Central_filtration_site'], itemList: configPvd.central_filtration_site_list , pvdName: 'editCentralFiltration', index: i)
                                                 ),
-                                                padding: EdgeInsets.all(5),
-                                                width: 80,
-                                                height: 60,
-                                                child: Center(
-                                                  child: Text('N/A',style: TextStyle(fontSize: 12)),
-                                                ),
-                                              ) : Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
-                                                ),
-                                                padding: EdgeInsets.all(5),
-                                                width: 80,
-                                                height: 60,
-                                                child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['fogger']}', config: configPvd, purpose: 'irrigationLinesFunctionality/fogger',),
-                                              ),
-                                              configPvd.totalFan == 0 && configPvd.irrigationLines[i]['fan'] == '' ?
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
-                                                ),
-                                                padding: EdgeInsets.all(5),
-                                                width: 80,
-                                                height: 60,
-                                                child: Center(
-                                                  child: Text('N/A',style: TextStyle(fontSize: 12)),
-                                                ),
-                                              ) : Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
-                                                ),
-                                                padding: EdgeInsets.all(5),
-                                                width: 80,
-                                                height: 60,
-                                                child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['fan']}', config: configPvd, purpose: 'irrigationLinesFunctionality/fan',),
-                                              ),
-                                              Container(
+                                                Container(
                                                   decoration: BoxDecoration(
                                                     border: Border(right: BorderSide(width: 1)),
                                                   ),
                                                   padding: EdgeInsets.symmetric(horizontal: 5),
                                                   width: 80,
                                                   height: 60,
-                                                  child: MyDropDown(initialValue: configPvd.irrigationLines[i]['Central_dosing_site'], itemList: configPvd.central_dosing_site_list , pvdName: 'editCentralDosing', index: i)
-                                              ),
-                                              Container(
+                                                  child: (configPvd.totalInjector == 0 &&  configPvd.irrigationLines[i]['Local_dosing_site'] == false) ?
+                                                  Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                                  Checkbox(
+                                                      value:  configPvd.irrigationLines[i]['Local_dosing_site'],
+                                                      onChanged: (value){
+                                                        if(value == true){
+                                                          showDialog(context: context, builder: (BuildContext context){
+                                                            return AlertDialog(
+                                                              title: Text('Add batch',style: TextStyle(color: Colors.black),),
+                                                              content: ldBatch(index: i, value: value!,),
+                                                            );
+                                                          });
+                                                        }else{
+                                                          configPvd.irrigationLinesFunctionality(['editLocalDosing',i,value!]);
+                                                        }
+                                                      }),
+                                                ),
+                                                Container(
                                                   decoration: BoxDecoration(
                                                     border: Border(right: BorderSide(width: 1)),
                                                   ),
                                                   padding: EdgeInsets.symmetric(horizontal: 5),
                                                   width: 80,
                                                   height: 60,
-                                                  child: MyDropDown(initialValue: configPvd.irrigationLines[i]['Central_filtration_site'], itemList: configPvd.central_filtration_site_list , pvdName: 'editCentralFiltration', index: i)
-                                              ),
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
+                                                  child: (configPvd.totalFilter == 0 &&  configPvd.irrigationLines[i]['local_filtration_site'] == false) ?
+                                                  Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                                  Checkbox(
+                                                      value:  configPvd.irrigationLines[i]['local_filtration_site'],
+                                                      onChanged: (value){
+                                                        configPvd.irrigationLinesFunctionality(['editLocalFiltration',i,value]);
+                                                      }),
                                                 ),
-                                                padding: EdgeInsets.symmetric(horizontal: 5),
-                                                width: 80,
-                                                height: 60,
-                                                child: (configPvd.totalInjector == 0 &&  configPvd.irrigationLines[i]['Local_dosing_site'] == false) ?
-                                                Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
-                                                Checkbox(
-                                                    value:  configPvd.irrigationLines[i]['Local_dosing_site'],
-                                                    onChanged: (value){
-                                                      if(value == true){
-                                                        showDialog(context: context, builder: (BuildContext context){
-                                                          return AlertDialog(
-                                                            title: Text('Add batch',style: TextStyle(color: Colors.black),),
-                                                            content: ldBatch(index: i, value: value!,),
-                                                          );
-                                                        });
-                                                      }else{
-                                                        configPvd.irrigationLinesFunctionality(['editLocalDosing',i,value!]);
-                                                      }
-                                                    }),
-                                              ),
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
-                                                ),
-                                                padding: EdgeInsets.symmetric(horizontal: 5),
-                                                width: 80,
-                                                height: 60,
-                                                child: (configPvd.totalFilter == 0 &&  configPvd.irrigationLines[i]['local_filtration_site'] == false) ?
-                                                Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
-                                                Checkbox(
-                                                    value:  configPvd.irrigationLines[i]['local_filtration_site'],
-                                                    onChanged: (value){
-                                                      configPvd.irrigationLinesFunctionality(['editLocalFiltration',i,value]);
-                                                    }),
-                                              ),
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
-                                                ),
-                                                padding: EdgeInsets.symmetric(horizontal: 5),
-                                                width: 80,
-                                                height: 60,
-                                                child: (configPvd.total_p_sensor == 0 && configPvd.irrigationLines[i]['pressureIn'].isEmpty) ?
-                                                const Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
-                                                Checkbox(
-                                                    value: configPvd.irrigationLines[i]['pressureIn'].isEmpty ? false : true,
-                                                    onChanged: (value){
-                                                      configPvd.irrigationLinesFunctionality(['editPressureSensorInConnection',i,value]);
-                                                    }),
-                                              ),
-                                              Container(
-                                                decoration: const BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
-                                                ),
-                                                padding: EdgeInsets.symmetric(horizontal: 5),
-                                                width: 80,
-                                                height: 60,
-                                                child: (configPvd.total_p_sensor == 0 && configPvd.irrigationLines[i]['pressureOut'].isEmpty) ?
-                                                Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
-                                                Checkbox(
-                                                    value: configPvd.irrigationLines[i]['pressureOut'].isEmpty ? false : true,
-                                                    onChanged: (value){
-                                                      configPvd.irrigationLinesFunctionality(['editPressureSensorOutConnection',i,value]);
-                                                    }),
-                                              ),
-                                              Container(
+                                                Container(
                                                   decoration: BoxDecoration(
                                                     border: Border(right: BorderSide(width: 1)),
                                                   ),
                                                   padding: EdgeInsets.symmetric(horizontal: 5),
                                                   width: 80,
                                                   height: 60,
-                                                  child: MyDropDown(initialValue: configPvd.irrigationLines[i]['irrigationPump'], itemList: getIpList(configPvd) , pvdName: 'editIrrigationPump', index: i)
-                                              ),
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
+                                                  child: (configPvd.total_p_sensor == 0 && configPvd.irrigationLines[i]['pressureIn'].isEmpty) ?
+                                                  Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                                  Checkbox(
+                                                      value: configPvd.irrigationLines[i]['pressureIn'].isEmpty ? false : true,
+                                                      onChanged: (value){
+                                                        configPvd.irrigationLinesFunctionality(['editPressureSensorInConnection',i,value]);
+                                                      }),
                                                 ),
-                                                padding: EdgeInsets.symmetric(horizontal: 5),
-                                                width: 80,
-                                                height: 60,
-                                                child: (configPvd.totalWaterMeter == 0 && configPvd.irrigationLines[i]['water_meter'].isEmpty) ?
-                                                Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
-                                                Checkbox(
-                                                    value: configPvd.irrigationLines[i]['water_meter'].isEmpty ? false : true,
-                                                    onChanged: (value){
-                                                      configPvd.irrigationLinesFunctionality(['editWaterMeter',i,value]);
-                                                    }),
-                                              ),
-                                              configPvd.totalOroSmartRTU == 0 && configPvd.irrigationLines[i]['ORO_Smart_RTU'] == '' ?
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
-                                                ),
-                                                padding: EdgeInsets.all(5),
-                                                width: 80,
-                                                height: 60,
-                                                child: Center(
-                                                  child: Text('N/A',style: TextStyle(fontSize: 12)),
-                                                ),
-                                              ) : Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
-                                                ),
-                                                padding: EdgeInsets.symmetric(horizontal: 5),
-                                                width: 80,
-                                                height: 60,
-                                                child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['ORO_Smart_RTU']}', config: configPvd, purpose: 'irrigationLinesFunctionality/OroSmartRtu',)),
-                                              ),
-                                              configPvd.totalRTU == 0 && configPvd.irrigationLines[i]['RTU'] == '' ?
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
-                                                ),
-                                                padding: EdgeInsets.all(5),
-                                                width: 80,
-                                                height: 60,
-                                                child: Center(
-                                                  child: Text('N/A',style: TextStyle(fontSize: 12)),
-                                                ),
-                                              ) : Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
-                                                ),
-                                                padding: EdgeInsets.all(5),
-                                                width: 80,
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.symmetric(horizontal: 5),
+                                                  width: 80,
                                                   height: 60,
-                                                child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['RTU']}', config: configPvd, purpose: 'irrigationLinesFunctionality/RTU',)),
-                                              ),
-                                              configPvd.totalOroSwitch == 0 && configPvd.irrigationLines[i]['ORO_switch'] == '' ?
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
+                                                  child: (configPvd.total_p_sensor == 0 && configPvd.irrigationLines[i]['pressureOut'].isEmpty) ?
+                                                  Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                                  Checkbox(
+                                                      value: configPvd.irrigationLines[i]['pressureOut'].isEmpty ? false : true,
+                                                      onChanged: (value){
+                                                        configPvd.irrigationLinesFunctionality(['editPressureSensorOutConnection',i,value]);
+                                                      }),
                                                 ),
-                                                padding: EdgeInsets.all(5),
-                                                width: 80,
-                                                height: 60,
-                                                child: Center(
-                                                  child: Text('N/A',style: TextStyle(fontSize: 12)),
+                                                Container(
+                                                    decoration: BoxDecoration(
+                                                      border: Border(right: BorderSide(width: 1)),
+                                                    ),
+                                                    padding: EdgeInsets.symmetric(horizontal: 5),
+                                                    width: 80,
+                                                    height: 60,
+                                                    child: MyDropDown(initialValue: configPvd.irrigationLines[i]['irrigationPump'], itemList: getIpList(configPvd) , pvdName: 'editIrrigationPump', index: i)
                                                 ),
-                                              ) : Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
-                                                ),
-                                                padding: EdgeInsets.all(5),
-                                                width: 90,
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.symmetric(horizontal: 5),
+                                                  width: 80,
                                                   height: 60,
-                                                child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['ORO_switch']}', config: configPvd, purpose: 'irrigationLinesFunctionality/0roSwitch',)),
-                                              ),
-                                              configPvd.totalOroSense == 0 && configPvd.irrigationLines[i]['ORO_sense'] == '' ?
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
+                                                  child: (configPvd.totalWaterMeter == 0 && configPvd.irrigationLines[i]['water_meter'].isEmpty) ?
+                                                  Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                                  Checkbox(
+                                                      value: configPvd.irrigationLines[i]['water_meter'].isEmpty ? false : true,
+                                                      onChanged: (value){
+                                                        configPvd.irrigationLinesFunctionality(['editWaterMeter',i,value]);
+                                                      }),
                                                 ),
-                                                padding: EdgeInsets.all(5),
-                                                width: 80,
-                                                height: 60,
-                                                child: Center(
-                                                  child: Text('N/A',style: TextStyle(fontSize: 12)),
+                                                configPvd.totalOroSmartRTU == 0 && configPvd.irrigationLines[i]['ORO_Smart_RTU'] == '' ?
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.all(5),
+                                                  width: 80,
+                                                  height: 60,
+                                                  child: Center(
+                                                    child: Text('N/A',style: TextStyle(fontSize: 12)),
+                                                  ),
+                                                ) : Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.symmetric(horizontal: 5),
+                                                  width: 80,
+                                                  height: 60,
+                                                  child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['ORO_Smart_RTU']}', config: configPvd, purpose: 'irrigationLinesFunctionality/OroSmartRtu',)),
                                                 ),
-                                              ) : Container(
-                                                decoration: BoxDecoration(
-                                                  border: Border(right: BorderSide(width: 1)),
+                                                configPvd.totalRTU == 0 && configPvd.irrigationLines[i]['RTU'] == '' ?
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.all(5),
+                                                  width: 80,
+                                                  height: 60,
+                                                  child: Center(
+                                                    child: Text('N/A',style: TextStyle(fontSize: 12)),
+                                                  ),
+                                                ) : Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.all(5),
+                                                  width: 80,
+                                                  height: 60,
+                                                  child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['RTU']}', config: configPvd, purpose: 'irrigationLinesFunctionality/RTU',)),
                                                 ),
+                                                configPvd.totalOroSwitch == 0 && configPvd.irrigationLines[i]['ORO_switch'] == '' ?
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.all(5),
+                                                  width: 90,
+                                                  height: 60,
+                                                  child: Center(
+                                                    child: Text('N/A',style: TextStyle(fontSize: 12)),
+                                                  ),
+                                                ) : Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.all(5),
+                                                  width: 90,
+                                                  height: 60,
+                                                  child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['ORO_switch']}', config: configPvd, purpose: 'irrigationLinesFunctionality/0roSwitch',)),
+                                                ),
+                                                configPvd.totalOroSense == 0 && configPvd.irrigationLines[i]['ORO_sense'] == '' ?
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.all(5),
+                                                  width: 90,
+                                                  height: 60,
+                                                  child: Center(
+                                                    child: Text('N/A',style: TextStyle(fontSize: 12)),
+                                                  ),
+                                                ) : Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
                                                   padding: EdgeInsets.symmetric(horizontal: 5),
                                                   width: 90,
                                                   height: 60,
-                                                child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['ORO_sense']}', config: configPvd, purpose: 'irrigationLinesFunctionality/0roSense',)),
-                                              ),
-                                            ],
+                                                  child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['ORO_sense']}', config: configPvd, purpose: 'irrigationLinesFunctionality/0roSense',)),
+                                                ),
+                                                configPvd.totalOroLevel == 0 && configPvd.irrigationLines[i]['ORO_level'] == '' ?
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.all(5),
+                                                  width: 90,
+                                                  height: 60,
+                                                  child: Center(
+                                                    child: Text('N/A',style: TextStyle(fontSize: 12)),
+                                                  ),
+                                                ) : Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border(right: BorderSide(width: 1)),
+                                                  ),
+                                                  padding: EdgeInsets.symmetric(horizontal: 5),
+                                                  width: 90,
+                                                  height: 60,
+                                                  child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['ORO_level']}', config: configPvd, purpose: 'irrigationLinesFunctionality/0roLevel',)),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                     ],
@@ -928,37 +983,7 @@ class _ldBatchState extends State<ldBatch> {
 
             ],
           ),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //   children: [
-          //     Text('Dosing meter per injector : ',style: TextStyle(color: Colors.black,fontSize: 14)),
-          //     give_D_meter(configPvd) == false ?
-          //     Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
-          //     Checkbox(
-          //         value: d_meter_value,
-          //         onChanged: (value){
-          //           setState(() {
-          //             d_meter_value = value!;
-          //           });
-          //         }),
-          //   ],
-          // ),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //   children: [
-          //     Text('Booster per injector : ',style: TextStyle(color: Colors.black,fontSize: 14)),
-          //     give_booster(configPvd) == false ?
-          //     Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
-          //     Checkbox(
-          //         value: booster_value,
-          //         onChanged: (value){
-          //           setState(() {
-          //             booster_value = value!;
-          //           });
-          //         }),
-          //
-          //   ],
-          // ),
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -1040,5 +1065,81 @@ class _ldBatchState extends State<ldBatch> {
       }
     }
     return booster;
+  }
+}
+class ReOrderInIL extends StatefulWidget {
+  final List<int> list;
+  const ReOrderInIL({super.key, required this.list});
+
+  @override
+  State<ReOrderInIL> createState() => _ReOrderInILState();
+}
+
+class _ReOrderInILState extends State<ReOrderInIL> {
+
+  late int oldIndex;
+  late int newIndex;
+  List<int> ilData = [];
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    ilData = widget.list;
+  }
+  @override
+  Widget build(BuildContext context) {
+    var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
+    return AlertDialog(
+      title: Text('Re-Order Irrigation Line',style: TextStyle(color: Colors.black),),
+      content: Container(
+        width: 250,
+        height: 250,
+        child: Center(
+          child: ReorderableGridView.count(
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            crossAxisCount: 3,
+            primary: true,
+            children: [
+              for(var i = 0;i < ilData.length;i++)
+                Container(
+                  decoration: BoxDecoration(
+                      border: Border.all(width: 1),
+                      borderRadius: BorderRadius.circular(5)
+                  ),
+                  width: 50,
+                  height: 50 ,
+                  key: ValueKey('IL${ilData[i]}'),
+                  child: GestureDetector(child: Center(child: Text('IL${ilData[i]}'))),
+                )
+            ],
+            onReorder: (oldIND, newIND) {
+              setState(() {
+                oldIndex = oldIND;
+                newIndex = newIND;
+                var removeData = ilData[oldIND];
+                ilData.removeAt(oldIND);
+                ilData.insert(newIND, removeData);
+              });
+            },
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+            onPressed: (){
+              Navigator.pop(context);
+            },
+            child: Text('Cancel')
+        ),
+        TextButton(
+            onPressed: (){
+              configPvd.irrigationLinesFunctionality(['reOrderIl',oldIndex,newIndex]);
+              Navigator.pop(context);
+            },
+            child: Text('Change')
+        )
+      ],
+    );
   }
 }

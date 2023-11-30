@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -7,18 +5,24 @@ import 'custom_drop_down.dart';
 import 'custom_time_picker.dart';
 
 class CustomSwitchTile extends StatelessWidget {
-  final String subtitle;
+  final String title;
+  final String? subtitle;
+  final bool showSubTitle;
   final bool value;
   final Function(bool) onChanged;
-  final IconData? icon;
+  final Widget? icon;
+  final bool showCircleAvatar;
   final BorderRadius? borderRadius;
 
   const CustomSwitchTile({super.key,
-    required this.subtitle,
+    required this.title,
     required this.value,
     required this.onChanged,
     this.icon,
     this.borderRadius,
+    this.subtitle,
+    this.showSubTitle = false,
+    this.showCircleAvatar = false,
   });
 
   @override
@@ -27,9 +31,10 @@ class CustomSwitchTile extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: borderRadius ?? BorderRadius.zero,
       ),
-      contentPadding: const EdgeInsets.all(8),
-      leading: CircleAvatar(backgroundColor: Theme.of(context).colorScheme.secondary, child: Icon(icon, color: Colors.black)),
-      title: Text(subtitle, style: Theme.of(context).textTheme.bodyLarge),
+      subtitle: showSubTitle ? Text(subtitle ?? '') : null,
+      contentPadding: showSubTitle ? null : const EdgeInsets.all(8),
+      leading: showCircleAvatar ? CircleAvatar(backgroundColor: Theme.of(context).colorScheme.secondary, child: icon) : null,
+      title: Text(title, style: Theme.of(context).textTheme.bodyLarge),
       trailing: Switch(
         value: value,
         onChanged: onChanged,
@@ -139,20 +144,12 @@ class CustomTextFormTile extends StatelessWidget {
   }
 }
 
-Color getRandomColor() {
-  final Random random = Random();
-  return Color.fromARGB(
-    255,
-    random.nextInt(256),
-    random.nextInt(256),
-    random.nextInt(256),
-  );
-}
 class CustomCheckBoxListTile extends StatelessWidget {
   final String subtitle;
   final bool value;
   final Function(bool?) onChanged;
   final IconData? icon;
+  final Widget? image;
   final BorderRadius? borderRadius;
 
   const CustomCheckBoxListTile({super.key,
@@ -161,6 +158,7 @@ class CustomCheckBoxListTile extends StatelessWidget {
     required this.onChanged,
     this.icon,
     this.borderRadius,
+    this.image,
   });
 
   @override
@@ -170,7 +168,7 @@ class CustomCheckBoxListTile extends StatelessWidget {
         borderRadius: borderRadius ?? BorderRadius.zero,
       ),
       contentPadding: const EdgeInsets.all(8),
-      leading: CircleAvatar(backgroundColor: Theme.of(context).colorScheme.secondary,child: Icon(icon, color: Colors.black)),
+      leading: CircleAvatar(backgroundColor: Theme.of(context).colorScheme.secondary,child: icon !=null ? Icon(icon, color: Colors.black) : image),
       title: Text(subtitle, style: Theme.of(context).textTheme.bodyLarge),
       trailing: Checkbox(
         value: value,
@@ -182,17 +180,19 @@ class CustomCheckBoxListTile extends StatelessWidget {
 
 class CustomTile extends StatelessWidget {
   final dynamic content;
-  final String subtitle;
+  final String title;
+  final String? subtitle;
   final Widget? leading;
   final Widget? trailing;
   final BorderRadius? borderRadius;
   final Color? tileColor;
   final TextAlign? textAlign;
   final TextStyle? titleColor;
-
+  final bool showCircleAvatar;
+  final bool showSubTitle;
   const CustomTile({
     Key? key,
-    required this.subtitle,
+    required this.title,
     this.trailing,
     this.borderRadius,
     this.content,
@@ -200,6 +200,9 @@ class CustomTile extends StatelessWidget {
     this.textAlign,
     this.titleColor,
     this.leading,
+    this.showCircleAvatar = true,
+    this.showSubTitle = false,
+    this.subtitle,
   }) : super(key: key);
 
   @override
@@ -208,8 +211,9 @@ class CustomTile extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: borderRadius ?? BorderRadius.zero,
       ),
-      contentPadding: const EdgeInsets.all(8),
-      leading: leading ?? CircleAvatar(
+      subtitle: showSubTitle ? Text(subtitle ?? '') : null,
+      contentPadding: showSubTitle ? null : const EdgeInsets.all(8),
+      leading: showCircleAvatar ? CircleAvatar(
         backgroundColor: Theme.of(context).colorScheme.secondary,
         child: content is IconData
             ? Icon(content, color: Colors.black)
@@ -220,8 +224,8 @@ class CustomTile extends StatelessWidget {
               fontSize: Theme.of(context).textTheme.bodyLarge?.fontSize
           ),
         ),
-      ),
-      title: Text(subtitle, style: titleColor ?? Theme.of(context).textTheme.bodyLarge, textAlign: textAlign,),
+      ) : null,
+      title: Text(title, style: titleColor ?? Theme.of(context).textTheme.bodyLarge, textAlign: textAlign,),
       trailing: trailing,
       tileColor: tileColor,
     );
@@ -230,7 +234,10 @@ class CustomTile extends StatelessWidget {
 
 class CustomDropdownTile extends StatelessWidget {
   final dynamic content;
-  final String subtitle;
+  final String title;
+  final String? subtitle;
+  final bool showSubTitle;
+  final double width;
   final Widget? trailing;
   final BorderRadius? borderRadius;
   final Color? tileColor;
@@ -244,7 +251,7 @@ class CustomDropdownTile extends StatelessWidget {
 
   const CustomDropdownTile({
     Key? key,
-    required this.subtitle,
+    required this.title,
     this.trailing,
     this.borderRadius,
     this.content,
@@ -256,6 +263,9 @@ class CustomDropdownTile extends StatelessWidget {
     required this.onChanged,
     this.includeNoneOption = true,
     this.showCircleAvatar = true,
+    this.subtitle,
+    this.showSubTitle = false,
+    this.width = 130,
   }) : super(key: key);
 
   @override
@@ -264,7 +274,8 @@ class CustomDropdownTile extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: borderRadius ?? BorderRadius.zero,
       ),
-      contentPadding: const EdgeInsets.all(8),
+      subtitle: showSubTitle ? Text(subtitle ?? '') : null,
+      contentPadding: showSubTitle ? null : const EdgeInsets.all(8),
       leading: showCircleAvatar ? CircleAvatar(
         backgroundColor: Theme.of(context).colorScheme.secondary,
         child: content is IconData
@@ -277,9 +288,9 @@ class CustomDropdownTile extends StatelessWidget {
           ),
         ),
       ) : null,
-      title: Text(subtitle, style: titleColor ?? Theme.of(context).textTheme.bodyLarge, textAlign: textAlign),
+      title: Text(title, style: titleColor ?? Theme.of(context).textTheme.bodyLarge, textAlign: textAlign),
       trailing: SizedBox(
-        width: 130,
+        width: width,
         child: CustomDropdownWidget(
           dropdownItems: dropdownItems,
           selectedValue: selectedValue,

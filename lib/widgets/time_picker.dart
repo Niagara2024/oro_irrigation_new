@@ -59,7 +59,7 @@ class _CustomTimePickerSivaState extends State<CustomTimePickerSiva> {
               ),
             ],
           ),
-          content: MyTimePicker(displayHours: widget.displayHours, displayMins: widget.displayMins, displaySecs: widget.displaySecs, displayCustom: widget.displayCustom, CustomString: widget.CustomString, CustomList: widget.CustomList, displayAM_PM: widget.displayAM_PM,),
+          content: MyTimePicker(displayHours: widget.displayHours, displayMins: widget.displayMins, displaySecs: widget.displaySecs, displayCustom: widget.displayCustom, CustomString: widget.CustomString, CustomList: widget.CustomList, displayAM_PM: widget.displayAM_PM, hourString: '', minString: '', secString: '',),
           actionsAlignment: MainAxisAlignment.end,
           actions: [
             TextButton(

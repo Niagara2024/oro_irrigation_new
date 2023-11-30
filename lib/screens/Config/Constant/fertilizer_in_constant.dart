@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/widgets/time_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../../state_management/constant_provider.dart';
 import '../../../state_management/overall_use.dart';
+import '../../../widgets/SCustomWidgets/custom_time_picker.dart';
 import '../../../widgets/drop_down_button.dart';
 import '../../../widgets/my_number_picker.dart';
 import '../../../widgets/table_needs.dart';
 import '../../../widgets/text_form_field_constant.dart';
+
+
 
 class FertilizerConstant extends StatefulWidget {
   const FertilizerConstant({super.key});
@@ -34,69 +41,49 @@ class _FertilizerConstantState extends State<FertilizerConstant> {
           [expandedTableCell_Text('Site','name'),
             fixedTableCell_Text('Used in','lines',80,width < 1100 ? constant_style : null),
             fixedTableCell_Text('No flow','behavior',200,width < 1100 ? constant_style : null),
-            expandedTableCell_Text('Fertilizer','(injector)',width < 1100 ? constant_style : null),
-            expandedTableCell_Text('Name','',width < 1100 ? constant_style : null),
-            expandedTableCell_Text('Dosing','meter',width < 1100 ? constant_style : null),
-            expandedTableCell_Text('Ratio','(l/pulse)',width < 1100 ? constant_style : null),
-            expandedTableCell_Text('Shortest','pulse(sec)',width < 1100 ? constant_style : null),
-            expandedTableCell_Text('Nominal','flow(l/h)',width < 1100 ? constant_style : null),
-            fixedTableCell_Text('Injector','mode',150,width < 1100 ? constant_style : null),
+            expandedTableCell_Text('Fertilizer','(injector)',null,width < 1100 ? constant_style : null),
+            expandedTableCell_Text('Name','',null,width < 1100 ? constant_style : null),
+            expandedTableCell_Text('Dosing','meter',null,width < 1100 ? constant_style : null),
+            expandedTableCell_Text('Ratio','(l/pulse)',null,width < 1100 ? constant_style : null),
+            expandedTableCell_Text('Shortest','pulse(sec)',null,width < 1100 ? constant_style : null),
+            // expandedTableCell_Text('Nominal','flow(l/h)',null,width < 1100 ? constant_style : null),
+            // fixedTableCell_Text('Injector','mode',150,width < 1100 ? constant_style : null),
           ],
           Expanded(
             child: ListView.builder(
-                itemCount: constantPvd.fertilizer.length,
+                itemCount: constantPvd.fertilizerUpdated.length,
                 itemBuilder: (BuildContext context,int index){
                   return Container(
-                    margin: index == constantPvd.fertilizer.length - 1 ? EdgeInsets.only(bottom: 60) : null,
+                    margin: index == constantPvd.fertilizerUpdated.length - 1 ? EdgeInsets.only(bottom: 60) : null,
                     decoration: BoxDecoration(
-                        color: myTheme.primaryColor,
-                        border: Border(bottom: BorderSide(width: 0.5,color: Colors.black))
+                      border: Border(bottom: BorderSide(width: 1)),
+                      color: Colors.white70,
                     ),
                     child: Row(
                       children: [
-                        expandedCustomCell(Text('${constantPvd.fertilizer[index][0]}',style: width < 1100 ? constant_style : TextStyle(color: Colors.white),),),
-                        fixedSizeCustomCell(Text('${constantPvd.fertilizer[index][1]}',style: width < 1100 ? constant_style : TextStyle(color: Colors.white),), 80),
-                        fixedSizeCustomCell(Container(color: Colors.white,margin: EdgeInsets.all(5),child: MyDropDown(initialValue: constantPvd.fertilizer[index][2], itemList: ['Stop Faulty Fertilizer','Stop Fertigation','Stop Irrigation','Inform Only'], pvdName: 'fertilizer/noFlowBehavior', index: index)), 200),
+                        expandedCustomCell(Text('${constantPvd.fertilizerUpdated[index]['name']}',style: width < 1100 ? constant_style : TextStyle(color: Colors.black),),null,null,40 * constantPvd.fertilizerUpdated[index]['fertilizer'].length),
+                        fixedSizeCustomCell(Text('${constantPvd.fertilizerUpdated[index]['location'] == '' ? 'null' : constantPvd.fertilizerUpdated[index]['location']}',style: width < 1100 ? constant_style : TextStyle(color: Colors.black),), 80,40 * constantPvd.fertilizerUpdated[index]['fertilizer'].length as double,false),
+                        fixedSizeCustomCell(Container(color: Colors.white,margin: EdgeInsets.all(5),child: MyDropDown(initialValue: constantPvd.fertilizerUpdated[index]['noFlowBehavior'], itemList: ['Stop Faulty Fertilizer','Stop Fertigation','Stop Irrigation','Inform Only'], pvdName: 'fertilizer/noFlowBehavior', index: index)), 200,40 * constantPvd.fertilizerUpdated[index]['fertilizer'].length as double,false),
                         expandedNestedCustomCell([
-                          for(var i = 0;i < constantPvd.fertilizer[index][3].length;i++)
-                            expandedCustomCell(Text('${constantPvd.fertilizer[index][3][i][0]}',style: width < 1100 ? constant_style1 : TextStyle(color: Colors.black),),i % 2 == 0 ? Colors.blue.shade50 : Colors.blue.shade100)
+                          for(var i = 0;i < constantPvd.fertilizerUpdated[index]['fertilizer'].length;i++)
+                            expandedCustomCell(Text('${constantPvd.fertilizerUpdated[index]['fertilizer'][i]['id']}',style: width < 1100 ? constant_style1 : TextStyle(color: Colors.black),))
                         ]),
                         expandedNestedCustomCell([
-                          for(var i = 0;i < constantPvd.fertilizer[index][3].length;i++)
-                            expandedCustomCell(Text('${constantPvd.fertilizer[index][3][i][1]}',style: width < 1100 ? constant_style1 : TextStyle(color: Colors.black),),i % 2 == 0 ? Colors.blue.shade50 : Colors.blue.shade100)
+                          for(var i = 0;i < constantPvd.fertilizerUpdated[index]['fertilizer'].length;i++)
+                            expandedCustomCell(Text('${constantPvd.fertilizerUpdated[index]['fertilizer'][i]['name']}',style: width < 1100 ? constant_style1 : TextStyle(color: Colors.black),))
                         ]),
                         expandedNestedCustomCell([
-                          for(var i = 0;i < constantPvd.fertilizer[index][3].length;i++)
-                            expandedCustomCell(Text('${constantPvd.fertilizer[index][3][i][2]}',style: width < 1100 ? constant_style1 : TextStyle(color: Colors.black),),i % 2 == 0 ? Colors.blue.shade50 : Colors.blue.shade100)
+                          for(var i = 0;i < constantPvd.fertilizerUpdated[index]['fertilizer'].length;i++)
+                            expandedCustomCell(Text('${constantPvd.fertilizerUpdated[index]['fertilizer'][i]['fertilizerMeter']}',style: width < 1100 ? constant_style1 : TextStyle(color: Colors.black),))
                         ]),
                         expandedNestedCustomCell([
-                          for(var i = 0;i < constantPvd.fertilizer[index][3].length;i++)
-                            expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.fertilizer[index][3][i][3], constantPvd: constantPvd, purpose: 'fertilizer_ratio/${index}/3/${i}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],),i % 2 == 0 ? Colors.blue.shade50 : Colors.blue.shade100)
+                          for(var i = 0;i < constantPvd.fertilizerUpdated[index]['fertilizer'].length;i++)
+                            expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.fertilizerUpdated[index]['fertilizer'][i]['ratio'], constantPvd: constantPvd, purpose: 'fertilizer_ratio/${index}/fertilizer/${i}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],))
                         ]),
                         expandedNestedCustomCell([
-                          for(var i = 0;i < constantPvd.fertilizer[index][3].length;i++)
-                            expandedCustomCell(CustomTimePickerSiva(purpose: 'fertilizer_shortestPulse/${index}/3/${i}', index: index, value: '${constantPvd.fertilizer[index][3][i][4]}', displayHours: false, displayMins: false, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,additional: 'split',),i % 2 == 0 ? Colors.blue.shade50 : Colors.blue.shade100)
+                          for(var i = 0;i < constantPvd.fertilizerUpdated[index]['fertilizer'].length;i++)
+                            expandedCustomCell(CustomTimePickerSiva(purpose: 'fertilizer_shortestPulse/${index}/fertilizer/${i}', index: index, value: '${constantPvd.fertilizerUpdated[index]['fertilizer'][i]['shortestPulse']}', displayHours: false, displayMins: false, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,additional: 'split',),null,i % 2 == 0 ? Colors.blue.shade50 : Colors.blue.shade100)
                         ]),
-                        expandedNestedCustomCell([
-                          for(var i = 0;i < constantPvd.fertilizer[index][3].length;i++)
-                            expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.fertilizer[index][3][i][5], constantPvd: constantPvd, purpose: 'fertilizer_nominal_flow/${index}/3/${i}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],),i % 2 == 0 ? Colors.blue.shade50 : Colors.blue.shade100)
-                        ]),
-                        Container(
-                          width: 150,
-                          child: Column(
-                            children: [
-                              for(var i = 0;i < constantPvd.fertilizer[index][3].length;i++)
-                                Container(
-                                  color: i % 2 == 0 ? Colors.blue.shade50 : Colors.blue.shade100,
-                                  width: double.infinity,
-                                  height: 60,
-                                  child: Center(
-                                    child: MyDropDown(initialValue: constantPvd.fertilizer[index][3][i][6], itemList: ['Concentration','PH_controlled','EC_controlled','Regular'], pvdName: 'fertilizer_injector_mode/${index}/3/${i}', index: index),
-                                  ),
-                                )
-                            ],
-                          ),
-                        ),
                       ],
                     ),
                   );
@@ -203,7 +190,7 @@ class _FertilizerConstant_MState extends State<FertilizerConstant_M> {
                                   child: Container(
                                     decoration: BoxDecoration(
                                       borderRadius: index == 0 ? BorderRadius.only(topLeft: Radius.circular(20)) : constantPvd.fertilizer[selectedSite][3].length -1 == index ? BorderRadius.only(topRight: Radius.circular(20)) : BorderRadius.circular(5),
-                                      color: selectedFertilizer == index ? myTheme.primaryColor : Colors.blue.shade50,
+                                      color: selectedFertilizer == index ? myTheme.primaryColor : Colors.blue.shade100,
                                     ),
                                     child: Center(child: Text('${index + 1}',style: TextStyle(color: selectedFertilizer == index ? Colors.white : null),)),
                                   ),

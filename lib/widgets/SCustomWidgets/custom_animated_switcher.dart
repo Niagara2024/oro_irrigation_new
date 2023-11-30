@@ -22,7 +22,7 @@ class CustomAnimatedSwitcher extends StatelessWidget {
           child: child,
         );
       },
-      child: condition ? child : const SizedBox(height: 0,),
+      child: condition ? child : Container(),
     );
   }
 }

@@ -79,7 +79,7 @@ class _ConfigScreenState extends State<ConfigScreen> with SingleTickerProviderSt
             nvRSelection == 1 ?
             PreferencesScreen(customerID: widget.customerID, controllerID: widget.controllerId, userID: widget.userID,):
             nvRSelection == 2 ?
-            ConstantInConfig(userID: widget.userID, customerID: widget.customerID, siteID: widget.controllerId):
+            ConstantInConfig(userId: widget.userID, customerId: widget.customerID, controllerId: widget.controllerId):
             nvRSelection == 3 ?
             DealerDefinitionInConfig(userID: widget.userID,  customerID: widget.customerID, groupID: widget.siteID, imeiNo: widget.imeiNumber,):
             DataAcquisitionMain(customerID: widget.customerID, controllerID: widget.controllerId, userId: widget.userID,),
@@ -187,7 +187,7 @@ class ConfigPage extends StatelessWidget
     }else if(label.toString()=='Data acquisition'){
       return DataAcquisitionMain(customerID: customerID, controllerID: controllerId, userId: userID,);
     }else if(label.toString()=='Constant'){
-      return ConstantInConfig(userID: userID, customerID: customerID, siteID: controllerId);
+      return ConstantInConfig(userId: userID, customerId: customerID, controllerId: controllerId);
     }
 
     return Center(child: Text('Page of $label'));

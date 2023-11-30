@@ -1,8 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ConstantProvider extends ChangeNotifier{
-  List<String> myTabs = ['General','Lines','Main valve','Valve','Water meter','Fertilizers','Filters','Analog sensor'];
+  List<String> myTabs = ['General','Lines','Main valve','Valve','Water meter','Fertilizers','EC/PH','Filters','Analog sensor','Moisture sensor','Level sensor'];
   List<List<dynamic>> general = [['Reset time','00:00',Icon(Icons.restart_alt),'time'],['Fertilizer leakage limit','20',Icon(Icons.production_quantity_limits),'numbers'],['Run list limit','10',Icon(Icons.list)],['Current irrigation day','1',Icon(Icons.today),'numbers'],['No pressure delay','00:00',Icon(Icons.timelapse_outlined),'time'],['Water pulse before dosing','Yes',Icon(Icons.navigate_before),'yes/no'],['Common dosing coefficient','100%',Icon(Icons.percent),'percentage']];
   int selected = -1;
   dynamic APIdata = {};
@@ -21,7 +23,18 @@ class ConstantProvider extends ChangeNotifier{
     ['Line 11','11','IP3','00:00:00','00:00:00','IGNORE','IGNORE','10'],
     ['Line 12','12','IP3','00:00:00','00:00:00','IGNORE','IGNORE','10'],
   ];
-  
+  List<Map<String,dynamic>> irrigationLineUpdated = [];
+  List<Map<String,dynamic>> mainValveUpdated = [];
+  List<Map<String,dynamic>> valveUpdated = [];
+  List<Map<String,dynamic>> fertilizerUpdated = [];
+  List<Map<String,dynamic>> ecPhUpdated = [];
+  List<Map<String,dynamic>> waterMeterUpdated = [];
+  List<Map<String,dynamic>> filterUpdated = [];
+  List<Map<String,dynamic>> analogSensorUpdated = [];
+  List<Map<String,dynamic>> moistureSensorUpdated = [];
+  List<Map<String,dynamic>> levelSensorUpdated = [];
+  Map<String,dynamic> setting = {};
+
   List<dynamic>  mainValve = [
     ['Main Valve 1','1','1','NO DELAY','00:00'],
     ['Main Valve 2','2','1','NO DELAY','00:00'],
@@ -202,8 +215,60 @@ class ConstantProvider extends ChangeNotifier{
       }
     }
   }
-
+  void fetchSettings(dynamic data){
+    setting['line'] = {};
+    for(var il in data['line']){
+      setting['line']['${il['sNo']}'] = il;
+    }
+    setting['mainValve'] = {};
+    for(var il in data['mainValve']){
+      setting['mainValve']['${il['sNo']}'] = il;
+    }
+    setting['valve'] = {};
+    for(var il in data['valve']){
+      for(var vl in il['valve']){
+        setting['valve']['${vl['sNo']}'] = vl;
+      }
+    }
+    setting['waterMeter'] = {};
+    for(var wm in data['waterMeter']){
+      setting['waterMeter']['${wm['sNo']}'] = wm;
+    }
+    setting['fertilization'] = {};
+    setting['inj'] = {};
+    for(var fertSite in data['fertilization']){
+      setting['fertilization']['${fertSite['sNo']}'] = fertSite;
+      for(var fert in fertSite['fertilizer']){
+        setting['inj']['${fert['sNo']}'] = fert;
+      }
+    }
+    setting['filtration'] = {};
+    for(var il in data['filtration']){
+      setting['filtration']['${il['sNo']}'] = il;
+    }
+    setting['ecPh'] = {};
+    for(var fertSite in data['ecPh']){
+      for(var fert in fertSite['fertilizer']){
+        setting['ecPh']['${fert['sNo']}'] = fert;
+      }
+    }
+    setting['analogSensor'] = {};
+    for(var il in data['analogSensor']){
+      setting['analogSensor']['${il['sNo']}'] = il;
+    }
+    setting['moistureSensor'] = {};
+    for(var il in data['moistureSensor']){
+      setting['moistureSensor']['${il['sNo']}'] = il;
+    }
+    setting['levelSensor'] = {};
+    for(var il in data['levelSensor']){
+      setting['levelSensor']['${il['sNo']}'] = il;
+    }
+    notifyListeners();
+  }
   void fetchAll(dynamic data){
+    // myTabs = [];
+    general = [['Reset time','00:00',Icon(Icons.restart_alt),'time'],['Fertilizer leakage limit','20',Icon(Icons.production_quantity_limits),'numbers'],['Run list limit','10',Icon(Icons.list)],['Current irrigation day','1',Icon(Icons.today),'numbers'],['No pressure delay','00:00',Icon(Icons.timelapse_outlined),'time'],['Water pulse before dosing','Yes',Icon(Icons.navigate_before),'yes/no'],['Common dosing coefficient','100%',Icon(Icons.percent),'percentage']];
     for(var i in data.entries){
       if(i.key == 'constant'){
         APIdata = i.value;
@@ -211,258 +276,174 @@ class ConstantProvider extends ChangeNotifier{
       if(i.key == 'default'){
         for(var j in i.value.entries){
           if(j.key == 'line'){
-            print('');
-            print('working line : ${APIdata['line']}');
-            print('');
-            var checkList = [];
+            // if(j.value.length != 0){
+            //   // myTabs.add('Lines');
+            // }
+            //TODO: generating line
             for(var line in j.value){
-              var add = true;
-              oldline : for(var oldLine in APIdata['line']){
-                if('${line['sNo']}' == '${oldLine[0]}'){
-                  add = false;
-                  checkList.add('${line['sNo']}');
-                  break oldline;
-                }else{
-                  print('no line');
-                }
+              irrigationLineUpdated.add({
+                'sNo' : line['sNo'],
+                'name' : line['name'],
+                'id' : line['id'],
+                'pump' : line['irrigationPump'].length != 0 ? line['irrigationPump'][0]['id'] : '-',
+                'lowFlowDelay' : setting['line']?['${line['sNo']}']?['lowFlowDelay'] ?? '00:00:00',
+                'highFlowDelay' : setting['line']?['${line['sNo']}']?['highFlowDelay'] ?? '00:00:00',
+                'lowFlowBehavior' : setting['line']?['${line['sNo']}']?['lowFlowBehavior'] ?? 'Ignore',
+                'highFlowBehavior' : setting['line']?['${line['sNo']}']?['highFlowBehavior'] ?? 'Ignore',
+                'leakageLimit' : setting['line']?['${line['sNo']}']?['leakageLimit'] ?? '0',
+              });
+              // if(line['mainValve'].length != 0){
+              //   if(!myTabs.contains('Main valve')){
+              //     myTabs.add('Main valve');
+              //   }
+              // }
+              //TODO: generating mainValve
+              for(var mv in line['mainValve']){
+                mainValveUpdated.add({
+                  'sNo' : mv['sNo'],
+                  'name' : mv['name'],
+                  'id' : mv['id'],
+                  'location' : line['name'],
+                  'mode' : setting['mainValve']?['${mv['sNo']}']?['mode'] ?? 'No delay',
+                  'delay' : setting['mainValve']?['${mv['sNo']}']?['delay'] ?? '00:00:00',
+                });
               }
-              if(add == true){
-                checkList.add('${line['sNo']}');
-                APIdata['line'].add(['${line['sNo']}','${line['name']}','${line['irrigationPump'].length == 0 ? APIpump[0] : line['irrigationPump'][0]}','00:00:00','00:00:00','Ignore','Ignore','10']);
+              //TODO: generating moistureSensor
+              for(var ms in line['moistureSensor']){
+                moistureSensorUpdated.add({
+                  'sNo' : ms['sNo'],
+                  'name' : ms['name'],
+                  'id' : ms['id'],
+                  'location' : line['name'],
+                  'high/low' : setting['moistureSensor']?['${ms['sNo']}']?['high/low'] ?? '-',
+                  'value' : setting['moistureSensor']?['${ms['sNo']}']?['value'] ?? '0',
+                  'minimum' : setting['moistureSensor']?['${ms['sNo']}']?['minimum'] ?? '0.00',
+                  'maximum' : setting['moistureSensor']?['${ms['sNo']}']?['maximum'] ?? '0.00',
+                });
               }
-            }
-            List<List<dynamic>> itemsToRemove = [];
-            var duplicate = APIdata['line'];
-            for (var oldLine = APIdata['line'].length - 1;oldLine >= 0;oldLine--) {
-              if (!checkList.contains('${APIdata['line'][oldLine][0]}')) {
-                print('no : ${oldLine}');
-                APIdata['line'].remove(APIdata['line'][oldLine]);
+              //TODO: generating levelSensor
+              for(var ls in line['levelSensor']){
+                levelSensorUpdated.add({
+                  'sNo' : ls['sNo'],
+                  'name' : ls['name'],
+                  'id' : ls['id'],
+                  'location' : line['name'],
+                  'high/low' : setting['levelSensor']?['${ls['sNo']}']?['high/low'] ?? '-',
+                  'value' : setting['levelSensor']?['${ls['sNo']}']?['value'] ?? '0',
+                  'minimum' : setting['levelSensor']?['${ls['sNo']}']?['minimum'] ?? '0.00',
+                  'maximum' : setting['levelSensor']?['${ls['sNo']}']?['maximum'] ?? '0.00',
+                });
               }
-            }
-            irrigationLines = APIdata['line'];
-            irrigationLines.sort((a, b) => a[1].compareTo(b[1]));
-            print('irrigationLines : ${irrigationLines}');
-          }else if(j.key == 'valve'){
-            var list = [];
-            for(var valve in j.value){
-              list.add(valve['location']);
-            }
-            var filterList = list.toSet().toList();
-            for(var flitem in filterList){
-              var dataAdd = true;
-              for(var vData in APIdata['valve']){
-                for(var keyLine in vData.entries){
-                  if(keyLine.key == '${flitem}'){
-                    dataAdd = false;
-                  }
-                }
+              //TODO: generating valve
+              var valve = [];
+              for(var v in line['valve']){
+                valve.add({
+                  'sNo' : v['sNo'],
+                  'name' : v['name'],
+                  'id' : v['id'],
+                  'location' : v['location'],
+                  'defaultDosage' : setting['valve']?['${v['sNo']}']?['defaultDosage'] ?? '00:00:00',
+                  'nominalFlow' : setting['valve']?['${v['sNo']}']?['nominalFlow'] ?? '100',
+                  'minimumFlow' : setting['valve']?['${v['sNo']}']?['minimumFlow'] ?? '75',
+                  'maximumFlow' : setting['valve']?['${v['sNo']}']?['maximumFlow'] ?? '125',
+                  'fillUpDelay' : setting['valve']?['${v['sNo']}']?['fillUpDelay'] ?? '00:00:00',
+                  'area' : setting['valve']?['${v['sNo']}']?['area'] ?? '0.00',
+                  'cropFactor' : setting['valve']?['${v['sNo']}']?['cropFactor'] ?? '0',
+                });
+              }
+              valveUpdated.add({
+                'sNo' : line['sNo'],
+                'name' : line['name'],
+                'valve' : valve,
+              });
 
-              }
-              if(dataAdd == true){
-                APIdata['valve'].add({flitem : []});
-              }
             }
-            var checkList = [];
-            for(var valve in j.value){
-              for(var apiValve in APIdata['valve']){
-                for(var valitem in apiValve.entries){
-                  if(valitem.key == valve['location']){
-                    var add = true;
-                    oldValve : for(var oldValve in valitem.value){
-                      if('${valve['sNo']}' == '${oldValve[0]}'){
-                        add = false;
-                        checkList.add('${valve['sNo']}');
-                        break oldValve;
-                      }
-                    }
-                    if(add == true){
-                      checkList.add('${valve['sNo']}');
-                      valitem.value.add(['${valve['sNo']}','${valve['id']}','${valve['name']}','00:00:00','100','50','75','125','10','1.00','100']);
-                    }
-                  }
-                }
-              }
-            }
-            List<List<dynamic>> itemsToRemove = [];
-            for(var valve in APIdata['valve']){
-              for(var dupValve in valve.entries){
-                for(var item in dupValve.value){
-                  if(!checkList.contains('${item[0]}')){
-                    itemsToRemove.add(item);
-                  }
-                }
-              }
-            }
-            for (var item in itemsToRemove) {
-              for(var valve in APIdata['valve']){
-                for(var dupValve in valve.entries){
-                  dupValve.value.remove(item);
-                }
-              }
-            }
-            valve = APIdata['valve'];
           }
           else if(j.key == 'fertilization'){
-            var checkList = [];
-            for(var fertilizer in j.value){
-              var add = true;
-              oldFertilizer : for(var oldFertilizer in APIdata['fertilization']){
-                for(var noOfFert in fertilizer['fertlizer']){
-                  for(var eachFert in oldFertilizer[3]){
-                    if('${noOfFert['sNo']}' == '${eachFert[eachFert.length - 1]}'){
-                      add = false;
-                      checkList.add('${noOfFert['sNo']}');
-                      break oldFertilizer;
-                    }
-                  }
+            for(var fert in j.value){
+              var fertilizer = [];
+              var ecPh = [];
+              for(var inj in fert['fertilizer']){
+                fertilizer.add({
+                  'sNo' : inj['sNo'],
+                  'id' : inj['id'],
+                  'name' : inj['name'],
+                  'fertilizerMeter' : inj['fertilizerMeter'].length != 0 ? 'yes' : 'no',
+                  'ratio' : setting['inj']?['${inj['sNo']}']?['ratio'] ?? '100',
+                  'shortestPulse' : setting['inj']?['${inj['sNo']}']?['shortestPulse'] ?? '100',
+                });
+              }
+              for(var inj in fert['fertilizer']){
+                ecPh.add({
+                  'sNo' : inj['sNo'],
+                  'id' : inj['id'],
+                  'name' : inj['name'],
+                  'fertilizerMeter' : inj['fertilizerMeter'].length != 0 ? 'yes' : 'no',
+                  'nominalFlow' : setting['ecPh']?['${inj['sNo']}']?['nominalFlow'] ?? '100',
+                  'injectorMode' : setting['ecPh']?['${inj['sNo']}']?['injectorMode'] ?? 'PH_controlled',
+                });
+              }
+              //TODO: generating injector
 
-                }
-              }
-              if(add == true){
-                var myList = [];
-                for(var fert in fertilizer['fertlizer']){
-                  checkList.add('${fert['sNo']}');
-                  myList.add(['${fert['id']}','${fert['name']}','${fert['fertilizerMeter'].length == 0 ? 'no' : 'yes'}','100','20','100','Regular','${fert['sNo']}']);
-                }
-                APIdata['fertilization'].add(['${fertilizer['name']}','${fertilizer['location']}','Inform Only',myList]);
-              }
+              fertilizerUpdated.add({
+                'sNo' : fert['sNo'],
+                'id' : fert['id'],
+                'name' : fert['name'],
+                'location' : fert['location'],
+                'noFlowBehavior' : setting['fertilization']?['${fert['sNo']}']?['noFlowBehavior'] ?? 'Inform Only',
+                'fertilizer' : fertilizer,
+              });
+              //TODO: generating ecPh
+              ecPhUpdated.add({
+                'sNo' : fert['sNo'],
+                'id' : fert['id'],
+                'name' : fert['name'],
+                'location' : fert['location'],
+                'fertilizer' : ecPh,
+              });
             }
-            List<List<dynamic>> itemsToRemove = [];
-            for (var oldFertilizer in APIdata['fertilization']) {
-              for(var eachFert in oldFertilizer[3]){
-                if (!checkList.contains('${eachFert[eachFert.length - 1]}')) {
-                  itemsToRemove.add(oldFertilizer);
-                }
-              }
-            }
-            for (var item in itemsToRemove) {
-              for (var oldFertilizer in APIdata['fertilization']) {
-                for(var eachFert in oldFertilizer[3]){
-                  if('${item}' == eachFert[eachFert.length - 1]){
-                    oldFertilizer[3].remove(eachFert);
-                  }
-                }
-              }
-            }
-            fertilizer = APIdata['fertilization'];
           }
-          else if(j.key == 'mainValve'){
-            var checkList = [];
-            for(var mainValve in j.value){
-              var add = true;
-              oldMainValve : for(var oldMainValve in APIdata['mainValve']){
-                if('${mainValve['sNo'] }'== '${oldMainValve[0]}'){
-                  add = false;
-                  checkList.add('${mainValve['sNo']}');
-                  break oldMainValve;
-                }
-              }
-              if(add == true){
-                checkList.add('${mainValve['sNo']}');
-                APIdata['mainValve'].add(['${mainValve['sNo']}','${mainValve['name']}','${mainValve['location']}','No delay','00:00']);
-              }
-            }
-            List<List<dynamic>> itemsToRemove = [];
-            for (var oldMainValve in APIdata['mainValve']) {
-              if (!checkList.contains('${oldMainValve[0]}')) {
-                itemsToRemove.add(oldMainValve);
-              }
-            }
-            for (var item in itemsToRemove) {
-              APIdata['mainValve'].remove(item);
-            }
-            mainValve = APIdata['mainValve'];
-            mainValve.sort((a, b) => a[1].compareTo(b[1]));
-          }else if(j.key == 'filtration'){
-            var checkList = [];
-            for(var filter in j.value){
-              for(var filt in filter['filter']){
-                var add = true;
-                oldFilter : for(var oldFilter in APIdata['filtration']){
-                  if('${filt['sNo'] }'== '${oldFilter[oldFilter.length - 1]}'){
-                    add = false;
-                    checkList.add('${filt['sNo']}');
-                    break oldFilter;
-                  }
-                }
-                if(add == true){
-                  checkList.add('${filt['sNo']}');
-                  APIdata['filtration'].add(['${filter['id']}','${filt['name']}','${filt['location']}','30','99','Stop Irrigation','${filt['sNo']}']);
-                }
-              }
-            }
-            List<List<dynamic>> itemsToRemove = [];
-            for (var oldFilter in APIdata['filtration']) {
-              if (!checkList.contains('${oldFilter[oldFilter.length - 1]}')) {
-                itemsToRemove.add(oldFilter);
-              }
-            }
-            for (var item in itemsToRemove) {
-              for (var oldFilter in APIdata['filtration']) {
-                if(oldFilter[oldFilter.length - 1] == item[item.length]){
-                  APIdata['filtration'].remove(item);
-                }
-              }
-            }
-            filter = APIdata['filtration'];
-
-          }else if(j.key == 'waterMeter'){
-            var checkList = [];
+          //TODO: generating waterMeter
+          else if(j.key == 'waterMeter'){
             for(var wm in j.value){
-              var add = true;
-              print(APIdata['waterMeter']);
-              oldWaterMeter : for(var oldWaterMeter in APIdata['waterMeter']){
-                if('${wm['sNo']}' == '${oldWaterMeter[0]}'){
-                  checkList.add('${wm['sNo']}');
-                  add = false;
-                  break oldWaterMeter;
-                }
-              }
-              if(add == true){
-                checkList.add('${wm['sNo']}');
-                APIdata['waterMeter'].add(['${wm['sNo']}','${wm['name']}','${wm['location']}','100','1000']);
-              }
+              waterMeterUpdated.add({
+                'sNo' : wm['sNo'],
+                'id' : wm['id'],
+                'name' : wm['name'],
+                'location' : wm['location'],
+                'ratio' : setting['waterMeter']?['${wm['sNo']}']?['ratio'] ?? '100',
+                'maximumFlow' : setting['waterMeter']?['${wm['sNo']}']?['maximumFlow'] ?? '100',
+              });
             }
-            List<List<dynamic>> itemsToRemove = [];
-            for (var oldWaterMeter in APIdata['waterMeter']) {
-              if (!checkList.contains('${oldWaterMeter[0]}')) {
-                itemsToRemove.add(oldWaterMeter);
-              }
+          }
+          //TODO: generating filtration
+          else if(j.key == 'filtration'){
+            for(var fl in j.value){
+              filterUpdated.add({
+                'sNo' : fl['sNo'],
+                'id' : fl['id'],
+                'name' : fl['name'],
+                'location' : fl['location'],
+                'dpDelay' : setting['filtration']?['${fl['sNo']}']?['dpDelay'] ?? '00:00:00',
+                'loopingLimit' : setting['filtration']?['${fl['sNo']}']?['loopingLimit'] ?? '1',
+                'whileFlushing' : setting['filtration']?['${fl['sNo']}']?['whileFlushing'] ?? 'Stop Irrigation',
+              });
             }
-            for (var item in itemsToRemove) {
-              APIdata['waterMeter'].remove(item);
+          }
+          //TODO: generating analogSensor
+          else if(j.key == 'analogSensor'){
+            for(var as in j.value){
+              analogSensorUpdated.add({
+                'sNo' : as['sNo'],
+                'id' : as['id'],
+                'name' : as['name'],
+                'type' : setting['analogSensor']?['${as['sNo']}']?['type'] ?? 'Soil Temperature',
+                'units' : setting['analogSensor']?['${as['sNo']}']?['units'] ?? 'bar',
+                'base' : setting['analogSensor']?['${as['sNo']}']?['base'] ?? 'Current',
+                'minimum' : setting['analogSensor']?['${as['sNo']}']?['minimum'] ?? '0.00',
+                'maximum' : setting['analogSensor']?['${as['sNo']}']?['maximum'] ?? '0.00',
+              });
             }
-            waterMeter = APIdata['waterMeter'];
-          }else if(j.key == 'analogSensor'){
-            var checkList = [];
-            print('full sensor : ${j.value}');
-            print("APIdata['analogSensor'] : ${APIdata['analogSensor']}");
-            for(var AS in j.value){
-              var add = true;
-              oldAnalogSensor : for(var oldAnalogSensor in APIdata['analogSensor']){
-                print('oldAnalogSensor : ${oldAnalogSensor}');
-                if(AS['sNo'] == oldAnalogSensor[0]){
-                  checkList.add('${AS['sNo']}');
-                  add = false;
-                  break oldAnalogSensor;
-                }
-              }
-              if(add == true){
-                checkList.add('${AS['sNo']}');
-                APIdata['analogSensor'].add(['${AS['sNo']}','${AS['name']}','EC','Bar','Cloud','Current','10','10']);
-              }
-            }
-            List<List<dynamic>> itemsToRemove = [];
-            for (var oldAnalogSensor in APIdata['analogSensor']) {
-              if (!checkList.contains('${oldAnalogSensor[0]}')) {
-                itemsToRemove.add(oldAnalogSensor);
-              }
-            }
-            for (var item in itemsToRemove) {
-              APIdata['analogSensor'].remove(item);
-            }
-            analogSensor = APIdata['analogSensor'];
-            print(analogSensor);
           }
         }
       }
@@ -476,33 +457,33 @@ class ConstantProvider extends ChangeNotifier{
   }
 
   void generalFunctionality(int index,String value){
-   general[index][1] = value;
-   notifyListeners();
+    general[index][1] = value;
+    notifyListeners();
   }
   void irrigationLineFunctionality(dynamic list){
     switch(list[0]){
       case ('line/irrigationPump'):{
-        irrigationLines[list[1]][2] = list[2];
+        irrigationLineUpdated[list[1]]['pump'] = list[2];
         break;
       }
       case ('line/lowFlowDelay'):{
-        irrigationLines[list[1]][3] = list[2];
+        irrigationLineUpdated[list[1]]['lowFlowDelay'] = list[2];
         break;
       }
       case ('line/highFlowDelay'):{
-        irrigationLines[list[1]][4] = list[2];
+        irrigationLineUpdated[list[1]]['highFlowDelay'] = list[2];
         break;
       }
       case ('line/lowFlowBehavior'):{
-        irrigationLines[list[1]][5] = list[2];
+        irrigationLineUpdated[list[1]]['lowFlowBehavior'] = list[2];
         break;
       }
       case ('line/highFlowBehavior'):{
-        irrigationLines[list[1]][6] = list[2];
+        irrigationLineUpdated[list[1]]['highFlowBehavior'] = list[2];
         break;
       }
       case ('line/leakageLimit'):{
-        irrigationLines[list[1]][7] = list[2];
+        irrigationLineUpdated[list[1]]['leakageLimit'] = list[2];
         break;
       }
     }
@@ -512,11 +493,11 @@ class ConstantProvider extends ChangeNotifier{
   void mainValveFunctionality(dynamic list){
     switch (list[0]){
       case ('mainvalve/mode'):{
-        mainValve[list[1]][3] = list[2];
+        mainValveUpdated[list[1]]['mode'] = list[2];
         break;
       }
       case ('mainvalve/delay'):{
-        mainValve[list[1]][4] = list[2];
+        mainValveUpdated[list[1]]['delay'] = list[2];
         break;
       }
     }
@@ -526,31 +507,31 @@ class ConstantProvider extends ChangeNotifier{
   void valveFunctionality(dynamic list){
     switch (list[0]){
       case ('valve_defaultDosage'):{
-        valve[list[1]][list[2]]?[list[3]][3] = list[4];
+        valveUpdated[list[1]]['valve'][list[2]]['defaultDosage'] = list[3];
         break;
       }
       case ('valve_nominal_flow'):{
-        valve[list[1]][list[2]]?[list[3]][4] = list[4];
+        valveUpdated[list[1]]['valve'][list[2]]['nominalFlow'] = list[3];
         break;
       }
       case ('valve_minimum_flow'):{
-        valve[list[1]][list[2]]?[list[3]][5] = list[4];
+        valveUpdated[list[1]]['valve'][list[2]]['minimumFlow'] = list[3];
         break;
       }
       case ('valve_maximum_flow'):{
-        valve[list[1]][list[2]]?[list[3]][6] = list[4];
+        valveUpdated[list[1]]['valve'][list[2]]['maximumFlow'] = list[3];
         break;
       }
       case ('valve_fillUpDelay'):{
-        valve[list[1]][list[2]]?[list[3]][7] = list[4];
+        valveUpdated[list[1]]['valve'][list[2]]['fillUpDelay'] = list[3];
         break;
       }
       case ('valve_area'):{
-        valve[list[1]][list[2]]?[list[3]][8] = list[4];
+        valveUpdated[list[1]]['valve'][list[2]]['area'] = list[3];
         break;
       }
       case ('valve_crop_factor'):{
-        valve[list[1]][list[2]]?[list[3]][9] = list[4];
+        valveUpdated[list[1]]['valve'][list[2]]['cropFactor'] = list[3];
         break;
       }
     }
@@ -560,11 +541,11 @@ class ConstantProvider extends ChangeNotifier{
   void waterMeterFunctionality(dynamic list){
     switch (list[0]){
       case ('wm_ratio'):{
-        waterMeter[list[1]][3] = list[2];
+        waterMeterUpdated[list[1]]['ratio'] = list[2];
         break;
       }
       case ('maximum_flow'):{
-        waterMeter[list[1]][4] = list[2];
+        waterMeterUpdated[list[1]]['maximumFlow'] = list[2];
         break;
       }
     }
@@ -574,26 +555,39 @@ class ConstantProvider extends ChangeNotifier{
   void fertilizerFunctionality(dynamic list){
     switch (list[0]){
       case ('fertilizer/noFlowBehavior'):{
-        fertilizer[list[1]][2] = list[2];
+        fertilizerUpdated[list[1]]['noFlowBehavior'] = list[2];
         break;
       }
       case ('fertilizer_ratio'):{
-        fertilizer[list[1]][list[2]][list[3]][3] = list[4];
+        fertilizerUpdated[list[1]][list[2]][list[3]]['ratio'] = list[4];
         break;
       }
       case ('fertilizer_shortestPulse'):{
-        fertilizer[list[1]][list[2]][list[3]][4] = list[4];
+        fertilizerUpdated[list[1]][list[2]][list[3]]['shortestPulse'] = list[4];
         break;
       }
-      case ('fertilizer_nominal_flow'):{
-        fertilizer[list[1]][list[2]][list[3]][5] = list[4];
-        break;
-      }
-      case ('fertilizer_injector_mode'):{
-        fertilizer[list[1]][list[2]][list[3]][6] = list[4];
-        break;
-      }
+    // case ('fertilizer_nominal_flow'):{
+    //   fertilizer[list[1]][list[2]][list[3]][5] = list[4];
+    //   break;
+    // }
+    // case ('fertilizer_injector_mode'):{
+    //   fertilizer[list[1]][list[2]][list[3]][6] = list[4];
+    //   break;
+    // }
 
+    }
+    notifyListeners();
+  }
+  void ecPhFunctionality(dynamic list){
+    switch (list[0]){
+      case ('ecPh_nominal_flow'):{
+        ecPhUpdated[list[1]][list[2]][list[3]]['nominalFlow'] = list[4];
+        break;
+      }
+      case ('ecPh_injector_mode'):{
+        ecPhUpdated[list[1]][list[2]][list[3]]['injectorMode'] = list[4];
+        break;
+      }
     }
     notifyListeners();
   }
@@ -601,15 +595,15 @@ class ConstantProvider extends ChangeNotifier{
   void filterFunctionality(dynamic list){
     switch (list[0]){
       case ('filter_dp_delay'):{
-        filter[list[1]][3] = list[2];
+        filterUpdated[list[1]]['dpDelay'] = list[2];
         break;
       }
       case ('filter_looping_limit'):{
-        filter[list[1]][4] = list[2];
+        filterUpdated[list[1]]['loopingLimit'] = list[2];
         break;
       }
       case ('filter/flushing'):{
-        filter[list[1]][5] = list[2];
+        filterUpdated[list[1]]['whileFlushing'] = list[2];
         break;
       }
 
@@ -620,26 +614,68 @@ class ConstantProvider extends ChangeNotifier{
   void analogSensorFunctionality(dynamic list){
     switch (list[0]){
       case ('analogSensor/type'):{
-        analogSensor[list[1]][2] = list[2];
+        analogSensorUpdated[list[1]]['type'] = list[2];
         break;
       }
       case ('analogSensor/units'):{
-        analogSensor[list[1]][3] = list[2];
+        analogSensorUpdated[list[1]]['units'] = list[2];
         break;
       }
       case ('analogSensor/base'):{
-        analogSensor[list[1]][5] = list[2];
+        analogSensorUpdated[list[1]]['base'] = list[2];
         break;
       }
       case ('analogSensor_minimum_v'):{
-        analogSensor[list[1]][list[2]] = list[3];
+        analogSensorUpdated[list[1]]['minimum'] = list[2];
         break;
       }
       case ('analogSensor_maximum_v'):{
-        analogSensor[list[1]][list[2]] = list[3];
+        analogSensorUpdated[list[1]]['maximum'] = list[2];
         break;
       }
 
+    }
+    notifyListeners();
+  }
+  void moistureSensorFunctionality(dynamic list){
+    switch (list[0]){
+      case ('moistureSensor_high_low'):{
+        moistureSensorUpdated[list[1]]['high/low'] = list[2];
+        break;
+      }
+      case ('moistureSensor_value'):{
+        moistureSensorUpdated[list[1]]['value'] = list[2];
+        break;
+      }
+      case ('moistureSensor_minimum_v'):{
+        moistureSensorUpdated[list[1]]['minimum'] = list[2];
+        break;
+      }
+      case ('moistureSensor_maximum_v'):{
+        moistureSensorUpdated[list[1]]['maximum'] = list[2];
+        break;
+      }
+    }
+    notifyListeners();
+  }
+  void levelSensorFunctionality(dynamic list){
+    switch (list[0]){
+      case ('levelSensor_high_low'):{
+        levelSensorUpdated[list[1]]['high/low'] = list[2];
+        break;
+      }
+      case ('levelSensor_value'):{
+        levelSensorUpdated[list[1]]['value'] = list[2];
+        break;
+      }
+      case ('levelSensor_minimum_v'):{
+        levelSensorUpdated[list[1]]['minimum'] = list[2];
+        break;
+      }
+      case ('levelSensor_maximum_v'):{
+        levelSensorUpdated[list[1]]['maximum'] = list[2];
+        break;
+      }
     }
     notifyListeners();
   }
@@ -647,5 +683,102 @@ class ConstantProvider extends ChangeNotifier{
   void editValveContentShow(bool value){
     valveContentShow = value;
     notifyListeners();
+  }
+  //TODO: generating HW payload
+  void sendDataToHW(){
+    var payload = {
+      "300" : [
+        {
+          "301" : ""
+        },
+        {
+          "302" : ""
+        },
+        {
+          "303" : ""
+        },
+        {
+          "304" : ""
+        },
+        {
+          "305" : ""
+        },
+        {
+          "306" : ""
+        },
+        {
+          "307" : ""
+        }
+      ]
+    };
+    var mv = '';
+    for(var i in mainValveUpdated){
+      mv += '${mv.length != 0 ? ';' : ''}${i['sNo']},${i['name']},${i['mode']},${i['delay']}';
+    }
+    payload['300']?.add({'302' : mv});
+    var ms = '';
+    for(var i in moistureSensorUpdated){
+      ms += '${ms.length != 0 ? ';' : ''}${i['sNo']},${i['name']},${i['id']},${i['high/low']},${i['value']},${i['minimum']},${i['maximum']}';
+    }
+    payload['300']?.add({'310' : ms});
+    var ls = '';
+    for(var i in levelSensorUpdated){
+      ls += '${ls.length != 0 ? ';' : ''}${i['sNo']},${i['name']},${i['id']},${i['high/low']},${i['value']},${i['minimum']},${i['maximum']}';
+    }
+    payload['300']?.add({'311' : ls});
+    var line = '';
+    for(var i in irrigationLineUpdated){
+      line += '${line.length != 0 ? ';' : ''}${i['sNo']},${i['pump']},${i['lowFlowDelay']},${i['highFlowDelay']},${i['lowFlowBehavior']},${i['highFlowBehavior']},${i['leakageLimit']}';
+    }
+    payload['300']?.add({'303' : line});
+    var valve = '';
+    for(var i in valveUpdated){
+      for(var vl in i['valve']){
+        valve += '${valve.length != 0 ? ';' : ''}${vl['sNo']},${vl['location']},${vl['name']},${vl['defaultDosage']},${vl['nominalFlow']},${vl['minimumFlow']},${vl['maximumFlow']},${vl['fillUpDelay']},${vl['area']},${vl['cropFactor']}';
+      }
+    }
+    payload['300']?.add({'304' : valve});
+    var wm = '';
+    for(var i in waterMeterUpdated){
+      wm += '${wm.length != 0 ? ';' : ''}${i['sNo']},${i['location']},${i['name']},${i['ratio']},${i['maximumFlow']}';
+    }
+    payload['300']?.add({'305' : wm});
+    var fertilizer = '';
+    for(var i in fertilizerUpdated){
+      for(var fert in i['fertilizer']){
+        fertilizer += '${fertilizer.length != 0 ? ';' : ''}${fert['sNo']},${i['id']},${fert['id']},${i['noFlowBehavior']},${fert['id']},${fert['fertilizerMeter']},${fert['ratio']},${fert['shortestPulse']}';
+      }
+    }
+    payload['300']?.add({'306' : fertilizer});
+
+    var ecPh = '';
+    for(var i in ecPhUpdated){
+      for(var j in i['fertilizer']){
+        ecPh += '${ecPh.length != 0 ? ';' : ''}${j['sNo']},${i['id']},${j['id']},${j['nominalFlow']},${j['injectorMode']}';
+      }
+    }
+    payload['300']?.add({'307' : ecPh});
+
+    var filter = '';
+    for(var i in filterUpdated){
+      filter += '${filter.length != 0 ? ';' : ''}${i['sNo']},${i['location']},${i['dpDelay']},${i['loopingLimit']},${i['whileFlushing']}';
+    }
+
+    payload['300']?.add({'308' : filter});
+    var as = '';
+    for(var i in analogSensorUpdated){
+      as += '${as.length != 0 ? ';' : ''}${i['sNo']},${i['name']},${i['type']},${i['units']},${i['base']},${i['minimum']},${i['maximum']}';
+    }
+    payload['300']?.add({'309' : as});
+
+
+    print('mv : ${mv}');
+    print('line : ${line}');
+    print('valve : ${valve}');
+    print('wm : ${wm}');
+    print('fertilizer : ${fertilizer}');
+    print('ecPh : ${ecPh}');
+    print('filter : ${filter}');
+
   }
 }

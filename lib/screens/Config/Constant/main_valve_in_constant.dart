@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
 
 import '../../../state_management/constant_provider.dart';
 import '../../../state_management/overall_use.dart';
+import '../../../widgets/SCustomWidgets/custom_time_picker.dart';
 import '../../../widgets/drop_down_button.dart';
 import '../../../widgets/table_needs.dart';
 import '../../../widgets/time_picker.dart';
@@ -28,7 +31,7 @@ class _MainValveConstantState extends State<MainValveConstant> {
         return MainValveConstant_M();
       }
       return myTable(
-          [expandedTableCell_Text('Name',''),
+          [expandedTableCell_Text('Name','','first'),
             expandedTableCell_Text('ID',''),
             expandedTableCell_Text('Line',''),
             expandedTableCell_Text('Mode',''),
@@ -36,18 +39,21 @@ class _MainValveConstantState extends State<MainValveConstant> {
           ],
           Expanded(
             child: ListView.builder(
-                itemCount: constantPvd.mainValve.length,
+                itemCount: constantPvd.mainValveUpdated.length,
                 itemBuilder: (BuildContext context,int index){
                   return Container(
-                    margin: index == constantPvd.mainValve.length - 1 ? EdgeInsets.only(bottom: 60) : null,
-                    color: index % 2 == 0 ? Colors.blue.shade50 : Colors.blue.shade100,
+                    margin: index == constantPvd.mainValveUpdated.length - 1 ? EdgeInsets.only(bottom: 60) : null,
+                    decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(width: 1)),
+                      color: Colors.white70,
+                    ),
                     child: Row(
                       children: [
-                        expandedCustomCell(Text('${constantPvd.mainValve[index][1]}'),),
-                        expandedCustomCell(Text('${index + 1}')),
-                        expandedCustomCell(Text('${constantPvd.mainValve[index][2]}'),),
-                        expandedCustomCell(MyDropDown(initialValue: constantPvd.mainValve[index][3], itemList: ['No delay','Open before','Open after'], pvdName: 'mainvalve/mode', index: index),),
-                        expandedCustomCell(CustomTimePickerSiva(purpose: 'mainvalve/delay', index: index, value: '${constantPvd.mainValve[index][4]}', displayHours: true, displayMins: true, displaySecs: false, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,)),
+                        expandedCustomCell(Text('${constantPvd.mainValveUpdated[index]['name']}'),'first'),
+                        expandedCustomCell(Text('${constantPvd.mainValveUpdated[index]['id']}'),),
+                        expandedCustomCell(Text('${constantPvd.mainValveUpdated[index]['location']}'),),
+                        expandedCustomCell(MyDropDown(initialValue: constantPvd.mainValveUpdated[index]['mode'], itemList: ['No delay','Open before','Open after'], pvdName: 'mainvalve/mode', index: index),),
+                        expandedCustomCell(CustomTimePickerSiva(purpose: 'mainvalve/delay', index: index, value: '${constantPvd.mainValveUpdated[index]['delay']}', displayHours: true, displayMins: true, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,)),
                       ],
                     ),
                   );
@@ -110,7 +116,7 @@ class _MainValveConstant_MState extends State<MainValveConstant_M> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: index == 0 ? BorderRadius.only(topLeft: Radius.circular(20)) : constantPvd.mainValve.length -1 == index ? BorderRadius.only(topRight: Radius.circular(20)) : BorderRadius.circular(5),
-                                    color: selected_M_Valve == index ? myTheme.primaryColor : Colors.blue.shade50,
+                                    color: selected_M_Valve == index ? myTheme.primaryColor : Colors.blue.shade100,
                                   ),
                                   child: Center(child: Text('${index + 1}',style: TextStyle(color: selected_M_Valve == index ? Colors.white : null),)),
                                 ),

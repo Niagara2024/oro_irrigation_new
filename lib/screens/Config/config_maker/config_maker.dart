@@ -49,6 +49,7 @@ class _ConfigMakerScreenState extends State<ConfigMakerScreen> with SingleTicker
   void dispose() {
     // Dispose of your TabController and other resources here
     controller.dispose();
+
     super.dispose();
   }
   void getProductLimit(ConfigMakerProvider configPvd)async{

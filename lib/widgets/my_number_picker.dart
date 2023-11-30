@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
 
-import '../../state_management/constant_provider.dart';
-import '../constants/theme.dart';
 import '../state_management/overall_use.dart';
 
 class MyTimePicker extends StatefulWidget {
@@ -14,8 +12,18 @@ class MyTimePicker extends StatefulWidget {
   final bool displayCustom;
   final bool displayAM_PM;
   final String CustomString;
+  String? hourString;
+  String? minString;
+  String? secString;
   final List<int> CustomList;
-  const MyTimePicker({super.key, required this.displayHours, required this.displayMins, required this.displaySecs, required this.displayCustom, required this.CustomString, required this.CustomList, required this.displayAM_PM});
+  MyTimePicker({super.key,
+    required this.displayHours,
+    this.hourString,
+    this.minString,
+    this.secString,
+    required this.displayMins,
+    required this.displaySecs,
+    required this.displayCustom, required this.CustomString, required this.CustomList, required this.displayAM_PM});
   @override
   State<MyTimePicker> createState() => _MyTimePickerState();
 }
@@ -25,7 +33,7 @@ class _MyTimePickerState extends State<MyTimePicker> {
   // Create a list of options for the segmented control
   final Map<int, Widget> segmentedOptions = {
     0: Padding(padding: EdgeInsets.symmetric(vertical: 5,horizontal: 5),
-    child : Text('AM',style: TextStyle(color: Colors.black),)),
+        child : Text('AM',style: TextStyle(color: Colors.black),)),
     1: Padding(padding: EdgeInsets.symmetric(vertical: 5,horizontal: 5),
         child : Text('PM',style: TextStyle(color: Colors.black),)),
   };
@@ -33,28 +41,31 @@ class _MyTimePickerState extends State<MyTimePicker> {
   Widget build(BuildContext context) {
     var overAllPvd = Provider.of<OverAllUse>(context,listen: true);
     return Container(
-      height: 250,
+      height: 300,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: myTheme.primaryColor
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.white
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Visibility(
             visible: widget.displayAM_PM,
-            child: CupertinoSegmentedControl(
-              unselectedColor: Colors.blueGrey,
-              borderColor: Colors.white,
-              selectedColor: Colors.white,
-              children: segmentedOptions,
-              groupValue: _currentSegment,
-              onValueChanged: (value) {
-                setState(() {
-                  _currentSegment = value;
-                });
-                overAllPvd.edit_am_pm(value == 0 ? 'AM' : 'PM');
-              },
+            child: Container(
+              width: 200,
+              child: CupertinoSegmentedControl(
+                unselectedColor: Colors.grey.shade100,
+                borderColor: Colors.white,
+                selectedColor: Colors.green.shade200,
+                children: segmentedOptions,
+                groupValue: _currentSegment,
+                onValueChanged: (value) {
+                  setState(() {
+                    _currentSegment = value;
+                  });
+                  overAllPvd.edit_am_pm(value == 0 ? 'AM' : 'PM');
+                },
+              ),
             ),
           ),
           Row(
@@ -62,31 +73,36 @@ class _MyTimePickerState extends State<MyTimePicker> {
             children: [
               Visibility(
                 visible: widget.displayHours,
-                child: NumberPicker(
-                  itemHeight: 80,
-                    textStyle: TextStyle(color: Colors.white70,fontSize: 12),
-                    selectedTextStyle: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),
+                child: Container(
+                  width: 50,
+                  child: NumberPicker(
+                    itemHeight: 80,
+                    textStyle: TextStyle(color: Colors.grey,fontSize: 12),
+                    selectedTextStyle: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),
                     decoration: BoxDecoration(
-                        border: Border(top: BorderSide(width: 1,color: Colors.white),bottom: BorderSide(width: 1,color: Colors.white))
+                        border: Border(top: BorderSide(width: 1,color: Colors.black),bottom: BorderSide(width: 1,color: Colors.black))
                     ),
                     infiniteLoop: true,
                     minValue: 0,
-                    maxValue: widget.displayAM_PM == true ? 12 : 24,
+                    maxValue: widget.displayAM_PM == true ? 11 : 23,
                     value: overAllPvd.hrs,
                     onChanged: (value){
                       overAllPvd.editTime('hrs', value);
                     },
-                  forWhat: 'hrs',
+                    forWhat: widget.hourString == null ? 'hrs' : widget.hourString!,
+                  ),
                 ),
               ),
               Visibility(
                 visible: widget.displayMins,
-                child: NumberPicker(
-                  itemHeight: 80,
-                    textStyle: TextStyle(color: Colors.white70,fontSize: 12),
-                    selectedTextStyle: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),
+                child: Container(
+                  width: 50,
+                  child: NumberPicker(
+                    itemHeight: 80,
+                    textStyle: TextStyle(color: Colors.grey,fontSize: 12),
+                    selectedTextStyle: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),
                     decoration: BoxDecoration(
-                        border: Border(top: BorderSide(width: 1,color: Colors.white),bottom: BorderSide(width: 1,color: Colors.white))
+                        border: Border(top: BorderSide(width: 1,color: Colors.black),bottom: BorderSide(width: 1,color: Colors.black))
                     ),
                     infiniteLoop: true,
                     minValue: 0,
@@ -95,17 +111,20 @@ class _MyTimePickerState extends State<MyTimePicker> {
                     onChanged: (value){
                       overAllPvd.editTime('min', value);
                     },
-                  forWhat: 'min',
+                    forWhat: widget.minString == null ? 'min' : widget.minString!,
+                  ),
                 ),
               ),
               Visibility(
                 visible: widget.displaySecs,
-                child: NumberPicker(
-                  itemHeight: 80,
-                    textStyle: TextStyle(color: Colors.white70,fontSize: 12),
-                    selectedTextStyle: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),
+                child: Container(
+                  width: 50,
+                  child: NumberPicker(
+                    itemHeight: 80,
+                    textStyle: TextStyle(color: Colors.grey,fontSize: 12),
+                    selectedTextStyle: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),
                     decoration: BoxDecoration(
-                        border: Border(top: BorderSide(width: 1,color: Colors.white),bottom: BorderSide(width: 1,color: Colors.white))
+                        border: Border(top: BorderSide(width: 1,color: Colors.black),bottom: BorderSide(width: 1,color: Colors.black))
                     ),
                     infiniteLoop: true,
                     minValue: 0,
@@ -114,17 +133,18 @@ class _MyTimePickerState extends State<MyTimePicker> {
                     onChanged: (value){
                       overAllPvd.editTime('sec', value);
                     },
-                  forWhat: 'sec',
+                    forWhat: widget.secString == null ? 'sec' : widget.secString!,
+                  ),
                 ),
               ),
               Visibility(
                 visible: widget.displayCustom,
                 child: NumberPicker(
                   itemHeight: 80,
-                  textStyle: TextStyle(color: Colors.white70,fontSize: 12),
-                  selectedTextStyle: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),
+                  textStyle: TextStyle(color: Colors.grey,fontSize: 12),
+                  selectedTextStyle: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),
                   decoration: BoxDecoration(
-                      border: Border(top: BorderSide(width: 1,color: Colors.white),bottom: BorderSide(width: 1,color: Colors.white))
+                      border: Border(top: BorderSide(width: 1,color: Colors.black),bottom: BorderSide(width: 1,color: Colors.black))
                   ),
                   infiniteLoop: true,
                   minValue: widget.CustomList[0],

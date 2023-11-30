@@ -65,7 +65,7 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
         return  MappingOfInputsTable(configPvd: configPvd,);
       }
       case (11):{
-        return  FinishPageConfigMaker(userID: widget.userID, customerID: widget.customerID, siteId: widget.siteId,);
+        return  FinishPageConfigMaker(userId: widget.userID, customerID: widget.customerID, controllerId: widget.siteId,);
       }
       default : {
         Container();

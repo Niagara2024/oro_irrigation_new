@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
 
 import '../../../state_management/constant_provider.dart';
 import '../../../state_management/overall_use.dart';
+import '../../../widgets/SCustomWidgets/custom_time_picker.dart';
 import '../../../widgets/drop_down_button.dart';
 import '../../../widgets/table_needs.dart';
 import '../../../widgets/time_picker.dart';
@@ -35,19 +38,21 @@ class _FilterConstantState extends State<FilterConstant> {
           ],
           Expanded(
             child: ListView.builder(
-                itemCount: constantPvd.filter.length,
+                itemCount: constantPvd.filterUpdated.length,
                 itemBuilder: (BuildContext context,int index){
                   return Container(
-                    margin: index == constantPvd.filter.length - 1 ? EdgeInsets.only(bottom: 60) : null,
-                    color: index % 2 == 0 ? Colors.blue.shade50 : Colors.blue.shade100,
-                    child: Row(
+                    margin: index == constantPvd.filterUpdated.length - 1 ? EdgeInsets.only(bottom: 60) : null,
+                    decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(width: 1)),
+                      color: Colors.white70,
+                    ),                    child: Row(
                       children: [
-                        expandedCustomCell(Text('${constantPvd.filter[index][0]}'),),
-                        expandedCustomCell(Text('${constantPvd.filter[index][1]}'),),
-                        expandedCustomCell( Text('${constantPvd.filter[index][2]}'),),
-                        expandedCustomCell(CustomTimePickerSiva(purpose: 'filter_dp_delay', index: index, value: '${constantPvd.filter[index][3]}', displayHours: false, displayMins: false, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,)),
-                        expandedCustomCell(CustomTimePickerSiva(purpose: 'filter_looping_limit', index: index, value: '${constantPvd.filter[index][4]}', displayHours: false, displayMins: false, displaySecs: false, displayCustom: true, CustomString: '', CustomList: [0,99], displayAM_PM: false,)),
-                        expandedCustomCell(MyDropDown(initialValue: constantPvd.filter[index][5], itemList: ['Continue Irrigation','Stop Irrigation','No Fertilization'], pvdName: 'filter/flushing', index: index),),
+                        expandedCustomCell(Text('${constantPvd.filterUpdated[index]['id']}'),),
+                        expandedCustomCell(Text('${constantPvd.filterUpdated[index]['name']}'),),
+                        expandedCustomCell( Text('${constantPvd.filterUpdated[index]['location']}'),),
+                        expandedCustomCell(CustomTimePickerSiva(purpose: 'filter_dp_delay', index: index, value: '${constantPvd.filterUpdated[index]['dpDelay']}', displayHours: true, displayMins: true, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,)),
+                        expandedCustomCell(CustomTimePickerSiva(purpose: 'filter_looping_limit', index: index, value: '${constantPvd.filterUpdated[index]['loopingLimit']}', displayHours: false, displayMins: false, displaySecs: false, displayCustom: true, CustomString: '', CustomList: [0,99], displayAM_PM: false,)),
+                        expandedCustomCell(MyDropDown(initialValue: constantPvd.filterUpdated[index]['whileFlushing'], itemList: ['Continue Irrigation','Stop Irrigation','No Fertilization'], pvdName: 'filter/flushing', index: index),),
                       ],
                     ),
                   );
@@ -110,7 +115,7 @@ class _FilterConstant_MState extends State<FilterConstant_M> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: index == 0 ? BorderRadius.only(topLeft: Radius.circular(20)) : constantPvd.filter.length -1 == index ? BorderRadius.only(topRight: Radius.circular(20)) : BorderRadius.circular(5),
-                                    color: selectedSite == index ? myTheme.primaryColor : Colors.blue.shade50,
+                                    color: selectedSite == index ? myTheme.primaryColor : Colors.blue.shade100,
                                   ),
                                   child: Center(child: Text('${index + 1}',style: TextStyle(color: selectedSite == index ? Colors.white : null),)),
                                 ),

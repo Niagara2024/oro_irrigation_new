@@ -15,14 +15,13 @@ class StartPageConfigMaker extends StatefulWidget {
 class _StartPageConfigMakerState extends State<StartPageConfigMaker> {
   bool isHovered = false;
   bool isHovered1 = false;
-
   @override
   Widget build(BuildContext context) {
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
     return Container(
       width: double.infinity,
       height: double.infinity,
-      //color: Color(0xFFF3F3F3),
+      color: Color(0xFFF3F3F3),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

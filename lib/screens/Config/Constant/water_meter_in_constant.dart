@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
 
 import '../../../state_management/constant_provider.dart';
@@ -36,18 +38,21 @@ class _WaterMeterConstantState extends State<WaterMeterConstant> {
           ],
           Expanded(
             child: ListView.builder(
-                itemCount: constantPvd.waterMeter.length,
+                itemCount: constantPvd.waterMeterUpdated.length,
                 itemBuilder: (BuildContext context,int index){
                   return Container(
-                    margin: index == constantPvd.waterMeter.length - 1 ? EdgeInsets.only(bottom: 60) : null,
-                    color: index % 2 == 0 ? Colors.blue.shade50 : Colors.blue.shade100,
+                    margin: index == constantPvd.waterMeterUpdated.length - 1 ? EdgeInsets.only(bottom: 60) : null,
+                    decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(width: 1)),
+                      color: Colors.white70,
+                    ),
                     child: Row(
                       children: [
-                        expandedCustomCell(Text('${index + 1}'),),
-                        expandedCustomCell(Text('${constantPvd.waterMeter[index][1]}'),),
-                        expandedCustomCell(Text('${constantPvd.waterMeter[index][2]}'),),
-                        expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.waterMeter[index][3], constantPvd: constantPvd, purpose: 'wm_ratio/${index}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
-                        expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.waterMeter[index][4], constantPvd: constantPvd, purpose: 'maximum_flow/${index}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
+                        expandedCustomCell(Text('${constantPvd.waterMeterUpdated[index]['id']}'),),
+                        expandedCustomCell(Text('${constantPvd.waterMeterUpdated[index]['location']}'),),
+                        expandedCustomCell(Text('${constantPvd.waterMeterUpdated[index]['name']}'),),
+                        expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.waterMeterUpdated[index]['ratio'], constantPvd: constantPvd, purpose: 'wm_ratio/${index}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
+                        expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.waterMeterUpdated[index]['maximumFlow'], constantPvd: constantPvd, purpose: 'maximum_flow/${index}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
                       ],
                     ),
                   );
@@ -110,7 +115,7 @@ class _WaterMeterConstant_MState extends State<WaterMeterConstant_M> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: index == 0 ? BorderRadius.only(topLeft: Radius.circular(20)) : constantPvd.waterMeter.length -1 == index ? BorderRadius.only(topRight: Radius.circular(20)) : BorderRadius.circular(5),
-                                    color: selectedWaterMeter == index ? myTheme.primaryColor : Colors.blue.shade50,
+                                    color: selectedWaterMeter == index ? myTheme.primaryColor : Colors.blue.shade100,
                                   ),
                                   child: Center(child: Text('${index + 1}',style: TextStyle(color: selectedWaterMeter == index ? Colors.white : null),)),
                                 ),

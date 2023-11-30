@@ -196,7 +196,7 @@ class _PumpScreenState extends State<PumpScreen> with SingleTickerProviderStateM
                                       }).toList(),
                                     ],
                                   ),
-                                  borderRadius: BorderRadius.circular(15),
+                                  borderRadius: BorderRadius.circular(15), title: '',
                                 ),
                               ),
                               const SizedBox(height: 5),

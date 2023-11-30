@@ -2,14 +2,20 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:oro_irrigation_new/Models/IrrigationModel/irrigation_program_model.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/irrigation_program_main.dart';
+import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/program_library.dart';
 import 'package:oro_irrigation_new/screens/Customer/conditionscreen.dart';
+import 'package:oro_irrigation_new/screens/Customer/radiationsets.dart';
 
 import '../../constants/http_service.dart';
+import 'Group/groupscreen.dart';
+import 'frost_productionScreen.dart';
 
-enum MenuItems { itemOne, itemTwo, itemThree, itemFour, itemFive, itemSix, itemSeven}
+enum MenuItems { itemOne, itemTwo, itemThree, itemFour, itemFive, itemSix, itemSeven, itemEight}
 const List<String> list = <String>['Manual', 'Program 1', 'Program 2', 'Program 3'];
-
+enum Calendar { manual, time, flow}
 
 class ControllerDashboard extends StatefulWidget {
   const ControllerDashboard({Key? key, required this.customerID, required this.siteID, required this.siteName, required this.controllerID, required this.imeiNo}) : super(key: key);
@@ -24,7 +30,7 @@ class _ControllerDashboardState extends State<ControllerDashboard>
 {
   MenuItems? selectedMenu;
   String dropdownValue = list.first;
-  late List<DashboardData> data = [];
+  late List<DashboardData> dashBoardData = [];
   bool visibleLoading = false;
 
   @override
@@ -37,7 +43,7 @@ class _ControllerDashboardState extends State<ControllerDashboard>
   {
     indicatorViewShow();
     try {
-      data = await fetchData();
+      dashBoardData = await fetchData();
       setState(() {
       });
     } catch (e) {
@@ -46,17 +52,25 @@ class _ControllerDashboardState extends State<ControllerDashboard>
 
   }
 
-  Future<List<DashboardData>> fetchData() async
-  {
-    Map<String, Object> body = {"userId" : widget.customerID, "controllerId" : widget.controllerID};
-    final response = await HttpService().postRequest("getCustomerDashboard", body);
+  Future<List<DashboardData>> fetchData() async {
+    Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.controllerID};
+    final response = await HttpService().postRequest("getCustomerDashboardByManual", body);
+
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
       //print(jsonResponse);
       indicatorViewHide();
-      return (jsonResponse['data'] as List<dynamic>)
-          .map((item) => DashboardData.fromJson(item))
-          .toList();
+
+      if (jsonResponse['data'] != null) {
+        dynamic data = jsonResponse['data'];
+        if (data is Map<String, dynamic>) {
+          return [DashboardData.fromJson(data)];
+        } else {
+          throw Exception('Invalid response format: "data" is not a Map');
+        }
+      } else {
+        throw Exception('Invalid response format: "data" is null');
+      }
     } else {
       throw Exception('Failed to load data');
     }
@@ -87,6 +101,29 @@ class _ControllerDashboardState extends State<ControllerDashboard>
       appBar: AppBar(
         title: Text(widget.siteName),
         actions: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              DropdownButton<String>(
+                value: dropdownValue,
+                icon: const Icon(Icons.arrow_drop_down, color: Colors.white,),
+                focusColor: Colors.transparent,
+                onChanged: (String? value) {
+                  // This is called when the user selects an item.
+                  setState(() {
+                    dropdownValue = value!;
+                  });
+                },
+                items: list.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value, style: const TextStyle(color: Colors.black87),),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(width: 10,)
+            ],
+          ),
           IconButton(tooltip: 'Refresh', icon: const Icon(Icons.refresh), color: Colors.white, onPressed: () async
           {
             getControllerDashboardDetails();
@@ -102,10 +139,22 @@ class _ControllerDashboardState extends State<ControllerDashboard>
             onSelected: (MenuItems item) {
               setState(() {
                 selectedMenu = item;
-                if(item.index==3){
-                  print('condition selection');
-                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  ConditionScreen(userId: widget.customerID, controllerId: widget.controllerID, imeiNo: widget.imeiNo,)),);
+                if(item.index==0){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  ProgramLibraryScreen(userId: widget.customerID, controllerId: widget.controllerID)));
                 }
+                else if(item.index==3){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  RadiationsetUI(userId: widget.customerID, controllerId: widget.controllerID)),);
+                }
+                else if(item.index==6){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  ConditionScreen(userId: widget.customerID, controllerId: widget.controllerID, imeiNo: widget.imeiNo)),);
+                }
+                else if(item.index==5){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyGroupScreen(userId: widget.customerID, controllerId: widget.controllerID)),);
+                }
+                else if(item.index==7){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  FrostMobUI(userId: widget.customerID, controllerId: widget.controllerID)),);
+                }
+
 
               });
             },
@@ -120,12 +169,29 @@ class _ControllerDashboardState extends State<ControllerDashboard>
               ),
               const PopupMenuItem<MenuItems>(
                 value: MenuItems.itemThree,
-                child: Text('Groups'),
+                child: Text('Virtual Water Meter'),
               ),
               const PopupMenuItem<MenuItems>(
                 value: MenuItems.itemFour,
+                child: Text('Radiation sets'),
+              ),
+              const PopupMenuItem<MenuItems>(
+                value: MenuItems.itemFive,
+                child: Text('Satellite'),
+              ),
+              const PopupMenuItem<MenuItems>(
+                value: MenuItems.itemSix,
+                child: Text('Groups'),
+              ),
+              const PopupMenuItem<MenuItems>(
+                value: MenuItems.itemSeven,
                 child: Text('Conditions'),
               ),
+              const PopupMenuItem<MenuItems>(
+                value: MenuItems.itemEight,
+                child: Text('Frost production & Rain delay'),
+              ),
+
             ],
           ),
           const SizedBox(width: 20,),
@@ -144,70 +210,40 @@ class _ControllerDashboardState extends State<ControllerDashboard>
       ) :
       Column(
         children: [
-          Container(
-            color: Colors.white,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                DropdownButton<String>(
-                  value: dropdownValue,
-                  icon: const Icon(Icons.arrow_drop_down),
-                  elevation: 16,
-                  underline: Container(
-                    height: 2,
-                    color: myTheme.primaryColor,
-                  ),
-                  onChanged: (String? value) {
-                    // This is called when the user selects an item.
-                    setState(() {
-                      dropdownValue = value!;
-                    });
-                  },
-                  items: list.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(width: 10,)
-              ],
-            ),
-          ),
           Expanded(
             child: Row(
               children: [
                 Expanded(
-                  flex: 2,
+                  flex: 10,
                   child: SingleChildScrollView(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
                         children: [
-                          SizedBox(
-                            height: 100,
-                            child: DisplaySourcePump(sourcePump: data[0].sourcePump,),
-                          ),
+                          if (dashBoardData.isNotEmpty) // Add this condition
+                            SizedBox(
+                              height: 100,
+                              child: DisplaySourcePump(sourcePump: dashBoardData[0].sourcePump,),
+                            ),
                           const Divider(),
-                          SizedBox(
-                            height: 100,
-                            child: DisplayIrrigationPump(irrigationPump: data[0].irrigationPump,),
-                          ),
+                          if (dashBoardData.isNotEmpty) // Add this condition
+                            SizedBox(
+                              height: 100,
+                              child: DisplayIrrigationPump(irrigationPump: dashBoardData[0].irrigationPump,),
+                            ),
                           const Divider(),
-                          SizedBox(
-                            height: 100,
-                            child: DisplayCentralFilterSite(centralFilterSite: data[0].centralFilterSite,),
-                          ),
+                          if (dashBoardData.isNotEmpty) // Add this condition
+                            SizedBox(
+                              height: 100,
+                              child: DisplayCentralFilterSite(centralFilterSite: dashBoardData[0]!.centralFilterSite,),
+                            ),
                           const Divider(),
-                          SizedBox(
-                            height: 100,
-                            child: DisplayCentralFertilizationSite(centralFertilizationSite: data[0].centralFertilizationSite,),
-                          ),
+                          if (dashBoardData.isNotEmpty) // Add this condition
+                            SizedBox(
+                              height: 100,
+                              child: DisplayCentralFertilizationSite(centralFertilizationSite: dashBoardData[0].centralFertilizationSite,),
+                            ),
                           const Divider(),
-                          SizedBox(
-                            height: 100,
-                            child: DisplayMainValve(mainValve: data[0].mainValve,),
-                          ),
                         ],
                       ),
                     ),
@@ -215,10 +251,10 @@ class _ControllerDashboardState extends State<ControllerDashboard>
                 ),
                 const VerticalDivider(),
                 Expanded(
-                  flex: 1,
+                  flex: 6,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: DisplayIrrigationLine(irrigationLine: data[0].irrigationLine, valves: data[0].valve,),
+                    child: DisplayLineOrSequence(lineOrSequence: dashBoardData.isNotEmpty ? dashBoardData[0].lineOrSequence : []),
                   ),
                 ),
               ],
@@ -327,9 +363,241 @@ class _ControllerDashboardState extends State<ControllerDashboard>
 
 }
 
+class DashboardData {
+  List<SourcePump> sourcePump;
+  List<IrrigationPump> irrigationPump;
+  List<LineOrSequence> lineOrSequence;
+  List<CentralFertilizationSite> centralFertilizationSite;
+  List<CentralFilterSite> centralFilterSite;
+
+  DashboardData({
+    required this.sourcePump,
+    required this.irrigationPump,
+    required this.lineOrSequence,
+    required this.centralFertilizationSite,
+    required this.centralFilterSite,
+  });
+
+  factory DashboardData.fromJson(Map<String, dynamic> json) {
+    List<SourcePump> sourcePumpList = (json['sourcePump'] as List)
+        .map((sourcePumpJson) => SourcePump.fromJson(sourcePumpJson))
+        .toList();
+
+    List<IrrigationPump> irrigationPump = (json['irrigationPump'] as List)
+        .map((sourcePumpJson) => IrrigationPump.fromJson(sourcePumpJson))
+        .toList();
+
+    List<LineOrSequence> lineOrSequence = (json['lineOrSequence'] as List)
+        .map((irrigationLineJson) => LineOrSequence.fromJson(irrigationLineJson))
+        .toList();
+
+    List<CentralFilterSite> centralFilterSite = (json['centralFilterSite'] as List)
+        .map((irrigationLineJson) => CentralFilterSite.fromJson(irrigationLineJson))
+        .toList();
+
+    List<CentralFertilizationSite> centralFertilizationSite = (json['centralFertilizerSite'] as List)
+        .map((irrigationLineJson) => CentralFertilizationSite.fromJson(irrigationLineJson))
+        .toList();
+
+    return DashboardData(
+      sourcePump: sourcePumpList,
+      lineOrSequence: lineOrSequence,
+      irrigationPump: irrigationPump,
+      centralFertilizationSite: centralFertilizationSite,
+      centralFilterSite: centralFilterSite,
+    );
+  }
+
+}
+
+
+class SourcePump {
+  int sNo;
+  String id;
+  String name;
+  String location;
+
+  SourcePump({required this.sNo, required this.id, required this.name, required this.location});
+
+  factory SourcePump.fromJson(Map<String, dynamic> json) {
+    return SourcePump(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      location: json['location'],
+    );
+  }
+}
+
+class IrrigationPump {
+  int sNo;
+  String id;
+  String name;
+  String location;
+
+  IrrigationPump({required this.sNo, required this.id, required this.name, required this.location});
+
+  factory IrrigationPump.fromJson(Map<String, dynamic> json) {
+    return IrrigationPump(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      location: json['location'],
+    );
+  }
+}
+
+class CentralFilterSite {
+  int sNo;
+  String id;
+  String name;
+  String location;
+
+  CentralFilterSite({required this.sNo, required this.id, required this.name, required this.location});
+
+  factory CentralFilterSite.fromJson(Map<String, dynamic> json) {
+    return CentralFilterSite(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      location: json['location'],
+    );
+  }
+}
+
+class CentralFertilizationSite {
+  int sNo;
+  String id;
+  String name;
+  String location;
+
+  CentralFertilizationSite({required this.sNo, required this.id, required this.name, required this.location});
+
+  factory CentralFertilizationSite.fromJson(Map<String, dynamic> json) {
+    return CentralFertilizationSite(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      location: json['location'],
+    );
+  }
+}
+
+class LineOrSequence {
+  int sNo;
+  String id;
+  String name;
+  String location;
+  List<Valve> valves;
+  List<MainValve> mainValves;
+  List<MoistureSensor> moistureSensor;
+  List<LevelSensor> levelSensor;
+
+
+  LineOrSequence({required this.sNo, required this.id, required this.name, required this.location,
+    required this.valves, required this.mainValves, required this.moistureSensor, required this.levelSensor});
+
+  factory LineOrSequence.fromJson(Map<String, dynamic> json) {
+    var valveList = json['valve'] as List;
+    var mainValveList = json['mainValve'] as List;
+    var moistureSensorList = json['moistureSensor'] as List;
+    var levelSensorList = json['levelSensor'] as List;
+
+
+    List<Valve> valves = valveList.map((valveJson) => Valve.fromJson(valveJson)).toList();
+    List<MainValve> mainValves = mainValveList.map((valveJson) => MainValve.fromJson(valveJson)).toList();
+    List<MoistureSensor> moistureSensor = moistureSensorList.map((valveJson) => MoistureSensor.fromJson(valveJson)).toList();
+    List<LevelSensor> levelSensor = levelSensorList.map((valveJson) => LevelSensor.fromJson(valveJson)).toList();
+
+
+    return LineOrSequence(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      location: json['location'],
+      valves: valves,
+      mainValves: mainValves,
+      moistureSensor: moistureSensor,
+      levelSensor: levelSensor,
+    );
+  }
+}
+
+class Valve {
+  int sNo;
+  String id;
+  String name;
+  String location;
+
+  Valve({required this.sNo, required this.id, required this.name, required this.location});
+
+  factory Valve.fromJson(Map<String, dynamic> json) {
+    return Valve(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      location: json['location'],
+    );
+  }
+}
+
+class MainValve {
+  int sNo;
+  String id;
+  String name;
+  String location;
+
+  MainValve({required this.sNo, required this.id, required this.name, required this.location});
+
+  factory MainValve.fromJson(Map<String, dynamic> json) {
+    return MainValve(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      location: json['location'],
+    );
+  }
+}
+
+class MoistureSensor {
+  int sNo;
+  String id;
+  String name;
+  String location;
+
+  MoistureSensor({required this.sNo, required this.id, required this.name, required this.location});
+
+  factory MoistureSensor.fromJson(Map<String, dynamic> json) {
+    return MoistureSensor(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      location: json['location'],
+    );
+  }
+}
+
+class LevelSensor {
+  int sNo;
+  String id;
+  String name;
+  String location;
+
+  LevelSensor({required this.sNo, required this.id, required this.name, required this.location});
+
+  factory LevelSensor.fromJson(Map<String, dynamic> json) {
+    return LevelSensor(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      location: json['location'],
+    );
+  }
+}
+
 class DisplaySourcePump extends StatelessWidget
 {
-  const DisplaySourcePump({super.key, required this.sourcePump});
+  const DisplaySourcePump({Key? key, required this.sourcePump}) : super(key: key);
   final List<SourcePump> sourcePump;
 
   @override
@@ -355,7 +623,7 @@ class DisplaySourcePump extends StatelessWidget
 
 class DisplayIrrigationPump extends StatelessWidget
 {
-  const DisplayIrrigationPump({super.key, required this.irrigationPump});
+  const DisplayIrrigationPump({Key? key, required this.irrigationPump}) : super(key: key);
   final List<IrrigationPump> irrigationPump;
 
   @override
@@ -431,74 +699,218 @@ class DisplayCentralFilterSite extends StatelessWidget
   }
 }
 
-class DisplayMainValve extends StatelessWidget
-{
-  const DisplayMainValve({super.key, required this.mainValve});
-  final List<MainValve> mainValve;
+
+
+class DisplayLineOrSequence extends StatefulWidget {
+  const DisplayLineOrSequence({super.key, required this.lineOrSequence});
+  final List<LineOrSequence> lineOrSequence;
 
   @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      scrollDirection: Axis.horizontal, // Set the direction to horizontal
-      itemCount: mainValve.length,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Column(
-            children: [
-              const CircleAvatar(child: Icon(Icons.account_balance_outlined),),
-              Text(mainValve[index].name, style: const TextStyle(fontWeight: FontWeight.normal),),
-              Text(mainValve[index].id, style: const TextStyle(fontWeight: FontWeight.normal),),
-            ],
-          ),
-        );
-      },
-    );
-  }
+  State<DisplayLineOrSequence> createState() => _DisplayLineOrSequenceState();
 }
 
-
-class DisplayIrrigationLine extends StatelessWidget
-{
-  const DisplayIrrigationLine({super.key, required this.irrigationLine, required this.valves});
-  final List<IrrigationLine> irrigationLine;
-  final List<Valve> valves;
+class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
+  Calendar calendarView = Calendar.manual;
 
   @override
   Widget build(BuildContext context)
   {
-    Map<String, List<Valve>> groupedValves = groupValvesByLocation(valves);
 
-    return ListView.builder(
-      itemCount: groupedValves.keys.length,
-      itemBuilder: (context, index) {
-        String location = groupedValves.keys.elementAt(index);
-        List<Valve> locationValves = groupedValves[location]!;
-
-        return  Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                'Location: $location',
-                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-              ),
-            ),
-            // Display the valves for the current location
-            for (var valve in locationValves)
-              Card(
-                elevation: 5,
-                child: ListTile(
-                  title: Text(valve.id),
-                  subtitle: Text(valve.name),
+    return Column(
+      children: [
+        SizedBox(
+          width: MediaQuery.of(context).size.width,
+          height: 50,
+          child: ListTile(
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SegmentedButton<Calendar>(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStatePropertyAll(myTheme.primaryColor.withOpacity(0.1)),
+                    iconColor: MaterialStateProperty.all(myTheme.primaryColor),
+                  ),
+                  segments: const <ButtonSegment<Calendar>>[
+                    ButtonSegment<Calendar>(
+                        value: Calendar.manual,
+                        label: Text('Default'),
+                        icon: Icon(Icons.edit_note)),
+                    ButtonSegment<Calendar>(
+                        value: Calendar.time,
+                        label: Text('Time'),
+                        icon: Icon(Icons.timer_outlined)),
+                    ButtonSegment<Calendar>(
+                        value: Calendar.flow,
+                        label: Text('Flow'),
+                        icon: Icon(Icons.gas_meter_outlined)),
+                  ],
+                  selected: <Calendar>{calendarView},
+                  onSelectionChanged: (Set<Calendar> newSelection) {
+                    setState(() {
+                      // By default there is only a single segment that can be
+                      // selected at one time, so its value is always the first
+                      // item in the selected set.
+                      calendarView = newSelection.first;
+                    });
+                  },
                 ),
-              ),
-          ],
-        );
-      },
-    );
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+            child:
+            ListView.builder(
+              itemCount: widget.lineOrSequence.length,
+              itemBuilder: (context, index) {
+                LineOrSequence line = widget.lineOrSequence[index];
+                Map<String, List<Valve>> groupedValves = groupValvesByLocation(line.valves);
+                Map<String, List<MainValve>> groupedMainValves = groupMainValvesByLocation(line.mainValves);
+                Map<String, List<MoistureSensor>> groupedMoistureSensor = groupMoistureSensorByLocation(line.moistureSensor);
+                Map<String, List<LevelSensor>> groupedLevelSensor = groupLevelSensorByLocation(line.levelSensor);
 
+                return Card(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: myTheme.primaryColor.withOpacity(0.5),
+                          borderRadius: const BorderRadius.only(topRight: Radius.circular(10), topLeft: Radius.circular(10)),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Location : ${line.name}',
+                            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.normal),
+                          ),
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(left: 10),
+                            child: Text('Main Valve'),
+                          ),
+                          SizedBox(
+                            width: MediaQuery.sizeOf(context).width-740,
+                            height: 60,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: groupedMainValves.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                var mainValveLocation = groupedMainValves.keys.elementAt(index);
+                                return Row(
+                                  children: [
+                                    for (var mainValve in groupedMainValves[mainValveLocation]!)
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: CircleAvatar(
+                                          radius: 22,
+                                          child: Text(mainValve.id, style: TextStyle(fontSize: 11, fontWeight: FontWeight.normal),),
+                                          backgroundColor: Colors.orangeAccent,
+                                        ),
+                                      ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Divider(),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(left: 10),
+                            child: Text('Moisture Sensor'),
+                          ),
+                          SizedBox(
+                            width: MediaQuery.sizeOf(context).width-740,
+                            height: 60,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: groupedMoistureSensor.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                var moistureSensorLocation = groupedMoistureSensor.keys.elementAt(index);
+                                return Row(
+                                  children: [
+                                    for (var moistureSensor in groupedMoistureSensor[moistureSensorLocation]!)
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: CircleAvatar(
+                                          radius: 22,
+                                          child: Text(moistureSensor.id, style: TextStyle(fontSize: 11, fontWeight: FontWeight.normal),),
+                                          backgroundColor: Colors.orangeAccent,
+                                        ),
+                                      ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Divider(),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(left: 10),
+                            child: Text('Level Sensor'),
+                          ),
+                          SizedBox(
+                            width: MediaQuery.sizeOf(context).width-740,
+                            height: 60,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: groupedLevelSensor.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                var levelSensorLocation = groupedLevelSensor.keys.elementAt(index);
+                                return Row(
+                                  children: [
+                                    for (var levelSensor in groupedLevelSensor[levelSensorLocation]!)
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: CircleAvatar(
+                                          radius: 22,
+                                          child: Text(levelSensor.id, style: TextStyle(fontSize: 11, fontWeight: FontWeight.normal),),
+                                          backgroundColor: Colors.orangeAccent,
+                                        ),
+                                      ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      for (var valveLocation in groupedValves.keys)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (var valve in groupedValves[valveLocation]!)
+                              Card(
+                                elevation: 5,
+                                child: ListTile(
+                                  title: Text(valve.id),
+                                  subtitle: Text(valve.name),
+                                ),
+                              ),
+                          ],
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
+        ),
+      ],
+    );
   }
 
   Map<String, List<Valve>> groupValvesByLocation(List<Valve> valves) {
@@ -511,214 +923,38 @@ class DisplayIrrigationLine extends StatelessWidget
     }
     return groupedValves;
   }
-}
 
+  Map<String, List<MainValve>> groupMainValvesByLocation(List<MainValve> mainValves) {
+    Map<String, List<MainValve>> groupedMainValves = {};
+    for (var mainValve in mainValves) {
+      if (!groupedMainValves.containsKey(mainValve.location)) {
+        groupedMainValves[mainValve.location] = [];
+      }
+      groupedMainValves[mainValve.location]!.add(mainValve);
+    }
+    return groupedMainValves;
+  }
 
-class DisplayValve extends StatelessWidget
-{
-  const DisplayValve({super.key, required this.valve});
-  final List<Valve> valve;
+  Map<String, List<MoistureSensor>> groupMoistureSensorByLocation(List<MoistureSensor> moistureSensor) {
+    Map<String, List<MoistureSensor>> groupedMoistureSensor = {};
+    for (var moistureSensor in moistureSensor) {
+      if (!groupedMoistureSensor.containsKey(moistureSensor.location)) {
+        groupedMoistureSensor[moistureSensor.location] = [];
+      }
+      groupedMoistureSensor[moistureSensor.location]!.add(moistureSensor);
+    }
+    return groupedMoistureSensor;
+  }
 
-  @override
-  Widget build(BuildContext context)
-  {
-    return ListView.builder(
-      scrollDirection: Axis.vertical, // Set the direction to horizontal
-      itemCount: valve.length,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Column(
-            children: [
-              Text(valve[index].name, style: const TextStyle(fontWeight: FontWeight.normal),),
-              Text(valve[index].id, style: const TextStyle(fontWeight: FontWeight.normal),),
-            ],
-          ),
-        );
-      },
-    );
+  Map<String, List<LevelSensor>> groupLevelSensorByLocation(List<LevelSensor> levelSensor) {
+    Map<String, List<LevelSensor>> groupedLevelSensor = {};
+    for (var levelSensor in levelSensor) {
+      if (!groupedLevelSensor.containsKey(levelSensor.location)) {
+        groupedLevelSensor[levelSensor.location] = [];
+      }
+      groupedLevelSensor[levelSensor.location]!.add(levelSensor);
+    }
+    return groupedLevelSensor;
   }
 }
 
-class DashboardData
-{
-  final List<SourcePump> sourcePump;
-  final List<IrrigationPump> irrigationPump;
-  final List<CentralFilterSite> centralFilterSite;
-  final List<CentralFertilizationSite> centralFertilizationSite;
-  final List<IrrigationLine> irrigationLine;
-  final List<Valve> valve;
-  final List<MainValve> mainValve;
-
-  DashboardData({
-    required this.sourcePump,
-    required this.irrigationPump,
-    required this.centralFilterSite,
-    required this.centralFertilizationSite,
-    required this.irrigationLine,
-    required this.valve,
-    required this.mainValve,
-  });
-
-  factory DashboardData.fromJson(Map<String, dynamic> json) {
-    return DashboardData(
-      sourcePump: (json['sourcePump'] as List<dynamic>?)
-          ?.map((item) => SourcePump.fromJson(item as Map<String, dynamic>))
-          .toList() ?? [],
-      irrigationPump: (json['irrigationPump'] as List<dynamic>?)
-          ?.map((item) => IrrigationPump.fromJson(item as Map<String, dynamic>))
-          .toList() ?? [],
-      centralFilterSite: (json['centralFilterSite'] as List<dynamic>?)
-          ?.map((item) => CentralFilterSite.fromJson(item as Map<String, dynamic>))
-          .toList() ?? [],
-      centralFertilizationSite: (json['centralFertilizationSite'] as List<dynamic>?)
-          ?.map((item) => CentralFertilizationSite.fromJson(item as Map<String, dynamic>))
-          .toList() ?? [],
-      irrigationLine: (json['irrigationLine'] as List<dynamic>?)
-          ?.map((item) => IrrigationLine.fromJson(item as Map<String, dynamic>))
-          .toList() ?? [],
-      valve: (json['valve'] as List<dynamic>?)
-          ?.map((item) => Valve.fromJson(item as Map<String, dynamic>))
-          .toList() ?? [],
-      mainValve: (json['mainValve'] as List<dynamic>?)
-          ?.map((item) => MainValve.fromJson(item as Map<String, dynamic>))
-          .toList() ?? [],
-      // Add other fields here.
-    );
-  }
-}
-
-class SourcePump {
-  final int sNo;
-  final String id;
-  final String location;
-  final String name;
-
-  SourcePump({required this.sNo, required this.id, required this.location, required this.name});
-
-  factory SourcePump.fromJson(Map<String, dynamic> json) {
-    return SourcePump(
-      sNo: json['sNo'] ?? 0,
-      id: json['id'] ?? '',
-      location: json['location'] ?? '',
-      name: json['name'] ?? '',
-    );
-  }
-}
-
-class IrrigationPump {
-  final int sNo;
-  final String id;
-  final String location;
-  final String name;
-
-  IrrigationPump({required this.sNo, required this.id, required this.location, required this.name});
-
-  factory IrrigationPump.fromJson(Map<String, dynamic> json) {
-    return IrrigationPump(
-      sNo: json['sNo'] ?? 0,
-      id: json['id'] ?? '',
-      location: json['location'] ?? '',
-      name: json['name'] ?? '',
-    );
-  }
-}
-
-class CentralFilterSite {
-  final int sNo;
-  final String id;
-  final String location;
-  final String name;
-
-  CentralFilterSite({required this.sNo, required this.id, required this.location, required this.name});
-
-  factory CentralFilterSite.fromJson(Map<String, dynamic> json) {
-    return CentralFilterSite(
-      sNo: json['sNo'] ?? 0,
-      id: json['id'] ?? '',
-      location: json['location'] ?? '',
-      name: json['name'] ?? '',
-    );
-  }
-}
-
-class CentralFertilizationSite {
-  final int sNo;
-  final String id;
-  final String location;
-  final String name;
-
-  CentralFertilizationSite({required this.sNo, required this.id, required this.location, required this.name});
-
-  factory CentralFertilizationSite.fromJson(Map<String, dynamic> json) {
-    return CentralFertilizationSite(
-      sNo: json['sNo'] ?? 0,
-      id: json['id'] ?? '',
-      location: json['location'] ?? '',
-      name: json['name'] ?? '',
-    );
-  }
-}
-
-class IrrigationLine {
-  final int sNo;
-  final String id;
-  final String location;
-  final String name;
-
-  IrrigationLine({required this.sNo, required this.id, required this.location, required this.name});
-
-  factory IrrigationLine.fromJson(Map<String, dynamic> json) {
-    return IrrigationLine(
-      sNo: json['sNo'] ?? 0,
-      id: json['id'] ?? '',
-      location: json['location'] ?? '',
-      name: json['name'] ?? '',
-    );
-  }
-}
-
-class Valve {
-  final int sNo;
-  final String id;
-  final String location;
-  final String name;
-
-  Valve({required this.sNo, required this.id, required this.location, required this.name});
-
-  factory Valve.fromJson(Map<String, dynamic> json) {
-    return Valve(
-      sNo: json['sNo'] ?? 0,
-      id: json['id'] ?? '',
-      location: json['location'] ?? '',
-      name: json['name'] ?? '',
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'sNo': sNo,
-      'id': id,
-      'location': location,
-      'name': name,
-    };
-  }
-}
-
-class MainValve {
-  final int sNo;
-  final String id;
-  final String location;
-  final String name;
-
-  MainValve({required this.sNo, required this.id, required this.location, required this.name});
-
-  factory MainValve.fromJson(Map<String, dynamic> json) {
-    return MainValve(
-      sNo: json['sNo'] ?? 0,
-      id: json['id'] ?? '',
-      location: json['location'] ?? '',
-      name: json['name'] ?? '',
-    );
-  }
-}

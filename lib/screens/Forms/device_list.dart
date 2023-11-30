@@ -695,19 +695,35 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                           const Text('Active'),
                         ],
                       ):
-                      Row(
+                      widget.userType == 2? Row(
                         children: [
                           CircleAvatar(radius: 5,
                             backgroundColor:
-                            widget.customerProductList[index].prdStatus==1? Colors.pink:
-                            widget.customerProductList[index].prdStatus==2? Colors.purple:
-                            widget.customerProductList[index].prdStatus==3? Colors.yellow:
-                            widget.customerProductList[index].prdStatus==4? Colors.deepOrangeAccent:
+                            widget.customerProductList[index].prdStatus==2? Colors.pink:
+                            widget.customerProductList[index].prdStatus==3? Colors.blue:
+                            widget.customerProductList[index].prdStatus==4? Colors.yellow:
+                            widget.customerProductList[index].prdStatus==5? Colors.deepOrangeAccent:
                             Colors.green,
                           ),
                           const SizedBox(width: 5,),
                           widget.customerProductList[index].prdStatus==2? const Text('In-Stock'):
-                          widget.customerProductList[index].prdStatus==3? const Text('Sold-Out'):
+                          widget.customerProductList[index].prdStatus==3? const Text('Stock'):
+                          widget.customerProductList[index].prdStatus==4? const Text('Pending'):
+                          widget.customerProductList[index].prdStatus==5? const Text('Installed'):
+                          const Text('Active'),
+                        ],
+                      ):
+                      Row(
+                        children: [
+                          CircleAvatar(radius: 5,
+                            backgroundColor:
+                            widget.customerProductList[index].prdStatus==3? Colors.pink:
+                            widget.customerProductList[index].prdStatus==4? Colors.yellow:
+                            widget.customerProductList[index].prdStatus==5? Colors.deepOrangeAccent:
+                            Colors.green,
+                          ),
+                          const SizedBox(width: 5,),
+                          widget.customerProductList[index].prdStatus==3? const Text('In-Stock'):
                           widget.customerProductList[index].prdStatus==4? const Text('Pending'):
                           widget.customerProductList[index].prdStatus==5? const Text('Installed'):
                           const Text('Active'),

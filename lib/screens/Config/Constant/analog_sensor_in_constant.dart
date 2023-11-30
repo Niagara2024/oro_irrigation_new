@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
 
 import '../../../state_management/constant_provider.dart';
@@ -37,20 +39,23 @@ class _AnalogSensorConstantState extends State<AnalogSensorConstant> {
           ],
           Expanded(
             child: ListView.builder(
-                itemCount: constantPvd.analogSensor.length,
+                itemCount: constantPvd.analogSensorUpdated.length,
                 itemBuilder: (BuildContext context,int index){
                   return Container(
-                    margin: index == constantPvd.analogSensor.length - 1 ? EdgeInsets.only(bottom: 60) : null,
-                    color: index % 2 == 0 ? Colors.blue.shade50 : Colors.blue.shade100,
+                    margin: index == constantPvd.analogSensorUpdated.length - 1 ? EdgeInsets.only(bottom: 60) : null,
+                    decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(width: 1)),
+                      color: Colors.white70,
+                    ),
                     child: Row(
                       children: [
-                        expandedCustomCell(Text('${constantPvd.analogSensor[index][0]}'),),
-                        expandedCustomCell(Text('${constantPvd.analogSensor[index][1]}'),),
-                        expandedCustomCell(MyDropDown(initialValue: constantPvd.analogSensor[index][2], itemList: ['Pressure IN','Pressure OUT','EC','PH','Level','Valve Pressure','Soil Moisture','Soil Temperature'], pvdName: 'analogSensor/type', index: index),),
-                        expandedCustomCell(MyDropDown(initialValue: constantPvd.analogSensor[index][3], itemList: ['Bar','dS/m'], pvdName: 'analogSensor/units', index: index),),
-                        expandedCustomCell(MyDropDown(initialValue: constantPvd.analogSensor[index][5], itemList: ['Current','Voltage'], pvdName: 'analogSensor/base', index: index),),
-                        expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.analogSensor[index][6], constantPvd: constantPvd, purpose: 'analogSensor_minimum_v/${index}/6', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],),index % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50),
-                        expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.analogSensor[index][7], constantPvd: constantPvd, purpose: 'analogSensor_maximum_v/${index}/7', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],),index % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50),
+                        expandedCustomCell(Text('${constantPvd.analogSensorUpdated[index]['id']}'),),
+                        expandedCustomCell(Text('${constantPvd.analogSensorUpdated[index]['name']}'),),
+                        expandedCustomCell(MyDropDown(initialValue: constantPvd.analogSensorUpdated[index]['type'], itemList: ['Pressure IN','Pressure OUT','EC','PH','Level','Valve Pressure','Soil Moisture','Soil Temperature'], pvdName: 'analogSensor/type', index: index),),
+                        expandedCustomCell(MyDropDown(initialValue: constantPvd.analogSensorUpdated[index]['units'], itemList: ['bar','dS/m'], pvdName: 'analogSensor/units', index: index),),
+                        expandedCustomCell(MyDropDown(initialValue: constantPvd.analogSensorUpdated[index]['base'], itemList: ['Current','Voltage'], pvdName: 'analogSensor/base', index: index),),
+                        expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.analogSensorUpdated[index]['minimum'], constantPvd: constantPvd, purpose: 'analogSensor_minimum_v/${index}/6', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
+                        expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.analogSensorUpdated[index]['maximum'], constantPvd: constantPvd, purpose: 'analogSensor_maximum_v/${index}/7', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
                       ],
                     ),
                   );
@@ -112,7 +117,7 @@ class _AnalogSensorConstant_MState extends State<AnalogSensorConstant_M> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: index == 0 ? BorderRadius.only(topLeft: Radius.circular(20)) : constantPvd.analogSensor.length -1 == index ? BorderRadius.only(topRight: Radius.circular(20)) : BorderRadius.circular(5),
-                                    color: selectedSensor == index ? myTheme.primaryColor : Colors.blue.shade50,
+                                    color: selectedSensor == index ? myTheme.primaryColor : Colors.blue.shade100,
                                   ),
                                   child: Center(child: Text('${index + 1}',style: TextStyle(color: selectedSensor == index ? Colors.white : null),)),
                                 ),

@@ -2,13 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 
 
-Widget expandedTableCell_Text(String first,String second,[TextStyle? mystyle]){
+Widget expandedTableCell_Text(String first,String second,[String? column,TextStyle? mystyle]){
   return  Expanded(
     child: Container(
       width: double.infinity,
-      height: 60,
+      height: 50,
       decoration: BoxDecoration(
-          color: myTheme.primaryColor
+          color: Colors.blueGrey,
+          border: Border(
+            top: BorderSide(width: 1),
+            bottom: BorderSide(width: 1),
+            right: BorderSide(width: 1),
+            left: BorderSide(width: column != null ? 1 : 0),
+          )
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -24,9 +30,14 @@ Widget expandedTableCell_Text(String first,String second,[TextStyle? mystyle]){
 Widget fixedTableCell_Text(String first,String second,double myWidth,[TextStyle? mystyle]){
   return  Container(
     width: myWidth,
-    height: 60,
+    height: 50,
     decoration: BoxDecoration(
-        color: myTheme.primaryColor
+        color: Colors.blueGrey,
+        border: Border(
+          top: BorderSide(width: 1),
+          bottom: BorderSide(width: 1),
+          right: BorderSide(width: 1),
+        )
     ),
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -40,12 +51,13 @@ Widget fixedTableCell_Text(String first,String second,double myWidth,[TextStyle?
 }
 
 
-Widget expandedCustomCell(Widget mywidget,[Color? colors]){
+Widget expandedCustomCell(Widget mywidget,[String? row ,Color? colors,height]){
   return  Expanded(
     child: Container(
-      color: colors,
-      width: double.infinity,
-      height: 60,
+      decoration: BoxDecoration(
+          border: Border(left: BorderSide(width: row != null ? 1 : 0),right: BorderSide(width: 1))
+      ),     width: double.infinity,
+      height: height == null ? 40 : height,
       child: Center(child: mywidget),
     ),
   );
@@ -56,10 +68,10 @@ Widget expandedNestedCustomCell(List<Widget> listOfWidget){
   return Expanded(
     child: Container(
       width: double.infinity,
-      height: listOfWidget.length * 60,
+      height: listOfWidget.length * 40,
       child: Column(
         children: [
-         ...listOfWidget
+          ...listOfWidget
         ],
       ),
     ),
@@ -68,12 +80,15 @@ Widget expandedNestedCustomCell(List<Widget> listOfWidget){
 
 
 
-Widget fixedSizeCustomCell(Widget mywidget,double myWidth, [Color? colors]){
+Widget fixedSizeCustomCell(Widget mywidget,double myWidth,double height,bool border, [Color? colors]){
   return  Container(
     width : myWidth,
-    color: colors,
-    height: 60,
+    height: height,
     child: Center(child: mywidget),
+    decoration: BoxDecoration(
+        color: colors,
+        border: Border(left: BorderSide(width: border == true ? 1 : 0))
+    ),
   );
 }
 
@@ -109,25 +124,25 @@ Widget returnMyListTile(String heading,Widget mywidget){
     ),
     child: Center(
       child: ListTile(
-          focusColor: Colors.white,
-          selectedColor: Colors.white,
-          leading: Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-                color: Colors.black12,
-                borderRadius: BorderRadius.circular(10.0)
-            ),
-            child: Center(
-              child: Icon(Icons.people),
-            ),
+        focusColor: Colors.white,
+        selectedColor: Colors.white,
+        leading: Container(
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+              color: Colors.black12,
+              borderRadius: BorderRadius.circular(10.0)
           ),
-          contentPadding: EdgeInsets.all(0),
-          title: Text(heading,style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold),),
-          trailing: Container(
+          child: Center(
+            child: Icon(Icons.people),
+          ),
+        ),
+        contentPadding: EdgeInsets.all(0),
+        title: Text(heading,style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold),),
+        trailing: Container(
             width: 150,
-              child: Center(
-                  child: mywidget)),
+            child: Center(
+                child: mywidget)),
       ),
     ),
   );

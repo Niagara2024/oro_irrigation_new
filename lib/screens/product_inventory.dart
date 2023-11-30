@@ -623,18 +623,22 @@ class ProductInventoryState extends State<ProductInventory> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Column(children: [
+            const SizedBox(height: 5,),
             const Text('Total Category', style: TextStyle(fontSize: 13)),
             Text('$totalCategory',style: TextStyle(fontSize: 17)),
           ],),
           Column(children: [
+            const SizedBox(height: 5,),
             const Text("Total Products", style: TextStyle(fontSize: 13)),
             Text('$totalModel', style: TextStyle(fontSize: 17)),
           ],),
           Column(children: [
+            const SizedBox(height: 5,),
             const Text("Out of stock", style: TextStyle(fontSize: 13)),
             Text('$outOfStockModel',style: TextStyle(fontSize: 17)),
           ],),
           Column(children: [
+            const SizedBox(height: 5,),
             const Text("Total Items", style: TextStyle(fontSize: 13)),
             Text('$totalProduct', style: const TextStyle(fontSize: 17)),
           ],),
@@ -758,6 +762,14 @@ class ProductInventoryState extends State<ProductInventory> {
             ),
             actions: <Widget>[
               MaterialButton(
+                color: Colors.red,
+                textColor: Colors.white,
+                child: const Text('Cancel'),
+                onPressed: () async {
+                  Navigator.pop(context);
+                },
+              ),
+              MaterialButton(
                 color: Colors.green,
                 textColor: Colors.white,
                 child: const Text('OK'),
@@ -864,31 +876,39 @@ class ProductInventoryState extends State<ProductInventory> {
             ),
             actions: <Widget>[
               MaterialButton(
+                color: Colors.red,
+                textColor: Colors.white,
+                child: const Text('Cancel'),
+                onPressed: () async {
+                  Navigator.pop(context);
+                },
+              ),
+              MaterialButton(
                 color: Colors.green,
                 textColor: Colors.white,
                 child: const Text('Replace'),
                 onPressed: () async {
                   final body = {"userId": customerId, "oldDeviceId": imeiNo, "newDeviceId": txtEdControllerIMEi.text, 'modifyUser': userID};
-                    print(body);
-                    final response = await HttpService().postRequest("replaceProduct", body);
-                    print(response.body);
-                    if (response.statusCode == 200)
+                  print(body);
+                  final response = await HttpService().postRequest("replaceProduct", body);
+                  print(response.body);
+                  if (response.statusCode == 200)
+                  {
+                    if(jsonDecode(response.body)["code"]==200)
                     {
-                      if(jsonDecode(response.body)["code"]==200)
-                      {
-                        setState(() {
-                          Navigator.pop(context);
-                          getProductStock();
-                          getProductList(currentSet, batchSize);
-                          _showSnackBar(jsonDecode(response.body)["message"]);
-                        });
-                      }else{
+                      setState(() {
                         Navigator.pop(context);
+                        getProductStock();
+                        getProductList(currentSet, batchSize);
                         _showSnackBar(jsonDecode(response.body)["message"]);
-                      }
-                    } else {
-                      throw Exception('Failed to load data');
+                      });
+                    }else{
+                      Navigator.pop(context);
+                      _showSnackBar(jsonDecode(response.body)["message"]);
                     }
+                  } else {
+                    throw Exception('Failed to load data');
+                  }
 
                   setState(() {
                     //codeDialog = valueText;

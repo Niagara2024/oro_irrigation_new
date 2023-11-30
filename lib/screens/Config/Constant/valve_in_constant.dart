@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
-
 import '../../../state_management/constant_provider.dart';
 import '../../../state_management/overall_use.dart';
 import '../../../widgets/my_number_picker.dart';
@@ -30,7 +29,7 @@ class _ValveConstantState extends State<ValveConstant> {
         return ValveConstant_M();
       }
       return myTable(
-        [expandedTableCell_Text('Valve',''),
+        [expandedTableCell_Text('Valve','','first'),
           expandedTableCell_Text('Name',''),
           expandedTableCell_Text('Default','dosage'),
           expandedTableCell_Text('Nominal','flow(l/h)'),
@@ -45,42 +44,48 @@ class _ValveConstantState extends State<ValveConstant> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    for(var i = 0;i < constantPvd.valve.length;i++)
-                      for(var j in constantPvd.valve[i].entries)
-                        Column(
-                          children: [
-                            Container(
-                              height: 30,
-                              color: Colors.blue,
-                              width: double.infinity,
-                              child: Center(child: Text('Irrigation line ${j.key}',style: TextStyle(color: Colors.white),)),
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                    child: Column(
-                                      children: [
-                                        for(var k = 0;k < j.value.length;k++)
-                                          Row(
+                    for(var i = 0;i < constantPvd.valveUpdated.length;i++)
+                      Column(
+                        children: [
+                          Container(
+                            color: Colors.blueGrey.shade100,
+                            height: 30,
+                            width: double.infinity,
+                            child: Center(child: Text('${constantPvd.valveUpdated[i]['name']}',style: TextStyle(color: Colors.black87),)),
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                  child: Column(
+                                    children: [
+                                      for(var k = 0;k < constantPvd.valveUpdated[i]['valve'].length;k++)
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            border: Border(bottom: BorderSide(width: 1),top: BorderSide(width: k == 0 ? 1 : 0))
+                                          ),
+                                          child: Row(
                                             children: [
-                                              expandedCustomCell(Text('${j.value[k][1]}'),k % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50),
-                                              expandedCustomCell(Text('${j.value[k][2]}'),k % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50),
-                                              expandedCustomCell(CustomTimePickerSiva(purpose: 'valve_defaultDosage/${i}/${j.key}/${k}', index: k, value: '${j.value[k][3]}', displayHours: true, displayMins: true, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,additional: 'split',),k % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50),
-                                              expandedCustomCell(TextFieldForConstant(index: -1, initialValue: j.value[k][4], constantPvd: constantPvd, purpose: 'valve_nominal_flow/${i}/${j.key}/${k}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],),k % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50),
-                                              expandedCustomCell(TextFieldForConstant(index: -1, initialValue: j.value[k][5], constantPvd: constantPvd, purpose: 'valve_minimum_flow/${i}/${j.key}/${k}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],),k % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50),
-                                              expandedCustomCell(TextFieldForConstant(index: -1, initialValue: j.value[k][6], constantPvd: constantPvd, purpose: 'valve_maximum_flow/${i}/${j.key}/${k}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],),k % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50),
-                                              expandedCustomCell(CustomTimePickerSiva(purpose: 'valve_fillUpDelay/${i}/${j.key}/${k}', index: k, value: '${j.value[k][7]}', displayHours: false, displayMins: true, displaySecs: false, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,additional: 'split',),k % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50),
-                                              expandedCustomCell(TextFieldForConstant(index: -1, initialValue: j.value[k][8], constantPvd: constantPvd, purpose: 'valve_area/${i}/${j.key}/${k}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),],),k % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50),
-                                              expandedCustomCell(TextFieldForConstant(index: -1, initialValue: j.value[k][9], constantPvd: constantPvd, purpose: 'valve_crop_factor/${i}/${j.key}/${k}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],),k % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50),
+                                              expandedCustomCell(Text('${k+1}'),'first',k % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50),
+                                              expandedCustomCell(Text('${constantPvd.valveUpdated[i]['valve'][k]['name']}')),
+                                              expandedCustomCell(CustomTimePickerSiva(purpose: 'valve_defaultDosage/${i}/${k}', index: k, value: '${constantPvd.valveUpdated[i]['valve'][k]['defaultDosage']}', displayHours: true, displayMins: true, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,additional: 'split',)),
+                                              expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.valveUpdated[i]['valve'][k]['nominalFlow'], constantPvd: constantPvd, purpose: 'valve_nominal_flow/${i}/${k}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
+                                              expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.valveUpdated[i]['valve'][k]['minimumFlow'], constantPvd: constantPvd, purpose: 'valve_minimum_flow/${i}/${k}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
+                                              expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.valveUpdated[i]['valve'][k]['maximumFlow'], constantPvd: constantPvd, purpose: 'valve_maximum_flow/${i}/${k}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
+                                              expandedCustomCell(CustomTimePickerSiva(purpose: 'valve_fillUpDelay/${i}/${k}', index: k, value: '${constantPvd.valveUpdated[i]['valve'][k]['fillUpDelay']}', displayHours: true, displayMins: true, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,additional: 'split',)),
+                                              expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.valveUpdated[i]['valve'][k]['area'], constantPvd: constantPvd, purpose: 'valve_area/${i}/${k}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),],)),
+                                              expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.valveUpdated[i]['valve'][k]['cropFactor'], constantPvd: constantPvd, purpose: 'valve_crop_factor/${i}/${k}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
                                             ],
-                                          )
-                                      ],
-                                    )
-                                )
-                              ],
-                            )
-                          ],
-                        )
+                                          ),
+                                        )
+                                    ],
+                                  )
+                              )
+                            ],
+                          )
+                        ],
+                      )
+                      // for(var j in constantPvd.valve[i].entries)
+
                   ],
                 ),
               ),
@@ -116,7 +121,7 @@ class _ValveConstant_MState extends State<ValveConstant_M> {
     //   });
     // }
   }
-  void _showTimePicker(BuildContext context,ConstantProvider constantPvd,OverAllUse overAllPvd) async {
+  void _showTimePicker(BuildContext context,ConstantProvider constantPvd, OverAllUse overAllPvd) async {
     overAllPvd.editTimeAll();
     final result = await showDialog<String>(
       context: context,
@@ -175,7 +180,7 @@ class _ValveConstant_MState extends State<ValveConstant_M> {
               onPressed: (){
                 _showTimePicker(context,constantPvd,overAllPvd);
               },
-              child: Text('Click to select line',style: TextStyle(color: Colors.yellow,fontSize: 16),),
+              child: Text('Click to select line',style: TextStyle(color: Colors.yellow, fontSize: 16),),
           ),
           SizedBox(height: 10,),
           Container(
@@ -214,7 +219,7 @@ class _ValveConstant_MState extends State<ValveConstant_M> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: index == 0 ? BorderRadius.only(topLeft: Radius.circular(20)) : valvesInSelectedLine.length -1 == index ? BorderRadius.only(topRight: Radius.circular(20)) : BorderRadius.circular(5),
-                                    color: selected_valve == index ? myTheme.primaryColor : Colors.blue.shade50,
+                                    color: selected_valve == index ? myTheme.primaryColor : Colors.blue.shade100,
                                   ),
                                   child: Center(child: Text('${index + 1}',style: TextStyle(color: selected_valve == index ? Colors.white : null),)),
                                 ),

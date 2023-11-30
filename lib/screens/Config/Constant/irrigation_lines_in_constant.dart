@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
 
 import '../../../state_management/constant_provider.dart';
 import '../../../state_management/overall_use.dart';
+import '../../../widgets/SCustomWidgets/custom_time_picker.dart';
 import '../../../widgets/drop_down_button.dart';
 import '../../../widgets/table_needs.dart';
 import '../../../widgets/time_picker.dart';
@@ -28,7 +31,7 @@ class _IrrigationLinesConstantState extends State<IrrigationLinesConstant> {
         return IrrigationLinesConstant_M();
       }
       return myTable(
-          [expandedTableCell_Text('Name',''),
+          [expandedTableCell_Text('Name','','first',null),
             expandedTableCell_Text('ID',''),
             expandedTableCell_Text('Pump',''),
             expandedTableCell_Text('Low flow','delay'),
@@ -38,21 +41,24 @@ class _IrrigationLinesConstantState extends State<IrrigationLinesConstant> {
             expandedTableCell_Text('Leakage','limit')],
           Expanded(
             child: ListView.builder(
-                itemCount: constantPvd.irrigationLines.length,
+                itemCount: constantPvd.irrigationLineUpdated.length,
                 itemBuilder: (BuildContext context,int index){
                   return Container(
-                    margin: index == constantPvd.irrigationLines.length - 1 ? EdgeInsets.only(bottom: 60) : null,
-                    color: index % 2 == 0 ? Colors.blue.shade50 : Colors.blue.shade100,
+                    margin: index == constantPvd.irrigationLineUpdated.length - 1 ? EdgeInsets.only(bottom: 60) : null,
+                    decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(width: 1)),
+                      color: Colors.white70,
+                    ),
                     child: Row(
                       children: [
-                        expandedCustomCell(Text('${constantPvd.irrigationLines[index][1]}',),),
-                        expandedCustomCell(Text('${index + 1}'),),
-                        expandedCustomCell(MyDropDown(initialValue: constantPvd.irrigationLines[index][2], itemList: ['IP1','IP2','IP3'], pvdName: 'line/irrigationPump', index: index),),
-                        expandedCustomCell(CustomTimePickerSiva(purpose: 'line/lowFlowDelay', index: index, value: '${constantPvd.irrigationLines[index][3]}', displayHours: true, displayMins: true, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,)),
-                        expandedCustomCell(CustomTimePickerSiva(purpose: 'line/highFlowDelay', index: index, value: '${constantPvd.irrigationLines[index][4]}', displayHours: true, displayMins: true, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,)),
-                        expandedCustomCell(MyDropDown(initialValue: constantPvd.irrigationLines[index][5], itemList: ['Ignore','Do next','wait'], pvdName: 'line/lowFlowBehavior', index: index),),
-                        expandedCustomCell(MyDropDown(initialValue: constantPvd.irrigationLines[index][6], itemList: ['Ignore','Do next','wait'], pvdName: 'line/highFlowBehavior', index: index),),
-                        expandedCustomCell(CustomTimePickerSiva(purpose: 'line/leakageLimit', index: index, value: '${constantPvd.irrigationLines[index][7]}', displayHours: false, displayMins: false, displaySecs: false, displayCustom: true, CustomString: 'pulse', CustomList: [0,10], displayAM_PM: false,)),
+                        expandedCustomCell(Text('${constantPvd.irrigationLineUpdated[index]['name']}',),'first',null),
+                        expandedCustomCell(Text('${constantPvd.irrigationLineUpdated[index]['id']}'),),
+                        expandedCustomCell(MyDropDown(initialValue: constantPvd.irrigationLineUpdated[index]['pump'], itemList: ['-','IP1','IP2','IP3'], pvdName: 'line/irrigationPump', index: index),),
+                        expandedCustomCell(CustomTimePickerSiva(purpose: 'line/lowFlowDelay', index: index, value: '${constantPvd.irrigationLineUpdated[index]['lowFlowDelay']}', displayHours: true, displayMins: true, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,)),
+                        expandedCustomCell(CustomTimePickerSiva(purpose: 'line/highFlowDelay', index: index, value: '${constantPvd.irrigationLineUpdated[index]['highFlowDelay']}', displayHours: true, displayMins: true, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,)),
+                        expandedCustomCell(MyDropDown(initialValue: constantPvd.irrigationLineUpdated[index]['lowFlowBehavior'], itemList: ['Ignore','Do next','wait'], pvdName: 'line/lowFlowBehavior', index: index),),
+                        expandedCustomCell(MyDropDown(initialValue: constantPvd.irrigationLineUpdated[index]['highFlowBehavior'], itemList: ['Ignore','Do next','wait'], pvdName: 'line/highFlowBehavior', index: index),),
+                        expandedCustomCell(CustomTimePickerSiva(purpose: 'line/leakageLimit', index: index, value: '${constantPvd.irrigationLineUpdated[index]['leakageLimit']}', displayHours: false, displayMins: false, displaySecs: false, displayCustom: true, CustomString: 'pulse', CustomList: [0,10], displayAM_PM: false,)),
                       ],
                     ),
                   );
@@ -116,7 +122,7 @@ class _IrrigationLinesConstant_MState extends State<IrrigationLinesConstant_M> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: index == 0 ? BorderRadius.only(topLeft: Radius.circular(20)) : constantPvd.irrigationLines.length -1 == index ? BorderRadius.only(topRight: Radius.circular(20)) : BorderRadius.circular(5),
-                                    color: selectedLine == index ? myTheme.primaryColor : Colors.blue.shade50,
+                                    color: selectedLine == index ? myTheme.primaryColor : Colors.blue.shade100,
                                   ),
                                   child: Center(child: Text('${index + 1}',style: TextStyle(color: selectedLine == index ? Colors.white : null),)),
                                 ),

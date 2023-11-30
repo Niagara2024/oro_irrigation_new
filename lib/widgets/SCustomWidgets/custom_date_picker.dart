@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 
 class DatePickerField extends StatefulWidget {
   final DateTime value;
-  final void Function(DateTime) onChanged; // Callback function
+  final void Function(DateTime) onChanged;
   const DatePickerField({Key? key, required this.value, required this.onChanged}) : super(key: key);
 
   @override
@@ -23,14 +23,14 @@ class _DatePickerFieldState extends State<DatePickerField> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: widget.value,
-      firstDate: DateTime(2000),
+      initialDate: widget.value.isAfter(DateTime.now()) ? widget.value : DateTime.now(),
+      firstDate: DateTime.now(),
       lastDate: DateTime(2101),
     );
     if (picked != null) {
       setState(() {
         dateController.text = dateFormat.format(picked);
-        widget.onChanged(picked); // Call the callback with the updated value
+        widget.onChanged(picked);
       });
     }
   }

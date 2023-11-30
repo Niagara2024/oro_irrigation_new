@@ -6,6 +6,7 @@ import 'package:oro_irrigation_new/screens/dash_board.dart';
 import 'package:oro_irrigation_new/screens/login_form.dart';
 import 'package:oro_irrigation_new/state_management/constant_provider.dart';
 import 'package:oro_irrigation_new/state_management/data_acquisition_provider.dart';
+import 'package:oro_irrigation_new/state_management/irrigation_program_main_provider.dart';
 import 'package:oro_irrigation_new/state_management/mqtt_message_provider.dart';
 import 'package:oro_irrigation_new/state_management/overall_use.dart';
 import 'package:oro_irrigation_new/state_management/preferences_screen_main_provider.dart';
@@ -22,6 +23,9 @@ void main() {
       ChangeNotifierProvider(create: (context) => ConstantProvider()),
       ChangeNotifierProvider(create: (context) => OverAllUse()),
       ChangeNotifierProvider(create: (context) => MessageProvider()),
+      ChangeNotifierProvider(create: (context) => IrrigationProgramMainProvider()),
+      ChangeNotifierProvider(create: (context) => OverAllUse()),
+      ChangeNotifierProvider(create: (context) => ConstantProvider()),
       // ChangeNotifierProvider(create: (context) => MqttProvider(mqttClient: mqtt)),
     ],
     child: MyApp(),

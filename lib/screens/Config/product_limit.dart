@@ -26,7 +26,6 @@ class ProductLimits extends StatefulWidget {
 
 class _ProductLimitsState extends State<ProductLimits> {
 
-
   String userID = '0';
   String userType = '0';
   int filledRelayCount = 0;
@@ -43,26 +42,32 @@ class _ProductLimitsState extends State<ProductLimits> {
   void initState() {
     super.initState();
     getProductLimits();
-
   }
-
 
   @override
   void dispose() {
     print('dispose');
-    var configPvd = Provider.of<ConfigMakerProvider>(context, listen: false);
-    configPvd.clearConfig();
 
     for (var c in myControllers) {
       c.dispose();
     }
+
+    /*if(mounted){
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        var configPvd = Provider.of<ConfigMakerProvider>(context, listen: false);
+        configPvd.clearConfig();
+      });
+    }*/
+
     super.dispose();
   }
 
   Widget buildStepContent(BuildContext context, int stepNumber)
   {
     final mediaQuery = MediaQuery.of(context);
+
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
+    configPvd.clearConfig();
 
     switch (stepNumber) {
       case 1:
@@ -503,7 +508,7 @@ class _ProductLimitsState extends State<ProductLimits> {
             content: Container(
               height: mediaQuery.size.height-230,
               color:  Colors.white,
-              child: ConfigMakerScreen(userID: widget.userID, customerID: widget.customerID, siteID: widget.siteID, imeiNumber: widget.deviceId,),
+              child: ConfigMakerScreen(userID: widget.userID, customerID: widget.customerID, siteID: widget.userDeviceListId, imeiNumber: widget.deviceId,),
             ),
             isActive: _currentStep >= 0,
             state:  _currentStep == 1 ? StepState.editing : _currentStep >= 2 ? StepState.complete : StepState.disabled,

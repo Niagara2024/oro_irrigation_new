@@ -62,12 +62,14 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
   Widget wideLayout(DataModelDDConfig data, BuildContext context)
   {
     final mediaQuery = MediaQuery.of(context);
-    return visibleLoading? Visibility(
-      visible: visibleLoading,
-      child: Container(
-        padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 50, 0, mediaQuery.size.width/2 - 50, 0),
-        child: const LoadingIndicator(
-          indicatorType: Indicator.ballPulse,
+    return visibleLoading? Center(
+      child: Visibility(
+        visible: visibleLoading,
+        child: Container(
+          padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 115, 0, mediaQuery.size.width/2 - 115, 0),
+          child: const LoadingIndicator(
+            indicatorType: Indicator.ballPulse,
+          ),
         ),
       ),
     ) : Container(
@@ -100,7 +102,6 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
                       ]
                     });
                     MqttWebClient().publishMessage('AppToFirmware/${widget.imeiNo}', payLoadFinal);
-
                     final sendData = jsonEncode(data.dealerDefinition);
                     Map<String, Object> body = {
                       "userId": widget.customerID,
@@ -162,7 +163,7 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
         ),
         borderRadius: const BorderRadius.all(Radius.circular(5)),
       ),
-      margin: const EdgeInsets.all(5.0),
+      margin: const EdgeInsets.only(left: 5, right: 5),
       child: Column(
         children: [
           buildFixedRow(category.categoryName),

@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
-import 'package:oro_irrigation_new/widgets/time_picker.dart';
 import 'package:provider/provider.dart';
-
 import '../../../state_management/constant_provider.dart';
 import '../../../state_management/overall_use.dart';
-import '../../../widgets/SCustomWidgets/custom_time_picker.dart';
 import '../../../widgets/drop_down_button.dart';
-
+import '../../../widgets/time_picker.dart';
 
 
 class GeneralInConstant extends StatefulWidget {

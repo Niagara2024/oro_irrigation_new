@@ -257,7 +257,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                                                     value: (settingsProvider.getValueForIdentifier(title, pumpIndex)) != '' ? (settingsProvider.getValueForIdentifier(title, pumpIndex)): false,
                                                     onChanged: (value) => settingsProvider.updateValueForIdentifier(title, value, pumpIndex),
                                                     //icon: itemIcon,
-                                                    borderRadius: BorderRadius.circular(15)
+                                                    borderRadius: BorderRadius.circular(15), title: '',
                                                 ),
                                               );
                                             }
@@ -267,7 +267,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                                                   value: (settingsProvider.getValueForIdentifier(title, pumpIndex)) != '' ? (settingsProvider.getValueForIdentifier(title, pumpIndex)) : false,
                                                   onChanged: (value) => settingsProvider.updateValueForIdentifier(title, value, pumpIndex),
                                                   //icon: itemIcon,
-                                                  borderRadius: BorderRadius.circular(15)
+                                                  borderRadius: BorderRadius.circular(15), title: '',
                                               );
                                             }
                                             break;

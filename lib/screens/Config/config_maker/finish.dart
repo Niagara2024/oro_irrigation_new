@@ -1,16 +1,18 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:mqtt_client/mqtt_browser_client.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Models/create_json_file.dart';
 import '../../../constants/http_service.dart';
+import '../../../constants/mqtt_web_client.dart';
 import '../../../state_management/config_maker_provider.dart';
 
 
 class FinishPageConfigMaker extends StatefulWidget {
-  const FinishPageConfigMaker({super.key, required this.userID, required this.customerID, required this.siteId});
-  final int userID, siteId, customerID;
+  const FinishPageConfigMaker({super.key, required this.userId, required this.customerID, required this.controllerId});
+  final int userId, controllerId, customerID;
 
   @override
   State<FinishPageConfigMaker> createState() => _FinishPageConfigMakerState();
@@ -22,17 +24,17 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
 
     return Container(
-      //color: Color(0xFFF3F3F3),
+      color: Color(0xFFF3F3F3),
       child: Center(
         child: ElevatedButton(
           onPressed: ()async{
             try{
-            configPvd.sendData();
-            HttpService service = HttpService();
-              var response = await service.postRequest('createUserConfigMaker', {
+              configPvd.sendData();
+              configPvd.configFinish();
+              var body = {
                 "userId" : widget.customerID,
-                "createUser" : widget.userID,
-                "controllerId" : widget.siteId,
+                "createUser" : widget.userId,
+                "controllerId" : widget.controllerId,
                 "productLimit" : {
                   'totalWaterSource' : configPvd.totalWaterSource,
                   'totalWaterMeter' : configPvd.totalWaterMeter,
@@ -100,15 +102,23 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
                 "mappingOfOutput" : {},
                 "mappingOfInput" : {},
                 'hardware' : configPvd.sendData(),
-              });
-              print(configPvd.sendData());
+                'names' : configPvd.configFinish(),
+                'isNewConfig' : configPvd.isNew == true ? '1' : '0',
+              };
+              print('response body : $body');
+              HttpService service = HttpService();
+              var response = await service.postRequest('createUserConfigMaker', body);
+
+              //print(configPvd.sendData());
               var jsonData = jsonDecode(response.body);
-              print('jsonData : ${jsonData['code']}');
+              print('response code : ${jsonData['code']}');
+              print('response data : $jsonData');
             }catch(e){
               print(e.toString());
             }
             CreateJsonFile store = CreateJsonFile();
             // store.writeDataInJsonFile('configFile', configPvd.sendData());
+            MqttWebClient().publishMessage('AppToFirmware/${widget.controllerId}', jsonEncode(configPvd.sendData()));
           },
           child: Text('Send'),
         ),

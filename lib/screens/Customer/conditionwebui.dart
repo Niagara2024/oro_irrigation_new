@@ -7,6 +7,7 @@ import 'package:data_table_2/data_table_2.dart';
 import '../../Models/condition_model.dart';
 import '../../constants/http_service.dart';
 import '../../constants/mqtt_web_client.dart';
+import '../../constants/snack_bar.dart';
 import '../Config/dealer_definition_config.dart';
 
 class ConditionwebUI extends StatefulWidget {
@@ -66,8 +67,8 @@ class _ConditionwebUIState extends State<ConditionwebUI>
         _conditionModel.data!.conditionLibrary!.isNotEmpty) {
       setState(() {
         for (var i = 0;
-            i < _conditionModel.data!.conditionLibrary!.length;
-            i++) {
+        i < _conditionModel.data!.conditionLibrary!.length;
+        i++) {
           conditionList.add(_conditionModel.data!.conditionLibrary![i].name!);
         }
       });
@@ -84,7 +85,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
         _conditionModel = ConditionModel.fromJson(jsondata1);
         _conditionModel.data!.dropdown!.insert(0, '');
         // changeval();
-        MqttWebClient().onSubscribed('tweet/');
+        // MqttWebClient().onSubscribed('tweet/');
       });
     } else {
       //_showSnackBar(response.body);
@@ -103,7 +104,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
     if (usedprogramdropdownstr.contains('Sensor')) {
       var usedprogramdropdownstrarr = usedprogramdropdownstr.split('is');
       conditionselectionstr =
-          '$id is ${usedprogramdropdownstrarr[1]} value $value ';
+      '$id is ${usedprogramdropdownstrarr[1]} value $value ';
     }
     if (usedprogramdropdownstr.contains('Contact')) {
       var usedprogramdropdownstrarr = usedprogramdropdownstr.split('is');
@@ -209,17 +210,17 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                               DataColumn2(
                                 label: Center(
                                     child: Text(
-                                  conditionhdrlist[i].toString(),
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold),
-                                  softWrap: true,
-                                )),
+                                      conditionhdrlist[i].toString(),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                      softWrap: true,
+                                    )),
                               ),
                           ],
                           rows: List<DataRow>.generate(
                               _conditionModel.data!.conditionLibrary!.length,
-                              (index) => DataRow(
-                                    color: MaterialStateColor.resolveWith(
+                                  (index) => DataRow(
+                                color: MaterialStateColor.resolveWith(
                                         (states) {
                                       if (index == Selectindexrow) {
                                         return Colors.blue.withOpacity(
@@ -227,88 +228,88 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                                       }
                                       return Color.fromARGB(0, 176, 35, 35);
                                     }),
-                                    cells: [
-                                      for (int i = 0;
-                                          i < conditionhdrlist.length;
-                                          i++)
-                                        if (conditionhdrlist[i] == 'Enable')
-                                          DataCell(
-                                            onTap: () {
-                                              setState(() {
-                                                Selectindexrow = index;
-                                              });
-                                            },
-                                            MySwitch(
-                                              value: _conditionModel
-                                                      .data!
-                                                      .conditionLibrary![index]
-                                                      .enable ??
-                                                  false,
-                                              onChanged: ((value) {
-                                                setState(() {
-                                                  Selectindexrow = index;
-                                                  _conditionModel
-                                                      .data!
-                                                      .conditionLibrary![index]
-                                                      .enable = value;
-                                                });
-                                              }),
-                                            ),
-                                          )
-                                        else if (conditionhdrlist[i] ==
-                                            'Notification')
-                                          DataCell(
-                                            onTap: () {
-                                              setState(() {
-                                                Selectindexrow = index;
-                                              });
-                                            },
-                                            MySwitch(
-                                              value: _conditionModel
-                                                      .data!
-                                                      .conditionLibrary![index]
-                                                      .notification ??
-                                                  false,
-                                              onChanged: ((value) {
-                                                setState(() {
-                                                  Selectindexrow = index;
-                                                  _conditionModel
-                                                      .data!
-                                                      .conditionLibrary![index]
-                                                      .notification = value;
-                                                });
-                                              }),
-                                            ),
-                                          )
-                                        else if (conditionhdrlist[i] ==
-                                            'Duration')
-                                          DataCell(onTap: () {
+                                cells: [
+                                  for (int i = 0;
+                                  i < conditionhdrlist.length;
+                                  i++)
+                                    if (conditionhdrlist[i] == 'Enable')
+                                      DataCell(
+                                        onTap: () {
+                                          setState(() {
+                                            Selectindexrow = index;
+                                          });
+                                        },
+                                        MySwitch(
+                                          value: _conditionModel
+                                              .data!
+                                              .conditionLibrary![index]
+                                              .enable ??
+                                              false,
+                                          onChanged: ((value) {
                                             setState(() {
                                               Selectindexrow = index;
+                                              _conditionModel
+                                                  .data!
+                                                  .conditionLibrary![index]
+                                                  .enable = value;
                                             });
-                                          },
-                                              Center(
-                                                  child: InkWell(
-                                                child: Text(
-                                                  '${_conditionModel.data!.conditionLibrary![index].duration}',
-                                                  style: const TextStyle(
-                                                      fontSize: 20),
-                                                ),
-                                                onTap: () async {
-                                                  String time =
-                                                      await _selectTime(
-                                                          context);
-                                                  setState(() {
-                                                    Selectindexrow = index;
-                                                    _conditionModel
-                                                        .data!
-                                                        .conditionLibrary![
-                                                            index]
-                                                        .duration = time;
-                                                  });
-                                                },
-                                              )))
-                                        else if (conditionhdrlist[i] ==
+                                          }),
+                                        ),
+                                      )
+                                    else if (conditionhdrlist[i] ==
+                                        'Notification')
+                                      DataCell(
+                                        onTap: () {
+                                          setState(() {
+                                            Selectindexrow = index;
+                                          });
+                                        },
+                                        MySwitch(
+                                          value: _conditionModel
+                                              .data!
+                                              .conditionLibrary![index]
+                                              .notification ??
+                                              false,
+                                          onChanged: ((value) {
+                                            setState(() {
+                                              Selectindexrow = index;
+                                              _conditionModel
+                                                  .data!
+                                                  .conditionLibrary![index]
+                                                  .notification = value;
+                                            });
+                                          }),
+                                        ),
+                                      )
+                                    else if (conditionhdrlist[i] ==
+                                          'Duration')
+                                        DataCell(onTap: () {
+                                          setState(() {
+                                            Selectindexrow = index;
+                                          });
+                                        },
+                                            Center(
+                                                child: InkWell(
+                                                  child: Text(
+                                                    '${_conditionModel.data!.conditionLibrary![index].duration}',
+                                                    style: const TextStyle(
+                                                        fontSize: 20),
+                                                  ),
+                                                  onTap: () async {
+                                                    String time =
+                                                    await _selectTime(
+                                                        context);
+                                                    setState(() {
+                                                      Selectindexrow = index;
+                                                      _conditionModel
+                                                          .data!
+                                                          .conditionLibrary![
+                                                      index]
+                                                          .duration = time;
+                                                    });
+                                                  },
+                                                )))
+                                      else if (conditionhdrlist[i] ==
                                             'Unit Hour')
                                           DataCell(onTap: () {
                                             setState(() {
@@ -317,149 +318,148 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                                           },
                                               Center(
                                                   child: InkWell(
-                                                child: Text(
-                                                  '${_conditionModel.data!.conditionLibrary![index].untilTime}',
-                                                  style: const TextStyle(
-                                                      fontSize: 20),
-                                                ),
-                                                onTap: () async {
-                                                  String time =
+                                                    child: Text(
+                                                      '${_conditionModel.data!.conditionLibrary![index].untilTime}',
+                                                      style: const TextStyle(
+                                                          fontSize: 20),
+                                                    ),
+                                                    onTap: () async {
+                                                      String time =
                                                       await _selectTime(
                                                           context);
+                                                      setState(() {
+                                                        Selectindexrow = index;
+                                                        _conditionModel
+                                                            .data!
+                                                            .conditionLibrary![
+                                                        index]
+                                                            .untilTime = time;
+                                                      });
+                                                    },
+                                                  )))
+                                        else if (conditionhdrlist[i] ==
+                                              'From Hour')
+                                            DataCell(onTap: () {
+                                              setState(() {
+                                                Selectindexrow = index;
+                                              });
+                                            },
+                                                Center(
+                                                    child: InkWell(
+                                                      child: Text(
+                                                        '${_conditionModel.data!.conditionLibrary![index].fromTime}',
+                                                        style: const TextStyle(
+                                                            fontSize: 20),
+                                                      ),
+                                                      onTap: () async {
+                                                        String time =
+                                                        await _selectTime(
+                                                            context);
+                                                        setState(() {
+                                                          Selectindexrow = index;
+                                                          _conditionModel
+                                                              .data!
+                                                              .conditionLibrary![
+                                                          index]
+                                                              .fromTime = time;
+                                                        });
+                                                      },
+                                                    )))
+                                          else if (conditionhdrlist[i] == 'sNo')
+                                              DataCell(onTap: () {
+                                                setState(() {
+                                                  Selectindexrow = index;
+                                                });
+                                              },
+                                                  Center(
+                                                      child: Text(
+                                                        '${_conditionModel.data!.conditionLibrary![index].sNo}',
+                                                      )))
+                                            else if (conditionhdrlist[i] == 'ID')
+                                                DataCell(onTap: () {
                                                   setState(() {
                                                     Selectindexrow = index;
-                                                    _conditionModel
-                                                        .data!
-                                                        .conditionLibrary![
-                                                            index]
-                                                        .untilTime = time;
                                                   });
                                                 },
-                                              )))
-                                        else if (conditionhdrlist[i] ==
-                                            'From Hour')
-                                          DataCell(onTap: () {
-                                            setState(() {
-                                              Selectindexrow = index;
-                                            });
-                                          },
-                                              Center(
-                                                  child: InkWell(
-                                                child: Text(
-                                                  '${_conditionModel.data!.conditionLibrary![index].fromTime}',
-                                                  style: const TextStyle(
-                                                      fontSize: 20),
-                                                ),
-                                                onTap: () async {
-                                                  String time =
-                                                      await _selectTime(
-                                                          context);
-                                                  setState(() {
-                                                    Selectindexrow = index;
-                                                    _conditionModel
-                                                        .data!
-                                                        .conditionLibrary![
-                                                            index]
-                                                        .fromTime = time;
-                                                  });
-                                                },
-                                              )))
-                                        else if (conditionhdrlist[i] == 'sNo')
-                                          DataCell(onTap: () {
-                                            setState(() {
-                                              Selectindexrow = index;
-                                            });
-                                          },
-                                              Center(
-                                                  child: Text(
-                                                '${_conditionModel.data!.conditionLibrary![index].sNo}',
-                                              )))
-                                        else if (conditionhdrlist[i] == 'ID')
-                                          DataCell(onTap: () {
-                                            setState(() {
-                                              Selectindexrow = index;
-                                            });
-                                          },
-                                              Center(
-                                                  child: Text(
-                                                '${_conditionModel.data!.conditionLibrary![index].id}',
-                                              )))
-                                        else if (conditionhdrlist[i] == 'Name')
-                                          DataCell(onTap: () {
-                                            setState(() {
-                                              Selectindexrow = index;
-                                            });
-                                          },
-                                              Center(
-                                                  child: Text(
-                                                '${_conditionModel.data!.conditionLibrary![index].name}',
-                                              )))
-                                        else if (conditionhdrlist[i] ==
-                                            'condition IsTrueWhen')
-                                          DataCell(onTap: () {
-                                            setState(() {
-                                              Selectindexrow = index;
-                                            });
-                                          },
-                                              Center(
-                                                  child: Container(
-                                                child: Text(
-                                                  '${_conditionModel.data!.conditionLibrary![index].conditionIsTrueWhen}',
-                                                  style:
-                                                      TextStyle(fontSize: 11),
-                                                ),
-                                              )))
-                                        else if (conditionhdrlist[i] == 'State')
-                                          DataCell(onTap: () {
-                                            setState(() {
-                                              Selectindexrow = index;
-                                            });
-                                          },
-                                              Center(
-                                                  child: Text(
-                                                '${_conditionModel.data!.conditionLibrary![index].state}',
-                                              )))
-                                        else if (conditionhdrlist[i] ==
-                                            'Used Program')
-                                          DataCell(onTap: () {
-                                            setState(() {
-                                              Selectindexrow = index;
-                                            });
-                                          },
-                                              Center(
-                                                  child: Text(
-                                                '${_conditionModel.data!.conditionLibrary![index].usedByProgram}',
-                                              )))
-                                        // else if (conditionhdrlist[i] == 'Zone')
-                                        //   DataCell(onTap: () { setState(() {
-                                        //     Selectindexrow = index;
-                                        //   }); },Center(
-                                        //       child: Text( '${_conditionModel.data!.conditionLibrary![index].zone}',  )))
-                                        // else if (conditionhdrlist[i] == 'Program')
-                                        //   DataCell(onTap: () { setState(() {
-                                        //     Selectindexrow = index;
-                                        //   }); },Center(
-                                        //       child: Text( '${_conditionModel.data!.conditionLibrary![index].program}',  )))
-                                        else
-                                          DataCell(onTap: () {
-                                            setState(() {
-                                              Selectindexrow = index;
-                                            });
-                                          },
-                                              Center(
-                                                  child: Text(
-                                                'data',
-                                              )))
-                                    ],
-                                   
-                                  )))),
+                                                    Center(
+                                                        child: Text(
+                                                          '${_conditionModel.data!.conditionLibrary![index].id}',
+                                                        )))
+                                              else if (conditionhdrlist[i] == 'Name')
+                                                  DataCell(onTap: () {
+                                                    setState(() {
+                                                      Selectindexrow = index;
+                                                    });
+                                                  },
+                                                      Center(
+                                                          child: Text(
+                                                            '${_conditionModel.data!.conditionLibrary![index].name}',
+                                                          )))
+                                                else if (conditionhdrlist[i] ==
+                                                      'condition IsTrueWhen')
+                                                    DataCell(onTap: () {
+                                                      setState(() {
+                                                        Selectindexrow = index;
+                                                      });
+                                                    },
+                                                        Center(
+                                                            child: Container(
+                                                              child: Text(
+                                                                '${_conditionModel.data!.conditionLibrary![index].conditionIsTrueWhen}',
+                                                                style:
+                                                                TextStyle(fontSize: 11),
+                                                              ),
+                                                            )))
+                                                  else if (conditionhdrlist[i] == 'State')
+                                                      DataCell(onTap: () {
+                                                        setState(() {
+                                                          Selectindexrow = index;
+                                                        });
+                                                      },
+                                                          Center(
+                                                              child: Text(
+                                                                '${_conditionModel.data!.conditionLibrary![index].state}',
+                                                              )))
+                                                    else if (conditionhdrlist[i] ==
+                                                          'Used Program')
+                                                        DataCell(onTap: () {
+                                                          setState(() {
+                                                            Selectindexrow = index;
+                                                          });
+                                                        },
+                                                            Center(
+                                                                child: Text(
+                                                                  '${_conditionModel.data!.conditionLibrary![index].usedByProgram}',
+                                                                )))
+                                                      // else if (conditionhdrlist[i] == 'Zone')
+                                                      //   DataCell(onTap: () { setState(() {
+                                                      //     Selectindexrow = index;
+                                                      //   }); },Center(
+                                                      //       child: Text( '${_conditionModel.data!.conditionLibrary![index].zone}',  )))
+                                                      // else if (conditionhdrlist[i] == 'Program')
+                                                      //   DataCell(onTap: () { setState(() {
+                                                      //     Selectindexrow = index;
+                                                      //   }); },Center(
+                                                      //       child: Text( '${_conditionModel.data!.conditionLibrary![index].program}',  )))
+                                                      else
+                                                        DataCell(onTap: () {
+                                                          setState(() {
+                                                            Selectindexrow = index;
+                                                          });
+                                                        },
+                                                            Center(
+                                                                child: Text(
+                                                                  'data',
+                                                                )))
+                                ],
+                              )))),
                 ),
               ),
               Flexible(
                   child: buildconditionselection(
-                _conditionModel.data!.conditionLibrary![Selectindexrow].id,
-                Selectindexrow,
-              )),
+                    _conditionModel.data!.conditionLibrary![Selectindexrow].id,
+                    Selectindexrow,
+                  )),
             ],
           ),
           floatingActionButton: FloatingActionButton(
@@ -477,7 +477,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
   Widget buildconditionselection(String? title, int index) {
     changeval();
     String conditiontrue =
-        _conditionModel.data!.conditionLibrary![index].conditionIsTrueWhen!;
+    _conditionModel.data!.conditionLibrary![index].conditionIsTrueWhen!;
 
     bool containsOnlyNumbers = RegExp(r'^[0-9]+$').hasMatch(dropdownvalues);
     bool containsOnlyOperators = RegExp(r'^[&|^]+$').hasMatch(dropdownvalues);
@@ -485,7 +485,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
     if ((usedprogramdropdownstr.contains('Combined') == true)) {
       if (conditionList.contains(usedprogramdropdownstr2)) {
         usedprogramdropdownstr2 =
-            _conditionModel.data!.conditionLibrary![index].dropdown2!;
+        _conditionModel.data!.conditionLibrary![index].dropdown2!;
       } else {
         usedprogramdropdownstr2 = "";
       }
@@ -494,10 +494,8 @@ class _ConditionwebUIState extends State<ConditionwebUI>
           .map((contact) => contact.name as String)
           .toList();
       if (names.contains(usedprogramdropdownstr2)) {
-     
         usedprogramdropdownstr2 = usedprogramdropdownstr2;
       } else {
-       
         if (usedprogramdropdownlist!.length > 0) {
           usedprogramdropdownstr2 = '${usedprogramdropdownlist![0].name}';
         }
@@ -507,7 +505,6 @@ class _ConditionwebUIState extends State<ConditionwebUI>
         usedprogramdropdownlist!.isNotEmpty) {
       usedprogramdropdownstr2 = '${usedprogramdropdownlist![0].name}';
     }
-    
 
     if (conditiontrue.contains("&&")) {
       selectedOperator = "&&";
@@ -542,12 +539,12 @@ class _ConditionwebUIState extends State<ConditionwebUI>
               color: Colors.amber,
               child: Center(
                   child: Text(
-                '$title',
-              )),
+                    '$title',
+                  )),
             ),
             const Text('When in Used'),
             if (Selectindexrow != null)
-              //First Dropdown values
+            //First Dropdown values
               DropdownButton(
                 items: _conditionModel.data!.dropdown?.map((String? items) {
                   return DropdownMenuItem(
@@ -567,11 +564,11 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                 },
                 value: usedprogramdropdownstr == ''
                     ? _conditionModel.data!.conditionLibrary![Selectindexrow]
-                            .dropdown1!.isEmpty
-                        ? (_conditionModel.data!.dropdown![0])
-                        : _conditionModel
-                            .data!.conditionLibrary![Selectindexrow].dropdown1!
-                            .toString()
+                    .dropdown1!.isEmpty
+                    ? (_conditionModel.data!.dropdown![0])
+                    : _conditionModel
+                    .data!.conditionLibrary![Selectindexrow].dropdown1!
+                    .toString()
                     : usedprogramdropdownstr,
               ),
             if (usedprogramdropdownlist?.length != 0) Text(dropdowntitle),
@@ -589,11 +586,9 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                 }).toList(),
                 onChanged: (value) {
                   setState(() {
-                  
                     usedprogramdropdownstr2 = value.toString();
                     _conditionModel.data!.conditionLibrary![Selectindexrow]
                         .dropdown2 = value.toString();
-                    
                   });
                 },
                 value: usedprogramdropdownstr2,
@@ -606,7 +601,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                 child: Center(
                   child: TextFormField(
                     keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    const TextInputType.numberWithOptions(decimal: true),
                     initialValue: containsOnlyNumbers ? dropdownvalues : null,
                     showCursor: true,
                     inputFormatters: [
@@ -667,7 +662,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                           });
                         },
                         items: filterlist(
-                                conditionList, conditionList[Selectindexrow])
+                            conditionList, conditionList[Selectindexrow])
                             .map((condition) {
                           return DropdownMenuItem(
                             value: condition,
@@ -683,10 +678,9 @@ class _ConditionwebUIState extends State<ConditionwebUI>
             ElevatedButton(
                 onPressed: () {
                   setState(() {
-                  
                     if (usedprogramdropdownstr.contains('Program')) {
                       _conditionModel.data!.conditionLibrary![Selectindexrow]
-                              .conditionIsTrueWhen =
+                          .conditionIsTrueWhen =
                           conditionselection(usedprogramdropdownstr,
                               usedprogramdropdownstr2, '');
                       _conditionModel.data!.conditionLibrary![Selectindexrow]
@@ -701,7 +695,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                       List<UserNames>? program = _conditionModel.data!.program!;
                       if (program != null) {
                         String? sNo =
-                            getSNoByName(program, usedprogramdropdownstr2);
+                        getSNoByName(program, usedprogramdropdownstr2);
                         if (sNo != null) {
                           _conditionModel
                               .data!
@@ -714,7 +708,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                       }
                     } else if (usedprogramdropdownstr.contains('Contact')) {
                       _conditionModel.data!.conditionLibrary![Selectindexrow]
-                              .conditionIsTrueWhen =
+                          .conditionIsTrueWhen =
                           conditionselection(usedprogramdropdownstr,
                               usedprogramdropdownstr2, '');
                       _conditionModel.data!.conditionLibrary![Selectindexrow]
@@ -726,7 +720,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                       List<UserNames>? program = _conditionModel.data!.contact!;
                       if (program != null) {
                         String? sNo =
-                            getSNoByName(program, usedprogramdropdownstr2);
+                        getSNoByName(program, usedprogramdropdownstr2);
                         if (sNo != null) {
                           _conditionModel
                               .data!
@@ -739,7 +733,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                       }
                     } else if (usedprogramdropdownstr.contains('Sensor')) {
                       _conditionModel.data!.conditionLibrary![Selectindexrow]
-                              .conditionIsTrueWhen =
+                          .conditionIsTrueWhen =
                           conditionselection(usedprogramdropdownstr,
                               usedprogramdropdownstr2, dropdownvalues);
                       _conditionModel.data!.conditionLibrary![Selectindexrow]
@@ -749,10 +743,10 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                       // _conditionModel.data!.conditionLibrary![Selectindexrow]
                       //     .dropdownValue = dropdownvalues;
                       List<UserNames>? program =
-                          _conditionModel.data!.analogSensor!;
+                      _conditionModel.data!.analogSensor!;
                       if (program != null) {
                         String? sNo =
-                            getSNoByName(program, usedprogramdropdownstr2);
+                        getSNoByName(program, usedprogramdropdownstr2);
                         if (sNo != null) {
                           _conditionModel
                               .data!
@@ -773,10 +767,10 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                       // _conditionModel.data!.conditionLibrary![Selectindexrow]
                       //     .dropdownValue = dropdownvalues;
                       List<UserNames>? program =
-                          _conditionModel.data!.waterMeter!;
+                      _conditionModel.data!.waterMeter!;
                       if (program != null) {
                         String? sNo =
-                            getSNoByName(program, usedprogramdropdownstr2);
+                        getSNoByName(program, usedprogramdropdownstr2);
                         if (sNo != null) {
                           _conditionModel
                               .data!
@@ -789,8 +783,8 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                       }
                     } else if (usedprogramdropdownstr.contains('condition')) {
                       _conditionModel.data!.conditionLibrary![Selectindexrow]
-                              .conditionIsTrueWhen =
-                          '$usedprogramdropdownstr ${conditionList[Selectindexrow]} $dropdownvalues $usedprogramdropdownstr2';
+                          .conditionIsTrueWhen =
+                      '$usedprogramdropdownstr ${conditionList[Selectindexrow]} $dropdownvalues $usedprogramdropdownstr2';
                       _conditionModel.data!.conditionLibrary![Selectindexrow]
                           .dropdown1 = usedprogramdropdownstr;
                       _conditionModel.data!.conditionLibrary![Selectindexrow]
@@ -848,13 +842,13 @@ class _ConditionwebUIState extends State<ConditionwebUI>
 
   changeval() {
     usedprogramdropdownstr =
-        _conditionModel.data!.conditionLibrary![Selectindexrow].dropdown1!;
+    _conditionModel.data!.conditionLibrary![Selectindexrow].dropdown1!;
     usedprogramdropdownstr2 =
-        _conditionModel.data!.conditionLibrary![Selectindexrow].dropdown2!;
+    _conditionModel.data!.conditionLibrary![Selectindexrow].dropdown2!;
     // valueforwhentrue =
     //     _conditionModel.data!.conditionLibrary![Selectindexrow].dropdownValue!;
     dropdownvalues =
-        _conditionModel.data!.conditionLibrary![Selectindexrow].dropdownValue!;
+    _conditionModel.data!.conditionLibrary![Selectindexrow].dropdownValue!;
     checklistdropdown();
   }
 
@@ -865,30 +859,45 @@ class _ConditionwebUIState extends State<ConditionwebUI>
   }
 
   updateconditions() async {
-     List<Map<String, dynamic>> conditionJson = _conditionModel
+    List<Map<String, dynamic>> conditionJson = _conditionModel
         .data!.conditionLibrary!
         .map((condition) => condition.toJson())
         .toList();
 
     String Mqttsenddata = toMqttformat(_conditionModel.data!.conditionLibrary);
-     Map<String, Object> body = {
-      "userId": widget.userId,
-      "controllerId": widget.controllerId,
+    Map<String, Object> body = {
+      "userId": '15',
+      "controllerId": "1",
       "condition": conditionJson,
       "createUser": "1"
     };
-
-     final response = await HttpService()
+    final response = await HttpService()
         .postRequest("createUserPlanningConditionLibrary", body);
     final jsonDataresponse = json.decode(response.body);
-    //AlertDialogHelper.showAlert(context, '', jsonDataresponse['message']);
- 
+    GlobalSnackBar.show(context, jsonDataresponse['message'], response.statusCode);
+
     String payLoadFinal = jsonEncode({
       "700": [
+        {"701": ''},
+        {"702": ''},
+        {"703": ''},
+        {"704": ''},
+        {"705": ''},
+        {"706": ''},
+        {"707": ''},
         {"708": Mqttsenddata},
+        {"709": ''},
+        {"710": ''},
+        {"711": ''},
+        {"712": ''},
+        {"713": ''},
+        {"714": ''},
+        {"715": ''},
+        {"716": ''},
+
       ]
     });
-    MqttWebClient().publishMessage('AppToFirmware/${widget.imeiNo}', payLoadFinal);
+    // MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
   }
 
   String? getSNoByName(List<UserNames> data, String name) {
@@ -904,15 +913,15 @@ class _ConditionwebUIState extends State<ConditionwebUI>
   }
 
   String toMqttformat(
-    List<ConditionLibrary>? data,
-  ) {
+      List<ConditionLibrary>? data,
+      ) {
     String Mqttdata = '';
     for (var i = 0; i < data!.length; i++) {
       String enablevalue = data[i].enable! ? '1' : '0';
       String Notifigation = data[i].notification! ? '1' : '0';
       String conditionIsTrueWhenvalue = '0,0,0,0';
       String Combine = '';
- 
+
       if (data[i].conditionIsTrueWhen!.contains('Program')) {
         if (data[i].conditionIsTrueWhen!.contains('running')) {
           conditionIsTrueWhenvalue = "1,1,${data[i].program},0";
@@ -928,16 +937,16 @@ class _ConditionwebUIState extends State<ConditionwebUI>
       } else if (data[i].conditionIsTrueWhen!.contains('Contact')) {
         if (data[i].conditionIsTrueWhen!.contains('opened')) {
           conditionIsTrueWhenvalue =
-              "2,5,${data[i].program},${data[i].dropdownValue}";
+          "2,5,${data[i].program},${data[i].dropdownValue}";
         } else if (data[i].conditionIsTrueWhen!.contains('closed')) {
           conditionIsTrueWhenvalue =
-              "2,6,${data[i].program},${data[i].dropdownValue}";
+          "2,6,${data[i].program},${data[i].dropdownValue}";
         } else if (data[i].conditionIsTrueWhen!.contains('opening')) {
           conditionIsTrueWhenvalue =
-              "2,7,${data[i].program},${data[i].dropdownValue}";
+          "2,7,${data[i].program},${data[i].dropdownValue}";
         } else if (data[i].conditionIsTrueWhen!.contains('closing')) {
           conditionIsTrueWhenvalue =
-              "2,8,${data[i].program},${data[i].dropdownValue}";
+          "2,8,${data[i].program},${data[i].dropdownValue}";
         } else {
           conditionIsTrueWhenvalue = "2,0,0,0";
         }
@@ -954,20 +963,20 @@ class _ConditionwebUIState extends State<ConditionwebUI>
       } else if (data[i].conditionIsTrueWhen!.contains('Water')) {
         if (data[i].conditionIsTrueWhen!.contains('higher than')) {
           conditionIsTrueWhenvalue =
-              "4,12,${data[i].program},${data[i].dropdownValue}";
+          "4,12,${data[i].program},${data[i].dropdownValue}";
         } else if (data[i].conditionIsTrueWhen!.contains('lower than')) {
           conditionIsTrueWhenvalue =
-              "4,13,${data[i].program},${data[i].dropdownValue}";
+          "4,13,${data[i].program},${data[i].dropdownValue}";
         } else {
           conditionIsTrueWhenvalue = "4,0,0,0";
         }
       } else if (data[i].conditionIsTrueWhen!.contains('Sensor')) {
         if (data[i].conditionIsTrueWhen!.contains('higher than')) {
           conditionIsTrueWhenvalue =
-              "3,14,${data[i].program},${data[i].dropdownValue}";
+          "3,14,${data[i].program},${data[i].dropdownValue}";
         } else if (data[i].conditionIsTrueWhen!.contains('lower than')) {
           conditionIsTrueWhenvalue =
-              "3,15,${data[i].program},${data[i].dropdownValue}";
+          "3,15,${data[i].program},${data[i].dropdownValue}";
         } else {
           conditionIsTrueWhenvalue = "3,0,0,0";
         }
@@ -988,12 +997,12 @@ class _ConditionwebUIState extends State<ConditionwebUI>
             .conditionIsTrueWhen!
             .contains('Combined condition is true')) {
           conditionIsTrueWhenvalue =
-              "5,16,${data[i].sNo},$operator,${data[i].program}";
+          "5,16,${data[i].sNo},$operator,${data[i].program}";
         } else if (data[i]
             .conditionIsTrueWhen!
             .contains('Combined condition is false')) {
           conditionIsTrueWhenvalue =
-              "5,17,${data[i].sNo},$operator,${data[i].program}";
+          "5,17,${data[i].sNo},$operator,${data[i].program}";
         } else {
           conditionIsTrueWhenvalue = "5,0,0,0";
         }
@@ -1001,7 +1010,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
         conditionIsTrueWhenvalue = "0,0,0,0";
       }
       Mqttdata +=
-          '${data[i].sNo},${data[i].name},$enablevalue,${data[i].duration}:00,${data[i].fromTime}:00,${data[i].untilTime}:00,$Notifigation,$conditionIsTrueWhenvalue;';
+      '${data[i].sNo},${data[i].name},$enablevalue,${data[i].duration}:00,${data[i].fromTime}:00,${data[i].untilTime}:00,$Notifigation,$conditionIsTrueWhenvalue;';
     }
     return Mqttdata;
   }

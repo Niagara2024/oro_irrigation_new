@@ -7,6 +7,10 @@ class OverAllUse extends ChangeNotifier{
   int sec = 0;
   int other = 1;
   String am_pm = '';
+  int userId = 21;
+  int createUser = 21;
+  int controllerId = 10;
+
   void editTimeAll(){
     hrs = 0;
     min = 0;

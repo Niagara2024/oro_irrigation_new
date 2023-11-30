@@ -7,7 +7,7 @@ import '../../../widgets/drop_down_button.dart';
 
 
 class MappingOfOutputsTable extends StatefulWidget {
-  ConfigMakerProvider configPvd;
+  final ConfigMakerProvider configPvd;
   MappingOfOutputsTable({super.key,required this.configPvd});
 
   @override
@@ -27,7 +27,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
     return LayoutBuilder(builder: (context,constrainst){
       var width = constrainst.maxWidth;
       return Container(
-        //color: Color(0xFFF3F3F3),
+        color: Color(0xFFF3F3F3),
         child: Column(
           children: [
             Container(
@@ -121,27 +121,27 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                 width: double.infinity,
                 height: double.infinity,
                 child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Column(
-                          children: getIrrigationLine(irrigationLine(configPvd),configPvd),
-                        ),
-                        Column(
-                          children: getCentralDosing(centralDosing(configPvd),configPvd),
-                        ),
-                        Column(
-                          children: getCentralFiltration(centralFiltration(configPvd),configPvd),
-                        ),
-                        Column(
-                          children: getSourcePump(sourcePump(configPvd),configPvd),
-                        ),
-                        Column(
-                          children: getIrrigationPump(irrigationPump(configPvd),configPvd),
-                        ),
-                        SizedBox(height: 150,),
-                      ],
-                    ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Column(
+                        children: getIrrigationLine(irrigationLine(configPvd),configPvd),
+                      ),
+                      Column(
+                        children: getCentralDosing(centralDosing(configPvd),configPvd),
+                      ),
+                      Column(
+                        children: getCentralFiltration(centralFiltration(configPvd),configPvd),
+                      ),
+                      Column(
+                        children: getSourcePump(sourcePump(configPvd),configPvd),
+                      ),
+                      Column(
+                        children: getIrrigationPump(irrigationPump(configPvd),configPvd),
+                      ),
+                      SizedBox(height: 150,),
+                    ],
+                  ),
                 ),
               ),
             )
@@ -805,10 +805,10 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                     'line' : i,
                     'count' : injector,
                     'connection' : 'injector',
-                    'sNo' :  configPvd.localDosingUpdated[i]['injector'][injector]['sNo'],
-                    'rtu' :  configPvd.localDosingUpdated[i]['injector'][injector]['rtu'],
-                    'rfNo' : configPvd.localDosingUpdated[i]['injector'][injector]['rfNo'],
-                    'output' : configPvd.localDosingUpdated[i]['injector'][injector]['output'],
+                    'sNo' :  configPvd.localDosingUpdated[ld]['injector'][injector]['sNo'],
+                    'rtu' :  configPvd.localDosingUpdated[ld]['injector'][injector]['rtu'],
+                    'rfNo' : configPvd.localDosingUpdated[ld]['injector'][injector]['rfNo'],
+                    'output' : configPvd.localDosingUpdated[ld]['injector'][injector]['output'],
                     'c-type' : 'N/A'
                   }
               );
@@ -821,10 +821,10 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                     'line' : i,
                     'count' : boosterPump,
                     'connection' : 'boosterConnection',
-                    'sNo' :  configPvd.localDosingUpdated[i]['boosterConnection'][boosterPump]['sNo'],
-                    'rtu' :  configPvd.localDosingUpdated[i]['boosterConnection'][boosterPump]['rtu'],
-                    'rfNo' : configPvd.localDosingUpdated[i]['boosterConnection'][boosterPump]['rfNo'],
-                    'output' : configPvd.localDosingUpdated[i]['boosterConnection'][boosterPump]['output'],
+                    'sNo' :  configPvd.localDosingUpdated[ld]['boosterConnection'][boosterPump]['sNo'],
+                    'rtu' :  configPvd.localDosingUpdated[ld]['boosterConnection'][boosterPump]['rtu'],
+                    'rfNo' : configPvd.localDosingUpdated[ld]['boosterConnection'][boosterPump]['rfNo'],
+                    'output' : configPvd.localDosingUpdated[ld]['boosterConnection'][boosterPump]['output'],
                     'c-type' : 'N/A'
                   }
               );
@@ -844,10 +844,10 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                     'line' : i,
                     'count' : filter,
                     'connection' : 'filterConnection',
-                    'sNo' :  configPvd.localFiltrationUpdated[i]['filterConnection'][filter]['sNo'],
-                    'rtu' :  configPvd.localFiltrationUpdated[i]['filterConnection'][filter]['rtu'],
-                    'rfNo' : configPvd.localFiltrationUpdated[i]['filterConnection'][filter]['rfNo'],
-                    'output' : configPvd.localFiltrationUpdated[i]['filterConnection'][filter]['output'],
+                    'sNo' :  configPvd.localFiltrationUpdated[ld]['filterConnection'][filter]['sNo'],
+                    'rtu' :  configPvd.localFiltrationUpdated[ld]['filterConnection'][filter]['rtu'],
+                    'rfNo' : configPvd.localFiltrationUpdated[ld]['filterConnection'][filter]['rfNo'],
+                    'output' : configPvd.localFiltrationUpdated[ld]['filterConnection'][filter]['output'],
                     'c-type' : 'N/A'
                   }
               );
@@ -860,10 +860,10 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                     'line' : i,
                     'count' : -1,
                     'connection' : 'dv',
-                    'sNo' :  configPvd.localFiltrationUpdated[i]['dv']['sNo'],
-                    'rtu' :  configPvd.localFiltrationUpdated[i]['dv']['rtu'],
-                    'rfNo' : configPvd.localFiltrationUpdated[i]['dv']['rfNo'],
-                    'output' : configPvd.localFiltrationUpdated[i]['dv']['output'],
+                    'sNo' :  configPvd.localFiltrationUpdated[ld]['dv']['sNo'],
+                    'rtu' :  configPvd.localFiltrationUpdated[ld]['dv']['rtu'],
+                    'rfNo' : configPvd.localFiltrationUpdated[ld]['dv']['rfNo'],
+                    'output' : configPvd.localFiltrationUpdated[ld]['dv']['output'],
                     'c-type' : 'N/A'
                   }
               );

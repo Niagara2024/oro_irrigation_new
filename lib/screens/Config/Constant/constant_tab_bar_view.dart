@@ -5,80 +5,68 @@ import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/screens/Config/Constant/valve_in_constant.dart';
 import 'package:oro_irrigation_new/screens/Config/Constant/water_meter_in_constant.dart';
 import 'package:provider/provider.dart';
+
+
 import '../../../constants/http_service.dart';
 import '../../../state_management/constant_provider.dart';
+import '../../../state_management/overall_use.dart';
 import 'analog_sensor_in_constant.dart';
+import 'ec_ph_in_constant.dart';
 import 'fertilizer_in_constant.dart';
 import 'filter_in_constant.dart';
 import 'general.dart';
 import 'irrigation_lines_in_constant.dart';
+import 'level_sensor_in_constant.dart';
 import 'main_valve_in_constant.dart';
+import 'moisture_sensor_in_constant.dart';
 
 class ConstantInConfig extends StatefulWidget {
-  const ConstantInConfig({super.key, required this.userID, required this.customerID, required this.siteID});
-  final int userID, customerID, siteID;
+  const ConstantInConfig({super.key, required this.userId, required this.controllerId, required this.customerId});
+  final userId, controllerId, customerId;
 
   @override
   State<ConstantInConfig> createState() => _ConstantInConfigState();
 }
 
-class _ConstantInConfigState extends State<ConstantInConfig>
-{
-  @override
-  void initState() {
-    super.initState();
-    getConstantDetails();
-  }
-
-  Future<void> getConstantDetails() async
-  {
-    var configPvd = Provider.of<ConstantProvider>(context, listen: false);
-
-    Map<String, Object> body = {"userId" : widget.customerID, "controllerId" : widget.siteID};
-    final response = await HttpService().postRequest("getUserConstant", body);
-    if (response.statusCode == 200)
-    {
-      var jsonData = jsonDecode(response.body);
-      configPvd.fetchAll(jsonData['data']);
-    }
-    else{
-      //_showSnackBar(response.body);
-    }
-
-  }
-
+class _ConstantInConfigState extends State<ConstantInConfig> {
   @override
   Widget build(BuildContext context) {
+    var overAllPvd = Provider.of<OverAllUse>(context,listen: true);
     var constantPvd = Provider.of<ConstantProvider>(context,listen: true);
     return Scaffold(
-
+      appBar: AppBar(
+        title: Text('Constant'),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: ()async{
+          constantPvd.sendDataToHW();
           HttpService service = HttpService();
           try{
-            print('sended data is 123: ${jsonEncode({
-              'userId' : 8,
-              'controllerId' : 4,
-              'createUser' : 8,
-              'line' : constantPvd.irrigationLines,
-              'mainValve' : constantPvd.mainValve,
-              'valve' : constantPvd.valve,
-              'fertilization' : constantPvd.fertilizer,
-              'filtration' : constantPvd.filter,
-              'analogSensor' : constantPvd.analogSensor,
-              'waterMeter' : constantPvd.waterMeter
-            })}');
             var response = await service.postRequest('createUserConstant', {
-              'userId' : 8,
-              'controllerId' : 4,
-              'createUser' : 8,
-              'line' : constantPvd.irrigationLines,
-              'mainValve' : constantPvd.mainValve,
-              'valve' : constantPvd.valve,
-              'fertilization' : constantPvd.fertilizer,
-              'filtration' : constantPvd.filter,
-              'analogSensor' : constantPvd.analogSensor,
-              'waterMeter' : constantPvd.waterMeter
+              'userId' : overAllPvd.userId,
+              'controllerId' : overAllPvd.controllerId,
+              'createUser' : overAllPvd.createUser,
+              'general' : '',
+              'line' : constantPvd.irrigationLineUpdated,
+              // 'line' : [],
+              'mainValve' : constantPvd.mainValveUpdated,
+              // 'mainValve' : [],
+              'valve' : constantPvd.valveUpdated,
+              // 'valve' : [],
+              'waterMeter' : constantPvd.waterMeterUpdated,
+              // 'waterMeter' : [],
+              'fertilization' : constantPvd.fertilizerUpdated,
+              // 'fertilization' : [],
+              'ecPh' : constantPvd.ecPhUpdated,
+              // 'ecPh' : [],
+              'filtration' : constantPvd.filterUpdated,
+              // 'filtration' : [],
+              'analogSensor' : constantPvd.analogSensorUpdated,
+              // 'analogSensor' : [],
+              'moistureSensor' : constantPvd.moistureSensorUpdated,
+              // 'moistureSensor' : [],
+              'levelSensor' : constantPvd.levelSensorUpdated,
+              // 'levelSensor' : []
             });
             var jsonData = jsonDecode(response.body);
             print('jsonData : ${jsonData['code']}');
@@ -100,7 +88,7 @@ class _ConstantInConfigState extends State<ConstantInConfig>
             children: [
               Container(
                 width: double.infinity,
-                //color: Color(0XFFF3F3F3),
+                color: Color(0XFFF3F3F3),
                 child: TabBar(
                   indicatorColor: myTheme.primaryColor,
                   labelStyle: TextStyle(fontWeight: FontWeight.bold),
@@ -118,14 +106,18 @@ class _ConstantInConfigState extends State<ConstantInConfig>
                 child: TabBarView(
                   physics: NeverScrollableScrollPhysics(),
                     children: [
+                      // ...dynamicTab()
                       GeneralInConstant(),
                       IrrigationLinesConstant(),
                       MainValveConstant(),
                       ValveConstant(),
                       WaterMeterConstant(),
                       FertilizerConstant(),
+                      EcPhInConstant(),
                       FilterConstant(),
-                      AnalogSensorConstant()
+                      AnalogSensorConstant(),
+                      MoistureSensorInConstant(),
+                      LevelSensorInConstant()
                     ]
                 ),
               )
@@ -135,4 +127,42 @@ class _ConstantInConfigState extends State<ConstantInConfig>
       ),
     );
   }
+  List<Widget> dynamicTab(){
+    List<Widget> tabs = [];
+    var constantPvd = Provider.of<ConstantProvider>(context,listen: true);
+    for(var i in constantPvd.myTabs){
+      if(i == 'General'){
+        tabs.add( GeneralInConstant());
+      }else if(i == 'Lines'){
+        tabs.add( IrrigationLinesConstant());
+
+      }else if(i == 'Main valve'){
+        tabs.add( MainValveConstant());
+
+      }else if(i == 'Water meter'){
+        tabs.add( WaterMeterConstant());
+
+      }else if(i == 'Fertilizers'){
+        tabs.add( FertilizerConstant());
+
+      }else if(i == 'EC/PH'){
+        tabs.add( EcPhInConstant());
+
+      }else if(i == 'Filters'){
+        tabs.add( FilterConstant());
+
+      }else if(i == 'Analog sensor'){
+        tabs.add( AnalogSensorConstant());
+
+      }else if(i == 'Moisture sensor'){
+        tabs.add( MoistureSensorInConstant());
+
+      }else if(i == 'Level sensor'){
+        tabs.add(LevelSensorInConstant());
+
+      }
+    }
+    return tabs;
+  }
 }
+

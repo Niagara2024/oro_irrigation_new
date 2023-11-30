@@ -66,7 +66,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                           onChanged: (selectedOption) {
                             dataProvider.changeTypeForContact(index,selectedOption!);
                           },
-                        ),
+                        ), title: '',
                       ),
                     ),
                     const SizedBox(height: 5,),

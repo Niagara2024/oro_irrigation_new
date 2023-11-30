@@ -43,7 +43,6 @@ class _ConstantInConfigState extends State<ConstantInConfig> {
     try{
       var response = await service.postRequest('getUserConstant', {'userId' : widget.customerId,'controllerId' : widget.controllerId});
       var jsonData = jsonDecode(response.body);
-      print('jsonData : ${jsonEncode(jsonData)}');
       if(jsonData['data']['isNewConfig'] == '0'){
         constantPvd.fetchSettings(jsonData['data']['constant']);
       }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../Models/IrrigationModel/irrigation_program_model.dart';
+import '../../../Models/IrrigationModel/sequence_model.dart';
 import '../../../state_management/irrigation_program_main_provider.dart';
 import '../../../widgets/SCustomWidgets/custom_alert_dialog.dart';
 import '../../../widgets/SCustomWidgets/custom_train_widget.dart';

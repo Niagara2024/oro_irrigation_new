@@ -29,6 +29,9 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
         child: ElevatedButton(
           onPressed: ()async{
             try{
+              print(widget.userId);
+              print(widget.customerID);
+              print(widget.controllerId);
               configPvd.sendData();
               configPvd.configFinish();
               var body = {

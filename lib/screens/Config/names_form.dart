@@ -6,8 +6,8 @@ import '../../constants/http_service.dart';
 import '../../constants/theme.dart';
 
 class Names extends StatefulWidget {
-  const Names({Key? key, required this.userID, required this.customerID, required this.groupID,});
-  final int userID, customerID, groupID;
+  const Names({Key? key, required this.userID, required this.customerID, required this.controllerId,});
+  final int userID, customerID, controllerId;
 
   @override
   State<Names> createState() => _NamesState();
@@ -26,15 +26,15 @@ class _NamesState extends State<Names>  with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     print('User ID:${widget.userID}');
-    print('groupID ID:${widget.groupID}');
+    print('controllerId ID:${widget.controllerId}');
     print('customerID ID:${widget.customerID}');
     //print(_namesList);
 
-    return MyContainerWithTabs(names: _namesList, userID: widget.userID, groupID: widget.groupID, customerID: widget.customerID,);
+    return MyContainerWithTabs(names: _namesList, userID: widget.userID, controllerId: widget.controllerId, customerID: widget.customerID,);
   }
 
   Future<void> fetchData() async {
-    final response = await HttpService().postRequest("getUserName", {"userId": widget.customerID, "controllerId": widget.groupID});
+    final response = await HttpService().postRequest("getUserName", {"userId": widget.customerID, "controllerId": widget.controllerId});
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       setState(() {
@@ -57,9 +57,9 @@ class _NamesState extends State<Names>  with TickerProviderStateMixin
 
 class MyContainerWithTabs extends StatefulWidget
 {
-  const MyContainerWithTabs({super.key, required this.names, required this.userID, required this.customerID, required this.groupID});
+  const MyContainerWithTabs({super.key, required this.names, required this.userID, required this.customerID, required this.controllerId});
   final List<NamesModel> names;
-  final int userID, customerID, groupID;
+  final int userID, customerID, controllerId;
 
   @override
   State<MyContainerWithTabs> createState() => _MyContainerWithTabsState();
@@ -115,7 +115,7 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
                     List<Map<String, dynamic>> nameListJson =  widget.names.map((name) => name.toJson()).toList();
                     Map<String, dynamic> body = {
                       "userId": widget.customerID,
-                      "controllerId": widget.groupID,
+                      "controllerId": widget.controllerId,
                       "userNameList": nameListJson,
                       "createUser": widget.userID
                     };

@@ -24,7 +24,7 @@ class ConfigMakerProvider extends ChangeNotifier{
   Map<String,dynamic> names = {};
   bool isNew = true;
   dynamic oldData = {};
-  int totalWaterSource = 6;
+  dynamic totalWaterSource = 6;
   int totalWaterMeter = 15;
   int totalSourcePump = 6;
   int totalIrrigationPump = 10;
@@ -4332,6 +4332,7 @@ class ConfigMakerProvider extends ChangeNotifier{
   //TODO: sendData for hardware
   void fetchFromServer(){
     isNew = false;
+    print(oldData['productLimit']);
     totalWaterSource = oldData['productLimit']['totalWaterSource'];
     totalWaterMeter = oldData['productLimit']['totalWaterMeter'];
     totalSourcePump = oldData['productLimit']['totalSourcePump'];

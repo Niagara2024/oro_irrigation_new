@@ -20,6 +20,14 @@ final ThemeData myTheme = ThemeData(
   primaryColor: primaryColorDark,
   fontFamily: GoogleFonts.poppins().fontFamily,
 
+  appBarTheme: const AppBarTheme(
+    backgroundColor: primaryColorDark,
+    titleTextStyle: TextStyle(color: textColorWhite, fontSize: 22),
+    iconTheme: IconThemeData(
+      color: Colors.white, // Set your desired color here
+    ),
+  ),
+
   textTheme: const TextTheme(
     titleLarge: TextStyle(fontSize: 22, color: textColorBlack),
     titleMedium: TextStyle(fontSize: 15, color: textColorBlack),
@@ -34,8 +42,6 @@ final ThemeData myTheme = ThemeData(
       foregroundColor: textColorWhite, backgroundColor: primaryColorDark
     ),
   ),
-
-  appBarTheme: const AppBarTheme(backgroundColor: primaryColorDark, titleTextStyle: TextStyle(color: textColorWhite, fontSize: 22)),
 
 
 );

@@ -3,8 +3,27 @@ import 'package:flutter/material.dart';
 class DetailsSection extends StatelessWidget {
   final List<dynamic> data;
   final VoidCallback onClose;
+  List<List<String>> valveNames = [];
 
-  DetailsSection({required this.data, required this.onClose});
+
+  DetailsSection({required this.data, required this.onClose}) {
+    extractValveNames();
+  }
+
+  void extractValveNames() {
+
+    Map<String, List<String>> valveNamesMap = {};
+
+    for (var group in data) {
+      List<String> names = [];
+      for (var valve in group['valve']) {
+        names.add(valve['name']);
+      }
+      valveNamesMap[group['name']] = names;
+    }
+
+    valveNames = valveNamesMap.values.toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +65,7 @@ class DetailsSection extends StatelessWidget {
                   child: SingleChildScrollView(
                     child: DataTable(
                       columns: const <DataColumn>[
-                           DataColumn(
+                        DataColumn(
                           label: Text(
                             'Srno',
                             style: TextStyle(fontStyle: FontStyle.italic),
@@ -72,11 +91,12 @@ class DetailsSection extends StatelessWidget {
                         ),
                       ],
                       rows: List.generate(data.length, (index) {
+
                         return DataRow(cells: [
                           DataCell(Text(data[index]['sNo'].toString())),
                           DataCell(Text(data[index]['name'].toString())),
                           DataCell(Text(data[index]['location'].toString())),
-                          DataCell(Text(data[index]['valve'].toString())),
+                          DataCell(Text(valveNames[index].toString())),
                         ]);
                       }),
                     ),

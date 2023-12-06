@@ -19,8 +19,8 @@ import 'mapping_of_inputs.dart';
 import 'mapping_of_outputs.dart';
 
 class ConfigMakerForWeb extends StatefulWidget {
-  const ConfigMakerForWeb({super.key, required this.userID, required this.customerID, required this.siteId});
-  final int userID, siteId, customerID;
+  const ConfigMakerForWeb({super.key, required this.userID, required this.customerID, required this.controllerId});
+  final int userID, customerID, controllerId;
 
   @override
   State<ConfigMakerForWeb> createState() => _ConfigMakerForWebState();
@@ -65,7 +65,7 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
         return  MappingOfInputsTable(configPvd: configPvd,);
       }
       case (11):{
-        return  FinishPageConfigMaker(userId: widget.userID, customerID: widget.customerID, controllerId: widget.siteId,);
+        return  FinishPageConfigMaker(userId: widget.userID, customerID: widget.customerID, controllerId: widget.controllerId,);
       }
       default : {
         Container();

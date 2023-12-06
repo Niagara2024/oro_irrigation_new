@@ -1,11 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import '../Models/IrrigationModel/irrigation_program_model.dart';
-import '../Models/IrrigationModel/selection_model.dart';
+import '../Models/IrrigationModel/sequence_model.dart';
 import '../constants/http_service.dart';
-
 
 
 class IrrigationProgramMainProvider extends ChangeNotifier {
@@ -22,8 +19,8 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
   //TODO:SEQUENCE SCREEN PROVIDER
   final HttpService httpService = HttpService();
 
-  IrrigationLine? _irrigationLine;
-  IrrigationLine? get irrigationLine => _irrigationLine;
+  SequenceModel? _irrigationLine;
+  SequenceModel? get irrigationLine => _irrigationLine;
 
   Future<void> getUserProgramSequence(int userId, int controllerId, int serialNumber) async {
     try {
@@ -36,7 +33,7 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
       if(getUserProgramSequence.statusCode == 200) {
         final responseJson = getUserProgramSequence.body;
         final convertedJson = jsonDecode(responseJson);
-        _irrigationLine = IrrigationLine.fromJson(convertedJson);
+        _irrigationLine = SequenceModel.fromJson(convertedJson);
       } else {
         log("HTTP Request failed or received an unexpected response.");
       }
@@ -77,92 +74,128 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
     isAgitator = true;
     notifyListeners();
   }
+
   void updateSequencedValves(Valve valves, valueToShow, titleIndex) {
     if (isSingleValveMode) {
-      if(selectedProgramType == 'Agitator Program') {
-        _irrigationLine!.sequence.add({
-          "valve": [valves.toJson()],
-          "selected": [valves.name]
-        });
-      } else {
-        int length = _irrigationLine!.sequence.isNotEmpty
-            ? _irrigationLine!.sequence[0]['valve'].length
-            : 0;
+      handleSingleValveMode(valves, valueToShow);
+    } else {
+      handleMultipleValvesMode(valves, valueToShow, titleIndex);
+    }
+  }
 
-        for (var i = 0; i < length; i++) {
-          if (_irrigationLine!.sequence.any((item) => item['valve'].length > i && item['valve'][i]['sNo']! == valves.sNo)) {
-            isContains = true;
-            break;
-          } else {
-            isContains = false;
-          }
-        }
-        if (irrigationLine!.defaultData.reuseValve || !isContains) {
-          isReuseValve = false;
-          _irrigationLine!.sequence.add({
-            "valve": [valves.toJson()],
-            "selected": [valueToShow]
-          });
-          isStartTogether = false;
-        } else {
-          isReuseValve = true;
-        }
+  void handleSingleValveMode(Valve valves, valueToShow) {
+    if (selectedProgramType == 'Agitator Program') {
+      _irrigationLine!.sequence.add({
+        "valve": [valves.toJson()],
+        "selected": [valves.name]
+      });
+    } else {
+      handleNonAgitatorSingleValveMode(valves, valueToShow);
+    }
+  }
+
+  void handleNonAgitatorSingleValveMode(Valve valves, valueToShow) {
+    int length = _irrigationLine!.sequence.isNotEmpty
+        ? _irrigationLine!.sequence[0]['valve'].length
+        : 0;
+
+    bool isContains = checkValveContainment(valves, length);
+
+    if (irrigationLine!.defaultData.reuseValve || !isContains) {
+      isReuseValve = false;
+      _irrigationLine!.sequence.add({
+        "valve": [valves.toJson()],
+        "selected": [valueToShow]
+      });
+      isStartTogether = false;
+    } else {
+      isReuseValve = true;
+    }
+  }
+
+  bool checkValveContainment(Valve valves, int length) {
+    for (var i = 0; i < length; i++) {
+      if (_irrigationLine!.sequence.any((item) => item['valve'].length > i && item['valve'][i]['sNo']! == valves.sNo)) {
+        return true;
       }
     }
-    else {
-      if (_irrigationLine!.sequence.isEmpty && !isAgitator) {
-        _irrigationLine!.sequence.add({
-          "valve": [valves.toJson()],
-          "selected": [valueToShow]
-        });
-        isStartTogether = false;
+    return false;
+  }
+
+  void handleMultipleValvesMode(Valve valves, valueToShow, titleIndex) {
+    if (_irrigationLine!.sequence.isEmpty && !isAgitator) {
+      _irrigationLine!.sequence.add({
+        "valve": [valves.toJson()],
+        "selected": [valueToShow]
+      });
+      isStartTogether = false;
+    } else {
+      handleNonEmptySequence(valves, valueToShow, titleIndex);
+    }
+  }
+
+  void handleNonEmptySequence(Valve valves, valueToShow, titleIndex) {
+    int lastIndex = _irrigationLine!.sequence.length - 1;
+
+    if (lastIndex >= 0) {
+      Map<String, List> lastItem = _irrigationLine!.sequence[lastIndex];
+      List? sNoList = lastItem["valve"];
+      isSameLine = lastItem['selected']!.every((item) {
+        String itemString = item.toString();
+        return itemString.startsWith(titleIndex.toString());
+      });
+
+      if (selectedProgramType == 'Agitator Program') {
+        updateAgitatorProgram(valves, sNoList, valueToShow, lastItem);
       } else {
-        int lastIndex = _irrigationLine!.sequence.length - 1;
-        if (lastIndex >= 0) {
-          Map<String, List> lastItem = _irrigationLine!.sequence[lastIndex];
-          List? sNoList = lastItem["valve"];
-          isSameLine = lastItem['selected']!.every((item) {
-            String itemString = item.toString();
-            return itemString.startsWith(titleIndex.toString());
-          });
-
-          if (valves is! List<dynamic>) {
-            log('Not string');
-          }
-
-          if(selectedProgramType == 'Agitator Program') {
-            sNoList?.add(valves.toJson());
-            List<String>? selectedList = lastItem["selected"]?.cast<String>();
-            selectedList?.add(valves.name);
-          }
-
-          if (irrigationLine!.defaultData.startTogether) {
-            if (irrigationLine!.defaultData.reuseValve || !sNoList!.any((element) => element['sNo'] == valves.sNo)) {
-              isReuseValve = false;
-              sNoList?.add(valves.toJson());
-              List<String>? selectedList = lastItem["selected"]?.cast<String>();
-              selectedList?.add(valueToShow);
-            } else {
-              isReuseValve = true;
-            }
-          } else {
-            if (isSameLine) {
-              if (irrigationLine!.defaultData.reuseValve || !sNoList!.any((element) => element['sNo'] == valves.sNo)) {
-                isReuseValve = false;
-                sNoList?.add(valves.toJson());
-                List<String>? selectedList = lastItem["selected"]?.cast<String>();
-                selectedList?.add(valueToShow);
-                isStartTogether = false;
-              } else {
-                isReuseValve = true;
-                isStartTogether = false;
-              }
-            } else {
-              isStartTogether = true;
-            }
-          }
-        }
+        updateNonAgitatorProgram(valves, sNoList, valueToShow, lastItem, titleIndex);
       }
+    }
+  }
+
+  void updateAgitatorProgram(Valve valves, sNoList, valueToShow, lastItem) {
+    sNoList?.add(valves.toJson());
+    List<String>? selectedList = lastItem["selected"]?.cast<String>();
+    selectedList?.add(valves.name);
+  }
+
+  void updateNonAgitatorProgram(Valve valves, sNoList, valueToShow, lastItem, titleIndex) {
+    if (irrigationLine!.defaultData.startTogether) {
+      handleStartTogether(valves, sNoList, valueToShow, lastItem);
+    } else {
+      handleNonStartTogether(valves, sNoList, valueToShow, lastItem, titleIndex);
+    }
+  }
+
+  void handleStartTogether(Valve valves, sNoList, valueToShow, lastItem) {
+    if (irrigationLine!.defaultData.reuseValve || !sNoList!.any((element) => element['sNo'] == valves.sNo)) {
+      isReuseValve = false;
+      sNoList?.add(valves.toJson());
+      List<String>? selectedList = lastItem["selected"]?.cast<String>();
+      selectedList?.add(valueToShow);
+    } else {
+      isReuseValve = true;
+    }
+  }
+
+  void handleNonStartTogether(Valve valves, sNoList, valueToShow, lastItem, titleIndex) {
+    if (isSameLine) {
+      handleSameLine(valves, sNoList, valueToShow, lastItem, titleIndex);
+    } else {
+      isStartTogether = true;
+    }
+  }
+
+  void handleSameLine(Valve valves, sNoList, valueToShow, lastItem, titleIndex) {
+    if (irrigationLine!.defaultData.reuseValve || !sNoList!.any((element) => element['sNo'] == valves.sNo)) {
+      isReuseValve = false;
+      sNoList?.add(valves.toJson());
+      List<String>? selectedList = lastItem["selected"]?.cast<String>();
+      selectedList?.add(valueToShow);
+      isStartTogether = false;
+    } else {
+      isReuseValve = true;
+      isStartTogether = false;
     }
   }
 
@@ -228,17 +261,17 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
           convertedJson['data']['schedule'] = {
             "scheduleAsRunList" : {
               "rtc" : {
-                "rtc1": {"onTime": "00:00", "offTime": "00:00", "interval": "00:00", "noOfCycles": "00", "maxTime": "00:00", "condition": false},
-                "rtc2": {"onTime": "00:00", "offTime": "00:00", "interval": "00:00", "noOfCycles": "00", "maxTime": "00:00", "condition": false},
+                "rtc1": {"onTime": "00:00", "offTime": "00:00", "interval": "00:00", "noOfCycles": "0", "maxTime": "00:00", "condition": false},
+                "rtc2": {"onTime": "00:00", "offTime": "00:00", "interval": "00:00", "noOfCycles": "0", "maxTime": "00:00", "condition": false},
               },
               "schedule": { "noOfDays": "00", "startDate": DateTime.now().toString(), "type" : [] },
             },
             "scheduleByDays" : {
               "rtc" : {
-                "rtc1": {"onTime": "00:00", "offTime": "00:00", "interval": "00:00", "noOfCycles": "00", "maxTime": "00:00", "condition": false},
-                "rtc2": {"onTime": "00:00", "offTime": "00:00", "interval": "00:00", "noOfCycles": "00", "maxTime": "00:00", "condition": false},
+                "rtc1": {"onTime": "00:00", "offTime": "00:00", "interval": "00:00", "noOfCycles": "0", "maxTime": "00:00", "condition": false},
+                "rtc2": {"onTime": "00:00", "offTime": "00:00", "interval": "00:00", "noOfCycles": "0", "maxTime": "00:00", "condition": false},
               },
-              "schedule": { "startDate": DateTime.now().toString(), "runDays": "00", "skipDays": "00" }
+              "schedule": { "startDate": DateTime.now().toString(), "runDays": "0", "skipDays": "0" }
             },
             "selected" : "NO SCHEDULE",
           };
@@ -258,12 +291,18 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
   }
 
   void updateRtcProperty(newTime, selectedRtc, property, scheduleType) {
+    // print(scheduleType);
+    // print(selectedRtc);
+    // print(property);
+    // print(newTime);
     if(scheduleType == sampleScheduleModel!.scheduleAsRunList){
       final selectedRtcKey = sampleScheduleModel!.scheduleAsRunList.rtc.keys.toList()[selectedRtcIndex1];
       sampleScheduleModel!.scheduleAsRunList.rtc[selectedRtcKey][property] = newTime;
+      print(sampleScheduleModel!.scheduleAsRunList.rtc[selectedRtcKey]['onTime']);
     } else {
       final selectedRtcKey = sampleScheduleModel!.scheduleByDays.rtc.keys.toList()[selectedRtcIndex2];
       sampleScheduleModel!.scheduleByDays.rtc[selectedRtcKey][property] = newTime;
+      print(sampleScheduleModel!.scheduleAsRunList.rtc[selectedRtcKey]['onTime']);
     }
     notifyListeners();
   }
@@ -406,63 +445,80 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
-
   //TODO: CONDITIONS PROVIDER
-  Map<String, dynamic> sampleConditionsData = {
-    "data": {
-      "condition": [
-        {
-          "title": "START BY CONDITION",
-          "widgetTypeId": 6,
-          "iconCodePoint": "0xe4cb",
-          "iconFontFamily": "MaterialIcons",
-          "value": {},
-          "hidden": false,
-          "selected": false
-        },
-        {
-          "title": "STOP BY CONDITION",
-          "widgetTypeId": 6,
-          "iconCodePoint": "0xe606",
-          "iconFontFamily": "MaterialIcons",
-          "value": {},
-          "hidden": false,
-          "selected": false
-        },
-        {
-          "title": "ENABLE BY CONDITION",
-          "widgetTypeId": 6,
-          "iconCodePoint": "0xe66c",
-          "iconFontFamily": "MaterialIcons",
-          "value": {},
-          "hidden": false,
-          "selected": false
-        },
-        {
-          "title": "DISABLE BY CONDITION",
-          "widgetTypeId": 6,
-          "iconCodePoint": "0xe66b",
-          "iconFontFamily": "MaterialIcons",
-          "value": {},
-          "hidden": false,
-          "selected": false
-        }
-      ],
-      "default": {
-        "conditionLibrary": [
-          {"sNo": 1, "id": "COND1", "location": "", "name": "Condition1", "enable": false, "state": "", "duration": "00:00", "conditionIsTrueWhen": "", "fromTime": "00:00", "untilTime": "00:00", "notification": false, "usedByProgram": "", "program": "", "zone": "", "dropdown1": "", "dropdown2": "", "dropdownValue": ""},
-          {"sNo": 2, "id": "COND2", "location": "", "name": "Condition2", "enable": false, "state": "", "duration": "00:00", "conditionIsTrueWhen": "", "fromTime": "00:00", "untilTime": "00:00", "notification": false, "usedByProgram": "", "program": "", "zone": "", "dropdown1": "", "dropdown2": "", "dropdownValue": ""},
-          {"sNo": 3, "id": "COND3", "location": "", "name": "Condition3", "enable": false, "state": "", "duration": "00:00", "conditionIsTrueWhen": "", "fromTime": "00:00", "untilTime": "00:00", "notification": false, "usedByProgram": "", "program": "", "zone": "", "dropdown1": "", "dropdown2": "", "dropdownValue": ""},
-        ]
-      }
-    }
-  };
+  // Map<String, dynamic> sampleConditionsData = {
+  //   "data": {
+  //     "condition": [
+  //       {
+  //         "title": "START BY CONDITION",
+  //         "widgetTypeId": 6,
+  //         "iconCodePoint": "0xe4cb",
+  //         "iconFontFamily": "MaterialIcons",
+  //         "value": {},
+  //         "hidden": false,
+  //         "selected": false
+  //       },
+  //       {
+  //         "title": "STOP BY CONDITION",
+  //         "widgetTypeId": 6,
+  //         "iconCodePoint": "0xe606",
+  //         "iconFontFamily": "MaterialIcons",
+  //         "value": {},
+  //         "hidden": false,
+  //         "selected": false
+  //       },
+  //       {
+  //         "title": "ENABLE BY CONDITION",
+  //         "widgetTypeId": 6,
+  //         "iconCodePoint": "0xe66c",
+  //         "iconFontFamily": "MaterialIcons",
+  //         "value": {},
+  //         "hidden": false,
+  //         "selected": false
+  //       },
+  //       {
+  //         "title": "DISABLE BY CONDITION",
+  //         "widgetTypeId": 6,
+  //         "iconCodePoint": "0xe66b",
+  //         "iconFontFamily": "MaterialIcons",
+  //         "value": {},
+  //         "hidden": false,
+  //         "selected": false
+  //       }
+  //     ],
+  //     "default": {
+  //       "conditionLibrary": [
+  //         {"sNo": 1, "id": "COND1", "location": "", "name": "Condition1", "enable": false, "state": "", "duration": "00:00", "conditionIsTrueWhen": "", "fromTime": "00:00", "untilTime": "00:00", "notification": false, "usedByProgram": "", "program": "", "zone": "", "dropdown1": "", "dropdown2": "", "dropdownValue": ""},
+  //         {"sNo": 2, "id": "COND2", "location": "", "name": "Condition2", "enable": false, "state": "", "duration": "00:00", "conditionIsTrueWhen": "", "fromTime": "00:00", "untilTime": "00:00", "notification": false, "usedByProgram": "", "program": "", "zone": "", "dropdown1": "", "dropdown2": "", "dropdownValue": ""},
+  //         {"sNo": 3, "id": "COND3", "location": "", "name": "Condition3", "enable": false, "state": "", "duration": "00:00", "conditionIsTrueWhen": "", "fromTime": "00:00", "untilTime": "00:00", "notification": false, "usedByProgram": "", "program": "", "zone": "", "dropdown1": "", "dropdown2": "", "dropdownValue": ""},
+  //       ]
+  //     }
+  //   }
+  // };
 
   SampleConditions? _sampleConditions;
   SampleConditions? get sampleConditions => _sampleConditions;
-
-  Future<void> conditionTypeData(int userId, int controllerId) async {
-    _sampleConditions = SampleConditions.fromJson(sampleConditionsData);
+  bool conditionsLibraryIsNotEmpty = false;
+  Future<void> getUserProgramCondition(int userId, int controllerId, int serialNumber) async {
+    try {
+      var userData = {
+        "userId": userId,
+        "controllerId": controllerId,
+        "serialNumber": serialNumber
+      };
+      var getUserProgramCondition = await httpService.postRequest('getUserProgramCondition', userData);
+      if(getUserProgramCondition.statusCode == 200) {
+        final responseJson = getUserProgramCondition.body;
+        final convertedJson = jsonDecode(responseJson);
+        _sampleConditions = SampleConditions.fromJson(convertedJson);
+      } else {
+        log("HTTP Request failed or received an unexpected response.");
+      }
+    } catch (e) {
+      log('Error: $e');
+      rethrow;
+    }
+    // _sampleConditions = SampleConditions.fromJson(sampleConditionsData);
 
     Future.delayed(Duration.zero, () {
       notifyListeners();
@@ -558,6 +614,7 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
     radio = value;
     notifyListeners();
   }
+  var waterAndFertData = [];
 
   void editNextForGroupSiteInjector(String title){
     switch(title){
@@ -849,19 +906,24 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void dataToWF(){
+  void dataToWF() {
     serverDataWM = [];
-    List<dynamic> mySequence = _irrigationLine!.sequence;
-    for(var sequence in mySequence){
+    List<dynamic> mySequence = [];
+    mySequence = List.from(_irrigationLine!.sequence);
+
+    for (var index = 0; index < mySequence.length; index++) {
+      var sequence = mySequence[index];
+
       var seq = '';
-      for(var vl in sequence['selected']){
+      for (var vl in sequence['selected']) {
         seq += '${seq.isNotEmpty ? ' & ' : ''}$vl';
       }
-      check : for(var i in sequenceData){
-        for(var j in i.entries){
-          if(j.key == seq){
+
+      check: for (var i in sequenceData) {
+        for (var j in i.entries) {
+          if (j.key == seq) {
             sequence['water&fert'] = [j.value];
-            log("sequence['water&fert'] : ${sequence['water&fert']}");
+            // log("sequence['water&fert'] : ${sequence['water&fert']}");
             break check;
           }
         }
@@ -870,19 +932,6 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
-
-  // dynamic selectedSequenceDetails(String value){
-  //   var data = {};
-  //   for(var i in sequenceData){
-  //     for(var j in i.entries){
-  //       if(j.key == value){
-  //         data = i;
-  //       }
-  //     }
-  //   }
-  //   currentSequenceDetails = data;
-  //   return data;
-  // }
 
   //TODO: SELECTION PROVIDER
   SelectionModel _selectionModel = SelectionModel();
@@ -924,6 +973,9 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
         break;
       case 'Central Fertilizer':
         selectionModel.data!.centralFertilizerSite![index].selected = !selectionModel.data!.centralFertilizerSite![index].selected!;
+        break;
+      case 'Central Fertilizer Injector':
+        selectionModel.data!.centralFertilizer![index].selected = !selectionModel.data!.centralFertilizer![index].selected!;
         break;
       case 'Local Fertilizer':
         selectionModel.data!.localFertilizer![index].selected = !selectionModel.data!.localFertilizer![index].selected!;
@@ -1062,7 +1114,7 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
         "serialNumber": serialNumber
       };
 
-      var getUserProgramName = await httpService.postRequest('getUserProgramNameList', userData);
+      var getUserProgramName = await httpService.postRequest('getUserProgramLibrary', userData);
 
       if (getUserProgramName.statusCode == 200) {
         final responseJson = getUserProgramName.body;
@@ -1071,6 +1123,7 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
         priorityList = List.generate(_programLibrary!.program.length, (index) => (index + 1));
         priority = _programDetails?.priority ?? 0;
         agitatorCountIsNotZero = convertedJson['data']['agitatorCount'] != 0 ? true : false;
+        conditionsLibraryIsNotEmpty = convertedJson['data']['conditionLibraryCount'] != 0 ? true : false;
         // irrigationProgramType = _programLibrary?.program[serialNumber].programType == "Irrigation Program" ? true : false;
       } else {
         log("HTTP Request failed or received an unexpected response.");
@@ -1171,6 +1224,24 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
     Icons.done_rounded,
   ];
 
+  List<String> label3 = ['Sequence', 'Schedule', 'Alarm', 'Done'];
+  List<IconData> icons3 = [
+    Icons.view_headline_rounded,
+    Icons.calendar_month,
+    Icons.alarm_rounded,
+    Icons.done_rounded,
+  ];
+
+  List<String> label4 = ['Sequence', 'Schedule', 'Water & Fert', 'Selection', 'Alarm', 'Done'];
+  List<IconData> icons4 = [
+    Icons.view_headline_rounded,
+    Icons.calendar_month,
+    Icons.local_florist_rounded,
+    Icons.checklist,
+    Icons.alarm_rounded,
+    Icons.done_rounded,
+  ];
+
   //TODO: UPDATE PROGRAM DETAILS
   Future<String> updateUserProgramDetails(
       int userId, int controllerId, int serialNumber, int programId, String programName, String programType, int priority) async {
@@ -1200,6 +1271,5 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
       rethrow;
     }
   }
-
 
 }

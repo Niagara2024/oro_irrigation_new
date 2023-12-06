@@ -257,10 +257,10 @@ class _DashboardWideState extends State<DashboardWide> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircleAvatar(
+                  const CircleAvatar(
                     radius: 35,
-                    //backgroundImage: AssetImage("assets/images/login_amico.png"),
-                    backgroundColor: myTheme.primaryColor.withOpacity(0.1),
+                    backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
+                    backgroundColor: Colors.transparent,
                   ),
                   const SizedBox(height: 3,),
                   Text(widget.userName, style: myTheme.textTheme.titleSmall,),
@@ -314,7 +314,7 @@ class _DashboardWideState extends State<DashboardWide> {
                 padding: EdgeInsets.only(top: 5),
                 icon: Icon(Icons.group_outlined),
                 selectedIcon: Icon(Icons.group_outlined, color: Color(0xFF0D5D9A),),
-                label: Text('Manage User'),
+                label: Text('My Product'),
               ) :
               const NavigationRailDestination(
                 padding: EdgeInsets.only(top: 5),

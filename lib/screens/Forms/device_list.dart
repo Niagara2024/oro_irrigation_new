@@ -1165,7 +1165,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                     for(int i=0; i<widget.usedNodeList[siteIndex].length; i++){
                                       relayCnt = relayCnt + widget.usedNodeList[siteIndex][i].relayCount;
                                     }
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  ProductLimits(userID: widget.userID, customerID: widget.customerID, userType: 2, siteID: widget.customerSiteList[siteIndex].groupId, nodeCount: relayCnt, siteName: widget.customerSiteList[siteIndex].groupName, userDeviceListId: widget.customerSiteList[siteIndex].userDeviceListId, deviceId: widget.customerSiteList[siteIndex].deviceId,)),);
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  ProductLimits(userID: widget.userID, customerID: widget.customerID, userType: 2, nodeCount: relayCnt, siteName: widget.customerSiteList[siteIndex].groupName, controllerId: widget.customerSiteList[siteIndex].userDeviceListId, deviceId: widget.customerSiteList[siteIndex].deviceId,)),);
                                   },
                                   icon: const Icon(Icons.list_alt)),
                               const SizedBox(width: 20,),

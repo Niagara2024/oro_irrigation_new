@@ -24,8 +24,8 @@ import 'mapping_of_inputs.dart';
 import 'mapping_of_outputs.dart';
 
 class ConfigMakerScreen extends StatefulWidget {
-  const ConfigMakerScreen({super.key, required this.userID, required this.customerID, required this.siteID, required this.imeiNumber});
-  final int userID, customerID, siteID;
+  const ConfigMakerScreen({super.key, required this.userId, required this.customerId, required this.controllerId, required this.imeiNumber});
+  final int userId, customerId, controllerId;
   final String imeiNumber;
 
   @override
@@ -117,7 +117,6 @@ class _ConfigMakerScreenState extends State<ConfigMakerScreen> with SingleTicker
                         const WeatherStationConfig(),
                         MappingOfOutputsTable(configPvd: configPvd,),
                         MappingOfInputsTable(configPvd: configPvd),
-                        //FinishPageConfigMaker(customerId: widget.customerID, controllerId: widget.siteID, userId: widget.userID, imeiNo: widget.imeiNumber,),
                       ],
                     ),
                   )
@@ -126,7 +125,7 @@ class _ConfigMakerScreenState extends State<ConfigMakerScreen> with SingleTicker
           ),
         );
       }else{
-        return  ConfigMakerForWeb(userID: widget.userID, customerID: widget.customerID, siteId: widget.siteID,);
+        return  ConfigMakerForWeb(userID: widget.userId, customerID: widget.customerId, controllerId: widget.controllerId,);
       }
     },);
   }

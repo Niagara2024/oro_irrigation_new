@@ -82,7 +82,21 @@ flutter:
   assets:
      - assets/images/otp_illustrator.png
      - assets/images/login_illustrator.png
+     - assets/images/user_thumbnail.png
      - assets/images/no_data.jpg
+     - assets/images/irrigation_pump.png
+     - assets/images/source_pump.png
+     - assets/images/main_valve.png
+     - assets/images/valve.png
+     - assets/images/central_filtration.png
+     - assets/images/central_dosing.png
+     - assets/images/moisture_sensor.png
+     - assets/images/level_sensor.png
+     - assets/images/fert_chanel.png
+     - assets/images/oro_switch.png
+     - assets/images/oro_gem.png
+     - assets/images/oro_sense.png
+     - assets/images/oro_rtu.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

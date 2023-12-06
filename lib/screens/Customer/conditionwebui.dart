@@ -11,7 +11,11 @@ import '../../constants/snack_bar.dart';
 import '../Config/dealer_definition_config.dart';
 
 class ConditionwebUI extends StatefulWidget {
-  const ConditionwebUI({Key? key, required this.userId, required this.controllerId, required this.imeiNo});
+  const ConditionwebUI(
+      {Key? key,
+        required this.userId,
+        required this.controllerId,
+        required this.imeiNo});
   final userId, controllerId;
   final String imeiNo;
 
@@ -76,7 +80,10 @@ class _ConditionwebUIState extends State<ConditionwebUI>
   }
 
   Future<void> fetchData() async {
-    Map<String, Object> body = {"userId": widget.userId, "controllerId": widget.controllerId};
+    Map<String, Object> body = {
+      "userId": widget.userId,
+      "controllerId": widget.controllerId
+    };
     final response = await HttpService()
         .postRequest("getUserPlanningConditionLibrary", body);
     if (response.statusCode == 200) {
@@ -85,7 +92,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
         _conditionModel = ConditionModel.fromJson(jsondata1);
         _conditionModel.data!.dropdown!.insert(0, '');
         // changeval();
-        // MqttWebClient().onSubscribed('tweet/');
+        MqttWebClient().onSubscribed('tweet/');
       });
     } else {
       //_showSnackBar(response.body);
@@ -108,7 +115,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
     }
     if (usedprogramdropdownstr.contains('Contact')) {
       var usedprogramdropdownstrarr = usedprogramdropdownstr.split('is');
-      conditionselectionstr = '$id is ${usedprogramdropdownstrarr[1]}';
+      conditionselectionstr = '$name value is $value ';
     }
     if (usedprogramdropdownstr.contains('Water')) {
       var usedprogramdropdownstrarr = usedprogramdropdownstr.split('is');
@@ -123,6 +130,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
       conditionselectionstr = '${usedprogramdropdownstrarr[0]} $value';
       zonestr = name;
     }
+    print('conditionselectionstr:  $conditionselectionstr');
     return conditionselectionstr;
   }
 
@@ -164,24 +172,35 @@ class _ConditionwebUIState extends State<ConditionwebUI>
     }
   }
 
-  Future<String> _selectTime(BuildContext context) async {
+  Future<String?> _selectTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: _selectedTime,
     );
-    if (picked != null && picked != _selectedTime) {
+
+    if (picked != null) {
       _selectedTime = picked;
+      final hour = _selectedTime.hour.toString().padLeft(2, '0');
+      final minute = _selectedTime.minute.toString().padLeft(2, '0');
+      return '$hour:$minute';
     }
-    final hour = _selectedTime.hour.toString().padLeft(2, '0');
-    final minute = _selectedTime.minute.toString().padLeft(2, '0');
-    return '$hour:$minute';
+
+    return null;
   }
 
   Widget build(BuildContext context) {
     if (_conditionModel.data == null) {
-      return Center(
+      return const Center(
         child: CircularProgressIndicator(),
-      ); // Or handle the null case in a way that makes sense for your application
+      );
+    } else if (_conditionModel.data!.conditionLibrary!.length <= 0) {
+      return Container(
+        child: const Center(
+            child: Text(
+              'Condition Not Found',
+              style: TextStyle(color: Colors.black, fontSize: 20),
+            )),
+      );
     } else {
       return Padding(
         padding: const EdgeInsets.all(8.0),
@@ -296,16 +315,18 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                                                         fontSize: 20),
                                                   ),
                                                   onTap: () async {
-                                                    String time =
+                                                    String? time =
                                                     await _selectTime(
                                                         context);
                                                     setState(() {
-                                                      Selectindexrow = index;
-                                                      _conditionModel
-                                                          .data!
-                                                          .conditionLibrary![
-                                                      index]
-                                                          .duration = time;
+                                                      if (time != null) {
+                                                        Selectindexrow = index;
+                                                        _conditionModel
+                                                            .data!
+                                                            .conditionLibrary![
+                                                        index]
+                                                            .duration = time;
+                                                      }
                                                     });
                                                   },
                                                 )))
@@ -324,16 +345,18 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                                                           fontSize: 20),
                                                     ),
                                                     onTap: () async {
-                                                      String time =
+                                                      String? time =
                                                       await _selectTime(
                                                           context);
                                                       setState(() {
-                                                        Selectindexrow = index;
-                                                        _conditionModel
-                                                            .data!
-                                                            .conditionLibrary![
-                                                        index]
-                                                            .untilTime = time;
+                                                        if (time != null) {
+                                                          Selectindexrow = index;
+                                                          _conditionModel
+                                                              .data!
+                                                              .conditionLibrary![
+                                                          index]
+                                                              .untilTime = time;
+                                                        }
                                                       });
                                                     },
                                                   )))
@@ -352,16 +375,18 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                                                             fontSize: 20),
                                                       ),
                                                       onTap: () async {
-                                                        String time =
+                                                        String? time =
                                                         await _selectTime(
                                                             context);
                                                         setState(() {
-                                                          Selectindexrow = index;
-                                                          _conditionModel
-                                                              .data!
-                                                              .conditionLibrary![
-                                                          index]
-                                                              .fromTime = time;
+                                                          if (time != null) {
+                                                            Selectindexrow = index;
+                                                            _conditionModel
+                                                                .data!
+                                                                .conditionLibrary![
+                                                            index]
+                                                                .fromTime = time;
+                                                          }
                                                         });
                                                       },
                                                     )))
@@ -709,8 +734,8 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                     } else if (usedprogramdropdownstr.contains('Contact')) {
                       _conditionModel.data!.conditionLibrary![Selectindexrow]
                           .conditionIsTrueWhen =
-                          conditionselection(usedprogramdropdownstr,
-                              usedprogramdropdownstr2, '');
+                          conditionselection(
+                              usedprogramdropdownstr, '', dropdownvalues);
                       _conditionModel.data!.conditionLibrary![Selectindexrow]
                           .dropdown1 = usedprogramdropdownstr;
                       _conditionModel.data!.conditionLibrary![Selectindexrow]
@@ -866,15 +891,16 @@ class _ConditionwebUIState extends State<ConditionwebUI>
 
     String Mqttsenddata = toMqttformat(_conditionModel.data!.conditionLibrary);
     Map<String, Object> body = {
-      "userId": '15',
-      "controllerId": "1",
+      "userId": widget.userId,
+      "controllerId": widget.controllerId,
       "condition": conditionJson,
-      "createUser": "1"
+      "createUser": widget.userId
     };
     final response = await HttpService()
         .postRequest("createUserPlanningConditionLibrary", body);
     final jsonDataresponse = json.decode(response.body);
-    GlobalSnackBar.show(context, jsonDataresponse['message'], response.statusCode);
+    GlobalSnackBar.show(
+        context, jsonDataresponse['message'], response.statusCode);
 
     String payLoadFinal = jsonEncode({
       "700": [
@@ -894,10 +920,9 @@ class _ConditionwebUIState extends State<ConditionwebUI>
         {"714": ''},
         {"715": ''},
         {"716": ''},
-
       ]
     });
-    // MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
+    MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
   }
 
   String? getSNoByName(List<UserNames> data, String name) {

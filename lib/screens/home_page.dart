@@ -447,7 +447,6 @@ class HomePageState extends State<HomePage>
                                                   trailing : userType==1 ? ActionChip(
                                                     label: const Text('New Stock'),
                                                     tooltip: 'Add new stock',
-                                                    //backgroundColor: myTheme.primaryColor,
                                                     avatar: const Icon(Icons.add),
                                                     onPressed: () {
                                                       Navigator.push(context, MaterialPageRoute(builder: (context) =>  AddProduct(callback: callbackFunction,)),);
@@ -494,7 +493,15 @@ class HomePageState extends State<HomePage>
                                                       ],
                                                       rows: List<DataRow>.generate(productStockList.length, (index) => DataRow(cells: [
                                                         DataCell(Text('${index+1}')),
-                                                        DataCell(Row(children: [const CircleAvatar(radius: 17, child: Icon(Icons.gas_meter_outlined),), SizedBox(width: 10,), Text(productStockList[index].categoryName)],)),
+                                                        DataCell(Row(children: [CircleAvatar(radius: 17,
+                                                          backgroundImage: productStockList[index].categoryName == 'ORO SWITCH'
+                                                              || productStockList[index].categoryName == 'ORO SENSE'?
+                                                          AssetImage('assets/images/oro_switch.png'):
+                                                          productStockList[index].categoryName == 'ORO LEVEL'?
+                                                          AssetImage('assets/images/oro_sense.png'):
+                                                          AssetImage('assets/images/oro_rtu.png'),
+                                                          backgroundColor: Colors.transparent,
+                                                        ), SizedBox(width: 10,), Text(productStockList[index].categoryName)],)),
                                                         DataCell(Text(productStockList[index].model)),
                                                         DataCell(Text('${productStockList[index].imeiNo}')),
                                                         DataCell(Text(productStockList[index].dtOfMnf)),
@@ -542,6 +549,8 @@ class HomePageState extends State<HomePage>
                                                             const SizedBox(height: 10,),
                                                             const CircleAvatar(
                                                               radius: 30,
+                                                              backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
+                                                              backgroundColor: Colors.transparent,
                                                             ),
                                                             Expanded(
                                                               child: Column(

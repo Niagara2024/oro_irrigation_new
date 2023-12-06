@@ -2,15 +2,17 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:oro_irrigation_new/constants/mqtt_web_client.dart';
 
 import '../../Models/Customer/frost_model.dart';
 import '../../constants/http_service.dart';
 import '../../constants/snack_bar.dart';
 import '../Config/dealer_definition_config.dart';
 
-
 class FrostMobUI extends StatefulWidget {
-  const FrostMobUI({Key? key, required this.userId, required this.controllerId});
+  const FrostMobUI(
+      {Key? key, required this.userId, required this.controllerId});
   final userId, controllerId;
 
   @override
@@ -34,10 +36,14 @@ class _ConditionUIState extends State<FrostMobUI>
   void initState() {
     super.initState();
     fetchData();
+    MqttWebClient().init();
   }
 
   Future<void> fetchData() async {
-    Map<String, Object> body = {"userId": widget.userId, "controllerId": widget.controllerId};
+    Map<String, Object> body = {
+      "userId": widget.userId,
+      "controllerId": widget.controllerId
+    };
     final response = await HttpService()
         .postRequest("getUserPlanningFrostProtectionAndRainDelay", body);
     if (response.statusCode == 200) {
@@ -45,6 +51,7 @@ class _ConditionUIState extends State<FrostMobUI>
         var jsondata1 = jsonDecode(response.body);
         _frostProtectionModel = frostProtectionModelFromJson(response.body);
       });
+      MqttWebClient().onSubscribed('tweet/');
     } else {
       //_showSnackBar(response.body);
     }
@@ -91,7 +98,7 @@ class _ConditionUIState extends State<FrostMobUI>
                       },
                       groupValue: _currentSelection,
                     ),
-                    buildFrostselection1(),
+                    _currentSelection == 0 ? rain() : buildFrostselection(),
                   ],
                 ),
               ),
@@ -111,7 +118,8 @@ class _ConditionUIState extends State<FrostMobUI>
     }
   }
 
-  Widget buildFrostselection1() {
+  Widget buildFrostselection() {
+    print('buildFrostselection');
     List<FrostProtection>? Listofvalue = _currentSelection == 0
         ? _frostProtectionModel.frostProtection
         : _frostProtectionModel.rainDelay;
@@ -125,26 +133,24 @@ class _ConditionUIState extends State<FrostMobUI>
           String iconfontfamily =
               Listofvalue?[index].iconFontFamily ?? "MaterialIcons";
           if (Listofvalue?[index].widgetTypeId == 1) {
-            return Column(
-              children: [
-                Container(
+            return Container(
+                child: Card(
                   child: ListTile(
                     title: Text('${Listofvalue?[index].title}'),
-                    // leading:
-                    //     Icon(IconData(iconcode, fontFamily: iconfontfamily)),
                     trailing: SizedBox(
                         width: 50,
-                        child: CustomTextField(
+                        child: TextFormField(
                           onChanged: (text) {
                             setState(() {
                               _currentSelection == 0
                                   ? _frostProtectionModel
-                                      .frostProtection![index].value = text
-                                  : _frostProtectionModel
-                                      .rainDelay![index].value = text;
+                                  .frostProtection![index].value = text
+                                  : _frostProtectionModel.rainDelay![index].value =
+                                  text;
                             });
                           },
                           initialValue: '${Listofvalue?[index].value}' ?? '0',
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Value is required';
@@ -152,61 +158,39 @@ class _ConditionUIState extends State<FrostMobUI>
                               setState(() {
                                 _currentSelection == 0
                                     ? _frostProtectionModel
-                                        .frostProtection![index].value = value
+                                    .frostProtection![index].value = value
                                     : _frostProtectionModel
-                                        .rainDelay![index].value = value;
+                                    .rainDelay![index].value = value;
                               });
                             }
                             return null;
                           },
                         )),
                   ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(
-                    left: 70,
-                  ),
-                  child: Divider(
-                    height: 1.0,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
-            );
+                ));
           } else {
-            return Column(
-              children: [
-                Container(
-                  child: ListTile(
-                    title: Text('${Listofvalue?[index].title}'),
-                    // leading:
-                    //     Icon(IconData(iconcode, fontFamily: iconfontfamily)),
-                    trailing: MySwitch(
-                      value: Listofvalue?[index].value == '1',
-                      onChanged: ((value) {
-                        setState(() {
-                          Listofvalue?[index].value = !value ? '0' : '1';
-                          _currentSelection == 0
-                              ? _frostProtectionModel.frostProtection![index]
-                                  .value = !value ? '0' : '1'
-                              : _frostProtectionModel.rainDelay![index].value =
-                                  !value ? '0' : '1';
-                        });
-                        // Listofvalue?[index].value = value;
-                      }),
-                    ),
+            return Container(
+              child: Card(
+                child: ListTile(
+                  title: Text('${Listofvalue?[index].title}'),
+                  // leading:
+                  //     Icon(IconData(iconcode, fontFamily: iconfontfamily)),
+                  trailing: MySwitch(
+                    value: Listofvalue?[index].value == '1',
+                    onChanged: ((value) {
+                      setState(() {
+                        Listofvalue?[index].value = !value ? '0' : '1';
+                        _currentSelection == 0
+                            ? _frostProtectionModel.frostProtection![index]
+                            .value = !value ? '0' : '1'
+                            : _frostProtectionModel.rainDelay![index].value =
+                        !value ? '0' : '1';
+                      });
+                      // Listofvalue?[index].value = value;
+                    }),
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.only(
-                    left: 70,
-                  ),
-                  child: Divider(
-                    height: 1.0,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
+              ),
             );
           }
         },
@@ -214,9 +198,113 @@ class _ConditionUIState extends State<FrostMobUI>
     );
   }
 
+  Widget rain() {
+    print('rain');
+    List<FrostProtection>? Listofvalue = _currentSelection == 0
+        ? _frostProtectionModel.frostProtection
+        : _frostProtectionModel.rainDelay;
+
+    return Expanded(
+      child: ListView.builder(
+        itemCount: Listofvalue?.length ?? 0,
+        itemBuilder: (context, index) {
+          int iconcode = int.parse(Listofvalue?[index].iconCodePoint ?? "");
+          String C = '\u00B0C';
+          String iconfontfamily =
+              Listofvalue?[index].iconFontFamily ?? "MaterialIcons";
+          if (Listofvalue?[index].widgetTypeId == 1) {
+            return Card(
+              child: ListTile(
+                title: Text('${Listofvalue?[index].title}'),
+                trailing: SizedBox(
+                    width: 50,
+                    child: TextFormField(
+                      onChanged: (text) {
+                        setState(() {
+                          _currentSelection == 0
+                              ? _frostProtectionModel
+                              .frostProtection![index].value = text
+                              : _frostProtectionModel.rainDelay![index].value =
+                              text;
+                        });
+                      },
+                      initialValue: '${Listofvalue?[index].value}' ?? '0',
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        suffixText: '${Listofvalue?[index].title}' ==
+                            'CRITICAL TEMPERATURE'
+                            ? '°C'
+                            : '',
+                      ),
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Value is required';
+                        } else {
+                          setState(() {
+                            _currentSelection == 0
+                                ? _frostProtectionModel
+                                .frostProtection![index].value = value
+                                : _frostProtectionModel
+                                .rainDelay![index].value = value;
+                          });
+                        }
+                        return null;
+                      },
+                    )),
+              ),
+            );
+          } else {
+            return Container(
+              child: Card(
+                child: ListTile(
+                  title: Text('${Listofvalue?[index].title}'),
+                  // leading:
+                  //     Icon(IconData(iconcode, fontFamily: iconfontfamily)),
+                  trailing: MySwitch(
+                    value: Listofvalue?[index].value == '1',
+                    onChanged: ((value) {
+                      setState(() {
+                        Listofvalue?[index].value = !value ? '0' : '1';
+                        _currentSelection == 0
+                            ? _frostProtectionModel.frostProtection![index]
+                            .value = !value ? '0' : '1'
+                            : _frostProtectionModel.rainDelay![index].value =
+                        !value ? '0' : '1';
+                      });
+                      // Listofvalue?[index].value = value;
+                    }),
+                  ),
+                ),
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  String toMqttformat(
+      List<FrostProtection>? data,
+      ) {
+    String Mqttdata = '';
+    for (var i = 0; i < data!.length; i++) {
+      Mqttdata += '${i},${data[i].title},${data[i].value};';
+    }
+    return Mqttdata;
+  }
+
   updateconditions() async {
-    //  final frostProtection = jsonEncode(_frostProtectionModel.frostProtection);
-    // final rainDelay = jsonEncode(_frostProtectionModel.rainDelay);
+    String Mqttsenddata = toMqttformat(_currentSelection == 0
+        ? _frostProtectionModel.frostProtection
+        : _frostProtectionModel.rainDelay);
+    String Mqttdatacode = _currentSelection == 0 ? '711' : '710';
+    String payLoadFinal = jsonEncode({
+      "700": [
+        {"$Mqttdatacode": Mqttsenddata},
+      ]
+    });
+    MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
 
     List<Map<String, dynamic>> frostProtection = _frostProtectionModel
         .frostProtection!
@@ -226,15 +314,16 @@ class _ConditionUIState extends State<FrostMobUI>
         .map((frost) => frost.toJson())
         .toList();
     Map<String, Object> body = {
-      "userId": '15',
-      "controllerId": "1",
+      "userId": widget.userId,
+      "controllerId": widget.controllerId,
       "frostProtection": frostProtection,
       "rainDelay": rainDelay,
-      "createUser": "1"
+      "createUser": widget.userId
     };
     final response = await HttpService()
         .postRequest("createUserPlanningFrostProtectionAndRainDelay", body);
     final jsonDataresponse = json.decode(response.body);
-    GlobalSnackBar.show(context, jsonDataresponse['message'], response.statusCode);
+    GlobalSnackBar.show(
+        context, jsonDataresponse['message'], response.statusCode);
   }
 }

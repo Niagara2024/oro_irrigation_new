@@ -6,13 +6,10 @@ import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/schedule_s
 import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/selection_screen.dart';
 import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/sequence_screen.dart';
 import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/water_fert_screen.dart';
-
 import 'package:provider/provider.dart';
-
-
+import '../../../Models/IrrigationModel/sequence_model.dart';
 import '../../../constants/http_service.dart';
 import '../../../state_management/irrigation_program_main_provider.dart';
-import '../../../state_management/overall_use.dart';
 import '../../../widgets/SCustomWidgets/custom_alert_dialog.dart';
 import '../../../widgets/SCustomWidgets/custom_snack_bar.dart';
 import '../../../widgets/SCustomWidgets/custom_tab.dart';
@@ -21,11 +18,17 @@ import 'conditions_screen.dart';
 import 'done_screen.dart';
 
 class IrrigationProgram extends StatefulWidget {
-  const IrrigationProgram({Key? irrigationProgramKey,required this.userId, required this.controllerId, required this.serialNumber, this.programType}) :super(key: irrigationProgramKey);
   final int userId;
   final int controllerId;
   final int serialNumber;
   final String? programType;
+  final bool? conditionsLibraryIsNotEmpty;
+  const IrrigationProgram({Key? irrigationProgramKey,
+    required this.userId,
+    required this.controllerId,
+    required this.serialNumber,
+    this.programType,
+    this.conditionsLibraryIsNotEmpty}) :super(key: irrigationProgramKey);
 
   @override
   State<IrrigationProgram> createState() => _IrrigationProgramState();
@@ -39,7 +42,8 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
   final delete = const SnackBar(content: Center(child: Text('The sequence is erased!')));
   final singleSelection = const SnackBar(content: Center(child: Text('Single valve selection is enabled')));
   final multipleSelection = const SnackBar(content: Center(child: Text('Multiple valve selection is enabled')));
-  dynamic API_data = {};
+  dynamic apiData = {};
+  dynamic waterAndFertData = [];
 
   @override
   void initState() {
@@ -55,17 +59,24 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
       });
     }
     irrigationProvider.fetchSelectionData(widget.userId, widget.controllerId, widget.serialNumber);
-    irrigationProvider.conditionTypeData(widget.userId, widget.controllerId);
+    irrigationProvider.getUserProgramCondition(widget.userId, widget.controllerId, widget.serialNumber);
     irrigationProvider.alarmDataFetched(widget.userId, widget.controllerId, widget.serialNumber);
     _tabController = TabController(
       length: (widget.serialNumber == 0
           ? irrigationProvider.isIrrigationProgram
           : widget.programType == "Irrigation Program")
-          ? irrigationProvider.label1.length
-          : irrigationProvider.label2.length,
+          ? irrigationProvider.conditionsLibraryIsNotEmpty ? irrigationProvider.label1.length : irrigationProvider.label4.length
+          : irrigationProvider.conditionsLibraryIsNotEmpty ? irrigationProvider.label2.length : irrigationProvider.label3.length,
       vsync: this,
     );
-
+    // _tabController = TabController(
+    //   length: (widget.serialNumber == 0
+    //       ? irrigationProvider.isIrrigationProgram
+    //       : widget.programType == "Irrigation Program")
+    //       ? irrigationProvider.label1.length
+    //       : irrigationProvider.label2.length,
+    //   vsync: this,
+    // );
     irrigationProvider.updateTabIndex(0);
 
     _tabController.addListener(() {
@@ -74,17 +85,17 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
   }
 
   void getData(IrrigationProgramMainProvider programPvd, userId, controllerId, serialNumber)async{
-    var overAllPvd = Provider.of<OverAllUse>(context,listen: false);
-
     try{
       HttpService service = HttpService();
       var response = await service.postRequest('getUserProgramWaterAndFert', {'userId' : userId,'controllerId' : controllerId, 'serialNumber': serialNumber});
       var jsonData = response.body;
       var myData = jsonDecode(jsonData);
       setState(() {
-        API_data = myData['data']['default'];
+        apiData = myData['data']['default'];
+        programPvd.waterAndFertData = myData['data']['waterAndFert'];
       });
-      programPvd.editApiData(API_data);
+      print(waterAndFertData);
+      programPvd.editApiData(apiData);
     }catch(e){
       print(e.toString());
     }
@@ -106,6 +117,7 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
 
     final mainProvider = Provider.of<IrrigationProgramMainProvider>(context);
     int selectedIndex = mainProvider.selectedTabIndex;
+
     if(mainProvider.irrigationLine != null || mainProvider.programDetails != null) {
       final program = mainProvider.programDetails!.programName.isNotEmpty
           ? mainProvider.programName == ''? "Program ${mainProvider.programCount+1}" : mainProvider.programName
@@ -113,7 +125,9 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
       return DefaultTabController(
         length: (widget.serialNumber == 0
             ? mainProvider.isIrrigationProgram
-            : widget.programType == "Irrigation Program") ? mainProvider.label1.length : mainProvider.label2.length,
+            : widget.programType == "Irrigation Program")
+            ? mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.label1.length : mainProvider.label4.length
+            : mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.label2.length : mainProvider.label3.length,
         child: Scaffold(
           appBar: AppBar(
             // title: Text(mainProvider.programName != '' ? mainProvider.programName : 'New Program'),
@@ -138,15 +152,21 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
                   tabs: [
                     for (int i = 0; i <  ((widget.serialNumber == 0
                         ? mainProvider.isIrrigationProgram
-                        : widget.programType == "Irrigation Program") ? mainProvider.label1.length : mainProvider.label2.length); i++)
+                        : widget.programType == "Irrigation Program")
+                        ? mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.label1.length : mainProvider.label4.length
+                        : mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.label2.length : mainProvider.label3.length); i++)
                       CustomTab(
                         height: 80,
                         label: (widget.serialNumber == 0
                             ? mainProvider.isIrrigationProgram
-                            : widget.programType == "Irrigation Program") ? mainProvider.label1[i] : mainProvider.label2[i],
+                            : widget.programType == "Irrigation Program")
+                            ? mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.label1[i] : mainProvider.label4[i]
+                            : mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.label2[i] : mainProvider.label3[i],
                         content: (widget.serialNumber == 0
                             ? mainProvider.isIrrigationProgram
-                            : widget.programType == "Irrigation Program") ? mainProvider.icons1[i] : mainProvider.icons2[i],
+                            : widget.programType == "Irrigation Program")
+                            ? mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.icons1[i] : mainProvider.icons4[i]
+                            : mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.icons2[i] : mainProvider.icons3[i],
                         tabIndex: i,
                         selectedTabIndex: mainProvider.selectedTabIndex,
                       ),
@@ -167,12 +187,17 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
             controller: _tabController,
             physics: const NeverScrollableScrollPhysics(),
             children:  [
-              for (int i = 0; i < ((widget.serialNumber == 0
+              for (
+              int i = 0;
+              i < ((widget.serialNumber == 0
                   ? mainProvider.isIrrigationProgram
-                  : widget.programType == "Irrigation Program") ? mainProvider.label1.length : mainProvider.label2.length); i++)
+                  : widget.programType == "Irrigation Program")
+                  ? mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.label1.length : mainProvider.label4.length
+                  : mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.label2.length : mainProvider.label3.length);
+              i++)
                 _buildTabContent(i, (widget.serialNumber == 0
                     ? mainProvider.isIrrigationProgram
-                    : widget.programType == "Irrigation Program")),
+                    : widget.programType == "Irrigation Program"), mainProvider.conditionsLibraryIsNotEmpty),
             ],
           ),
           floatingActionButton: _buildFloatingActionButton(selectedIndex),
@@ -183,42 +208,74 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
     }
   }
 
-  Widget _buildTabContent(int index, bool isIrrigationProgram) {
-    final IrrigationProgramMainProvider mainProvider = Provider.of<IrrigationProgramMainProvider>(context);
-
+  Widget _buildTabContent(int index, bool isIrrigationProgram, conditionsLibraryIsNotEmpty) {
     if (isIrrigationProgram) {
-      switch (index) {
-        case 0:
-          return SequenceScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
-        case 1:
-          return ScheduleScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
-        case 2:
-          return ConditionsScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
-        case 3:
-          return WaterAndFertScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
-        case 4:
-          return SelectionScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
-        case 5:
-          return AlarmScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
-        case 6:
-          return DoneScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
-        default:
-          return Container();
+      if(conditionsLibraryIsNotEmpty) {
+        switch (index) {
+          case 0:
+            return SequenceScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 1:
+            return ScheduleScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 2:
+            return ConditionsScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 3:
+            return WaterAndFertScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 4:
+            return SelectionScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 5:
+            return AlarmScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 6:
+            return DoneScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          default:
+            return Container();
+        }
+      } else {
+        switch (index) {
+          case 0:
+            return SequenceScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 1:
+            return ScheduleScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 2:
+            return WaterAndFertScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 3:
+            return SelectionScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 4:
+            return AlarmScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 5:
+            return DoneScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          default:
+            return Container();
+        }
       }
     } else {
-      switch (index) {
-        case 0:
-          return SequenceScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
-        case 1:
-          return ScheduleScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
-        case 2:
-          return ConditionsScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
-        case 3:
-          return AlarmScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
-        case 4:
-          return DoneScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
-        default:
-          return Container();
+      if(conditionsLibraryIsNotEmpty) {
+        switch (index) {
+          case 0:
+            return SequenceScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 1:
+            return ScheduleScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 2:
+            return ConditionsScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 3:
+            return AlarmScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 4:
+            return DoneScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          default:
+            return Container();
+        }
+      } else {
+        switch (index) {
+          case 0:
+            return SequenceScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 1:
+            return ScheduleScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 2:
+            return AlarmScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 3:
+            return DoneScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          default:
+            return Container();
+        }
       }
     }
   }
@@ -227,7 +284,9 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
     final mainProvider = Provider.of<IrrigationProgramMainProvider>(context);
     if(selectedIndex == ((widget.serialNumber == 0
         ? mainProvider.isIrrigationProgram
-        : widget.programType == "Irrigation Program") ? mainProvider.label1.length-1 : mainProvider.label2.length-1)) {
+        : widget.programType == "Irrigation Program")
+        ? mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.label1.length - 1 : mainProvider.label4.length - 1
+        : mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.label2.length - 1 : mainProvider.label3.length - 1)) {
       return FloatingActionButton(
         onPressed: () async{
           mainProvider.dataToWF();
@@ -237,6 +296,289 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
             "controllerId": widget.controllerId,
             "createUser": widget.userId,
             "serialNumber": widget.serialNumber == 0 ? mainProvider.serialNumberCreation : widget.serialNumber,
+          };
+          var dataToMqtt = {};
+          var programCategory = mainProvider.irrigationLine!.sequence[0]['valve'][0]['location'];
+          List sNoList = mainProvider.irrigationLine!.sequence.map((e) {
+            List valveSerialNumbers = e['valve'].map((valve) => valve['sNo']).toList();
+            return valveSerialNumbers.join('+');
+          }).toList();
+          String formattedSNo = sNoList.join('_');
+          List<NameData>? selectedPumpsList = mainProvider.selectionModel.data?.irrigationPump?.where((element) => element.selected == true).toList();
+          List<NameData>? selectedMainValveList = mainProvider.selectionModel.data?.mainValve?.where((element) => element.selected == true).toList();
+          String selectedPump = selectedPumpsList?.join('_') ?? '';
+          String mainValve = selectedMainValveList?.join('_') ?? '';
+          List daySelectionList = [int.parse(mainProvider.sampleScheduleModel!.scheduleByDays.schedule['skipDays']), int.parse(mainProvider.sampleScheduleModel!.scheduleByDays.schedule['runDays'])];
+          String daySelectionString = daySelectionList.join('_');
+
+          Object getDaySelectionMode() {
+            List typeData = mainProvider.sampleScheduleModel!.scheduleAsRunList.schedule['type'];
+            var selectionModeList = [];
+            for(var i = 0; i < typeData.length; i++) {
+              switch(typeData[i]) {
+                case "DO NOTHING":
+                  selectionModeList.add(0);
+                  break;
+                case "DO WATERING":
+                  selectionModeList.add(1);
+                  break;
+                case "DO ONE TIME":
+                  selectionModeList.add(2);
+                  break;
+                case "DO FERTIGATION":
+                  selectionModeList.add(3);
+                  break;
+              }
+            }
+            return selectionModeList.join('_');
+          }
+
+          List<String> generateRtcTimeList(Map<String, dynamic> rtcData, String key, bool isCycles) {
+            return List.generate(6, (index) {
+              final rtcKey = 'rtc${index + 1}';
+              return index < rtcData.length ? rtcData[rtcKey][key] ?? '00:00:00' : isCycles ? "0" : '00:00:00';
+            });
+          }
+
+          String generateRtcTimeString(SampleScheduleModel model, String type, bool isRunList) {
+            final rtcTimeList = generateRtcTimeList(isRunList ? model.scheduleAsRunList.rtc : model.scheduleByDays.rtc, type, false);
+            return rtcTimeList.join('_');
+          }
+
+          String generateFilterSiteString(List<NameData>? dataList, String idField) {
+            final selectedIds = dataList?.where((element) => element.selected == true).map((element) => element.id ?? "").toList() ?? [];
+            return selectedIds.join('_');
+          }
+
+          String generateFertilizerString(List<NameData>? dataList, String idField) {
+            final selectedIds = dataList?.where((element) => element.selected == true).map((element) => element.id ?? "").toList() ?? [];
+            return selectedIds.join('_');
+          }
+
+          String generateFertilizerLocationString(List<NameData>? dataList, String locationField) {
+            final selectedLocations = dataList?.where((element) => element.selected == true).map((element) => element.location ?? "").toList() ?? [];
+            return selectedLocations.join('_');
+          }
+
+          final sampleScheduleModel = mainProvider.sampleScheduleModel!;
+
+          String sBRrtcOnTimeString = generateRtcTimeString(sampleScheduleModel, 'onTime', true);
+          String sBDrtcOnTimeString = generateRtcTimeString(sampleScheduleModel, 'onTime', false);
+          String sBRrtcMaxTimeString = generateRtcTimeString(sampleScheduleModel, 'maxTime', true);
+          String sBDrtcMaxTimeString = generateRtcTimeString(sampleScheduleModel, 'maxTime', false);
+          String sBRrtcOffTimeString = generateRtcTimeString(sampleScheduleModel, 'offTime', true);
+          String sBDrtcOffTimeString = generateRtcTimeString(sampleScheduleModel, 'offTime', false);
+          String sBRrtcNoOfCyclesString = generateRtcTimeString(sampleScheduleModel, 'noOfCycles', true);
+          String sBDrtcNoOfCyclesString = generateRtcTimeString(sampleScheduleModel, 'noOfCycles', false);
+          String sBRrtcIntervalString = generateRtcTimeString(sampleScheduleModel, 'interval', true);
+          String sBDrtcIntervalString = generateRtcTimeString(sampleScheduleModel, 'interval', false);
+
+          String centralFertilizerSitesString = generateFertilizerString(mainProvider.selectionModel.data!.centralFertilizerSite, 'id');
+          String localFertString = generateFertilizerString(mainProvider.selectionModel.data!.localFertilizer, 'id');
+          String centralFertilizerInjString = generateFertilizerString(mainProvider.selectionModel.data!.centralFertilizer, 'id');
+          String localFertilizerInjString = generateFertilizerLocationString(mainProvider.selectionModel.data!.localFertilizer, 'location');
+
+          String centralFilterSiteString = generateFilterSiteString(mainProvider.selectionModel.data!.centralFilterSite, 'id');
+          String localFilterSiteString = generateFilterSiteString(mainProvider.selectionModel.data!.localFilter, 'id');
+
+          List<String?> conditionList = mainProvider.sampleConditions?.condition
+              .map((e) => e.value['sNo']?.toString())
+              .toList() ?? List.generate(6, (index) => '0');
+
+          conditionList = conditionList.map((value) => value ?? '0').toList();
+          String conditionString = conditionList.join('_');
+
+          final selectedIds = mainProvider.selectionModel.data!.centralFilterSite?.where((element) => element.selected == true).map((element) => element.id ?? "").toList() ?? [];
+          List<String> generateFilterSelectionList() {
+            return List.generate(10, (index) {
+              return index < selectedIds.length ? '1' : '0';
+            });
+          }
+          String centralFilterSelection = generateFilterSelectionList().join('_');
+
+          final selectedIds2 = mainProvider.selectionModel.data!.localFilter?.where((element) => element.selected == true).map((element) => element.id ?? "").toList() ?? [];
+          List<String> generateFilterSelectionList2() {
+            return List.generate(10, (index) {
+              return index < selectedIds2.length ? '1' : '0';
+            });
+          }
+          String localFilterSelection = generateFilterSelectionList2().join('_');
+
+          List zoneSnoList = List.generate(mainProvider.irrigationLine!.sequence.length, (index) => index+1);
+          String getListFromWaterAndFertData() {
+            List<String> resultList = [];
+            for (var i = 0; i < mainProvider.waterAndFertData.length; i++) {
+              List<String> currentSet = [];
+              // currentSet.add('${zoneSnoList[i]}');
+              currentSet.add('${widget.serialNumber == 0 ? mainProvider.serialNumberCreation : widget.serialNumber}');
+              currentSet.add('Zone ${zoneSnoList[i]}');
+              currentSet.add('${sNoList[i]}');
+              currentSet.add('0');
+              currentSet.add('${10000}');
+
+              if(mainProvider.waterAndFertData[i]['water&fert'] != null) {
+                for(var j = 0; j < mainProvider.waterAndFertData[i]['water&fert'].length; j++) {
+                  currentSet.add(mainProvider.waterAndFertData[i]['water&fert'][j]['type']== 'Time'
+                      ? '${1}'
+                      : '${2}');
+                  currentSet.add(mainProvider.waterAndFertData[i]['water&fert'][j]['type']== 'Time'
+                      ? '${mainProvider.waterAndFertData[i]['water&fert'][j]['time']}'
+                      : '${mainProvider.waterAndFertData[i]['water&fert'][j]['flow']}');
+                  currentSet.add(mainProvider.selectionModel.data!.centralFertilizer!.any((element) => element.selected == true)
+                      ? '${1}'
+                      : '${0}');
+                  currentSet.add(mainProvider.selectionModel.data!.localFertilizer!.any((element) => element.selected == true)
+                      ? '${1}'
+                      : '${0}');
+                  currentSet.add('${1}');
+                  currentSet.add('00:10:00');
+                  currentSet.add('00:10:00');
+                  if (mainProvider.waterAndFertData[i]['water&fert'][j]['dSite'] != null) {
+                    for (var k = 0; k < mainProvider.waterAndFertData[i]['water&fert'][j]['dSite'].length; k++) {
+                      if(mainProvider.waterAndFertData[i]['water&fert'][j]['dSite'][k]['injector'] != null) {
+                        var fertilizerId = mainProvider.waterAndFertData[i]['water&fert'][j]['dSite'][k]['id'];
+                        var isCentralFertilizer = fertilizerId.startsWith("CFESI");
+                        var isLocalFertilizer = fertilizerId.startsWith("IL");
+                        String generateFilterList(List<dynamic>? dataList, String field) {
+                          final filteredList = dataList
+                              ?.map((element) => element[field] == 'Time' ? 1 : 0)
+                              .toList() ?? [];
+
+                          while (filteredList.length < 8) {
+                            filteredList.add(0);
+                          }
+
+                          return filteredList.join('_');
+                        }
+
+                        String generateDurationList(List<dynamic>? dataList, String field) {
+                          final filteredList = dataList
+                              ?.map((element) =>
+                          element[field] == 'Time'
+                              ? element['time'] ?? "00:00:00"
+                              : element[field] == 'Flow'
+                              ? element['flow'] ?? "0"
+                              : "00:00:00")
+                              .toList() ?? [];
+
+                          while (filteredList.length < 8) {
+                            filteredList.add(
+                                field == 'Time' ? "00:00:00" : field == 'Flow' ? "0" : "00:00:00");
+                          }
+
+                          return filteredList.join('_');
+                        }
+
+                        if(isCentralFertilizer) {
+                          for(var l = 0; l < mainProvider.waterAndFertData[i]['water&fert'][j]['dSite'][k]['injector'].length; l++) {
+                            currentSet.add(generateFilterList(mainProvider.waterAndFertData[i]['water&fert'][j]['dSite'][k]['injector'], 'type'));
+                          }
+                        }
+                        if(isLocalFertilizer) {
+                          for(var l = 0; l < mainProvider.waterAndFertData[i]['water&fert'][j]['dSite'][k]['injector'].length; l++) {
+                            currentSet.insert(14,generateFilterList(mainProvider.waterAndFertData[i]['water&fert'][j]['dSite'][k]['injector'], 'type'));
+                          }
+                        }
+                        if(isCentralFertilizer) {
+                          for(var l = 0; l < mainProvider.waterAndFertData[i]['water&fert'][j]['dSite'][k]['injector'].length; l++) {
+                            currentSet.add(mainProvider.waterAndFertData[i]['water&fert'][j]['dSite'][k]['injector'][l]['type'] == 'Time'
+                                ? generateDurationList(mainProvider.waterAndFertData[i]['water&fert'][j]['dSite'][k]['injector'], 'type')
+                                : generateDurationList(mainProvider.waterAndFertData[i]['water&fert'][j]['dSite'][k]['injector'], 'type'));
+                          }
+                        }
+                        if(isLocalFertilizer) {
+                          for(var l = 0; l < mainProvider.waterAndFertData[i]['water&fert'][j]['dSite'][k]['injector'].length; l++) {
+                            currentSet.add(mainProvider.waterAndFertData[i]['water&fert'][j]['dSite'][k]['injector'][l]['type'] == 'Time'
+                                ? generateDurationList(mainProvider.waterAndFertData[i]['water&fert'][j]['dSite'][k]['injector'], 'type')
+                                : generateDurationList(mainProvider.waterAndFertData[i]['water&fert'][j]['dSite'][k]['injector'], 'type'));
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              } else {
+                currentSet.add('${0}');
+                currentSet.add('00:00:00');
+                currentSet.add('${0}');
+                currentSet.add('${0}');
+                currentSet.add('${1}');
+                currentSet.add('00:10:00');
+                currentSet.add('00:10:00');
+                currentSet.add('0_0_0_0_0_0_0_0');
+                currentSet.add('0_0_0_0_0_0_0_0');
+                currentSet.add("00:00:00_00:00:00_00:00:00_00:00:00_00:00:00_00:00:00_00:00:00_00:00:00");
+                currentSet.add("00:00:00_00:00:00_00:00:00_00:00:00_00:00:00_00:00:00_00:00:00_00:00:00");
+              }
+              currentSet.add('${0}');
+              currentSet.add('${0}');
+              currentSet.add('${0}');
+              currentSet.add('${0}');
+              currentSet.add('');
+              currentSet.add('');
+              currentSet.add('');
+              currentSet.add('${0}');
+
+              resultList.add(currentSet.join(','));
+            }
+            return resultList.join(';\n');
+          }
+          List getProgramData = [
+            widget.serialNumber == 0
+                ? mainProvider.serialNumberCreation
+                : widget.serialNumber,
+            programCategory,
+            mainProvider.programName,
+            formattedSNo,
+            0, selectedPump, mainValve, mainProvider.priority, mainProvider.sampleScheduleModel!.selected == "NO SCHEDULE"
+                ? 1
+                : mainProvider.sampleScheduleModel!.selected == "SCHEDULE AS RUN LIST"
+                ? 2 : 3,
+            mainProvider.sampleScheduleModel!.selected == "SCHEDULE AS RUN LIST"
+                ? mainProvider.sampleScheduleModel!.scheduleAsRunList.schedule['startDate']
+                : mainProvider.sampleScheduleModel!.scheduleByDays.schedule['startDate'],
+            int.parse(mainProvider.sampleScheduleModel!.scheduleAsRunList.schedule['noOfDays']),
+            mainProvider.sampleScheduleModel!.selected == "SCHEDULE AS RUN LIST"
+                ? getDaySelectionMode()
+                : daySelectionString,
+            mainProvider.sampleScheduleModel!.selected == "SCHEDULE AS RUN LIST"
+                ? sBRrtcOnTimeString
+                : sBDrtcOnTimeString,
+            mainProvider.sampleScheduleModel!.defaultModel.rtcMaxTime
+                ? 3 : mainProvider.sampleScheduleModel!.defaultModel.rtcOffTime ? 2 : 1,
+            mainProvider.sampleScheduleModel!.defaultModel.rtcMaxTime
+                ? mainProvider.sampleScheduleModel!.selected == "SCHEDULE AS RUN LIST"
+                ? sBRrtcMaxTimeString
+                : sBDrtcMaxTimeString : mainProvider.sampleScheduleModel!.selected == "SCHEDULE AS RUN LIST"
+                ? sBDrtcOffTimeString : sBRrtcOffTimeString,
+            mainProvider.sampleScheduleModel!.selected == "SCHEDULE AS RUN LIST"
+                ? sBRrtcNoOfCyclesString
+                : sBDrtcNoOfCyclesString,
+            mainProvider.sampleScheduleModel!.selected == "SCHEDULE AS RUN LIST"
+                ? sBRrtcIntervalString
+                : sBDrtcIntervalString,
+            centralFertilizerSitesString,
+            localFertString,
+            centralFertilizerInjString,
+            localFertilizerInjString,
+            centralFilterSiteString,
+            localFilterSiteString,
+            3,
+            3,
+            centralFilterSelection,
+            localFilterSelection,
+            1,
+            1,
+            mainProvider.sampleConditions!.condition.any((element) => element.selected == true) ? 1 : 0,
+            conditionString
+          ];
+          dataToMqtt = {
+            "700" : [
+              {
+                "701": getProgramData.join(','),
+                "702": getListFromWaterAndFertData()
+              }
+            ],
           };
           if(mainProvider.irrigationLine!.sequence.isNotEmpty) {
             var dataToSend = {
@@ -249,7 +591,8 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
               "programName": mainProvider.programName,
               "priority": mainProvider.priority,
               "incompleteRestart": mainProvider.isCompletionEnabled ? "1" : "0",
-              "programType": mainProvider.selectedProgramType
+              "programType": mainProvider.selectedProgramType,
+              "hardware": dataToMqtt
             };
             userData.addAll(dataToSend);
           } else {
@@ -269,6 +612,7 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
           try {
             final createUserProgram = await httpService.postRequest('createUserProgram', userData);
             final response = jsonDecode(createUserProgram.body);
+            print(response['message']);
             if(createUserProgram.statusCode == 200) {
               ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(message: response['message']));
             }
@@ -280,23 +624,23 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
         child: const Icon(Icons.send),
       );
     } else {
-    return null;
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FloatingActionButton(
-              onPressed: () {},
-              child: const Text('Back'),
-              backgroundColor: Colors.red
-            ),
-            const SizedBox(width: 20,),
-            FloatingActionButton(
-              onPressed: () {},
-              child: const Text('Next'),
-              backgroundColor: Colors.green
-            ),
-          ],
-        );
+      return null;
+      // return Row(
+      //   mainAxisSize: MainAxisSize.min,
+      //   children: [
+      //     FloatingActionButton(
+      //         onPressed: () {},
+      //         child: const Text('Back'),
+      //         backgroundColor: Colors.red
+      //     ),
+      //     const SizedBox(width: 20,),
+      //     FloatingActionButton(
+      //         onPressed: () {},
+      //         child: const Text('Next'),
+      //         backgroundColor: Colors.green
+      //     ),
+      //   ],
+      // );
     }
   }
 

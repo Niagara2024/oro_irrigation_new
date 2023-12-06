@@ -3,12 +3,14 @@ class GeneralData {
   String categoryName;
   String controllerName;
   String deviceId;
+  int controllerId;
 
   GeneralData({
     required this.userName,
     required this.categoryName,
     required this.controllerName,
     required this.deviceId,
+    required this.controllerId
   });
 
   factory GeneralData.fromJson(Map<String, dynamic> json) {
@@ -17,6 +19,7 @@ class GeneralData {
       categoryName: json['categoryName'] ?? '',
       controllerName: json['controllerName'] ?? '',
       deviceId: json['deviceId'] ?? 0,
+      controllerId: json['controllerId'] ?? 0
     );
   }
   Map<String, dynamic> toJson() {
@@ -25,6 +28,7 @@ class GeneralData {
       'categoryName': categoryName,
       'controllerName': controllerName,
       'deviceId': deviceId,
+      'controllerId': controllerId
     };
   }
 }

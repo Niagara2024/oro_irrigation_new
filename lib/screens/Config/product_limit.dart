@@ -15,8 +15,8 @@ import 'config_screen.dart';
 import 'dealer_definition_config.dart';
 
 class ProductLimits extends StatefulWidget {
-  const ProductLimits({Key? key, required this.userID,  required this.customerID, required this.userType, required this.siteID, required this.nodeCount, required this.siteName, required this.userDeviceListId, required this.deviceId}) : super(key: key);
-  final int userID, customerID, userType, siteID, nodeCount, userDeviceListId;
+  const ProductLimits({Key? key, required this.userID,  required this.customerID, required this.userType, required this.nodeCount, required this.siteName, required this.controllerId, required this.deviceId}) : super(key: key);
+  final int userID, customerID, userType, nodeCount, controllerId;
   final String siteName, deviceId;
 
 
@@ -204,7 +204,7 @@ class _ProductLimitsState extends State<ProductLimits> {
                             _showSnackBar('Product Limit empty');
                           }else{
                             configPvd.clearConfig();
-                            Navigator.push(context, MaterialPageRoute(builder: (context) =>  ConfigScreen(userID: widget.userID, customerID: widget.customerID, siteName: widget.siteName, siteID: widget.siteID, controllerId: widget.userDeviceListId, imeiNumber: widget.deviceId,)),);
+                            Navigator.push(context, MaterialPageRoute(builder: (context) =>  ConfigScreen(userID: widget.userID, customerID: widget.customerID, siteName: widget.siteName, controllerId: widget.controllerId, imeiNumber: widget.deviceId,)),);
                           }
                         },
                         icon: const Icon(Icons.account_tree_rounded)),
@@ -234,7 +234,7 @@ class _ProductLimitsState extends State<ProductLimits> {
   {
     indicatorViewShow();
     await Future.delayed(const Duration(milliseconds: 500));
-    Map<String, dynamic> body = {"userId" : widget.customerID, "controllerId" : widget.siteID};
+    Map<String, dynamic> body = {"userId" : widget.customerID, "controllerId" : widget.controllerId};
     print(body);
     final response = await HttpService().postRequest("getUserProductLimit", body);
     if (response.statusCode == 200)
@@ -273,7 +273,7 @@ class _ProductLimitsState extends State<ProductLimits> {
 
     Map<String, dynamic> body = {
       "userId": widget.customerID,
-      "controllerId": widget.userDeviceListId,
+      "controllerId": widget.controllerId,
       "productLimit": productLimits,
       "createUser": widget.userID,
     };
@@ -294,7 +294,7 @@ class _ProductLimitsState extends State<ProductLimits> {
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: false);
     HttpService service = HttpService();
     try{
-      var response = await service.postRequest('getUserConfigMaker', {'userId' : widget.customerID, 'controllerId' : widget.siteID});
+      var response = await service.postRequest('getUserConfigMaker', {'userId' : widget.customerID, 'controllerId' : widget.controllerId});
       var jsonData = jsonDecode(response.body);
       print('jsonData : ${jsonData['data']}');
       configPvd.fetchAll(jsonData['data']);
@@ -507,7 +507,7 @@ class _ProductLimitsState extends State<ProductLimits> {
             content: Container(
               height: mediaQuery.size.height-230,
               color:  Colors.white,
-              child: ConfigMakerScreen(userID: widget.userID, customerID: widget.customerID, siteID: widget.userDeviceListId, imeiNumber: widget.deviceId,),
+              child: ConfigMakerScreen(userId: widget.userID, customerId: widget.customerID, controllerId: widget.controllerId, imeiNumber: widget.deviceId,),
             ),
             isActive: _currentStep >= 0,
             state:  _currentStep == 1 ? StepState.editing : _currentStep >= 2 ? StepState.complete : StepState.disabled,
@@ -517,7 +517,7 @@ class _ProductLimitsState extends State<ProductLimits> {
             content: Container(
               height: mediaQuery.size.height-176,
               color:  Colors.white,
-              child: ConfigScreen(userID: widget.userID, customerID: widget.customerID, siteName: widget.siteName, siteID: widget.siteID, controllerId: widget.userDeviceListId, imeiNumber: widget.deviceId,),
+              child: ConfigScreen(userID: widget.userID, customerID: widget.customerID, siteName: widget.siteName, controllerId: widget.controllerId, imeiNumber: widget.deviceId,),
             ),
             isActive: _currentStep >= 0,
             state: _currentStep >= 2? StepState.editing : StepState.disabled,

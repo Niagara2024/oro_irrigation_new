@@ -109,7 +109,11 @@ class _CustomerHomeState extends State<CustomerHome>
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const CircleAvatar(radius: 50),
+                                    const CircleAvatar(
+                                      radius: 50,
+                                      backgroundImage: AssetImage('assets/images/oro_gem.png'),
+                                      backgroundColor: Colors.transparent,
+                                    ),
                                     const SizedBox(height: 5,),
                                     Text(customerSiteList[siteIndex].categoryName),
                                     const SizedBox(height: 3,),
@@ -211,7 +215,16 @@ class _CustomerHomeState extends State<CustomerHome>
                                       child: Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            const CircleAvatar(radius: 20),
+                                            CircleAvatar(
+                                              radius: 25,
+                                              backgroundImage: usedNodeList[siteIndex][siteNodeIndex].categoryName == 'ORO SWITCH'
+                                                  || usedNodeList[siteIndex][siteNodeIndex].categoryName == 'ORO SENSE'?
+                                              AssetImage('assets/images/oro_switch.png'):
+                                              usedNodeList[siteIndex][siteNodeIndex].categoryName == 'ORO LEVEL'?
+                                              AssetImage('assets/images/oro_sense.png'):
+                                              AssetImage('assets/images/oro_rtu.png'),
+                                              backgroundColor: Colors.transparent,
+                                            ),
                                             const SizedBox(width: 10,),
                                             Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,

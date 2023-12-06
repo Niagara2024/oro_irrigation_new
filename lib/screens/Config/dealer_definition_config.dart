@@ -10,8 +10,8 @@ import '../../constants/http_service.dart';
 import '../../constants/mqtt_web_client.dart';
 
 class DealerDefinitionInConfig extends StatefulWidget {
-  const DealerDefinitionInConfig({Key? key, required this.userID, required this.customerID, required this.groupID, required this.imeiNo}) : super(key: key);
-  final int userID, customerID, groupID;
+  const DealerDefinitionInConfig({Key? key, required this.userId, required this.customerId, required this.controllerId, required this.imeiNo}) : super(key: key);
+  final int userId, customerId, controllerId;
   final String imeiNo;
 
   @override
@@ -27,7 +27,7 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
   @override
   Widget build(BuildContext context) {
     if (MediaQuery.sizeOf(context).width <= 600) {
-      return MyContainerWithTabs(data: data, userID: widget.userID, customerID: widget.customerID, groupID: widget.groupID,);
+      return MyContainerWithTabs(data: data, userID: widget.userId, customerID: widget.customerId, controllerId: widget.controllerId,);
     } else {
       return wideLayout(data, context);
     }
@@ -44,7 +44,7 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
   {
     indicatorViewShow();
     await Future.delayed(const Duration(milliseconds: 500));
-    Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.groupID};
+    Map<String, Object> body = {"userId": widget.customerId, "controllerId": widget.controllerId};
     //print(body);
     final response =   await HttpService().postRequest("getUserDealerDefinition", body);
     final jsonData = json.decode(response.body);
@@ -104,10 +104,10 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
                     MqttWebClient().publishMessage('AppToFirmware/${widget.imeiNo}', payLoadFinal);
                     final sendData = jsonEncode(data.dealerDefinition);
                     Map<String, Object> body = {
-                      "userId": widget.customerID,
-                      "controllerId": widget.groupID,
+                      "userId": widget.customerId,
+                      "controllerId": widget.controllerId,
                       "dealerDefinition": sendData,
-                      "createUser": widget.userID
+                      "createUser": widget.userId
                     };
                     final response = await HttpService().postRequest("createUserDealerDefinition", body);
                     if(response.statusCode == 200)
@@ -320,9 +320,9 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
 
 class MyContainerWithTabs extends StatefulWidget
 {
-  const MyContainerWithTabs({super.key, required this.data, required this.userID, required this.customerID, required this.groupID});
+  const MyContainerWithTabs({super.key, required this.data, required this.userID, required this.customerID, required this.controllerId});
   final DataModelDDConfig data;
-  final int userID, customerID, groupID;
+  final int userID, customerID, controllerId;
 
   @override
   State<MyContainerWithTabs> createState() => _MyContainerWithTabsState();
@@ -385,7 +385,7 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
                     final sendData = jsonEncode(widget.data.dealerDefinition);
                     Map<String, Object> body = {
                       "userId": widget.customerID,
-                      "controllerId": widget.groupID,
+                      "controllerId": widget.controllerId,
                       "dealerDefinition": sendData,
                       "createUser": widget.userID
                     };

@@ -7,9 +7,9 @@ import '../../../constants/http_service.dart';
 import '../../../state_management/group_provider.dart';
 import 'groupdetailsscreen.dart';
 
-
 class MyGroupScreen extends StatefulWidget {
-  const MyGroupScreen({super.key, required this.userId, required this.controllerId});
+  const MyGroupScreen(
+      {super.key, required this.userId, required this.controllerId});
   final userId, controllerId;
 
   @override
@@ -29,7 +29,7 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
   int oldgroupIndex = -1;
   int oldlineindex = -1;
   NameListProvider nameListProvider = NameListProvider();
- 
+
   var jsondata;
 
   @override
@@ -45,9 +45,12 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
   }
 
   Future<void> fetchData() async {
-    Map<String, Object> body = {"userId": widget.userId, "controllerId": widget.controllerId};
+    Map<String, Object> body = {
+      "userId": widget.userId,
+      "controllerId": widget.controllerId
+    };
     final response =
-        await HttpService().postRequest("getUserPlanningNamedGroup", body);
+    await HttpService().postRequest("getUserPlanningNamedGroup", body);
     if (response.statusCode == 200) {
       setState(() {
         final jsondata1 = jsonDecode(response.body);
@@ -83,15 +86,15 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
         jsondata['group']![selectedgroupIndex]['location'] == ''
             ? selectline = -1
             : selectline = int.parse(jsondata['group']![selectedgroupIndex]
-                    ['location']
-                .split(' ')[1]);
+        ['location']
+            .split(' ')[1]);
         ;
 
-         for (var i = 0;
-            i < jsondata['group']![selectedgroupIndex]['valve'].length;
-            i++) {
+        for (var i = 0;
+        i < jsondata['group']![selectedgroupIndex]['valve'].length;
+        i++) {
           groupedvalvestr =
-              '${jsondata['group']![selectedgroupIndex]['name']}:';
+          '${jsondata['group']![selectedgroupIndex]['name']}:';
           selectedValuesList
               .add(jsondata['group']![selectedgroupIndex]['valve'][i]);
           groupedvalvestr = jsondata['group']![selectedgroupIndex]['name'];
@@ -117,11 +120,11 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
   }
 
   void _showAlertDialog(
-    BuildContext context,
-    String title,
-    String msg,
-    bool btncount,
-  ) {
+      BuildContext context,
+      String title,
+      String msg,
+      bool btncount,
+      ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -137,11 +140,11 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
             ),
             btncount
                 ? TextButton(
-                    child: const Text("cancel"),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  )
+              child: const Text("cancel"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            )
                 : Container(),
           ],
         );
@@ -164,9 +167,7 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
 
   @override
   Widget build(BuildContext context) {
-    print('emptygrouplist');
     if (emptygrouplist.isEmpty) {
-      print(emptygrouplist);
       _showAlertDialog(context, 'Warnning',
           'Currently no group available add first Product Limit', false);
       return Container();
@@ -176,39 +177,39 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
           // backgroundColor: Colors.white70,
           appBar: AppBar(
               title: const Text(
-            'Groups',
-            textAlign: TextAlign.center,
-          )),
+                'Groups',
+                textAlign: TextAlign.center,
+              )),
           body: Padding(
             padding: MediaQuery.of(context).size.width > 600
                 ? const EdgeInsets.only(
-                    left: 80.0, right: 80.0, top: 10.0, bottom: 20.0)
+                left: 80.0, right: 80.0, top: 10.0, bottom: 20.0)
                 : const EdgeInsets.all(8.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                    // height: 50,
+                  // height: 50,
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     child: nameListProvider.names.isNotEmpty
                         ? Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                '$groupedvalvestr :',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              Chip(
-                                label: Text(
-                                  '${nameListProvider.names.join('')}',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ],
-                          )
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '$groupedvalvestr :',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold),
+                        ),
+                        Chip(
+                          label: Text(
+                            '${nameListProvider.names.join('')}',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    )
                         : null),
                 //Group Details Icon
                 Container(
@@ -223,7 +224,7 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
                           jsondata['group']!.isNotEmpty
                               ? _showDetailsScreen(context)
                               : _showAlertDialog(context, 'Warnning',
-                                  'Currently no group available', false);
+                              'Currently no group available', false);
                         },
                       ),
                     )),
@@ -243,7 +244,7 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
                               itemCount: grouplist.length,
                               itemBuilder: (context, groupIndex) {
                                 String gname = jsondata['group']![groupIndex]
-                                        ['name']
+                                ['name']
                                     .toString();
                                 //ClicK Group
                                 return GestureDetector(
@@ -260,12 +261,12 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
                                     margin: const EdgeInsets.all(4),
                                     child: Center(
                                         child: Chip(
-                                      label: Text(gname),
-                                      backgroundColor:
+                                          label: Text(gname),
+                                          backgroundColor:
                                           selectedgroupIndex == groupIndex
                                               ? Colors.amber
                                               : Colors.blueGrey,
-                                    )),
+                                        )),
                                   ),
                                 );
                               },
@@ -311,7 +312,7 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
                   child: ListView.builder(
                     controller: ScrollController(),
                     itemCount:
-                        jsondata['line']?.length, // Outer list item count
+                    jsondata['line']?.length, // Outer list item count
                     itemBuilder: (context, index) {
                       return Card(
                         elevation: 4,
@@ -344,13 +345,12 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
                                     controller: ScrollController(),
                                     scrollDirection: Axis.horizontal,
                                     itemCount: (jsondata['line']![index]
-                                                ['valve']
-                                            ?.length) ??
+                                    ['valve']
+                                        ?.length) ??
                                         0,
                                     itemBuilder: (context, innerIndex) {
-                   
                                       int vnamesrno = jsondata['line']![index]
-                                          ['valve'][innerIndex]['sNo'];
+                                      ['valve'][innerIndex]['sNo'];
 //Edit
                                       return GestureDetector(
                                         onTap: () {
@@ -363,24 +363,24 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
                                                 oldlineindex = index + 1;
                                                 nameListProvider.removeAll();
                                               }
-                                            
+
                                               int? checksrno;
                                               if (jsondata['group'].length >
                                                   0) {
                                                 for (var i = 0;
-                                                    i <
-                                                        jsondata['group']
-                                                            .length;
-                                                    i++) {
+                                                i <
+                                                    jsondata['group']
+                                                        .length;
+                                                i++) {
                                                   for (var j = 0;
-                                                      j <
-                                                          jsondata['group'][i]
-                                                                  ['valve']
-                                                              .length;
-                                                      j++) {
+                                                  j <
+                                                      jsondata['group'][i]
+                                                      ['valve']
+                                                          .length;
+                                                  j++) {
                                                     if (jsondata['group'][i]
-                                                                ['valve'][j]
-                                                            ['sNo'] ==
+                                                    ['valve'][j]
+                                                    ['sNo'] ==
                                                         vnamesrno) {
                                                       checksrno = j;
                                                     }
@@ -395,15 +395,15 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
                                                 if (checksrno == null) {
                                                   print('checksrno == null');
                                                   jsondata['group']![
-                                                              selectedgroupIndex]
-                                                          ['valve']
+                                                  selectedgroupIndex]
+                                                  ['valve']
                                                       .add(jsondata['line']![
-                                                              index]['valve']
-                                                          [innerIndex]);
+                                                  index]['valve']
+                                                  [innerIndex]);
                                                 } else {
                                                   jsondata['group']![
-                                                              selectedgroupIndex]
-                                                          ['valve']
+                                                  selectedgroupIndex]
+                                                  ['valve']
                                                       .removeAt(checksrno);
                                                 }
                                               }
@@ -412,11 +412,11 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
                                               oldlineindex = index + 1;
 
                                               nameListProvider.names.contains(
-                                                      '${innerIndex + 1},')
+                                                  '${innerIndex + 1},')
                                                   ? nameListProvider.removeName(
-                                                      '${innerIndex + 1},')
+                                                  '${innerIndex + 1},')
                                                   : nameListProvider.addName(
-                                                      '${innerIndex + 1},');
+                                                  '${innerIndex + 1},');
                                             } else {
                                               _showAlertDialog(
                                                   context,
@@ -434,12 +434,12 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
                                             child: CircleAvatar(
                                               // backgroundColor: Colors.blueGrey,
                                               backgroundColor: selectline ==
-                                                          index + 1 &&
-                                                      colorChange(
-                                                          jsondata['group'][
-                                                                  selectedgroupIndex]
-                                                              ['valve'],
-                                                          vnamesrno.toString())
+                                                  index + 1 &&
+                                                  colorChange(
+                                                      jsondata['group'][
+                                                      selectedgroupIndex]
+                                                      ['valve'],
+                                                      vnamesrno.toString())
                                                   ? Colors.amber
                                                   : Colors.blueGrey,
                                               child: Text('${innerIndex + 1}'),
@@ -471,10 +471,10 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
                   jsondata['group']?[selectedgroupIndex]['location'] = '';
 
                   Map<String, Object> body = {
-                    "userId": '15',
-                    "controllerId": "1",
+                    "userId": widget.userId,
+                    "controllerId": widget.controllerId,
                     "group": jsondata['group'],
-                    "createUser": "1"
+                    "createUser": widget.userId
                   };
                   final response = await HttpService()
                       .postRequest("createUserPlanningNamedGroup", body);
@@ -488,14 +488,13 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
               //Send button
               FloatingActionButton(
                 onPressed: () async {
-            
                   jsondata['group']?[selectedgroupIndex]['location'] =
-                      'Line $selectline';
+                  'Line $selectline';
                   Map<String, Object> body = {
-                    "userId": '15',
-                    "controllerId": "1",
+                    "userId": widget.userId,
+                    "controllerId": widget.controllerId,
                     "group": jsondata['group'],
-                    "createUser": "1"
+                    "createUser": widget.userId
                   };
                   // print(body);
                   final response = await HttpService()

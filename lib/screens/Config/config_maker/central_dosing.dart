@@ -180,6 +180,27 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          Text('Pressure',style: TextStyle(color: Colors.white),),
+                          Text('Switch(${configPvd.totalPressureSwitch})',style: TextStyle(color: Colors.white),),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
                           Text('Injector',style: TextStyle(color: Colors.white),),
                           Text('(${configPvd.totalInjector})',style: TextStyle(color: Colors.white),),
                         ],
@@ -337,6 +358,22 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
                                   ) : Center(
                                       child: TextFieldForFlexibleConfig(index: index, initialValue: '${configPvd.centralDosingUpdated[index]['ph']}', config: configPvd, purpose: 'centralDosingFunctionality/editPhSensor',)
                                   )
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1)),
+                                ),
+                                width: double.infinity,
+                                height: (configPvd.centralDosingUpdated[index]['injector'].length) * 60 ,
+                                child: (configPvd.totalPressureSwitch == 0 && configPvd.centralDosingUpdated[index]['pressureSwitch'].isEmpty) ?
+                                Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                Checkbox(
+                                    value: configPvd.centralDosingUpdated[index]['pressureSwitch'].isEmpty ? false : true,
+                                    onChanged: (value){
+                                      configPvd.centralDosingFunctionality(['editPressureSwitch',index,value]);
+                                    }),
                               ),
                             ),
                             Expanded(
@@ -704,7 +741,9 @@ class _AddBatchCDState extends State<AddBatchCD> {
               ElevatedButton(
                   style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.green)),
                   onPressed: (){
-                    configPvd.centralDosingFunctionality(['addBatch_CD',totalSite,int.parse(injector),d_meter_value,booster_value]);
+                    if(injector != '-'){
+                      configPvd.centralDosingFunctionality(['addBatch_CD',totalSite,int.parse(injector),d_meter_value,booster_value]);
+                    }
                     setState(() {
                       totalSite = 0;
                       injector = '-';

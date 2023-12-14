@@ -184,7 +184,15 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
                     initialValue: nameList[index]['name'],
                     onChanged: (val){
                       setState(() {
-                        nameList[index]['name'] = val;
+                        for (var element in nameList) {
+                          if (element['name'] == val) {
+                            _showSnackBar("Name Already Exists");
+                            break;
+                          } else {
+                            nameList[index]['name'] = val;
+                            break;
+                          }
+                        }
                       });
                     },
                     decoration: InputDecoration(

@@ -182,7 +182,7 @@ class _ProductLimitsState extends State<ProductLimits> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    const Text('Relay Total :'),
+                    const Text('Total Relay :'),
                     const SizedBox(width: 10,),
                     Text('${widget.nodeCount}', style: const TextStyle(fontSize: 17),),
                     const SizedBox(width: 20,),
@@ -329,8 +329,11 @@ class _ProductLimitsState extends State<ProductLimits> {
         },
         onStepContinue: () {
           if(_currentStep==0){
+            Future.delayed(const Duration(seconds: 2), () {
+              getConfigData();
+            });
             updateProductLimit();
-            getConfigData();
+
           }else if(_currentStep == 2){
             //updateProductLimit();
           }
@@ -359,7 +362,7 @@ class _ProductLimitsState extends State<ProductLimits> {
                 child: _currentStep==0? Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    const Text('Relay Total :'),
+                    const Text('Total Relay :'),
                     const SizedBox(width: 10,),
                     Text('${widget.nodeCount}', style: const TextStyle(fontSize: 17),),
                     const SizedBox(width: 20,),
@@ -439,9 +442,15 @@ class _ProductLimitsState extends State<ProductLimits> {
                                           ),
                                           child: Padding(
                                             padding: const EdgeInsets.all(8.0),
-                                            child: CircleAvatar(
-                                              backgroundColor: myTheme.primaryColor.withOpacity(0.5),
-                                              child: const Icon(Icons.reset_tv, color: Colors.white,),
+                                            child: CircleAvatar(radius: 17,
+                                              backgroundImage: productLimits[index].product == 'Valve'?
+                                              const AssetImage('assets/images/valve.png'):
+                                              productLimits[index].product == 'Main Valve'?
+                                              const AssetImage('assets/images/main_valve.png'):
+                                              productLimits[index].product == 'Source Pump'?
+                                              AssetImage('assets/images/source_pump.png'):
+                                              AssetImage('assets/images/irrigation_pump.png'),
+                                              backgroundColor: Colors.transparent,
                                             ),
                                           ),
                                         ),),
@@ -795,7 +804,7 @@ class _ProductLimitsState extends State<ProductLimits> {
                                         borderRadius: const BorderRadius.only(topLeft: Radius.circular(5.0), bottomLeft: Radius.circular(5.0)),
                                       ),
                                       child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
+                                        padding: const EdgeInsets.all(8.0),z
                                         child: CircleAvatar(
                                           backgroundColor: myTheme.primaryColor.withOpacity(0.5),
                                           child: Icon(Icons.reset_tv, color: Colors.white,),

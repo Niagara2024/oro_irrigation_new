@@ -97,6 +97,7 @@ flutter:
      - assets/images/oro_gem.png
      - assets/images/oro_sense.png
      - assets/images/oro_rtu.png
+     - assets/images/channel_img.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -1090,6 +1090,11 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
     }
   }
 
+  void updatePriority(newValue, index) {
+    _programLibrary?.program[index].priority = int.tryParse(newValue) ?? 0;
+    notifyListeners();
+  }
+
   //TODO: PROGRAM LIBRARY
   bool get getProgramType => _programDetails?.programType == "Irrigation Program" ? true : false;
   ProgramLibrary? _programLibrary;
@@ -1244,15 +1249,16 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
 
   //TODO: UPDATE PROGRAM DETAILS
   Future<String> updateUserProgramDetails(
-      int userId, int controllerId, int serialNumber, int programId, String programName, String programType, int priority) async {
+      int userId, int controllerId, int serialNumber, int programId, String programName, int priority) async {
     try {
+      print(priority);
       Map<String, dynamic> userData = {
         "userId": userId,
         "controllerId": controllerId,
+        "serialNumber": serialNumber,
         "modifyUser": userId,
         "programId": programId,
         "programName": programName,
-        "programType": programType,
         "priority": priority,
       };
 

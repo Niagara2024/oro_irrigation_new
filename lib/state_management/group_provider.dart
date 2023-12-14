@@ -8,11 +8,13 @@ class NameListProvider with ChangeNotifier {
 
   void addName(String name) {
     _names.add(name);
+    names.sort();
     notifyListeners();
   }
 
   void removeName(String name) {
     _names.remove(name);
+    names.sort();
     notifyListeners();
   }
 
@@ -24,6 +26,7 @@ class NameListProvider with ChangeNotifier {
   void updateName(String oldName, String newName) {
     final index = _names.indexOf(oldName);
     _names[index] = newName;
+    names.sort();
     notifyListeners();
   }
 
@@ -34,12 +37,12 @@ class NameListProvider with ChangeNotifier {
     // print('Provider selectedValuesList $selectedValuesList');
     notifyListeners();
   }
-    void AddSelectedValues(List<dynamic> updatedList) {
-      selectedValuesList.add(updatedList);
+  void AddSelectedValues(List<dynamic> updatedList) {
+    selectedValuesList.add(updatedList);
     notifyListeners();
   }
-      void removeSelectedValues(List<dynamic> updatedList) {
-        
+  void removeSelectedValues(List<dynamic> updatedList) {
+
     selectedValuesList.add(updatedList);
     notifyListeners();
   }

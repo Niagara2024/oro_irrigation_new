@@ -117,6 +117,7 @@ class _ConfigMakerScreenState extends State<ConfigMakerScreen> with SingleTicker
                         const WeatherStationConfig(),
                         MappingOfOutputsTable(configPvd: configPvd,),
                         MappingOfInputsTable(configPvd: configPvd),
+                        //FinishPageConfigMaker(customerId: widget.customerID, controllerId: widget.siteID, userId: widget.userID, imeiNo: widget.imeiNumber,),
                       ],
                     ),
                   )
@@ -125,7 +126,7 @@ class _ConfigMakerScreenState extends State<ConfigMakerScreen> with SingleTicker
           ),
         );
       }else{
-        return  ConfigMakerForWeb(userID: widget.userId, customerID: widget.customerId, controllerId: widget.controllerId,);
+        return  ConfigMakerForWeb(userID: widget.userId, customerID: widget.customerId, siteId: widget.controllerId,);
       }
     },);
   }

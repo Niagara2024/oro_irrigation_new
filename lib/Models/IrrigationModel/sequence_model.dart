@@ -557,12 +557,16 @@ class AlarmData {
 class ProgramLibrary {
   List<String> programType;
   List<Program> program;
+  int programLimit;
+  int agitatorCount;
 
-  ProgramLibrary({required this.programType, required this.program});
+  ProgramLibrary({required this.programType, required this.program, required this.programLimit, required this.agitatorCount});
 
   factory ProgramLibrary.fromJson(Map<String, dynamic> json) {
     return ProgramLibrary(
       programType: List<String>.from(json['data']['programType'] ?? []),
+      programLimit: json['data']['programLimit'],
+      agitatorCount: json['data']['agitatorCount'],
       program: List<Program>.from((json['data']['program'] as List<dynamic>? ?? []).map((program) => Program.fromJson(program))),
     );
   }
@@ -575,6 +579,8 @@ class Program {
   String defaultProgramName;
   String programType;
   int priority;
+  dynamic sequence;
+  Map<String, dynamic> schedule;
 
   Program({
     required this.programId,
@@ -583,16 +589,20 @@ class Program {
     required this.defaultProgramName,
     required this.programType,
     required this.priority,
+    required this.sequence,
+    required this.schedule
   });
 
   factory Program.fromJson(Map<String, dynamic> json) {
     return Program(
-      programId: json['programId'],
-      serialNumber: json['serialNumber'],
-      programName: json['programName'],
-      defaultProgramName: json['defaultProgramName'],
-      programType: json['programType'],
-      priority: json['priority'],
+        programId: json['programId'],
+        serialNumber: json['serialNumber'],
+        programName: json['programName'],
+        defaultProgramName: json['defaultProgramName'],
+        programType: json['programType'],
+        priority: json['priority'],
+        sequence: json['sequence'],
+        schedule: json['schedule']
     );
   }
 }

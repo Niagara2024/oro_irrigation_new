@@ -1,12 +1,9 @@
 import 'dart:convert';
 
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
-import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/program_library.dart';
-import 'package:oro_irrigation_new/screens/Customer/conditionscreen.dart';
-import 'package:oro_irrigation_new/screens/Customer/radiationsets.dart';
-import 'package:oro_irrigation_new/screens/Customer/virtual_screen.dart';
 
 import '../../Models/Customer/Dashboard/CentralFertilizerSite.dart';
 import '../../Models/Customer/Dashboard/CentralFilterSite.dart';
@@ -18,16 +15,13 @@ import '../../Models/Customer/Dashboard/MainValve.dart';
 import '../../Models/Customer/Dashboard/Sensor.dart';
 import '../../Models/Customer/Dashboard/SourcePump.dart';
 import '../../constants/http_service.dart';
-import 'Group/groupscreen.dart';
-import 'backwash_ui.dart';
-import 'frost_productionScreen.dart';
 
-enum MenuItems {itemOne, itemTwo, itemThree, itemFour, itemFive, itemSix, itemSeven, itemEight, itemNine}
+
 enum Calendar {manual, duration, flow}
 
 class ControllerDashboard extends StatefulWidget {
-  const ControllerDashboard({Key? key, required this.customerID, required this.siteID, required this.siteName, required this.controllerID, required this.imeiNo}) : super(key: key);
-  final int customerID, siteID, controllerID;
+  const ControllerDashboard({Key? key, required this.customerID, required this.siteID, required this.siteName, required this.controllerID, required this.imeiNo, required this.programId}) : super(key: key);
+  final int customerID, siteID, controllerID, programId;
   final String siteName, imeiNo;
 
   @override
@@ -36,72 +30,31 @@ class ControllerDashboard extends StatefulWidget {
 
 class _ControllerDashboardState extends State<ControllerDashboard>
 {
-  MenuItems? selectedMenu;
   late List<DashboardData> dashBoardData = [];
   bool visibleLoading = false;
-  List<Program> programs =[];
 
   @override
   void initState() {
     super.initState();
-    getProgramList();
-    getControllerDashboardDetails('Manual', 0);
+    getControllerDashboardDetails(widget.programId);
   }
 
-  void CallbackFunctionProgram(int programId)
-  {
-    getControllerDashboardDetails('Manual', programId);
-  }
-
-  Future<void> getControllerDashboardDetails(String type, int id) async
+  Future<void> getControllerDashboardDetails(int id) async
   {
     indicatorViewShow();
     try {
-      dashBoardData = await fetchData(type, id);
+      dashBoardData = await fetchControllerData(id);
       setState(() {
       });
     } catch (e) {
       print('Error: $e');
     }
-
   }
 
-  Future<void> getProgramList() async
+  Future<List<DashboardData>> fetchControllerData(int id) async
   {
-    programs.clear();
-    try {
-      Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.controllerID};
-      final response = await HttpService().postRequest("getUserProgramNameList", body);
-      if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
-        List<dynamic> programsJson = jsonResponse['data'];
-        setState(() {
-
-          programs = [
-            Program(
-              programId: 0,
-              serialNumber: 0,
-              programName: "Manual",
-              defaultProgramName: "Manual",
-              programType: "",
-              priority: 0,
-            ),
-            ...programsJson.map((programJson) => Program.fromJson(programJson)).toList(),
-          ];
-
-        });
-
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
-
-  }
-
-  Future<List<DashboardData>> fetchData(String type, int id) async {
-    Map<String, Object> body = id == 0 ?{"userId": widget.customerID, "controllerId": widget.controllerID} :
+    Map<String, Object> body = id == 0 ? {"userId": widget.customerID, "controllerId": widget.controllerID} :
     {"userId": widget.customerID, "controllerId": widget.controllerID, "programId": id};
-    print(body);
     final response = await HttpService().postRequest(id == 0? "getCustomerDashboardByManual" : "getCustomerDashboardByProgram", body);
 
     if (response.statusCode == 200) {
@@ -149,91 +102,13 @@ class _ControllerDashboardState extends State<ControllerDashboard>
       appBar: AppBar(
         title: Text(widget.siteName),
         actions: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              ProgramDropdown(programs: programs, callback: CallbackFunctionProgram,),
-              const SizedBox(width: 10,)
-            ],
-          ),
-          IconButton(tooltip: 'Refresh', icon: const Icon(Icons.refresh), onPressed: () async
-          {
-            getControllerDashboardDetails('Manual',0);
+          IconButton(tooltip: 'Refresh', icon: const Icon(Icons.refresh), onPressed: () async {
+            getControllerDashboardDetails(widget.programId);
           }),
           const SizedBox(width: 10,),
           IconButton(tooltip: 'Settings', icon: const Icon(Icons.settings_outlined), onPressed: () async
           {
           }),
-          const SizedBox(width: 10,),
-          PopupMenuButton<MenuItems>(
-            initialValue: selectedMenu,
-            onSelected: (MenuItems item) {
-              setState(() {
-                selectedMenu = item;
-                if(item.index==0){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  ProgramLibraryScreen(userId: widget.customerID, controllerId: widget.controllerID)));
-                }
-                else if(item.index==2){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  VirtualMeterScreen(userId: widget.customerID, controllerId: widget.controllerID)),);
-                }
-                else if(item.index==3){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  RadiationsetUI(userId: widget.customerID, controllerId: widget.controllerID)),);
-                }
-                else if(item.index==6){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  ConditionScreen(userId: widget.customerID, controllerId: widget.controllerID, imeiNo: widget.imeiNo)),);
-                }
-                else if(item.index==5){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyGroupScreen(userId: widget.customerID, controllerId: widget.controllerID)),);
-                }
-                else if(item.index==7){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  FrostMobUI(userId: widget.customerID, controllerId: widget.controllerID)),);
-                }
-                else if(item.index==8){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  FilterBackwashUI(userId: widget.customerID, controllerId: widget.controllerID)),);
-                }
-
-              });
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<MenuItems>>[
-              const PopupMenuItem<MenuItems>(
-                value: MenuItems.itemOne,
-                child: Text('Irrigation program'),
-              ),
-              const PopupMenuItem<MenuItems>(
-                value: MenuItems.itemTwo,
-                child: Text('Water source'),
-              ),
-              const PopupMenuItem<MenuItems>(
-                value: MenuItems.itemThree,
-                child: Text('Virtual Water Meter'),
-              ),
-              const PopupMenuItem<MenuItems>(
-                value: MenuItems.itemFour,
-                child: Text('Radiation sets'),
-              ),
-              const PopupMenuItem<MenuItems>(
-                value: MenuItems.itemFive,
-                child: Text('Satellite'),
-              ),
-              const PopupMenuItem<MenuItems>(
-                value: MenuItems.itemSix,
-                child: Text('Groups'),
-              ),
-              const PopupMenuItem<MenuItems>(
-                value: MenuItems.itemSeven,
-                child: Text('Conditions'),
-              ),
-              const PopupMenuItem<MenuItems>(
-                value: MenuItems.itemEight,
-                child: Text('Frost protection & Rain delay'),
-              ),
-              const PopupMenuItem<MenuItems>(
-                value: MenuItems.itemNine,
-                child: Text('Filter Backwash'),
-              ),
-
-            ],
-          ),
           const SizedBox(width: 20,),
         ],
       ),
@@ -254,7 +129,7 @@ class _ControllerDashboardState extends State<ControllerDashboard>
             child: Row(
               children: [
                 SizedBox(
-                  width: 250,
+                  width: 350,
                   height: double.infinity,
                   child: SingleChildScrollView(
                     child: Padding(
@@ -267,77 +142,69 @@ class _ControllerDashboardState extends State<ControllerDashboard>
                               padding: EdgeInsets.all(8.0),
                               child: Text('Source Pump'),
                             ),
-                            SizedBox(
-                              height: dashBoardData[0].sourcePump.length * 89,
-                              child: DisplaySourcePump(sourcePump: dashBoardData[0].sourcePump,),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const VerticalDivider(),
-                Expanded(
-                  flex: 6,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: DisplayLineOrSequence(lineOrSequence: dashBoardData.isNotEmpty ? dashBoardData[0].lineOrSequence : []),
-                  ),
-                ),
-                const VerticalDivider(),
-                SizedBox(
-                  width: 350,
-                  height: double.infinity,
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                          SizedBox(
+                            height: (dashBoardData[0].sourcePump.length % 5 == 0
+                          ? dashBoardData[0].sourcePump.length ~/ 5 * 70
+                              : (dashBoardData[0].sourcePump.length ~/ 5 + 1) * 70),
+                            child: DisplaySourcePump(sourcePump: dashBoardData[0].sourcePump,),
+                          ),
+                          const Divider(height: 0),
                           if (dashBoardData.isNotEmpty)
                             const Padding(
                               padding: EdgeInsets.all(8.0),
                               child: Text('Irrigation Pump'),
                             ),// Add this condition
                           SizedBox(
-                            height: dashBoardData[0].irrigationPump.length * 89,
+                            height: (dashBoardData[0].irrigationPump.length % 5 == 0
+                                ? dashBoardData[0].irrigationPump.length ~/ 5 * 70
+                                : (dashBoardData[0].irrigationPump.length ~/ 5 + 1) * 70),
                             child: DisplayIrrigationPump(irrigationPump: dashBoardData[0].irrigationPump,),
                           ),
-                          const Divider(),
+                          const Divider(height: 0),
                           if (dashBoardData.isNotEmpty)
                             const Padding(
                               padding: EdgeInsets.all(8.0),
                               child: Text('Main Valve'),
                             ),// Add this condition
                           SizedBox(
-                            height: (dashBoardData[0].mainValve.length % 4 == 0
-                                ? dashBoardData[0].mainValve.length ~/ 4 * 70
-                                : (dashBoardData[0].mainValve.length ~/ 4 + 1) * 70),
+                            height: (dashBoardData[0].mainValve.length % 5 == 0
+                                ? dashBoardData[0].mainValve.length ~/ 5 * 70
+                                : (dashBoardData[0].mainValve.length ~/ 5 + 1) * 70),
                             child: DisplayMainValve(mainValve: dashBoardData[0].mainValve,),
                           ),
-                          const Divider(),
+                          const Divider(height: 0),
                           if (dashBoardData.isNotEmpty)
                             const Padding(
                               padding: EdgeInsets.all(8.0),
                               child: Text('Central Filter Site'),
                             ),
-                            SizedBox(
-                              height: dashBoardData[0].centralFilterSite.length * 89,
-                              child: DisplayCentralFilterSite(centralFilterSite: dashBoardData[0].centralFilterSite,),
-                            ),
-                          const Divider(),
+                          SizedBox(
+                            height: (dashBoardData[0].centralFilterSite.length % 5 == 0
+                                ? dashBoardData[0].centralFilterSite.length ~/ 5 * 70
+                                : (dashBoardData[0].centralFilterSite.length ~/ 5 + 1) * 70),
+                            child: DisplayCentralFilterSite(centralFilterSite: dashBoardData[0].centralFilterSite,),
+                          ),
+                          const Divider(height: 0),
                           if (dashBoardData.isNotEmpty)
                             const Padding(
                               padding: EdgeInsets.all(8.0),
                               child: Text('Central Fertilizer Site'),
                             ),
-                            SizedBox(
-                              height: dashBoardData[0].centralFertilizerSite.length * 170,
-                              child: DisplayCentralFertilizerSite(centralFertilizationSite: dashBoardData[0].centralFertilizerSite,),
-                            ),
+                          SizedBox(
+                            height: dashBoardData[0].centralFertilizerSite.length * 170,
+                            child: DisplayCentralFertilizerSite(centralFertilizationSite: dashBoardData[0].centralFertilizerSite,),
+                          ),
                         ],
                       ),
                     ),
+                  ),
+                ),
+                const VerticalDivider(width: 5),
+                Expanded(
+                  flex: 6,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: DisplayLineOrSequence(lineOrSequence: dashBoardData.isNotEmpty ? dashBoardData[0].lineOrSequence : [], prgId: widget.programId,),
                   ),
                 ),
               ],
@@ -345,8 +212,8 @@ class _ControllerDashboardState extends State<ControllerDashboard>
           ),
         ],
       ),
-      bottomNavigationBar: BottomAppBar(
-        color: myTheme.primaryColor.withOpacity(0.2),
+      bottomNavigationBar: widget.programId==0 ? BottomAppBar(
+        color: myTheme.primaryColor.withOpacity(0.1),
         elevation: 10,
         child: Padding(
           padding: const EdgeInsets.only(left: 10, right: 10),
@@ -428,7 +295,7 @@ class _ControllerDashboardState extends State<ControllerDashboard>
             ],
           ),
         ),
-      ),
+      ) : null,
     );
   }
 
@@ -444,42 +311,6 @@ class _ControllerDashboardState extends State<ControllerDashboard>
     });
   }
 
-}
-
-class ProgramDropdown extends StatefulWidget {
-
-  const ProgramDropdown({super.key, required this.programs, required this.callback});
-  final List<Program> programs;
-  final void Function(int) callback;
-
-  @override
-  _ProgramDropdownState createState() => _ProgramDropdownState();
-}
-
-class _ProgramDropdownState extends State<ProgramDropdown> {
-  Program? selectedProgram;
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.programs.isNotEmpty? DropdownButton<Program>(
-      value: selectedProgram ?? widget.programs.first,
-      focusColor: Colors.transparent,
-      onChanged: (Program? newValue) {
-        setState(() {
-          selectedProgram = newValue;
-          print(newValue?.programName);
-          widget.callback(newValue!.programId);
-          //getControllerDashboardDetails();
-        });
-      },
-      items: widget.programs.map<DropdownMenuItem<Program>>((Program program) {
-        return DropdownMenuItem<Program>(
-          value: program,
-          child: Text(program.programName),
-        );
-      }).toList(),
-    ) : const Text('Manual');
-  }
 }
 
 class DashboardData {
@@ -565,7 +396,6 @@ class Program {
   }
 }
 
-
 class DisplaySourcePump extends StatelessWidget
 {
   const DisplaySourcePump({Key? key, required this.sourcePump}) : super(key: key);
@@ -573,39 +403,35 @@ class DisplaySourcePump extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      scrollDirection: Axis.vertical,
+    return GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 5, // Number of columns
+        crossAxisSpacing: 3.0, // Spacing between columns
+        mainAxisSpacing: 3.0, // Spacing between rows
+      ),
       itemCount: sourcePump.length,
       itemBuilder: (context, index) {
-        return Card(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 3),
-                child: SizedBox(
-                  width: 60,
-                  height: 60,
-                  child: Image.asset('assets/images/source_pump.png'),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(sourcePump[index].name, style: const TextStyle(fontWeight: FontWeight.normal),),
-                    Text(sourcePump[index].id, style: const TextStyle(fontWeight: FontWeight.normal),),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        return Column(
+          children: [
+            CircleAvatar(
+              radius: 22,
+              backgroundImage: const AssetImage('assets/images/source_pump.png'),
+              backgroundColor: Colors.transparent,
+              child: IconButton(
+                  hoverColor: Colors.transparent,
+                  tooltip: sourcePump[index].name,
+                  onPressed: (){
+                  }, icon: const Text('    '),
+                  ),
+            ),
+            Text(sourcePump[index].id, style: const TextStyle(fontSize: 11)),
+          ],
         );
       },
     );
   }
 }
+
 
 class DisplayIrrigationPump extends StatelessWidget
 {
@@ -614,6 +440,32 @@ class DisplayIrrigationPump extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
+    return GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 5, // Number of columns
+        crossAxisSpacing: 3.0, // Spacing between columns
+        mainAxisSpacing: 3.0, // Spacing between rows
+      ),
+      itemCount: irrigationPump.length,
+      itemBuilder: (context, index) {
+        return Column(
+          children: [
+            CircleAvatar(
+              radius: 22,
+              backgroundImage: const AssetImage('assets/images/irrigation_pump.png'),
+              backgroundColor: Colors.transparent,
+              child: IconButton(
+                  hoverColor: Colors.transparent,
+                  tooltip: '${irrigationPump[index].name}\n${irrigationPump[index].location}',
+                  onPressed: (){},
+                  icon: const Text('      ')
+              ),
+            ),
+            Text(irrigationPump[index].id, style: const TextStyle(fontSize: 11)),
+          ],
+        );
+      },
+    );
     return ListView.builder(
       scrollDirection: Axis.vertical,
       itemCount: irrigationPump.length,
@@ -672,7 +524,6 @@ class DisplayMainValve extends StatelessWidget
               backgroundColor: Colors.transparent,
             ),
             Text(mainValve[index].id, style: const TextStyle(fontSize: 11)),
-
           ],
         );
       },
@@ -726,7 +577,7 @@ class DisplayCentralFertilizerSite extends StatelessWidget
               ),
               Container(
                 width: MediaQuery.sizeOf(context).width-1070,
-                height: 85,
+                height: 70,
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
@@ -743,31 +594,42 @@ class DisplayCentralFertilizerSite extends StatelessWidget
                     ),
                     SizedBox(
                       width: MediaQuery.sizeOf(context).width-740,
-                      height: 65,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: fertilizers.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return Row(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(left: 5),
-                                child: Column(
+                      height: 46,
+                      child: Column(
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(left: 5, right: 5),
+                            child: Divider(),
+                          ),
+                          SizedBox(
+                            width: 310,
+                            height: 30,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: fertilizers.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Row(
                                   children: [
-                                    const CircleAvatar(
-                                      radius: 22,
-                                      backgroundImage: AssetImage('assets/images/fert_chanel.png'),
-                                      backgroundColor: Colors.transparent,
-                                    ),
-                                    Text(fertilizers[index].id, style: const TextStyle(fontSize: 11)),
-
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 5),
+                                      child: Column(
+                                        children: [
+                                          const VerticalDivider(),
+                                          CircleAvatar(
+                                            radius: 15,
+                                            backgroundColor: Colors.grey,
+                                            child: Text('${index+1}', style: const TextStyle(fontSize: 13, color: Colors.white),),
+                                          ),
+                                        ],
+                                      ),
+                                    )
                                   ],
-                                ),
-                              )
-                            ],
-                          );
-                        },
-                      ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      )
                     ),
                   ],
                 ),
@@ -798,39 +660,29 @@ class DisplayCentralFilterSite extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      scrollDirection: Axis.vertical,
+    return GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 5, // Number of columns
+        crossAxisSpacing: 3.0, // Spacing between columns
+        mainAxisSpacing: 3.0, // Spacing between rows
+      ),
       itemCount: centralFilterSite.length,
       itemBuilder: (context, index) {
-        return Card(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 10),
-                child:SizedBox(
-                  width: 60,
-                  height: 60,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Image.asset('assets/images/central_filtration.png'),
-                  ),
-                ),
+        return Column(
+          children: [
+            CircleAvatar(
+              radius: 22,
+              backgroundImage: const AssetImage('assets/images/central_filtration.png'),
+              backgroundColor: Colors.transparent,
+              child: IconButton(
+                  hoverColor: Colors.transparent,
+                  tooltip: '${centralFilterSite[index].name}\n${centralFilterSite[index].location}',
+                  onPressed: (){},
+                  icon: const Text('      ')
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(centralFilterSite[index].name, style: const TextStyle(fontWeight: FontWeight.normal),),
-                    Text(centralFilterSite[index].id, style: const TextStyle(fontWeight: FontWeight.normal),),
-                    Text(
-                      'Location : ${centralFilterSite[index].location}', style: const TextStyle(fontWeight: FontWeight.normal),),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+            Text(centralFilterSite[index].id, style: const TextStyle(fontSize: 11)),
+          ],
         );
       },
     );
@@ -838,8 +690,9 @@ class DisplayCentralFilterSite extends StatelessWidget
 }
 
 class DisplayLineOrSequence extends StatefulWidget {
-  const DisplayLineOrSequence({super.key, required this.lineOrSequence});
+  const DisplayLineOrSequence({super.key, required this.lineOrSequence, required this.prgId});
   final List<LineOrSequence> lineOrSequence;
+  final int prgId;
 
   @override
   State<DisplayLineOrSequence> createState() => _DisplayLineOrSequenceState();
@@ -855,12 +708,14 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
   {
     return Column(
       children: [
-        SizedBox(
-          width: MediaQuery.of(context).size.width-650,
+        widget.prgId ==0 ? const SizedBox(height: 10,): 
+        Container(),
+        widget.prgId ==0 ? SizedBox(
+          width: MediaQuery.of(context).size.width-550,
           height: 35,
           child: SegmentedButton<Calendar>(
             style: ButtonStyle(
-              backgroundColor: MaterialStatePropertyAll(myTheme.primaryColor.withOpacity(0.1)),
+              backgroundColor: MaterialStatePropertyAll(myTheme.primaryColor.withOpacity(0.05)),
               iconColor: MaterialStateProperty.all(myTheme.primaryColor),
             ),
             segments: const <ButtonSegment<Calendar>>[
@@ -884,6 +739,16 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
               });
             },
           ),
+        ) : 
+        const Padding(
+          padding: EdgeInsets.only(left: 15, right: 15, top: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('RTC ON Time : 10:00 AM', style: TextStyle(fontSize: 15),),
+              Text('RTC OFF Time : 05:00 PM', style: TextStyle(fontSize: 15)),
+            ],
+          ),
         ),
         const SizedBox(height: 10,),
         Expanded(
@@ -897,79 +762,41 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                 _textController.text = line.flow;
 
                 return Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.only(left: 5, right: 5, bottom: 5),
                   child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.0), // Adjust the value as needed
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          width: MediaQuery.of(context).size.width-650,
-                          height: 65,
+                          width: MediaQuery.of(context).size.width-380,
+                          height: 50,
                           decoration: BoxDecoration(
                             color: myTheme.primaryColor.withOpacity(0.1),
-                            borderRadius: const BorderRadius.only(topRight: Radius.circular(10), topLeft: Radius.circular(10)),
+                            borderRadius: const BorderRadius.only(topRight: Radius.circular(5), topLeft: Radius.circular(5)),
                           ),
-                          child: Row(
+                          child: widget.prgId ==0 ? Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              SizedBox(
-                                width: 175,
-                                child: Center(
-                                  child: Text(line.name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 10, top: 10),
+                                  child: Text(line.name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.normal)),
                                 ),
                               ),
-                              const VerticalDivider(color: Colors.grey),
-                              sensors.isEmpty ? Container() : Expanded(
-                                flex: 1,
-                                child: SizedBox(
-                                  height: 65,
-                                  child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: ListView.builder(
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: sensors.length,
-                                      itemBuilder: (BuildContext context, int index) {
-                                        var sensorLocation = sensors.keys.elementAt(index);
-                                        return Padding(
-                                          padding: const EdgeInsets.only(left: 8, top: 3),
-                                          child: Row(
-                                            children: [
-                                              for (var sensor in sensors[sensorLocation]!)
-                                                Column(
-                                                  children: [
-                                                    CircleAvatar(
-                                                      radius: 22,
-                                                      backgroundImage: sensor.id.contains('MS')
-                                                          ? const AssetImage('assets/images/moisture_sensor.png')
-                                                          : const AssetImage('assets/images/level_sensor.png'),
-                                                      backgroundColor: Colors.transparent,
-                                                    ),
-                                                    Text(
-                                                      sensor.id,
-                                                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),
-                                                    ),
-                                                  ],
-                                                ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ),
-
                               if (calendarView.index == 1) ...[
-                                const VerticalDivider(color: Colors.grey),
+                                VerticalDivider(color: myTheme.primaryColor.withOpacity(0.1)),
                               ],
                               if (calendarView.index == 1) ...[
                                 SizedBox(
-                                  width: 130,
+                                  width: 200,
                                   child: Center(
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        const Text('(HH:MM) :'),
+                                        const Text('Duration(HH:MM) :'),
                                         const SizedBox(width: 5,),
                                         InkWell(
                                           onTap: () => _selectTimeDuration(context, TimeOfDay(hour: int.parse(line.time.split(":")[0]), minute: int.parse(line.time.split(":")[1])), line),
@@ -984,61 +811,143 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                               ],
 
                               if (calendarView.index == 2) ...[
-                                const VerticalDivider(color: Colors.grey),
+                                VerticalDivider(color: myTheme.primaryColor.withOpacity(0.1)),
                               ],
                               if (calendarView.index == 2) ...[
                                 SizedBox(
-                                  width: 130,
+                                  width: 150,
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
-                                    child: TextField(
-                                      controller: _textController,
-                                      decoration: const InputDecoration(
-                                        labelText: 'Liter',
-                                      ),
+                                    child: Row(
+                                      children: [
+                                        SizedBox(
+                                          width: 80,
+                                          child: TextField(
+                                            controller: _textController,
+                                            decoration: const InputDecoration(
+                                              hintText: 'Liter',
+                                            ),
+                                          ),
+                                        ),
+                                        const Text('/'),
+                                        const Text('Lit', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12),)
+                                      ],
                                     ),
                                   ),
                                 ),
                               ],
                             ],
-                          ),
-                        ),
-                        const SizedBox(height: 5,),
-                        const Padding(
-                          padding: EdgeInsets.only(left: 10, bottom: 10),
-                          child: Text('Valve'),
-                        ),
-                        for (var valveLocation in groupedValves.keys)
+                          ) :
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              for (var valve in groupedValves[valveLocation]!)
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 5, right: 5, bottom: 5),
-                                  child: Card(
-                                    elevation: 3,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(left: 8, right: 8),
-                                      child: Column(
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 10, top: 10),
+                                  child: Text(line.name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.normal)),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 3,bottom: 3),
+                                child: VerticalDivider(color: myTheme.primaryColor.withOpacity(0.1)),
+                              ),
+                              SizedBox(
+                                width: 220,
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.end,
                                         children: [
-                                          SizedBox(height: 50, child: Image.asset('assets/images/valve.png')),
-                                          Text(valve.id),
-                                          Text(valve.name),
-                                          Switch(
-                                            value: valve.isOn, // Assuming you have a property isOn in your Valve class
-                                            onChanged: (bool newValue) {
-                                              setState(() {
-                                                valve.isOn = newValue;
-                                              });
-                                            },
-                                          )
+                                          const Text('Start at 09:00 AM', style: TextStyle(fontSize: 13, fontWeight: FontWeight.normal)),
+                                          const SizedBox(width: 3,),
+                                          Text('Duration(HH:MM) : ${line.time}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.normal)),
                                         ],
                                       ),
-                                    ),
-                                  )
+                                      const SizedBox(width: 10,)
+                                    ],
+                                  ),
                                 ),
+                              )
+
                             ],
+                          ),
+                        ),
+                        for (var valveLocation in groupedValves.keys)
+                          SizedBox(
+                            height: (groupedValves[valveLocation]!.length * 40)+40,
+                            width: MediaQuery.sizeOf(context).width-380,
+                            child: DataTable2(
+                              columnSpacing: 12,
+                              horizontalMargin: 12,
+                              minWidth: 600,
+                              dataRowHeight: 40.0,
+                              headingRowHeight: 35,
+                              headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
+                              columns: [
+                                const DataColumn2(
+                                    label: Center(child: Text('S.No', style: TextStyle(fontSize: 14),)),
+                                    fixedWidth: 50
+                                ),
+                                const DataColumn2(
+                                    label: Center(child: Text('Valve Id', style: TextStyle(fontSize: 14),)),
+                                    size: ColumnSize.M
+                                ),
+                                const DataColumn2(
+                                  label: Center(child: Text('Location', style: TextStyle(fontSize: 14),)),
+                                  fixedWidth: 100,
+                                ),
+                                const DataColumn2(
+                                    label: Center(
+                                      child: Text(
+                                        'Valve Name',
+                                        style: TextStyle(fontSize: 14),
+                                        textAlign: TextAlign.right,
+                                      ),
+                                    ),
+                                    size: ColumnSize.M
+                                ),
+                                DataColumn2(
+                                  label: widget.prgId ==0? const Center(
+                                    child: Text(
+                                      'On/Off Status',
+                                      style: TextStyle(fontSize: 14),
+                                      textAlign: TextAlign.right,
+                                    ),
+                                  ):
+                                  const Center(
+                                    child: Text(
+                                      'Valve Status',
+                                      style: TextStyle(fontSize: 14),
+                                      textAlign: TextAlign.right,
+                                    ),
+                                  ),
+                                  fixedWidth: 120,
+                                ),
+                              ],
+                              rows: List<DataRow>.generate(groupedValves[valveLocation]!.length, (index) => DataRow(cells: [
+                                DataCell(Center(child: Text('${index + 1}', style: TextStyle(fontWeight: FontWeight.normal)))),
+                                DataCell(Center(child: Text(groupedValves[valveLocation]![index].id, style: TextStyle(fontWeight: FontWeight.normal)))),
+                                DataCell(Center(child: Text(groupedValves[valveLocation]![index].location, style: TextStyle(fontWeight: FontWeight.normal)))),
+                                DataCell(Center(child: Text(groupedValves[valveLocation]![index].name, style: TextStyle(fontWeight: FontWeight.normal)))),
+                                DataCell(Center(
+                                    child: widget.prgId ==0? Transform.scale(
+                                      scale: 0.7,
+                                      child: Switch(
+                                        value: groupedValves[valveLocation]![index].isOn,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            groupedValves[valveLocation]![index].isOn = value;
+                                          });
+                                        },
+                                      ),
+                                    ):
+                                    Text('Active', style: TextStyle(color: Colors.green, fontWeight: FontWeight.normal),))
+                                ),
+                              ])),
+                            ),
                           ),
                       ],
                     ),

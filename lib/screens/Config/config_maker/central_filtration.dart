@@ -183,6 +183,48 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                       ),
                     ),
                   ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Pressure',style: TextStyle(color: Colors.white),),
+                          Text('Switch(${configPvd.totalPressureSwitch})',style: TextStyle(color: Colors.white),),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Diff.Press',style: TextStyle(color: Colors.white),),
+                          Text('Sensor(${configPvd.totalDiffPressureSensor})',style: TextStyle(color: Colors.white),),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
 
                 ],
               ),
@@ -281,6 +323,38 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                                     value: configPvd.centralFiltrationUpdated[index]['pressureOut'].isEmpty ? false : true,
                                     onChanged: (value){
                                       configPvd.centralFiltrationFunctionality(['editPressureSensor_out',index,value]);
+                                    }),
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1)),
+                                ),
+                                width: double.infinity,
+                                height: 60 ,
+                                child: (configPvd.totalPressureSwitch == 0 && configPvd.centralFiltrationUpdated[index]['pressureSwitch'].isEmpty) ?
+                                Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                Checkbox(
+                                    value: configPvd.centralFiltrationUpdated[index]['pressureSwitch'].isEmpty ? false : true,
+                                    onChanged: (value){
+                                      configPvd.centralFiltrationFunctionality(['editPressureSwitch',index,value]);
+                                    }),
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border(right: BorderSide(width: 1)),
+                                ),
+                                width: double.infinity,
+                                height: 60 ,
+                                child: (configPvd.totalDiffPressureSensor == 0 && configPvd.centralFiltrationUpdated[index]['diffPressureSensor'].isEmpty) ?
+                                Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                Checkbox(
+                                    value: configPvd.centralFiltrationUpdated[index]['diffPressureSensor'].isEmpty ? false : true,
+                                    onChanged: (value){
+                                      configPvd.centralFiltrationFunctionality(['editDiffPressureSensor',index,value]);
                                     }),
                               ),
                             ),

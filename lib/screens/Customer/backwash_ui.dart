@@ -9,7 +9,6 @@ import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/screens/Config/dealer_definition_config.dart';
 
 import '../../Models/Customer/back_wash_model.dart';
- 
 
 class FilterBackwashUI extends StatefulWidget {
   const FilterBackwashUI(
@@ -32,12 +31,15 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
   @override
   void initState() {
     super.initState();
-      MqttWebClient().init();
+    MqttWebClient().init();
     fetchData();
   }
 
   Future<void> fetchData() async {
-    Map<String, Object> body = {"userId": widget.userId, "controllerId": widget.controllerId};
+    Map<String, Object> body = {
+      "userId": widget.userId,
+      "controllerId": widget.controllerId
+    };
     final response = await HttpService()
         .postRequest("getUserPlanningFilterBackwashing", body);
     if (response.statusCode == 200) {
@@ -70,72 +72,60 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
   @override
   Widget build(BuildContext context) {
     if (_filterbackwash.data == null) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     } else {
       return DefaultTabController(
         length: _filterbackwash.data!.length ?? 0,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Scaffold(
-            appBar: AppBar(
-              title: const Text('Filter BackWash'),
-              backgroundColor: myTheme.primaryColor,
-              bottom: TabBar(
-                // controller: _tabController,
-                indicatorColor: const Color.fromARGB(255, 175, 73, 73),
-                isScrollable: true,
-                unselectedLabelColor: Colors.grey,
-                labelColor: Colors.white,
-                tabs: [
-                  for (var i = 0; i < _filterbackwash.data!.length; i++)
-                    Tab(
-                      text: '${_filterbackwash.data![i].name}',
+        child: Scaffold(
+          body: Padding(
+            padding: EdgeInsets.only(left: 8, bottom: 80, right: 8, top: 8),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  Container(
+                    height: 50,
+                    child: TabBar(
+                      // controller: _tabController,
+                      indicatorColor: const Color.fromARGB(255, 175, 73, 73),
+                      isScrollable: true,
+                      unselectedLabelColor: Colors.grey,
+                      labelColor: myTheme.primaryColor,
+                      tabs: [
+                        for (var i = 0; i < _filterbackwash.data!.length; i++)
+                          Tab(
+                            text: '${_filterbackwash.data![i].name}',
+                          ),
+                      ],
+                      onTap: (value) {
+                        setState(() {
+                          tabclickindex = value;
+                          changeval(value);
+                        });
+                      },
                     ),
-                ],
-                onTap: (value) {
-                  setState(() {
-                    tabclickindex = value;
-                    changeval(value);
-                  });
-                },
-              ),
-            ),
-            body: Padding(
-              padding: EdgeInsets.only(left: 8, bottom: 80, right: 8, top: 8),
-              child: Form(
-                key: _formKey,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey,
-                        spreadRadius: 5,
-                        blurRadius: 7,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
                   ),
-                  child: TabBarView(children: [
-                    for (var i = 0; i < _filterbackwash.data!.length; i++)
-                      buildTab(
-                        _filterbackwash.data![i].filter,
-                        i,
-                      )
-                  ]),
-                ),
+                  Expanded(
+                    child: TabBarView(children: [
+                      for (var i = 0; i < _filterbackwash.data!.length; i++)
+                        buildTab(
+                          _filterbackwash.data![i].filter,
+                          i,
+                        )
+                    ]),
+                  ),
+                ],
               ),
             ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () async {
-                setState(() {
-                  updateradiationset();
-                });
-              },
-              tooltip: 'Send',
-              child: const Icon(Icons.send),
-            ),
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () async {
+              setState(() {
+                updateradiationset();
+              });
+            },
+            tooltip: 'Send',
+            child: const Icon(Icons.send),
           ),
         ),
       );
@@ -168,12 +158,13 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
                           trailing: SizedBox(
                               width: 100,
                               child: TextFormField(
+                                textAlign: TextAlign.center,
                                 onChanged: (text) {
                                   setState(() {
                                     Listofvalue?[index].value = text;
                                   });
                                 },
-                                 inputFormatters: [
+                                inputFormatters: [
                                   FilteringTextInputFormatter.digitsOnly
                                 ],
                                 initialValue: Listofvalue?[index].value ?? '0',
@@ -233,25 +224,23 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
                               color: Colors.white70,
                               width: 180,
                               child: DropdownButton(
-                                items: dropdownlist.map((String items) {
-                                  return DropdownMenuItem(
-                                    value: items,
-                                    child: Container(
-                                        padding: EdgeInsets.only(left: 10),
-                                        child: Text(items)),
-                                  );
-                                }).toList(),
-                                onChanged: (value) {
-                                  setState(() {
-                                    Listofvalue?[index].value = value!;
-                                    dropdownval = Listofvalue?[index].value;
-                                  });
-                                },
-                                value: Listofvalue?[index]
-                                      .value == '' ? dropdownlist[0] : Listofvalue?[index]
-                                      .value
-                                    
-                              ),
+                                  items: dropdownlist.map((String items) {
+                                    return DropdownMenuItem(
+                                      value: items,
+                                      child: Container(
+                                          padding: EdgeInsets.only(left: 10),
+                                          child: Text(items)),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      Listofvalue?[index].value = value!;
+                                      dropdownval = Listofvalue?[index].value;
+                                    });
+                                  },
+                                  value: Listofvalue?[index].value == ''
+                                      ? dropdownlist[0]
+                                      : Listofvalue?[index].value),
                             ),
                           ),
                         ),
@@ -269,23 +258,23 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
                             width: 100,
                             child: Container(
                                 child: Center(
-                              child: InkWell(
-                                child: Text(
-                                  '${Listofvalue?[index].value}' != ''
-                                      ? '${Listofvalue?[index].value}'
-                                      : '00:00',
-                                  style: const TextStyle(fontSize: 20),
-                                ),
-                                onTap: () async {
-                                  String? time = await _selectTime(context);
-                                  setState(() {
-                                    if (time != null) {
-                                      Listofvalue?[index].value = time;
-                                    }
-                                  });
-                                },
-                              ),
-                            )),
+                                  child: InkWell(
+                                    child: Text(
+                                      '${Listofvalue?[index].value}' != ''
+                                          ? '${Listofvalue?[index].value}'
+                                          : '00:00',
+                                      style: const TextStyle(fontSize: 20),
+                                    ),
+                                    onTap: () async {
+                                      String? time = await _selectTime(context);
+                                      setState(() {
+                                        if (time != null) {
+                                          Listofvalue?[index].value = time;
+                                        }
+                                      });
+                                    },
+                                  ),
+                                )),
                           ),
                         ),
                       ),
@@ -296,7 +285,7 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
                     children: [
                       Container(
                         height:
-                            Changesize(Listofvalue?[index].value.length, 60),
+                        Changesize(Listofvalue?[index].value.length, 60),
                         width: double.infinity,
                         child: ListView.builder(
                             itemCount: Listofvalue?[index].value!.length ?? 0,
@@ -311,28 +300,28 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
                                         width: 80,
                                         child: Container(
                                             child: Center(
-                                          child: InkWell(
-                                            child: Text(
-                                              '${Listofvalue?[index].value![flusingindex]['value']}' !=
+                                              child: InkWell(
+                                                child: Text(
+                                                  '${Listofvalue?[index].value![flusingindex]['value']}' !=
                                                       ''
-                                                  ? '${Listofvalue?[index].value![flusingindex]['value']}'
-                                                  : '00:00',
-                                              style:
+                                                      ? '${Listofvalue?[index].value![flusingindex]['value']}'
+                                                      : '00:00',
+                                                  style:
                                                   const TextStyle(fontSize: 20),
-                                            ),
-                                            onTap: () async {
-                                              String? time =
+                                                ),
+                                                onTap: () async {
+                                                  String? time =
                                                   await _selectTime(context);
-                                              setState(() {
-                                                if (time != null) {
-                                                  Listofvalue?[index]
+                                                  setState(() {
+                                                    if (time != null) {
+                                                      Listofvalue?[index]
                                                           .value![flusingindex]
                                                       ['value'] = time;
-                                                }
-                                              });
-                                            },
-                                          ),
-                                        )),
+                                                    }
+                                                  });
+                                                },
+                                              ),
+                                            )),
                                       ),
                                     ),
                                   ),
@@ -353,7 +342,7 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
 
   updateradiationset() async {
     List<Map<String, dynamic>> Filterbackwash =
-        _filterbackwash.data!.map((condition) => condition.toJson()).toList();
+    _filterbackwash.data!.map((condition) => condition.toJson()).toList();
     Map<String, Object> body = {
       "userId": widget.userId,
       "controllerId": widget.controllerId,
@@ -361,32 +350,23 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
       "createUser": widget.userId
     };
     String Mqttsenddata = toMqttformat(_filterbackwash.data);
-     final response = await HttpService()
+    final response = await HttpService()
         .postRequest("createUserPlanningFilterBackwashing", body);
-     final jsonDataresponse = json.decode(response.body);
-         GlobalSnackBar.show(
+    final jsonDataresponse = json.decode(response.body);
+    GlobalSnackBar.show(
         context, jsonDataresponse['message'], response.statusCode);
 
-
-       String payLoadFinal = jsonEncode({
+    String payLoadFinal = jsonEncode({
       "900": [
         {"901": Mqttsenddata},
       ]
     });
     MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
-
   }
 
-
-
-
-
-
-
-
   String toMqttformat(
-    List<Datum>? data,
-  ) {
+      List<Datum>? data,
+      ) {
     String Mqttdata = '';
 
     for (var i = 0; i < data!.length; i++) {
@@ -415,9 +395,9 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
       }
 
       String cycles =
-          data[i].filter![4].value!.isEmpty ? '0' : data[i].filter![4].value!;
+      data[i].filter![4].value!.isEmpty ? '0' : data[i].filter![4].value!;
       String pressureValues =
-          data[i].filter![5].value!.isEmpty ? '0' : data[i].filter![5].value!;
+      data[i].filter![5].value!.isEmpty ? '0' : data[i].filter![5].value!;
       String deltaPressureDelay = data[i].filter![6].value!.isEmpty
           ? '00:00:00'
           : '${data[i].filter![6].value!}:00';
@@ -425,10 +405,10 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
           ? '00:00:00'
           : '${data[i].filter![7].value!}:00';
       String manualFlushingStatus =
-          data[i].filter![8].value! == false ? '0' : '1';
+      data[i].filter![8].value! == false ? '0' : '1';
 
       Mqttdata +=
-          '$sno,$id,$flushingTime,$filterInterval,$flushingInterval,$whileFlushing,$cycles,$pressureValues,$deltaPressureDelay,$dwellTimeMainFilter,$manualFlushingStatus;';
+      '$sno,$id,$flushingTime,$filterInterval,$flushingInterval,$whileFlushing,$cycles,$pressureValues,$deltaPressureDelay,$dwellTimeMainFilter,$manualFlushingStatus;';
     }
     return Mqttdata;
   }

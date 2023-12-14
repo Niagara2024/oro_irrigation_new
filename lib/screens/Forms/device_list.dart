@@ -6,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
-import 'package:oro_irrigation_new/screens/Config/config_screen.dart';
 
 import '../../Models/customer_list.dart';
 import '../../Models/customer_product.dart';
@@ -16,8 +15,8 @@ import '../../Models/node_model.dart';
 import '../../Models/product_stock.dart';
 import '../../constants/http_service.dart';
 import '../../constants/mqtt_web_client.dart';
-import '../../state_management/config_maker_provider.dart';
 import '../Config/product_limit.dart';
+import '../Customer/customer_home.dart';
 
 enum MasterController {gem1, gem2, gem3, gem4, gem5, gem6, gem7, gem8, gem9, gem10,}
 
@@ -669,7 +668,17 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
               ],
               rows: List<DataRow>.generate(widget.customerProductList.length, (index) => DataRow(cells: [
                 DataCell(Text('${index+1}')),
-                DataCell(Row(children: [const CircleAvatar(radius: 17, child: Icon(Icons.gas_meter_outlined),), const SizedBox(width: 10,), Text(widget.customerProductList[index].catName)],)),
+                DataCell(Row(children: [ CircleAvatar(
+                  radius: 17,
+                    backgroundColor: Colors.transparent,
+                    backgroundImage: widget.customerProductList[index].catName == 'ORO SWITCH'
+                        || widget.customerProductList[index].catName == 'OROSENSE'?
+                    AssetImage('assets/images/oro_switch.png'):
+                    widget.customerProductList[index].catName == 'ORO LEVEL'?
+                    AssetImage('assets/images/oro_sense.png'):
+                    widget.customerProductList[index].catName == 'OROGEM'?
+                    AssetImage('assets/images/oro_gem.png'): AssetImage('assets/images/oro_rtu.png'),
+                ), const SizedBox(width: 10,), Text(widget.customerProductList[index].catName)],)),
                 DataCell(Text(widget.customerProductList[index].model)),
                 DataCell(Text(widget.customerProductList[index].imei)),
                 DataCell(widget.userType==2 ? Text(widget.customerProductList[index].groupName) : widget.customerProductList[index].buyer == widget.userName? const Text('-') : Text(widget.customerProductList[index].buyer)),
@@ -776,7 +785,11 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                 child: Column(
                                   children: [
                                     const SizedBox(height: 10,),
-                                    const CircleAvatar(radius: 42,),
+                                    CircleAvatar(radius: 42,
+                                      backgroundImage: AssetImage('assets/images/oro_gem.png'),
+                                      backgroundColor: Colors.transparent,
+                                    ),
+
                                     const SizedBox(height: 5,),
                                     Text(widget.customerSiteList[siteIndex].categoryName,style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
                                     Text('IMEi Number : ${widget.customerSiteList[siteIndex].deviceId.toString()}', style: const TextStyle(fontWeight: FontWeight.normal),),
@@ -991,92 +1004,115 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                 flex: 1,
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
-                                  child: GridView.builder(
-                                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 5,
-                                      crossAxisSpacing: 5.0,
-                                      mainAxisSpacing: 5.0,
-                                    ),
-                                    itemCount: widget.usedNodeList[siteIndex].length,
-                                    itemBuilder: (BuildContext context, int siteNodeIndex) {
-                                      return Card(
-                                        elevation: 5.0,
-                                        color: Colors.white,
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            ListTile(
-                                              leading: const CircleAvatar(radius: 20,),
-                                              trailing: IconButton(onPressed: () async {
-                                                Map<String, dynamic> body = {
-                                                  "userId": widget.customerID,
-                                                  "controllerId": widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId,
-                                                  "modifyUser": widget.userID,
-                                                  "productId": widget.usedNodeList[siteIndex][siteNodeIndex].productId,
-                                                };
+                                  child: DataTable2(
+                                    columnSpacing: 12,
+                                    horizontalMargin: 12,
+                                    minWidth: 600,
+                                    dataRowHeight: 40.0,
+                                    headingRowHeight: 35,
+                                    headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
+                                    columns: const [
+                                      DataColumn2(
+                                          label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+                                          fixedWidth: 50
+                                      ),
+                                      DataColumn2(
+                                          label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+                                          size: ColumnSize.M
+                                      ),
+                                      DataColumn2(
+                                          label: Text('Model Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+                                          size: ColumnSize.M
+                                      ),
+                                      DataColumn2(
+                                        label: Text('IMEI Number', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+                                        fixedWidth: 170,
+                                      ),
+                                      DataColumn2(
+                                        label: Center(child: Text('Interface', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+                                        fixedWidth: 100,
+                                      ),
+                                      DataColumn2(
+                                        label: Center(child: Text('Interval', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+                                        fixedWidth: 100,
+                                      ),
+                                      DataColumn2(
+                                        label: Center(child: Text('Action', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+                                        fixedWidth: 50,
+                                      ),
+                                    ],
+                                    rows: List<DataRow>.generate(widget.usedNodeList[siteIndex].length, (index) => DataRow(cells: [
+                                      DataCell(Center(child: Text('${index + 1}'))),
+                                      DataCell(Text(widget.usedNodeList[siteIndex][index].categoryName)),
+                                      DataCell(Text(widget.usedNodeList[siteIndex][index].modelName)),
+                                      DataCell(Text(widget.usedNodeList[siteIndex][index].deviceId)),
+                                      DataCell(Center(
+                                          child: DropdownButton(
+                                            value: widget.usedNodeList[siteIndex][index].interface,
+                                            style: const TextStyle(fontSize: 12),
+                                            onChanged: (newValue) {
+                                              setState(() {
+                                                widget.usedNodeList[siteIndex][index].interface = newValue!;
+                                                int index1 = widget.interfaceType.indexWhere((model) => model.interface == newValue);
+                                                widget.usedNodeList[siteIndex][index1].interfaceTypeId = widget.interfaceType[index1].interfaceTypeId;
+                                              });
+                                            },
+                                            items: widget.interfaceType.map((interface) {
+                                              return DropdownMenuItem(
+                                                value: interface.interface,
+                                                child: Text(interface.interface, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                              );
+                                            }).toList(),
+                                          )
+                                      )),
+                                      DataCell(Center(
+                                          child: DropdownButton(
+                                            value: widget.usedNodeList[siteIndex][index].interfaceInterval ?? '0 sec',
+                                            style: const TextStyle(fontSize: 12),
+                                            onChanged: (newValue) {
+                                              setState(() {
+                                                widget.usedNodeList[siteIndex][index].interfaceInterval = newValue!;
+                                              });
+                                            },
+                                            items: _interfaceInterval.map((interface) {
+                                              return DropdownMenuItem(
+                                                value: interface,
+                                                child: Text(interface, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                              );
+                                            }).toList(),
+                                          ),
+                                      )),
+                                      DataCell(Center(
+                                          child: IconButton(onPressed: () async {
+                                            Map<String, dynamic> body = {
+                                              "userId": widget.customerID,
+                                              "controllerId": widget.usedNodeList[siteIndex][index].userDeviceListId,
+                                              "modifyUser": widget.userID,
+                                              "productId": widget.usedNodeList[siteIndex][index].productId,
+                                            };
 
-                                                final response = await HttpService().putRequest("removeNodeInMaster", body);
-                                                if(response.statusCode == 200)
-                                                {
-                                                  var data = jsonDecode(response.body);
-                                                  if(data["code"]==200)
-                                                  {
-                                                    widget.usedNodeList[siteIndex].removeWhere((node) => node.userDeviceListId == widget.usedNodeList[siteIndex][siteNodeIndex].userDeviceListId);
-                                                    _showSnackBar(data["message"]);
+                                            final response = await HttpService().putRequest("removeNodeInMaster", body);
+                                            if(response.statusCode == 200)
+                                            {
+                                              var data = jsonDecode(response.body);
+                                              if(data["code"]==200)
+                                              {
+                                                widget.usedNodeList[siteIndex].removeWhere((node) => node.userDeviceListId == widget.usedNodeList[siteIndex][index].userDeviceListId);
+                                                _showSnackBar(data["message"]);
 
-                                                    setState(() {
-                                                      checkboxValueNode = false;
-                                                    });
-                                                    widget.getNodeStockList();
-                                                  }
-                                                  else{
-                                                    _showSnackBar(data["message"]);
-                                                  }
-                                                }
+                                                setState(() {
+                                                  checkboxValueNode = false;
+                                                });
+                                                widget.getNodeStockList();
+                                              }
+                                              else{
+                                                _showSnackBar(data["message"]);
+                                              }
+                                            }
 
-                                              }, icon: const Icon(Icons.delete_outline, color: Colors.red,)),
-                                            ),
-                                            Text(widget.usedNodeList[siteIndex][siteNodeIndex].categoryName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
-                                            Text(widget.usedNodeList[siteIndex][siteNodeIndex].modelName, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
-                                            Text(widget.usedNodeList[siteIndex][siteNodeIndex].deviceId, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
-                                            ListTile(
-                                              title: DropdownButton(
-                                                value: widget.usedNodeList[siteIndex][siteNodeIndex].interface,
-                                                style: const TextStyle(fontSize: 12),
-                                                onChanged: (newValue) {
-                                                  setState(() {
-                                                    widget.usedNodeList[siteIndex][siteNodeIndex].interface = newValue!;
-                                                    int index = widget.interfaceType.indexWhere((model) => model.interface == newValue);
-                                                    widget.usedNodeList[siteIndex][siteNodeIndex].interfaceTypeId = widget.interfaceType[index].interfaceTypeId;
-                                                  });
-                                                },
-                                                items: widget.interfaceType.map((interface) {
-                                                  return DropdownMenuItem(
-                                                    value: interface.interface,
-                                                    child: Text(interface.interface, style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                  );
-                                                }).toList(),
-                                              ),
-                                              trailing: DropdownButton(
-                                                value: widget.usedNodeList[siteIndex][siteNodeIndex].interfaceInterval ?? '0 sec',
-                                                style: const TextStyle(fontSize: 12),
-                                                onChanged: (newValue) {
-                                                  setState(() {
-                                                    widget.usedNodeList[siteIndex][siteNodeIndex].interfaceInterval = newValue!;
-                                                  });
-                                                },
-                                                items: _interfaceInterval.map((interface) {
-                                                  return DropdownMenuItem(
-                                                    value: interface,
-                                                    child: Text(interface, style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                  );
-                                                }).toList(),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
+                                          }, icon: const Icon(Icons.delete_outline, color: Colors.red,)),
+                                      )),
+                                    ])),
                                   ),
                                 ),
                               ),
@@ -1085,8 +1121,8 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                         ),
                         Container(
                           height: 50,
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.only(bottomRight: Radius.circular(5), bottomLeft: Radius.circular(5)),
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.only(bottomRight: Radius.circular(5), bottomLeft: Radius.circular(5)),
                             color: Colors.white,
                           ),
                           child: Row(
@@ -1195,6 +1231,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
           itemBuilder: (BuildContext context, int index) {
             return UserCard(user: myCustomerChildList, index: index,);
           },
+          
         ),
       );
     }
@@ -1277,28 +1314,37 @@ class UserCard extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 3.0,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const CircleAvatar(radius: 40, child: Icon(Icons.supervised_user_circle_outlined)),
-            _sizedBox,
-            Text(
-              user[index].userName,
-              style: _boldTextStyle,
-            ),
-            _sizedBox,
-            Text(
-              user[index].mobileNumber,
-              style: _normalTextStyle,
-            ),
-          ],
+    return InkWell(
+      child: Card(
+        elevation: 3.0,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                radius: 40,
+                backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
+                backgroundColor: Colors.transparent,
+              ),
+              _sizedBox,
+              Text(
+                user[index].userName,
+                style: _boldTextStyle,
+              ),
+              _sizedBox,
+              Text(
+                user[index].mobileNumber,
+                style: _normalTextStyle,
+              ),
+            ],
+          ),
         ),
       ),
+      onTap: (){
+        Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerHome(customerID: user[index].userId, type: 1, customerName: user[index].userName,)),);
+      },
     );
   }
 }

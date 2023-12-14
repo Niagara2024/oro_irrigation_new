@@ -79,16 +79,16 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                   Expanded(
                     child: Container(
                       width: double.infinity,
-                      height: 60,
+                      height: 50,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Source',style: TextStyle(color: Colors.white),),
-                          Text('Pump(${configPvd.totalSourcePump})',style: TextStyle(color: Colors.white)),
+                          Text('Source',style: TextStyle(color: Colors.black),),
+                          Text('Pump(${configPvd.totalSourcePump})',style: TextStyle(color: Colors.black)),
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: Colors.blueGrey,
+                          color: Colors.indigo.shade50,
                           border: Border(
                             top: BorderSide(width: 1),
                             bottom: BorderSide(width: 1),
@@ -101,7 +101,7 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                          color: Colors.blueGrey,
+                          color: Colors.indigo.shade50,
                           border: Border(
                             top: BorderSide(width: 1),
                             bottom: BorderSide(width: 1),
@@ -110,12 +110,12 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                           )
                       ),
                       width: double.infinity,
-                      height: 60,
+                      height: 50,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Water',style: TextStyle(color: Colors.white),),
-                          Text('Source(6)',style: TextStyle(color: Colors.white)),
+                          Text('Water',style: TextStyle(color: Colors.black),),
+                          Text('Source(6)',style: TextStyle(color: Colors.black)),
                         ],
                       ),
                     ),
@@ -123,16 +123,16 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                   Expanded(
                     child: Container(
                       width: double.infinity,
-                      height: 60,
+                      height: 50,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Water',style: TextStyle(color: Colors.white),),
-                          Text('Meter(${configPvd.totalWaterMeter})',style: TextStyle(color: Colors.white)),
+                          Text('Water',style: TextStyle(color: Colors.black),),
+                          Text('Meter(${configPvd.totalWaterMeter})',style: TextStyle(color: Colors.black)),
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: Colors.blueGrey,
+                          color: Colors.indigo.shade50,
                           border: Border(
                             top: BorderSide(width: 1),
                             bottom: BorderSide(width: 1),
@@ -144,16 +144,16 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                   Expanded(
                     child: Container(
                       width: double.infinity,
-                      height: 60,
+                      height: 50,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('ORO',style: TextStyle(color: Colors.white),),
-                          Text('pump',style: TextStyle(color: Colors.white)),
+                          Text('ORO',style: TextStyle(color: Colors.black),),
+                          Text('pump',style: TextStyle(color: Colors.black)),
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: Colors.blueGrey,
+                          color: Colors.indigo.shade50,
                           border: Border(
                             top: BorderSide(width: 1),
                             bottom: BorderSide(width: 1),
@@ -165,16 +165,16 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                   Expanded(
                     child: Container(
                       width: double.infinity,
-                      height: 60,
+                      height: 50,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Relay',style: TextStyle(color: Colors.white),),
-                          Text('count',style: TextStyle(color: Colors.white)),
+                          Text('Relay',style: TextStyle(color: Colors.black),),
+                          Text('count',style: TextStyle(color: Colors.black)),
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: Colors.blueGrey,
+                          color: Colors.indigo.shade50,
                           border: Border(
                             top: BorderSide(width: 1),
                             bottom: BorderSide(width: 1),
@@ -186,16 +186,16 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                   Expanded(
                     child: Container(
                       width: double.infinity,
-                      height: 60,
+                      height: 50,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Top',style: TextStyle(color: Colors.white),),
-                          Text('tank(high)',style: TextStyle(color: Colors.white)),
+                          Text('Top',style: TextStyle(color: Colors.black),),
+                          Text('tank(high)',style: TextStyle(color: Colors.black)),
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: Colors.blueGrey,
+                          color: Colors.indigo.shade50,
                           border: Border(
                             top: BorderSide(width: 1),
                             bottom: BorderSide(width: 1),
@@ -207,16 +207,16 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                   Expanded(
                     child: Container(
                       width: double.infinity,
-                      height: 60,
+                      height: 50,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Top',style: TextStyle(color: Colors.white),),
-                          Text('tank(low)',style: TextStyle(color: Colors.white)),
+                          Text('Top',style: TextStyle(color: Colors.black),),
+                          Text('tank(low)',style: TextStyle(color: Colors.black)),
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: Colors.blueGrey,
+                          color: Colors.indigo.shade50,
                           border: Border(
                             top: BorderSide(width: 1),
                             bottom: BorderSide(width: 1),
@@ -228,16 +228,16 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                   Expanded(
                     child: Container(
                       width: double.infinity,
-                      height: 60,
+                      height: 50,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Sump',style: TextStyle(color: Colors.white),),
-                          Text('tank(high)',style: TextStyle(color: Colors.white)),
+                          Text('Sump',style: TextStyle(color: Colors.black),),
+                          Text('tank(high)',style: TextStyle(color: Colors.black)),
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: Colors.blueGrey,
+                          color: Colors.indigo.shade50,
                           border: Border(
                             top: BorderSide(width: 1),
                             bottom: BorderSide(width: 1),
@@ -249,16 +249,16 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                   Expanded(
                     child: Container(
                       width: double.infinity,
-                      height: 60,
+                      height: 50,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Sump',style: TextStyle(color: Colors.white),),
-                          Text('tank(low)',style: TextStyle(color: Colors.white)),
+                          Text('Sump',style: TextStyle(color: Colors.black),),
+                          Text('tank(low)',style: TextStyle(color: Colors.black)),
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: Colors.blueGrey,
+                          color: Colors.indigo.shade50,
                           border: Border(
                             top: BorderSide(width: 1),
                             bottom: BorderSide(width: 1),
@@ -294,7 +294,7 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                                     border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1))
                                 ),
                                 width: double.infinity,
-                                height: 60,
+                                height: 50,
                                 child: Center(
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -317,7 +317,7 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                                       border: Border(right: BorderSide(width: 1))
                                   ),
                                   width: double.infinity,
-                                  height: 60,
+                                  height: 50,
                                   child: MyDropDown(initialValue: configPvd.sourcePumpUpdated[index]['waterSource'], itemList: configPvd.waterSource, pvdName: 'editWaterSource_sp', index: index)
                               ),
                             ),
@@ -327,9 +327,9 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                                     border: Border(right: BorderSide(width: 1))
                                 ),
                                 width: double.infinity,
-                                height: 60,
+                                height: 50,
                                 child: (configPvd.totalWaterMeter == 0 && configPvd.sourcePumpUpdated[index]['waterMeter'].isEmpty) ?
-                                Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                notAvailable :
                                 Checkbox(
                                     value: configPvd.sourcePumpUpdated[index]['waterMeter'].isEmpty ? false : true,
                                     onChanged: (value){
@@ -343,7 +343,7 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                                     border: Border(right: BorderSide(width: 1))
                                 ),
                                 width: double.infinity,
-                                height: 60,
+                                height: 50,
                                 child: Checkbox(
                                     value: configPvd.sourcePumpUpdated[index]['oro_pump'],
                                     onChanged: (value){
@@ -357,9 +357,9 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                                       border: Border(right: BorderSide(width: 1))
                                   ),
                                   width: double.infinity,
-                                  height: 60,
+                                  height: 50,
                                   child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
-                                  Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                  notAvailable :
                                   MyDropDown(initialValue: configPvd.sourcePumpUpdated[index]['relayCount'], itemList: ['1','2','3','4'], pvdName: 'editRelayCount_sp', index: index)
                               ),
                             ),
@@ -369,9 +369,9 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                                     border: Border(right: BorderSide(width: 1))
                                 ),
                                 width: double.infinity,
-                                height: 60,
+                                height: 50,
                                 child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
-                                Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                notAvailable :
                                 Checkbox(
                                     value: configPvd.sourcePumpUpdated[index]['TopTankHigh'].isEmpty ? false : true,
                                     onChanged: (value){
@@ -385,9 +385,9 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                                     border: Border(right: BorderSide(width: 1))
                                 ),
                                 width: double.infinity,
-                                height: 60,
+                                height: 50,
                                 child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
-                                Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                notAvailable :
                                 Checkbox(
                                     value: configPvd.sourcePumpUpdated[index]['TopTankLow'].isEmpty ? false : true,
                                     onChanged: (value){
@@ -401,9 +401,9 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                                     border: Border(right: BorderSide(width: 1))
                                 ),
                                 width: double.infinity,
-                                height: 60,
+                                height: 50,
                                 child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
-                                Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                notAvailable :
                                 Checkbox(
                                     value: configPvd.sourcePumpUpdated[index]['SumpTankHigh'].isEmpty ? false : true,
                                     onChanged: (value){
@@ -417,9 +417,9 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                                     border: Border(right: BorderSide(width: 1))
                                 ),
                                 width: double.infinity,
-                                height: 60,
+                                height: 50,
                                 child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
-                                Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                notAvailable :
                                 Checkbox(
                                     value: configPvd.sourcePumpUpdated[index]['SumpTankLow'].isEmpty ? false : true,
                                     onChanged: (value){
@@ -536,7 +536,7 @@ Widget configButtons(
       bool? local
     }){
   return Container(
-    height: 60,
+    height: 50,
     color: Colors.white,
     child: Center(
       child: Row(
@@ -587,7 +587,7 @@ Widget configButtons(
                 splashColor: Colors.grey,
                 color: Colors.black,
                 style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Colors.blueGrey)
+                    backgroundColor: MaterialStateProperty.all(Colors.indigo.shade50)
                 ),
                 highlightColor: myTheme.primaryColor,
                 onPressed: addBatchButtonFunction,
@@ -620,3 +620,5 @@ Widget configButtons(
     ),
   );
 }
+
+Widget notAvailable = Center(child: Text('N/A',style: TextStyle(fontSize: 12,color: Colors.black54),));

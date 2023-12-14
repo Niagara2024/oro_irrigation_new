@@ -38,8 +38,11 @@ class _StartPageConfigMakerState extends State<StartPageConfigMaker> {
             },
             child: InkWell(
               onTap: (){
-                print(jsonEncode(configPvd.oldData));
-                configPvd.fetchFromServer();
+                configPvd.clearConfig();
+                configPvd.fetchAll(configPvd.serverData,true);
+                // configPvd.clearConfig();
+                // print(jsonEncode(configPvd.oldData));
+                // configPvd.fetchFromServer();
               },
               child: Container(
                 width: 250,
@@ -56,7 +59,7 @@ class _StartPageConfigMakerState extends State<StartPageConfigMaker> {
                         width: 100,
                         height: 100,
                         child: Image.asset('assets/images/data-transfer.png')),
-                    Text('Get Data',style: TextStyle(fontSize: 20,color: isHovered == false ? Colors.black : Colors.white,),),
+                    Text('New Config',style: TextStyle(fontSize: 20,color: isHovered == false ? Colors.black : Colors.white,),),
                   ],
                 ),
               ),

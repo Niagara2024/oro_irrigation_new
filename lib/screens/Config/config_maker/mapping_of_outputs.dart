@@ -139,6 +139,9 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                       Column(
                         children: getIrrigationPump(irrigationPump(configPvd),configPvd),
                       ),
+                      Column(
+                        children: getAgitator(agitator(configPvd),configPvd),
+                      ),
                       SizedBox(height: 150,),
                     ],
                   ),
@@ -545,6 +548,81 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
     }
     return widgetList;
   }
+  List<Widget> getAgitator(List<Map<String,dynamic>> myList,ConfigMakerProvider configPvd){
+    List<Widget> widgetList = [];
+    for(var i = 0;i < myList.length;i++){
+      if(myList[i]['map'].length != 0){
+        widgetList.add(
+            Container(
+              width: double.infinity,
+              height: 40,
+              child: Center(
+                child: Text('${myList[i]['name']}',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),),
+              ),
+            )
+        );
+      }
+      for(var j = 0;j < myList[i]['map'].length;j++){
+        widgetList.add(
+            Container(
+              width: double.infinity,
+              height: 40,
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(width: 1)),
+                color: j % 2 == 0 ? Colors.white : Colors.white70,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(child: Text('${myList[i]['map'][j]['name']} ')),
+                      )
+                  ),
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: ['-','ORO RTU','ORO Smart RTU','ORO Switch'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                        ),
+                      )
+                  ),
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(
+                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['rfNo']}', itemList: getrefNoForOthers(configPvd,'${myList[i]['map'][j]['rtu']}'), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rfNo', index: -1),
+                        ),
+                      )
+                  ),
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(
+                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['output']}', itemList: getOutPut(configPvd,'${myList[i]['map'][j]['rtu']}','${myList[i]['map'][j]['rfNo']}','${myList[i]['map'][j]['output']}',myList[i]['map'][j]['count']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/output', index: -1),
+                        ),
+                      )
+                  ),
+                ],
+              ),
+            )
+        );
+      }
+    }
+    return widgetList;
+  }
   List<String> getrefNoForOthers(ConfigMakerProvider configPvd,String title){
     List<String> myList = ['-'];
     if(title == 'ORO Smart RTU'){
@@ -689,6 +767,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
           }
         }
       }
+      filterList.addAll(filterOutPut(configPvd.totalAgitator,rtu,rf,output));
       for(var i in configPvd.centralFiltrationUpdated){
         filterList.addAll(filterOutPut(i['filterConnection'],rtu,rf,output));
         filterList.addAll(filterOutPut([i['dv']],rtu,rf,output));
@@ -742,7 +821,6 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
               'rtu' :  configPvd.irrigationLines[i]['valveConnection'][valve]['rtu'],
               'rfNo' : configPvd.irrigationLines[i]['valveConnection'][valve]['rfNo'],
               'output' : configPvd.irrigationLines[i]['valveConnection'][valve]['output'],
-              'c-type' : 'N/A'
             }
         );
       }
@@ -758,7 +836,6 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
               'rtu' :  configPvd.irrigationLines[i]['main_valveConnection'][mainValve]['rtu'],
               'rfNo' : configPvd.irrigationLines[i]['main_valveConnection'][mainValve]['rfNo'],
               'output' : configPvd.irrigationLines[i]['main_valveConnection'][mainValve]['output'],
-              'c-type' : 'N/A'
             }
         );
       }
@@ -774,7 +851,6 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
               'rtu' :  configPvd.irrigationLines[i]['foggerConnection'][fogger]['rtu'],
               'rfNo' : configPvd.irrigationLines[i]['foggerConnection'][fogger]['rfNo'],
               'output' : configPvd.irrigationLines[i]['foggerConnection'][fogger]['output'],
-              'c-type' : 'N/A'
             }
         );
       }
@@ -790,13 +866,12 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
               'rtu' :  configPvd.irrigationLines[i]['fanConnection'][fan]['rtu'],
               'rfNo' : configPvd.irrigationLines[i]['fanConnection'][fan]['rfNo'],
               'output' : configPvd.irrigationLines[i]['fanConnection'][fan]['output'],
-              'c-type' : 'N/A'
             }
         );
       }
       if(configPvd.irrigationLines[i]['Local_dosing_site'] == true){
         localDosing : for(var ld = 0;ld < configPvd.localDosingUpdated.length;ld++){
-          if(configPvd.localDosingUpdated[ld]['lineAutoIncrement'] == configPvd.irrigationLines[i]['autoIncrement']){
+          if(configPvd.localDosingUpdated[ld]['sNo'] == configPvd.irrigationLines[i]['sNo']){
             for(var injector = 0;injector < configPvd.localDosingUpdated[ld]['injector'].length;injector++){
               myList[i]['map'].add(
                   {
@@ -809,7 +884,6 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                     'rtu' :  configPvd.localDosingUpdated[ld]['injector'][injector]['rtu'],
                     'rfNo' : configPvd.localDosingUpdated[ld]['injector'][injector]['rfNo'],
                     'output' : configPvd.localDosingUpdated[ld]['injector'][injector]['output'],
-                    'c-type' : 'N/A'
                   }
               );
             }
@@ -825,7 +899,6 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                     'rtu' :  configPvd.localDosingUpdated[ld]['boosterConnection'][boosterPump]['rtu'],
                     'rfNo' : configPvd.localDosingUpdated[ld]['boosterConnection'][boosterPump]['rfNo'],
                     'output' : configPvd.localDosingUpdated[ld]['boosterConnection'][boosterPump]['output'],
-                    'c-type' : 'N/A'
                   }
               );
             }
@@ -835,7 +908,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
       }
       if(configPvd.irrigationLines[i]['local_filtration_site'] == true){
         localFiltration : for(var ld = 0;ld < configPvd.localFiltrationUpdated.length;ld++){
-          if(configPvd.localFiltrationUpdated[ld]['lineAutoIncrement'] == configPvd.irrigationLines[i]['autoIncrement']){
+          if(configPvd.localFiltrationUpdated[ld]['sNo'] == configPvd.irrigationLines[i]['sNo']){
             for(var filter = 0;filter < configPvd.localFiltrationUpdated[ld]['filterConnection'].length;filter++){
               myList[i]['map'].add(
                   {
@@ -848,7 +921,6 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                     'rtu' :  configPvd.localFiltrationUpdated[ld]['filterConnection'][filter]['rtu'],
                     'rfNo' : configPvd.localFiltrationUpdated[ld]['filterConnection'][filter]['rfNo'],
                     'output' : configPvd.localFiltrationUpdated[ld]['filterConnection'][filter]['output'],
-                    'c-type' : 'N/A'
                   }
               );
             }
@@ -864,7 +936,6 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                     'rtu' :  configPvd.localFiltrationUpdated[ld]['dv']['rtu'],
                     'rfNo' : configPvd.localFiltrationUpdated[ld]['dv']['rfNo'],
                     'output' : configPvd.localFiltrationUpdated[ld]['dv']['output'],
-                    'c-type' : 'N/A'
                   }
               );
             }
@@ -898,7 +969,6 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
               'rtu' :  configPvd.centralDosingUpdated[i]['injector'][injector]['rtu'],
               'rfNo' : configPvd.centralDosingUpdated[i]['injector'][injector]['rfNo'],
               'output' : configPvd.centralDosingUpdated[i]['injector'][injector]['output'],
-              'c-type' : 'N/A'
             }
         );
       }
@@ -914,7 +984,6 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
               'rtu' :  configPvd.centralDosingUpdated[i]['boosterConnection'][boosterPump]['rtu'],
               'rfNo' : configPvd.centralDosingUpdated[i]['boosterConnection'][boosterPump]['rfNo'],
               'output' : configPvd.centralDosingUpdated[i]['boosterConnection'][boosterPump]['output'],
-              'c-type' : 'N/A'
             }
         );
       }
@@ -942,7 +1011,6 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
               'rtu' :  configPvd.centralFiltrationUpdated[i]['filterConnection'][filter]['rtu'],
               'rfNo' : configPvd.centralFiltrationUpdated[i]['filterConnection'][filter]['rfNo'],
               'output' : configPvd.centralFiltrationUpdated[i]['filterConnection'][filter]['output'],
-              'c-type' : 'N/A'
             }
         );
       }
@@ -958,7 +1026,6 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
               'rtu' :  configPvd.centralFiltrationUpdated[i]['dv']['rtu'],
               'rfNo' : configPvd.centralFiltrationUpdated[i]['dv']['rfNo'],
               'output' : configPvd.centralFiltrationUpdated[i]['dv']['output'],
-              'c-type' : 'N/A'
             }
         );
       }
@@ -987,7 +1054,6 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
               'rtu' :  configPvd.sourcePumpUpdated[i]['pumpConnection']['rtu'],
               'rfNo' : configPvd.sourcePumpUpdated[i]['pumpConnection']['rfNo'],
               'output' : configPvd.sourcePumpUpdated[i]['pumpConnection']['output'],
-              'c-type' : configPvd.sourcePumpUpdated[i]['pumpConnection']['current_selection']
             }
         );
       }
@@ -1006,7 +1072,6 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                 'rtu' :  configPvd.sourcePumpUpdated[i]['on']['rtu'],
                 'rfNo' : configPvd.sourcePumpUpdated[i]['on']['rfNo'],
                 'output' : configPvd.sourcePumpUpdated[i]['on']['output'],
-                'c-type' : configPvd.sourcePumpUpdated[i]['on']['current_selection']
               }
           );
         }
@@ -1023,7 +1088,6 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                 'rtu' :  configPvd.sourcePumpUpdated[i]['off']['rtu'],
                 'rfNo' : configPvd.sourcePumpUpdated[i]['off']['rfNo'],
                 'output' : configPvd.sourcePumpUpdated[i]['off']['output'],
-                'c-type' : configPvd.sourcePumpUpdated[i]['off']['current_selection']
               }
           );
         }
@@ -1040,7 +1104,6 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                 'rtu' :  configPvd.sourcePumpUpdated[i]['scr']['rtu'],
                 'rfNo' : configPvd.sourcePumpUpdated[i]['scr']['rfNo'],
                 'output' : configPvd.sourcePumpUpdated[i]['scr']['output'],
-                'c-type' : configPvd.sourcePumpUpdated[i]['scr']['current_selection']
               }
           );
         }
@@ -1057,7 +1120,6 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                 'rtu' :  configPvd.sourcePumpUpdated[i]['ecr']['rtu'],
                 'rfNo' : configPvd.sourcePumpUpdated[i]['ecr']['rfNo'],
                 'output' : configPvd.sourcePumpUpdated[i]['ecr']['output'],
-                'c-type' : configPvd.sourcePumpUpdated[i]['ecr']['current_selection']
               }
           );
         }
@@ -1163,6 +1225,32 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
         }
       }
     }
+    return myList;
+  }
+  List<Map<String,dynamic>> agitator(ConfigMakerProvider configPvd){
+    List<Map<String,dynamic>> myList = [];
+    myList.add(
+        {
+          'name' : 'Agitator',
+          'map' : [],
+        }
+    );
+    for(var i = 0;i < configPvd.totalAgitator.length;i++){
+      myList[0]['map'].add(
+          {
+            'name' : 'AG ${i+1}',
+            'type' : 'm_o_agitator',
+            'agitator' : i,
+            'count' : i,
+            'connection' : 'totalAgitator',
+            'sNo' :  configPvd.totalAgitator[i]['sNo'],
+            'rtu' :  configPvd.totalAgitator[i]['rtu'],
+            'rfNo' : configPvd.totalAgitator[i]['rfNo'],
+            'output' : configPvd.totalAgitator[i]['output'],
+          }
+      );
+    }
+    print('myLIST : $myList');
     return myList;
   }
 

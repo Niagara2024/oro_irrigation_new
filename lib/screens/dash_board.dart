@@ -171,8 +171,6 @@ class _DashboardWideState extends State<DashboardWide> {
   double groupAlignment = -1.0;
   Calendar calendarView = Calendar.day;
 
-
-
   @override
   Widget build(BuildContext context)
   {
@@ -194,24 +192,7 @@ class _DashboardWideState extends State<DashboardWide> {
           const SizedBox(width: 20,),
           const Icon(Icons.notifications_none, color: Colors.white,),
           const SizedBox(width: 30,),
-        ] :
-        _selectedIndex==1? [
-          ActionChip(
-            tooltip: 'Create new Product',
-            shape: const StadiumBorder(side: BorderSide()),
-            avatar: const Icon(Icons.add_card, color: Colors.white),
-            label: const Text('New Product', style: TextStyle(color: Colors.white),),
-            backgroundColor: myTheme.primaryColor,
-            elevation: 6.0,
-            shadowColor: Colors.grey[60],
-            padding: const EdgeInsets.all(5.0),
-            onPressed: () async {
-              Navigator.push(context, MaterialPageRoute(builder: (context) =>  const AllEntry()),);
-            },
-          ),
-          const SizedBox(width: 20,),
-        ] :
-        [],
+        ] : [],
       ) :
       widget.userType =='2'?
       AppBar(
@@ -303,39 +284,62 @@ class _DashboardWideState extends State<DashboardWide> {
                 }
               });
             },
-            destinations: <NavigationRailDestination>[
+            destinations: widget.userType == '1'? <NavigationRailDestination>[
               const NavigationRailDestination(
-                padding: EdgeInsets.only(top: 10),
+                padding: EdgeInsets.only(top: 5),
                 icon: Icon(Icons.home_outlined),
                 selectedIcon: Icon(Icons.home_outlined, color: Color(0xFF0D5D9A),),
                 label: Text('Home'),
               ),
-              widget.userType =='3'? const NavigationRailDestination(
-                padding: EdgeInsets.only(top: 5),
-                icon: Icon(Icons.group_outlined),
-                selectedIcon: Icon(Icons.group_outlined, color: Color(0xFF0D5D9A),),
-                label: Text('My Product'),
-              ) :
               const NavigationRailDestination(
-                padding: EdgeInsets.only(top: 5),
                 icon: Icon(Icons.add_chart),
                 selectedIcon: Icon(Icons.add_chart, color: Color(0xFF0D5D9A),),
                 label: Text('Product'),
               ),
               const NavigationRailDestination(
-                padding: EdgeInsets.only(top: 5),
+                icon: Icon(Icons.topic_outlined),
+                selectedIcon: Icon(Icons.topic_outlined, color: Color(0xFF0D5D9A),),
+                label: Text('Master'),
+              ),
+              const NavigationRailDestination(
                 icon: Icon(Icons.settings_outlined),
                 selectedIcon: Icon(Icons.settings_outlined, color: Color(0xFF0D5D9A),),
                 label: Text('My Preference'),
               ),
               const NavigationRailDestination(
-                padding: EdgeInsets.only(top: 5),
                 icon: Icon(Icons.info_outline),
                 selectedIcon: Icon(Icons.info_outline, color: Color(0xFF0D5D9A),),
                 label: Text('App Info'),
               ),
               const NavigationRailDestination(
-                padding: EdgeInsets.only(top: 5, bottom: 70),
+                icon: Icon(Icons.help_outline),
+                selectedIcon: Icon(Icons.help_outline, color: Color(0xFF0D5D9A),),
+                label: Text('Help & Support'),
+              ),
+            ]:
+            <NavigationRailDestination>[
+              const NavigationRailDestination(
+                padding: EdgeInsets.only(top: 5),
+                icon: Icon(Icons.home_outlined),
+                selectedIcon: Icon(Icons.home_outlined, color: Color(0xFF0D5D9A),),
+                label: Text('Home'),
+              ),
+              const NavigationRailDestination(
+                icon: Icon(Icons.add_chart),
+                selectedIcon: Icon(Icons.add_chart, color: Color(0xFF0D5D9A),),
+                label: Text('Product'),
+              ),
+              const NavigationRailDestination(
+                icon: Icon(Icons.settings_outlined),
+                selectedIcon: Icon(Icons.settings_outlined, color: Color(0xFF0D5D9A),),
+                label: Text('My Preference'),
+              ),
+              const NavigationRailDestination(
+                icon: Icon(Icons.info_outline),
+                selectedIcon: Icon(Icons.info_outline, color: Color(0xFF0D5D9A),),
+                label: Text('App Info'),
+              ),
+              const NavigationRailDestination(
                 icon: Icon(Icons.help_outline),
                 selectedIcon: Icon(Icons.help_outline, color: Color(0xFF0D5D9A),),
                 label: Text('Help & Support'),
@@ -344,10 +348,10 @@ class _DashboardWideState extends State<DashboardWide> {
           ),
           Expanded(
             child: _selectedIndex == 0 ?
-            widget.userType =='3'? CustomerHome(customerID: widget.userID,): const HomePage() :
-            _selectedIndex == 1 ?
-            ProductInventory(userName: widget.userName) :
-            _selectedIndex == 2 ? const MyPreference(userID: 1,) : const MyWebView(),
+            widget.userType =='3'? CustomerHome(customerID: widget.userID, type: 0, customerName: '',) : const HomePage() :
+            _selectedIndex == 1 ? ProductInventory(userName: widget.userName) :
+            _selectedIndex == 2 ? widget.userType =='1'? const AllEntry() : const MyPreference(userID: 1,) : const MyWebView(),
+
           ),
         ],
       ),

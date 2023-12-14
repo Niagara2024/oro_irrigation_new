@@ -3,7 +3,7 @@
 //     final conditionModel = conditionModelFromJson(jsonString);
 
 import 'dart:convert';
- 
+
 import 'package:flutter/material.dart';
 
 ConditionModel conditionModelFromJson(String str) =>
@@ -23,88 +23,130 @@ class ConditionModel {
   });
 
   factory ConditionModel.fromJson(Map<String, dynamic> json) => ConditionModel(
-        code: json["code"],
-        message: json["message"],
-        data: json["data"] == null ? null : Data.fromJson(json["data"]),
-      );
+    code: json["code"],
+    message: json["message"],
+    data: json["data"] == null ? null : Data.fromJson(json["data"]),
+  );
 
   Map<String, dynamic> toJson() => {
-        "code": code,
-        "message": message,
-        "data": data?.toJson(),
-      };
+    "code": code,
+    "message": message,
+    "data": data?.toJson(),
+  };
 }
 
 class Data {
   List<String>? dropdown;
   List<UserNames>? program;
   List<UserNames>? analogSensor;
+  List<UserNames>? moistureSensor;
+  List<UserNames>? levelSensor;
   List<UserNames>? waterMeter;
   List<UserNames>? contact;
   List<UserNames>? condition;
-  List<ConditionLibrary>? conditionLibrary;
+  // List<ConditionLibrary>? conditionLibrary;
+  List<ConditionLibrary>? conditionProgram;
+  List<ConditionLibrary>? conditionMoisture;
+  List<ConditionLibrary>? conditionLevel;
+
 
   Data({
     this.dropdown,
     this.program,
     this.analogSensor,
+    this.moistureSensor,
+    this.levelSensor,
     this.waterMeter,
     this.contact,
     this.condition,
-    this.conditionLibrary,
+    // this.conditionLibrary,
+    this.conditionProgram,
+    this.conditionMoisture,
+    this.conditionLevel,
   });
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
-        dropdown: json["dropdown"] == null
-            ? []
-            : List<String>.from(json["dropdown"]!.map((x) => x)),
-        program: json["program"] == null
-            ? []
-            : List<UserNames>.from(
-                json["program"]!.map((x) => UserNames.fromJson(x))),
-        analogSensor: json["analogSensor"] == null
-            ? []
-            : List<UserNames>.from(
-                json["analogSensor"]!.map((x) => UserNames.fromJson(x))),
-        waterMeter: json["waterMeter"] == null
-            ? []
-            : List<UserNames>.from(
-                json["waterMeter"]!.map((x) => UserNames.fromJson(x))),
-        contact: json["contact"] == null
-            ? []
-            : List<UserNames>.from(
-                json["contact"]!.map((x) => UserNames.fromJson(x))),
-        condition: json["condition"] == null
-            ? []
-            : List<UserNames>.from(
-                json["condition"]!.map((x) => UserNames.fromJson(x))),
-        conditionLibrary: json["conditionLibrary"] == null
-            ? []
-            : List<ConditionLibrary>.from(json["conditionLibrary"]!
-                .map((x) => ConditionLibrary.fromJson(x))),
-      );
+    dropdown: json['default']["dropdown"] == null
+        ? []
+        : List<String>.from(json['default']["dropdown"]!.map((x) => x)),
+    program: json['default']["program"] == null
+        ? []
+        : List<UserNames>.from(
+        json['default']["program"]!.map((x) => UserNames.fromJson(x))),
+    analogSensor: json['default']["analogSensor"] == null
+        ? []
+        : List<UserNames>.from(
+        json['default']["analogSensor"]!.map((x) => UserNames.fromJson(x))),
+
+    moistureSensor: json['default']["moistureSensor"] == null
+        ? []
+        : List<UserNames>.from(json['default']["moistureSensor"]!
+        .map((x) => UserNames.fromJson(x))),
+
+    levelSensor: json['default']["levelSensor"] == null
+        ? []
+        : List<UserNames>.from(json['default']["levelSensor"]!
+        .map((x) => UserNames.fromJson(x))),
+    waterMeter: json['default']["waterMeter"] == null
+        ? []
+        : List<UserNames>.from(
+        json['default']["waterMeter"]!.map((x) => UserNames.fromJson(x))),
+    contact: json['default']["contact"] == null
+        ? []
+        : List<UserNames>.from(
+        json['default']["contact"]!.map((x) => UserNames.fromJson(x))),
+    condition: json['default']["condition"] == null
+        ? []
+        : List<UserNames>.from(
+        json['default']["condition"]!.map((x) => UserNames.fromJson(x))),
+
+    // conditionLibrary: json["conditionLibrary"]["program"] == null
+    //     ? []
+    //     : List<ConditionLibrary>.from(json["conditionLibrary"]["program"]!
+    //         .map((x) => ConditionLibrary.fromJson(x))),
+    conditionProgram: json["conditionLibrary"]["program"] == null
+        ? []
+        : List<ConditionLibrary>.from(json["conditionLibrary"]["program"]!
+        .map((x) => ConditionLibrary.fromJson(x))),
+    conditionMoisture: json["conditionLibrary"]["moisture"] == null
+        ? []
+        : List<ConditionLibrary>.from(json["conditionLibrary"]["moisture"]!
+        .map((x) => ConditionLibrary.fromJson(x))),
+    conditionLevel: json["conditionLibrary"]["level"] == null
+        ? []
+        : List<ConditionLibrary>.from(json["conditionLibrary"]["level"]!
+        .map((x) => ConditionLibrary.fromJson(x))),
+  );
 
   Map<String, dynamic> toJson() => {
-        "dropdown":
-            dropdown == null ? [] : List<dynamic>.from(dropdown!.map((x) => x)),
-        "program":
-            program == null ? [] : List<dynamic>.from(program!.map((x) => x)),
-        "analogSensor": analogSensor == null
-            ? []
-            : List<dynamic>.from(analogSensor!.map((x) => x)),
-        "waterMeter": waterMeter == null
-            ? []
-            : List<dynamic>.from(waterMeter!.map((x) => x)),
-        "contact": contact == null
-            ? []
-            : List<dynamic>.from(contact!.map((x) => x.toJson())),
-        "condition": condition == null
-            ? []
-            : List<dynamic>.from(condition!.map((x) => x.toJson())),
-        "conditionLibrary": conditionLibrary == null
-            ? []
-            : List<dynamic>.from(conditionLibrary!.map((x) => x.toJson())),
-      };
+    "dropdown":
+    dropdown == null ? [] : List<dynamic>.from(dropdown!.map((x) => x)),
+    "program":
+    program == null ? [] : List<dynamic>.from(program!.map((x) => x)),
+    "analogSensor": analogSensor == null
+        ? []
+        : List<dynamic>.from(analogSensor!.map((x) => x)),
+
+    "moistureSensor": moistureSensor == null
+        ? []
+        : List<dynamic>.from(moistureSensor!.map((x) => x)),
+
+    "levelSensor": levelSensor == null
+        ? []
+        : List<dynamic>.from(levelSensor!.map((x) => x)),
+    "waterMeter": waterMeter == null
+        ? []
+        : List<dynamic>.from(waterMeter!.map((x) => x)),
+    "contact": contact == null
+        ? []
+        : List<dynamic>.from(contact!.map((x) => x.toJson())),
+    "condition": condition == null
+        ? []
+        : List<dynamic>.from(condition!.map((x) => x.toJson())),
+    // "conditionLibrary": conditionLibrary == null
+    //     ? []
+    //     : List<dynamic>.from(conditionLibrary!.map((x) => x.toJson())),
+  };
 }
 
 class UserNames {
@@ -121,18 +163,18 @@ class UserNames {
   });
 
   factory UserNames.fromJson(Map<String, dynamic> json) => UserNames(
-        sNo: json["sNo"],
-        id: json["id"],
-        location: json["location"],
-        name: json["name"],
-      );
+    sNo: json["sNo"],
+    id: json["id"],
+    location: json["location"],
+    name: json["name"],
+  );
 
   Map<String, dynamic> toJson() => {
-        "sNo": sNo,
-        "id": id,
-        "location": location,
-        "name": name,
-      };
+    "sNo": sNo,
+    "id": id,
+    "location": location,
+    "name": name,
+  };
 }
 
 class ConditionLibrary {
@@ -196,24 +238,24 @@ class ConditionLibrary {
       );
 
   Map<String, dynamic> toJson() => {
-        "sNo": sNo,
-        "id": id,
-        "location": location,
-        "name": name,
-        "enable": enable,
-        "state": state,
-        "duration": duration,
-        "conditionIsTrueWhen": conditionIsTrueWhen,
-        "fromTime": fromTime,
-        "untilTime": untilTime,
-        "notification": notification,
-        "usedByProgram": usedByProgram,
-        "program": usedByProgram,
-        "zone": zone,
-        "dropdown1": dropdown1,
-        "dropdown2": dropdown2,
-        "dropdownValue": dropdownValue,
-      };
+    "sNo": sNo,
+    "id": id,
+    "location": location,
+    "name": name,
+    "enable": enable,
+    "state": state,
+    "duration": duration,
+    "conditionIsTrueWhen": conditionIsTrueWhen,
+    "fromTime": fromTime,
+    "untilTime": untilTime,
+    "notification": notification,
+    "usedByProgram": usedByProgram,
+    "program": usedByProgram,
+    "zone": zone,
+    "dropdown1": dropdown1,
+    "dropdown2": dropdown2,
+    "dropdownValue": dropdownValue,
+  };
 
   String toMqttformat() {
     String enablevalue = enable! ? '1' : '0';

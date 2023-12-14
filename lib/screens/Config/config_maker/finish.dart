@@ -1,4 +1,5 @@
-import 'dart:convert';
+import 'dart:convert' as convert;
+import 'dart:html' as html;
 
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_browser_client.dart';
@@ -28,10 +29,10 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
       child: Center(
         child: ElevatedButton(
           onPressed: ()async{
+            print('userId : ${widget.customerID}');
+            print('createUser : ${widget.customerID}');
+            print('controllerId : ${widget.controllerId}');
             try{
-              print(widget.userId);
-              print(widget.customerID);
-              print(widget.controllerId);
               configPvd.sendData();
               configPvd.configFinish();
               var body = {
@@ -113,7 +114,7 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
               var response = await service.postRequest('createUserConfigMaker', body);
 
               //print(configPvd.sendData());
-              var jsonData = jsonDecode(response.body);
+              var jsonData = convert.jsonDecode(response.body);
               print('response code : ${jsonData['code']}');
               print('response data : $jsonData');
             }catch(e){
@@ -121,7 +122,7 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
             }
             CreateJsonFile store = CreateJsonFile();
             // store.writeDataInJsonFile('configFile', configPvd.sendData());
-            MqttWebClient().publishMessage('AppToFirmware/${widget.controllerId}', jsonEncode(configPvd.sendData()));
+            MqttWebClient().publishMessage('AppToFirmware/${widget.controllerId}', convert.jsonEncode(configPvd.sendData()));
           },
           child: Text('Send'),
         ),

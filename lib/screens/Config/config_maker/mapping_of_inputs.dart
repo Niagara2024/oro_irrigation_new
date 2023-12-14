@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -1115,11 +1117,14 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
       for(var i in configPvd.centralFiltrationUpdated){
         filterList.addAll(filterInPut([i['pressureIn']],rtu,rf,input));
         filterList.addAll(filterInPut([i['pressureOut']],rtu,rf,input));
+        filterList.addAll(filterInPut([i['pressureSwitch']],rtu,rf,input));
+        filterList.addAll(filterInPut([i['diffPressureSensor']],rtu,rf,input));
       }
 
       for(var i in configPvd.centralDosingUpdated){
         filterList.addAll(filterInPut(i['ecConnection'],rtu,rf,input));
         filterList.addAll(filterInPut(i['phConnection'],rtu,rf,input));
+        filterList.addAll(filterInPut([i['pressureSwitch']],rtu,rf,input));
         for(var j in i['injector']){
           if(j['dosingMeter'].isNotEmpty){
             filterList.addAll(filterInPut([j['dosingMeter']],rtu,rf,input));
@@ -1129,12 +1134,15 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
       for(var i in configPvd.irrigationLines){
         filterList.addAll(filterInPut(i['moistureSensorConnection'],rtu,rf,input));
         filterList.addAll(filterInPut(i['levelSensorConnection'],rtu,rf,input));
+        filterList.addAll(filterInPut([i['pressureIn']],rtu,rf,input));
+        filterList.addAll(filterInPut([i['pressureOut']],rtu,rf,input));
       }
       filterList.addAll(filterInPut(configPvd.totalAnalogSensor,rtu,rf,input));
       filterList.addAll(filterInPut(configPvd.totalContact,rtu,rf,input));
       for(var i in configPvd.localDosingUpdated){
         filterList.addAll(filterInPut(i['ecConnection'],rtu,rf,input));
         filterList.addAll(filterInPut(i['phConnection'],rtu,rf,input));
+        filterList.addAll(filterInPut([i['pressureSwitch']],rtu,rf,input));
         for(var j in i['injector']){
           if(j['dosingMeter'].isNotEmpty){
             filterList.addAll(filterInPut([j['dosingMeter']],rtu,rf,input));
@@ -1144,6 +1152,9 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
       for(var i in configPvd.localFiltrationUpdated){
         filterList.addAll(filterInPut([i['pressureIn']],rtu,rf,input));
         filterList.addAll(filterInPut([i['pressureOut']],rtu,rf,input));
+        filterList.addAll(filterInPut([i['pressureSwitch']],rtu,rf,input));
+        filterList.addAll(filterInPut([i['diffPressureSensor']],rtu,rf,input));
+
       }
     }
     print('filter : ${filterList}');
@@ -1248,7 +1259,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
 
       if(configPvd.irrigationLines[i]['Local_dosing_site'] == true){
         localDosing : for(var ld = 0;ld < configPvd.localDosingUpdated.length;ld++){
-          if(configPvd.localDosingUpdated[ld]['lineAutoIncrement'] == configPvd.irrigationLines[i]['autoIncrement']){
+          if(configPvd.localDosingUpdated[ld]['sNo'] == configPvd.irrigationLines[i]['sNo']){
             for(var ec = 0;ec < configPvd.localDosingUpdated[ld]['ecConnection'].length;ec++){
               myList[i]['map'].add(
                   {
@@ -1299,13 +1310,29 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
                 );
               }
             }
+            if(configPvd.localDosingUpdated[ld]['pressureSwitch'].isNotEmpty){
+              myList[i]['map'].add(
+                  {
+                    'name' : 'press switch',
+                    'type' : 'm_i_localDosing',
+                    'line' : i,
+                    'count' : -1,
+                    'connection' : 'pressureSwitch',
+                    'sNo' :  configPvd.localDosingUpdated[ld]['pressureSwitch']['sNo'],
+                    'rtu' :  configPvd.localDosingUpdated[ld]['pressureSwitch']['rtu'],
+                    'rfNo' : configPvd.localDosingUpdated[ld]['pressureSwitch']['rfNo'],
+                    'input' : configPvd.localDosingUpdated[ld]['pressureSwitch']['input'],
+                    'input_type' : configPvd.localDosingUpdated[ld]['pressureSwitch']['input_type'],
+                  }
+              );
+            }
             break localDosing;
           }
         }
       }
       if(configPvd.irrigationLines[i]['local_filtration_site'] == true){
         localFiltration : for(var ld = 0;ld < configPvd.localFiltrationUpdated.length;ld++){
-          if(configPvd.localFiltrationUpdated[ld]['lineAutoIncrement'] == configPvd.irrigationLines[i]['autoIncrement']){
+          if(configPvd.localFiltrationUpdated[ld]['sNo'] == configPvd.irrigationLines[i]['sNo']){
             if(configPvd.localFiltrationUpdated[ld]['pressureIn'].isNotEmpty){
               myList[i]['map'].add(
                   {
@@ -1338,12 +1365,44 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
                   }
               );
             }
+            if(configPvd.localFiltrationUpdated[ld]['pressureSwitch'].isNotEmpty){
+              myList[i]['map'].add(
+                  {
+                    'name' : 'press switch',
+                    'type' : 'm_i_localFiltration',
+                    'line' : i,
+                    'count' : -1,
+                    'connection' : 'pressureSwitch',
+                    'sNo' :  configPvd.localFiltrationUpdated[ld]['pressureSwitch']['sNo'],
+                    'rtu' :  configPvd.localFiltrationUpdated[ld]['pressureSwitch']['rtu'],
+                    'rfNo' : configPvd.localFiltrationUpdated[ld]['pressureSwitch']['rfNo'],
+                    'input' : configPvd.localFiltrationUpdated[ld]['pressureSwitch']['input'],
+                    'input_type' : configPvd.localFiltrationUpdated[ld]['pressureSwitch']['input_type'],
+                  }
+              );
+            }
+            if(configPvd.localFiltrationUpdated[ld]['diffPressureSensor'].isNotEmpty){
+              myList[i]['map'].add(
+                  {
+                    'name' : 'D.Press sensor',
+                    'type' : 'm_i_localFiltration',
+                    'line' : i,
+                    'count' : -1,
+                    'connection' : 'diffPressureSensor',
+                    'sNo' :  configPvd.localFiltrationUpdated[ld]['diffPressureSensor']['sNo'],
+                    'rtu' :  configPvd.localFiltrationUpdated[ld]['diffPressureSensor']['rtu'],
+                    'rfNo' : configPvd.localFiltrationUpdated[ld]['diffPressureSensor']['rfNo'],
+                    'input' : configPvd.localFiltrationUpdated[ld]['diffPressureSensor']['input'],
+                    'input_type' : configPvd.localFiltrationUpdated[ld]['diffPressureSensor']['input_type'],
+                  }
+              );
+            }
 
             break localFiltration;
           }
         }
       }
-
+      print('mylist : ${jsonEncode(myList)}');
     }
     return myList;
   }
@@ -1385,6 +1444,22 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
               'rfNo' : configPvd.centralDosingUpdated[i]['phConnection'][ph]['rfNo'],
               'input' : configPvd.centralDosingUpdated[i]['phConnection'][ph]['input'],
               'input_type' : configPvd.centralDosingUpdated[i]['phConnection'][ph]['input_type'],
+            }
+        );
+      }
+      if(configPvd.centralDosingUpdated[i]['pressureSwitch'].isNotEmpty){
+        myList[i]['map'].add(
+            {
+              'name' : 'press switch',
+              'type' : 'm_i_centralDosing',
+              'site' : i,
+              'count' : -1,
+              'connection' : 'pressureSwitch',
+              'sNo' :  configPvd.centralDosingUpdated[i]['pressureSwitch']['sNo'],
+              'rtu' :  configPvd.centralDosingUpdated[i]['pressureSwitch']['rtu'],
+              'rfNo' : configPvd.centralDosingUpdated[i]['pressureSwitch']['rfNo'],
+              'input' : configPvd.centralDosingUpdated[i]['pressureSwitch']['input'],
+              'input_type' : configPvd.centralDosingUpdated[i]['pressureSwitch']['input_type'],
             }
         );
       }
@@ -1447,6 +1522,38 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
               'rfNo' : configPvd.centralFiltrationUpdated[i]['pressureOut']['rfNo'],
               'input' : configPvd.centralFiltrationUpdated[i]['pressureOut']['input'],
               'input_type' : configPvd.centralFiltrationUpdated[i]['pressureOut']['input_type'],
+            }
+        );
+      }
+      if(configPvd.centralFiltrationUpdated[i]['pressureSwitch'].isNotEmpty){
+        myList[i]['map'].add(
+            {
+              'name' : 'press switch',
+              'type' : 'm_i_centralFiltration',
+              'site' : i,
+              'count' : -1,
+              'connection' : 'pressureSwitch',
+              'sNo' :  configPvd.centralFiltrationUpdated[i]['pressureSwitch']['sNo'],
+              'rtu' :  configPvd.centralFiltrationUpdated[i]['pressureSwitch']['rtu'],
+              'rfNo' : configPvd.centralFiltrationUpdated[i]['pressureSwitch']['rfNo'],
+              'input' : configPvd.centralFiltrationUpdated[i]['pressureSwitch']['input'],
+              'input_type' : configPvd.centralFiltrationUpdated[i]['pressureSwitch']['input_type'],
+            }
+        );
+      }
+      if(configPvd.centralFiltrationUpdated[i]['diffPressureSensor'].isNotEmpty){
+        myList[i]['map'].add(
+            {
+              'name' : 'D.Press sensor',
+              'type' : 'm_i_centralFiltration',
+              'site' : i,
+              'count' : -1,
+              'connection' : 'diffPressureSensor',
+              'sNo' :  configPvd.centralFiltrationUpdated[i]['diffPressureSensor']['sNo'],
+              'rtu' :  configPvd.centralFiltrationUpdated[i]['diffPressureSensor']['rtu'],
+              'rfNo' : configPvd.centralFiltrationUpdated[i]['diffPressureSensor']['rfNo'],
+              'input' : configPvd.centralFiltrationUpdated[i]['diffPressureSensor']['input'],
+              'input_type' : configPvd.centralFiltrationUpdated[i]['diffPressureSensor']['input_type'],
             }
         );
       }
@@ -1857,8 +1964,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
             'input_type' : configPvd.totalContact[i]['input_type']
           }
       );
-
-
     }
     print('myLIST : $myList');
     return myList;

@@ -19,16 +19,18 @@ import 'mapping_of_inputs.dart';
 import 'mapping_of_outputs.dart';
 
 class ConfigMakerForWeb extends StatefulWidget {
-  const ConfigMakerForWeb({super.key, required this.userID, required this.customerID, required this.controllerId});
-  final int userID, customerID, controllerId;
+  const ConfigMakerForWeb({super.key, required this.userID, required this.customerID, required this.siteId});
+  final int userID, siteId, customerID;
 
   @override
   State<ConfigMakerForWeb> createState() => _ConfigMakerForWebState();
 }
 
 class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
-  int selectedTab = 0;
+  int selectedTab = 1;
   int hoverTab = -1;
+  @override
+
   Widget configTables(ConfigMakerProvider configPvd){
     switch(selectedTab){
       case (0):{
@@ -65,7 +67,7 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
         return  MappingOfInputsTable(configPvd: configPvd,);
       }
       case (11):{
-        return  FinishPageConfigMaker(userId: widget.userID, customerID: widget.customerID, controllerId: widget.controllerId,);
+        return  FinishPageConfigMaker(userId: widget.userID, customerID: widget.customerID, controllerId: widget.siteId,);
       }
       default : {
         Container();
@@ -124,7 +126,17 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
             height: double.infinity,
             child: Row(
               children: [
-                SizedBox(
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.indigo.shade50,
+                        Colors.white70,
+                      ],
+                    ),
+                  ),
                   width: 220,
                   height: double.infinity,
                   child: SingleChildScrollView(

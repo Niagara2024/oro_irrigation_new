@@ -172,6 +172,48 @@ class LocalFiltrationTableState extends State<LocalFiltrationTable> {
                       ),
                     ),
                   ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Pressure',style: TextStyle(color: Colors.white),),
+                          Text('Switch(${configPvd.totalPressureSwitch})',style: TextStyle(color: Colors.white),),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Diff.Press',style: TextStyle(color: Colors.white),),
+                          Text('Sensor(${configPvd.totalDiffPressureSensor})',style: TextStyle(color: Colors.white),),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
 
                 ],
               ),
@@ -267,6 +309,38 @@ class LocalFiltrationTableState extends State<LocalFiltrationTable> {
                                   value: configPvd.localFiltrationUpdated[index]['pressureOut'].isEmpty ? false : true,
                                   onChanged: (value){
                                     configPvd.localFiltrationFunctionality(['editPressureSensor_out',index,value]);
+                                  }),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border(right: BorderSide(width: 1)),
+                              ),
+                              width: double.infinity,
+                              height: 60 ,
+                              child: (configPvd.totalPressureSwitch == 0 && configPvd.localFiltrationUpdated[index]['pressureSwitch'].isEmpty) ?
+                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                              Checkbox(
+                                  value: configPvd.localFiltrationUpdated[index]['pressureSwitch'].isEmpty ? false : true,
+                                  onChanged: (value){
+                                    configPvd.localFiltrationFunctionality(['editPressureSwitch',index,value]);
+                                  }),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border(right: BorderSide(width: 1)),
+                              ),
+                              width: double.infinity,
+                              height: 60 ,
+                              child: (configPvd.totalDiffPressureSensor == 0 && configPvd.localFiltrationUpdated[index]['diffPressureSensor'].isEmpty) ?
+                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                              Checkbox(
+                                  value: configPvd.localFiltrationUpdated[index]['diffPressureSensor'].isEmpty ? false : true,
+                                  onChanged: (value){
+                                    configPvd.localFiltrationFunctionality(['editDiffPressureSensor',index,value]);
                                   }),
                             ),
                           ),

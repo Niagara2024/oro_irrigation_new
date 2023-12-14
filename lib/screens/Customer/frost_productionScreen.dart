@@ -62,57 +62,36 @@ class _ConditionUIState extends State<FrostMobUI>
     if (_frostProtectionModel.frostProtection == null) {
       return const Center(child: CircularProgressIndicator());
     } else {
-      return Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Scaffold(
-          appBar: AppBar(
-            title: const Text('Frost Protection'),
-            backgroundColor: const Color.fromARGB(255, 31, 164, 231),
-          ),
-          body: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Form(
-              key: _formKey,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 5,
-                      blurRadius: 7,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
+      return Scaffold(
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                const SizedBox(height: 16),
+                CupertinoSegmentedControl<int>(
+                  children: _children,
+                  onValueChanged: (value) {
+                    setState(() {
+                      _currentSelection = value!;
+                    });
+                  },
+                  groupValue: _currentSelection,
                 ),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 16),
-                    CupertinoSegmentedControl<int>(
-                      children: _children,
-                      onValueChanged: (value) {
-                        setState(() {
-                          _currentSelection = value!;
-                        });
-                      },
-                      groupValue: _currentSelection,
-                    ),
-                    _currentSelection == 0 ? rain() : buildFrostselection(),
-                  ],
-                ),
-              ),
+                _currentSelection == 0 ? rain() : buildFrostselection(),
+              ],
             ),
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () async {
-              setState(() {
-                updateconditions();
-              });
-            },
-            tooltip: 'Send',
-            child: const Icon(Icons.send),
-          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            setState(() {
+              updateconditions();
+            });
+          },
+          tooltip: 'Send',
+          child: const Icon(Icons.send),
         ),
       );
     }
@@ -140,6 +119,7 @@ class _ConditionUIState extends State<FrostMobUI>
                     trailing: SizedBox(
                         width: 50,
                         child: TextFormField(
+                          textAlign: TextAlign.center,
                           onChanged: (text) {
                             setState(() {
                               _currentSelection == 0

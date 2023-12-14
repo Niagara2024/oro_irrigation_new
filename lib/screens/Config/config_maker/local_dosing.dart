@@ -159,6 +159,27 @@ class _LocalDosingTableState extends State<LocalDosingTable> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          Text('Pressure',style: TextStyle(color: Colors.white),),
+                          Text('Switch(${configPvd.totalPressureSwitch})',style: TextStyle(color: Colors.white),),
+                        ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          border: Border(
+                            top: BorderSide(width: 1),
+                            bottom: BorderSide(width: 1),
+                            right: BorderSide(width: 1),
+                          )
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
                           Text('Injector',style: TextStyle(color: Colors.white),),
                           Text('(${configPvd.totalInjector})',style: TextStyle(color: Colors.white),),
                         ],
@@ -316,6 +337,22 @@ class _LocalDosingTableState extends State<LocalDosingTable> {
                                 ) : Center(
                                     child: TextFieldForFlexibleConfig(index: index, initialValue: '${configPvd.localDosingUpdated[index]['ph']}', config: configPvd, purpose: 'localDosingFunctionality/editPhSensor',)
                                 )
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border(right: BorderSide(width: 1)),
+                              ),
+                              width: double.infinity,
+                              height: (configPvd.localDosingUpdated[index]['injector'].length) * 60 ,
+                              child: (configPvd.totalPressureSwitch == 0 && configPvd.localDosingUpdated[index]['pressureSwitch'].isEmpty) ?
+                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                              Checkbox(
+                                  value: configPvd.localDosingUpdated[index]['pressureSwitch'].isEmpty ? false : true,
+                                  onChanged: (value){
+                                    configPvd.localDosingFunctionality(['editPressureSwitch',index,value]);
+                                  }),
                             ),
                           ),
                           Expanded(

@@ -380,9 +380,9 @@ class ConditionLibraryItem {
   }
 }
 
-SelectionModel selectionModelFromJson(String str) => SelectionModel.fromJson(json.decode(str));
-
-String selectionModelToJson(SelectionModel data) => json.encode(data.toJson());
+// SelectionModel selectionModelFromJson(String str) => SelectionModel.fromJson(json.decode(str));
+//
+// String selectionModelToJson(SelectionModel data) => json.encode(data.toJson());
 
 class SelectionModel {
   int? code;
@@ -416,6 +416,7 @@ class Data {
   List<NameData>? localFertilizer;
   List<NameData>? centralFilterSite;
   List<NameData>? localFilter;
+  AdditionalData? additionalData;
 
   Data({
     this.irrigationPump,
@@ -425,6 +426,7 @@ class Data {
     this.localFertilizer,
     this.centralFilterSite,
     this.localFilter,
+    this.additionalData,
   });
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
@@ -435,6 +437,7 @@ class Data {
     localFertilizer: json["localFertilizer"] == null ? [] : List<NameData>.from(json["localFertilizer"]!.map((x) => NameData.fromJson(x))),
     centralFilterSite: json["centralFilterSite"] == null ? [] : List<NameData>.from(json["centralFilterSite"]!.map((x) => NameData.fromJson(x))),
     localFilter: json["localFilter"] == null ? [] : List<NameData>.from(json["localFilter"]!.map((x) => NameData.fromJson(x))),
+    additionalData: AdditionalData.fromJson(json['additionalData']),
   );
 
   Map<String, dynamic> toJson() => {
@@ -445,6 +448,7 @@ class Data {
     "localFertilizer": localFertilizer == null ? [] : List<dynamic>.from(localFertilizer!.map((x) => x.toJson())),
     "centralFilterSite": centralFilterSite == null ? [] : List<dynamic>.from(centralFilterSite!.map((x) => x.toJson())),
     "localFilter": localFilter == null ? [] : List<dynamic>.from(localFilter!.map((x) => x.toJson())),
+    "additionalData": additionalData
   };
 }
 
@@ -480,6 +484,38 @@ class NameData {
         "name": name,
         "selected": selected,
       };
+}
+
+class AdditionalData {
+  String centralFiltrationOperationMode;
+  String localFiltrationOperationMode;
+  bool centralFiltrationBeginningOnly;
+  bool localFiltrationBeginningOnly;
+  bool pumpStationMode;
+
+  AdditionalData({
+    required this.centralFiltrationOperationMode,
+    required this.localFiltrationOperationMode,
+    required this.centralFiltrationBeginningOnly,
+    required this.localFiltrationBeginningOnly,
+    required this.pumpStationMode
+  });
+
+  factory AdditionalData.fromJson(Map<String, dynamic> json) => AdditionalData(
+      centralFiltrationOperationMode: json['centralFiltrationOperationMode'] ?? "TIME",
+      localFiltrationOperationMode: json['localFiltrationOperationMode'] ?? "TIME",
+      centralFiltrationBeginningOnly: json['centralFiltrationBeginningOnly'] ?? false,
+      localFiltrationBeginningOnly: json['localFiltrationBeginningOnly'] ?? false,
+      pumpStationMode: json['pumpStationMode'] ?? false
+  );
+
+  Map<String, dynamic> toJson() => {
+    "centralFiltrationOperationMode": centralFiltrationOperationMode,
+    "localFiltrationOperationMode": localFiltrationOperationMode,
+    "centralFiltrationBeginningOnly": centralFiltrationBeginningOnly,
+    "localFiltrationBeginningOnly": localFiltrationBeginningOnly,
+    "pumpStationMode": pumpStationMode
+  };
 }
 
 class AlarmType {
@@ -638,3 +674,4 @@ class ProgramDetails {
     );
   }
 }
+

@@ -120,7 +120,8 @@ class _WaterAndFertScreenState extends State<WaterAndFertScreen> with SingleTick
   Widget build(BuildContext context) {
     final programPvd = Provider.of<IrrigationProgramMainProvider>(context);
     var overAllPvd = Provider.of<OverAllUse>(context,listen: true);
-    return LayoutBuilder(builder: (context,constraints){
+    return programPvd.sequence.isNotEmpty
+        ? LayoutBuilder(builder: (context,constraints){
       return Container(
         width: double.infinity,
         height: double.infinity,
@@ -939,7 +940,11 @@ class _WaterAndFertScreenState extends State<WaterAndFertScreen> with SingleTick
           ],
         ),
       );
-    });
+    })
+        : const Center(child: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text('Without selecting sequence, water and fertigation can not be configured', textAlign: TextAlign.center,),
+        ),);
 
   }
   void _showTimePicker(IrrigationProgramMainProvider programPvd,OverAllUse overAllPvd) async {
@@ -958,7 +963,18 @@ class _WaterAndFertScreenState extends State<WaterAndFertScreen> with SingleTick
               ),
             ],
           ),
-          content: MyTimePicker(displayHours: true,hourString: 'hr', displayMins: true,minString: 'min',secString: 'sec', displaySecs: true, displayCustom: false, CustomString: '', CustomList: [0,10], displayAM_PM: false,),
+          content:  MyTimePicker(
+            displayHours: true,
+            hourString: 'hr',
+            displayMins: true,
+            minString: 'min',
+            secString: 'sec',
+            displaySecs: true,
+            displayCustom: false,
+            CustomString: '',
+            CustomList: [0,10],
+            displayAM_PM: false,
+          ),
           actionsAlignment: MainAxisAlignment.end,
           actions: [
             TextButton(

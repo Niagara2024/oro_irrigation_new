@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+
 import '../../../state_management/irrigation_program_main_provider.dart';
 import '../../../widgets/SCustomWidgets/custom_alert_dialog.dart';
 import '../../../widgets/SCustomWidgets/custom_list_tile.dart';
@@ -12,7 +13,7 @@ class ProgramLibraryScreen extends StatefulWidget {
   final int userId;
   final int controllerId;
 
-  const ProgramLibraryScreen({Key? programLibraryKey, this.userId = 21, this.controllerId = 10}) : super(key: programLibraryKey);
+  const ProgramLibraryScreen({Key? programLibraryKey, this.userId = 15, this.controllerId = 1}) : super(key: programLibraryKey);
 
   @override
   State<ProgramLibraryScreen> createState() => _ProgramLibraryScreenState();
@@ -57,40 +58,12 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
     return mainProvider.programLibrary?.program != null
         ? (mainProvider.programLibrary!.program.isNotEmpty
         ? _buildProgramListView(mainProvider, constraints)
-        : Center(
+        : const Center(
       child: Padding(
         padding: EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Programs not yet created, To create a program tap the '+' icon button",
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 10,),
-            IconButton(
-              onPressed: () {
-                if(mainProvider.programLibrary?.agitatorCount != 0) {
-                  _showAdaptiveDialog(context, mainProvider);
-                } else {
-                  mainProvider.selectedProgramType = 'Irrigation Program';
-                  mainProvider.updateIsIrrigationProgram();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => IrrigationProgram(
-                        userId: widget.userId,
-                        controllerId: widget.controllerId,
-                        serialNumber: 0,
-                        conditionsLibraryIsNotEmpty: mainProvider.conditionsLibraryIsNotEmpty,
-                      ),
-                    ),
-                  );
-                }
-              },
-              icon: const Icon(Icons.add),
-            )
-          ],
+        child: Text(
+          "Programs not yet created, To create a program tap the '+' icon button",
+          textAlign: TextAlign.center,
         ),
       ),
     ))
@@ -101,37 +74,29 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
     return Column(
       children: [
         mainProvider.programLibrary?.agitatorCount != 0 ? const SizedBox(height: 10) : Container(),
-        mainProvider.programLibrary?.agitatorCount != 0 ? Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildButtonsRow(mainProvider),
-            Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: IconButton(
-                tooltip: 'New program',
-                onPressed: () {
-                  if(mainProvider.programLibrary?.agitatorCount != 0) {
-                    _showAdaptiveDialog(context, mainProvider);
-                  } else {
-                    mainProvider.selectedProgramType = 'Irrigation Program';
-                    mainProvider.updateIsIrrigationProgram();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => IrrigationProgram(
-                          userId: widget.userId,
-                          controllerId: widget.controllerId,
-                          serialNumber: 0,
-                          conditionsLibraryIsNotEmpty: mainProvider.conditionsLibraryIsNotEmpty,
-                        ),
-                      ),
-                    );
-                  }
-                },
-                icon: const Icon(Icons.add),
-              ),
-            ),
-          ],) : Container(),
+        mainProvider.programLibrary?.agitatorCount != 0 ? _buildButtonsRow(mainProvider) : IconButton(
+          onPressed: () {
+            if(mainProvider.programLibrary?.agitatorCount != 0) {
+              _showAdaptiveDialog(context, mainProvider);
+            } else {
+              mainProvider.selectedProgramType = 'Irrigation Program';
+              mainProvider.updateIsIrrigationProgram();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => IrrigationProgram(
+                    userId: widget.userId,
+                    controllerId: widget.controllerId,
+                    serialNumber: 0,
+                    conditionsLibraryIsNotEmpty: mainProvider.conditionsLibraryIsNotEmpty,
+                  ),
+                ),
+              );
+            }
+          },
+          icon: const Icon(Icons.add),
+        )
+        ,
         const SizedBox(height: 10),
         Expanded(
           child: ListView.builder(
@@ -149,18 +114,10 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
     final program = mainProvider.programLibrary!.program[index];
     String scheduleType = program.schedule['selected'] ?? '';
     String startDate = '';
-    String rtcOnTime = '';
-    String rtcOffTime = '';
     if (program.schedule.isNotEmpty) {
       startDate = program.schedule['selected'] == mainProvider.scheduleTypes[1]
           ? program.schedule['scheduleAsRunList']['schedule']['startDate']
           : program.schedule['scheduleByDays']['schedule']['startDate'];
-      rtcOnTime = program.schedule['selected'] == mainProvider.scheduleTypes[1]
-          ? program.schedule['scheduleAsRunList']['rtc']['rtc1']['onTime']
-          : program.schedule['scheduleByDays']['rtc']['rtc1']['onTime'];
-      rtcOffTime = program.schedule['selected'] == mainProvider.scheduleTypes[1]
-          ? program.schedule['scheduleAsRunList']['rtc']['rtc1']['offTime']
-          : program.schedule['scheduleByDays']['rtc']['rtc1']['offTime'];
     }
     final DateFormat formatter = DateFormat('dd-MM-yyyy');
     final formattedStartDate = program.schedule.isNotEmpty ? formatter.format(DateTime.parse(startDate)) : '';
@@ -170,45 +127,45 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
       return Column(
         children: [
           InkWell(
-              onTap: () => _navigateToIrrigationProgram(program, mainProvider),
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 10),
-                padding: constraints.maxWidth > 550 ? EdgeInsets.all(8) : null,
-                decoration: _buildContainerDecoration(),
-                child: constraints.maxWidth > 550
-                    ? Row(
-                  children: [
-                    _buildCircleAvatar(index),
-                    const SizedBox(width: 10,),
-                    Container(width: 1, color: Colors.black38, height: 50,),
-                    const SizedBox(width: 10,),
-                    _buildProgramDetails(program, constraints),
-                    const SizedBox(width: 10,),
-                    Container(width: 1, color: Colors.black38, height: 50,),
-                    const SizedBox(width: 10,),
-                    _buildScheduleDetails(program, constraints, mainProvider),
-                    const SizedBox(width: 10,),
-                    Container(width: 1, color: Colors.black38, height: 50,),
-                    const SizedBox(width: 10,),
-                    _buildRtcDetails(program, constraints, mainProvider),
-                    const SizedBox(width: 10,),
-                    Container(width: 1, color: Colors.black38, height: 50,),
-                    const SizedBox(width: 10,),
-                    Visibility(visible: constraints.maxWidth > 620,child: Expanded(child: Text('Status'))),
-                    _buildProgramActions(program, mainProvider, index),
-                  ],
-                )
-                    :  CustomTile(
-                  title: (program.programName.isNotEmpty)
-                      ? program.programName
-                      : program.defaultProgramName,
-                  showCircleAvatar: true,
-                  showSubTitle: true,
-                  subtitle: '${scheduleType == '' ? 'Program Data Erased': scheduleType} , ${scheduleType != "NO SCHEDULE" ? formattedStartDate : ''}',
-                  content: '${index + 1}',
-                  trailing:  SizedBox(width: constraints.maxWidth * 0.3, child: _buildProgramActions(program, mainProvider, index)),
-                ),
-              )),
+            onTap: () => _navigateToIrrigationProgram(program, mainProvider),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 10),
+              padding: constraints.maxWidth > 550 ? const EdgeInsets.all(8) : null,
+              decoration: _buildContainerDecoration(),
+              child: constraints.maxWidth > 550 ?
+              Row(
+                children: [
+                  _buildCircleAvatar(index),
+                  const SizedBox(width: 10,),
+                  Container(width: 1, color: Colors.black38, height: 50,),
+                  const SizedBox(width: 10,),
+                  _buildProgramDetails(program, constraints),
+                  const SizedBox(width: 10,),
+                  Container(width: 1, color: Colors.black38, height: 50,),
+                  const SizedBox(width: 10,),
+                  _buildScheduleDetails(program, constraints, mainProvider),
+                  const SizedBox(width: 10,),
+                  Container(width: 1, color: Colors.black38, height: 50,),
+                  const SizedBox(width: 10,),
+                  _buildRtcDetails(program, constraints, mainProvider),
+                  const SizedBox(width: 10,),
+                  Container(width: 1, color: Colors.black38, height: 50,),
+                  const SizedBox(width: 10,),
+                  Visibility(visible: constraints.maxWidth > 620,child: const Expanded(child: Text('Status'))),
+                  _buildProgramActions(program, mainProvider, index),
+                ],
+              ) :
+              CustomTile(
+                title: (program.programName.isNotEmpty)
+                    ? program.programName
+                    : program.defaultProgramName,
+              showCircleAvatar: true,
+              showSubTitle: true,
+              subtitle: '${scheduleType == '' ? 'Program Data Erased': scheduleType} , ${scheduleType != "NO SCHEDULE" ? formattedStartDate : ''}',
+              content: '${index + 1}',
+                trailing:  SizedBox(width: constraints.maxWidth * 0.3, child: _buildProgramActions(program, mainProvider, index)),
+            ),
+          )),
           const SizedBox(height: 10),
         ],
       );
@@ -288,18 +245,10 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
     final widthRatio = (constraints.maxWidth > 550 && constraints.maxWidth <= 1050) ? 0.2 : 0.25;
     String scheduleType = program.schedule['selected'] ?? '';
     String startDate = '';
-    String rtcOnTime = '';
-    String rtcOffTime = '';
     if (program.schedule.isNotEmpty) {
       startDate = program.schedule['selected'] == mainProvider.scheduleTypes[1]
           ? program.schedule['scheduleAsRunList']['schedule']['startDate']
           : program.schedule['scheduleByDays']['schedule']['startDate'];
-      rtcOnTime = program.schedule['selected'] == mainProvider.scheduleTypes[1]
-          ? program.schedule['scheduleAsRunList']['rtc']['rtc1']['onTime']
-          : program.schedule['scheduleByDays']['rtc']['rtc1']['onTime'];
-      rtcOffTime = program.schedule['selected'] == mainProvider.scheduleTypes[1]
-          ? program.schedule['scheduleAsRunList']['rtc']['rtc1']['offTime']
-          : program.schedule['scheduleByDays']['rtc']['rtc1']['offTime'];
     }
 
     final DateFormat formatter = DateFormat('dd-MM-yyyy');
@@ -466,10 +415,7 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
                   child: const Text('Cancel'),
                 ),
                 TextButton(
-                  onPressed: () {
-                    _saveProgramDetails(mainProvider, program, index);
-                    Navigator.pop(dialogContext);
-                  },
+                  onPressed: () => _saveProgramDetails(mainProvider, program, index),
                   child: const Text('Save'),
                 ),
               ],
@@ -487,7 +433,9 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
         program.programId,
         program.programName,
         program.priority
-    ).then((value) => ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(message: value)));
+    ).then(
+            (value) => ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(message: value))
+    );
   }
 
   Widget _buildButtonsRow(IrrigationProgramMainProvider mainProvider) {
@@ -507,6 +455,28 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
         _buildOutlinedButton('AGITATOR', mainProvider.showAgitatorPrograms, () {
           mainProvider.updateShowPrograms(false, false, true);
         }),
+        IconButton(
+          onPressed: () {
+            if(mainProvider.programLibrary?.agitatorCount != 0) {
+              _showAdaptiveDialog(context, mainProvider);
+            } else {
+              mainProvider.selectedProgramType = 'Irrigation Program';
+              mainProvider.updateIsIrrigationProgram();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => IrrigationProgram(
+                    userId: widget.userId,
+                    controllerId: widget.controllerId,
+                    serialNumber: 0,
+                    conditionsLibraryIsNotEmpty: mainProvider.conditionsLibraryIsNotEmpty,
+                  ),
+                ),
+              );
+            }
+          },
+          icon: const Icon(Icons.add),
+        )
       ],
     );
   }

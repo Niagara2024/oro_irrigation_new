@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
+
 import '../Models/IrrigationModel/sequence_model.dart';
 import '../constants/http_service.dart';
 
@@ -21,6 +23,11 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
 
   SequenceModel? _irrigationLine;
   SequenceModel? get irrigationLine => _irrigationLine;
+  List zoneSnoList = [];
+  List zoneNameList = [];
+  List sNoList = [];
+  List programSNoList = [];
+  String zoneSerialNumberCreation = '';
 
   Future<void> getUserProgramSequence(int userId, int controllerId, int serialNumber) async {
     try {
@@ -45,23 +52,31 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
 
   bool isRecentlySelected = false;
 
-  void valveSelection(Valve valves, titleIndex, valveIndex, isGroup) {
+  void valveSelection(valves, titleIndex, valveIndex, isGroup, serialNumber) {
     final String valueToShow = isGroup ? 'G${valveIndex + 1}' : '${titleIndex + 1}.${valveIndex + 1}';
-
-    if (_irrigationLine!.sequence.isNotEmpty) {
-      final lastItem = _irrigationLine!.sequence.last['valve'];
-      if(lastItem!.isNotEmpty && lastItem.last['sNo'] == valves) {
-        isRecentlySelected = true;
+    int zoneSno() {
+      if(_irrigationLine!.sequence.isEmpty) {
+        int zoneSNo = 1;
+        return zoneSNo++;
       } else {
-        isRecentlySelected = false;
-        updateSequencedValves(valves, valueToShow, titleIndex+1);
+        int length = _irrigationLine!.sequence.length+1;
+        return length++;
       }
-    } else {
-      isRecentlySelected = false;
-      updateSequencedValves(valves, valueToShow, titleIndex+1);
     }
+    updateSequencedValves(valves, valueToShow, titleIndex+1, serialNumber, zoneSno(), isGroup);
+    // if (_irrigationLine!.sequence.isNotEmpty) {
+    //   final lastItem = _irrigationLine!.sequence.last['valve'];
+    //   if(!isGroup || lastItem!.isNotEmpty && lastItem.last['sNo'] == valves) {
+    //     isRecentlySelected = true;
+    //   } else {
+    //     isRecentlySelected = false;
+    //     updateSequencedValves(valves, valueToShow, titleIndex+1, serialNumber, zoneSno(), isGroup);
+    //   }
+    // } else {
+    //   isRecentlySelected = false;
+    //   updateSequencedValves(valves, valueToShow, titleIndex+1, serialNumber, zoneSno(), isGroup);
+    // }
     notifyListeners();
-    // log(_irrigationLine!.sequence);
   }
 
   bool isSameLine = false;
@@ -75,26 +90,33 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateSequencedValves(Valve valves, valueToShow, titleIndex) {
+  void updateSequencedValves(valves, valueToShow, titleIndex, serialNumber, sNo, isGroup) {
     if (isSingleValveMode) {
-      handleSingleValveMode(valves, valueToShow);
+      handleSingleValveMode(valves, valueToShow, serialNumber, sNo, isGroup);
     } else {
-      handleMultipleValvesMode(valves, valueToShow, titleIndex);
+      handleMultipleValvesMode(valves, valueToShow, titleIndex, serialNumber, sNo, isGroup);
     }
   }
 
-  void handleSingleValveMode(Valve valves, valueToShow) {
+  void handleSingleValveMode(valves, valueToShow, serialNumber, sNo, isGroup) {
     if (selectedProgramType == 'Agitator Program') {
       _irrigationLine!.sequence.add({
-        "valve": [valves.toJson()],
+        "sNo": sNo,
+        "id": 'SEQ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo',
+        "name": 'Sequence ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo',
+        "location": '',
+        "valve": isGroup ? valves : [valves],
         "selected": [valves.name]
       });
+      zoneSnoList.add('${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo');
+      zoneNameList.add('Sequence ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo');
+      programSNoList.add('${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo');
     } else {
-      handleNonAgitatorSingleValveMode(valves, valueToShow);
+      handleNonAgitatorSingleValveMode(valves, valueToShow, serialNumber, sNo, isGroup);
     }
   }
 
-  void handleNonAgitatorSingleValveMode(Valve valves, valueToShow) {
+  void handleNonAgitatorSingleValveMode(valves, valueToShow, serialNumber, sNo, isGroup) {
     int length = _irrigationLine!.sequence.isNotEmpty
         ? _irrigationLine!.sequence[0]['valve'].length
         : 0;
@@ -102,43 +124,73 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
     bool isContains = checkValveContainment(valves, length);
 
     if (irrigationLine!.defaultData.reuseValve || !isContains) {
-      isReuseValve = false;
       _irrigationLine!.sequence.add({
-        "valve": [valves.toJson()],
+        "sNo": sNo,
+        "id": 'SEQ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo',
+        "name": 'Sequence ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo',
+        "location": '',
+        "valve": isGroup ? valves : [valves],
         "selected": [valueToShow]
       });
+      zoneSnoList.add('${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo');
+      zoneNameList.add('Sequence ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo');
       isStartTogether = false;
+      isReuseValve = false;
     } else {
       isReuseValve = true;
     }
   }
 
-  bool checkValveContainment(Valve valves, int length) {
+  bool checkValveContainment(valves, int length) {
     for (var i = 0; i < length; i++) {
-      if (_irrigationLine!.sequence.any((item) => item['valve'].length > i && item['valve'][i]['sNo']! == valves.sNo)) {
-        return true;
+      if(valves.runtimeType != List<Map<String, dynamic>>) {
+        if (_irrigationLine!.sequence.any((item) => item['valve'].length > i && item['valve'][i]['sNo']! == valves['sNo'])) {
+          return true;
+        } else {
+          return false;
+        }
       }
     }
     return false;
   }
 
-  void handleMultipleValvesMode(Valve valves, valueToShow, titleIndex) {
+  void handleMultipleValvesMode(valves, valueToShow, titleIndex, serialNumber, sNo, isGroup) {
     if (_irrigationLine!.sequence.isEmpty && !isAgitator) {
       _irrigationLine!.sequence.add({
-        "valve": [valves.toJson()],
+        "sNo": sNo,
+        "id": 'SEQ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo',
+        "name": 'Sequence ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo',
+        "location": '',
+        "valve": isGroup ? valves : [valves],
         "selected": [valueToShow]
       });
+      zoneSnoList.add('${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo');
+      zoneNameList.add('Sequence ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo');
       isStartTogether = false;
     } else {
-      handleNonEmptySequence(valves, valueToShow, titleIndex);
+      handleNonEmptySequence(valves, valueToShow, titleIndex, isGroup);
     }
   }
 
-  void handleNonEmptySequence(Valve valves, valueToShow, titleIndex) {
+  void createNewList(valves, valueToShow, titleIndex, serialNumber, sNo, isGroup) {
+    _irrigationLine!.sequence.add({
+      "sNo": sNo,
+      "id": 'SEQ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo',
+      "name": 'Sequence ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo',
+      "location": '',
+      "valve": isGroup ? valves : [valves],
+      "selected": [valueToShow]
+    });
+    zoneSnoList.add('${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo');
+    zoneNameList.add('Sequence ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo');
+    isStartTogether = false;
+  }
+
+  void handleNonEmptySequence(valves, valueToShow, titleIndex, isGroup) {
     int lastIndex = _irrigationLine!.sequence.length - 1;
 
     if (lastIndex >= 0) {
-      Map<String, List> lastItem = _irrigationLine!.sequence[lastIndex];
+      dynamic lastItem = _irrigationLine!.sequence[lastIndex];
       List? sNoList = lastItem["valve"];
       isSameLine = lastItem['selected']!.every((item) {
         String itemString = item.toString();
@@ -148,54 +200,59 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
       if (selectedProgramType == 'Agitator Program') {
         updateAgitatorProgram(valves, sNoList, valueToShow, lastItem);
       } else {
-        updateNonAgitatorProgram(valves, sNoList, valueToShow, lastItem, titleIndex);
+        updateNonAgitatorProgram(valves, sNoList, valueToShow, lastItem, titleIndex, isGroup);
       }
     }
   }
 
-  void updateAgitatorProgram(Valve valves, sNoList, valueToShow, lastItem) {
-    sNoList?.add(valves.toJson());
+  void updateAgitatorProgram(valves, sNoList, valueToShow, lastItem) {
+    sNoList?.add(valves);
     List<String>? selectedList = lastItem["selected"]?.cast<String>();
-    selectedList?.add(valves.name);
+    selectedList?.add(valves);
   }
 
-  void updateNonAgitatorProgram(Valve valves, sNoList, valueToShow, lastItem, titleIndex) {
+  void updateNonAgitatorProgram(valves, sNoList, valueToShow, lastItem, titleIndex, isGroup) {
     if (irrigationLine!.defaultData.startTogether) {
       handleStartTogether(valves, sNoList, valueToShow, lastItem);
     } else {
-      handleNonStartTogether(valves, sNoList, valueToShow, lastItem, titleIndex);
+      handleNonStartTogether(valves, sNoList, valueToShow, lastItem, titleIndex, isGroup);
     }
   }
 
-  void handleStartTogether(Valve valves, sNoList, valueToShow, lastItem) {
+  void handleStartTogether(valves, sNoList, valueToShow, lastItem) {
     if (irrigationLine!.defaultData.reuseValve || !sNoList!.any((element) => element['sNo'] == valves.sNo)) {
-      isReuseValve = false;
-      sNoList?.add(valves.toJson());
+      isReuseValve = true;
+      sNoList?.add(valves);
       List<String>? selectedList = lastItem["selected"]?.cast<String>();
       selectedList?.add(valueToShow);
     } else {
-      isReuseValve = true;
+      isReuseValve = false;
     }
   }
 
-  void handleNonStartTogether(Valve valves, sNoList, valueToShow, lastItem, titleIndex) {
+  void handleNonStartTogether(valves, sNoList, valueToShow, lastItem, titleIndex, isGroup) {
     if (isSameLine) {
-      handleSameLine(valves, sNoList, valueToShow, lastItem, titleIndex);
+      handleSameLine(valves, sNoList, valueToShow, lastItem, titleIndex, isGroup);
     } else {
       isStartTogether = true;
     }
   }
 
-  void handleSameLine(Valve valves, sNoList, valueToShow, lastItem, titleIndex) {
-    if (irrigationLine!.defaultData.reuseValve || !sNoList!.any((element) => element['sNo'] == valves.sNo)) {
-      isReuseValve = false;
-      sNoList?.add(valves.toJson());
-      List<String>? selectedList = lastItem["selected"]?.cast<String>();
-      selectedList?.add(valueToShow);
-      isStartTogether = false;
-    } else {
-      isReuseValve = true;
-      isStartTogether = false;
+  void handleSameLine(valves, sNoList, valueToShow, lastItem, titleIndex, isGroup) {
+    if(!isGroup){
+      if(!irrigationLine!.defaultData.reuseValve) {
+        if (!sNoList!.any((element) => element['sNo'] == valves['sNo'])) {
+          isReuseValve = false;
+          sNoList?.add(valves);
+          List<String>? selectedList = lastItem["selected"]?.cast<String>();
+          selectedList?.add(valueToShow);
+          isStartTogether = false;
+        } else {
+          isReuseValve = true;
+        }
+      } else {
+        isStartTogether = false;
+      }
     }
   }
 
@@ -209,11 +266,13 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
   }
 
   bool isSingleValveMode = true;
+  bool isNext = false;
   bool isMultipleValveMode = false;
   void enableMultipleValveMode() {
     isSingleValveMode = false;
     isMultipleValveMode = true;
     isDelete = false;
+    isNext = false;
     notifyListeners();
   }
 
@@ -221,6 +280,7 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
     isSingleValveMode = true;
     isMultipleValveMode = false;
     isDelete = false;
+    isNext = false;
     notifyListeners();
   }
 
@@ -229,6 +289,15 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
     isDelete = true;
     isMultipleValveMode = false;
     isSingleValveMode = false;
+    isNext = false;
+    notifyListeners();
+  }
+
+  void enableSkipNex() {
+    isDelete = false;
+    isMultipleValveMode = true;
+    isSingleValveMode = false;
+    isNext = true;
     notifyListeners();
   }
 
@@ -237,10 +306,14 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool isSelected(valveIndex, titleIndex, isGroup) {
+  bool isSelected(valveIndex, titleIndex, isGroup, bigScreen, valve) {
     final String valueToShow = isGroup ? 'G${valveIndex + 1}' : '${titleIndex + 1}.${valveIndex + 1}';
-    return _irrigationLine!.sequence.any((list) => list['selected']!.contains(valueToShow));
+
+    return bigScreen
+        ? _irrigationLine!.sequence.any((list) => list['valve']!.any((v) => v['name'] == valve))
+        : _irrigationLine!.sequence.any((list) => list['selected']!.contains(valueToShow));
   }
+
 
   //TODO: SCHEDULE SCREEN PROVIDERS
   SampleScheduleModel? _sampleScheduleModel;
@@ -298,11 +371,11 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
     if(scheduleType == sampleScheduleModel!.scheduleAsRunList){
       final selectedRtcKey = sampleScheduleModel!.scheduleAsRunList.rtc.keys.toList()[selectedRtcIndex1];
       sampleScheduleModel!.scheduleAsRunList.rtc[selectedRtcKey][property] = newTime;
-      print(sampleScheduleModel!.scheduleAsRunList.rtc[selectedRtcKey]['onTime']);
+      // print(sampleScheduleModel!.scheduleAsRunList.rtc[selectedRtcKey]['onTime']);
     } else {
       final selectedRtcKey = sampleScheduleModel!.scheduleByDays.rtc.keys.toList()[selectedRtcIndex2];
       sampleScheduleModel!.scheduleByDays.rtc[selectedRtcKey][property] = newTime;
-      print(sampleScheduleModel!.scheduleAsRunList.rtc[selectedRtcKey]['onTime']);
+      // print(sampleScheduleModel!.scheduleAsRunList.rtc[selectedRtcKey]['onTime']);
     }
     notifyListeners();
   }
@@ -445,57 +518,8 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
-  //TODO: CONDITIONS PROVIDER
-  // Map<String, dynamic> sampleConditionsData = {
-  //   "data": {
-  //     "condition": [
-  //       {
-  //         "title": "START BY CONDITION",
-  //         "widgetTypeId": 6,
-  //         "iconCodePoint": "0xe4cb",
-  //         "iconFontFamily": "MaterialIcons",
-  //         "value": {},
-  //         "hidden": false,
-  //         "selected": false
-  //       },
-  //       {
-  //         "title": "STOP BY CONDITION",
-  //         "widgetTypeId": 6,
-  //         "iconCodePoint": "0xe606",
-  //         "iconFontFamily": "MaterialIcons",
-  //         "value": {},
-  //         "hidden": false,
-  //         "selected": false
-  //       },
-  //       {
-  //         "title": "ENABLE BY CONDITION",
-  //         "widgetTypeId": 6,
-  //         "iconCodePoint": "0xe66c",
-  //         "iconFontFamily": "MaterialIcons",
-  //         "value": {},
-  //         "hidden": false,
-  //         "selected": false
-  //       },
-  //       {
-  //         "title": "DISABLE BY CONDITION",
-  //         "widgetTypeId": 6,
-  //         "iconCodePoint": "0xe66b",
-  //         "iconFontFamily": "MaterialIcons",
-  //         "value": {},
-  //         "hidden": false,
-  //         "selected": false
-  //       }
-  //     ],
-  //     "default": {
-  //       "conditionLibrary": [
-  //         {"sNo": 1, "id": "COND1", "location": "", "name": "Condition1", "enable": false, "state": "", "duration": "00:00", "conditionIsTrueWhen": "", "fromTime": "00:00", "untilTime": "00:00", "notification": false, "usedByProgram": "", "program": "", "zone": "", "dropdown1": "", "dropdown2": "", "dropdownValue": ""},
-  //         {"sNo": 2, "id": "COND2", "location": "", "name": "Condition2", "enable": false, "state": "", "duration": "00:00", "conditionIsTrueWhen": "", "fromTime": "00:00", "untilTime": "00:00", "notification": false, "usedByProgram": "", "program": "", "zone": "", "dropdown1": "", "dropdown2": "", "dropdownValue": ""},
-  //         {"sNo": 3, "id": "COND3", "location": "", "name": "Condition3", "enable": false, "state": "", "duration": "00:00", "conditionIsTrueWhen": "", "fromTime": "00:00", "untilTime": "00:00", "notification": false, "usedByProgram": "", "program": "", "zone": "", "dropdown1": "", "dropdown2": "", "dropdownValue": ""},
-  //       ]
-  //     }
-  //   }
-  // };
 
+  //TODO: CONDITIONS PROVIDER
   SampleConditions? _sampleConditions;
   SampleConditions? get sampleConditions => _sampleConditions;
   bool conditionsLibraryIsNotEmpty = false;
@@ -518,8 +542,6 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
       log('Error: $e');
       rethrow;
     }
-    // _sampleConditions = SampleConditions.fromJson(sampleConditionsData);
-
     Future.delayed(Duration.zero, () {
       notifyListeners();
     });
@@ -941,29 +963,66 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
     _selectionModel = newSelectionModel;
     notifyListeners();
   }
+  List<String> filtrationModes = ['TIME', 'DP', 'BOTH'];
+  String get selectedCentralFiltrationMode => _selectionModel.data?.additionalData?.centralFiltrationOperationMode ?? "TIME";
+  String get selectedLocalFiltrationMode => _selectionModel.data?.additionalData?.localFiltrationOperationMode ?? "TIME";
 
-  Future<void> fetchSelectionData(int userId, int controllerId, int serialNumber) async {
+  void updateFiltrationMode(newValue, bool isCentral) {
+    if(isCentral) {
+      _selectionModel.data?.additionalData?.centralFiltrationOperationMode = newValue;
+    } else {
+      _selectionModel.data?.additionalData?.localFiltrationOperationMode = newValue;
+    }
+    notifyListeners();
+  }
+
+  bool get isPumpStationMode => _selectionModel.data?.additionalData?.pumpStationMode ?? false;
+  void updatePumpStationMode(newValue) {
+    _selectionModel.data?.additionalData?.pumpStationMode = newValue;
+    notifyListeners();
+  }
+
+  bool get centralFiltBegin => _selectionModel.data?.additionalData?.centralFiltrationBeginningOnly ?? false;
+  bool get localFiltBegin => _selectionModel.data?.additionalData?.localFiltrationBeginningOnly ?? false;
+  void updateFiltBegin(newValue, isCentral) {
+    if(isCentral) {
+      _selectionModel.data?.additionalData?.centralFiltrationBeginningOnly = newValue;
+    } else {
+      _selectionModel.data?.additionalData?.localFiltrationBeginningOnly = newValue;
+    }
+    notifyListeners();
+  }
+
+  Future<void> getUserProgramSelection(int userId, int controllerId, int serialNumber) async {
     var userData = {
       "userId": userId,
       "controllerId": controllerId,
       "serialNumber": serialNumber
     };
-    final response = await HttpService().postRequest("getUserProgramSelection", userData);
-    final jsonData = json.decode(response.body);
     try {
-
-      _selectionModel = SelectionModel.fromJson(jsonData);
+      final response = await HttpService().postRequest("getUserProgramSelection", userData);
+      final jsonData = json.decode(response.body);
+      if (jsonData['data']['additionalData'] != null) {
+        _selectionModel = SelectionModel.fromJson(jsonData);
+      } else {
+        jsonData['data']['additionalData'] = {
+          "centralFiltrationOperationMode": "TIME",
+          "localFiltrationOperationMode": "TIME",
+          "centralFiltrationBeginningOnly": false,
+          "localFiltrationBeginningOnly": false,
+          "pumpStationMode": false,
+        };
+        _selectionModel = SelectionModel.fromJson(jsonData);
+      }
     } catch (e) {
       log('Error: $e');
     }
-
-    Future.delayed(const Duration(seconds: 0), () {
+    Future.delayed(Duration.zero, () {
       notifyListeners();
     });
   }
 
   void selectItem(int index, String title) {
-
     switch (title) {
       case 'MAIN VALVE':
         selectionModel.data!.mainValve![index].selected = !selectionModel.data!.mainValve![index].selected!;
@@ -1074,7 +1133,11 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
         serialNumberCreation = _programLibrary!.program.length + 1;
         priorityList = List.generate(_programLibrary!.program.length, (index) => (index + 1));
         priority = _programDetails!.priority;
+        // if(_programDetails != null) {
         programName = (_programDetails!.programName == '' || _programDetails!.programName.isEmpty) ?  "Program $programCount" : _programDetails!.programName;
+        // } else {
+        //   programName = _programDetails!.defaultProgramName;
+        // }
         selectedProgramType = _programDetails!.programType == '' ? selectedProgramType : _programDetails!.programType;
         defaultProgramName = (_programDetails!.defaultProgramName == '' || _programDetails!.defaultProgramName.isEmpty) ?  "Program $programCount" : _programDetails!.defaultProgramName;
         isCompletionEnabled = _programDetails!.completionOption;
@@ -1088,11 +1151,6 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
       log('Error: $e');
       rethrow;
     }
-  }
-
-  void updatePriority(newValue, index) {
-    _programLibrary?.program[index].priority = int.tryParse(newValue) ?? 0;
-    notifyListeners();
   }
 
   //TODO: PROGRAM LIBRARY
@@ -1165,6 +1223,11 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
       log('Error: $e');
       rethrow;
     }
+  }
+
+  void updatePriority(newValue, index) {
+    _programLibrary?.program[index].priority = int.tryParse(newValue) ?? 0;
+    notifyListeners();
   }
 
   void updateProgramName(dynamic newValue, String type) {
@@ -1251,7 +1314,6 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
   Future<String> updateUserProgramDetails(
       int userId, int controllerId, int serialNumber, int programId, String programName, int priority) async {
     try {
-      print(priority);
       Map<String, dynamic> userData = {
         "userId": userId,
         "controllerId": controllerId,
@@ -1277,5 +1339,4 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
       rethrow;
     }
   }
-
 }

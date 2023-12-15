@@ -7,6 +7,7 @@ import '../constants/http_service.dart';
 
 /// A provider class for handling data acquisition and related functionality.
 class DataAcquisitionProvider extends ChangeNotifier {
+
   final HttpService httpService = HttpService();
   DataModel? _dataModel;
   bool _isLoading = false;
@@ -14,11 +15,11 @@ class DataAcquisitionProvider extends ChangeNotifier {
   DataModel? get dataModel => _dataModel;
   bool get isLoading => _isLoading;
 
-  Future<void> dataAcquisitionFromApi(int customerId, int controllerId) async {
+  Future<void> dataAcquisitionFromApi(userId, controllerId) async {
     try {
       _isLoading = true;
       final userData = {
-        "userId": customerId,
+        "userId": userId,
         "controllerId": controllerId,
       };
 
@@ -26,22 +27,19 @@ class DataAcquisitionProvider extends ChangeNotifier {
 
       if (getDataAcquisition.statusCode == 200) {
         final responseJson = getDataAcquisition.body;
-        print(responseJson);
         final convertedJson = jsonDecode(responseJson);
         _dataModel = DataModel.fromJson(convertedJson);
 
         _isLoading = false;
-        notifyListeners();
       } else {
         print("HTTP Request failed or received an unexpected response.");
         _isLoading = false;
-        notifyListeners();
       }
     } catch (error) {
       _isLoading = false;
-      notifyListeners();
       print("Error: $error");
     }
+    notifyListeners();
   }
 
   int _selectedTabIndex = 0;
@@ -56,6 +54,8 @@ class DataAcquisitionProvider extends ChangeNotifier {
 
   void updateSelectedValue(int index, int rowIndex, String newValue) {
     _dataModel?.data[index].dataAcquisition[rowIndex].sampleRate = newValue;
+    print(newValue);
+    print(_dataModel?.data[index].dataAcquisition[rowIndex].sampleRate);
     notifyListeners();
   }
 }

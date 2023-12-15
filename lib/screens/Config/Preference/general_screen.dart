@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../state_management/preferences_screen_main_provider.dart';
+import '../../../widgets/SCustomWidgets/custom_list_tile.dart';
 
 class GeneralScreen extends StatefulWidget {
   const GeneralScreen({super.key});
@@ -23,13 +25,9 @@ class _GeneralScreenState extends State<GeneralScreen> {
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15)
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              color: Theme.of(context).colorScheme.background,
-            ),
-            width: double.infinity,
-            padding: const EdgeInsets.all(10),
+          surfaceTintColor: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -52,118 +50,69 @@ class _GeneralScreenState extends State<GeneralScreen> {
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15)
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              color: Theme.of(context).colorScheme.background,
-            ),
-            child: Column(
-              children: [
-                const SizedBox(height: 8,),
-                ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Theme.of(context).colorScheme.secondary,
-                    child: const Icon(
-                      Icons.type_specimen_rounded,
-                      color: Colors.black,
-                    ),
-                  ),
-                  shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))
-                  ),
-                  tileColor: Colors.white,
-                  title: const Text('TYPE'),
-                  subtitle: Text(
-                    configuration != null ? configuration.general.categoryName : '',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ),
-                const SizedBox(height: 8,),
-
-                ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Theme.of(context).colorScheme.secondary,
-                    child: const Icon(
-                      Icons.format_list_numbered_rounded,
-                      color: Colors.black,
-                    ),
-                  ),
-                  tileColor: Colors.white,
-                  title: const Text('SERIAL NUMBER'),
-                  subtitle: Text(
-                    configuration != null ? configuration.general.deviceId.toString() : '',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ),
-
-                ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Theme.of(context).colorScheme.secondary,
-                    child: const Icon(
-                      Icons.perm_device_info,
-                      color: Colors.black,
-                    ),
-                  ),
-                  tileColor: Colors.white,
-                  title: const Text('CONTROLLER NAME'),
-                  subtitle: Text(
-                    configuration != null ? configuration.general.controllerName : '',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  trailing: InkWell(
-                    child: Icon(Icons.drive_file_rename_outline_rounded, color: Theme.of(context).primaryColor,),
-                    onTap: () {
-                      _textEditingController.text = Provider.of<PreferencesMainProvider>(context, listen: false).configuration!.general.controllerName;
-                      showDialog(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: const Text("Edit Controller name"),
-                          content: TextFormField(
-                            controller: _textEditingController,
-                            onChanged: (newValue) => tempControllerName = newValue,
-                            onTap: () {
-                              _textEditingController.selection = TextSelection(
-                                baseOffset: 0,
-                                extentOffset: _textEditingController.text.length,
-                              );
-                            },
-                          ),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () => Navigator.of(ctx).pop(),
-                              child: const Text("CANCEL", style: TextStyle(color: Colors.red),),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(ctx).pop();
-                                Provider.of<PreferencesMainProvider>(context, listen: false).updateControllerName(tempControllerName);
-                              },
-                              child: const Text("OKAY", style: TextStyle(color: Colors.green),),
-                            ),
-                          ],
+          surfaceTintColor: Colors.white,
+          child: Column(
+            children: [
+              CustomTile(
+                title: 'TYPE',
+                content: Icons.type_specimen_rounded,
+                showSubTitle: true,
+                subtitle: configuration != null ? configuration.general.categoryName : '',
+              ),
+              CustomTile(
+                title: 'SERIAL NUMBER',
+                content: Icons.format_list_numbered_rounded,
+                showSubTitle: true,
+                subtitle: configuration != null ? configuration.general.deviceId.toString() : '',
+              ),
+              CustomTile(
+                title: 'CONTROLLER NAME',
+                content: Icons.perm_device_info,
+                showSubTitle: true,
+                subtitle: configuration != null ? configuration.general.controllerName : '',
+                trailing: InkWell(
+                  child: Icon(Icons.drive_file_rename_outline_rounded, color: Theme.of(context).primaryColor,),
+                  onTap: () {
+                    _textEditingController.text = Provider.of<PreferencesMainProvider>(context, listen: false).configuration!.general.controllerName;
+                    _textEditingController.selection = TextSelection(
+                      baseOffset: 0,
+                      extentOffset: _textEditingController.text.length,
+                    );
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text("Edit Controller name"),
+                        content: TextFormField(
+                          controller: _textEditingController,
+                          autofocus: true,
+                          onChanged: (newValue) => tempControllerName = newValue,
+                          inputFormatters: [LengthLimitingTextInputFormatter(20)],
                         ),
-                      );
-                    },
-                  ),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(),
+                            child: const Text("CANCEL", style: TextStyle(color: Colors.red),),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(ctx).pop();
+                              Provider.of<PreferencesMainProvider>(context, listen: false).updateControllerName(tempControllerName);
+                            },
+                            child: const Text("OKAY", style: TextStyle(color: Colors.green),),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
-                ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Theme.of(context).colorScheme.secondary,
-                    child: const Icon(
-                      Icons.account_box_rounded,
-                      color: Colors.black,
-                    ),
-                  ),
-                  tileColor: Colors.white,
-                  title: const Text('AFFILIATE'),
-                  subtitle: Text(
-                    configuration != null ? configuration.general.userName : '',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ),
-                const SizedBox(height: 8,),
-              ],
-            ),
+              ),
+              CustomTile(
+                title: 'AFFILIATE',
+                content: Icons.account_box_rounded,
+                showSubTitle: true,
+                subtitle: configuration != null ? configuration.general.userName : '',
+              ),
+            ],
           ),
         ),
       ],

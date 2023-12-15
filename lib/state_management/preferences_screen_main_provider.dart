@@ -8,14 +8,32 @@ import '../constants/http_service.dart';
 
 class PreferencesMainProvider extends ChangeNotifier {
   final HttpService httpService = HttpService();
-  late TabController tabController;
+  late TabController settingsTabController;
+
+  List<String> label1 = ['General', 'Contact', 'Pump', 'Settings', 'Notifications'];
+  List<IconData> icons1 = [
+    Icons.settings_rounded,
+    Icons.connect_without_contact_rounded,
+    Icons.waterfall_chart_rounded,
+    Icons.settings_applications_rounded,
+    Icons.notifications_rounded
+  ];
+
+  List<String> label2 = ['General', 'Settings', 'Notifications'];
+  List<IconData> icons2 = [
+    Icons.settings_rounded,
+    Icons.settings_applications_rounded,
+    Icons.notifications_rounded
+  ];
 
   int _selectedTabIndex = 0;
   int get selectedTabIndex => _selectedTabIndex;
 
   void updateTabIndex(int newIndex) {
     _selectedTabIndex = newIndex;
-    notifyListeners();
+    Future.delayed(Duration.zero, () {
+      notifyListeners();
+    });
   }
 
   Configuration? _configuration;
@@ -30,10 +48,12 @@ class PreferencesMainProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> preferencesDataFromApi(int customerId, int controllerId) async {
+  List<String> label = [];
+  List<IconData> icons = [];
+  Future<void> preferencesDataFromApi(userId, controllerId) async {
     try{
       final userData = {
-        "userId": customerId,
+        "userId": userId,
         "controllerId": controllerId,
       };
       final getUserPreference = await httpService.postRequest('defaultUserPreference', userData);
@@ -41,6 +61,29 @@ class PreferencesMainProvider extends ChangeNotifier {
         final responseJson = getUserPreference.body;
         final convertedJson = jsonDecode(responseJson);
         _configuration = Configuration.fromJson(convertedJson['data']);
+        if(_configuration!.irrigationPumpName.isEmpty && _configuration!.sourcePumpName.isEmpty) {
+          label = ['General'];
+          icons = [Icons.settings_rounded];
+        } else {
+          if(_configuration!.contactName.isNotEmpty) {
+            label = ['General', 'Contact', 'Pump', 'Settings', 'Notifications'];
+            icons = [
+              Icons.settings_rounded,
+              Icons.connect_without_contact_rounded,
+              Icons.waterfall_chart_rounded,
+              Icons.settings_applications_rounded,
+              Icons.notifications_rounded
+            ];
+          }
+          else{
+            label = ['General', 'Settings', 'Notifications'];
+            icons = [
+              Icons.settings_rounded,
+              Icons.settings_applications_rounded,
+              Icons.notifications_rounded
+            ];
+          }
+        }
       }else {
         print("HTTP Request failed or received an unexpected response.");
       }
@@ -48,9 +91,6 @@ class PreferencesMainProvider extends ChangeNotifier {
       print("Error: $error");
     }
 
-    // extractContactInfo();
-    // extractPumpInfo();
-    // extractTotalPumpsInfo();
     Future.delayed(Duration.zero, () {
       notifyListeners();
     });
@@ -98,20 +138,35 @@ class PreferencesMainProvider extends ChangeNotifier {
   }
 
   void extractPumpInfo() {
-    if (_configuration!.pumps!.isEmpty) {
-      initPumpsList(_configuration!.sourcePumpName);
-      initPumpsList(_configuration!.irrigationPumpName);
-    }
+    initPumpsList(_configuration!.sourcePumpName);
+    initPumpsList(_configuration!.irrigationPumpName);
   }
 
   void initPumpsList(List<dynamic> pumpNames) {
-    for (var i = 0; i < pumpNames.length; i++) {
-      var id = pumpNames[i].id;
-      var values = initPumpValues();
-      _configuration!.pumps!.add(PumpItem(
-        id: id,
-        value: values,
+    if (_configuration!.pumps!.isEmpty) {
+      _configuration!.pumps!.addAll(List.generate(
+        pumpNames.length,
+            (index) => PumpItem(
+          id: pumpNames[index].id,
+          value: initPumpValues(),
+        ),
       ));
+    } else {
+      if(totalPumps.length > _configuration!.pumps!.length){
+        _configuration!.pumps!.addAll(List.generate(
+          pumpNames.length,
+              (index) {
+            final pumpId = pumpNames[index].id;
+            final existingPump = _configuration!.pumps!.firstWhere(
+                  (pump) => pump.id == pumpId,
+              orElse: () => PumpItem(id: pumpId, value: initPumpValues()),
+            );
+            return existingPump;
+          },
+        ));
+      } else if (totalPumps.length < _configuration!.pumps!.length) {
+        _configuration!.pumps!.removeWhere((pump) => !totalPumps.any((tp) => tp == pump.id));
+      }
     }
   }
 
@@ -195,7 +250,9 @@ class PreferencesMainProvider extends ChangeNotifier {
 
   void updateControllerName(String newControllerName) {
     if (_configuration != null) {
-      _configuration!.general.controllerName = newControllerName;
+      _configuration!.general.controllerName = newControllerName != ''
+          ? newControllerName
+          : _configuration!.general.controllerName;
       notifyListeners();
     }
   }
@@ -256,9 +313,7 @@ class PreferencesMainProvider extends ChangeNotifier {
   dynamic getValueForIdentifier(String title, int pumpId) {
     if (_configuration != null) {
       final item = _configuration!.settings?[pumpId].pumpSettings.expand((setting) =>
-      setting.setting).firstWhere(
-              (setting) => setting.title == title
-      );
+      setting.setting).firstWhere((setting) => setting.title == title);
 
       if(item?.value is bool){
         return ((item!.value != null) || item.value != '') ? item.value : false;

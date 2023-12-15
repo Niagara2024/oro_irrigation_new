@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
 
 import '../../../state_management/preferences_screen_main_provider.dart';
@@ -13,6 +14,8 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
+  final ScrollController scrollController1 = ScrollController();
+  final ScrollController scrollController2 = ScrollController();
 
   @override
   void initState() {
@@ -42,11 +45,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
             Expanded(
               child: notificationProvider.selectedSegment == 0
                   ? Padding(
-                padding: isScreenSizeLarge ? const EdgeInsets.symmetric(horizontal: 50, vertical: 20) : const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                padding: isScreenSizeLarge ? const EdgeInsets.symmetric(horizontal: 50, vertical: 20) : const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                 child: _buildNotificationList(context, 'event'),
               )
                   : Padding(
-                padding: isScreenSizeLarge ? const EdgeInsets.symmetric(horizontal: 50, vertical: 20) : const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                padding: isScreenSizeLarge ? const EdgeInsets.symmetric(horizontal: 50, vertical: 20) : const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                 child: _buildNotificationList(context, 'alarm'),
               ),
             ),
@@ -72,11 +75,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
         return Column(
           children: [
-            Container(
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15)
+            Card(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)
               ),
+              surfaceTintColor: Colors.white,
               child: CustomCheckBoxListTile(
                   subtitle: notification.notificationDescription,
                   value: value ?? false,
@@ -84,10 +87,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       ? notificationProvider.updateValueForEvent(notification.notificationTypeId, newValue!)
                       : notificationProvider.updateValueForAlarm(notification.notificationTypeId, newValue!),
                   borderRadius: BorderRadius.circular(15),
-                  //icon: IconData(int.parse(notification.iconCodePoint), fontFamily: notification.iconFontFamily)
+                  showCircleAvatar: true,
+                  content: IconData(0xf0164, fontFamily: notification.iconFontFamily),
+                  icon: notification.iconCodePoint.length < 6 ? IconData(int.parse(notification.iconCodePoint), fontFamily: notification.iconFontFamily) : IconData(0xf0164, fontFamily: notification.iconFontFamily)
               ),
             ),
-            const SizedBox(height: 5,),
             if (index == notifications.length - 1)
               const SizedBox(height: 70),
           ],

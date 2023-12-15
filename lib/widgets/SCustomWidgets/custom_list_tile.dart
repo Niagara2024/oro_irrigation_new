@@ -50,11 +50,13 @@ class CustomTimerTile extends StatelessWidget {
   final Function(String) onChanged;
   final IconData? icon;
   final bool isSeconds;
+  final bool isNative;
   final Color? tileColor;
   final BorderRadius? borderRadius;
   final bool? is24HourMode;
 
-  const CustomTimerTile({super.key,
+  const CustomTimerTile({
+    Key? key,
     required this.subtitle,
     required this.initialValue,
     required this.onChanged,
@@ -64,7 +66,8 @@ class CustomTimerTile extends StatelessWidget {
     this.is24HourMode,
     this.tileColor,
     this.leading,
-  });
+    this.isNative = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -73,9 +76,65 @@ class CustomTimerTile extends StatelessWidget {
         borderRadius: borderRadius ?? BorderRadius.zero,
       ),
       contentPadding: const EdgeInsets.all(8),
-      leading: leading ?? CircleAvatar(backgroundColor: Theme.of(context).colorScheme.secondary, child: Icon(icon, color: Colors.black)),
-      title: Text(subtitle, style: Theme.of(context).textTheme.bodyLarge),
-      trailing: CustomTimePicker(
+      leading: leading ??
+          CircleAvatar(
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+              child: Icon(icon, color: Colors.black)),
+      title: Text(subtitle, style: Theme.of(context).textTheme.bodyText1),
+      trailing: isNative
+          ? InkWell(
+        child: Text(initialValue, style: Theme.of(context).textTheme.bodyMedium),
+        onTap: () async {
+          TimeOfDay? selectedTime;
+
+          if (initialValue != '') {
+            try {
+              List<String> timeParts = initialValue.split(' ');
+
+              if (timeParts.length == 2) {
+                String time = timeParts[0];
+                String period = timeParts[1];
+
+                List<String> timeDigits = time.split(':');
+                if (timeDigits.length == 2) {
+                  int hour = int.parse(timeDigits[0]);
+                  int minute = int.parse(timeDigits[1]);
+
+                  if (period.toLowerCase() == 'am' || period.toLowerCase() == 'pm') {
+                    if (period.toLowerCase() == 'pm' && hour < 12) {
+                      hour += 12;
+                    } else if (period.toLowerCase() == 'am' && hour == 12) {
+                      hour = 0;
+                    }
+
+                    selectedTime = TimeOfDay(hour: hour, minute: minute);
+                  } else {
+                    print("Invalid time period");
+                  }
+                } else {
+                  print("Invalid time format");
+                }
+              } else {
+                print("Invalid time format");
+              }
+            } catch (e) {
+              print("Error parsing time: $e");
+            }
+          } else {
+            selectedTime = TimeOfDay.fromDateTime(DateTime.now());
+          }
+
+          selectedTime = await showTimePicker(
+            context: context,
+            initialTime: selectedTime ?? TimeOfDay.now(),
+          );
+
+          if (selectedTime != null) {
+            onChanged(selectedTime.format(context));
+          }
+        },
+      )
+          : CustomTimePicker(
         initialTime: initialValue,
         onChanged: onChanged,
         isSeconds: isSeconds,
@@ -149,7 +208,9 @@ class CustomCheckBoxListTile extends StatelessWidget {
   final bool value;
   final Function(bool?) onChanged;
   final IconData? icon;
+  final dynamic content;
   final Widget? image;
+  final bool showCircleAvatar;
   final BorderRadius? borderRadius;
 
   const CustomCheckBoxListTile({super.key,
@@ -159,6 +220,8 @@ class CustomCheckBoxListTile extends StatelessWidget {
     this.icon,
     this.borderRadius,
     this.image,
+    this.content,
+    this.showCircleAvatar = true
   });
 
   @override
@@ -168,7 +231,18 @@ class CustomCheckBoxListTile extends StatelessWidget {
         borderRadius: borderRadius ?? BorderRadius.zero,
       ),
       contentPadding: const EdgeInsets.all(8),
-      leading: CircleAvatar(backgroundColor: Theme.of(context).colorScheme.secondary,child: icon !=null ? Icon(icon, color: Colors.black) : image),
+      leading: showCircleAvatar ? CircleAvatar(
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        child: content is IconData
+            ? Icon(content, color: Colors.black)
+            : Text(
+          content,
+          style: TextStyle(
+              color: Colors.black,
+              fontSize: Theme.of(context).textTheme.bodyLarge?.fontSize
+          ),
+        ),
+      ) : null,
       title: Text(subtitle, style: Theme.of(context).textTheme.bodyLarge),
       trailing: Checkbox(
         value: value,

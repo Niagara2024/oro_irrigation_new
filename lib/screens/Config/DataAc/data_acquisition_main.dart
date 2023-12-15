@@ -50,32 +50,26 @@ class _DataAcquisitionMainState extends State<DataAcquisitionMain> with SingleTi
               child: Scaffold(
                 body: Column(
                   children: [
-                    PreferredSize(
-                      preferredSize: const Size.fromHeight(80.0),
-                      child: Container(
-                        width: double.infinity,
-                        color: Theme.of(context).colorScheme.background,
-                        child: TabBar(
-                          controller: _tabController,
-                          // isScrollable: dataProvider.dataModel!.data.length > 3 && !isScreenSizeLarge,
-                          isScrollable: true,
-                          tabs: [
-                            ...dataProvider.dataModel!.data.asMap().entries.map((entry) {
-                              final index = entry.key;
-                              final dataItem = entry.value;
-                              final tab = dataItem.nameDescription;
-                              final icon = index < tabIcons.length ? tabIcons[index] : Icons.sensor_occupied;
+                    Container(
+                      width: double.infinity,
+                      color: Theme.of(context).colorScheme.background,
+                      child: TabBar(
+                        controller: _tabController,
+                        // isScrollable: dataProvider.dataModel!.data.length > 3 && !isScreenSizeLarge,
+                        isScrollable: true,
+                        tabs: [
+                          ...dataProvider.dataModel!.data.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final dataItem = entry.value;
+                            final tab = dataItem.nameDescription;
+                            final icon = index < tabIcons.length ? tabIcons[index] : Icons.sensor_occupied;
 
-                              return CustomTab(
-                                height: 80,
-                                content: icon,
-                                label: tab,
-                                tabIndex: index,
-                                selectedTabIndex: dataProvider.selectedTabIndex,
-                              );
-                            }).toList(),
-                          ],
-                        ),
+                            return Tab(
+                              icon: Icon(icon),
+                              text: tab,
+                            );
+                          }).toList(),
+                        ],
                       ),
                     ),
                     Expanded(
@@ -205,7 +199,7 @@ class _DataAcquisitionMainState extends State<DataAcquisitionMain> with SingleTi
                       "controllerId": widget.userId,
                       "dataAcquisitions": dataAcquisition!.toJson(),
                     };
-
+                    print(dataAcquisition.toMqtt().join(';'));
                     try {
                       final crateDataAcquisition = await httpService.postRequest('createUserDataAcquisition', jsonData);
                       final message = jsonDecode(crateDataAcquisition.body);

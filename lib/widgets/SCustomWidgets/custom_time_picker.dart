@@ -64,7 +64,6 @@ class _CustomTimePickerState extends State<CustomTimePicker> {
               isForce2Digits: true,
               is24HourMode: widget.is24HourMode ?? true,
               isShowSeconds: widget.isSeconds,
-              isShowHours: true,
               normalTextStyle: const TextStyle(fontSize: 20, color: Colors.grey),
               highlightedTextStyle: const TextStyle(fontSize: 20, color: Colors.black),
               spacing: 50,

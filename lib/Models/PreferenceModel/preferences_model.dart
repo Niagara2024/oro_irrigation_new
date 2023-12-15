@@ -15,11 +15,11 @@ class GeneralData {
 
   factory GeneralData.fromJson(Map<String, dynamic> json) {
     return GeneralData(
-      userName: json['userName'] ?? '',
-      categoryName: json['categoryName'] ?? '',
-      controllerName: json['controllerName'] ?? '',
-      deviceId: json['deviceId'] ?? 0,
-      controllerId: json['controllerId'] ?? 0
+        userName: json['userName'] ?? '',
+        categoryName: json['categoryName'] ?? '',
+        controllerName: json['controllerName'] ?? '',
+        deviceId: json['deviceId'] ?? "0",
+        controllerId: json['controllerId'] ?? 0
     );
   }
   Map<String, dynamic> toJson() {
@@ -28,7 +28,7 @@ class GeneralData {
       'categoryName': categoryName,
       'controllerName': controllerName,
       'deviceId': deviceId,
-      'controllerId': controllerId
+      'controllerId': controllerId,
     };
   }
 }
@@ -68,12 +68,12 @@ class Contacts {
 }
 
 class ContactItem {
-  String? id;
+  String id;
   String? name;
   String? value;
 
   ContactItem({
-    this.id,
+    required this.id,
     this.name,
     this.value,
   });
@@ -113,47 +113,6 @@ class ContactType {
   Map<String, dynamic> toJson() {
     return {
       'contactType': contactType,
-    };
-  }
-}
-
-class Pumps {
-  List<PumpItem2> sourcePumpName;
-  List<PumpItem2> irrigationPumpName;
-  List<PumpItem> list;
-
-  Pumps({
-    required this.sourcePumpName,
-    required this.irrigationPumpName,
-    required this.list,
-  });
-
-  factory Pumps.fromJson(Map<String, dynamic> json) {
-    final sourcePumpNameData = json['sourcePumpName'] as List<dynamic>? ?? [];
-    final irrigationPumpNameData = json['irrigationPumpName'] as List<dynamic>? ?? [];
-    final listData = json['list'] as List<dynamic>? ?? [];
-
-    final sourcePumpName = sourcePumpNameData.map((item) {
-      return PumpItem2.fromJson(item);
-    }).toList();
-
-    final irrigationPumpName = irrigationPumpNameData.map((item) {
-      return PumpItem2.fromJson(item);
-    }).toList();
-
-    final list = listData.map((item) {
-      return PumpItem.fromJson(item);
-    }).toList();
-
-    return Pumps(
-      sourcePumpName: sourcePumpName,
-      irrigationPumpName: irrigationPumpName,
-      list: list,
-    );
-  }
-  Map<String, dynamic> toJson() {
-    return {
-      'list': list.map((item) => item.toJson()).toList(),
     };
   }
 }
@@ -531,14 +490,17 @@ class Configuration {
     final contactName = contactNameData.map((setting) {
       return ContactItem.fromJson(setting);
     }).toList();
+
     final sourcePumpNameData = json['sourcePumpName'] as List<dynamic>;
     final sourcePumpName = sourcePumpNameData.map((setting) {
       return ContactItem.fromJson(setting);
     }).toList();
+
     final irrigationPumpNameData = json['irrigationPumpName'] as List<dynamic>;
     final irrigationPumpName = irrigationPumpNameData.map((setting) {
       return ContactItem.fromJson(setting);
     }).toList();
+
     final contactTypesData = json['contactType'] as List<dynamic>?;
 
     final contactTypes = contactTypesData?.map((setting) {

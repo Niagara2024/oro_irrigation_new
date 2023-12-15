@@ -1,0 +1,61 @@
+import 'CentralFertilizerSite.dart';
+import 'CentralFilterSite.dart';
+import 'IrrigationPump.dart';
+import 'LineOrSequence.dart';
+import 'MainValve.dart';
+import 'SourcePump.dart';
+
+class DashboardDataProvider
+{
+  List<SourcePump> sourcePump;
+  List<IrrigationPump> irrigationPump;
+  List<MainValve> mainValve;
+  List<LineOrSequence> lineOrSequence;
+  List<CentralFertilizerSite> centralFertilizerSite;
+  List<CentralFilterSite> centralFilterSite;
+
+  DashboardDataProvider({
+    required this.sourcePump,
+    required this.irrigationPump,
+    required this.mainValve,
+    required this.lineOrSequence,
+    required this.centralFertilizerSite,
+    required this.centralFilterSite,
+  });
+
+  factory DashboardDataProvider.fromJson(Map<String, dynamic> json) {
+    List<SourcePump> sourcePumpList = (json['sourcePump'] as List)
+        .map((sourcePumpJson) => SourcePump.fromJson(sourcePumpJson))
+        .toList();
+
+    List<IrrigationPump> irrigationPump = (json['irrigationPump'] as List)
+        .map((sourcePumpJson) => IrrigationPump.fromJson(sourcePumpJson))
+        .toList();
+
+    List<MainValve> mainValve = (json['mainValve'] as List)
+        .map((sourcePumpJson) => MainValve.fromJson(sourcePumpJson))
+        .toList();
+
+    List<LineOrSequence> lineOrSequence = (json['lineOrSequence'] as List)
+        .map((irrigationLineJson) => LineOrSequence.fromJson(irrigationLineJson))
+        .toList();
+
+    List<CentralFilterSite> centralFilterSite = (json['centralFilterSite'] as List)
+        .map((irrigationLineJson) => CentralFilterSite.fromJson(irrigationLineJson))
+        .toList();
+
+    List<CentralFertilizerSite> centralFertilizerSite = (json['centralFertilizerSite'] as List)
+        .map((irrigationLineJson) => CentralFertilizerSite.fromJson(irrigationLineJson))
+        .toList();
+
+    return DashboardDataProvider(
+      sourcePump: sourcePumpList,
+      mainValve: mainValve,
+      lineOrSequence: lineOrSequence,
+      irrigationPump: irrigationPump,
+      centralFertilizerSite: centralFertilizerSite,
+      centralFilterSite: centralFilterSite,
+    );
+  }
+
+}

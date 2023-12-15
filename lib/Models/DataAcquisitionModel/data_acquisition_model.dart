@@ -16,6 +16,10 @@ class DataModel {
   List<Map<String, dynamic>> toJson() {
     return data.map((item) => item.toJson()).toList();
   }
+
+  List toMqtt() {
+    return data.map((item) => item.toMqtt()).toList();
+  }
 }
 
 class DataItemModel {
@@ -52,6 +56,16 @@ class DataItemModel {
       'dataAcquisition': dataAcquisition.map((item) => item.toJson()).toList(),
     };
   }
+
+  dynamic toMqtt() {
+    String dataAcquisitionString = dataAcquisition
+        .map((item) => "$name, ${item.toMqtt()}")
+        .toList()
+        .join(';\n');
+
+    return dataAcquisitionString;
+  }
+
 }
 
 class DataAcquisitionModel {
@@ -70,12 +84,11 @@ class DataAcquisitionModel {
   });
 
   factory DataAcquisitionModel.fromJson(Map<String, dynamic> json) {
-    print(json);
     return DataAcquisitionModel(
       sNo: json['sNo'],
       name: json['name'],
       id: json['id'],
-      location: json['location'] != '' ? json['location'] : 'No name',
+      location: json['location'],
       sampleRate: json['sampleRate'],
     );
   }
@@ -88,5 +101,11 @@ class DataAcquisitionModel {
       'location': location,
       'sampleRate': sampleRate,
     };
+  }
+
+  dynamic toMqtt() {
+    // return "$sNo, $name, $id, $location, ${sampleRate != '' ? "${sampleRate.substring(0, sampleRate.length - 5)}:00:00" : '00:00:00'}";
+    return "$sNo, $name, $id, $location, $sampleRate";
+
   }
 }

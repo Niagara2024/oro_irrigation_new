@@ -265,6 +265,7 @@ class SampleConditions {
 }
 
 class Condition {
+  int sNo;
   String title;
   int widgetTypeId;
   String iconCodePoint;
@@ -274,6 +275,7 @@ class Condition {
   bool selected;
 
   Condition({
+    required this.sNo,
     required this.title,
     required this.widgetTypeId,
     required this.iconCodePoint,
@@ -285,6 +287,7 @@ class Condition {
 
   factory Condition.fromJson(Map<String, dynamic> json) {
     return Condition(
+      sNo: json['sNo'],
       title: json['title'],
       widgetTypeId: json['widgetTypeId'],
       iconCodePoint: json['iconCodePoint'],
@@ -297,6 +300,7 @@ class Condition {
 
   Map<String, dynamic> toJson() {
     return {
+      'sNo': sNo,
       'title': title,
       'value': value,
       'selected': selected,

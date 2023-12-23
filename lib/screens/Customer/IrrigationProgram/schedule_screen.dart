@@ -9,7 +9,6 @@ import '../../../widgets/SCustomWidgets/custom_list_tile.dart';
 import '../../../widgets/SCustomWidgets/custom_tab.dart';
 import '../../../widgets/SCustomWidgets/custom_train_widget.dart';
 
-
 class ScheduleScreen extends StatefulWidget {
   final int userId;
   final int controllerId;
@@ -92,22 +91,22 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
     final scheduleProvider = Provider.of<IrrigationProgramMainProvider>(context, listen: false);
     if(rtcType.length > 2) {
       setState(() {
-      if (rtcType.isNotEmpty) {
-        rtcType.remove(rtcType.keys.last);
+        if (rtcType.isNotEmpty) {
+          rtcType.remove(rtcType.keys.last);
 
-        if (rtcType == runListRtc) {
-          _tabController1 = TabController(length: rtcType.length, vsync: this)..addListener(() {
-            scheduleProvider.updateRtcIndex1(_tabController1.index);
-          });
-          _tabController1.animateTo(rtcType.length - 1);
-        } else {
-          _tabController2 = TabController(length: rtcType.length, vsync: this)..addListener(() {
-            scheduleProvider.updateRtcIndex2(_tabController2.index);
-          });
-          _tabController2.animateTo(rtcType.length - 1);
+          if (rtcType == runListRtc) {
+            _tabController1 = TabController(length: rtcType.length, vsync: this)..addListener(() {
+              scheduleProvider.updateRtcIndex1(_tabController1.index);
+            });
+            _tabController1.animateTo(rtcType.length - 1);
+          } else {
+            _tabController2 = TabController(length: rtcType.length, vsync: this)..addListener(() {
+              scheduleProvider.updateRtcIndex2(_tabController2.index);
+            });
+            _tabController2.animateTo(rtcType.length - 1);
+          }
         }
-      }
-    });
+      });
     } else {
       showAdaptiveDialog(
         context: context,
@@ -128,56 +127,56 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
   Widget build(BuildContext context) {
     final scheduleProvider = Provider.of<IrrigationProgramMainProvider>(context);
     return LayoutBuilder(
-      builder: (context, BoxConstraints constraints) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 10,),
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10)
+        builder: (context, BoxConstraints constraints) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 10,),
+              Card(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)
+                ),
+                surfaceTintColor: Colors.white,
+                child: DropdownButton(
+                  borderRadius: BorderRadius.circular(10),
+                  underline: Container(),
+                  items: scheduleProvider.scheduleTypes.map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Center(child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(value),
+                      )),
+                    );
+                  }).toList(),
+                  value: scheduleProvider.selectedScheduleType,
+                  onChanged: (newValue) => scheduleProvider.updateSelectedValue(newValue),
+                ),
               ),
-              surfaceTintColor: Colors.white,
-              child: DropdownButton(
-                borderRadius: BorderRadius.circular(10),
-                underline: Container(),
-                items: scheduleProvider.scheduleTypes.map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Center(child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(value),
-                    )),
-                  );
-                }).toList(),
-                value: scheduleProvider.selectedScheduleType,
-                onChanged: (newValue) => scheduleProvider.updateSelectedValue(newValue),
-              ),
-            ),
-            const SizedBox(height: 10,),
-            if(scheduleProvider.selectedScheduleType == scheduleProvider.scheduleTypes[1])
-              buildScheduleWidgets(
-                scheduleProvider,
-                scheduleProvider.sampleScheduleModel!.scheduleAsRunList,
-                _tabController1,
-                _textEditingController,
-                scheduleProvider.selectedRtcIndex1,
-                runListRtc,
-                constraints
-              ),
-            if(scheduleProvider.selectedScheduleType == scheduleProvider.scheduleTypes[2])
-              buildScheduleWidgets(
-                scheduleProvider,
-                scheduleProvider.sampleScheduleModel!.scheduleByDays,
-                _tabController2,
-                _textEditingController,
-                scheduleProvider.selectedRtcIndex2,
-                byDaysRtc,
-                constraints
-              ),
-          ],
-        );
-      }
+              const SizedBox(height: 10,),
+              if(scheduleProvider.selectedScheduleType == scheduleProvider.scheduleTypes[1])
+                buildScheduleWidgets(
+                    scheduleProvider,
+                    scheduleProvider.sampleScheduleModel!.scheduleAsRunList,
+                    _tabController1,
+                    _textEditingController,
+                    scheduleProvider.selectedRtcIndex1,
+                    runListRtc,
+                    constraints
+                ),
+              if(scheduleProvider.selectedScheduleType == scheduleProvider.scheduleTypes[2])
+                buildScheduleWidgets(
+                    scheduleProvider,
+                    scheduleProvider.sampleScheduleModel!.scheduleByDays,
+                    _tabController2,
+                    _textEditingController,
+                    scheduleProvider.selectedRtcIndex2,
+                    byDaysRtc,
+                    constraints
+                ),
+            ],
+          );
+        }
     );
   }
 
@@ -240,56 +239,56 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
               ],
             )
                 : Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TabBar(
-                      controller: tabController,
-                      dividerColor: Colors.transparent,
-                      // labelPadding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      indicatorColor: Colors.transparent,
-                      isScrollable: true,
-                      tabs: [
-                        ...rtcType.keys.map((rtc) {
-                          final rtcIndex = rtcType.keys.toList().indexOf(rtc);
-                          return Container(
-                            width: constraints.maxWidth > 800 ? constraints.maxWidth * 0.07 : constraints.maxWidth * 0.05,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: selectedRtcIndex == rtcIndex ? Theme.of(context).primaryColor : Colors.white),
-                                color: Colors.white,
-                                shape: BoxShape.rectangle,
-                                borderRadius: BorderRadius.circular(10),
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TabBar(
+                    controller: tabController,
+                    dividerColor: Colors.transparent,
+                    // labelPadding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    indicatorColor: Colors.transparent,
+                    isScrollable: true,
+                    tabs: [
+                      ...rtcType.keys.map((rtc) {
+                        final rtcIndex = rtcType.keys.toList().indexOf(rtc);
+                        return Container(
+                          width: constraints.maxWidth > 800 ? constraints.maxWidth * 0.07 : constraints.maxWidth * 0.05,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: selectedRtcIndex == rtcIndex ? Theme.of(context).primaryColor : Colors.white),
+                            color: Colors.white,
+                            shape: BoxShape.rectangle,
+                            borderRadius: BorderRadius.circular(10),
 
-                            ),
-                            child: Tab(
-                              text: constraints.maxWidth > 800 ? 'RTC ${rtcIndex + 1}' : '${rtcIndex + 1}',
-                            ),
-                          );
-                        }).toList(),
-                      ]
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () => addTab(rtcType),
-                          style: ButtonStyle(
-                            fixedSize: MaterialStateProperty.all(Size(constraints.maxWidth * 0.1, 35)),
                           ),
-                          child: constraints.maxWidth > 800 ? const Text('ADD') : const Text('+'),
-                        ),
-                        const SizedBox(width: 10,),
-                        ElevatedButton(
-                          onPressed: () => deleteTab(rtcType),
-                          style: ButtonStyle(
-                            fixedSize: MaterialStateProperty.all(Size(constraints.maxWidth * 0.1, 35)),
+                          child: Tab(
+                            text: constraints.maxWidth > 800 ? 'RTC ${rtcIndex + 1}' : '${rtcIndex + 1}',
                           ),
-                          child: constraints.maxWidth > 800 ? const Text('DELETE') : const Text('-')
-                        ),
-                        SizedBox(width: constraints.maxWidth * 0.03,)
-                      ],
+                        );
+                      }).toList(),
+                    ]
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => addTab(rtcType),
+                      style: ButtonStyle(
+                        fixedSize: MaterialStateProperty.all(Size(constraints.maxWidth * 0.1, 35)),
+                      ),
+                      child: constraints.maxWidth > 800 ? const Text('ADD') : const Text('+'),
                     ),
+                    const SizedBox(width: 10,),
+                    ElevatedButton(
+                        onPressed: () => deleteTab(rtcType),
+                        style: ButtonStyle(
+                          fixedSize: MaterialStateProperty.all(Size(constraints.maxWidth * 0.1, 35)),
+                        ),
+                        child: constraints.maxWidth > 800 ? const Text('DELETE') : const Text('-')
+                    ),
+                    SizedBox(width: constraints.maxWidth * 0.03,)
                   ],
                 ),
+              ],
+            ),
             const SizedBox(height: 10,),
             Expanded(
               child: Padding(
@@ -341,8 +340,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
                             ? '00'
                             : scheduleData['skipDays'];
 
-                        print(startDate);
-                        print(DateTime.parse(startDate));
+                        // print(startDate);
+                        // print(DateTime.parse(startDate));
                         // List<String> days = List.generate(int.parse(noOfDays != '' ? noOfDays : '0'), (index) => 'DAY ${index + 1}');
                         String getWeekday(int weekday) {
                           const daysInWeek = 7;
@@ -366,7 +365,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
                             Card(
                               surfaceTintColor: Colors.white,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15)
+                                  borderRadius: BorderRadius.circular(15)
                               ),
                               child: Column(
                                 children: [
@@ -381,7 +380,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
                                           },
                                           isSeconds: false,
                                           is24HourMode: true,
-                                          isNative: false,
+                                          isNative: true,
                                           icon: Icons.timer_outlined,
                                         ),
                                         Visibility(
@@ -426,15 +425,15 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
                                         Visibility(
                                           visible: scheduleProvider.sampleScheduleModel?.defaultModel.rtcOffTime,
                                           child: CustomTimerTile(
-                                              subtitle: 'MAXIMUM TIME',
-                                              initialValue: maxTime,
-                                              onChanged: (newTime){
-                                                scheduleProvider.updateRtcProperty(newTime, selectedRtc, 'maxTime', scheduleType);
-                                              },
-                                              isSeconds: false,
-                                              is24HourMode: true,
-                                              isNative: true,
-                                              icon: Icons.share_arrival_time_rounded,
+                                            subtitle: 'MAXIMUM TIME',
+                                            initialValue: maxTime,
+                                            onChanged: (newTime){
+                                              scheduleProvider.updateRtcProperty(newTime, selectedRtc, 'maxTime', scheduleType);
+                                            },
+                                            isSeconds: false,
+                                            is24HourMode: true,
+                                            isNative: true,
+                                            icon: Icons.share_arrival_time_rounded,
                                           ),
                                         ),
                                         CustomSwitchTile(

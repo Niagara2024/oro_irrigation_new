@@ -30,7 +30,7 @@ class _NewCustomTimePickerState extends State<NewCustomTimePicker> {
         children: [
           Text(
             widget.title,
-            style: TextStyle(color: Colors.black),
+            style: const TextStyle(color: Colors.black),
             textAlign: TextAlign.center,
           ),
         ],

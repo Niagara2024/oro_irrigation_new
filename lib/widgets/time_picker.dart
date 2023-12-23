@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
-
 import '../../state_management/constant_provider.dart';
 import '../../state_management/overall_use.dart';
+import '../state_management/GlobalFertLimitProvider.dart';
 import 'my_number_picker.dart';
 
 class CustomTimePickerSiva extends StatefulWidget {
@@ -37,15 +37,17 @@ class _CustomTimePickerSivaState extends State<CustomTimePickerSiva> {
   Widget build(BuildContext context) {
     var constantPvd = Provider.of<ConstantProvider>(context,listen: true);
     var overAllPvd = Provider.of<OverAllUse>(context,listen: true);
+    var gfertpvd = Provider.of<GlobalFertLimitProvider>(context, listen: true);
+
     return GestureDetector(
       onTap: () {
-        _showTimePicker(context,constantPvd,overAllPvd);
+        _showTimePicker(context,constantPvd,overAllPvd,gfertpvd);
       },
-      child: Text(widget.value,style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold),),
+      child: Text(widget.value,style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold,color: myTheme.primaryColor),),
     );
   }
 
-  void _showTimePicker(BuildContext context,ConstantProvider constantPvd,OverAllUse overAllPvd) async {
+  void _showTimePicker(BuildContext context,ConstantProvider constantPvd,OverAllUse overAllPvd,GlobalFertLimitProvider gfertpvd) async {
     overAllPvd.editTimeAll();
     final result = await showDialog<String>(
       context: context,
@@ -59,7 +61,7 @@ class _CustomTimePickerSivaState extends State<CustomTimePickerSiva> {
               ),
             ],
           ),
-          content: MyTimePicker(displayHours: widget.displayHours, displayMins: widget.displayMins, displaySecs: widget.displaySecs, displayCustom: widget.displayCustom, CustomString: widget.CustomString, CustomList: widget.CustomList, displayAM_PM: widget.displayAM_PM, hourString: '', minString: '', secString: '',),
+          content: MyTimePicker(displayHours: widget.displayHours,hourString: 'hr', displayMins: widget.displayMins, displaySecs: widget.displaySecs, displayCustom: widget.displayCustom, CustomString: widget.CustomString, CustomList: widget.CustomList, displayAM_PM: widget.displayAM_PM,),
           actionsAlignment: MainAxisAlignment.end,
           actions: [
             TextButton(
@@ -90,20 +92,41 @@ class _CustomTimePickerSivaState extends State<CustomTimePickerSiva> {
                 }else if(widget.purpose == 'line/leakageLimit'){
                   constantPvd.irrigationLineFunctionality(['line/leakageLimit',widget.index,'${overAllPvd.other}']);
                 }else if(widget.purpose == 'mainvalve/delay'){
-                  constantPvd.mainValveFunctionality(['mainvalve/delay',widget.index,'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}']);
+                  constantPvd.mainValveFunctionality(['mainvalve/delay',widget.index,'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
                 }else if(widget.purpose == 'filter_dp_delay'){
-                  constantPvd.filterFunctionality(['filter_dp_delay',widget.index,'${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                  constantPvd.filterFunctionality(['filter_dp_delay',widget.index,'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
                 }else if(widget.purpose == 'filter_looping_limit'){
                   constantPvd.filterFunctionality(['filter_looping_limit',widget.index,'${overAllPvd.other}']);
                 }else if(widget.additional == 'split'){
                   var split = widget.purpose.split('/');
                   if(split[0] == 'valve_defaultDosage'){
-                    print('i came');
-                    constantPvd.valveFunctionality([split[0],int.parse(split[1]),split[2],int.parse(split[3]),'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                    constantPvd.valveFunctionality([split[0],int.parse(split[1]),int.parse(split[2]),'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
                   }else if(split[0] == 'valve_fillUpDelay'){
-                    constantPvd.valveFunctionality([split[0],int.parse(split[1]),split[2],int.parse(split[3]),'${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}']);
+                    constantPvd.valveFunctionality([split[0],int.parse(split[1]),int.parse(split[2]),'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
                   }else if(split[0] == 'fertilizer_shortestPulse'){
-                    constantPvd.fertilizerFunctionality([split[0],int.parse(split[1]),int.parse(split[2]),int.parse(split[3]),'${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                    constantPvd.fertilizerFunctionality([split[0],int.parse(split[1]),split[2],int.parse(split[3]),'${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                  }else if(split[0] == 'alarm_scanTime'){
+                    constantPvd.alarmFunctionality([split[0],int.parse(split[1]),int.parse(split[2]),'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                  }else if(split[0] == 'alarm_auto_reset'){
+                    constantPvd.alarmFunctionality([split[0],int.parse(split[1]),int.parse(split[2]),'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                  }else if(split[0] == 'critical_alarm_scanTime'){
+                    constantPvd.criticalAlarmFunctionality([split[0],int.parse(split[1]),int.parse(split[2]),'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                  }else if(split[0] == 'critical_alarm_auto_reset'){
+                    constantPvd.criticalAlarmFunctionality([split[0],int.parse(split[1]),int.parse(split[2]),'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                  }else if(split[0] == 'ecPhControlCycle'){
+                    constantPvd.ecPhFunctionality([split[0],int.parse(split[1]),split[2],int.parse(split[3]),'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                  }else if(split[0] == 'ecPhInteg'){
+                    constantPvd.ecPhFunctionality([split[0],int.parse(split[1]),split[2],int.parse(split[3]),'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                  }else if(split[0] == 'fertilizer_minimalOnTime'){
+                    constantPvd.fertilizerFunctionality([split[0],int.parse(split[1]),'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                  }else if(split[0] == 'fertilizer_minimalOffTime'){
+                    constantPvd.fertilizerFunctionality([split[0],int.parse(split[1]),'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                  }else if(split[0] == 'fertilizer_waterFlowStabilityTime'){
+                    constantPvd.fertilizerFunctionality([split[0],int.parse(split[1]),'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                  }else if(split[0] == 'fertilizer_boosterOffDelay'){
+                    constantPvd.fertilizerFunctionality([split[0],int.parse(split[1]),'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                  }else if(split[0] == 'time'){
+                    gfertpvd.editGfert('time',int.parse(split[1]),int.parse(split[2]),split[3],'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}');
                   }
                 }
                 Navigator.of(context).pop();

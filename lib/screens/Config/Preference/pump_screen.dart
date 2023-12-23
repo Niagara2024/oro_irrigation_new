@@ -7,7 +7,6 @@ import '../../../widgets/SCustomWidgets/custom_tab.dart';
 import '../../../widgets/SCustomWidgets/custom_text_container.dart';
 import '../../../widgets/SCustomWidgets/custom_train_widget.dart';
 
-
 class PumpScreen extends StatefulWidget {
   const PumpScreen({Key? key}) : super(key: key);
 
@@ -24,12 +23,10 @@ class _PumpScreenState extends State<PumpScreen> with SingleTickerProviderStateM
 
     final pumpScreenProvider = Provider.of<PreferencesMainProvider>(context, listen: false);
 
-    // Initialize the provider
     pumpScreenProvider.updatePumpIndex(0);
     pumpScreenProvider.extractTotalPumpsInfo();
     pumpScreenProvider.extractPumpInfo();
 
-    // Initialize the TabController
     _tabController = TabController(
       length: pumpScreenProvider.totalPumps.length,
       vsync: this,
@@ -80,15 +77,15 @@ class _PumpScreenState extends State<PumpScreen> with SingleTickerProviderStateM
                 ),
               ),
             ],
-          const SizedBox(height: 10),
+          isScreenSizeLarge ? Container() : const SizedBox(height: 10),
           Expanded(
             child: isScreenSizeLarge
                 ? Container(
-              margin: const EdgeInsets.symmetric(horizontal: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
+              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              decoration: const BoxDecoration(
+                // borderRadius: BorderRadius.circular(15),
                 color: Colors.white,
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
                     color: Colors.black12,
                     offset: Offset(0, 2),
@@ -161,7 +158,7 @@ class _PumpScreenState extends State<PumpScreen> with SingleTickerProviderStateM
                     Expanded(
                       child: ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        itemCount: pumpScreenProvider.configuration!.pumps!.length,
+                        itemCount: pumpScreenProvider.configuration!.pumps![pumpIndex].value.length,
                         itemBuilder: (context, index) {
                           return Column(
                             children: [
@@ -171,8 +168,9 @@ class _PumpScreenState extends State<PumpScreen> with SingleTickerProviderStateM
                                   color: Colors.white,
                                 ),
                                 child: CustomTile(
-                                  subtitle: pumpScreenProvider.configuration!.pumps!.firstWhere((element) => element.id == pump).value[index].type,
-                                  //content: IconData(int.parse(pumpScreenProvider.configuration!.selectedContact.selectedContact[index].iconCodePoint ?? ''), fontFamily: pumpScreenProvider.configuration!.selectedContact.selectedContact[index].iconFontFamily),
+                                  title: pumpScreenProvider.configuration!.pumps!.firstWhere((element) => element.id == pump).value[index].type,
+                                  content: '',
+                                  // content: IconData(int.parse(pumpScreenProvider.configuration!.selectedContact.selectedContact[index].iconCodePoint ?? ''), fontFamily: pumpScreenProvider.configuration!.selectedContact.selectedContact[index].iconFontFamily),
                                   trailing: DropdownButton<String>(
                                     value: pumpScreenProvider.configuration!.pumps!.firstWhere((element) => element.id == pump).value[index].selectedContact,
                                     underline: Container(),
@@ -196,7 +194,7 @@ class _PumpScreenState extends State<PumpScreen> with SingleTickerProviderStateM
                                       }).toList(),
                                     ],
                                   ),
-                                  borderRadius: BorderRadius.circular(15), title: '',
+                                  borderRadius: BorderRadius.circular(15),
                                 ),
                               ),
                               const SizedBox(height: 5),
@@ -238,15 +236,18 @@ class _PumpScreenState extends State<PumpScreen> with SingleTickerProviderStateM
       ];
 
       final pumpItem = pumpScreenProvider.configuration!.pumps![index];
-      for (final selectedContact in pumpItem.value) {
+      for (var i = 0; i < pumpItem.value.length; i++) {
         final dropdown = SizedBox(
           width: 100,
           child: DropdownButton<String>(
             isExpanded: true,
-            value: selectedContact.selectedContact,
+            value: pumpItem.value[i].selectedContact,
             underline: Container(),
             onChanged: (newContact) {
-              pumpScreenProvider.updateContactsForPumps(newContact, pump, pumpScreenProvider.configuration!.selectedContact.selectedContact[index].type, index);
+              pumpScreenProvider.updateContactsForPumps(newContact,
+                  pump,
+                  pumpScreenProvider.configuration!.selectedContact.selectedContact[index].type,
+                  i);
             },
             items: [
               const DropdownMenuItem<String>(

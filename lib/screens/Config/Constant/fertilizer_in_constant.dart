@@ -41,13 +41,15 @@ class _FertilizerConstantState extends State<FertilizerConstant> {
           [expandedTableCell_Text('Site','name'),
             fixedTableCell_Text('Used in','lines',80,width < 1100 ? constant_style : null),
             fixedTableCell_Text('No flow','behavior',200,width < 1100 ? constant_style : null),
-            expandedTableCell_Text('Fertilizer','(injector)',null,width < 1100 ? constant_style : null),
+            fixedTableCell_Text('Minimal','on time',90,width < 1100 ? constant_style : null),
+            fixedTableCell_Text('Minimal','off time',90,width < 1100 ? constant_style : null),
+            fixedTableCell_Text('water flow','stability time',90,width < 1100 ? constant_style : null),
+            fixedTableCell_Text('Booster off','delay',90,width < 1100 ? constant_style : null),
             expandedTableCell_Text('Name','',null,width < 1100 ? constant_style : null),
-            expandedTableCell_Text('Dosing','meter',null,width < 1100 ? constant_style : null),
             expandedTableCell_Text('Ratio','(l/pulse)',null,width < 1100 ? constant_style : null),
             expandedTableCell_Text('Shortest','pulse(sec)',null,width < 1100 ? constant_style : null),
-            // expandedTableCell_Text('Nominal','flow(l/h)',null,width < 1100 ? constant_style : null),
-            // fixedTableCell_Text('Injector','mode',150,width < 1100 ? constant_style : null),
+            expandedTableCell_Text('Nominal','flow(l/h)',null,width < 1100 ? constant_style : null),
+            expandedTableCell_Text('Injector','Mode',null,width < 1100 ? constant_style : null),
           ],
           Expanded(
             child: ListView.builder(
@@ -64,17 +66,13 @@ class _FertilizerConstantState extends State<FertilizerConstant> {
                         expandedCustomCell(Text('${constantPvd.fertilizerUpdated[index]['name']}',style: width < 1100 ? constant_style : TextStyle(color: Colors.black),),null,null,40 * constantPvd.fertilizerUpdated[index]['fertilizer'].length),
                         fixedSizeCustomCell(Text('${constantPvd.fertilizerUpdated[index]['location'] == '' ? 'null' : constantPvd.fertilizerUpdated[index]['location']}',style: width < 1100 ? constant_style : TextStyle(color: Colors.black),), 80,40 * constantPvd.fertilizerUpdated[index]['fertilizer'].length as double,false),
                         fixedSizeCustomCell(Container(color: Colors.white,margin: EdgeInsets.all(5),child: MyDropDown(initialValue: constantPvd.fertilizerUpdated[index]['noFlowBehavior'], itemList: ['Stop Faulty Fertilizer','Stop Fertigation','Stop Irrigation','Inform Only'], pvdName: 'fertilizer/noFlowBehavior', index: index)), 200,40 * constantPvd.fertilizerUpdated[index]['fertilizer'].length as double,false),
-                        expandedNestedCustomCell([
-                          for(var i = 0;i < constantPvd.fertilizerUpdated[index]['fertilizer'].length;i++)
-                            expandedCustomCell(Text('${constantPvd.fertilizerUpdated[index]['fertilizer'][i]['id']}',style: width < 1100 ? constant_style1 : TextStyle(color: Colors.black),))
-                        ]),
+                        fixedSizeCustomCell(CustomTimePickerSiva(purpose: 'fertilizer_minimalOnTime/$index', index: index, value: '${constantPvd.fertilizerUpdated[index]['minimalOnTime']}', displayHours: false, displayMins: false, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,additional: 'split',), 90,40 * constantPvd.fertilizerUpdated[index]['fertilizer'].length as double,false),
+                        fixedSizeCustomCell(CustomTimePickerSiva(purpose: 'fertilizer_minimalOffTime/$index', index: index, value: '${constantPvd.fertilizerUpdated[index]['minimalOffTime']}', displayHours: false, displayMins: false, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,additional: 'split',), 90,40 * constantPvd.fertilizerUpdated[index]['fertilizer'].length as double,false),
+                        fixedSizeCustomCell(CustomTimePickerSiva(purpose: 'fertilizer_waterFlowStabilityTime/$index', index: index, value: '${constantPvd.fertilizerUpdated[index]['waterFlowStabilityTime']}', displayHours: false, displayMins: false, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,additional: 'split',), 90,40 * constantPvd.fertilizerUpdated[index]['fertilizer'].length as double,false),
+                        fixedSizeCustomCell(CustomTimePickerSiva(purpose: 'fertilizer_boosterOffDelay/$index', index: index, value: '${constantPvd.fertilizerUpdated[index]['boosterOffDelay']}', displayHours: false, displayMins: false, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,additional: 'split',), 90,40 * constantPvd.fertilizerUpdated[index]['fertilizer'].length as double,false),
                         expandedNestedCustomCell([
                           for(var i = 0;i < constantPvd.fertilizerUpdated[index]['fertilizer'].length;i++)
                             expandedCustomCell(Text('${constantPvd.fertilizerUpdated[index]['fertilizer'][i]['name']}',style: width < 1100 ? constant_style1 : TextStyle(color: Colors.black),))
-                        ]),
-                        expandedNestedCustomCell([
-                          for(var i = 0;i < constantPvd.fertilizerUpdated[index]['fertilizer'].length;i++)
-                            expandedCustomCell(Text('${constantPvd.fertilizerUpdated[index]['fertilizer'][i]['fertilizerMeter']}',style: width < 1100 ? constant_style1 : TextStyle(color: Colors.black),))
                         ]),
                         expandedNestedCustomCell([
                           for(var i = 0;i < constantPvd.fertilizerUpdated[index]['fertilizer'].length;i++)
@@ -84,6 +82,15 @@ class _FertilizerConstantState extends State<FertilizerConstant> {
                           for(var i = 0;i < constantPvd.fertilizerUpdated[index]['fertilizer'].length;i++)
                             expandedCustomCell(CustomTimePickerSiva(purpose: 'fertilizer_shortestPulse/${index}/fertilizer/${i}', index: index, value: '${constantPvd.fertilizerUpdated[index]['fertilizer'][i]['shortestPulse']}', displayHours: false, displayMins: false, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,additional: 'split',),null,i % 2 == 0 ? Colors.blue.shade50 : Colors.blue.shade100)
                         ]),
+                        expandedNestedCustomCell([
+                          for(var i = 0;i < constantPvd.fertilizerUpdated[index]['fertilizer'].length;i++)
+                            expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.fertilizerUpdated[index]['fertilizer'][i]['nominalFlow'], constantPvd: constantPvd, purpose: 'fertilizer_nominalFlow/${index}/fertilizer/${i}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],))
+                        ]),
+                        expandedNestedCustomCell([
+                          for(var i = 0;i < constantPvd.fertilizerUpdated[index]['fertilizer'].length;i++)
+                            expandedCustomCell(MyDropDown(initialValue: constantPvd.fertilizerUpdated[index]['fertilizer'][i]['injectorMode'], itemList: ['Concentration','Ec controlled','Ph controlled','Regular'], pvdName: 'fertilizer_injectorMode/$index/fertilizer/$i', index: index))
+                        ]),
+
                       ],
                     ),
                   );
@@ -149,7 +156,7 @@ class _FertilizerConstant_MState extends State<FertilizerConstant_M> {
                     ],
                   );
                 });
-                },
+              },
               child: Text('Click to select site',style: TextStyle(color: Colors.yellow,fontSize: 16),),
             ),
             SizedBox(height: 10,),
@@ -241,7 +248,6 @@ class _FertilizerConstant_MState extends State<FertilizerConstant_M> {
               child: Container(
                 child: SingleChildScrollView(
                   child: Column(
-                    // mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       returnMyListTile('Site name', Text('${constantPvd.fertilizer[selectedSite][0]}',style: TextStyle(fontSize: 14))),
                       returnMyListTile('Used in lines', Text('${constantPvd.fertilizer[selectedSite][1]}',style: TextStyle(fontSize: 14))),
@@ -311,7 +317,7 @@ class _DropDownValueState extends State<DropDownValue> {
                 contentPadding: EdgeInsets.all(0),
                 title: Text('No flow behavior',style: TextStyle(fontSize: 12),),
                 trailing: Container(
-                  width: 170,
+                    width: 170,
                     height: 40,
                     child: MyDropDown(initialValue: constantPvd.dropDownValue, itemList:['Stop Faulty Fertilizer','Stop Fertigation','Stop Irrigation','Inform Only'], pvdName: 'editDropDownValue', index: -1)),
               ),

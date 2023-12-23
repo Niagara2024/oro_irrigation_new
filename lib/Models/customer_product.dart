@@ -1,29 +1,26 @@
 class CustomerProductModel
 {
-  int prdId, prdStatus;
-  String catName, model, buyer, imei, groupName, lastModified;
+  int productId, productStatus;
+  String categoryName, model, deviceId, siteName, modifyDate;
 
   CustomerProductModel({
-    this.prdId = 0,
-    this.prdStatus = 0,
-    this.catName ='',
+    this.productId = 0,
+    this.productStatus = 0,
+    this.categoryName ='',
     this.model = '',
-    this.imei = '',
-    this.buyer = '',
-    this.groupName = '',
-    this.lastModified = '',
-
+    this.deviceId = '',
+    this.siteName = '',
+    this.modifyDate = '',
   });
 
   factory CustomerProductModel.fromJson(Map<String, dynamic> json) => CustomerProductModel(
-    prdId: json['prdId'],
-    prdStatus: json['prdStatus'],
-    catName: json['catName'],
-    model: json['model'],
-    imei: json['imei'],
-    buyer: json['buyer'],
-    groupName: json['groupName']??'',
-    lastModified: json['lastModified'],
+    productId: json['prdId'],
+    productStatus: json['prdStatus'],
+    categoryName: json['catName'],
+    model: json['mdl'],
+    deviceId: json['dvcId'],
+    siteName: json['siteName'] ?? '',
+    modifyDate: json['mDate'],
   );
 
 }

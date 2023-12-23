@@ -82,22 +82,6 @@ class _DoneScreenState extends State<DoneScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 5),
-              Container(
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15)
-                ),
-                child: CustomSwitchTile(
-                    title: 'Completion option',
-                    icon: const Icon(Icons.incomplete_circle, color: Colors.black,),
-                    subtitle: 'Description',
-                    showSubTitle: true,
-                    showCircleAvatar: true,
-                    value: doneProvider.isCompletionEnabled,
-                    onChanged: (newValue) => doneProvider.updateProgramName(newValue, 'completion')
-                ),
-              ),
               const SizedBox(height: 5,),
               Container(
                 decoration: BoxDecoration(
@@ -115,9 +99,90 @@ class _DoneScreenState extends State<DoneScreen> {
                     onChanged: (newValue) => doneProvider.updateProgramName(newValue, 'priority')
                 ),
               ),
+              const SizedBox(height: 5,),
+              Container(
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15)
+                ),
+                child: CustomTimerTile(
+                  subtitle: 'DELAY B/W ZONES',
+                  initialValue: doneProvider.delayBetweenZones != "" ? doneProvider.delayBetweenZones : "00:00",
+                  onChanged: (newTime){
+                    doneProvider.updateProgramName(newTime, 'delayBetweenZones');
+                  },
+                  isSeconds: false,
+                  is24HourMode: true,
+                  isNative: true,
+                  icon: Icons.timer_outlined,
+                ),
+              ),
+              const SizedBox(height: 5,),
+              Container(
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15)
+                ),
+                child: CustomTextFormTile(
+                  subtitle: 'WATER ADJUST PERCENTAGE',
+                  initialValue: doneProvider.adjustPercentage != "" ? doneProvider.adjustPercentage : "100",
+                  hintText: '0%',
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.deny(RegExp('[^0-9]')),
+                    LengthLimitingTextInputFormatter(5),
+                  ],
+                  onChanged: (newValue){
+                    doneProvider.updateProgramName(newValue, 'adjustPercentage');
+                  },
+                  icon: Icons.safety_check,
+                  trailing: true,
+                  trailingText: "%",
+                ),
+              ),
             ],
           );
         }
     );
+  }
+}
+class PercentageInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    // Extract the numeric part of the input
+    String numericValue = newValue.text.replaceAll('%', '');
+
+    // Check if the numeric part is empty or not
+    if (numericValue.isEmpty) {
+      // Handle empty input (e.g., display '0%' by default)
+      return TextEditingValue(
+        text: '0%',
+        selection: TextSelection.fromPosition(
+          TextPosition(offset: '0%'.length),
+        ),
+      );
+    } else {
+      // Format the input with the '%' symbol
+      String formattedValue = '$numericValue%';
+
+      // Ensure that the input doesn't exceed 5 characters (excluding '%')
+      if (formattedValue.length <= 5) {
+        return TextEditingValue(
+          text: formattedValue,
+          selection: TextSelection.fromPosition(
+            TextPosition(offset: formattedValue.length),
+          ),
+        );
+      } else {
+        // If the input exceeds 5 characters, truncate it
+        return TextEditingValue(
+          text: formattedValue.substring(0, 5),
+          selection: TextSelection.fromPosition(
+            TextPosition(offset: 5),
+          ),
+        );
+      }
+    }
   }
 }

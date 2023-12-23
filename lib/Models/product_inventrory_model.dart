@@ -21,8 +21,6 @@ class ProductListModel
   });
 
 
-
-
   factory ProductListModel.fromJson(Map<String, dynamic> json) => ProductListModel(
     productId: json['productId'],
     categoryId: json['categoryId'],

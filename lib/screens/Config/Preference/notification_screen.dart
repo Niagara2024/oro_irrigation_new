@@ -88,8 +88,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       : notificationProvider.updateValueForAlarm(notification.notificationTypeId, newValue!),
                   borderRadius: BorderRadius.circular(15),
                   showCircleAvatar: true,
-                  content: IconData(0xf0164, fontFamily: notification.iconFontFamily),
-                  icon: notification.iconCodePoint.length < 6 ? IconData(int.parse(notification.iconCodePoint), fontFamily: notification.iconFontFamily) : IconData(0xf0164, fontFamily: notification.iconFontFamily)
+                  content: const IconData(0xf0164, fontFamily: 'MaterialIcons'),
+                  // icon: notification.iconCodePoint.length < 6 ? IconData(int.parse(notification.iconCodePoint), fontFamily: notification.iconFontFamily) : IconData(0xf0164, fontFamily: notification.iconFontFamily)
               ),
             ),
             if (index == notifications.length - 1)

@@ -30,12 +30,12 @@ class _ConditionwebUIState extends State<ConditionwebUI>
   dynamic jsondata;
   TimeOfDay _selectedTime = TimeOfDay.now();
   List<String> conditionhdrlist = [
-    'sNo',
+    'SNo',
     'Name',
     'Enable',
     'State',
     'Duration',
-    'condition IsTrueWhen',
+    'Condition IsTrue',
     'From Hour',
     'Unit Hour',
     'Notification',
@@ -160,7 +160,17 @@ class _ConditionwebUIState extends State<ConditionwebUI>
       dropdowntitle = 'Contact';
       hint = 'Contacts';
     }
-    if (usedprogramdropdownstr.contains('Sensor')) {
+    if (usedprogramdropdownstr.contains('Level')) {
+      usedprogramdropdownlist = _conditionModel.data!.levelSensor;
+      dropdowntitle = 'Sensor';
+      hint = 'Values';
+    }
+    if (usedprogramdropdownstr.contains('Moisture')) {
+      usedprogramdropdownlist = _conditionModel.data!.moistureSensor;
+      dropdowntitle = 'Sensor';
+      hint = 'Values';
+    }
+    if (usedprogramdropdownstr.contains('Analog')) {
       usedprogramdropdownlist = _conditionModel.data!.analogSensor;
       dropdowntitle = 'Sensor';
       hint = 'Values';
@@ -180,6 +190,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
           ? '${usedprogramdropdownlist?[0].name}'
           : usedprogramdropdownstr2;
     }
+    print(usedprogramdropdownlist);
   }
 
   Future<String?> _selectTime(BuildContext context) async {
@@ -202,7 +213,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
       return const Center(
         child: CircularProgressIndicator(),
       );
-    } else if (conditionLibrary!.length <= 0) {
+    } else if (conditionLibrary!.length <= 0 || conditionLibrary!.isEmpty) {
       return Container(
         child: const Center(
             child: Text(
@@ -313,7 +324,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                                 return Color.fromARGB(255, 240, 234, 160)
                                     .withOpacity(0.5); // Selected row color
                               }
-                              return Color.fromARGB(0, 176, 35, 35);
+                              return Colors.white;
                             }),
                             cells: [
                               for (int i = 0;
@@ -445,7 +456,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                                                     });
                                                   },
                                                 )))
-                                      else if (conditionhdrlist[i] == 'sNo')
+                                      else if (conditionhdrlist[i] == 'SNo')
                                           DataCell(onTap: () {
                                             setState(() {
                                               Selectindexrow = index;
@@ -478,7 +489,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                                                             fontSize: _fontSizelabel()),
                                                       )))
                                             else if (conditionhdrlist[i] ==
-                                                  'condition IsTrueWhen')
+                                                  'Condition IsTrue')
                                                 DataCell(onTap: () {
                                                   setState(() {
                                                     Selectindexrow = index;
@@ -538,7 +549,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                                                     },
                                                         Center(
                                                             child: Text(
-                                                              'data',
+                                                              '',
                                                               style: TextStyle(
                                                                   fontSize: _fontSizelabel()),
                                                             )))
@@ -643,7 +654,10 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                     value: items,
                     child: Container(
                         padding: const EdgeInsets.only(left: 10),
-                        child: Text(items!)),
+                        child: Text(
+                          items!,
+                          style: TextStyle(fontSize: 12),
+                        )),
                   );
                 }).toList(),
                 onChanged: (value) {
@@ -656,7 +670,8 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                 value: usedprogramdropdownstr == ''
                     ? conditionLibrary![Selectindexrow].dropdown1!.isEmpty
                     ? (_conditionModel.data!.dropdown![0])
-                    : conditionLibrary![Selectindexrow].dropdown1!
+                    : conditionLibrary![Selectindexrow]
+                    .dropdown1!
                     .toString()
                     : usedprogramdropdownstr,
               ),
@@ -721,8 +736,8 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                         onChanged: (value) {
                           setState(() {
                             dropdownvalues = value!;
-                            conditionLibrary![Selectindexrow]
-                                .dropdownValue = value!;
+                            conditionLibrary![Selectindexrow].dropdownValue =
+                            value!;
                             print('dropdownValue $value');
                           });
                         },
@@ -743,8 +758,8 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                         onChanged: (value) {
                           setState(() {
                             usedprogramdropdownstr2 = value!;
-                            conditionLibrary![Selectindexrow]
-                                .dropdown2 = value!;
+                            conditionLibrary![Selectindexrow].dropdown2 =
+                            value!;
                             print('dropdown2 $value');
                           });
                         },
@@ -783,8 +798,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                         String? sNo =
                         getSNoByName(program, usedprogramdropdownstr2);
                         if (sNo != null) {
-                          conditionLibrary![Selectindexrow]
-                              .program = '$sNo';
+                          conditionLibrary![Selectindexrow].program = '$sNo';
                         } else {
                           conditionLibrary![Selectindexrow].program = '0';
                         }
@@ -805,8 +819,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                         String? sNo =
                         getSNoByName(program, usedprogramdropdownstr2);
                         if (sNo != null) {
-                          conditionLibrary![Selectindexrow]
-                              .program = '$sNo';
+                          conditionLibrary![Selectindexrow].program = '$sNo';
                         } else {
                           conditionLibrary![Selectindexrow].program = '0';
                         }
@@ -828,8 +841,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                         String? sNo =
                         getSNoByName(program, usedprogramdropdownstr2);
                         if (sNo != null) {
-                          conditionLibrary![Selectindexrow]
-                              .program = '$sNo';
+                          conditionLibrary![Selectindexrow].program = '$sNo';
                         } else {
                           conditionLibrary![Selectindexrow].program = '0';
                         }
@@ -851,8 +863,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                         String? sNo =
                         getSNoByName(program, usedprogramdropdownstr2);
                         if (sNo != null) {
-                          conditionLibrary![Selectindexrow]
-                              .program = '$sNo';
+                          conditionLibrary![Selectindexrow].program = '$sNo';
                         } else {
                           conditionLibrary![Selectindexrow].program = '0';
                         }
@@ -874,8 +885,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                         String? sNo =
                         getSNoByName(program, usedprogramdropdownstr2);
                         if (sNo != null) {
-                          conditionLibrary![Selectindexrow]
-                              .program = '$sNo';
+                          conditionLibrary![Selectindexrow].program = '$sNo';
                         } else {
                           conditionLibrary![Selectindexrow].program = '0';
                         }
@@ -896,8 +906,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                         String? sNo =
                         getSNoByName(program, usedprogramdropdownstr2);
                         if (sNo != null) {
-                          conditionLibrary![Selectindexrow]
-                              .program = '$sNo';
+                          conditionLibrary![Selectindexrow].program = '$sNo';
                         } else {
                           conditionLibrary![Selectindexrow].program = '0';
                         }
@@ -919,8 +928,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                         String? sNo = getSNoByNamecondition(
                             program, usedprogramdropdownstr2);
                         if (sNo != null) {
-                          conditionLibrary![Selectindexrow]
-                              .program = '$sNo';
+                          conditionLibrary![Selectindexrow].program = '$sNo';
                         } else {
                           conditionLibrary![Selectindexrow].program = '0';
                         }
@@ -970,13 +978,11 @@ class _ConditionwebUIState extends State<ConditionwebUI>
   }
 
   updateconditions() async {
-
     List<Map<String, dynamic>> programJson = _conditionModel
         .data!.conditionProgram!
         .map((condition) => condition.toJson())
         .toList();
-    List<Map<String, dynamic>> levelJson = _conditionModel
-        .data!.conditionLevel!
+    List<Map<String, dynamic>> levelJson = _conditionModel.data!.conditionLevel!
         .map((condition) => condition.toJson())
         .toList();
     List<Map<String, dynamic>> moistureJson = _conditionModel
@@ -984,13 +990,16 @@ class _ConditionwebUIState extends State<ConditionwebUI>
         .map((condition) => condition.toJson())
         .toList();
 
-
     // var conditionJson = _conditionModel
     //     .data!.conditionLevel.to
     Map<String, dynamic> conditionJo2n = _conditionModel.data!.toJson();
     //    print('  print(conditionJso2n["conditionLibrary"]) ${conditionJo2n[
     // "conditionLibrary"]["program"]}');
-    Map<String, dynamic> finaljson = {"program": programJson,"moisture": moistureJson,"level":levelJson};
+    Map<String, dynamic> finaljson = {
+      "program": programJson,
+      "moisture": moistureJson,
+      "level": levelJson
+    };
     print('\n\n\n\n 3');
     print(finaljson);
     print('\n\n\n\n  3');

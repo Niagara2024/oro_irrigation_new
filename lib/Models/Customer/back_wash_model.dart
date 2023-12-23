@@ -1,6 +1,3 @@
- // To parse this JSON data, do
-//
-//     final filterbackwash = filterbackwashFromJson(jsonString);
 
 import 'dart:convert';
 
@@ -21,23 +18,24 @@ class Filterbackwash {
   });
 
   factory Filterbackwash.fromJson(Map<String, dynamic> json) => Filterbackwash(
-        code: json["code"],
-        message: json["message"],
-        data: json["data"] == null
-            ? []
-            : List<Datum>.from(json["data"]!.map((x) => Datum.fromJson(x))),
-      );
+    code: json["code"],
+    message: json["message"],
+    data: json["data"] == null
+        ? []
+        : List<Datum>.from(json["data"]!.map((x) => Datum.fromJson(x))),
+  );
 
   Map<String, dynamic> toJson() => {
-        "code": code,
-        "message": message,
-        "data": data == null
-            ? []
-            : List<dynamic>.from(data!.map((x) => x.toJson())),
-      };
+    "code": code,
+    "message": message,
+    "data": data == null
+        ? []
+        : List<dynamic>.from(data!.map((x) => x.toJson())),
+  };
 }
 
 class Filter {
+  int? sNo;
   String? title;
   int? widgetTypeId;
   String? iconCodePoint;
@@ -46,6 +44,7 @@ class Filter {
   bool? hidden;
 
   Filter({
+    this.sNo,
     this.title,
     this.widgetTypeId,
     this.iconCodePoint,
@@ -55,22 +54,24 @@ class Filter {
   });
 
   factory Filter.fromJson(Map<String, dynamic> json) => Filter(
-        title: json["title"],
-        widgetTypeId: json["widgetTypeId"],
-        iconCodePoint: json["iconCodePoint"],
-        iconFontFamily: json["iconFontFamily"],
-        value: json["value"],
-        hidden: json["hidden"],
-      );
+    sNo: json["sNo"],
+    title: json["title"],
+    widgetTypeId: json["widgetTypeId"],
+    iconCodePoint: json["iconCodePoint"],
+    iconFontFamily: json["iconFontFamily"],
+    value: json["value"],
+    hidden: json["hidden"],
+  );
 
   Map<String, dynamic> toJson() => {
-        "title": title,
-        "widgetTypeId": widgetTypeId,
-        "iconCodePoint": iconCodePoint,
-        "iconFontFamily": iconFontFamily,
-        "value": value,
-        "hidden": hidden,
-      };
+    "sNo": sNo,
+    "title": title,
+    "widgetTypeId": widgetTypeId,
+    "iconCodePoint": iconCodePoint,
+    "iconFontFamily": iconFontFamily,
+    "value": value,
+    "hidden": hidden,
+  };
 }
 
 class Datum {
@@ -91,24 +92,24 @@ class Datum {
   });
 
   factory Datum.fromJson(Map<String, dynamic> json) => Datum(
-        sNo: json["sNo"],
-        id: json["id"],
-        name: json["name"],
-        location: json["location"],
-        filter: json["filter"] == null
-            ? []
-            : List<Filter>.from(json["filter"]!.map((x) => Filter.fromJson(x))),
-        value: json["value"],
-      );
+    sNo: json["sNo"],
+    id: json["id"],
+    name: json["name"],
+    location: json["location"],
+    filter: json["filter"] == null
+        ? []
+        : List<Filter>.from(json["filter"]!.map((x) => Filter.fromJson(x))),
+    value: json["value"],
+  );
 
   Map<String, dynamic> toJson() => {
-        "sNo": sNo,
-        "id": id,
-        "name": name,
-        "location": location,
-        "filter": filter == null
-            ? []
-            : List<dynamic>.from(filter!.map((x) => x.toJson())),
-        "value": value,
-      };
+    "sNo": sNo,
+    "id": id,
+    "name": name,
+    "location": location,
+    "filter": filter == null
+        ? []
+        : List<dynamic>.from(filter!.map((x) => x.toJson())),
+    "value": value,
+  };
 }

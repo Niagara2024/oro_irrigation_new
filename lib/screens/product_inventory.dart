@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/src/response.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../Models/customer_product.dart';
 import '../Models/product_inventrory_model.dart';
 import '../Models/product_model.dart';
 import '../Models/product_stock.dart';
@@ -12,7 +14,6 @@ import '../constants/http_service.dart';
 import '../constants/theme.dart';
 
 enum SampleItem { itemOne, itemTwo}
-enum ddReplace { itemOne}
 
 class ProductInventory extends StatefulWidget {
   const ProductInventory({Key? key, required this.userName}) : super(key: key);
@@ -28,6 +29,10 @@ class ProductInventoryState extends State<ProductInventory> {
   int userType = 0;
   List<ProductListModel> productInventoryList = [];
   List<ProductListModel> filterProductInventoryList = [];
+
+  List<CustomerProductModel> productInventoryListCus = [];
+  List<CustomerProductModel> filterProductInventoryListCus = [];
+
   SampleItem? selectedMenu;
 
   List<String> jsonDataByImeiNo = [];
@@ -86,21 +91,36 @@ class ProductInventoryState extends State<ProductInventory> {
   }
 
   Future<void> getProductList(int set, int limit) async {
-    final body = userType == 1 ? {"fromUserId": null, "toUserId": null, "set":set, "limit":limit} : {"fromUserId": null, "toUserId": userID, "set":set, "limit":limit};
+    final body = userType == 1 ? {"fromUserId": null, "toUserId": null, "set":set, "limit":limit} :
+    {"fromUserId": null, "toUserId": userID, "set":set, "limit":limit};
     print(body);
-    final response = await HttpService().postRequest("getProduct", body);
+    Response response;
+    if(userType == 3){
+      response = await HttpService().postRequest("getCustomerProduct", body);
+    }else{
+      response = await HttpService().postRequest("getProduct", body);
+    }
+
     if (response.statusCode == 200)
     {
       if(jsonDecode(response.body)["code"]==200)
       {
-        setState(() {
+        setState(()
+        {
           totalProduct = jsonDecode(response.body)["data"]["totalProduct"];
-          totalCategory = jsonDecode(response.body)["data"]["totalCategory"];
-          totalModel = jsonDecode(response.body)["data"]["totalModel"];
-          outOfStockModel = jsonDecode(response.body)["data"]["outOfStockModel"];
-          productInventoryList = (jsonDecode(response.body)["data"]["product"] as List).map((data) => ProductListModel.fromJson(data)).toList();
 
-          isNextButtonEnabled = productInventoryList.length >= limit;
+          if(userType != 3){
+            totalCategory = jsonDecode(response.body)["data"]["totalCategory"];
+            totalModel = jsonDecode(response.body)["data"]["totalModel"];
+            outOfStockModel = jsonDecode(response.body)["data"]["outOfStockModel"];
+            productInventoryList = (jsonDecode(response.body)["data"]["product"] as List).map((data) => ProductListModel.fromJson(data)).toList();
+            isNextButtonEnabled = productInventoryList.length >= limit;
+          }
+          else{
+            productInventoryListCus = (jsonDecode(response.body)["data"]["product"] as List).map((data) => CustomerProductModel.fromJson(data)).toList();
+            isNextButtonEnabled = productInventoryListCus.length >= limit;
+          }
+
           isPreviousButtonEnabled = currentSet > 1;
           indicatorViewHide();
         });
@@ -143,14 +163,18 @@ class ProductInventoryState extends State<ProductInventory> {
       {
         setState(() {
           searched = true;
-          filterProductInventoryList = (jsonDecode(response.body)["data"] as List).map((data) => ProductListModel.fromJson(data)).toList();
+          if(userType==3){
+            filterProductInventoryListCus = (jsonDecode(response.body)["data"] as List).map((data) => CustomerProductModel.fromJson(data)).toList();
+          }else{
+            filterProductInventoryList = (jsonDecode(response.body)["data"] as List).map((data) => ProductListModel.fromJson(data)).toList();
+          }
+
         });
       }
     } else {
       throw Exception('Failed to load data');
     }
   }
-
 
   Future<void> getProductStock() async
   {
@@ -190,219 +214,37 @@ class ProductInventoryState extends State<ProductInventory> {
     return visibleLoading? Visibility(
       visible: visibleLoading,
       child: Container(
+        color: Colors.white,
         padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 100, 0, mediaQuery.size.width/2 - 100, 0),
         child: const LoadingIndicator(
           indicatorType: Indicator.ballPulse,
         ),
       ),
-    ) : Container(
+    ) : userType == 3? buildCustomerDataTable():
+    Container(
       color: Colors.blueGrey.shade50,
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            buildAdminOrDealerHeader(),
+            Expanded(
+              child: Container(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                children: [
-                  userType == 1 || userType == 2 ? buildAdminHeader() : buildUserHeader(),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 5, left: 5, top: 5),
-                      child: DataTable2(
-                          columnSpacing: 12,
-                          horizontalMargin: 12,
-                          minWidth: 600,
-                          dataRowHeight: 40.0,
-                          headingRowHeight: 40,
-                          headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
-                          border: TableBorder.all(color: Colors.grey),
-                          columns: const [
-                            DataColumn2(
-                                label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
-                                fixedWidth: 70
-                            ),
-                            DataColumn2(
-                                label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
-                                size: ColumnSize.M
-                            ),
-                            DataColumn2(
-                                label: Text('Model Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
-                                size: ColumnSize.M
-                            ),
-                            DataColumn2(
-                              label: Text('IMEI Number', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
-                              fixedWidth: 170,
-                            ),
-                            DataColumn2(
-                              label: Center(child: Text('M.Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
-                              fixedWidth: 95,
-                            ),
-                            DataColumn2(
-                              label: Center(child: Text('Warranty', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
-                              fixedWidth: 80,
-                            ),
-                            DataColumn2(
-                              label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
-                              fixedWidth: 90,
-                            ),
-                            DataColumn2(
-                              label: Center(child: Text('Sales Person', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
-                              fixedWidth: 150,
-                            ),
-                            DataColumn2(
-                              label: Center(child: Text('Modify Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
-                              fixedWidth: 100,
-                            ),
-                            DataColumn2(
-                              label: Center(child: Text('Action', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
-                              fixedWidth: 50,
-                            ),
-                          ],
-                          rows: searched ? List<DataRow>.generate(filterProductInventoryList.length, (index) => DataRow(cells: [
-                            DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}'))),
-                            DataCell(Text(filterProductInventoryList[index].categoryName)),
-                            DataCell(Text(filterProductInventoryList[index].modelName)),
-                            DataCell(Text(filterProductInventoryList[index].deviceId)),
-                            DataCell(Center(child: Text(filterProductInventoryList[index].dateOfManufacturing))),
-                            DataCell(Center(child: Text('${filterProductInventoryList[index].warrantyMonths}'))),
-                            DataCell(Center(child: userType==filterProductInventoryList[index].productStatus? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('In Stock')],):
-                            const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active')],))),
-                            DataCell(Center(child: widget.userName==filterProductInventoryList[index].latestBuyer? Text('-'):Text(filterProductInventoryList[index].latestBuyer))),
-                            const DataCell(Center(child: Text('25-09-2023'))),
-                            DataCell(Center(child: PopupMenuButton<SampleItem>(
-                              initialValue: selectedMenu,
-                              onSelected: (SampleItem item) {
-                                setState(() {
-                                  selectedMenu = item;
-                                });
-                              },
-                              itemBuilder: (BuildContext context) => <PopupMenuEntry<SampleItem>>[
-                                const PopupMenuItem<SampleItem>(
-                                  value: SampleItem.itemOne,
-                                  child: Text('Delete'),
-                                ),
-                                const PopupMenuItem<SampleItem>(
-                                  value: SampleItem.itemTwo,
-                                  child: Text('Replace'),
-                                ),
-                              ],
-                            )))
-                          ])):
-                          List<DataRow>.generate(productInventoryList.length, (index) => DataRow(cells: [
-                            DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}'))),
-                            DataCell(Text(productInventoryList[index].categoryName)),
-                            DataCell(Text(productInventoryList[index].modelName)),
-                            DataCell(Text(productInventoryList[index].deviceId)),
-                            DataCell(Center(child: Text(productInventoryList[index].dateOfManufacturing))),
-                            DataCell(Center(child: Text('${productInventoryList[index].warrantyMonths}'))),
-                            DataCell(
-                                Center(
-                                    child: userType == 1? Row(
-                                      children: [
-                                        CircleAvatar(radius: 5,
-                                          backgroundColor:
-                                          productInventoryList[index].productStatus==1? Colors.pink:
-                                          productInventoryList[index].productStatus==2? Colors.blue:
-                                          productInventoryList[index].productStatus==3? Colors.purple:
-                                          productInventoryList[index].productStatus==4? Colors.yellow:
-                                          productInventoryList[index].productStatus==5? Colors.deepOrangeAccent:
-                                          Colors.green,
-                                        ),
-                                        const SizedBox(width: 5,),
-                                        productInventoryList[index].productStatus==1? const Text('In-Stock'):
-                                        productInventoryList[index].productStatus==2? const Text('Stock'):
-                                        productInventoryList[index].productStatus==3? const Text('Sold-Out'):
-                                        productInventoryList[index].productStatus==4? const Text('Pending'):
-                                        productInventoryList[index].productStatus==5? const Text('Installed'):
-                                        const Text('Active'),
-                                      ],
-                                    ):
-                                    Row(
-                                      children: [
-                                        CircleAvatar(radius: 5,
-                                          backgroundColor:
-                                          productInventoryList[index].productStatus==1? Colors.pink:
-                                          productInventoryList[index].productStatus==2? Colors.purple:
-                                          productInventoryList[index].productStatus==3? Colors.yellow:
-                                          productInventoryList[index].productStatus==4? Colors.deepOrangeAccent:
-                                          Colors.green,
-                                        ),
-                                        const SizedBox(width: 5,),
-                                        productInventoryList[index].productStatus==2? const Text('In-Stock'):
-                                        productInventoryList[index].productStatus==3? const Text('Sold-Out'):
-                                        productInventoryList[index].productStatus==4? const Text('Pending'):
-                                        productInventoryList[index].productStatus==5? const Text('Installed'):
-                                        const Text('Active'),
-                                      ],
-                                    ),
-                                )
-                            ),
-                            DataCell(Center(child: widget.userName==productInventoryList[index].latestBuyer? Text('-'):Text(productInventoryList[index].latestBuyer))),
-                            const DataCell(Center(child: Text('25-09-2023'))),
-                            userType == 1 ? DataCell(Center(child: IconButton(tooltip:'Edit product', onPressed: () {
-                              getModelByActiveList(context, productInventoryList[index].categoryId, productInventoryList[index].categoryName,
-                                  productInventoryList[index].modelName, productInventoryList[index].modelId, productInventoryList[index].deviceId,
-                                  productInventoryList[index].warrantyMonths, productInventoryList[index].productId);
-                              }, icon: const Icon(Icons.edit_outlined),))):
-                            DataCell(Center(child: IconButton(tooltip:'replace product',onPressed: () {
-                              _displayReplaceProductDialog(context, productInventoryList[index].categoryId, productInventoryList[index].categoryName,
-                                  productInventoryList[index].modelName, productInventoryList[index].modelId, productInventoryList[index].deviceId,
-                                  productInventoryList[index].warrantyMonths, productInventoryList[index].productId, productInventoryList[index].buyerId);
-                            }, icon: const Icon(Icons.repeat),)))
-                            /*userType != productInventoryList[index].productStatus? DataCell(Center(child: PopupMenuButton<SampleItem>(
-                              initialValue: selectedMenu,
-                              // Callback that sets the selected popup menu item.
-                              onSelected: (SampleItem item) {
-                                setState(() {
-                                  selectedMenu = item;
-                                  _displayIMEiTextInputDialog(context, productInventoryList[index].deviceId, productInventoryList[index].buyerId);
-                                });
-                              },
-                              itemBuilder: (BuildContext context) => <PopupMenuEntry<SampleItem>>[
-                                const PopupMenuItem<SampleItem>(
-                                  value: SampleItem.itemOne,
-                                  child: Text('Replace'),
-                                ),
-                              ],
-                            ))):
-                            DataCell(Center(child: PopupMenuButton<SampleItem>(
-                              initialValue: selectedMenu,
-                              // Callback that sets the selected popup menu item.
-                              onSelected: (SampleItem item) {
-                                setState(() {
-                                  selectedMenu = item;
-                                });
-                              },
-                              itemBuilder: (BuildContext context) => <PopupMenuEntry<SampleItem>>[
-                                const PopupMenuItem<SampleItem>(
-                                  value: SampleItem.itemOne,
-                                  child: Text('Delete'),
-                                ),
-                                const PopupMenuItem<SampleItem>(
-                                  value: SampleItem.itemTwo,
-                                  child: Text('Replace'),
-                                ),
-                              ],
-                            )))*/
-                          ])),
-                      ),
-                    ),
-                  ),
-                  buildSummaryRow(),
-                ],
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 5, left: 5, top: 5),
+                  child: buildAdminOrDealerDataTable(),
+                ),
               ),
             ),
-          ),
-        ],
+            buildFooterView(),
+          ],
+        ),
       ),
     );
   }
 
-  Widget buildAdminHeader()
+  Widget buildAdminOrDealerHeader()
   {
     return Column(
       children: [
@@ -582,36 +424,299 @@ class ProductInventoryState extends State<ProductInventory> {
     );
   }
 
-  Widget buildUserHeader() {
-    return Column(
-      children: [
-        Container(
-          decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(10.0),
-                topRight: Radius.circular(10.0),
-              )
-          ),
-          height: 50,
-          child: ListTile(
-            title: RichText(
-              text: const TextSpan(
-                children: <TextSpan>[
-                  TextSpan(text: 'My ', style: TextStyle(fontSize: 20, color: Colors.black)),
-                  TextSpan(text: 'Product', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 21)),
-                ],
-              ),
-            ),
-          ),
+
+  Widget buildAdminOrDealerDataTable()
+  {
+    return DataTable2(
+      columnSpacing: 12,
+      horizontalMargin: 12,
+      minWidth: 600,
+      dataRowHeight: 40.0,
+      headingRowHeight: 40,
+      headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
+      border: TableBorder.all(color: Colors.grey),
+      columns: const [
+        DataColumn2(
+            label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+            fixedWidth: 70
+        ),
+        DataColumn2(
+            label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+            size: ColumnSize.M
+        ),
+        DataColumn2(
+            label: Text('Model Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+            size: ColumnSize.M
+        ),
+        DataColumn2(
+          label: Text('IMEI Number', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+          fixedWidth: 170,
+        ),
+        DataColumn2(
+          label: Center(child: Text('M.Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+          fixedWidth: 95,
+        ),
+        DataColumn2(
+          label: Center(child: Text('Warranty', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+          fixedWidth: 80,
+        ),
+        DataColumn2(
+          label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+          fixedWidth: 90,
+        ),
+        DataColumn2(
+          label: Center(child: Text('Sales Person', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+          fixedWidth: 150,
+        ),
+        DataColumn2(
+          label: Center(child: Text('Modify Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+          fixedWidth: 100,
+        ),
+        DataColumn2(
+          label: Center(child: Text('Action', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+          fixedWidth: 50,
         ),
       ],
+      rows: searched ? List<DataRow>.generate(filterProductInventoryList.length, (index) => DataRow(cells: [
+        DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}'))),
+        DataCell(Text(filterProductInventoryList[index].categoryName)),
+        DataCell(Text(filterProductInventoryList[index].modelName)),
+        DataCell(Text(filterProductInventoryList[index].deviceId)),
+        DataCell(Center(child: Text(filterProductInventoryList[index].dateOfManufacturing))),
+        DataCell(Center(child: Text('${filterProductInventoryList[index].warrantyMonths}'))),
+        DataCell(Center(child: userType==filterProductInventoryList[index].productStatus? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('In Stock')],):
+        const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active')],))),
+        DataCell(Center(child: widget.userName==filterProductInventoryList[index].latestBuyer? Text('-'):Text(filterProductInventoryList[index].latestBuyer))),
+        const DataCell(Center(child: Text('25-09-2023'))),
+        DataCell(Center(child: PopupMenuButton<SampleItem>(
+          initialValue: selectedMenu,
+          onSelected: (SampleItem item) {
+            setState(() {
+              selectedMenu = item;
+            });
+          },
+          itemBuilder: (BuildContext context) => <PopupMenuEntry<SampleItem>>[
+            const PopupMenuItem<SampleItem>(
+              value: SampleItem.itemOne,
+              child: Text('Delete'),
+            ),
+            const PopupMenuItem<SampleItem>(
+              value: SampleItem.itemTwo,
+              child: Text('Replace'),
+            ),
+          ],
+        )))
+      ])):
+      List<DataRow>.generate(productInventoryList.length, (index) => DataRow(cells: [
+        DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}'))),
+        DataCell(Text(productInventoryList[index].categoryName)),
+        DataCell(Text(productInventoryList[index].modelName)),
+        DataCell(Text(productInventoryList[index].deviceId)),
+        DataCell(Center(child: Text(productInventoryList[index].dateOfManufacturing))),
+        DataCell(Center(child: Text('${productInventoryList[index].warrantyMonths}'))),
+        DataCell(
+            Center(
+              child: userType == 1? Row(
+                children: [
+                  CircleAvatar(radius: 5,
+                    backgroundColor:
+                    productInventoryList[index].productStatus==1? Colors.pink:
+                    productInventoryList[index].productStatus==2? Colors.blue:
+                    productInventoryList[index].productStatus==3? Colors.purple:
+                    productInventoryList[index].productStatus==4? Colors.yellow:
+                    productInventoryList[index].productStatus==5? Colors.deepOrangeAccent:
+                    Colors.green,
+                  ),
+                  const SizedBox(width: 5,),
+                  productInventoryList[index].productStatus==1? const Text('In-Stock'):
+                  productInventoryList[index].productStatus==2? const Text('Stock'):
+                  productInventoryList[index].productStatus==3? const Text('Sold-Out'):
+                  productInventoryList[index].productStatus==4? const Text('Pending'):
+                  productInventoryList[index].productStatus==5? const Text('Installed'):
+                  const Text('Active'),
+                ],
+              ):
+              Row(
+                children: [
+                  CircleAvatar(radius: 5,
+                    backgroundColor:
+                    productInventoryList[index].productStatus==1? Colors.pink:
+                    productInventoryList[index].productStatus==2? Colors.purple:
+                    productInventoryList[index].productStatus==3? Colors.yellow:
+                    productInventoryList[index].productStatus==4? Colors.deepOrangeAccent:
+                    Colors.green,
+                  ),
+                  const SizedBox(width: 5,),
+                  productInventoryList[index].productStatus==2? const Text('In-Stock'):
+                  productInventoryList[index].productStatus==3? const Text('Sold-Out'):
+                  productInventoryList[index].productStatus==4? const Text('Pending'):
+                  productInventoryList[index].productStatus==5? const Text('Installed'):
+                  const Text('Active'),
+                ],
+              ),
+            )
+        ),
+        DataCell(Center(child: widget.userName==productInventoryList[index].latestBuyer? Text('-'):Text(productInventoryList[index].latestBuyer))),
+        const DataCell(Center(child: Text('25-09-2023'))),
+        userType == 1 ? DataCell(Center(child: IconButton(tooltip:'Edit product', onPressed: () {
+          getModelByActiveList(context, productInventoryList[index].categoryId, productInventoryList[index].categoryName,
+              productInventoryList[index].modelName, productInventoryList[index].modelId, productInventoryList[index].deviceId,
+              productInventoryList[index].warrantyMonths, productInventoryList[index].productId);
+        }, icon: const Icon(Icons.edit_outlined),))):
+        DataCell(Center(child: IconButton(tooltip:'replace product',onPressed: () {
+          _displayReplaceProductDialog(context, productInventoryList[index].categoryId, productInventoryList[index].categoryName,
+              productInventoryList[index].modelName, productInventoryList[index].modelId, productInventoryList[index].deviceId,
+              productInventoryList[index].warrantyMonths, productInventoryList[index].productId, productInventoryList[index].buyerId);
+        }, icon: const Icon(Icons.repeat),)))
+      ])),
     );
   }
 
-  Widget buildSummaryRow() {
-    //const List<String> list = <String>['10', '20', '30', '40', '50'];
-    //String dropdownValue = list.first;
+  Widget buildCustomerDataTable()
+  {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('MY PRODUCT'),
+        backgroundColor: myTheme.primaryColor.withOpacity(0.6),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(right: 12, left: 12, top: 5),
+              child: DataTable2(
+                columnSpacing: 12,
+                horizontalMargin: 12,
+                minWidth: 600,
+                dataRowHeight: 35.0,
+                headingRowHeight: 35,
+                headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
+                border: TableBorder.all(color: myTheme.primaryColor.withOpacity(0.2)),
+                columns: const [
+                  DataColumn2(
+                      label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),)),
+                      fixedWidth: 70
+                  ),
+                  DataColumn2(
+                      label: Text('Category', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),),
+                      size: ColumnSize.M
+                  ),
+                  DataColumn2(
+                      label: Text('Model Name', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),),
+                      size: ColumnSize.M
+                  ),
+                  DataColumn2(
+                    label: Text('Device ID', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),),
+                    fixedWidth: 170,
+                  ),
+                  DataColumn2(
+                      label: Center(child: Text('Site Name', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),)),
+                      size: ColumnSize.M
+                  ),
+                  DataColumn2(
+                    label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),)),
+                    fixedWidth: 90,
+                  ),
+                  DataColumn2(
+                    label: Center(child: Text('Modify Date', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),)),
+                    fixedWidth: 100,
+                  ),
+                ],
+                rows: searched ? List<DataRow>.generate(filterProductInventoryListCus.length, (index) => DataRow(cells: [
+                  DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14)))),
+                  DataCell(Text(filterProductInventoryListCus[index].categoryName, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
+                  DataCell(Text(filterProductInventoryListCus[index].model, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
+                  DataCell(Text(filterProductInventoryListCus[index].deviceId, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
+                  DataCell(Center(child: Text(filterProductInventoryListCus[index].siteName, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14)))),
+                  DataCell(Center(child: filterProductInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))],):
+                  const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))],))),
+                  const DataCell(Center(child: Text('25-09-2023', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14)))),
+                ])):
+                List<DataRow>.generate(productInventoryListCus.length, (index) => DataRow(cells: [
+                  DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13)))),
+                  DataCell(Text(productInventoryListCus[index].categoryName, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))),
+                  DataCell(Text(productInventoryListCus[index].model, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))),
+                  DataCell(Text(productInventoryListCus[index].deviceId, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))),
+                  DataCell(Center(child: Text(productInventoryListCus[index].productStatus==3? '-' : productInventoryListCus[index].siteName, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13)))),
+                  DataCell(Center(child: productInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))],):
+                  const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))],))),
+                  const DataCell(Center(child: Text('25-09-2023', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13)))),
+
+                ])),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+            child: buildFooterView(),
+          ),
+        ],
+      ),
+    );
+    return DataTable2(
+      columnSpacing: 12,
+      horizontalMargin: 12,
+      minWidth: 600,
+      dataRowHeight: 35.0,
+      headingRowHeight: 35,
+      headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
+      border: TableBorder.all(color: Colors.grey),
+      columns: const [
+        DataColumn2(
+            label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),)),
+            fixedWidth: 70
+        ),
+        DataColumn2(
+            label: Text('Category', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),),
+            size: ColumnSize.M
+        ),
+        DataColumn2(
+            label: Text('Model Name', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),),
+            size: ColumnSize.M
+        ),
+        DataColumn2(
+          label: Text('Device ID', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),),
+          fixedWidth: 170,
+        ),
+        DataColumn2(
+            label: Center(child: Text('Site Name', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),)),
+            size: ColumnSize.M
+        ),
+        DataColumn2(
+          label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),)),
+          fixedWidth: 90,
+        ),
+        DataColumn2(
+          label: Center(child: Text('Modify Date', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),)),
+          fixedWidth: 100,
+        ),
+      ],
+      rows: searched ? List<DataRow>.generate(filterProductInventoryListCus.length, (index) => DataRow(cells: [
+        DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14)))),
+        DataCell(Text(filterProductInventoryListCus[index].categoryName, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
+        DataCell(Text(filterProductInventoryListCus[index].model, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
+        DataCell(Text(filterProductInventoryListCus[index].deviceId, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
+        DataCell(Center(child: Text(filterProductInventoryListCus[index].siteName, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14)))),
+        DataCell(Center(child: filterProductInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))],):
+        const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))],))),
+        const DataCell(Center(child: Text('25-09-2023', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14)))),
+      ])):
+      List<DataRow>.generate(productInventoryListCus.length, (index) => DataRow(cells: [
+        DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13)))),
+        DataCell(Text(productInventoryListCus[index].categoryName, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))),
+        DataCell(Text(productInventoryListCus[index].model, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))),
+        DataCell(Text(productInventoryListCus[index].deviceId, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))),
+        DataCell(Center(child: Text(productInventoryListCus[index].productStatus==3? '-' : productInventoryListCus[index].siteName, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13)))),
+        DataCell(Center(child: productInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))],):
+        const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))],))),
+        const DataCell(Center(child: Text('25-09-2023', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13)))),
+
+      ])),
+    );
+  }
+
+  Widget buildFooterView()
+  {
     return filterActive ? Container() : Container(
       padding: const EdgeInsets.only(right: 20, left: 20, top: 5),
       decoration: BoxDecoration(
@@ -619,7 +724,27 @@ class ProductInventoryState extends State<ProductInventory> {
         borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
       ),
       height: 60,
-      child: Row(
+      child: userType == 3? Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          SizedBox(
+            width: 350,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text('${(currentSet - 1) * batchSize + 1} to ${currentSet * batchSize > totalProduct ? totalProduct : currentSet * batchSize}  of  $totalProduct'),
+                const SizedBox(width: 5,),
+                IconButton(tooltip:'Previous page', onPressed: isPreviousButtonEnabled ? () => _onPreviousButtonPressed() : null , icon: const Icon(Icons.arrow_left)),
+                const SizedBox(width: 5,),
+                IconButton(tooltip:'Next page', onPressed: isNextButtonEnabled ? () => _onNextButtonPressed() : null , icon: const Icon(Icons.arrow_right)),
+                const SizedBox(width: 10,),
+                IconButton(tooltip:'Settings',onPressed:() {}, icon: const Icon(Icons.settings_outlined))
+              ],
+            ),
+          ),
+        ],
+      ):
+      Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Column(children: [
@@ -662,11 +787,9 @@ class ProductInventoryState extends State<ProductInventory> {
     );
   }
 
-
   Future<void> _displayEditProductDialog(BuildContext context, int catId, String catName, String mdlName, int mdlId, String imeiNo, int warranty, int productId) async
   {
     int indexOfInitialSelection = activeModelList.indexWhere((model) => model.modelName == mdlName);
-
     final formKey = GlobalKey<FormState>();
     final TextEditingController textFieldModelList = TextEditingController();
     final TextEditingController ctrlIMI = TextEditingController();

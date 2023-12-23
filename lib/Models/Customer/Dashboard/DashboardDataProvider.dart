@@ -7,6 +7,8 @@ import 'SourcePump.dart';
 
 class DashboardDataProvider
 {
+  bool startTogether;
+  String time, flow;
   List<SourcePump> sourcePump;
   List<IrrigationPump> irrigationPump;
   List<MainValve> mainValve;
@@ -15,6 +17,9 @@ class DashboardDataProvider
   List<CentralFilterSite> centralFilterSite;
 
   DashboardDataProvider({
+    required this.startTogether,
+    required this.time,
+    required this.flow,
     required this.sourcePump,
     required this.irrigationPump,
     required this.mainValve,
@@ -24,6 +29,9 @@ class DashboardDataProvider
   });
 
   factory DashboardDataProvider.fromJson(Map<String, dynamic> json) {
+    bool startTogetherStatus = json['startTogether'];
+    String timeVal = json['time'];
+    String flowVal = json['flow'];
     List<SourcePump> sourcePumpList = (json['sourcePump'] as List)
         .map((sourcePumpJson) => SourcePump.fromJson(sourcePumpJson))
         .toList();
@@ -49,6 +57,9 @@ class DashboardDataProvider
         .toList();
 
     return DashboardDataProvider(
+      startTogether: startTogetherStatus,
+      time: timeVal,
+      flow: flowVal,
       sourcePump: sourcePumpList,
       mainValve: mainValve,
       lineOrSequence: lineOrSequence,

@@ -46,15 +46,15 @@ class _FilterConstantState extends State<FilterConstant> {
                       border: Border(bottom: BorderSide(width: 1)),
                       color: Colors.white70,
                     ),                    child: Row(
-                      children: [
-                        expandedCustomCell(Text('${constantPvd.filterUpdated[index]['id']}'),),
-                        expandedCustomCell(Text('${constantPvd.filterUpdated[index]['name']}'),),
-                        expandedCustomCell( Text('${constantPvd.filterUpdated[index]['location']}'),),
-                        expandedCustomCell(CustomTimePickerSiva(purpose: 'filter_dp_delay', index: index, value: '${constantPvd.filterUpdated[index]['dpDelay']}', displayHours: true, displayMins: true, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,)),
-                        expandedCustomCell(CustomTimePickerSiva(purpose: 'filter_looping_limit', index: index, value: '${constantPvd.filterUpdated[index]['loopingLimit']}', displayHours: false, displayMins: false, displaySecs: false, displayCustom: true, CustomString: '', CustomList: [0,99], displayAM_PM: false,)),
-                        expandedCustomCell(MyDropDown(initialValue: constantPvd.filterUpdated[index]['whileFlushing'], itemList: ['Continue Irrigation','Stop Irrigation','No Fertilization'], pvdName: 'filter/flushing', index: index),),
-                      ],
-                    ),
+                    children: [
+                      expandedCustomCell(Text('${constantPvd.filterUpdated[index]['id']}'),),
+                      expandedCustomCell(Text('${constantPvd.filterUpdated[index]['name']}'),),
+                      expandedCustomCell( Text('${constantPvd.filterUpdated[index]['location']}'),),
+                      expandedCustomCell(CustomTimePickerSiva(purpose: 'filter_dp_delay', index: index, value: '${constantPvd.filterUpdated[index]['dpDelay']}', displayHours: true, displayMins: true, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,)),
+                      expandedCustomCell(CustomTimePickerSiva(purpose: 'filter_looping_limit', index: index, value: '${constantPvd.filterUpdated[index]['loopingLimit']}', displayHours: false, displayMins: false, displaySecs: false, displayCustom: true, CustomString: '', CustomList: [0,99], displayAM_PM: false,)),
+                      expandedCustomCell(MyDropDown(initialValue: constantPvd.filterUpdated[index]['whileFlushing'], itemList: ['Continue Irrigation','Stop Irrigation','No Fertilization'], pvdName: 'filter/flushing', index: index),),
+                    ],
+                  ),
                   );
                 }),
           )
@@ -185,4 +185,3 @@ class _FilterConstant_MState extends State<FilterConstant_M> {
     );
   }
 }
-

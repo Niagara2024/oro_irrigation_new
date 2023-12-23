@@ -33,7 +33,7 @@ class _AnalogSensorConstantState extends State<AnalogSensorConstant> {
             expandedTableCell_Text('Name',''),
             expandedTableCell_Text('TYPE',''),
             expandedTableCell_Text('UNITS',''),
-            expandedTableCell_Text('DATA','SOURCE'),
+            expandedTableCell_Text('BASE',''),
             expandedTableCell_Text('MINIMUM',''),
             expandedTableCell_Text('MAXIMUM',''),
           ],
@@ -51,7 +51,7 @@ class _AnalogSensorConstantState extends State<AnalogSensorConstant> {
                       children: [
                         expandedCustomCell(Text('${constantPvd.analogSensorUpdated[index]['id']}'),),
                         expandedCustomCell(Text('${constantPvd.analogSensorUpdated[index]['name']}'),),
-                        expandedCustomCell(MyDropDown(initialValue: constantPvd.analogSensorUpdated[index]['type'], itemList: ['Pressure IN','Pressure OUT','EC','PH','Level','Valve Pressure','Soil Moisture','Soil Temperature'], pvdName: 'analogSensor/type', index: index),),
+                        expandedCustomCell(MyDropDown(initialValue: constantPvd.analogSensorUpdated[index]['type'], itemList: ['Soil Moisture','Soil Temperature','Rainfall','Windspeed','Wind Direction','Leaf Wetness','Humidity','Lux Sensor','Co2 Sensor','LDR'], pvdName: 'analogSensor/type', index: index),),
                         expandedCustomCell(MyDropDown(initialValue: constantPvd.analogSensorUpdated[index]['units'], itemList: ['bar','dS/m'], pvdName: 'analogSensor/units', index: index),),
                         expandedCustomCell(MyDropDown(initialValue: constantPvd.analogSensorUpdated[index]['base'], itemList: ['Current','Voltage'], pvdName: 'analogSensor/base', index: index),),
                         expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.analogSensorUpdated[index]['minimum'], constantPvd: constantPvd, purpose: 'analogSensor_minimum_v/${index}/6', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
@@ -189,5 +189,3 @@ class _AnalogSensorConstant_MState extends State<AnalogSensorConstant_M> {
     );
   }
 }
-
-

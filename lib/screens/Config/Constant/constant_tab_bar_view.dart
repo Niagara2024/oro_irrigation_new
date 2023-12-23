@@ -8,8 +8,12 @@ import 'package:provider/provider.dart';
 
 
 import '../../../constants/http_service.dart';
+import '../../../constants/mqtt_web_client.dart';
 import '../../../state_management/constant_provider.dart';
 import '../../../state_management/overall_use.dart';
+import 'AlarmInConstant.dart';
+import 'CriticalAlarmInConstant.dart';
+import 'FinishInConstant.dart';
 import 'analog_sensor_in_constant.dart';
 import 'ec_ph_in_constant.dart';
 import 'fertilizer_in_constant.dart';
@@ -28,24 +32,29 @@ class ConstantInConfig extends StatefulWidget {
   State<ConstantInConfig> createState() => _ConstantInConfigState();
 }
 
-class _ConstantInConfigState extends State<ConstantInConfig> {
-
+class _ConstantInConfigState extends State<ConstantInConfig> with SingleTickerProviderStateMixin{
+  late TabController myController ;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    myController = TabController(length: 14, vsync: this);
+    MqttWebClient().init();
     getUserConstant();
   }
 
   Future<void> getUserConstant() async {
     var constantPvd = Provider.of<ConstantProvider>(context,listen: false);
+    // constantPvd.sendDataToHW();
     HttpService service = HttpService();
     try{
       var response = await service.postRequest('getUserConstant', {'userId' : widget.customerId,'controllerId' : widget.controllerId});
       var jsonData = jsonDecode(response.body);
-      if(jsonData['data']['isNewConfig'] == '0'){
-        constantPvd.fetchSettings(jsonData['data']['constant']);
-      }
+      print('jsonData : ${jsonEncode(jsonData)}');
+      // if(jsonData['data']['isNewConfig'] == '0'){
+      //   constantPvd.fetchSettings(jsonData['data']['constant']);
+      // }
+      constantPvd.fetchSettings(jsonData['data']['constant']);
       constantPvd.fetchAll(jsonData['data']);
     }catch(e){
       print(e.toString());
@@ -57,44 +66,45 @@ class _ConstantInConfigState extends State<ConstantInConfig> {
     var overAllPvd = Provider.of<OverAllUse>(context,listen: true);
     var constantPvd = Provider.of<ConstantProvider>(context,listen: true);
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: ()async{
-          constantPvd.sendDataToHW();
-          HttpService service = HttpService();
-          try{
-            var response = await service.postRequest('createUserConstant', {
-              'userId' : widget.customerId,
-              'controllerId' : widget.controllerId,
-              'createUser' : widget.userId,
-              'general' : '',
-              'line' : constantPvd.irrigationLineUpdated,
-              // 'line' : [],
-              'mainValve' : constantPvd.mainValveUpdated,
-              // 'mainValve' : [],
-              'valve' : constantPvd.valveUpdated,
-              // 'valve' : [],
-              'waterMeter' : constantPvd.waterMeterUpdated,
-              // 'waterMeter' : [],
-              'fertilization' : constantPvd.fertilizerUpdated,
-              // 'fertilization' : [],
-              'ecPh' : constantPvd.ecPhUpdated,
-              // 'ecPh' : [],
-              'filtration' : constantPvd.filterUpdated,
-              // 'filtration' : [],
-              'analogSensor' : constantPvd.analogSensorUpdated,
-              // 'analogSensor' : [],
-              'moistureSensor' : constantPvd.moistureSensorUpdated,
-              // 'moistureSensor' : [],
-              'levelSensor' : constantPvd.levelSensorUpdated,
-              // 'levelSensor' : []
-            });
-            var jsonData = jsonDecode(response.body);
-            print('jsonData : ${jsonData['code']}');
-          }catch(e){
-            print(e.toString());
-          }
-        },
-        child: Icon(Icons.send),
+      floatingActionButton: SizedBox(
+        width: 100,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            FloatingActionButton.small(
+              heroTag: 'btn 1',
+              tooltip: 'Previous',
+              backgroundColor: myController.index == 0 ? Colors.white54 : Colors.white,
+              onPressed: myController.index == 0
+                  ? null
+                  : () {
+                if (myController.index != 0) {
+                  setState(() {
+                    myController.animateTo(myController.index - 1);
+                  });
+                }
+              },
+              child: const Icon(Icons.arrow_back_outlined),
+            ),
+            FloatingActionButton.small(
+              heroTag: 'btn 2',
+              tooltip: 'Next',
+              // backgroundColor: configPvd.selectedTab == 11 ? Colors.white54 : myTheme1.colorScheme.primary,
+              backgroundColor: myController.index == 13 ? Colors.white54 : Colors.white,
+              onPressed: myController.index == 13
+                  ? null
+                  : () {
+                if (myController.index != 13) {
+                  setState(() {
+                    myController.animateTo(myController.index + 1);
+                  });
+                  // configPvd.editSelectedTab(configPvd.selectedTab + 1);
+                }
+              },
+              child: const Icon(Icons.arrow_forward_outlined),
+            ),
+          ],
+        ),
       ),
       body: GestureDetector(
         onTap: (){
@@ -110,10 +120,11 @@ class _ConstantInConfigState extends State<ConstantInConfig> {
                 width: double.infinity,
                 color: Color(0XFFF3F3F3),
                 child: TabBar(
-                  indicatorColor: myTheme.primaryColor,
-                  labelStyle: TextStyle(fontWeight: FontWeight.bold),
-                  unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal),
-                  isScrollable: true,
+                    controller: myController,
+                    indicatorColor: myTheme.primaryColor,
+                    labelStyle: TextStyle(fontWeight: FontWeight.bold),
+                    unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal),
+                    isScrollable: true,
                     tabs: [
                       for(var i = 0;i < constantPvd.myTabs.length;i++)
                         Tab(
@@ -124,20 +135,24 @@ class _ConstantInConfigState extends State<ConstantInConfig> {
               ),
               Expanded(
                 child: TabBarView(
-                  physics: NeverScrollableScrollPhysics(),
+                    controller: myController,
+                    physics: NeverScrollableScrollPhysics(),
                     children: [
                       // ...dynamicTab()
                       GeneralInConstant(),
-                      IrrigationLinesConstant(),
-                      MainValveConstant(),
-                      ValveConstant(),
-                      WaterMeterConstant(),
-                      FertilizerConstant(),
-                      EcPhInConstant(),
-                      FilterConstant(),
-                      AnalogSensorConstant(),
-                      MoistureSensorInConstant(),
-                      LevelSensorInConstant()
+                      const IrrigationLinesConstant(),
+                      const MainValveConstant(),
+                      const ValveConstant(),
+                      const WaterMeterConstant(),
+                      const FertilizerConstant(),
+                      const EcPhInConstant(),
+                      const FilterConstant(),
+                      const AnalogSensorConstant(),
+                      const MoistureSensorInConstant(),
+                      const LevelSensorInConstant(),
+                      const AlarmInConstant(),
+                      const CriticalAlarmInConstant(),
+                      FinishInConstant(userId: widget.userId, controllerId: widget.controllerId, customerId: widget.customerId,)
                     ]
                 ),
               )
@@ -185,4 +200,3 @@ class _ConstantInConfigState extends State<ConstantInConfig> {
     return tabs;
   }
 }
-

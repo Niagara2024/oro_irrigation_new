@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
 
 import '../../../state_management/config_maker_provider.dart';
@@ -66,10 +67,14 @@ class _MyDropDownState extends State<MyDropDown> {
             // After selecting the desired option,it will
             // change button value to selected value
             onChanged: (dynamic newValue) {
-             if(widget.pvdName == 'editWaterSource_sp'){
+              if(widget.pvdName == 'editWaterSource_sp'){
                 configPvd.sourcePumpFunctionality(['editWaterSource_sp',widget.index,newValue!]);
               }else if(widget.pvdName == 'editRelayCount_sp'){
                 configPvd.sourcePumpFunctionality(['editRelayCount_sp',widget.index,newValue!]);
+              }else if(widget.pvdName == 'editLevelType_sp'){
+                configPvd.sourcePumpFunctionality(['editLevelType_sp',widget.index,newValue!]);
+              }else if(widget.pvdName == 'editLevelType_ip'){
+                configPvd.irrigationPumpFunctionality(['editLevelType_ip',widget.index,newValue!]);
               }else if(widget.pvdName == 'editRelayCount_ip'){
                 configPvd.irrigationPumpFunctionality(['editRelayCount_ip',widget.index,newValue!]);
               }else if(widget.pvdName == 'editCentralDosing'){
@@ -98,17 +103,30 @@ class _MyDropDownState extends State<MyDropDown> {
                 constantPvd.analogSensorFunctionality(['analogSensor/units',widget.index,newValue!]);
               }else if(widget.pvdName == 'analogSensor/base'){
                 constantPvd.analogSensorFunctionality(['analogSensor/base',widget.index,newValue!]);
+              }else if(widget.pvdName == 'moistureSensor/units'){
+                constantPvd.moistureSensorFunctionality(['moistureSensor/units',widget.index,newValue!]);
+              }else if(widget.pvdName == 'moistureSensor/base'){
+                constantPvd.moistureSensorFunctionality(['moistureSensor/base',widget.index,newValue!]);
+              }else if(widget.pvdName == 'levelSensor/units'){
+                constantPvd.levelSensorFunctionality(['levelSensor/units',widget.index,newValue!]);
+              }else if(widget.pvdName == 'levelSensor/base'){
+                constantPvd.levelSensorFunctionality(['levelSensor/base',widget.index,newValue!]);
               }else if(widget.pvdName == 'moistureSensor_high_low'){
                 constantPvd.moistureSensorFunctionality(['moistureSensor_high_low',widget.index,newValue!]);
               }else if(widget.pvdName == 'levelSensor_high_low'){
                 constantPvd.levelSensorFunctionality(['levelSensor_high_low',widget.index,newValue!]);
               }else if(widget.pvdName == 'editDropDownValue'){
-                print('venky');
                 constantPvd.editDropDownValue(newValue!);
               }else{
                 var forWhat = widget.pvdName.split('/');
                 if(forWhat[0] == 'm_o_line'){
                   configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+                }else if(forWhat[0]== 'valve_defaultDosage'){
+                  constantPvd.valveFunctionality(['valve_defaultDosage',int.parse(forWhat[1]),int.parse(forWhat[2]),newValue!]);
+                }else if(forWhat[0]== 'ecPhSenseOrAvg'){
+                  constantPvd.ecPhFunctionality(['ecPhSenseOrAvg',int.parse(forWhat[1]),forWhat[2],int.parse(forWhat[3]),newValue!]);
+                }else if(forWhat[0]== 'fertilizer_injectorMode'){
+                  constantPvd.fertilizerFunctionality(['fertilizer_injectorMode',int.parse(forWhat[1]),forWhat[2],int.parse(forWhat[3]),newValue!]);
                 }else if(forWhat[0] == 'm_i_line'){
                   configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
                 }else if(forWhat[0] == 'm_o_localDosing'){
@@ -129,6 +147,10 @@ class _MyDropDownState extends State<MyDropDown> {
                   configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
                 }else if(forWhat[0] == 'm_o_sourcePump'){
                   configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+                }else if(forWhat[0] == 'm_o_agitator'){
+                  configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+                }else if(forWhat[0] == 'm_o_selector'){
+                  configPvd.mappingOfOutputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
                 }else if(forWhat[0] == 'm_i_sourcePump'){
                   configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
                 }else if(forWhat[0] == 'm_o_irrigationPump'){
@@ -137,10 +159,38 @@ class _MyDropDownState extends State<MyDropDown> {
                   configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
                 }else if(forWhat[0] == 'm_i_analogSensor'){
                   configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+                }else if(forWhat[0] == 'm_i_temperature'){
+                  configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+                }else if(forWhat[0] == 'm_i_soilTemperature'){
+                  configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+                }else if(forWhat[0] == 'm_i_rainGauge'){
+                  configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+                }else if(forWhat[0] == 'm_i_lux'){
+                  configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+                }else if(forWhat[0] == 'm_i_ldr'){
+                  configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+                }else if(forWhat[0] == 'm_i_co2'){
+                  configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+                }else if(forWhat[0] == 'm_i_windSpeed'){
+                  configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+                }else if(forWhat[0] == 'm_i_windDirection'){
+                  configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+                }else if(forWhat[0] == 'm_i_leafWetness'){
+                  configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
+                }else if(forWhat[0] == 'm_i_humidity'){
+                  configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
                 }else if(forWhat[0] == 'm_i_contact'){
                   configPvd.mappingOfInputsFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2], int.parse(forWhat[3]), forWhat[4],newValue]);
-                }else if(forWhat[0] == 'ecPh_injector_mode'){
-                  constantPvd.ecPhFunctionality([forWhat[0], int.parse(forWhat[1]), forWhat[2],int.parse(forWhat[3]), newValue]);
+                }else if(forWhat[0] == 'alarm_status'){
+                  constantPvd.alarmFunctionality([forWhat[0], int.parse(forWhat[1]), int.parse(forWhat[2]), newValue]);
+                }else if(forWhat[0] == 'alarm_reset_irrigation'){
+                  constantPvd.alarmFunctionality([forWhat[0], int.parse(forWhat[1]), int.parse(forWhat[2]), newValue]);
+                }else if(forWhat[0] == 'critical_alarm_status'){
+                  constantPvd.criticalAlarmFunctionality([forWhat[0], int.parse(forWhat[1]), int.parse(forWhat[2]), newValue]);
+                }else if(forWhat[0] == 'critical_alarm_reset_irrigation'){
+                  constantPvd.criticalAlarmFunctionality([forWhat[0], int.parse(forWhat[1]), int.parse(forWhat[2]), newValue]);
+                }else if(forWhat[0] == 'ecPhAvgFiltSpeed'){
+                  constantPvd.ecPhFunctionality([forWhat[0], int.parse(forWhat[1]),forWhat[2], int.parse(forWhat[3]), newValue]);
                 }
               }
             },
@@ -154,8 +204,9 @@ class _MyDropDownState extends State<MyDropDown> {
             borderRadius: BorderRadius.circular(5),
           ),
           height: double.infinity,
-          child: Center(child: Text(widget.initialValue,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w600),))
+          child: Center(child: Text(widget.initialValue,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w600,color: myTheme.primaryColor),))
       ),
     );
+
   }
 }

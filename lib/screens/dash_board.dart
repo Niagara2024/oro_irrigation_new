@@ -7,6 +7,7 @@ import 'package:oro_irrigation_new/screens/web_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/mqtt_web_client.dart';
+import 'Customer/Dashboard/FarmSettings.dart';
 import 'Customer/customer_home.dart';
 import 'my_preference.dart';
 import 'product_entry.dart';
@@ -170,19 +171,65 @@ class _DashboardWideState extends State<DashboardWide> {
   NavigationRailLabelType labelType = NavigationRailLabelType.all;
   double groupAlignment = -1.0;
   Calendar calendarView = Calendar.day;
+  Widget _centerWidget = const Center(child: Text('Loading'));
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    loadFirstPage();
+  }
+
+  Future<void> loadFirstPage() async {
+    if(widget.userType =='3'){
+      await Future.delayed(const Duration(seconds: 2));
+      setState(() {
+        _centerWidget = Center(child: CustomerHome(customerID: widget.userID, type: 0, customerName: '', userID: widget.userID,));
+      });
+    }
+
+  }
 
   @override
   Widget build(BuildContext context)
   {
-    return Scaffold(
+    return widget.userType =='3'? Scaffold(
+      body: Stack(
+        children: [
+          MyDrawer(
+            onOptionSelected: (option) {
+              setState(() {
+                if (option == 'Dashboard') {
+                  _centerWidget = CustomerHome(customerID: widget.userID, type: 0, customerName: '', userID: widget.userID,);
+                } else if (option == 'My Product') {
+                  _centerWidget = ProductInventory(userName: widget.userName);
+                }else if (option == 'Device Settings') {
+                  //_centerWidget = FarmSettings(siteID: customerSiteList[selectedTabIndex].groupId, siteName: customerSiteList[selectedTabIndex].groupName, controllerID: customerSiteList[selectedTabIndex].userDeviceListId, customerID: widget.customerID, imeiNo: customerSiteList[selectedTabIndex].deviceId, userId: widget.userID,);
+                }
+
+                // Add more conditions for additional options
+              });
+            },
+            userName: widget.userName, countryCode: widget.countryCode, phoneNo: widget.mobileNo,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 250),
+            child: Container(
+                color:Colors.white,
+                child: _centerWidget
+            ),
+          ),
+        ],
+      ),
+    ):
+    Scaffold(
       appBar:
-      widget.userType =='1'?
-      AppBar(
+      widget.userType =='1'?  AppBar(
         title: Text (appBarTitle),
         actions: _selectedIndex==0?[
           IconButton(tooltip: 'Create Dealer account', icon: const Icon(Icons.person_add_outlined), color: Colors.white, onPressed: () async
           {
-              await showDialog<void>(
+            await showDialog<void>(
                 context: context,
                 builder: (context) => const AlertDialog(
                   content: CreateAccount(),
@@ -194,7 +241,6 @@ class _DashboardWideState extends State<DashboardWide> {
           const SizedBox(width: 30,),
         ] : [],
       ) :
-      widget.userType =='2'?
       AppBar(
         title: Text (appBarTitle),
         actions: _selectedIndex==0?[
@@ -213,243 +259,263 @@ class _DashboardWideState extends State<DashboardWide> {
         ] : [
           const SizedBox(width: 20,),
         ],
-      ) :
-      AppBar(
-        title: Text (appBarTitle),
-        actions: _selectedIndex==0?[
-          const Badge(
-            label: Text('32'),
-            child: Icon(Icons.notifications_none, color: Colors.white,),
-          ),
-          const SizedBox(width: 30,),
-        ] : [
-          const SizedBox(width: 20,),
-        ],
       ),
       body: Row(
         children: <Widget>[
-          NavigationRail(
-            indicatorColor: myTheme.primaryColor.withOpacity(0.1),
-            minWidth: 125.0,
-            selectedIndex: _selectedIndex,
-            groupAlignment: groupAlignment,
-            labelType: NavigationRailLabelType.all,
-            leading: Center(
+          SizedBox(
+            width: 150,
+            child: NavigationRail(
+              indicatorColor: myTheme.primaryColor.withOpacity(0.1),
+              minWidth: 145.0,
+              selectedIndex: _selectedIndex,
+              groupAlignment: groupAlignment,
+              labelType: NavigationRailLabelType.all,
+              leading: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircleAvatar(
+                      radius: 35,
+                      backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
+                      backgroundColor: Colors.transparent,
+                    ),
+                    const SizedBox(height: 3,),
+                    Text(widget.userName, style: myTheme.textTheme.titleSmall,),
+                    const SizedBox(height: 3,),
+                    Text('+${widget.countryCode} ${widget.mobileNo}', style: myTheme.textTheme.titleSmall,),
+                  ],
+                ),
+              ),
+              trailing: Expanded(
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: IconButton(tooltip: 'Logout', icon: const Icon(Icons.logout, color: Colors.redAccent,),
+                      onPressed: () async {
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.remove('userId');
+                        await prefs.remove('userName');
+                        await prefs.remove('countryCode');
+                        await prefs.remove('mobileNumber');
+                        await prefs.remove('subscribeTopic');
+
+                        if (mounted){
+                          Navigator.pushNamedAndRemoveUntil(context, '/login', ModalRoute.withName('/login'));
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              onDestinationSelected: (int index) {
+                setState(() {
+                  _selectedIndex = index;
+                  if(_selectedIndex==0){
+                    appBarTitle = 'Home';
+                  }else if(_selectedIndex==1){
+                    appBarTitle = 'Product';
+                  }else{
+                    appBarTitle = 'My Preference';
+                  }
+                });
+              },
+              destinations: widget.userType == '1'? <NavigationRailDestination>[
+                const NavigationRailDestination(
+                  padding: EdgeInsets.only(top: 5),
+                  icon: Icon(Icons.home_outlined),
+                  selectedIcon: Icon(Icons.home_outlined, color: Color(0xFF0D5D9A),),
+                  label: Text('Home'),
+                ),
+                const NavigationRailDestination(
+                  icon: Icon(Icons.add_chart),
+                  selectedIcon: Icon(Icons.add_chart, color: Color(0xFF0D5D9A),),
+                  label: Text('Product'),
+                ),
+                const NavigationRailDestination(
+                  icon: Icon(Icons.topic_outlined),
+                  selectedIcon: Icon(Icons.topic_outlined, color: Color(0xFF0D5D9A),),
+                  label: Text('Master'),
+                ),
+                const NavigationRailDestination(
+                  icon: Icon(Icons.settings_outlined),
+                  selectedIcon: Icon(Icons.settings_outlined, color: Color(0xFF0D5D9A),),
+                  label: Text('My Preference'),
+                ),
+                const NavigationRailDestination(
+                  icon: Icon(Icons.info_outline),
+                  selectedIcon: Icon(Icons.info_outline, color: Color(0xFF0D5D9A),),
+                  label: Text('App Info'),
+                ),
+                const NavigationRailDestination(
+                  icon: Icon(Icons.help_outline),
+                  selectedIcon: Icon(Icons.help_outline, color: Color(0xFF0D5D9A),),
+                  label: Text('Help & Support'),
+                ),
+              ]:
+              <NavigationRailDestination>[
+                const NavigationRailDestination(
+                  padding: EdgeInsets.only(top: 5),
+                  icon: Icon(Icons.home_outlined),
+                  selectedIcon: Icon(Icons.home_outlined, color: Color(0xFF0D5D9A),),
+                  label: Text('Home'),
+                ),
+                const NavigationRailDestination(
+                  icon: Icon(Icons.add_chart),
+                  selectedIcon: Icon(Icons.add_chart, color: Color(0xFF0D5D9A),),
+                  label: Text('Product'),
+                ),
+                const NavigationRailDestination(
+                  icon: Icon(Icons.settings_outlined),
+                  selectedIcon: Icon(Icons.settings_outlined, color: Color(0xFF0D5D9A),),
+                  label: Text('My Preference'),
+                ),
+                const NavigationRailDestination(
+                  icon: Icon(Icons.info_outline),
+                  selectedIcon: Icon(Icons.info_outline, color: Color(0xFF0D5D9A),),
+                  label: Text('App Info'),
+                ),
+                const NavigationRailDestination(
+                  icon: Icon(Icons.help_outline),
+                  selectedIcon: Icon(Icons.help_outline, color: Color(0xFF0D5D9A),),
+                  label: Text('Help & Support'),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: _selectedIndex == 0 ? const HomePage() :
+            _selectedIndex == 1 ? ProductInventory(userName: widget.userName) :
+            _selectedIndex == 2 ? widget.userType =='1'? const AllEntry() : const MyPreference(userID: 1,) : const MyWebView(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class MyDrawer extends StatelessWidget {
+  final Function(String) onOptionSelected;
+  const MyDrawer({super.key, required this.onOptionSelected, required this.userName, required this.countryCode, required this.phoneNo});
+  final String userName, countryCode, phoneNo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 250,
+      color: myTheme.primaryColor.withOpacity(0.2),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: myTheme.primaryColor.withOpacity(0.5),
+            ),
+            child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const CircleAvatar(
-                    radius: 35,
+                    radius: 40,
                     backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
                     backgroundColor: Colors.transparent,
                   ),
                   const SizedBox(height: 3,),
-                  Text(widget.userName, style: myTheme.textTheme.titleSmall,),
+                  Text(userName, style: const TextStyle(fontSize: 17, color: Colors.white)),
                   const SizedBox(height: 3,),
-                  Text('+${widget.countryCode} ${widget.mobileNo}', style: myTheme.textTheme.titleSmall,),
+                  Text('+$countryCode $phoneNo', style: const TextStyle(fontSize: 14, color: Colors.white)),
                 ],
               ),
             ),
-            trailing: Expanded(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: IconButton(tooltip: 'Logout', icon: const Icon(Icons.logout, color: Colors.redAccent,),
-                    onPressed: () async {
-                      final prefs = await SharedPreferences.getInstance();
-                      await prefs.remove('userId');
-                      await prefs.remove('userName');
-                      await prefs.remove('countryCode');
-                      await prefs.remove('mobileNumber');
-                      await prefs.remove('subscribeTopic');
-
-                      if (mounted){
-                        Navigator.pushNamedAndRemoveUntil(context, '/login', ModalRoute.withName('/login'));
-                      }
-                    },
-                  ),
-                ),
-              ),
-            ),
-            onDestinationSelected: (int index) {
-              setState(() {
-                _selectedIndex = index;
-                if(_selectedIndex==0){
-                  appBarTitle = 'Home';
-                }else if(_selectedIndex==1){
-                  appBarTitle = 'Product';
-                }else{
-                  appBarTitle = 'My Preference';
-                }
-              });
+          ),
+          const Padding(
+            padding: EdgeInsets.only(left: 10, bottom: 5),
+            child: Text('HOME'),
+          ),
+          ListTile(
+            leading: Icon(Icons.dashboard_outlined, color: myTheme.primaryColor,),
+            title: const Text('Dashboard', style: TextStyle(fontSize: 14)),
+            onTap: () {
+              onOptionSelected('Dashboard');
             },
-            destinations: widget.userType == '1'? <NavigationRailDestination>[
-              const NavigationRailDestination(
-                padding: EdgeInsets.only(top: 5),
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home_outlined, color: Color(0xFF0D5D9A),),
-                label: Text('Home'),
-              ),
-              const NavigationRailDestination(
-                icon: Icon(Icons.add_chart),
-                selectedIcon: Icon(Icons.add_chart, color: Color(0xFF0D5D9A),),
-                label: Text('Product'),
-              ),
-              const NavigationRailDestination(
-                icon: Icon(Icons.topic_outlined),
-                selectedIcon: Icon(Icons.topic_outlined, color: Color(0xFF0D5D9A),),
-                label: Text('Master'),
-              ),
-              const NavigationRailDestination(
-                icon: Icon(Icons.settings_outlined),
-                selectedIcon: Icon(Icons.settings_outlined, color: Color(0xFF0D5D9A),),
-                label: Text('My Preference'),
-              ),
-              const NavigationRailDestination(
-                icon: Icon(Icons.info_outline),
-                selectedIcon: Icon(Icons.info_outline, color: Color(0xFF0D5D9A),),
-                label: Text('App Info'),
-              ),
-              const NavigationRailDestination(
-                icon: Icon(Icons.help_outline),
-                selectedIcon: Icon(Icons.help_outline, color: Color(0xFF0D5D9A),),
-                label: Text('Help & Support'),
-              ),
-            ]:
-            <NavigationRailDestination>[
-              const NavigationRailDestination(
-                padding: EdgeInsets.only(top: 5),
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home_outlined, color: Color(0xFF0D5D9A),),
-                label: Text('Home'),
-              ),
-              const NavigationRailDestination(
-                icon: Icon(Icons.add_chart),
-                selectedIcon: Icon(Icons.add_chart, color: Color(0xFF0D5D9A),),
-                label: Text('Product'),
-              ),
-              const NavigationRailDestination(
-                icon: Icon(Icons.settings_outlined),
-                selectedIcon: Icon(Icons.settings_outlined, color: Color(0xFF0D5D9A),),
-                label: Text('My Preference'),
-              ),
-              const NavigationRailDestination(
-                icon: Icon(Icons.info_outline),
-                selectedIcon: Icon(Icons.info_outline, color: Color(0xFF0D5D9A),),
-                label: Text('App Info'),
-              ),
-              const NavigationRailDestination(
-                icon: Icon(Icons.help_outline),
-                selectedIcon: Icon(Icons.help_outline, color: Color(0xFF0D5D9A),),
-                label: Text('Help & Support'),
-              ),
-            ],
           ),
-          Expanded(
-            child: _selectedIndex == 0 ?
-            widget.userType =='3'? CustomerHome(customerID: widget.userID, type: 0, customerName: '',) : const HomePage() :
-            _selectedIndex == 1 ? ProductInventory(userName: widget.userName) :
-            _selectedIndex == 2 ? widget.userType =='1'? const AllEntry() : const MyPreference(userID: 1,) : const MyWebView(),
+          ListTile(
+            leading: Icon(Icons.devices_other, color: myTheme.primaryColor,),
+            title: const Text('My Product', style: TextStyle(fontSize: 14)),
+            onTap: () {
+              onOptionSelected('My Product');
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.my_library_books_outlined, color: myTheme.primaryColor,),
+            title: const Text('Report Overview', style: TextStyle(fontSize: 14)),
+            onTap: () {
+              onOptionSelected('Report Overview');
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.manage_history, color: myTheme.primaryColor,),
+            title: const Text('System logs', style: TextStyle(fontSize: 14)),
+            onTap: () {
+              onOptionSelected('System logs');
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.settings_outlined, color: myTheme.primaryColor,),
+            title: const Text('Device Settings', style: TextStyle(fontSize: 14)),
+            onTap: () {
+              onOptionSelected('Device Settings');
+            },
+          ),
+          const Padding(
+            padding: EdgeInsets.only(left: 10, top: 10, bottom: 5),
+            child: Text('ORGANIZATION'),
+          ),
+          ListTile(
+            leading: Icon(Icons.info_outline, color: myTheme.primaryColor,),
+            title: const Text('App Info', style: TextStyle(fontSize: 14)),
+            onTap: () {
+              onOptionSelected('Device Settings');
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.help_outline, color: myTheme.primaryColor,),
+            title: const Text('Help & Support', style: TextStyle(fontSize: 14)),
+            onTap: () {
+              onOptionSelected('Device Settings');
+            },
+          ),
+          const Padding(
+            padding: EdgeInsets.only(left: 10, top: 10, bottom: 5),
+            child: Text('ACCOUNT'),
+          ),
+          ListTile(
+            leading: Icon(Icons.settings_outlined, color: myTheme.primaryColor,),
+            title: const Text('My Preference', style: TextStyle(fontSize: 14)),
+            onTap: () {
+              onOptionSelected('Device Settings');
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.logout, color: Colors.red,),
+            title: const Text('Logout', style: TextStyle(fontSize: 14)),
+            onTap: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.remove('userId');
+              await prefs.remove('userName');
+              await prefs.remove('countryCode');
+              await prefs.remove('mobileNumber');
+              await prefs.remove('subscribeTopic');
 
+              if (context.mounted){
+                Navigator.pushNamedAndRemoveUntil(context, '/login', ModalRoute.withName('/login'));
+              }
+            },
           ),
+          // Add more ListTile widgets for additional options
         ],
       ),
     );
   }
 }
-
-
-/*class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key}) : super(key: key);
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _selectedDestination = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('widget.title'),
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Header',
-                style: textTheme.headline6,
-              ),
-            ),
-            Divider(
-              height: 1,
-              thickness: 1,
-            ),
-            ListTile(
-              leading: Icon(Icons.favorite),
-              title: Text('Item 1'),
-              selected: _selectedDestination == 0,
-              onTap: () => selectDestination(0),
-            ),
-            ListTile(
-              leading: Icon(Icons.delete),
-              title: Text('Item 2'),
-              selected: _selectedDestination == 1,
-              onTap: () => selectDestination(1),
-            ),
-            ListTile(
-              leading: Icon(Icons.label),
-              title: Text('Item 3'),
-              selected: _selectedDestination == 2,
-              onTap: () => selectDestination(2),
-            ),
-            Divider(
-              height: 1,
-              thickness: 1,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Label',
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.bookmark),
-              title: Text('Item A'),
-              selected: _selectedDestination == 3,
-              onTap: () => selectDestination(3),
-            ),
-          ],
-        ),
-      ),
-      body: GridView.count(
-        crossAxisCount: 2,
-        crossAxisSpacing: 20,
-        mainAxisSpacing: 20,
-        padding: EdgeInsets.all(20),
-        childAspectRatio: 3 / 2,
-        children: [
-          Image.asset('assets/nav-drawer-1.jpg'),
-          Image.asset('assets/nav-drawer-2.jpg'),
-          Image.asset('assets/nav-drawer-3.jpg'),
-          Image.asset('assets/nav-drawer-4.jpg'),
-        ],
-      ),
-    );
-  }
-
-  void selectDestination(int index) {
-    setState(() {
-      _selectedDestination = index;
-    });
-  }
-}*/

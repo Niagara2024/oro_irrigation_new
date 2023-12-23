@@ -6,7 +6,6 @@ import '../../../state_management/irrigation_program_main_provider.dart';
 import '../../../widgets/SCustomWidgets/custom_alert_dialog.dart';
 import '../../../widgets/SCustomWidgets/custom_train_widget.dart';
 
-
 class SequenceScreen extends StatefulWidget {
   final int userId;
   final int controllerId;
@@ -24,7 +23,6 @@ class _SequenceScreenState extends State<SequenceScreen> {
   @override
   void initState() {
     super.initState();
-    // Other initialization code here
   }
 
   @override
@@ -36,6 +34,7 @@ class _SequenceScreenState extends State<SequenceScreen> {
   Widget build(BuildContext context) {
     final sequenceProvider = Provider.of<IrrigationProgramMainProvider>(context);
     final Map<int, GlobalKey> itemKeys = {};
+    var sequenceIndex = 0;
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -71,6 +70,8 @@ class _SequenceScreenState extends State<SequenceScreen> {
                           itemCount: sequenceProvider.irrigationLine!.sequence.length,
                           itemBuilder: (context, index) {
                             final valveList = sequenceProvider.irrigationLine!.sequence[index]['selected'];
+                            // sequenceIndex = sequenceProvider.irrigationLine!.sequence[index];
+                            // print(sequenceProvider.irrigationLine!.sequence[index]);
                             final nonEmptyStrings = valveList?.toList();
                             if (!itemKeys.containsKey(index)) {
                               itemKeys[index] = GlobalKey();
@@ -174,14 +175,6 @@ class _SequenceScreenState extends State<SequenceScreen> {
                                                       ),
                                                     ),
                                                     onTap: () {
-                                                      // Line line = Line(
-                                                      //   sNo: groupValve.sNo,
-                                                      //   id: groupValve.id,
-                                                      //   location: groupValve.location,
-                                                      //   name: groupValve.name,
-                                                      //   valve: groupValve.valve
-                                                      // );
-
                                                       List<dynamic> valve = groupValve.valve.map((e) => Valve(
                                                         sNo: e.sNo,
                                                         id: e.id,
@@ -290,7 +283,8 @@ class _SequenceScreenState extends State<SequenceScreen> {
                                                       location: valveMap.location,
                                                       name: valveMap.name,
                                                     );
-                                                    int targetIndex = index;
+                                                    int targetIndex = sequenceIndex;
+                                                    // print(targetIndex);
                                                     double itemSize = 60.0;
                                                     double targetOffset = targetIndex * itemSize;
                                                     _scrollController.animateTo(targetOffset, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
@@ -418,7 +412,7 @@ class _SequenceScreenState extends State<SequenceScreen> {
                                                 name: name,
                                               );
                                               sequenceProvider.updateIsAgitator();
-                                              sequenceProvider.valveSelection(agitator, 0, 0, false,
+                                              sequenceProvider.valveSelection(agitator.toJson(), 0, 0, false,
                                                   widget.serialNumber == 0 ? sequenceProvider.serialNumberCreation : widget.serialNumber);
                                             }
                                         ),

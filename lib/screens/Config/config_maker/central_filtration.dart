@@ -4,6 +4,7 @@ import 'package:oro_irrigation_new/screens/Config/config_maker/source_pump.dart'
 import 'package:provider/provider.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 
+import '../../../constants/theme.dart';
 import '../../../state_management/config_maker_provider.dart';
 import '../../../widgets/text_form_field_config.dart';
 
@@ -48,7 +49,115 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                 configPvd.cancelSelection();
               },
               addBatchButtonFunction: (){
+                showDialog(context: context, builder: (BuildContext context){
+                  return Consumer<ConfigMakerProvider>(builder: (context,configPvd,child){
+                    if(configPvd.totalCentralFiltration == 0){
+                      return showingMessage('Oops!', 'The filtration site limit is achieved!..', context);
+                    }else if(configPvd.totalFilter == 0){
+                      return showingMessage('Oops!', 'The filter limit is achieved!..', context);
+                    }else{
+                      return AlertDialog(
+                        backgroundColor: myTheme.primaryColor,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(0))
+                        ),
+                        title: Text('Add Batch of Filtration Sites',style: TextStyle(color: Colors.white,fontSize: 14),),
+                        content: SizedBox(
+                            width: double.infinity,
+                            height: 150,
+                            child: Column(
+                              children: [
+                                ListTile(
+                                  title: Text('No of Filtration sites',style: TextStyle(color: Colors.indigo.shade50,fontSize: 14),),
+                                  trailing: DropdownButton(
+                                      value: configPvd.cfSite,
+                                      icon: Icon(Icons.arrow_drop_down,color: Colors.white,),
+                                      dropdownColor: Colors.black87,
+                                      // focusColor: Colors.white,
+                                      underline: Container(),
+                                      items: dropDownList(configPvd.totalCentralFiltration).map((String items) {
+                                        return DropdownMenuItem(
+                                          onTap: (){
+                                          },
+                                          value: items,
+                                          child: Container(
+                                              child: Text(items,style: TextStyle(fontSize: 11,color: Colors.white),)
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value){
+                                        configPvd.editCfSite(value!);
+                                        configPvd.editFilter('1');
+                                      }),
+                                ),
+                                ListTile(
+                                  title: Text('no of filter per site',style: TextStyle(color: Colors.indigo.shade50,fontSize: 14),),
+                                  trailing: int.parse(configPvd.cfSite) > configPvd.totalFilter ?  Text('N/A',style: TextStyle(color: Colors.white),) : DropdownButton(
+                                      value: configPvd.filter,
+                                      icon: Icon(Icons.arrow_drop_down,color: Colors.white,),
+                                      dropdownColor: Colors.black87,
+                                      // focusColor: Colors.white,
+                                      underline: Container(),
+                                      items: dropDownList(configPvd.totalFilter ~/ int.parse(configPvd.cfSite)).map((String items) {
+                                        return DropdownMenuItem(
+                                          onTap: (){
+                                          },
+                                          value: items,
+                                          child: Container(
+                                              child: Text(items,style: TextStyle(fontSize: 11,color: Colors.white),)
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value){
+                                        configPvd.editFilter(value!);
+                                      }),
+                                ),
+                              ],
+                            )
+                        ),
+                        actions: [
+                          InkWell(
+                              onTap: (){
+                                configPvd.editCfSite('1');
+                                configPvd.editFilter('1');
+                                Navigator.pop(context);
+                              },
+                              child: Container(
+                                child: Center(
+                                  child: Text('cancel',style: TextStyle(color: Colors.indigo.shade50,fontSize: 16),
+                                  ),
+                                ),
+                                width : 80,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                    border: Border.all(width: 0.5,color: Colors.indigo.shade50),
+                                    borderRadius: BorderRadius.circular(5)
+                                ),
+                              )
+                          ),
+                          InkWell(
+                            onTap: (){
+                              configPvd.centralFiltrationFunctionality(['addBatch_CF',int.parse(configPvd.cfSite),configPvd.totalFilter == 0 ? 0 : int.parse(configPvd.filter)]);
+                              configPvd.editCfSite('1');
+                              configPvd.editFilter('1');
+                              Navigator.pop(context);
+                            },
+                            child: Container(
+                              child: Center(
+                                child: Text('ok',style: TextStyle(color: Colors.black,fontSize: 16),
+                                ),
+                              ),
+                              width: 80,
+                              height: 30,
+                              color: Colors.indigo.shade50,
+                            ),
+                          )
+                        ],
+                      );
+                    }
+                  });
 
+                });
               },
               reOrderFunction: (){
                 List<int> list1 = [];
@@ -60,12 +169,28 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                 });
               },
               addButtonFunction: (){
-                configPvd.centralFiltrationFunctionality(['addCentralFiltration']);
-                scrollController.animateTo(
-                  scrollController.position.maxScrollExtent,
-                  duration: Duration(milliseconds: 500), // Adjust the duration as needed
-                  curve: Curves.easeInOut, // Adjust the curve as needed
-                );
+                if(configPvd.totalCentralFiltration == 0){
+                  showDialog(
+                      context: context,
+                      builder: (context){
+                        return showingMessage('Oops!', 'The filtration site limit is achieved!..', context);
+                      }
+                  );
+                }else if(configPvd.totalFilter == 0){
+                  showDialog(
+                      context: context,
+                      builder: (context){
+                        return showingMessage('Oops!', 'The filter limit is achieved!..', context);
+                      }
+                  );
+                }else{
+                  configPvd.centralFiltrationFunctionality(['addCentralFiltration']);
+                  scrollController.animateTo(
+                    scrollController.position.maxScrollExtent,
+                    duration: Duration(milliseconds: 500), // Adjust the duration as needed
+                    curve: Curves.easeInOut, // Adjust the curve as needed
+                  );
+                }
               },
               deleteButtonFunction: (){
                 configPvd.centralFiltrationFunctionality(['centralFiltrationSelection',false]);
@@ -79,153 +204,13 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
             Container(
               child: Row(
                 children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('#',style: TextStyle(color: Colors.white),),
-                        Text('(${configPvd.totalCentralFiltration})',style: TextStyle(color: Colors.white),),
-                      ],
-                    ),
-                    decoration: BoxDecoration(
-                        color: Colors.blueGrey,
-                        border: Border(
-                          top: BorderSide(width: 1),
-                          bottom: BorderSide(width: 1),
-                          right: BorderSide(width: 1),
-                          left: BorderSide(width: 1),
-                        )
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Filters',style: TextStyle(color: Colors.white),),
-                          Text('(${configPvd.totalFilter})',style: TextStyle(color: Colors.white),),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('D.stream',style: TextStyle(color: Colors.white),),
-                          Text('Valve(${configPvd.total_D_s_valve})',style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('P_Sense',style: TextStyle(color: Colors.white),),
-                          Text('in(${configPvd.total_p_sensor})',style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('P_Sense',style: TextStyle(color: Colors.white),),
-                          Text('out(${configPvd.total_p_sensor})',style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Pressure',style: TextStyle(color: Colors.white),),
-                          Text('Switch(${configPvd.totalPressureSwitch})',style: TextStyle(color: Colors.white),),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Diff.Press',style: TextStyle(color: Colors.white),),
-                          Text('Sensor(${configPvd.totalDiffPressureSensor})',style: TextStyle(color: Colors.white),),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-
+                  topBtmLftRgt('#', '(${configPvd.totalCentralFiltration})'),
+                  topBtmRgt('Filters','(${configPvd.totalFilter})'),
+                  topBtmRgt('D.stream','Valve(${configPvd.total_D_s_valve})'),
+                  topBtmRgt('P.Sense','in(${configPvd.total_p_sensor})'),
+                  topBtmRgt('P.Sense','out(${configPvd.total_p_sensor})'),
+                  topBtmRgt('Pressure','Switch(${configPvd.totalPressureSwitch})'),
+                  topBtmRgt('D.Press','Sensor(${configPvd.totalDiffPressureSensor})'),
                 ],
               ),
             ),
@@ -242,27 +227,27 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                           color: Colors.white70,
                         ),
                         margin: index == configPvd.centralFiltrationUpdated.length - 1 ? EdgeInsets.only(bottom: 60) : null,
-                        width: width-20,
                         child: Row(
                           children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                  border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1))
-                              ),
-                              width: 60,
-                              height: 60,
-                              child: Center(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    if(configPvd.centralFiltrationSelection == true || configPvd.centralFiltrationSelectAll == true)
-                                      Checkbox(
-                                          value: configPvd.centralFiltrationUpdated[index]['selection'] == 'select' ? true : false,
-                                          onChanged: (value){
-                                            configPvd.centralFiltrationFunctionality(['selectCentralFiltration',index,value]);
-                                          }),
-                                    Text('${index + 1}'),
-                                  ],
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1))
+                                ),
+                                height: 50,
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      if(configPvd.centralFiltrationSelection == true || configPvd.centralFiltrationSelectAll == true)
+                                        Checkbox(
+                                            value: configPvd.centralFiltrationUpdated[index]['selection'] == 'select' ? true : false,
+                                            onChanged: (value){
+                                              configPvd.centralFiltrationFunctionality(['selectCentralFiltration',index,value]);
+                                            }),
+                                      Text('${index + 1}'),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -272,7 +257,7 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                                       border: Border(right: BorderSide(width: 1))
                                   ),
                                   width: double.infinity,
-                                  height: 60,
+                                  height: 50,
                                   child: Center(
                                     child: TextFieldForConfig(index: index, initialValue: configPvd.centralFiltrationUpdated[index]['filter'], config: configPvd, purpose: 'centralFiltrationFunctionality',),
                                   )
@@ -284,9 +269,9 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                                     border: Border(right: BorderSide(width: 1))
                                 ),
                                 width: double.infinity,
-                                height: 60,
+                                height: 50,
                                 child: (configPvd.total_D_s_valve == 0 && configPvd.centralFiltrationUpdated[index]['dv'].isEmpty) ?
-                                Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                notAvailable :
                                 Checkbox(
                                     value: configPvd.centralFiltrationUpdated[index]['dv'].isEmpty ? false : true,
                                     onChanged: (value){
@@ -300,9 +285,9 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                                     border: Border(right: BorderSide(width: 1))
                                 ),
                                 width: double.infinity,
-                                height: 60,
+                                height: 50,
                                 child: (configPvd.total_p_sensor == 0 && configPvd.centralFiltrationUpdated[index]['pressureIn'].isEmpty) ?
-                                Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                notAvailable :
                                 Checkbox(
                                     value: configPvd.centralFiltrationUpdated[index]['pressureIn'].isEmpty ? false : true,
                                     onChanged: (value){
@@ -316,9 +301,9 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                                     border: Border(right: BorderSide(width: 1))
                                 ),
                                 width: double.infinity,
-                                height: 60,
+                                height: 50,
                                 child: (configPvd.total_p_sensor == 0 && configPvd.centralFiltrationUpdated[index]['pressureOut'].isEmpty) ?
-                                Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                notAvailable :
                                 Checkbox(
                                     value: configPvd.centralFiltrationUpdated[index]['pressureOut'].isEmpty ? false : true,
                                     onChanged: (value){
@@ -332,9 +317,9 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                                   border: Border(right: BorderSide(width: 1)),
                                 ),
                                 width: double.infinity,
-                                height: 60 ,
+                                height: 50 ,
                                 child: (configPvd.totalPressureSwitch == 0 && configPvd.centralFiltrationUpdated[index]['pressureSwitch'].isEmpty) ?
-                                Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                notAvailable :
                                 Checkbox(
                                     value: configPvd.centralFiltrationUpdated[index]['pressureSwitch'].isEmpty ? false : true,
                                     onChanged: (value){
@@ -348,9 +333,9 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
                                   border: Border(right: BorderSide(width: 1)),
                                 ),
                                 width: double.infinity,
-                                height: 60 ,
+                                height: 50 ,
                                 child: (configPvd.totalDiffPressureSensor == 0 && configPvd.centralFiltrationUpdated[index]['diffPressureSensor'].isEmpty) ?
-                                Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                notAvailable :
                                 Checkbox(
                                     value: configPvd.centralFiltrationUpdated[index]['diffPressureSensor'].isEmpty ? false : true,
                                     onChanged: (value){

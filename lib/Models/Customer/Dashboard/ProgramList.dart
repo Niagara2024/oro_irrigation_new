@@ -12,6 +12,7 @@ class ProgramList {
   final String firstSequence;
   final String duration;
 
+
   ProgramList({
     required this.programId,
     required this.serialNumber,

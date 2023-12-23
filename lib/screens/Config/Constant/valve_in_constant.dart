@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/widgets/drop_down_button.dart';
 import 'package:provider/provider.dart';
 import '../../../state_management/constant_provider.dart';
 import '../../../state_management/overall_use.dart';
@@ -48,7 +49,7 @@ class _ValveConstantState extends State<ValveConstant> {
                       Column(
                         children: [
                           Container(
-                            color: Colors.blueGrey.shade100,
+                            color: Colors.indigo.shade100,
                             height: 30,
                             width: double.infinity,
                             child: Center(child: Text('${constantPvd.valveUpdated[i]['name']}',style: TextStyle(color: Colors.black87),)),
@@ -61,13 +62,13 @@ class _ValveConstantState extends State<ValveConstant> {
                                       for(var k = 0;k < constantPvd.valveUpdated[i]['valve'].length;k++)
                                         Container(
                                           decoration: BoxDecoration(
-                                            border: Border(bottom: BorderSide(width: 1),top: BorderSide(width: k == 0 ? 1 : 0))
+                                              border: Border(bottom: BorderSide(width: 1),top: BorderSide(width: k == 0 ? 1 : 0))
                                           ),
                                           child: Row(
                                             children: [
                                               expandedCustomCell(Text('${k+1}'),'first',k % 2 != 0 ? Colors.blue.shade100 : Colors.blue.shade50),
                                               expandedCustomCell(Text('${constantPvd.valveUpdated[i]['valve'][k]['name']}')),
-                                              expandedCustomCell(CustomTimePickerSiva(purpose: 'valve_defaultDosage/${i}/${k}', index: k, value: '${constantPvd.valveUpdated[i]['valve'][k]['defaultDosage']}', displayHours: true, displayMins: true, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,additional: 'split',)),
+                                              expandedCustomCell(MyDropDown(initialValue: '${constantPvd.valveUpdated[i]['valve'][k]['defaultDosage']}', itemList: ['Time','Quantity'], pvdName: 'valve_defaultDosage/${i}/${k}', index: i)),
                                               expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.valveUpdated[i]['valve'][k]['nominalFlow'], constantPvd: constantPvd, purpose: 'valve_nominal_flow/${i}/${k}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
                                               expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.valveUpdated[i]['valve'][k]['minimumFlow'], constantPvd: constantPvd, purpose: 'valve_minimum_flow/${i}/${k}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
                                               expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.valveUpdated[i]['valve'][k]['maximumFlow'], constantPvd: constantPvd, purpose: 'valve_maximum_flow/${i}/${k}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
@@ -84,7 +85,7 @@ class _ValveConstantState extends State<ValveConstant> {
                           )
                         ],
                       )
-                      // for(var j in constantPvd.valve[i].entries)
+                    // for(var j in constantPvd.valve[i].entries)
 
                   ],
                 ),
@@ -174,13 +175,13 @@ class _ValveConstant_MState extends State<ValveConstant_M> {
           SizedBox(height: 5,),
           ElevatedButton(
             style: ButtonStyle(
-              minimumSize: MaterialStateProperty.all(Size(300, 40)),
-              backgroundColor: MaterialStateProperty.all(myTheme.primaryColor)
+                minimumSize: MaterialStateProperty.all(Size(300, 40)),
+                backgroundColor: MaterialStateProperty.all(myTheme.primaryColor)
             ),
-              onPressed: (){
-                _showTimePicker(context,constantPvd,overAllPvd);
-              },
-              child: Text('Click to select line',style: TextStyle(color: Colors.yellow, fontSize: 16),),
+            onPressed: (){
+              _showTimePicker(context,constantPvd,overAllPvd);
+            },
+            child: Text('Click to select line',style: TextStyle(color: Colors.yellow, fontSize: 16),),
           ),
           SizedBox(height: 10,),
           Container(

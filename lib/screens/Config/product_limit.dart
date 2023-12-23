@@ -64,7 +64,6 @@ class _ProductLimitsState extends State<ProductLimits> {
   Widget buildStepContent(BuildContext context, int stepNumber)
   {
     final mediaQuery = MediaQuery.of(context);
-
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
     configPvd.clearConfig();
 
@@ -235,7 +234,7 @@ class _ProductLimitsState extends State<ProductLimits> {
     indicatorViewShow();
     await Future.delayed(const Duration(milliseconds: 500));
     Map<String, dynamic> body = {"userId" : widget.customerID, "controllerId" : widget.controllerId};
-    print(body);
+    //print(body);
     final response = await HttpService().postRequest("getUserProductLimit", body);
     if (response.statusCode == 200)
     {
@@ -250,11 +249,10 @@ class _ProductLimitsState extends State<ProductLimits> {
           myControllers.add(TextEditingController());
           myControllers[i].text = '${productLimits[i].quantity}';
           filledRelayCount = filledRelayCount + productLimits[i].quantity;
-
         }
       }
       setState(() {
-        print('${filledRelayCount}');
+        //print('${filledRelayCount}');
         productLimits;
         indicatorViewHide();
       });
@@ -291,12 +289,13 @@ class _ProductLimitsState extends State<ProductLimits> {
   }
 
   Future<void> getConfigData()  async {
+    await Future.delayed(const Duration(seconds: 2));
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: false);
     HttpService service = HttpService();
     try{
       var response = await service.postRequest('getUserConfigMaker', {'userId' : widget.customerID, 'controllerId' : widget.controllerId});
       var jsonData = jsonDecode(response.body);
-      print('jsonData : ${jsonData['data']}');
+      //print('jsonData : ${jsonData['data']}');
       configPvd.fetchAll(jsonData['data']);
     }catch(e){
       print(e.toString());
@@ -308,7 +307,6 @@ class _ProductLimitsState extends State<ProductLimits> {
   Widget build(BuildContext context)
   {
     final mediaQuery = MediaQuery.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.siteName),
@@ -333,9 +331,6 @@ class _ProductLimitsState extends State<ProductLimits> {
               getConfigData();
             });
             updateProductLimit();
-
-          }else if(_currentStep == 2){
-            //updateProductLimit();
           }
           _currentStep < 2 ? setState(() => _currentStep += 1) : null;
         },
@@ -345,14 +340,16 @@ class _ProductLimitsState extends State<ProductLimits> {
         stepIconBuilder: (context, stepState) {
           if (stepState == StepState.editing) {
             return Icon(Icons.edit_outlined, color: myTheme.primaryColor); // Custom icon for completed step
-          } else if (stepState == StepState.complete) {
+          } else if (stepState == StepState.indexed) {
+            return const Icon(Icons.check, color: Colors.green); // Custom icon for disabled step
+          }else if (stepState == StepState.complete) {
             return const Icon(Icons.check, color: Colors.green); // Custom icon for disabled step
           } else {
             return const Icon(Icons.block, color: Colors.grey); // Custom icon for other steps
           }
         },
         controlsBuilder: (BuildContext context, ControlsDetails controlsDetails) {
-          return _currentStep==2 ? Container(height: 0) :
+          return _currentStep==1 || _currentStep==2 ? Container(height: 0) :
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -393,7 +390,7 @@ class _ProductLimitsState extends State<ProductLimits> {
           Step(
             title: const Text('Product Limit'),
             content: visibleLoading? Container(
-              margin: const EdgeInsets.only(top: 0),
+              padding: EdgeInsets.zero,
               height: mediaQuery.size.height-230,
               color:  Colors.white,
               child: Center(
@@ -408,9 +405,11 @@ class _ProductLimitsState extends State<ProductLimits> {
                   ),
                 ),
               ),
-            ) : Container(
+            ) :
+            Container(
               height: mediaQuery.size.height-230,
               color:  Colors.white,
+              padding: EdgeInsets.zero,
               child: Column(
                 children: [
                   Expanded(
@@ -448,9 +447,90 @@ class _ProductLimitsState extends State<ProductLimits> {
                                               productLimits[index].product == 'Main Valve'?
                                               const AssetImage('assets/images/main_valve.png'):
                                               productLimits[index].product == 'Source Pump'?
-                                              AssetImage('assets/images/source_pump.png'):
-                                              AssetImage('assets/images/irrigation_pump.png'),
+                                              const AssetImage('assets/images/source_pump.png'):
+                                              productLimits[index].product == 'Irrigation Pump'?
+                                              const AssetImage('assets/images/irrigation_pump.png'):
+                                              productLimits[index].product == 'Analog Sensor'?
+                                              const AssetImage('assets/images/analog_sensor.png'):
+                                              productLimits[index].product == 'Level Sensor'?
+                                              const AssetImage('assets/images/level_sensor.png'):
+                                              productLimits[index].product == 'Booster Pump'?
+                                              const AssetImage('assets/images/booster_pump.png'):
+                                              productLimits[index].product == 'Central Fertilizer Site'?
+                                              const AssetImage('assets/images/central_fertilizer_site.png'):
+                                              productLimits[index].product == 'Central Filter Site'?
+                                              const AssetImage('assets/images/central_filtration_site.png'):
+                                              productLimits[index].product == 'Agitator'?
+                                              const AssetImage('assets/images/agitator.png'):
+                                              productLimits[index].product == 'Injector'?
+                                              const AssetImage('assets/images/injector.png'):
+                                              productLimits[index].product == 'Filter'?
+                                              const AssetImage('assets/images/filter.png'):
+                                              productLimits[index].product == 'Downstream Valve'?
+                                              const AssetImage('assets/images/downstream_valve.png'):
+                                              productLimits[index].product == 'Fan'?
+                                              const AssetImage('assets/images/fan.png'):
+                                              productLimits[index].product == 'Fogger'?
+                                              const AssetImage('assets/images/fogger.png'):
+                                              productLimits[index].product == 'Selector'?
+                                              const AssetImage('assets/images/selector.png'):
+                                              productLimits[index].product == 'Water Meter'?
+                                              const AssetImage('assets/images/water_meter.png'):
+                                              productLimits[index].product == 'Fertilizer Meter'?
+                                              const AssetImage('assets/images/fertilizer_meter.png'):
+                                              productLimits[index].product == 'Co2 Sensor'?
+                                              const AssetImage('assets/images/co2.png'):
+                                              productLimits[index].product == 'Pressure Switch'?
+                                              const AssetImage('assets/images/pressure_switch.png'):
+                                              productLimits[index].product == 'Pressure Sensor'?
+                                              const AssetImage('assets/images/pressure_sensor.png'):
+                                              productLimits[index].product == 'Pressure Sensor'?
+                                              const AssetImage('assets/images/pressure_sensor.png'):
+                                              productLimits[index].product == 'Differential Pressure Sensor'?
+                                              const AssetImage('assets/images/differential_pressure_sensor.png'):
+                                              productLimits[index].product == 'EC Sensor'?
+                                              const AssetImage('assets/images/ec_sensor.png'):
+                                              productLimits[index].product == 'PH Sensor'?
+                                              const AssetImage('assets/images/ph_sensor.png'):
+                                              productLimits[index].product == 'Temperature Sensor'?
+                                              const AssetImage('assets/images/temperature_sensor.png'):
+                                              productLimits[index].product == 'Soil Temperature Sensor'?
+                                              const AssetImage('assets/images/soil_temperature_sensor.png'):
+                                              productLimits[index].product == 'Wind Direction Sensor'?
+                                              const AssetImage('assets/images/wind_direction_sensor.png'):
+                                              productLimits[index].product == 'Wind Speed Sensor'?
+                                              const AssetImage('assets/images/wind_speed_sensor.png'):
+                                              productLimits[index].product == 'LUX Sensor'?
+                                              const AssetImage('assets/images/lux_sensor.png'):
+                                              productLimits[index].product == 'LDR Sensor'?
+                                              const AssetImage('assets/images/ldr_sensor.png'):
+                                              productLimits[index].product == 'Humidity Sensor'?
+                                              const AssetImage('assets/images/humidity_sensor.png'):
+                                              productLimits[index].product == 'Leaf Wetness Sensor'?
+                                              const AssetImage('assets/images/leaf_wetness_sensor.png'):
+                                              productLimits[index].product == 'Rain Gauge Sensor'?
+                                              const AssetImage('assets/images/rain_gauge_sensor.png'):
+                                              productLimits[index].product == 'Contact'?
+                                              const AssetImage('assets/images/contact.png'):
+                                              productLimits[index].product == 'Weather Station'?
+                                              const AssetImage('assets/images/weather_station.png'):
+                                              productLimits[index].product == 'Condition'?
+                                              const AssetImage('assets/images/condition.png'):
+                                              productLimits[index].product == 'Valve Group'?
+                                              const AssetImage('assets/images/valve_group.png'):
+                                              productLimits[index].product == 'Virtual Water Meter'?
+                                              const AssetImage('assets/images/virtual_water_meter.png'):
+                                              productLimits[index].product == 'Program'?
+                                              const AssetImage('assets/images/programs.png'):
+                                              productLimits[index].product == 'Radiation Set'?
+                                              const AssetImage('assets/images/radiation_sets.png'):
+                                              productLimits[index].product == 'Fertilizer Set'?
+                                              const AssetImage('assets/images/fertilization_sets.png'):
+                                              productLimits[index].product == 'Filter Set'?
+                                              const AssetImage('assets/images/filter_sets.png'):
+                                              const AssetImage('assets/images/water_source.png'),
                                               backgroundColor: Colors.transparent,
+
                                             ),
                                           ),
                                         ),),
@@ -509,17 +589,19 @@ class _ProductLimitsState extends State<ProductLimits> {
               ),
             ),
             isActive: _currentStep >= 0,
-            state: _currentStep == 0 ? StepState.editing : _currentStep >= 1 ? StepState.complete : StepState.disabled,
+            state: filledRelayCount == 0? _currentStep == 0 ? StepState.editing : _currentStep >= 1 ? StepState.complete : StepState.disabled:
+            _currentStep == 0 ? StepState.editing : _currentStep >= 1 ? StepState.complete : StepState.indexed,
           ),
           Step(
             title: const Text('Config maker'),
             content: Container(
-              height: mediaQuery.size.height-230,
+              height: mediaQuery.size.height-180,
               color:  Colors.white,
-              child: ConfigMakerScreen(userId: widget.userID, customerId: widget.customerID, controllerId: widget.controllerId, imeiNumber: widget.deviceId,),
+              child: ConfigMakerScreen(userID: widget.userID, customerID: widget.customerID, siteID: widget.controllerId, imeiNumber: widget.deviceId,),
             ),
             isActive: _currentStep >= 0,
-            state:  _currentStep == 1 ? StepState.editing : _currentStep >= 2 ? StepState.complete : StepState.disabled,
+            state:  filledRelayCount == 0? _currentStep == 1 ? StepState.editing : _currentStep >= 2 ? StepState.complete : StepState.disabled:
+            _currentStep == 1 ? StepState.editing : _currentStep >= 2 ? StepState.complete : StepState.indexed,
           ),
           Step(
             title: const Text('Others'),
@@ -529,7 +611,8 @@ class _ProductLimitsState extends State<ProductLimits> {
               child: ConfigScreen(userID: widget.userID, customerID: widget.customerID, siteName: widget.siteName, controllerId: widget.controllerId, imeiNumber: widget.deviceId,),
             ),
             isActive: _currentStep >= 0,
-            state: _currentStep >= 2? StepState.editing : StepState.disabled,
+            state: filledRelayCount == 0? _currentStep >= 2? StepState.editing : StepState.disabled:
+            _currentStep >= 2? StepState.editing : StepState.indexed,
           ),
         ],
       ),

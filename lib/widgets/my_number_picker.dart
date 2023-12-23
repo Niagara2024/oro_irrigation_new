@@ -15,12 +15,16 @@ class MyTimePicker extends StatefulWidget {
   String? hourString;
   String? minString;
   String? secString;
+  int? hrsLimit;
+  int? minLimit;
   final List<int> CustomList;
   MyTimePicker({super.key,
     required this.displayHours,
     this.hourString,
     this.minString,
     this.secString,
+    this.hrsLimit,
+    this.minLimit,
     required this.displayMins,
     required this.displaySecs,
     required this.displayCustom, required this.CustomString, required this.CustomList, required this.displayAM_PM});
@@ -84,7 +88,7 @@ class _MyTimePickerState extends State<MyTimePicker> {
                     ),
                     infiniteLoop: true,
                     minValue: 0,
-                    maxValue: widget.displayAM_PM == true ? 11 : 23,
+                    maxValue: widget.displayAM_PM == true ? 11 : widget.hrsLimit != null ? widget.hrsLimit! : 23,
                     value: overAllPvd.hrs,
                     onChanged: (value){
                       overAllPvd.editTime('hrs', value);
@@ -106,7 +110,7 @@ class _MyTimePickerState extends State<MyTimePicker> {
                     ),
                     infiniteLoop: true,
                     minValue: 0,
-                    maxValue: 60,
+                    maxValue: widget.minLimit != null ? widget.minLimit! : 59,
                     value: overAllPvd.min,
                     onChanged: (value){
                       overAllPvd.editTime('min', value);
@@ -163,6 +167,3 @@ class _MyTimePickerState extends State<MyTimePicker> {
     );
   }
 }
-
-
-

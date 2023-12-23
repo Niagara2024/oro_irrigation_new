@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:oro_irrigation_new/constants/theme.dart';
-
-
 Widget expandedTableCell_Text(String first,String second,[String? column,TextStyle? mystyle]){
   return  Expanded(
     child: Container(
       width: double.infinity,
       height: 50,
       decoration: BoxDecoration(
-          color: Colors.blueGrey,
+          color: Colors.indigo.shade50,
           border: Border(
             top: BorderSide(width: 1),
             bottom: BorderSide(width: 1),
@@ -19,32 +16,33 @@ Widget expandedTableCell_Text(String first,String second,[String? column,TextSty
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('${first}',style: mystyle == null ? TextStyle(color: Colors.white) : mystyle,),
+          Text('${first}',style: mystyle == null ? TextStyle(color: Colors.black87) : mystyle,),
           if(second != '')
-            Text('${second}',style: mystyle == null ? TextStyle(color: Colors.white) : mystyle,),
+            Text('${second}',style: mystyle == null ? TextStyle(color: Colors.black87) : mystyle,),
         ],
       ),
     ),
   );
 }
-Widget fixedTableCell_Text(String first,String second,double myWidth,[TextStyle? mystyle]){
+Widget fixedTableCell_Text(String first,String second,double myWidth,[TextStyle? mystyle,bool? left]){
   return  Container(
     width: myWidth,
     height: 50,
     decoration: BoxDecoration(
-        color: Colors.blueGrey,
+        color: Colors.indigo.shade50,
         border: Border(
           top: BorderSide(width: 1),
           bottom: BorderSide(width: 1),
           right: BorderSide(width: 1),
+          left: BorderSide(width: left != null ? 1 : 0),
         )
     ),
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('${first}',style: mystyle == null ? TextStyle(color: Colors.white) : mystyle,),
+        Text('${first}',style: mystyle == null ? TextStyle(color: Colors.black87) : mystyle,),
         if(second != '')
-          Text('${second}',style: mystyle == null ? TextStyle(color: Colors.white) : mystyle,),
+          Text('${second}',style: mystyle == null ? TextStyle(color: Colors.black87) : mystyle,),
       ],
     ),
   );
@@ -55,9 +53,27 @@ Widget expandedCustomCell(Widget mywidget,[String? row ,Color? colors,height]){
   return  Expanded(
     child: Container(
       decoration: BoxDecoration(
-          border: Border(left: BorderSide(width: row != null ? 1 : 0),right: BorderSide(width: 1))
+          border: Border(
+            left: BorderSide(width: row != null ? 1 : 0),
+            right: BorderSide(width: 1),
+          )
       ),     width: double.infinity,
       height: height == null ? 40 : height,
+      child: Center(child: mywidget),
+    ),
+  );
+}
+Widget expandedForAlarmType(Widget mywidget,[String? row,bool? last ]){
+  return  Expanded(
+    child: Container(
+      decoration: BoxDecoration(
+          border: Border(
+              left: BorderSide(width: row != null ? 1 : 0),
+              right: BorderSide(width: 1),
+              bottom: BorderSide(width: last == true ? 0 : 1)
+          )
+      ),     width: double.infinity,
+      height: 40 ,
       child: Center(child: mywidget),
     ),
   );

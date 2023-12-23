@@ -61,6 +61,10 @@ class _ConditionUIState extends State<FrostMobUI>
   Widget build(BuildContext context) {
     if (_frostProtectionModel.frostProtection == null) {
       return const Center(child: CircularProgressIndicator());
+    } else if (_frostProtectionModel.frostProtection!.isEmpty) {
+      return const Center(
+          child: Text(
+              'Currently No Frost Production & Rain Delay Sets Available'));
     } else {
       return Scaffold(
         body: Padding(
@@ -129,7 +133,10 @@ class _ConditionUIState extends State<FrostMobUI>
                                   text;
                             });
                           },
-                          initialValue: '${Listofvalue?[index].value}' ?? '0',
+                          decoration: InputDecoration(hintText: '0'),
+                          initialValue:
+                          '${Listofvalue?[index].value == '' ? '' : Listofvalue?[index].value}' ??
+                              '',
                           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -208,8 +215,11 @@ class _ConditionUIState extends State<FrostMobUI>
                               text;
                         });
                       },
-                      initialValue: '${Listofvalue?[index].value}' ?? '0',
+                      initialValue:
+                      '${Listofvalue?[index].value == '' ? '' : Listofvalue?[index].value}' ??
+                          '',
                       decoration: InputDecoration(
+                        hintText: '0',
                         border: InputBorder.none,
                         suffixText: '${Listofvalue?[index].title}' ==
                             'CRITICAL TEMPERATURE'

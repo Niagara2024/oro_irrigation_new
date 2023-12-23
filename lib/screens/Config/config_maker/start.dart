@@ -40,6 +40,7 @@ class _StartPageConfigMakerState extends State<StartPageConfigMaker> {
               onTap: (){
                 configPvd.clearConfig();
                 configPvd.fetchAll(configPvd.serverData,true);
+                configPvd.editSelectedTab(1);
                 // configPvd.clearConfig();
                 // print(jsonEncode(configPvd.oldData));
                 // configPvd.fetchFromServer();
@@ -58,7 +59,7 @@ class _StartPageConfigMakerState extends State<StartPageConfigMaker> {
                     SizedBox(
                         width: 100,
                         height: 100,
-                        child: Image.asset('assets/images/data-transfer.png')),
+                        child: Image.asset('assets/images/newConfig.png')),
                     Text('New Config',style: TextStyle(fontSize: 20,color: isHovered == false ? Colors.black : Colors.white,),),
                   ],
                 ),

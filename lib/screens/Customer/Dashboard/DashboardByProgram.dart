@@ -55,7 +55,7 @@ class _DashboardByProgramState extends State<DashboardByProgram>
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
       indicatorViewHide();
-
+      //print(jsonResponse);
       if (jsonResponse['data'] != null) {
         dynamic data = jsonResponse['data'];
         if (data is Map<String, dynamic>) {
@@ -84,10 +84,6 @@ class _DashboardByProgramState extends State<DashboardByProgram>
             getControllerDashboardDetails(widget.programId);
           }),
           const SizedBox(width: 10,),
-          IconButton(tooltip: 'Settings', icon: const Icon(Icons.settings_outlined), onPressed: () async
-          {
-          }),
-          const SizedBox(width: 20,),
         ],
       ),
       body: visibleLoading? Center(
@@ -124,7 +120,7 @@ class _DashboardByProgramState extends State<DashboardByProgram>
                             height: (dashBoardData[0].sourcePump.length % 5 == 0
                           ? dashBoardData[0].sourcePump.length ~/ 5 * 70
                               : (dashBoardData[0].sourcePump.length ~/ 5 + 1) * 70),
-                            child: DisplaySourcePump(sourcePump: dashBoardData[0].sourcePump,),
+                            child: DisplaySourcePump(sourcePump: dashBoardData[0].sourcePump, type: 0,),
                           ),
                           const Divider(height: 0),
                           if (dashBoardData.isNotEmpty)

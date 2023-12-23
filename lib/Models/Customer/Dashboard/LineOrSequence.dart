@@ -7,10 +7,11 @@ class LineOrSequence {
   String name, location, time, flow, type;
   List<DashBoardValve> valves;
   List<Sensor> sensor;
+  bool selected;
 
 
   LineOrSequence({required this.sNo, required this.id, required this.name, required this.location,required this.time,
-    required this.flow, required this.type,  required this.valves, required this.sensor});
+    required this.flow, required this.type,  required this.valves, required this.sensor, required this.selected});
 
   factory LineOrSequence.fromJson(Map<String, dynamic> json) {
     var valveList = json['valve'] as List;
@@ -31,6 +32,7 @@ class LineOrSequence {
       type: json['type'],
       valves: valves,
       sensor: sensor,
+      selected: json['selected'],
     );
   }
 }

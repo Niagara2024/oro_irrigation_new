@@ -27,12 +27,11 @@ class ConfigMakerForWeb extends StatefulWidget {
 }
 
 class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
-  int selectedTab = 1;
   int hoverTab = -1;
   @override
 
   Widget configTables(ConfigMakerProvider configPvd){
-    switch(selectedTab){
+    switch(configPvd.selectedTab){
       case (0):{
         return StartPageConfigMaker();
       }
@@ -89,14 +88,12 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
               FloatingActionButton.small(
                 heroTag: 'btn 1',
                 tooltip: 'Previous',
-                backgroundColor: selectedTab == 0 ? Colors.white54 : Colors.white,
-                onPressed: selectedTab == 0
+                backgroundColor: configPvd.selectedTab == 0 ? Colors.white54 : Colors.white,
+                onPressed: configPvd.selectedTab == 0
                     ? null
                     : () {
-                  if (selectedTab != 0) {
-                    setState(() {
-                      selectedTab -= 1;
-                    });
+                  if (configPvd.selectedTab != 0) {
+                    configPvd.editSelectedTab(configPvd.selectedTab - 1);
                   }
                 },
                 child: const Icon(Icons.arrow_back_outlined),
@@ -104,15 +101,13 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
               FloatingActionButton.small(
                 heroTag: 'btn 2',
                 tooltip: 'Next',
-                // backgroundColor: selectedTab == 11 ? Colors.white54 : myTheme1.colorScheme.primary,
-                backgroundColor: selectedTab == 11 ? Colors.white54 : Colors.white,
-                onPressed: selectedTab == 11
+                // backgroundColor: configPvd.selectedTab == 11 ? Colors.white54 : myTheme1.colorScheme.primary,
+                backgroundColor: configPvd.selectedTab == 11 ? Colors.white54 : Colors.white,
+                onPressed: configPvd.selectedTab == 11
                     ? null
                     : () {
-                  if (selectedTab != 11) {
-                    setState(() {
-                      selectedTab += 1;
-                    });
+                  if (configPvd.selectedTab != 11) {
+                    configPvd.editSelectedTab(configPvd.selectedTab + 1);
                   }
                 },
                 child: const Icon(Icons.arrow_forward_outlined),
@@ -149,10 +144,10 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
                               InkWell(
                                 onTap: (){
                                   setState(() {
-                                    selectedTab = i;
+                                    configPvd.selectedTab = i;
                                   });
-                                  configPvd.editInitialIndex(selectedTab);
-                                  if(selectedTab != 5){
+                                  configPvd.editSelectedTab(configPvd.selectedTab);
+                                  if(configPvd.selectedTab != 5){
                                     // configPvd.editLoadIL(false);
                                   }
                                 },
@@ -170,7 +165,7 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
                                 child: Container(
                                   height: 45,
                                   decoration: BoxDecoration(
-                                    color: hoverTab == i ||selectedTab == i ? myTheme.primaryColor.withOpacity(0.5) : null,
+                                    color: hoverTab == i ||configPvd.selectedTab == i ? myTheme.primaryColor : null,
                                   ),
                                   // padding: EdgeInsets.all(10),
                                   margin: EdgeInsets.symmetric(vertical: 2),
@@ -178,9 +173,9 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
                                   child: Row(
                                       children: [
                                         SizedBox(width: 20,),
-                                        Icon(configPvd.tabs[i][2],color: hoverTab == i ? Colors.white : selectedTab == i ? Colors.white : Colors.black87,),
+                                        Icon(configPvd.tabs[i][2],color: hoverTab == i ? Colors.white : configPvd.selectedTab == i ? Colors.white : Colors.black87,),
                                         SizedBox(width: 20,),
-                                        Text('${configPvd.tabs[i][0]} ${configPvd.tabs[i][1]}',style: TextStyle(color: hoverTab == i ? Colors.white : selectedTab == i ? Colors.white : Colors.black87,fontWeight: FontWeight.bold),)
+                                        Text('${configPvd.tabs[i][0]} ${configPvd.tabs[i][1]}',style: TextStyle(color: hoverTab == i ? Colors.white : configPvd.selectedTab == i ? Colors.white : Colors.black87,fontWeight: FontWeight.bold),)
                                       ]
                                   ),
                                 )

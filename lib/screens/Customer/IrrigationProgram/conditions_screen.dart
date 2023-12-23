@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../../../state_management/irrigation_program_main_provider.dart';
 
-
 class ConditionsScreen extends StatefulWidget {
   final int userId;
   final int controllerId;
@@ -75,7 +74,7 @@ class _ConditionsScreenState extends State<ConditionsScreen> {
                                           value: conditionName,
                                           groupValue: conditionsProvider.sampleConditions!.condition[conditionTypeIndex].value['name'],
                                           onChanged: (newValue) {
-                                            conditionsProvider.updateConditions(title, conditionSno,newValue, conditionTypeIndex);
+                                            conditionsProvider.updateConditions(title, conditionSno, newValue, conditionTypeIndex);
                                             Navigator.of(context).pop();
                                           }
                                       );

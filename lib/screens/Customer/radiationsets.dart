@@ -72,6 +72,8 @@ class _RadiationsetUIState extends State<RadiationsetUI>
   Widget build(BuildContext context) {
     if (_radiationSet.data == null) {
       return Center(child: CircularProgressIndicator());
+    } else if (_radiationSet.data!.isEmpty) {
+      return const Center(child: Text('Currently No Radiation Sets Available'));
     } else {
       return DefaultTabController(
         length: _radiationSet.data!.length ?? 0,
@@ -87,6 +89,7 @@ class _RadiationsetUIState extends State<RadiationsetUI>
                     labelColor: myTheme.primaryColor,
                     unselectedLabelColor: Colors.grey,
                     isScrollable: true,
+                    labelStyle: TextStyle(fontWeight: FontWeight.bold),
                     tabs: [
                       for (var i = 0; i < _radiationSet.data!.length; i++)
                         Tab(
@@ -201,12 +204,13 @@ class _RadiationsetUIState extends State<RadiationsetUI>
                       setState(() {});
                     },
                     TextFormField(
-                      decoration: InputDecoration(border: InputBorder.none),
+                      decoration: InputDecoration(border: InputBorder.none,hintText: '0'),
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       initialValue: list![i].accumulated1 != ''
                           ? list![i].accumulated1
-                          : '0',
+                          : '',
                       textAlign: TextAlign.center,
+
                       onChanged: (value) {
                         setState(() {
                           list[i].accumulated1 = value;
@@ -216,10 +220,10 @@ class _RadiationsetUIState extends State<RadiationsetUI>
                   ),
                   DataCell(
                     TextFormField(
-                      decoration: InputDecoration(border: InputBorder.none),
+                      decoration: InputDecoration(border: InputBorder.none, hintText: '0'),
                       initialValue: list[i].accumulated2 != ''
                           ? list[i].accumulated2
-                          : '0',
+                          : '',
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       textAlign: TextAlign.center,
                       onChanged: (value) {
@@ -231,10 +235,10 @@ class _RadiationsetUIState extends State<RadiationsetUI>
                   ),
                   DataCell(
                     TextFormField(
-                      decoration: InputDecoration(border: InputBorder.none),
+                      decoration: InputDecoration(border: InputBorder.none, hintText: '0'),
                       initialValue: list[i].accumulated3 != ''
                           ? list[i].accumulated3
-                          : '0',
+                          : '',
                       textAlign: TextAlign.center,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onChanged: (value) {
@@ -380,9 +384,9 @@ class _RadiationsetUIState extends State<RadiationsetUI>
                   ),
                   DataCell(
                     TextFormField(
-                      decoration: InputDecoration(border: InputBorder.none),
+                      decoration: InputDecoration(border: InputBorder.none, hintText: '0'),
                       initialValue:
-                      list[i].coefficient != '' ? list[i].coefficient : '0',
+                      list[i].coefficient != '' ? list[i].coefficient : '',
                       textAlign: TextAlign.center,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onChanged: (value) {
@@ -416,10 +420,10 @@ class _RadiationsetUIState extends State<RadiationsetUI>
                   ),
                   DataCell(
                     TextFormField(
-                      decoration: InputDecoration(border: InputBorder.none),
+                      decoration: InputDecoration(border: InputBorder.none, hintText: '0'),
                       initialValue: list[i].usedByProgram != ''
                           ? list[i].usedByProgram
-                          : '0',
+                          : '',
                       textAlign: TextAlign.center,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onChanged: (value) {

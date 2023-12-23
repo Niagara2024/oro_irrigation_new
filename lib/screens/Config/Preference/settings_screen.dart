@@ -154,7 +154,8 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                                             final itemIconCodePoint = tile.iconCodePoint;
                                             final itemIconFontFamily = tile.iconFontFamily;
                                             final value = tile.value;
-                                            final itemIcon = IconData(int.parse(itemIconCodePoint), fontFamily: itemIconFontFamily);
+                                            const  itemIcon = IconData(0xe047, fontFamily: 'MaterialIcons');
+                                            //final itemIcon = IconData(int.parse(itemIconCodePoint), fontFamily: itemIconFontFamily);
                                             final rtcSettings = tile.rtcSettings;
                                             final hidden = tile.hidden;
 
@@ -275,7 +276,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                                                         showCircleAvatar: true,
                                                         icon: itemIconCodePoint.length > 6
                                                             ? Image.asset(itemIconCodePoint)
-                                                            : Icon(IconData(int.parse(itemIconCodePoint), fontFamily: itemIconFontFamily),  color: Colors.black),
+                                                            : Icon(Icons.account_balance_outlined),
                                                         borderRadius: BorderRadius.circular(15)
                                                     ),
                                                   );
@@ -289,7 +290,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                                                         // scrollController.animateTo(targetOffset, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
                                                       },
                                                       showCircleAvatar: true,
-                                                      icon: itemIconCodePoint.length > 6 ? Image.asset(itemIconCodePoint) : Icon(IconData(int.parse(itemIconCodePoint), fontFamily: itemIconFontFamily), color: Colors.black,),
+                                                      icon: itemIconCodePoint.length > 6 ? Image.asset(itemIconCodePoint) : Icon(Icons.account_balance_outlined),
                                                       borderRadius: BorderRadius.circular(15)
                                                   );
                                                 }

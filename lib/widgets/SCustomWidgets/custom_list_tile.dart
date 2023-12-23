@@ -32,7 +32,7 @@ class CustomSwitchTile extends StatelessWidget {
         borderRadius: borderRadius ?? BorderRadius.zero,
       ),
       subtitle: showSubTitle ? Text(subtitle ?? '') : null,
-      contentPadding: showSubTitle ? null : const EdgeInsets.all(8),
+      contentPadding: showSubTitle ? const EdgeInsets.symmetric(horizontal: 10) : const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       leading: showCircleAvatar ? CircleAvatar(backgroundColor: Theme.of(context).colorScheme.secondary, child: icon) : null,
       title: Text(title, style: Theme.of(context).textTheme.bodyLarge),
       trailing: Switch(
@@ -45,6 +45,8 @@ class CustomSwitchTile extends StatelessWidget {
 
 class CustomTimerTile extends StatelessWidget {
   final String subtitle;
+  final bool showSubTitle;
+  final String? subtitle2;
   final String initialValue;
   final Widget? leading;
   final Function(String) onChanged;
@@ -53,7 +55,7 @@ class CustomTimerTile extends StatelessWidget {
   final bool isNative;
   final Color? tileColor;
   final BorderRadius? borderRadius;
-  final bool? is24HourMode;
+  final bool is24HourMode;
 
   const CustomTimerTile({
     Key? key,
@@ -63,10 +65,12 @@ class CustomTimerTile extends StatelessWidget {
     this.icon,
     this.borderRadius,
     required this.isSeconds,
-    this.is24HourMode,
+    this.is24HourMode = false,
     this.tileColor,
     this.leading,
     this.isNative = false,
+    this.showSubTitle = false,
+    this.subtitle2
   }) : super(key: key);
 
   @override
@@ -75,12 +79,13 @@ class CustomTimerTile extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: borderRadius ?? BorderRadius.zero,
       ),
-      contentPadding: const EdgeInsets.all(8),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       leading: leading ??
           CircleAvatar(
               backgroundColor: Theme.of(context).colorScheme.secondary,
               child: Icon(icon, color: Colors.black)),
-      title: Text(subtitle, style: Theme.of(context).textTheme.bodyText1),
+      title: Text(subtitle, style: Theme.of(context).textTheme.bodyLarge),
+      subtitle: showSubTitle ? Text(subtitle ?? '') : null,
       trailing: isNative
           ? InkWell(
         child: Text(initialValue, style: Theme.of(context).textTheme.bodyMedium),
@@ -100,17 +105,15 @@ class CustomTimerTile extends StatelessWidget {
                   int hour = int.parse(timeDigits[0]);
                   int minute = int.parse(timeDigits[1]);
 
-                  if (period.toLowerCase() == 'am' || period.toLowerCase() == 'pm') {
+                  if (!is24HourMode) {
                     if (period.toLowerCase() == 'pm' && hour < 12) {
                       hour += 12;
                     } else if (period.toLowerCase() == 'am' && hour == 12) {
                       hour = 0;
                     }
-
-                    selectedTime = TimeOfDay(hour: hour, minute: minute);
-                  } else {
-                    print("Invalid time period");
                   }
+
+                  selectedTime = TimeOfDay(hour: hour, minute: minute);
                 } else {
                   print("Invalid time format");
                 }
@@ -127,10 +130,20 @@ class CustomTimerTile extends StatelessWidget {
           selectedTime = await showTimePicker(
             context: context,
             initialTime: selectedTime ?? TimeOfDay.now(),
+            builder: (BuildContext context, Widget? child) {
+              return MediaQuery(
+                data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: is24HourMode),
+                child: child!,
+              );
+            },
           );
 
           if (selectedTime != null) {
-            onChanged(selectedTime.format(context));
+            String formattedTime = is24HourMode
+                ? "${selectedTime.hour}:${selectedTime.minute}"
+                : selectedTime.format(context);
+
+            onChanged(formattedTime);
           }
         },
       )
@@ -157,6 +170,8 @@ class CustomTextFormTile extends StatelessWidget {
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
   final Color? tileColor;
+  final bool trailing;
+  final String? trailingText;
 
   const CustomTextFormTile({super.key,
     required this.subtitle,
@@ -170,6 +185,8 @@ class CustomTextFormTile extends StatelessWidget {
     this.errorText,
     this.initialValue,
     this.tileColor,
+    this.trailing = false,
+    this.trailingText
   });
 
   @override
@@ -184,18 +201,25 @@ class CustomTextFormTile extends StatelessWidget {
       subtitle: errorText != null ?Text(errorText!, style: const TextStyle(color: Colors.red, fontSize: 12),) : null,
       trailing: SizedBox(
         width: 80,
-        child: TextFormField(
-          initialValue: initialValue,
-          textAlign: TextAlign.center,
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          decoration: InputDecoration(
-            hintText: hintText,
-            contentPadding: const EdgeInsets.symmetric(vertical: 5),
-            // errorText: errorText
-          ),
-          onChanged: onChanged,
+        child: Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                initialValue: initialValue,
+                textAlign: TextAlign.center,
+                controller: controller,
+                keyboardType: keyboardType,
+                inputFormatters: inputFormatters,
+                decoration: InputDecoration(
+                  hintText: hintText,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 5),
+                  // errorText: errorText
+                ),
+                onChanged: onChanged,
+              ),
+            ),
+            if (trailing) Text(trailingText ?? "", style: Theme.of(context).textTheme.bodyMedium,),
+          ],
         ),
       ),
       tileColor: tileColor,
@@ -264,6 +288,8 @@ class CustomTile extends StatelessWidget {
   final TextStyle? titleColor;
   final bool showCircleAvatar;
   final bool showSubTitle;
+  final EdgeInsets contentPadding;
+
   const CustomTile({
     Key? key,
     required this.title,
@@ -277,6 +303,7 @@ class CustomTile extends StatelessWidget {
     this.showCircleAvatar = true,
     this.showSubTitle = false,
     this.subtitle,
+    this.contentPadding = const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
   }) : super(key: key);
 
   @override
@@ -286,7 +313,7 @@ class CustomTile extends StatelessWidget {
         borderRadius: borderRadius ?? BorderRadius.zero,
       ),
       subtitle: showSubTitle ? Text(subtitle ?? '') : null,
-      contentPadding: showSubTitle ? null : const EdgeInsets.all(8),
+      contentPadding: showSubTitle ? const EdgeInsets.symmetric(horizontal: 10) : contentPadding,
       leading: showCircleAvatar ? CircleAvatar(
         backgroundColor: Theme.of(context).colorScheme.secondary,
         child: content is IconData
@@ -349,7 +376,7 @@ class CustomDropdownTile extends StatelessWidget {
         borderRadius: borderRadius ?? BorderRadius.zero,
       ),
       subtitle: showSubTitle ? Text(subtitle ?? '') : null,
-      contentPadding: showSubTitle ? null : const EdgeInsets.all(8),
+      contentPadding: showSubTitle ? const EdgeInsets.symmetric(horizontal: 10) : const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       leading: showCircleAvatar ? CircleAvatar(
         backgroundColor: Theme.of(context).colorScheme.secondary,
         child: content is IconData

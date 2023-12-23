@@ -405,7 +405,7 @@ class HomePageState extends State<HomePage>
                                                         child: const Column(
                                                           crossAxisAlignment: CrossAxisAlignment.start,
                                                           children: [
-                                                            Text('ORO Sport'),
+                                                            Text('ORO Spot'),
                                                             Text('2510', style: TextStyle(fontSize: 33, color: Colors.black, fontWeight: FontWeight.bold),),
                                                             Text('In Stock : 10'),
                                                           ],

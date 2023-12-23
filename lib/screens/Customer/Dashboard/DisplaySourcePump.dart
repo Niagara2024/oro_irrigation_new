@@ -3,8 +3,9 @@ import '../../../Models/Customer/Dashboard/SourcePump.dart';
 
 class DisplaySourcePump extends StatelessWidget
 {
-  const DisplaySourcePump({Key? key, required this.sourcePump}) : super(key: key);
+  const DisplaySourcePump({Key? key, required this.sourcePump, required this.type}) : super(key: key);
   final List<SourcePump> sourcePump;
+  final int type;
 
   @override
   Widget build(BuildContext context) {
@@ -21,11 +22,14 @@ class DisplaySourcePump extends StatelessWidget
             CircleAvatar(
               radius: 22,
               backgroundImage: const AssetImage('assets/images/source_pump.png'),
-              backgroundColor: Colors.transparent,
+              backgroundColor: type==0? Colors.transparent :
+              sourcePump[index].selected? Colors.green.shade100 :
+              Colors.transparent,
               child: IconButton(
                 hoverColor: Colors.transparent,
                 tooltip: sourcePump[index].name,
                 onPressed: (){
+                  sourcePump[index].selected = true;
                 }, icon: const Text('    '),
               ),
             ),

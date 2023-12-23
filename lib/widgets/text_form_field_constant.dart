@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
 
+import '../../state_management/config_maker_provider.dart';
 import '../../state_management/constant_provider.dart';
 
 class TextFieldForConstant extends StatefulWidget {
@@ -105,7 +107,8 @@ class _TextFieldForConstantState extends State<TextFieldForConstant> {
             }else if(split[0] == 'maximum_flow'){
               constantPvd.waterMeterFunctionality([split[0],int.parse(split[1]),value]);
             }else if(split[0] == 'fertilizer_ratio'){
-              print('split : $split');
+              constantPvd.fertilizerFunctionality([split[0],int.parse(split[1]),split[2],int.parse(split[3]),value]);
+            }else if(split[0] == 'fertilizer_nominalFlow'){
               constantPvd.fertilizerFunctionality([split[0],int.parse(split[1]),split[2],int.parse(split[3]),value]);
             }else if(split[0] == 'ecPh_nominal_flow'){
               constantPvd.ecPhFunctionality([split[0],int.parse(split[1]),split[2],int.parse(split[3]),value]);
@@ -125,6 +128,18 @@ class _TextFieldForConstantState extends State<TextFieldForConstant> {
               constantPvd.levelSensorFunctionality([split[0],int.parse(split[1]),value]);
             }else if(split[0] == 'levelSensor_maximum_v'){
               constantPvd.levelSensorFunctionality([split[0],int.parse(split[1]),value]);
+            }else if(split[0] == 'alarm_threshold'){
+              constantPvd.alarmFunctionality([split[0],int.parse(split[1]),int.parse(split[2]),value]);
+            }else if(split[0] == 'critical_alarm_threshold'){
+              constantPvd.criticalAlarmFunctionality([split[0],int.parse(split[1]),int.parse(split[2]),value]);
+            }else if(split[0] == 'ecPhDelta'){
+              constantPvd.ecPhFunctionality([split[0],int.parse(split[1]),split[2],int.parse(split[3]),value]);
+            }else if(split[0] == 'ecPhFineTunning'){
+              constantPvd.ecPhFunctionality([split[0],int.parse(split[1]),split[2],int.parse(split[3]),value]);
+            }else if(split[0] == 'ecPhCoarseTunning'){
+              constantPvd.ecPhFunctionality([split[0],int.parse(split[1]),split[2],int.parse(split[3]),value]);
+            }else if(split[0] == 'ecPhDeadBand'){
+              constantPvd.ecPhFunctionality([split[0],int.parse(split[1]),split[2],int.parse(split[3]),value]);
             }
           },
           textAlign: TextAlign.center,
@@ -144,7 +159,7 @@ class _TextFieldForConstantState extends State<TextFieldForConstant> {
             borderRadius: BorderRadius.circular(5),
           ),
           height: double.infinity,
-          child: Center(child: Text(widget.initialValue,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w600),))
+          child: Center(child: Text(widget.initialValue,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w600,color: myTheme.primaryColor),))
       ),
     );
   }

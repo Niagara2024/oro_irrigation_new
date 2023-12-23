@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 
+import '../../../constants/theme.dart';
 import '../../../state_management/config_maker_provider.dart';
 import '../../../widgets/text_form_field_for_config_flexible.dart';
 
@@ -52,10 +53,114 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
               },
               addBatchButtonFunction: (){
                 showDialog(context: context, builder: (BuildContext context){
-                  return AlertDialog(
-                    title: Text('Add batch',style: TextStyle(color: Colors.black),),
-                    content: AddBatchCD(),
-                  );
+                  return Consumer<ConfigMakerProvider>(builder: (context,configPvd,child){
+                    if(configPvd.totalCentralDosing == 0){
+                      return showingMessage('Oops!', 'The dosing site limit is achieved!..', context);
+                    }else if(configPvd.totalInjector == 0){
+                      return showingMessage('Oops!', 'The injector limit is achieved!..', context);
+                    }else{
+                      return AlertDialog(
+                        backgroundColor: myTheme.primaryColor,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(0))
+                        ),
+                        title: Text('Add Batch of Dosing Sites',style: TextStyle(color: Colors.white,fontSize: 14),),
+                        content: SizedBox(
+                            width: double.infinity,
+                            height: 150,
+                            child: Column(
+                              children: [
+                                ListTile(
+                                  title: Text('No of Dosing sites',style: TextStyle(color: Colors.indigo.shade50,fontSize: 14),),
+                                  trailing: DropdownButton(
+                                      value: configPvd.cdSite,
+                                      icon: Icon(Icons.arrow_drop_down,color: Colors.white,),
+                                      dropdownColor: Colors.black87,
+                                      // focusColor: Colors.white,
+                                      underline: Container(),
+                                      items: dropDownList(configPvd.totalCentralDosing).map((String items) {
+                                        return DropdownMenuItem(
+                                          onTap: (){
+                                          },
+                                          value: items,
+                                          child: Container(
+                                              child: Text(items,style: TextStyle(fontSize: 11,color: Colors.white),)
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value){
+                                        configPvd.editTotalSite(value!);
+                                        configPvd.editInjector('1');
+                                      }),
+                                ),
+                                ListTile(
+                                  title: Text('no of injector per site',style: TextStyle(color: Colors.indigo.shade50,fontSize: 14),),
+                                  trailing: int.parse(configPvd.cdSite) > configPvd.totalInjector ?  Text('N/A',style: TextStyle(color: Colors.white),) : DropdownButton(
+                                      value: configPvd.injector,
+                                      icon: Icon(Icons.arrow_drop_down,color: Colors.white,),
+                                      dropdownColor: Colors.black87,
+                                      // focusColor: Colors.white,
+                                      underline: Container(),
+                                      items: dropDownList(configPvd.totalInjector ~/ int.parse(configPvd.cdSite)).map((String items) {
+                                        return DropdownMenuItem(
+                                          onTap: (){
+                                          },
+                                          value: items,
+                                          child: Container(
+                                              child: Text(items,style: TextStyle(fontSize: 11,color: Colors.white),)
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value){
+                                        configPvd.editInjector(value!);
+                                      }),
+                                ),
+                              ],
+                            )
+                        ),
+                        actions: [
+                          InkWell(
+                              onTap: (){
+                                configPvd.editTotalSite('1');
+                                configPvd.editInjector('1');
+                                Navigator.pop(context);
+                              },
+                              child: Container(
+                                child: Center(
+                                  child: Text('cancel',style: TextStyle(color: Colors.indigo.shade50,fontSize: 16),
+                                  ),
+                                ),
+                                width : 80,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                    border: Border.all(width: 0.5,color: Colors.indigo.shade50),
+                                    borderRadius: BorderRadius.circular(5)
+                                ),
+                              )
+                          ),
+                          InkWell(
+                            onTap: (){
+                              configPvd.centralDosingFunctionality(['addBatch_CD',int.parse(configPvd.cdSite),configPvd.totalInjector == 0 ? 0 : int.parse(configPvd.injector)]);
+                              configPvd.editTotalSite('1');
+                              configPvd.editInjector('1');
+                              Navigator.pop(context);
+                            },
+                            child: Container(
+                              child: Center(
+                                child: Text('ok',style: TextStyle(color: Colors.black,fontSize: 16),
+                                ),
+                              ),
+                              width: 80,
+                              height: 30,
+                              color: Colors.indigo.shade50,
+                            ),
+                          )
+                        ],
+                      );
+                    }
+
+                  });
+
                 });
               },
               reOrderFunction: (){
@@ -68,12 +173,28 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
                 });
               },
               addButtonFunction: (){
-                configPvd.centralDosingFunctionality(['addCentralDosing']);
-                scrollController.animateTo(
-                  scrollController.position.maxScrollExtent,
-                  duration: Duration(milliseconds: 500), // Adjust the duration as needed
-                  curve: Curves.easeInOut, // Adjust the curve as needed
-                );
+                if(configPvd.totalCentralDosing == 0){
+                  showDialog(
+                      context: context,
+                      builder: (context){
+                        return showingMessage('Oops!', 'The dosing site limit is achieved!..', context);
+                      }
+                  );
+                }else if(configPvd.totalInjector == 0){
+                  showDialog(
+                      context: context,
+                      builder: (context){
+                        return showingMessage('Oops!', 'The injector limit is achieved!..', context);
+                      }
+                  );
+                }else{
+                  configPvd.centralDosingFunctionality(['addCentralDosing']);
+                  scrollController.animateTo(
+                    scrollController.position.maxScrollExtent,
+                    duration: Duration(milliseconds: 500), // Adjust the duration as needed
+                    curve: Curves.easeInOut, // Adjust the curve as needed
+                  );
+                }
               },
               deleteButtonFunction: (){
                 configPvd.centralDosingFunctionality(['c_dosingSelection',false]);
@@ -87,178 +208,16 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
             Container(
               child: Row(
                 children: [
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('#',style: TextStyle(color: Colors.white),),
-                          Text('(${configPvd.totalCentralDosing})',style: TextStyle(color: Colors.white),),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                            left: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Booster',style: TextStyle(color: Colors.white),),
-                          Text('(${configPvd.totalBooster})',style: TextStyle(color: Colors.white),),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Ec',style: TextStyle(color: Colors.white),),
-                          Text('(${configPvd.totalEcSensor})',style: TextStyle(color: Colors.white),),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Ph',style: TextStyle(color: Colors.white),),
-                          Text('(${configPvd.totalPhSensor})',style: TextStyle(color: Colors.white),),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Pressure',style: TextStyle(color: Colors.white),),
-                          Text('Switch(${configPvd.totalPressureSwitch})',style: TextStyle(color: Colors.white),),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Injector',style: TextStyle(color: Colors.white),),
-                          Text('(${configPvd.totalInjector})',style: TextStyle(color: Colors.white),),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Dosing',style: TextStyle(color: Colors.white),),
-                          Text('Meter(${configPvd.totalDosingMeter})',style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Which',style: TextStyle(color: Colors.white),),
-                          Text('Bp',style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-
-
+                  topBtmLftRgt('#', '(${configPvd.totalCentralDosing})'),
+                  topBtmRgt('Booster','(${configPvd.totalBooster})'),
+                  topBtmRgt('Ec','(${configPvd.totalEcSensor})'),
+                  topBtmRgt('Ph','(${configPvd.totalPhSensor})'),
+                  topBtmRgt('Pressure','Switch(${configPvd.totalPressureSwitch})'),
+                  topBtmRgt('Injector','(${configPvd.totalInjector})'),
+                  topBtmRgt('Dosing','Meter(${configPvd.totalDosingMeter})'),
+                  topBtmRgt('Level','Sensor(${configPvd.totalLevelSensor})'),
+                  topBtmRgt('Injector','type'),
+                  topBtmRgt('Select','Bp'),
                 ],
               ),
             ),
@@ -282,7 +241,7 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
                                 decoration: BoxDecoration(
                                   border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1)),
                                 ),
-                                height: (configPvd.centralDosingUpdated[index]['injector'].length) * 60,
+                                height: (configPvd.centralDosingUpdated[index]['injector'].length) * 50,
                                 width: double.infinity,
                                 child: Center(
                                   child: Row(
@@ -305,16 +264,14 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
                                   decoration: BoxDecoration(
                                     border: Border(right: BorderSide(width: 1)),
                                   ),
-                                  height: (configPvd.centralDosingUpdated[index]['injector'].length) * 60,
+                                  height: (configPvd.centralDosingUpdated[index]['injector'].length) * 50,
                                   width: double.infinity,
                                   child : configPvd.totalBooster == 0 && configPvd.centralDosingUpdated[index]['boosterPump'] == '' ?
                                   Container(
                                     padding: EdgeInsets.all(5),
                                     width: 80,
-                                    height: 60,
-                                    child: Center(
-                                      child: Text('N/A',style: TextStyle(fontSize: 12)),
-                                    ),
+                                   height: 50,
+                                    child: notAvailable
                                   ) : Center(
                                     child: TextFieldForFlexibleConfig(index: index, initialValue: '${configPvd.centralDosingUpdated[index]['boosterPump']}', config: configPvd, purpose: 'centralDosingFunctionality/editBoosterPump',),
                                   )
@@ -325,16 +282,14 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
                                   decoration: BoxDecoration(
                                     border: Border(right: BorderSide(width: 1)),
                                   ),
-                                  height: (configPvd.centralDosingUpdated[index]['injector'].length) * 60,
+                                  height: (configPvd.centralDosingUpdated[index]['injector'].length) * 50,
                                   width: double.infinity,
                                   child : configPvd.totalEcSensor == 0 && configPvd.centralDosingUpdated[index]['ec'] == '' ?
                                   Container(
                                     padding: EdgeInsets.all(5),
                                     width: 80,
-                                    height: 60,
-                                    child: Center(
-                                      child: Text('N/A',style: TextStyle(fontSize: 12)),
-                                    ),
+                                   height: 50,
+                                    child: notAvailable
                                   ) : Center(
                                       child: TextFieldForFlexibleConfig(index: index, initialValue: '${configPvd.centralDosingUpdated[index]['ec']}', config: configPvd, purpose: 'centralDosingFunctionality/editEcSensor',)
                                   )
@@ -345,16 +300,14 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
                                   decoration: BoxDecoration(
                                     border: Border(right: BorderSide(width: 1)),
                                   ),
-                                  height: (configPvd.centralDosingUpdated[index]['injector'].length) * 60,
+                                  height: (configPvd.centralDosingUpdated[index]['injector'].length) * 50,
                                   width: double.infinity,
                                   child : configPvd.totalPhSensor == 0 && configPvd.centralDosingUpdated[index]['ph'] == '' ?
                                   Container(
                                     padding: EdgeInsets.all(5),
                                     width: 80,
-                                    height: 60,
-                                    child: Center(
-                                      child: Text('N/A',style: TextStyle(fontSize: 12)),
-                                    ),
+                                   height: 50,
+                                    child: notAvailable
                                   ) : Center(
                                       child: TextFieldForFlexibleConfig(index: index, initialValue: '${configPvd.centralDosingUpdated[index]['ph']}', config: configPvd, purpose: 'centralDosingFunctionality/editPhSensor',)
                                   )
@@ -366,9 +319,9 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
                                   border: Border(right: BorderSide(width: 1)),
                                 ),
                                 width: double.infinity,
-                                height: (configPvd.centralDosingUpdated[index]['injector'].length) * 60 ,
+                                height: (configPvd.centralDosingUpdated[index]['injector'].length) * 50 ,
                                 child: (configPvd.totalPressureSwitch == 0 && configPvd.centralDosingUpdated[index]['pressureSwitch'].isEmpty) ?
-                                Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                notAvailable :
                                 Checkbox(
                                     value: configPvd.centralDosingUpdated[index]['pressureSwitch'].isEmpty ? false : true,
                                     onChanged: (value){
@@ -387,7 +340,7 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
                                       for(var i = 0; i< configPvd.centralDosingUpdated[index]['injector'].length;i ++)
                                         Container(
                                           child: Center(child: Text('${i+1}')),
-                                          height: 60,
+                                         height: 50,
                                           decoration:  BoxDecoration(
                                               border: Border(
                                                   bottom: BorderSide(width: i == configPvd.centralDosingUpdated[index]['injector'].length - 1 ? 0 : 1)
@@ -414,9 +367,9 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
                                                   bottom: BorderSide(width: i == configPvd.centralDosingUpdated[index]['injector'].length - 1 ? 0 : 1)
                                               )
                                           ),
-                                          height: 60,
+                                          height: 50,
                                           child: (configPvd.totalDosingMeter == 0 && configPvd.centralDosingUpdated[index]['injector'][i]['dosingMeter'].isEmpty) ?
-                                          Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                                          notAvailable :
                                           Checkbox(
                                               value: configPvd.centralDosingUpdated[index]['injector'][i]['dosingMeter'].isEmpty ? false : true,
                                               onChanged: (value){
@@ -443,8 +396,79 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
                                                   bottom: BorderSide(width: i == configPvd.centralDosingUpdated[index]['injector'].length - 1 ? 0 : 1)
                                               )
                                           ),
-                                          height: 60,
+                                          height: 50,
+                                          child: (configPvd.totalLevelSensor == 0 && configPvd.centralDosingUpdated[index]['injector'][i]['levelSensor'].isEmpty) ?
+                                          notAvailable :
+                                          Checkbox(
+                                              value: configPvd.centralDosingUpdated[index]['injector'][i]['levelSensor'].isEmpty ? false : true,
+                                              onChanged: (value){
+                                                configPvd.centralDosingFunctionality(['editLevelSensor',index,i,value]);
+                                              }),
+                                        ),
+                                    ],
+                                  )
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                      border: Border(right: BorderSide(width: 1))
+                                  ),
+                                  width: double.infinity,
+                                  child: Column(
+                                    children: [
+                                      for(var i = 0; i< configPvd.centralDosingUpdated[index]['injector'].length;i ++)
+                                        Container(
+                                          width: double.infinity,
+                                          decoration:  BoxDecoration(
+                                              border: Border(
+                                                  bottom: BorderSide(width: i == configPvd.centralDosingUpdated[index]['injector'].length - 1 ? 0 : 1)
+                                              )
+                                          ),
+                                          height: 50,
                                           child: Center(
+                                            child: DropdownButton(
+                                                focusColor: Colors.transparent,
+                                                value: configPvd.centralDosingUpdated[index]['injector'][i]['injectorType'],
+                                                underline: Container(),
+                                                items: ['Venturi','Electrical'].map((String items) {
+                                                  return DropdownMenuItem(
+                                                    value: items,
+                                                    child: Container(
+                                                        child: Text(items,style: TextStyle(fontSize: 11,color: Colors.black),)
+                                                    ),
+                                                  );
+                                                }).toList(),
+                                                // After selecting the desired option,it will
+                                                // change button value to selected value
+                                                onChanged: (newValue) {
+                                                  configPvd.centralDosingFunctionality(['editInjectorType',index,i,newValue]);
+                                                }
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  )
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                      border: Border(right: BorderSide(width: 1))
+                                  ),
+                                  width: double.infinity,
+                                  child: Column(
+                                    children: [
+                                      for(var i = 0; i< configPvd.centralDosingUpdated[index]['injector'].length;i ++)
+                                        Container(
+                                          width: double.infinity,
+                                          decoration:  BoxDecoration(
+                                              border: Border(
+                                                  bottom: BorderSide(width: i == configPvd.centralDosingUpdated[index]['injector'].length - 1 ? 0 : 1)
+                                              )
+                                          ),
+                                          height: 50,
+                                          child: configPvd.centralDosingUpdated[index]['injector'][i]['injectorType'] == 'Electrical' ? Center(
                                             child: DropdownButton(
                                                 focusColor: Colors.transparent,
                                                 //style: ioText,
@@ -464,7 +488,7 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
                                                   configPvd.centralDosingFunctionality(['boosterSelectionForInjector',index,i,newValue]);
                                                 }
                                             ),
-                                          ),
+                                          ) : notAvailable,
                                         ),
                                     ],
                                   )
@@ -565,243 +589,6 @@ class _ReOrderInCdSiteState extends State<ReOrderInCdSite> {
         )
       ],
     );
-  }
-}
-
-class AddBatchCD extends StatefulWidget {
-  const AddBatchCD({super.key});
-
-  @override
-  State<AddBatchCD> createState() => _AddBatchCDState();
-}
-
-class _AddBatchCDState extends State<AddBatchCD> {
-  int totalSite = 0;
-  String injector = '-';
-  bool d_meter = false;
-  bool d_meter_value = false;
-  bool booster = false;
-  bool booster_value = false;
-  FocusNode myFocus = FocusNode();
-  late TextEditingController myController;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    myController = TextEditingController();
-    if(myFocus.hasFocus == false){
-      if(myController.text == ''){
-        totalSite = 0;
-      }
-    }
-
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
-    return Container(
-      width: double.infinity,
-      height: 250,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('No of dosing sites : ',style: TextStyle(color: Colors.black,fontSize: 14)),
-              Row(
-                children: [
-                  Container(
-                    width: 50,
-                    height: 40,
-                    child: TextFormField(
-                      focusNode: myFocus,
-                      controller: myController,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                      ],
-                      onFieldSubmitted: (value){
-                        if(value == ''){
-                          myController.text = '1';
-                        }
-                      },
-                      maxLength: 2,
-                      onChanged: (value){
-                        setState(() {
-                          injector = '-';
-                          booster_value = false;
-                          d_meter_value = false;
-                        });
-                        if(value == '0' ){
-                          myController.text = '1';
-                        }
-                        var total = configPvd.totalCentralDosing - int.parse(myController.text == '' ? '0' : myController.text);
-                        int value1 = 0;
-                        if(total < 0){
-                          value1 = int.parse(myController.text) + total;
-                          myController.text = value1.toString();
-                        }
-                        setState(() {
-                          totalSite = int.parse(myController.text == '' ? '0' : myController.text);
-                        });
-                      },
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                          counterText: '',
-                          border: OutlineInputBorder(
-                              borderSide: BorderSide.none
-                          )
-                      ),
-                    ),
-                  ),
-                  Text('(${configPvd.totalCentralDosing})')
-                ],
-              ),
-
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('No of injector per site : ',style: TextStyle(color: Colors.black,fontSize: 14)),
-              DropdownButton(
-                value: injector,
-                underline: Container(),
-                items: getList(configPvd).map((String items) {
-                  return DropdownMenuItem(
-                    value: items,
-                    child: Container(
-                        child: Text(items,style: TextStyle(fontSize: 12),)
-                    ),
-                  );
-                }).toList(),
-                // After selecting the desired option,it will
-                // change button value to selected value
-                onChanged: (String? newValue) {
-                  setState(() {
-                    injector = newValue!;
-                  });
-                },
-              )
-
-            ],
-          ),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //   children: [
-          //     Text('Dosing meter per injector : ',style: TextStyle(color: Colors.black,fontSize: 14)),
-          //     give_D_meter(configPvd) == false ?
-          //     Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
-          //     Checkbox(
-          //         value: d_meter_value,
-          //         onChanged: (value){
-          //           setState(() {
-          //             d_meter_value = value!;
-          //           });
-          //         }),
-          //   ],
-          // ),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //   children: [
-          //     Text('Booster per injector : ',style: TextStyle(color: Colors.black,fontSize: 14)),
-          //     give_booster(configPvd) == false ?
-          //     Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
-          //     Checkbox(
-          //         value: booster_value,
-          //         onChanged: (value){
-          //           setState(() {
-          //             booster_value = value!;
-          //           });
-          //         }),
-          //
-          //   ],
-          // ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              ElevatedButton(
-                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.red)),
-                  onPressed: (){
-                    Navigator.pop(context);
-                    setState(() {
-                      totalSite = 0;
-                      injector = '-';
-                      d_meter = false;
-                      d_meter_value = false;
-                      booster = false;
-                      booster_value = false;
-                    });
-                  },
-                  child: Text('Cancel',style: TextStyle(color: Colors.white),)
-              ),
-              ElevatedButton(
-                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.green)),
-                  onPressed: (){
-                    if(injector != '-'){
-                      configPvd.centralDosingFunctionality(['addBatch_CD',totalSite,int.parse(injector),d_meter_value,booster_value]);
-                    }
-                    setState(() {
-                      totalSite = 0;
-                      injector = '-';
-                      d_meter = false;
-                      d_meter_value = false;
-                      booster = false;
-                      booster_value = false;
-                    });
-                    Navigator.pop(context);
-                  },
-                  child: Text('Add',style: TextStyle(color: Colors.white))
-              ),
-            ],
-          )
-        ],
-      ),
-    );
-  }
-  List<String> getList(ConfigMakerProvider configPvd) {
-    List<String> myList = ['-'];
-    if(totalSite != 0){
-      for(var i = 0;i < 6;i++){
-        if(totalSite * (i+1) <= configPvd.totalInjector){
-          myList.add('${i+1}');
-        }
-      }
-    }
-    return myList;
-  }
-  bool give_D_meter(ConfigMakerProvider configPvd){
-    if(injector != '-'){
-      if(configPvd.totalDosingMeter - (totalSite * int.parse(injector))  < 0){
-        setState(() {
-          d_meter = false;
-        });
-      }else{
-        setState(() {
-          d_meter = true;
-        });
-      }
-    }
-
-    return d_meter;
-  }
-  bool give_booster(ConfigMakerProvider configPvd){
-    if(injector != '-'){
-      if(configPvd.totalBooster - (totalSite * int.parse(injector))  < 0){
-        setState(() {
-          booster = false;
-        });
-      }else{
-        setState(() {
-          booster = true;
-        });
-      }
-    }
-
-    return booster;
   }
 }
 

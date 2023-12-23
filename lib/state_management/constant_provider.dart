@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ConstantProvider extends ChangeNotifier{
-  List<String> myTabs = ['General','Lines','Main valve','Valve','Water meter','Fertilizers','EC/PH','Filters','Analog sensor','Moisture sensor','Level sensor'];
+  List<String> myTabs = ['General','Lines','Main valve','Valve','Water meter','Fertilizers','EC/PH','Filters','Analog sensor','Moisture sensor','Level sensor','Normal Alarm','Critical Alarm','Finish'];
   List<List<dynamic>> general = [['Reset time','00:00',Icon(Icons.restart_alt),'time'],['Fertilizer leakage limit','20',Icon(Icons.production_quantity_limits),'numbers'],['Run list limit','10',Icon(Icons.list)],['Current irrigation day','1',Icon(Icons.today),'numbers'],['No pressure delay','00:00',Icon(Icons.timelapse_outlined),'time'],['Water pulse before dosing','Yes',Icon(Icons.navigate_before),'yes/no'],['Common dosing coefficient','100%',Icon(Icons.percent),'percentage']];
   int selected = -1;
   dynamic APIdata = {};
@@ -33,7 +33,15 @@ class ConstantProvider extends ChangeNotifier{
   List<Map<String,dynamic>> analogSensorUpdated = [];
   List<Map<String,dynamic>> moistureSensorUpdated = [];
   List<Map<String,dynamic>> levelSensorUpdated = [];
+  List<dynamic> alarmUpdated = [];
+  List<dynamic> criticalAlarmUpdated = [];
+  List<dynamic> alarmType = [];
   Map<String,dynamic> setting = {};
+  int wantToSendData = 0;
+  editWantToSendData(value){
+    wantToSendData = value;
+    notifyListeners();
+  }
 
   List<dynamic>  mainValve = [
     ['Main Valve 1','1','1','NO DELAY','00:00'],
@@ -216,16 +224,13 @@ class ConstantProvider extends ChangeNotifier{
     }
   }
   void fetchSettings(dynamic data){
-    irrigationLineUpdated = [];
-    mainValveUpdated = [];
-    valveUpdated = [];
-    waterMeterUpdated = [];
-    fertilizerUpdated = [];
-    ecPhUpdated = [];
-    analogSensorUpdated = [];
-    moistureSensorUpdated = [];
-    levelSensorUpdated = [];
-    filterUpdated = [];
+    setting['resetTime'] = data['general']['resetTime'];
+    setting['fertilizerLeakageLimit'] = data['general']['fertilizerLeakageLimit'];
+    setting['runListLimit'] = data['general']['runListLimit'];
+    setting['currentIrrigationDay'] = data['general']['currentIrrigationDay'];
+    setting['noPressureDelay'] = data['general']['noPressureDelay'];
+    setting['waterPulseBeforeDosing'] = data['general']['waterPulseBeforeDosing'];
+    setting['commonDosingCoefficient'] = data['general']['commonDosingCoefficient'];
     setting['line'] = {};
     for(var il in data['line']){
       setting['line']['${il['sNo']}'] = il;
@@ -258,8 +263,8 @@ class ConstantProvider extends ChangeNotifier{
     }
     setting['ecPh'] = {};
     for(var fertSite in data['ecPh']){
-      for(var fert in fertSite['fertilizer']){
-        setting['ecPh']['${fert['sNo']}'] = fert;
+      for(var stg in fertSite['setting']){
+        setting['ecPh']['${fertSite['sNo']}${stg['name']}'] = stg;
       }
     }
     setting['analogSensor'] = {};
@@ -274,23 +279,106 @@ class ConstantProvider extends ChangeNotifier{
     for(var il in data['levelSensor']){
       setting['levelSensor']['${il['sNo']}'] = il;
     }
+    setting['normalAlarm'] = {};
+    for(var il in data['normalAlarm']){
+      setting['normalAlarm']['${il['sNo']}'] = {};
+      for(var st in il['alarm']){
+        setting['normalAlarm']['${il['sNo']}']['${st['name']}'] = {};
+        setting['normalAlarm']['${il['sNo']}']['${st['name']}']['scanTime'] = st['scanTime'];
+        setting['normalAlarm']['${il['sNo']}']['${st['name']}']['alarmOnStatus'] = st['alarmOnStatus'];
+        setting['normalAlarm']['${il['sNo']}']['${st['name']}']['resetAfterIrrigation'] = st['resetAfterIrrigation'];
+        setting['normalAlarm']['${il['sNo']}']['${st['name']}']['autoResetDuration'] = st['autoResetDuration'];
+        setting['normalAlarm']['${il['sNo']}']['${st['name']}']['threshold'] = st['threshold'];
+      }
+    }
+    setting['criticalAlarm'] = {};
+    for(var il in data['criticalAlarm']){
+      setting['criticalAlarm']['${il['sNo']}'] = {};
+      for(var st in il['alarm']){
+        setting['criticalAlarm']['${il['sNo']}']['${st['name']}'] = {};
+        setting['criticalAlarm']['${il['sNo']}']['${st['name']}']['scanTime'] = st['scanTime'];
+        setting['criticalAlarm']['${il['sNo']}']['${st['name']}']['alarmOnStatus'] = st['alarmOnStatus'];
+        setting['criticalAlarm']['${il['sNo']}']['${st['name']}']['resetAfterIrrigation'] = st['resetAfterIrrigation'];
+        setting['criticalAlarm']['${il['sNo']}']['${st['name']}']['autoResetDuration'] = st['autoResetDuration'];
+        setting['criticalAlarm']['${il['sNo']}']['${st['name']}']['threshold'] = st['threshold'];
+      }
+    }
+    print('setting1 : ${setting['ecPh']}');
     notifyListeners();
   }
   void fetchAll(dynamic data){
-    // myTabs = [];
-    general = [['Reset time','00:00',Icon(Icons.restart_alt),'time'],['Fertilizer leakage limit','20',Icon(Icons.production_quantity_limits),'numbers'],['Run list limit','10',Icon(Icons.list)],['Current irrigation day','1',Icon(Icons.today),'numbers'],['No pressure delay','00:00',Icon(Icons.timelapse_outlined),'time'],['Water pulse before dosing','Yes',Icon(Icons.navigate_before),'yes/no'],['Common dosing coefficient','100%',Icon(Icons.percent),'percentage']];
-    for(var i in data.entries){
+    irrigationLineUpdated = [];
+    mainValveUpdated = [];
+    valveUpdated = [];
+    waterMeterUpdated = [];
+    fertilizerUpdated = [];
+    ecPhUpdated = [];
+    filterUpdated = [];
+    analogSensorUpdated = [];
+    moistureSensorUpdated = [];
+    levelSensorUpdated = [];
+    alarmUpdated = [];
+    alarmType = [];
+    general = [
+      ['Reset time',setting['resetTime'] ?? '00:00',Icon(Icons.restart_alt),'time'],
+      ['Fertilizer leakage limit',setting['fertilizerLeakageLimit'] ?? '20',Icon(Icons.production_quantity_limits),'numbers'],
+      ['Run list limit',setting['runListLimit'] ?? '10',Icon(Icons.list)],
+      ['Current irrigation day',setting['currentIrrigationDay'] ?? '1',Icon(Icons.today),'numbers'],
+      ['No pressure delay',setting['noPressureDelay'] ?? '00:00',Icon(Icons.timelapse_outlined),'time'],
+      ['Water pulse before dosing',setting['waterPulseBeforeDosing'] ?? 'Yes',Icon(Icons.navigate_before),'yes/no'],
+      ['Common dosing coefficient',setting['commonDosingCoefficient'] ?? '100%',Icon(Icons.percent),'percentage']
+    ];    for(var i in data.entries){
       if(i.key == 'constant'){
         APIdata = i.value;
       }
       if(i.key == 'default'){
         for(var j in i.value.entries){
-          if(j.key == 'line'){
+          if(j.key == 'alarm'){
+            for(var at in j.value){
+              alarmType.add(at);
+            }
+          }
+          else if(j.key == 'line'){
             // if(j.value.length != 0){
             //   // myTabs.add('Lines');
             // }
             //TODO: generating line
             for(var line in j.value){
+              var type = [];
+              var criticalType = [];
+              for(var at in alarmType){
+                type.add({
+                  'name' : '${at['name']}',
+                  'scanTime' : setting['normalAlarm']?['${line['sNo']}']?['${at['name']}']?['scanTime'] ?? '00:00:00',
+                  'alarmOnStatus' : setting['normalAlarm']?['${line['sNo']}']?['${at['name']}']?['alarmOnStatus'] ?? 'Do Nothing',
+                  'resetAfterIrrigation' : setting['normalAlarm']?['${line['sNo']}']?['${at['name']}']?['resetAfterIrrigation'] ?? 'Yes',
+                  'autoResetDuration' : setting['normalAlarm']?['${line['sNo']}']?['${at['name']}']?['autoResetDuration'] ?? '00:00:00',
+                  'threshold' : setting['normalAlarm']?['${line['sNo']}']?['${at['name']}']?['threshold'] ?? '0',
+                  'unit' : '${at['unit']}',
+                });
+                criticalType.add({
+                  'name' : '${at['name']}',
+                  'scanTime' : setting['criticalAlarm']?['${line['sNo']}']?['${at['name']}']?['scanTime'] ?? '00:00:00',
+                  'alarmOnStatus' : setting['criticalAlarm']?['${line['sNo']}']?['${at['name']}']?['alarmOnStatus'] ?? 'Do Nothing',
+                  'resetAfterIrrigation' : setting['criticalAlarm']?['${line['sNo']}']?['${at['name']}']?['resetAfterIrrigation'] ?? 'Yes',
+                  'autoResetDuration' : setting['criticalAlarm']?['${line['sNo']}']?['${at['name']}']?['autoResetDuration'] ?? '00:00:00',
+                  'threshold' : setting['criticalAlarm']?['${line['sNo']}']?['${at['name']}']?['threshold'] ?? '0',
+                  'unit' : '${at['unit']}',
+                });
+              }
+              print('seee : ${setting['normalAlarm']?['${line['sNo']}']}');
+              alarmUpdated.add({
+                'sNo' : line['sNo'],
+                'name' : line['name'],
+                'id' : line['id'],
+                'alarm' : type,
+              });
+              criticalAlarmUpdated.add({
+                'sNo' : line['sNo'],
+                'name' : line['name'],
+                'id' : line['id'],
+                'alarm' : criticalType,
+              });
               irrigationLineUpdated.add({
                 'sNo' : line['sNo'],
                 'name' : line['name'],
@@ -324,9 +412,10 @@ class ConstantProvider extends ChangeNotifier{
                   'sNo' : ms['sNo'],
                   'name' : ms['name'],
                   'id' : ms['id'],
-                  'location' : line['name'],
+                  'location' : line['id'],
                   'high/low' : setting['moistureSensor']?['${ms['sNo']}']?['high/low'] ?? '-',
-                  'value' : setting['moistureSensor']?['${ms['sNo']}']?['value'] ?? '0',
+                  'units' : setting['moistureSensor']?['${ms['sNo']}']?['units'] ?? 'bar',
+                  'base' : setting['moistureSensor']?['${ms['sNo']}']?['base'] ?? 'Current',
                   'minimum' : setting['moistureSensor']?['${ms['sNo']}']?['minimum'] ?? '0.00',
                   'maximum' : setting['moistureSensor']?['${ms['sNo']}']?['maximum'] ?? '0.00',
                 });
@@ -337,9 +426,10 @@ class ConstantProvider extends ChangeNotifier{
                   'sNo' : ls['sNo'],
                   'name' : ls['name'],
                   'id' : ls['id'],
-                  'location' : line['name'],
+                  'location' : line['id'],
                   'high/low' : setting['levelSensor']?['${ls['sNo']}']?['high/low'] ?? '-',
-                  'value' : setting['levelSensor']?['${ls['sNo']}']?['value'] ?? '0',
+                  'units' : setting['levelSensor']?['${ls['sNo']}']?['units'] ?? 'bar',
+                  'base' : setting['levelSensor']?['${ls['sNo']}']?['base'] ?? 'Current',
                   'minimum' : setting['levelSensor']?['${ls['sNo']}']?['minimum'] ?? '0.00',
                   'maximum' : setting['levelSensor']?['${ls['sNo']}']?['maximum'] ?? '0.00',
                 });
@@ -352,7 +442,7 @@ class ConstantProvider extends ChangeNotifier{
                   'name' : v['name'],
                   'id' : v['id'],
                   'location' : v['location'],
-                  'defaultDosage' : setting['valve']?['${v['sNo']}']?['defaultDosage'] ?? '00:00:00',
+                  'defaultDosage' : setting['valve']?['${v['sNo']}']?['defaultDosage'] ?? 'Time',
                   'nominalFlow' : setting['valve']?['${v['sNo']}']?['nominalFlow'] ?? '100',
                   'minimumFlow' : setting['valve']?['${v['sNo']}']?['minimumFlow'] ?? '75',
                   'maximumFlow' : setting['valve']?['${v['sNo']}']?['maximumFlow'] ?? '125',
@@ -372,7 +462,7 @@ class ConstantProvider extends ChangeNotifier{
           else if(j.key == 'fertilization'){
             for(var fert in j.value){
               var fertilizer = [];
-              var ecPh = [];
+              var ecPhSetting = [];
               for(var inj in fert['fertilizer']){
                 fertilizer.add({
                   'sNo' : inj['sNo'],
@@ -380,19 +470,69 @@ class ConstantProvider extends ChangeNotifier{
                   'name' : inj['name'],
                   'fertilizerMeter' : inj['fertilizerMeter'].length != 0 ? 'yes' : 'no',
                   'ratio' : setting['inj']?['${inj['sNo']}']?['ratio'] ?? '100',
-                  'shortestPulse' : setting['inj']?['${inj['sNo']}']?['shortestPulse'] ?? '100',
+                  'shortestPulse' : setting['inj']?['${inj['sNo']}']?['shortestPulse'] ?? '1',
+                  'nominalFlow' : setting['inj']?['${inj['sNo']}']?['nominalFlow'] ?? '100',
+                  'injectorMode' : setting['inj']?['${inj['sNo']}']?['injectorMode'] ?? 'Regular',
                 });
               }
-              for(var inj in fert['fertilizer']){
-                ecPh.add({
-                  'sNo' : inj['sNo'],
-                  'id' : inj['id'],
-                  'name' : inj['name'],
-                  'fertilizerMeter' : inj['fertilizerMeter'].length != 0 ? 'yes' : 'no',
-                  'nominalFlow' : setting['ecPh']?['${inj['sNo']}']?['nominalFlow'] ?? '100',
-                  'injectorMode' : setting['ecPh']?['${inj['sNo']}']?['injectorMode'] ?? 'PH_controlled',
-                });
+              if(fert['ec'].length != 0){
+                print('see : ${setting['ecPh']}');
+                dynamic ecStg = {
+                  'name' : 'ec',
+                  'sensor' : [],
+                  'active' : setting['ecPh']?['${fert['sNo']}ec']?['active'] ?? false,
+                  'controlCycle' : setting['ecPh']?['${fert['sNo']}ec']?['controlCycle'] ?? '00:00:00',
+                  'delta' : setting['ecPh']?['${fert['sNo']}ec']?['delta'] ?? '0.0',
+                  'fineTunning' : setting['ecPh']?['${fert['sNo']}ec']?['fineTunning'] ?? '0',
+                  'coarseTunning' : setting['ecPh']?['${fert['sNo']}ec']?['coarseTunning'] ?? '0.0',
+                  'deadBand' : setting['ecPh']?['${fert['sNo']}ec']?['deadBand'] ?? '0.0',
+                  'integ' : setting['ecPh']?['${fert['sNo']}ec']?['integ'] ?? '00:00:00',
+                  'sensorList' : [],
+                  'avgFilterList' : ['1','2','3','4','5','6','7','8','9','10'],
+                  'senseOrAvg' : fert['ec'].length > 1 ? 'Average' : '${fert['ec'][0]['id']}',
+                  'avgFilterSpeed' : setting['ecPh']?['${fert['sNo']}ec']?['avgFilterSpeed'] ?? '1',
+                };
+                var sensorList = [];
+                for(var ec in fert['ec']){
+                  ecStg['sensor'].add(ec);
+                  sensorList.add(ec['id']);
+                }
+                if(fert['ec'].length > 1){
+                  sensorList.add('Average');
+                }
+                ecStg['sensorList'] = sensorList;
+                ecPhSetting.add(ecStg);
               }
+              if(fert['ph'].length != 0){
+                dynamic phStg = {
+                  'name' : 'ph',
+                  'sensor' : [],
+                  'active' : setting['ecPh']?['${fert['sNo']}ph']?['active'] ?? false,
+                  'controlCycle' : setting['ecPh']?['${fert['sNo']}ph']?['controlCycle'] ?? '00:00:00',
+                  'delta' : setting['ecPh']?['${fert['sNo']}ph']?['delta'] ?? '0.0',
+                  'fineTunning' : setting['ecPh']?['${fert['sNo']}ph']?['fineTunning'] ?? '0',
+                  'coarseTunning' : setting['ecPh']?['${fert['sNo']}ph']?['coarseTunning'] ?? '0.0',
+                  'deadBand' : setting['ecPh']?['${fert['sNo']}ph']?['deadBand'] ?? '0.0',
+                  'integ' : setting['ecPh']?['${fert['sNo']}ph']?['integ'] ?? '00:00:00',
+                  'sensorList' : [],
+                  'avgFilterList' : ['1','2','3','4','5','6','7','8','9','10'],
+                  'senseOrAvg' : fert['ph'].length > 1 ? 'Average' : '${fert['ph'][0]['id']}',
+                  'avgFilterSpeed' : setting['ecPh']?['${fert['sNo']}ph']?['avgFilterSpeed'] ?? '1',
+                };
+                var sensorList = [];
+
+                for(var ph in fert['ph']){
+                  phStg['sensor'].add(ph);
+                  sensorList.add(ph['id']);
+                }
+                if(fert['ph'].length > 1){
+                  sensorList.add('Average');
+                }
+                phStg['sensorList'] = sensorList;
+                ecPhSetting.add(phStg);
+              }
+
+
               //TODO: generating injector
 
               fertilizerUpdated.add({
@@ -401,16 +541,22 @@ class ConstantProvider extends ChangeNotifier{
                 'name' : fert['name'],
                 'location' : fert['location'],
                 'noFlowBehavior' : setting['fertilization']?['${fert['sNo']}']?['noFlowBehavior'] ?? 'Inform Only',
+                'minimalOnTime' : setting['fertilization']?['${fert['sNo']}']?['minimalOnTime'] ?? '00:00:00',
+                'minimalOffTime' : setting['fertilization']?['${fert['sNo']}']?['minimalOffTime'] ?? '00:00:00',
+                'waterFlowStabilityTime' : setting['fertilization']?['${fert['sNo']}']?['waterFlowStabilityTime'] ?? '00:00:00',
+                'boosterOffDelay' : setting['fertilization']?['${fert['sNo']}']?['boosterOffDelay'] ?? '00:00:00',
                 'fertilizer' : fertilizer,
               });
               //TODO: generating ecPh
-              ecPhUpdated.add({
-                'sNo' : fert['sNo'],
-                'id' : fert['id'],
-                'name' : fert['name'],
-                'location' : fert['location'],
-                'fertilizer' : ecPh,
-              });
+              if(ecPhSetting.length != 0){
+                ecPhUpdated.add({
+                  'sNo' : fert['sNo'],
+                  'id' : fert['id'],
+                  'name' : fert['name'],
+                  'location' : fert['location'],
+                  'setting' : ecPhSetting,
+                });
+              }
             }
           }
           //TODO: generating waterMeter
@@ -455,9 +601,11 @@ class ConstantProvider extends ChangeNotifier{
               });
             }
           }
+
         }
       }
     }
+    print('ecph : ${jsonEncode(ecPhUpdated)}');
     notifyListeners();
   }
 
@@ -515,6 +663,7 @@ class ConstantProvider extends ChangeNotifier{
   }
 
   void valveFunctionality(dynamic list){
+    print(list);
     switch (list[0]){
       case ('valve_defaultDosage'):{
         valveUpdated[list[1]]['valve'][list[2]]['defaultDosage'] = list[3];
@@ -568,6 +717,22 @@ class ConstantProvider extends ChangeNotifier{
         fertilizerUpdated[list[1]]['noFlowBehavior'] = list[2];
         break;
       }
+      case ('fertilizer_minimalOnTime'):{
+        fertilizerUpdated[list[1]]['minimalOnTime'] = list[2];
+        break;
+      }
+      case ('fertilizer_minimalOffTime'):{
+        fertilizerUpdated[list[1]]['minimalOffTime'] = list[2];
+        break;
+      }
+      case ('fertilizer_waterFlowStabilityTime'):{
+        fertilizerUpdated[list[1]]['waterFlowStabilityTime'] = list[2];
+        break;
+      }
+      case ('fertilizer_boosterOffDelay'):{
+        fertilizerUpdated[list[1]]['boosterOffDelay'] = list[2];
+        break;
+      }
       case ('fertilizer_ratio'):{
         fertilizerUpdated[list[1]][list[2]][list[3]]['ratio'] = list[4];
         break;
@@ -576,26 +741,54 @@ class ConstantProvider extends ChangeNotifier{
         fertilizerUpdated[list[1]][list[2]][list[3]]['shortestPulse'] = list[4];
         break;
       }
-    // case ('fertilizer_nominal_flow'):{
-    //   fertilizer[list[1]][list[2]][list[3]][5] = list[4];
-    //   break;
-    // }
-    // case ('fertilizer_injector_mode'):{
-    //   fertilizer[list[1]][list[2]][list[3]][6] = list[4];
-    //   break;
-    // }
+      case ('fertilizer_injectorMode'):{
+        fertilizerUpdated[list[1]][list[2]][list[3]]['injectorMode'] = list[4];
+        break;
+      }
+      case ('fertilizer_nominalFlow'):{
+        fertilizerUpdated[list[1]][list[2]][list[3]]['nominalFlow'] = list[4];
+        break;
+      }
 
     }
     notifyListeners();
   }
   void ecPhFunctionality(dynamic list){
     switch (list[0]){
-      case ('ecPh_nominal_flow'):{
-        ecPhUpdated[list[1]][list[2]][list[3]]['nominalFlow'] = list[4];
+      case ('activateEcPh'):{
+        ecPhUpdated[list[1]]['setting'][list[2]]['active'] = list[3];
         break;
       }
-      case ('ecPh_injector_mode'):{
-        ecPhUpdated[list[1]][list[2]][list[3]]['injectorMode'] = list[4];
+      case ('ecPhControlCycle'):{
+        ecPhUpdated[list[1]][list[2]][list[3]]['controlCycle'] = list[4];
+        break;
+      }
+      case ('ecPhInteg'):{
+        ecPhUpdated[list[1]][list[2]][list[3]]['integ'] = list[4];
+        break;
+      }
+      case ('ecPhDelta'):{
+        ecPhUpdated[list[1]][list[2]][list[3]]['delta'] = list[4];
+        break;
+      }
+      case ('ecPhFineTunning'):{
+        ecPhUpdated[list[1]][list[2]][list[3]]['fineTunning'] = list[4];
+        break;
+      }
+      case ('ecPhCoarseTunning'):{
+        ecPhUpdated[list[1]][list[2]][list[3]]['coarseTunning'] = list[4];
+        break;
+      }
+      case ('ecPhDeadBand'):{
+        ecPhUpdated[list[1]][list[2]][list[3]]['deadBand'] = list[4];
+        break;
+      }
+      case ('ecPhAvgFiltSpeed'):{
+        ecPhUpdated[list[1]][list[2]][list[3]]['senseOrAvg'] = list[4];
+        break;
+      }
+      case ('ecPhSenseOrAvg'):{
+        ecPhUpdated[list[1]][list[2]][list[3]]['senseOrAvg'] = list[4];
         break;
       }
     }
@@ -653,6 +846,14 @@ class ConstantProvider extends ChangeNotifier{
         moistureSensorUpdated[list[1]]['high/low'] = list[2];
         break;
       }
+      case ('moistureSensor/units'):{
+        moistureSensorUpdated[list[1]]['units'] = list[2];
+        break;
+      }
+      case ('moistureSensor/base'):{
+        moistureSensorUpdated[list[1]]['base'] = list[2];
+        break;
+      }
       case ('moistureSensor_value'):{
         moistureSensorUpdated[list[1]]['value'] = list[2];
         break;
@@ -674,6 +875,14 @@ class ConstantProvider extends ChangeNotifier{
         levelSensorUpdated[list[1]]['high/low'] = list[2];
         break;
       }
+      case ('levelSensor/units'):{
+        levelSensorUpdated[list[1]]['units'] = list[2];
+        break;
+      }
+      case ('levelSensor/base'):{
+        levelSensorUpdated[list[1]]['base'] = list[2];
+        break;
+      }
       case ('levelSensor_value'):{
         levelSensorUpdated[list[1]]['value'] = list[2];
         break;
@@ -689,106 +898,327 @@ class ConstantProvider extends ChangeNotifier{
     }
     notifyListeners();
   }
+  void alarmFunctionality(dynamic list){
+    switch (list[0]){
+      case ('alarm_scanTime'):{
+        alarmUpdated[list[1]]['alarm'][list[2]]['scanTime'] = list[3];
+        break;
+      }
+      case ('alarm_status'):{
+        alarmUpdated[list[1]]['alarm'][list[2]]['alarmOnStatus'] = list[3];
+        if(list[3] == 'Stop Irrigation'){
+          alarmUpdated[list[1]]['alarm'][list[2]].remove('resetAfterIrrigation');
+        }else{
+          alarmUpdated[list[1]]['alarm'][list[2]]['resetAfterIrrigation'] = 'No';
+        }
+        break;
+      }
+      case ('alarm_reset_irrigation'):{
+        alarmUpdated[list[1]]['alarm'][list[2]]['resetAfterIrrigation'] = list[3];
+        break;
+      }
+      case ('alarm_auto_reset'):{
+        alarmUpdated[list[1]]['alarm'][list[2]]['autoResetDuration'] = list[3];
+        break;
+      }
+      case ('alarm_threshold'):{
+        alarmUpdated[list[1]]['alarm'][list[2]]['threshold'] = list[3];
+        break;
+      }
+    }
+    notifyListeners();
+  }
+  void criticalAlarmFunctionality(dynamic list){
+    switch (list[0]){
+      case ('critical_alarm_scanTime'):{
+        criticalAlarmUpdated[list[1]]['alarm'][list[2]]['scanTime'] = list[3];
+        break;
+      }
+      case ('critical_alarm_status'):{
+        criticalAlarmUpdated[list[1]]['alarm'][list[2]]['alarmOnStatus'] = list[3];
+        if(list[3] == 'Stop Irrigation'){
+          criticalAlarmUpdated[list[1]]['alarm'][list[2]].remove('resetAfterIrrigation');
+        }else{
+          criticalAlarmUpdated[list[1]]['alarm'][list[2]]['resetAfterIrrigation'] = 'No';
+        }
+        break;
+      }
+      case ('critical_alarm_reset_irrigation'):{
+        criticalAlarmUpdated[list[1]]['alarm'][list[2]]['resetAfterIrrigation'] = list[3];
+        break;
+      }
+      case ('critical_alarm_auto_reset'):{
+        criticalAlarmUpdated[list[1]]['alarm'][list[2]]['autoResetDuration'] = list[3];
+        break;
+      }
+      case ('critical_alarm_threshold'):{
+        criticalAlarmUpdated[list[1]]['alarm'][list[2]]['threshold'] = list[3];
+        break;
+      }
+    }
+    notifyListeners();
+  }
+
   bool valveContentShow = false;
   void editValveContentShow(bool value){
     valveContentShow = value;
     notifyListeners();
   }
+
+  int returnMvMode(String name){
+    if(name == 'No delay'){
+      return 1;
+    }else if(name == 'Open before'){
+      return 2;
+    }else{
+      return 3;
+    }
+  }
+  int noFlowBehavior(String name){
+    if(name == 'Stop Faulty Fertilizer'){
+      return 1;
+    }else if(name == 'Stop Fertigation'){
+      return 2;
+    }else if(name == 'Stop Irrigation'){
+      return 3;
+    }else{
+      return 4;
+    }
+  }
+  int analogType(String name){
+    if(name == 'Soil Temperature'){
+      return 2;
+    }else if(name == 'Soil Moisture'){
+      return 1;
+    }else if(name == 'Rainfall'){
+      return 3;
+    }else if(name == 'Windspeed'){
+      return 4;
+    }else if(name == 'Wind Direction'){
+      return 5;
+    }else if(name == 'Leaf Wetness'){
+      return 6;
+    }else if(name == 'Humidity'){
+      return 7;
+    }else if(name == 'Lux Sensor'){
+      return 8;
+    }else if(name == 'Co2 Sensor'){
+      return 9;
+    }else{
+      return 10;
+    }
+  }
+
+  int moistureType(String name){
+    if(name == 'primary'){
+      return 1;
+    }else if(name == 'secondary'){
+      return 2;
+    }else{
+      return 0;
+    }
+  }
+  int levelType(String name){
+    if(name == 'top'){
+      return 1;
+    }else if(name == 'middle'){
+      return 2;
+    }else if(name == 'bottom'){
+      return 3;
+    }else{
+      return 0;
+    }
+  }
+
+  int injectorMode(String name){
+    if(name == 'Concentration'){
+      return 1;
+    }else if(name == 'Ec controlled'){
+      return 2;
+    }else if(name == 'Ph controlled'){
+      return 3;
+    }else if(name == 'Regular'){
+      return 4;
+    }else{
+      return 0;
+    }
+  }
+  int alarmBehavior(String name){
+    if(name == 'Do Nothing'){
+      return 1;
+    }else if(name == 'Stop Irrigation'){
+      return 2;
+    }else if(name == 'Stop Fertigation'){
+      return 3;
+    }else if(name == 'Skip Irrigation'){
+      return 4;
+    }else{
+      return 0;
+    }
+  }
+
+
   //TODO: generating HW payload
-  void sendDataToHW(){
+  dynamic sendDataToHW(){
     var payload = {
       "300" : [
-        {
-          "301" : ""
-        },
-        {
-          "302" : ""
-        },
-        {
-          "303" : ""
-        },
-        {
-          "304" : ""
-        },
-        {
-          "305" : ""
-        },
-        {
-          "306" : ""
-        },
-        {
-          "307" : ""
-        }
+        {'301': ''},
+
       ]
     };
     var mv = '';
     for(var i in mainValveUpdated){
-      mv += '${mv.length != 0 ? ';' : ''}${i['sNo']},${i['name']},${i['mode']},${i['delay']}';
+      mv += '${mv.length != 0 ? ';' : ''}${i['sNo']},${i['id']},${returnMvMode(i['mode'])},${i['delay']}';
     }
     payload['300']?.add({'302' : mv});
-    var ms = '';
-    for(var i in moistureSensorUpdated){
-      ms += '${ms.length != 0 ? ';' : ''}${i['sNo']},${i['name']},${i['id']},${i['high/low']},${i['value']},${i['minimum']},${i['maximum']}';
-    }
-    payload['300']?.add({'310' : ms});
-    var ls = '';
-    for(var i in levelSensorUpdated){
-      ls += '${ls.length != 0 ? ';' : ''}${i['sNo']},${i['name']},${i['id']},${i['high/low']},${i['value']},${i['minimum']},${i['maximum']}';
-    }
-    payload['300']?.add({'311' : ls});
+
+
     var line = '';
     for(var i in irrigationLineUpdated){
-      line += '${line.length != 0 ? ';' : ''}${i['sNo']},${i['pump']},${i['lowFlowDelay']},${i['highFlowDelay']},${i['lowFlowBehavior']},${i['highFlowBehavior']},${i['leakageLimit']}';
+      line += '${line.isNotEmpty ? ';' : ''}${i['sNo']},${i['id']},${i['pump'] == '-' ? 1 : i['pump'].split('IP')[1]},${i['leakageLimit']}';
     }
     payload['300']?.add({'303' : line});
+    // payload['300']?.add({'303' : ''});
+
+
     var valve = '';
     for(var i in valveUpdated){
       for(var vl in i['valve']){
-        valve += '${valve.length != 0 ? ';' : ''}${vl['sNo']},${vl['location']},${vl['name']},${vl['defaultDosage']},${vl['nominalFlow']},${vl['minimumFlow']},${vl['maximumFlow']},${vl['fillUpDelay']},${vl['area']},${vl['cropFactor']}';
+        valve += '${valve.isNotEmpty ? ';' : ''}${vl['sNo']},${vl['location']},${vl['id']},${vl['defaultDosage'] == 'Time' ? 1 : 2},${double.parse(vl['nominalFlow'])},${double.parse(vl['minimumFlow'])},${double.parse(vl['maximumFlow'])},${vl['fillUpDelay']},${vl['area']},${vl['cropFactor']}}';
       }
     }
     payload['300']?.add({'304' : valve});
+    // payload['300']?.add({'304' : ''});
+
+
     var wm = '';
     for(var i in waterMeterUpdated){
-      wm += '${wm.length != 0 ? ';' : ''}${i['sNo']},${i['location']},${i['name']},${i['ratio']},${i['maximumFlow']}';
+      wm += '${wm.isNotEmpty ? ';' : ''}${i['sNo']},${i['location']},${i['name']},${int.parse(i['ratio'])},${int.parse(i['maximumFlow'])}';
     }
     payload['300']?.add({'305' : wm});
+    // payload['300']?.add({'305' : ''});
+
+
     var fertilizer = '';
     for(var i in fertilizerUpdated){
       for(var fert in i['fertilizer']){
-        fertilizer += '${fertilizer.length != 0 ? ';' : ''}${fert['sNo']},${i['id']},${fert['id']},${i['noFlowBehavior']},${fert['id']},${fert['fertilizerMeter']},${fert['ratio']},${fert['shortestPulse']}';
+        fertilizer += '${fertilizer.length != 0 ? ';' : ''}'
+            '${fert['sNo']},${i['id']},${fert['id'][fert['id'].length - 1]},'
+            '${noFlowBehavior(i['noFlowBehavior'])},${i['minimalOnTime']},'
+            '${i['minimalOffTime']},${i['boosterOffDelay']},'
+            '${i['waterFlowStabilityTime']},${fert['nominalFlow']},'
+            '${injectorMode(fert['injectorMode'])},${fert['ratio']},${fert['shortestPulse']}';
       }
     }
     payload['300']?.add({'306' : fertilizer});
+    // payload['300']?.add({'306' : ''});
 
+
+    //
     var ecPh = '';
     for(var i in ecPhUpdated){
-      for(var j in i['fertilizer']){
-        ecPh += '${ecPh.length != 0 ? ';' : ''}${j['sNo']},${i['id']},${j['id']},${j['nominalFlow']},${j['injectorMode']}';
+      for(var j in i['setting']){
+        ecPh += '${ecPh.length != 0 ? ';' : ''}'
+            '${j['sensor'][0]['sNo']},'
+            '${i['id']},'
+            '${j['name'] == 'ec' ? 1 : 2},'
+            '${j['active'] == true ? 1 : 0},'
+            '${j['controlCycle']},'
+            '${double.parse(j['delta'])},'
+            '${double.parse(j['fineTunning'])},'
+            '${double.parse(j['coarseTunning'])},'
+            '${double.parse(j['deadBand'])},'
+            '${j['integ']},'
+            '${j['senseOrAvg'] == 'Average' ? '${j['sensor'][0]['id']}_${j['sensor'][1]['id']}' : j['senseOrAvg']},'
+            '${int.parse(j['avgFilterSpeed'])}';
       }
     }
     payload['300']?.add({'307' : ecPh});
+    // payload['300']?.add({'307' : ''});
+    //
+    // var filter = '';
+    // for(var i in filterUpdated){
+    //   filter += '${filter.length != 0 ? ';' : ''}${i['sNo']},${i['location']},${i['dpDelay']},${i['loopingLimit']},${i['whileFlushing']}';
+    // }
+    //
+    // payload['300']?.add({'308' : filter});
 
-    var filter = '';
-    for(var i in filterUpdated){
-      filter += '${filter.length != 0 ? ';' : ''}${i['sNo']},${i['location']},${i['dpDelay']},${i['loopingLimit']},${i['whileFlushing']}';
-    }
 
-    payload['300']?.add({'308' : filter});
     var as = '';
     for(var i in analogSensorUpdated){
-      as += '${as.length != 0 ? ';' : ''}${i['sNo']},${i['name']},${i['type']},${i['units']},${i['base']},${i['minimum']},${i['maximum']}';
+      as += '${as.length != 0 ? ';' : ''}${i['sNo']},${i['name']},${analogType(i['type'])},${i['units'] == 'bar' ? 1 : 2},${i['base'] == 'Voltage' ? 1 : 0},${double.parse(i['minimum'])},${double.parse(i['maximum'])}';
     }
-    payload['300']?.add({'309' : as});
+    payload['300']?.add({'308' : as});
+    // payload['300']?.add({'308' : ''});
 
 
-    print('mv : ${mv}');
-    print('line : ${line}');
-    print('valve : ${valve}');
-    print('wm : ${wm}');
-    print('fertilizer : ${fertilizer}');
-    print('ecPh : ${ecPh}');
-    print('filter : ${filter}');
+    var ms = '';
+    for(var i in moistureSensorUpdated){
+      ms += '${ms.length != 0 ? ';' : ''}'
+          '${i['sNo']},'
+          '${i['name']},'
+          '${i['location']},'
+          '${moistureType(i['high/low'])},'
+          '${i['units'] == 'bar' ? 1 : 2},'
+          '${i['base'] == 'Voltage' ? 1 : 0},'
+          '${double.parse(i['minimum'])},'
+          '${double.parse(i['maximum'])}';
+    }
+    // payload['300']?.add({'309' : ms});
+    payload['300']?.add({'309' : ''});
+
+
+    var ls = '';
+    for(var i in levelSensorUpdated){
+      ls += '${ls.length != 0 ? ';' : ''}'
+          '${i['sNo']},'
+          '${i['name']},'
+          '${i['location']},'
+          '${levelType(i['high/low'])},'
+          '${i['units'] == 'bar' ? 1 : 2},'
+          '${i['base'] == 'Voltage' ? 1 : 0},'
+          '${double.parse(i['minimum'])},'
+          '${double.parse(i['maximum'])}';
+    }
+    payload['300']?.add({'310' : ls});
+    // payload['300']?.add({'310' : ''});
+
+    var nAlarm = '';
+    print(jsonEncode(alarmUpdated));
+    var nTypeCount = 0;
+    for(var i = 0;i < alarmUpdated.length;i++){
+      var type = alarmUpdated[i]['alarm'];
+      for(var j = 0;j < type.length;j++){
+        nTypeCount = nTypeCount + 1;
+        nAlarm += '${nAlarm.isNotEmpty ? ';' : ''}'
+            '$nTypeCount,'
+        // '${alarmUpdated[i]['sNo']},'
+            '${alarmUpdated[i]['id']},${type[j]['name']},'
+            '${type[j]['scanTime']},${alarmBehavior(type[j]['alarmOnStatus'])},'
+            '${type[j]['resetAfterIrrigation'] == 'yes' ? 1 : 0},${type[j]['autoResetDuration']},${type[j]['threshold']}' ;
+      }
+    }
+    payload['300']?.add({'311' : nAlarm});
+    // payload['300']?.add({'310' : ''});
+
+
+    var cAlarm = '';
+    var cTypeCount = 0;
+    for(var i = 0;i < criticalAlarmUpdated.length;i++){
+      var type = criticalAlarmUpdated[i]['alarm'];
+      for(var j = 0;j < type.length;j++){
+        cTypeCount = cTypeCount + 1;
+        cAlarm += '${cAlarm.isNotEmpty ? ';' : ''}'
+            '$cTypeCount,'
+            '${criticalAlarmUpdated[i]['id']},${type[j]['name']},'
+            '${type[j]['scanTime']},${alarmBehavior(type[j]['alarmOnStatus'])},'
+            '${type[j]['resetAfterIrrigation'] == 'yes' ? 1 : 0},${type[j]['autoResetDuration']},${type[j]['threshold']}' ;
+      }
+    }
+    payload['300']?.add({'312' : cAlarm});
+
+    print('payload : $payload');
+    return payload;
 
   }
 }

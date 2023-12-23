@@ -24,8 +24,8 @@ import 'mapping_of_inputs.dart';
 import 'mapping_of_outputs.dart';
 
 class ConfigMakerScreen extends StatefulWidget {
-  const ConfigMakerScreen({super.key, required this.userId, required this.customerId, required this.controllerId, required this.imeiNumber});
-  final int userId, customerId, controllerId;
+  const ConfigMakerScreen({super.key, required this.userID, required this.customerID, required this.siteID, required this.imeiNumber});
+  final int userID, customerID, siteID;
   final String imeiNumber;
 
   @override
@@ -39,11 +39,28 @@ class _ConfigMakerScreenState extends State<ConfigMakerScreen> with SingleTicker
   @override
   void initState() {
     super.initState();
-    var configPvd = Provider.of<ConfigMakerProvider>(context, listen: false);
+    getConfigData();
     controller = TabController(length: 12, vsync: this, initialIndex: 0);
     controller.addListener(_handleTabSelection);
-    getProductLimit(configPvd);
 
+
+  }
+  Future<void> getConfigData()  async {
+    var configPvd = Provider.of<ConfigMakerProvider>(context, listen: false);
+    HttpService service = HttpService();
+    try{
+      print('here    customerID : ${widget.customerID}');
+      print('here    siteID : ${widget.siteID}');
+      print('here    userID : ${widget.userID}');
+      var response = await service.postRequest('getUserConfigMaker', {'userId' : widget.customerID, 'controllerId' : widget.siteID});
+      var jsonData = jsonDecode(response.body);
+      print('jsonData : ${jsonData['data']}');
+      configPvd.fetchAll(jsonData['data']);
+      print('userId  ${widget.customerID}');
+      print('userId  ${widget.siteID}');
+    }catch(e){
+      print(e.toString());
+    }
   }
   @override
   void dispose() {
@@ -52,14 +69,7 @@ class _ConfigMakerScreenState extends State<ConfigMakerScreen> with SingleTicker
 
     super.dispose();
   }
-  void getProductLimit(ConfigMakerProvider configPvd)async{
-    HttpService service = HttpService();
-    // var response = await service.postRequest('getUserConfigMaker', {'userId' : 21,'controllerId' : 22});
-    // var jsonData = response.body;
-    // var myData = jsonDecode(jsonData);
-    // print(myData);
-    // configPvd.fetchAll(myData['data']);
-  }
+
 
   void _handleTabSelection() {
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: false);
@@ -126,7 +136,7 @@ class _ConfigMakerScreenState extends State<ConfigMakerScreen> with SingleTicker
           ),
         );
       }else{
-        return  ConfigMakerForWeb(userID: widget.userId, customerID: widget.customerId, siteId: widget.controllerId,);
+        return  ConfigMakerForWeb(userID: widget.userID, customerID: widget.customerID, siteId: widget.siteID,);
       }
     },);
   }

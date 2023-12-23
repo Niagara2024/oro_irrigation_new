@@ -118,10 +118,10 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
     {
       customerProductList.clear();
       var data = jsonDecode(response.body);
-      print(data);
+      //print(data);
       if(data["code"]==200)
       {
-        final cntList = data["data"] as List;
+        final cntList = data["data"]['product'] as List;
         for (int i=0; i < cntList.length; i++) {
           customerProductList.add(CustomerProductModel.fromJson(cntList[i]));
         }
@@ -577,8 +577,8 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
   bool checkboxValueNode = false;
   final List<String> _interfaceInterval = ['0 sec', '5 sec', '10 sec', '20 sec', '30 sec', '45 sec','1 min','5 min','10 min','30 min','1 hr']; // Option 2
   List<CustomerListMDL> myCustomerChildList = <CustomerListMDL>[];
-
   List<int> nodeStockSelection = [];
+  int currentSite = 0;
 
   @override
   void initState() {
@@ -650,10 +650,6 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                   label: Text('IMEI', style: TextStyle(fontWeight: FontWeight.bold),),
                   size: ColumnSize.M,
                 ),
-                DataColumn2(
-                  size: ColumnSize.M,
-                  label: Text(widget.userType==2 ? 'Site Name': 'Sales person', style: const TextStyle(fontWeight: FontWeight.bold),),
-                ),
                 const DataColumn2(
                   label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold),),
                 ),
@@ -671,36 +667,36 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                 DataCell(Row(children: [ CircleAvatar(
                   radius: 17,
                     backgroundColor: Colors.transparent,
-                    backgroundImage: widget.customerProductList[index].catName == 'ORO SWITCH'
-                        || widget.customerProductList[index].catName == 'OROSENSE'?
+                    backgroundImage: widget.customerProductList[index].categoryName == 'ORO SWITCH'
+                        || widget.customerProductList[index].categoryName == 'OROSENSE'?
                     AssetImage('assets/images/oro_switch.png'):
-                    widget.customerProductList[index].catName == 'ORO LEVEL'?
+                    widget.customerProductList[index].categoryName == 'ORO LEVEL'?
                     AssetImage('assets/images/oro_sense.png'):
-                    widget.customerProductList[index].catName == 'OROGEM'?
+                    widget.customerProductList[index].categoryName == 'OROGEM'?
                     AssetImage('assets/images/oro_gem.png'): AssetImage('assets/images/oro_rtu.png'),
-                ), const SizedBox(width: 10,), Text(widget.customerProductList[index].catName)],)),
+                ), const SizedBox(width: 10,), Text(widget.customerProductList[index].categoryName)],)),
                 DataCell(Text(widget.customerProductList[index].model)),
-                DataCell(Text(widget.customerProductList[index].imei)),
-                DataCell(widget.userType==2 ? Text(widget.customerProductList[index].groupName) : widget.customerProductList[index].buyer == widget.userName? const Text('-') : Text(widget.customerProductList[index].buyer)),
+                DataCell(Text(widget.customerProductList[index].deviceId)),
+                //DataCell(widget.userType==2 ? Text(widget.customerProductList[index].siteName) : widget.customerProductList[index].buyer == widget.userName? const Text('-') : Text(widget.customerProductList[index].buyer)),
                 DataCell(
                     Center(
                       child: widget.userType == 1? Row(
                         children: [
                           CircleAvatar(radius: 5,
                             backgroundColor:
-                            widget.customerProductList[index].prdStatus==1? Colors.pink:
-                            widget.customerProductList[index].prdStatus==2? Colors.blue:
-                            widget.customerProductList[index].prdStatus==3? Colors.purple:
-                            widget.customerProductList[index].prdStatus==4? Colors.yellow:
-                            widget.customerProductList[index].prdStatus==5? Colors.deepOrangeAccent:
+                            widget.customerProductList[index].productStatus==1? Colors.pink:
+                            widget.customerProductList[index].productStatus==2? Colors.blue:
+                            widget.customerProductList[index].productStatus==3? Colors.purple:
+                            widget.customerProductList[index].productStatus==4? Colors.yellow:
+                            widget.customerProductList[index].productStatus==5? Colors.deepOrangeAccent:
                             Colors.green,
                           ),
                           const SizedBox(width: 5,),
-                          widget.customerProductList[index].prdStatus==1? const Text('In-Stock'):
-                          widget.customerProductList[index].prdStatus==2? const Text('Stock'):
-                          widget.customerProductList[index].prdStatus==3? const Text('Sold-Out'):
-                          widget.customerProductList[index].prdStatus==4? const Text('Pending'):
-                          widget.customerProductList[index].prdStatus==5? const Text('Installed'):
+                          widget.customerProductList[index].productStatus==1? const Text('In-Stock'):
+                          widget.customerProductList[index].productStatus==2? const Text('Stock'):
+                          widget.customerProductList[index].productStatus==3? const Text('Sold-Out'):
+                          widget.customerProductList[index].productStatus==4? const Text('Pending'):
+                          widget.customerProductList[index].productStatus==5? const Text('Installed'):
                           const Text('Active'),
                         ],
                       ):
@@ -708,17 +704,17 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                         children: [
                           CircleAvatar(radius: 5,
                             backgroundColor:
-                            widget.customerProductList[index].prdStatus==2? Colors.pink:
-                            widget.customerProductList[index].prdStatus==3? Colors.blue:
-                            widget.customerProductList[index].prdStatus==4? Colors.yellow:
-                            widget.customerProductList[index].prdStatus==5? Colors.deepOrangeAccent:
+                            widget.customerProductList[index].productStatus==2? Colors.pink:
+                            widget.customerProductList[index].productStatus==3? Colors.blue:
+                            widget.customerProductList[index].productStatus==4? Colors.yellow:
+                            widget.customerProductList[index].productStatus==5? Colors.deepOrangeAccent:
                             Colors.green,
                           ),
                           const SizedBox(width: 5,),
-                          widget.customerProductList[index].prdStatus==2? const Text('In-Stock'):
-                          widget.customerProductList[index].prdStatus==3? const Text('Stock'):
-                          widget.customerProductList[index].prdStatus==4? const Text('Pending'):
-                          widget.customerProductList[index].prdStatus==5? const Text('Installed'):
+                          widget.customerProductList[index].productStatus==2? const Text('In-Stock'):
+                          widget.customerProductList[index].productStatus==3? const Text('Stock'):
+                          widget.customerProductList[index].productStatus==4? const Text('Pending'):
+                          widget.customerProductList[index].productStatus==5? const Text('Installed'):
                           const Text('Active'),
                         ],
                       ):
@@ -726,21 +722,21 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                         children: [
                           CircleAvatar(radius: 5,
                             backgroundColor:
-                            widget.customerProductList[index].prdStatus==3? Colors.pink:
-                            widget.customerProductList[index].prdStatus==4? Colors.yellow:
-                            widget.customerProductList[index].prdStatus==5? Colors.deepOrangeAccent:
+                            widget.customerProductList[index].productStatus==3? Colors.pink:
+                            widget.customerProductList[index].productStatus==4? Colors.yellow:
+                            widget.customerProductList[index].productStatus==5? Colors.deepOrangeAccent:
                             Colors.green,
                           ),
                           const SizedBox(width: 5,),
-                          widget.customerProductList[index].prdStatus==3? const Text('In-Stock'):
-                          widget.customerProductList[index].prdStatus==4? const Text('Pending'):
-                          widget.customerProductList[index].prdStatus==5? const Text('Installed'):
+                          widget.customerProductList[index].productStatus==3? const Text('In-Stock'):
+                          widget.customerProductList[index].productStatus==4? const Text('Pending'):
+                          widget.customerProductList[index].productStatus==5? const Text('Installed'):
                           const Text('Active'),
                         ],
                       ),
                     )
                 ),
-                DataCell(Text(DateFormat('dd-MM-yyyy').format(DateTime.parse(widget.customerProductList[index].lastModified)))),
+                DataCell(Text(DateFormat('dd-MM-yyyy').format(DateTime.parse(widget.customerProductList[index].modifyDate)))),
                 widget.userType==2 ? DataCell(Center(child: IconButton(tooltip:'Delete product',onPressed: () {
                  print('IconButton click');
                 }, icon: const Icon(Icons.delete_outline, color:  Colors.red,),))) : DataCell.empty,
@@ -759,15 +755,206 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
         length: widget.customerSiteList.length, // Number of tabs
         child: Column(
           children: [
-            TabBar(
-              indicatorColor: const Color.fromARGB(255, 175, 73, 73),
-              isScrollable: true,
-              tabs: [
-                for (var i = 0; i < widget.customerSiteList.length; i++)
-                  Tab(text: widget.customerSiteList[i].groupName,),
+            Row(
+              children: [
+                Expanded(
+                  child: TabBar(
+                    indicatorColor: const Color.fromARGB(255, 175, 73, 73),
+                    isScrollable: true,
+                    tabs: [
+                      for (var i = 0; i < widget.customerSiteList.length; i++)
+                        Tab(text: widget.customerSiteList[i].groupName,),
+                    ],
+                    onTap: (index) {
+                      currentSite = index;
+                    },
+                  ),
+                ),
+                PopupMenuButton(
+                  elevation: 10,
+                  tooltip: 'Add node list',
+                  child: Center(child: Icon(Icons.add, color: myTheme.primaryColor,)),
+                  onCanceled: () {
+                    checkboxValueNode = false;
+                  },
+                  itemBuilder: (context) {
+                    return List.generate(widget.nodeStockList.length+1 ,(nodeIndex) {
+                      if(widget.nodeStockList.isEmpty){
+                        return const PopupMenuItem(
+                          child: Text('No node available to add in this site'),
+                        );
+                      }
+                      else if(widget.nodeStockList.length == nodeIndex){
+                        return PopupMenuItem(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              MaterialButton(
+                                color: Colors.red,
+                                textColor: Colors.white,
+                                child: const Text('CANCEL'),
+                                onPressed: () {
+                                  setState(() {
+                                    checkboxValueNode = false;
+                                    Navigator.pop(context);
+                                  });
+                                },
+                              ),
+                              MaterialButton(
+                                color: Colors.green,
+                                textColor: Colors.white,
+                                child: const Text('ADD'),
+                                onPressed: () async
+                                {
+                                  List<int> oldNodeListRfNo = [];
+                                  int refNo = 0;
+                                  String refNoUpdatingNode = '';
+
+                                  List<dynamic> selectedNodeList = [];
+                                  for(int i=0; i<nodeStockSelection.length; i++)
+                                  {
+                                    if(nodeStockSelection[i]==1){
+                                      Map<String, dynamic> myMap = {"productId": widget.nodeStockList[i].productId.toString(), 'categoryName': widget.nodeStockList[i].categoryName, 'referenceNumber': 0};
+                                      selectedNodeList.add(myMap);
+                                    }
+                                  }
+
+                                  if(selectedNodeList.isNotEmpty)
+                                  {
+                                    for(int i = 0; i < selectedNodeList.length; i++)
+                                    {
+                                      if(refNoUpdatingNode != selectedNodeList[i]['categoryName'])
+                                      {
+                                        refNoUpdatingNode = selectedNodeList[i]['categoryName'];
+                                        var contain = widget.usedNodeList[currentSite].where((element) => element.categoryName == refNoUpdatingNode);
+                                        if (contain.isNotEmpty)
+                                        {
+                                          for(int j = 0; j < widget.usedNodeList[currentSite].length; j++)
+                                          {
+                                            if(widget.usedNodeList[currentSite][j].categoryName == refNoUpdatingNode)
+                                            {
+                                              oldNodeListRfNo.add(widget.usedNodeList[currentSite][j].referenceNumber);
+                                            }
+                                          }
+                                          List missingRN = missingArray(oldNodeListRfNo);
+                                          if(missingRN.isNotEmpty)
+                                          {
+                                            refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
+                                            for(int k = 0; k < selectedNodeList.length; k++)
+                                            {
+                                              if(missingRN.isNotEmpty)
+                                              {
+                                                if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
+                                                {
+                                                  selectedNodeList[k]['referenceNumber'] = missingRN[0];
+                                                  missingRN.removeAt(0);
+                                                }
+                                              }else{
+                                                refNo = refNo+1;
+                                                selectedNodeList[k]['referenceNumber'] = refNo;
+                                              }
+                                            }
+                                          }
+                                          else
+                                          {
+                                            refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
+                                            for(int k = 0; k < selectedNodeList.length; k++)
+                                            {
+                                              if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
+                                              {
+                                                refNo = refNo+1;
+                                                selectedNodeList[k]['referenceNumber'] = refNo;
+                                              }
+                                            }
+                                          }
+                                        }
+                                        else
+                                        {
+                                          refNo = 0;
+                                          for(int k = 0; k < selectedNodeList.length; k++)
+                                          {
+                                            if(refNoUpdatingNode == selectedNodeList[k]['categoryName'])
+                                            {
+                                              refNo = refNo+1;
+                                              selectedNodeList[k]['referenceNumber'] = refNo;
+                                            }
+                                          }
+                                        }
+                                      }
+                                      else{
+                                      }
+                                    }
+
+                                    //print(selectedNodeList);
+
+                                    if(selectedNodeList.isNotEmpty)
+                                    {
+                                      Map<String, dynamic> body = {
+                                        "userId": widget.customerID,
+                                        "dealerId": widget.userID,
+                                        "masterId": widget.customerSiteList[currentSite].userDeviceListId,
+                                        "groupId": widget.customerSiteList[currentSite].groupId,
+                                        "products": selectedNodeList,
+                                        "createUser": widget.userID,
+                                      };
+
+                                      final response = await HttpService().postRequest("createUserDeviceListWithMaster", body);
+                                      print(response.body);
+                                      if(response.statusCode == 200)
+                                      {
+                                        var data = jsonDecode(response.body);
+                                        if(data["code"]==200)
+                                        {
+                                          setState(() {
+                                            selectedNodeList.clear();
+                                            nodeStockSelection.clear();
+                                            checkboxValueNode = false;
+                                          });
+
+                                          widget.getCustomerSite();
+                                          widget.getNodeStockList();
+                                          Navigator.pop(context);
+                                        }
+                                        else{
+                                          //_showSnackBar(data["message"]);
+                                          //_showAlertDialog('Warning', data["message"]);
+                                        }
+                                      }
+                                    }
+
+                                  }
+
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      return PopupMenuItem(
+                        child: StatefulBuilder(
+                          builder: (BuildContext context, void Function(void Function()) setState) {
+                            return CheckboxListTile(
+                              title: Text(widget.nodeStockList[nodeIndex].categoryName),
+                              subtitle: Text('${widget.nodeStockList[nodeIndex].imeiNo}'),
+                              value: checkboxValueNode,
+                              onChanged:(bool? value) { setState(() {
+                                checkboxValueNode = value!;
+                                if(value){
+                                  nodeStockSelection[nodeIndex] = 1;
+                                }else{
+                                  nodeStockSelection[nodeIndex] = 0;
+                                }
+
+                              });},
+                            );
+                          },
+                        ),
+                      );
+                    });
+                  },
+                ),
+                const SizedBox(width: 10,),
               ],
-              onTap: (value) {
-              },
             ),
             const SizedBox(height: 5.0),
             SizedBox(
@@ -781,221 +968,18 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                           child: Row(
                             children: [
                               SizedBox(
-                                width: 300,
+                                width: 260,
                                 child: Column(
                                   children: [
                                     const SizedBox(height: 10,),
-                                    CircleAvatar(radius: 42,
+                                    const CircleAvatar(radius: 42,
                                       backgroundImage: AssetImage('assets/images/oro_gem.png'),
                                       backgroundColor: Colors.transparent,
                                     ),
-
                                     const SizedBox(height: 5,),
                                     Text(widget.customerSiteList[siteIndex].categoryName,style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
                                     Text('IMEi Number : ${widget.customerSiteList[siteIndex].deviceId.toString()}', style: const TextStyle(fontWeight: FontWeight.normal),),
                                     Text('Model Name  : ${widget.customerSiteList[siteIndex].modelName}', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                    Padding(
-                                      padding: const EdgeInsets.all(5),
-                                      child: Container(
-                                        height: 50,
-                                        decoration: BoxDecoration(
-                                          borderRadius: const BorderRadius.all(Radius.circular(5)),
-                                          color: Colors.grey.shade300,
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(right: 15, left: 15),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              const Text('Add Node list to your site'),
-                                              PopupMenuButton(
-                                                elevation: 10,
-                                                tooltip: 'Add node list',
-                                                child: Center(child: Icon(Icons.add, color: myTheme.primaryColor,)),
-                                                onCanceled: () {
-                                                  checkboxValueNode = false;
-                                                },
-                                                itemBuilder: (context) {
-                                                  return List.generate(widget.nodeStockList.length+1 ,(nodeIndex) {
-                                                    if(widget.nodeStockList.isEmpty){
-                                                      return const PopupMenuItem(
-                                                        child: Text('No node available to add in this site'),
-                                                      );
-                                                    }
-                                                    else if(widget.nodeStockList.length == nodeIndex){
-                                                      return PopupMenuItem(
-                                                        child: Row(
-                                                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                                          children: [
-                                                            MaterialButton(
-                                                              color: Colors.red,
-                                                              textColor: Colors.white,
-                                                              child: const Text('CANCEL'),
-                                                              onPressed: () {
-                                                                setState(() {
-                                                                  checkboxValueNode = false;
-                                                                  Navigator.pop(context);
-                                                                });
-                                                              },
-                                                            ),
-                                                            MaterialButton(
-                                                              color: Colors.green,
-                                                              textColor: Colors.white,
-                                                              child: const Text('ADD'),
-                                                              onPressed: () async
-                                                              {
-                                                                List<int> oldNodeListRfNo = [];
-                                                                int refNo = 0;
-                                                                String refNoUpdatingNode = '';
-
-                                                                List<dynamic> selectedNodeList = [];
-                                                                for(int i=0; i<nodeStockSelection.length; i++)
-                                                                {
-                                                                  if(nodeStockSelection[i]==1){
-                                                                    Map<String, dynamic> myMap = {"productId": widget.nodeStockList[i].productId.toString(), 'categoryName': widget.nodeStockList[i].categoryName, 'referenceNumber': 0};
-                                                                    selectedNodeList.add(myMap);
-                                                                  }
-                                                                }
-
-                                                                if(selectedNodeList.isNotEmpty)
-                                                                {
-                                                                  for(int i = 0; i < selectedNodeList.length; i++)
-                                                                  {
-                                                                    if(refNoUpdatingNode != selectedNodeList[i]['categoryName'])
-                                                                    {
-                                                                      refNoUpdatingNode = selectedNodeList[i]['categoryName'];
-                                                                      var contain = widget.usedNodeList[siteIndex].where((element) => element.categoryName == refNoUpdatingNode);
-                                                                      if (contain.isNotEmpty)
-                                                                      {
-                                                                        for(int j = 0; j < widget.usedNodeList[siteIndex].length; j++)
-                                                                        {
-                                                                          if(widget.usedNodeList[siteIndex][j].categoryName == refNoUpdatingNode)
-                                                                          {
-                                                                            oldNodeListRfNo.add(widget.usedNodeList[siteIndex][j].referenceNumber);
-                                                                          }
-                                                                        }
-                                                                        List missingRN = missingArray(oldNodeListRfNo);
-                                                                        if(missingRN.isNotEmpty)
-                                                                        {
-                                                                          refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
-                                                                          for(int k = 0; k < selectedNodeList.length; k++)
-                                                                          {
-                                                                            if(missingRN.isNotEmpty)
-                                                                            {
-                                                                              if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
-                                                                              {
-                                                                                selectedNodeList[k]['referenceNumber'] = missingRN[0];
-                                                                                missingRN.removeAt(0);
-                                                                              }
-                                                                            }else{
-                                                                              refNo = refNo+1;
-                                                                              selectedNodeList[k]['referenceNumber'] = refNo;
-                                                                            }
-                                                                          }
-                                                                        }
-                                                                        else
-                                                                        {
-                                                                          refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
-                                                                          for(int k = 0; k < selectedNodeList.length; k++)
-                                                                          {
-                                                                            if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
-                                                                            {
-                                                                              refNo = refNo+1;
-                                                                              selectedNodeList[k]['referenceNumber'] = refNo;
-                                                                            }
-                                                                          }
-                                                                        }
-                                                                      }
-                                                                      else
-                                                                      {
-                                                                        refNo = 0;
-                                                                        for(int k = 0; k < selectedNodeList.length; k++)
-                                                                        {
-                                                                          if(refNoUpdatingNode == selectedNodeList[k]['categoryName'])
-                                                                          {
-                                                                            refNo = refNo+1;
-                                                                            selectedNodeList[k]['referenceNumber'] = refNo;
-                                                                          }
-                                                                        }
-                                                                      }
-                                                                    }
-                                                                    else{
-                                                                    }
-                                                                  }
-
-                                                                  //print(selectedNodeList);
-
-                                                                  if(selectedNodeList.isNotEmpty)
-                                                                  {
-                                                                    Map<String, dynamic> body = {
-                                                                      "userId": widget.customerID,
-                                                                      "dealerId": widget.userID,
-                                                                      "masterId": widget.customerSiteList[siteIndex].userDeviceListId,
-                                                                      "groupId": widget.customerSiteList[siteIndex].groupId,
-                                                                      "products": selectedNodeList,
-                                                                      "createUser": widget.userID,
-                                                                    };
-
-                                                                    final response = await HttpService().postRequest("createUserDeviceListWithMaster", body);
-                                                                    print(response.body);
-                                                                    if(response.statusCode == 200)
-                                                                    {
-                                                                      var data = jsonDecode(response.body);
-                                                                      if(data["code"]==200)
-                                                                      {
-                                                                        setState(() {
-                                                                          selectedNodeList.clear();
-                                                                          nodeStockSelection.clear();
-                                                                          checkboxValueNode = false;
-                                                                        });
-
-                                                                        widget.getCustomerSite();
-                                                                        widget.getNodeStockList();
-                                                                        Navigator.pop(context);
-                                                                      }
-                                                                      else{
-                                                                        //_showSnackBar(data["message"]);
-                                                                        //_showAlertDialog('Warning', data["message"]);
-                                                                      }
-                                                                    }
-                                                                  }
-
-                                                                }
-
-                                                              },
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      );
-                                                    }
-                                                    return PopupMenuItem(
-                                                      child: StatefulBuilder(
-                                                        builder: (BuildContext context, void Function(void Function()) setState) {
-                                                          return CheckboxListTile(
-                                                            title: Text(widget.nodeStockList[nodeIndex].categoryName),
-                                                            subtitle: Text('${widget.nodeStockList[nodeIndex].imeiNo}'),
-                                                            value: checkboxValueNode,
-                                                            onChanged:(bool? value) { setState(() {
-                                                              checkboxValueNode = value!;
-                                                              if(value){
-                                                                nodeStockSelection[nodeIndex] = 1;
-                                                              }else{
-                                                                nodeStockSelection[nodeIndex] = 0;
-                                                              }
-
-                                                            });},
-                                                          );
-                                                        },
-                                                      ),
-                                                    );
-                                                  });
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
                                   ],
                                 ),
                               ),
@@ -1343,7 +1327,7 @@ class UserCard extends StatelessWidget
         ),
       ),
       onTap: (){
-        Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerHome(customerID: user[index].userId, type: 1, customerName: user[index].userName,)),);
+        Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerHome(customerID: user[index].userId, type: 1, customerName: user[index].userName, userID: user[index].userId,)),);
       },
     );
   }

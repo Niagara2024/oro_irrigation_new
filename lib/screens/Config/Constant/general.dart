@@ -19,8 +19,8 @@ class _GeneralInConstantState extends State<GeneralInConstant> {
   Future<void> _show() async {
     final TimeOfDay? result =
     await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.now(),
+      context: context,
+      initialTime: TimeOfDay.now(),
     );
     if (result != null) {
       setState(() {
@@ -47,7 +47,7 @@ class _GeneralInConstantState extends State<GeneralInConstant> {
           childrenDelegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
               return Container(
-                margin: index == 0 ? EdgeInsets.only(top: 10) : null,
+                // margin: index == 0 ? EdgeInsets.only(top: 10) : null,
                 padding: EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),

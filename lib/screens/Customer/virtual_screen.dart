@@ -92,26 +92,32 @@ class _VirtualMeterScreenState extends State<VirtualMeterScreen>
   }
 
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          buildDataTableWidget(),
-          MediaQuery.of(context).size.width >= 600
-              ? buildFormulaEditorWidget()
-              : Container()
-          // buildFormulaEditorWidget(),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          updateconditions();
-        },
-        tooltip: 'Send',
-        child: const Icon(Icons.send),
-      ),
-    );
+    if (jsondata == null) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (jsondata['plan'].isEmpty || virtualMeterjson.isEmpty || formulajson.isEmpty) {
+      return const Center(child: Text('Currently No Virtual Meter Available'));
+    } else {
+      return Scaffold(
+        body: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            buildDataTableWidget(),
+            MediaQuery.of(context).size.width >= 600
+                ? buildFormulaEditorWidget()
+                : Container()
+            // buildFormulaEditorWidget(),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            updateconditions();
+          },
+          tooltip: 'Send',
+          child: const Icon(Icons.send),
+        ),
+      );
+    }
   }
 
   Widget buildDataTableWidget() {
@@ -161,7 +167,7 @@ class _VirtualMeterScreenState extends State<VirtualMeterScreen>
                           return Colors.blue
                               .withOpacity(0.5); // Selected row color
                         }
-                        return Color.fromARGB(0, 176, 35, 35);
+                        return Colors.white;
                       }),
                       cells: [
                         for (int i = 0; i < conditionhdrlist.length; i++)
@@ -173,7 +179,7 @@ class _VirtualMeterScreenState extends State<VirtualMeterScreen>
                                 });
                               },
                               DropdownButton(
-                                focusColor: Colors.transparent,
+                                // focusColor: Colors.transparent,
                                 items:
                                 functiondropdown.map((String? items) {
                                   return DropdownMenuItem(

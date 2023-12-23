@@ -7,13 +7,12 @@ import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/schedule_s
 import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/selection_screen.dart';
 import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/sequence_screen.dart';
 import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/water_fert_screen.dart';
-
-import 'package:oro_irrigation_new/state_management/irrigation_program_main_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import '../../../Models/IrrigationModel/sequence_model.dart';
 import '../../../constants/http_service.dart';
+import '../../../state_management/irrigation_program_main_provider.dart';
 import '../../../widgets/SCustomWidgets/custom_alert_dialog.dart';
 import '../../../widgets/SCustomWidgets/custom_snack_bar.dart';
 import '../../../widgets/SCustomWidgets/custom_tab.dart';
@@ -49,7 +48,7 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
   dynamic apiData = {};
   dynamic waterAndFertData = [];
 
-  //MqttService mqttService = MqttService();
+  // MqttService mqttService = MqttService();
 
   @override
   void initState() {
@@ -205,24 +204,24 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
                                 ? mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.label1.length : mainProvider.label4.length
                                 : mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.label2.length : mainProvider.label3.length); i++)
                               ListTile(
-                                title: Text((widget.serialNumber == 0
-                                    ? mainProvider.isIrrigationProgram
-                                    : widget.programType == "Irrigation Program")
-                                    ? mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.label1[i] : mainProvider.label4[i]
-                                    : mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.label2[i] : mainProvider.label3[i],
-                                style: TextStyle(color: _tabController.index == i ? Colors.white : null),),
-                                leading: Icon((widget.serialNumber == 0
-                                    ? mainProvider.isIrrigationProgram
-                                    : widget.programType == "Irrigation Program")
-                                    ? mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.icons1[i] : mainProvider.icons4[i]
-                                    : mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.icons2[i] : mainProvider.icons3[i],
-                                color: _tabController.index == i ? Colors.white : null,),
-                                selected: _tabController.index == i,
-                                onTap: () {
-                                  _navigateToTab(i);
-                                },
-                                selectedTileColor: _tabController.index == i ? Theme.of(context).primaryColor : null,
-                                hoverColor: _tabController.index == i ? Theme.of(context).primaryColor : null
+                                  title: Text((widget.serialNumber == 0
+                                      ? mainProvider.isIrrigationProgram
+                                      : widget.programType == "Irrigation Program")
+                                      ? mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.label1[i] : mainProvider.label4[i]
+                                      : mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.label2[i] : mainProvider.label3[i],
+                                    style: TextStyle(color: _tabController.index == i ? Colors.white : null),),
+                                  leading: Icon((widget.serialNumber == 0
+                                      ? mainProvider.isIrrigationProgram
+                                      : widget.programType == "Irrigation Program")
+                                      ? mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.icons1[i] : mainProvider.icons4[i]
+                                      : mainProvider.conditionsLibraryIsNotEmpty ? mainProvider.icons2[i] : mainProvider.icons3[i],
+                                    color: _tabController.index == i ? Colors.white : null,),
+                                  selected: _tabController.index == i,
+                                  onTap: () {
+                                    _navigateToTab(i);
+                                  },
+                                  selectedTileColor: _tabController.index == i ? Theme.of(context).primaryColor : null,
+                                  hoverColor: _tabController.index == i ? Theme.of(context).primaryColor : null
                               ),
                           ],
                         ),
@@ -270,9 +269,9 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
           case 2:
             return ConditionsScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
           case 3:
-            return WaterAndFertScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
-          case 4:
             return SelectionScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 4:
+            return WaterAndFertScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
           case 5:
             return AlarmScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
           case 6:
@@ -287,9 +286,9 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
           case 1:
             return ScheduleScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
           case 2:
-            return WaterAndFertScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
-          case 3:
             return SelectionScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
+          case 3:
+            return WaterAndFertScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
           case 4:
             return AlarmScreen(userId: widget.userId, controllerId: widget.controllerId, serialNumber: widget.serialNumber);
           case 5:
@@ -342,9 +341,9 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
       "serialNumber": widget.serialNumber == 0 ? mainProvider.serialNumberCreation : widget.serialNumber,
     };
     var programCategory = '';
-    if(mainProvider.irrigationLine!.sequence.isNotEmpty) {
-      programCategory = mainProvider.irrigationLine!.sequence[0]['valve'][0]['location'];
-    }
+    // if((!mainProvider.isIrrigationProgram || widget.programType != "Irrigation Program" )&& mainProvider.irrigationLine!.sequence.isNotEmpty) {
+    //   programCategory = mainProvider.irrigationLine!.sequence[0]['valve'][0]['location'];
+    // }
     // List sNoList = mainProvider.irrigationLine?.sequence.map((e) {
     //   List valveSerialNumbers = e['valve'].map((valve) => valve['sNo']).toList();
     //   return valveSerialNumbers.join('+');
@@ -354,7 +353,12 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
     List<NameData>? selectedMainValveList = mainProvider.selectionModel.data?.mainValve?.where((element) => element.selected == true).toList();
     String selectedPump = selectedPumpsList?.join('_') ?? '';
     String mainValve = selectedMainValveList?.join('_') ?? '';
-    List daySelectionList = [int.parse(mainProvider.sampleScheduleModel!.scheduleByDays.schedule['skipDays']), int.parse(mainProvider.sampleScheduleModel!.scheduleByDays.schedule['runDays'])];
+    List daySelectionList = [
+      mainProvider.sampleScheduleModel!.scheduleByDays.schedule['skipDays'] ?? '0',
+      mainProvider.sampleScheduleModel!.scheduleByDays.schedule['runDays'] ?? '0',
+      // int.parse(mainProvider.sampleScheduleModel!.scheduleByDays.schedule['skipDays']),
+      // int.parse(mainProvider.sampleScheduleModel!.scheduleByDays.schedule['runDays'])
+    ];
     String daySelectionString = daySelectionList.join('_');
 
     dynamic getDaySelectionMode() {
@@ -382,7 +386,7 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
     List<String> generateRtcTimeList(Map<String, dynamic> rtcData, String key, bool isCycles) {
       return List.generate(6, (index) {
         final rtcKey = 'rtc${index + 1}';
-        var rtcValue;
+        String rtcValue;
 
         if (key == 'noOfCycles') {
           rtcValue = index < rtcData.length ? rtcData[rtcKey]['noOfCycles'].toString() : '0';
@@ -427,13 +431,13 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
     String sBRrtcIntervalString = generateRtcTimeString(sampleScheduleModel, 'interval', true);
     String sBDrtcIntervalString = generateRtcTimeString(sampleScheduleModel, 'interval', false);
 
-    String centralFertilizerSitesString = generateFertilizerString(mainProvider.selectionModel.data!.centralFertilizerSite, 'id');
-    String localFertString = generateFertilizerString(mainProvider.selectionModel.data!.localFertilizer, 'id');
-    String centralFertilizerInjString = generateFertilizerString(mainProvider.selectionModel.data!.centralFertilizer, 'id');
-    String localFertilizerInjString = generateFertilizerLocationString(mainProvider.selectionModel.data!.localFertilizer, 'location');
+    // String centralFertilizerSitesString = generateFertilizerString(mainProvider.selectionModel.data!.centralFertilizerSite, 'id');
+    // String localFertString = generateFertilizerString(mainProvider.selectionModel.data!.localFertilizer, 'id');
+    // String centralFertilizerInjString = generateFertilizerString(mainProvider.selectionModel.data!.centralFertilizer, 'id');
+    // String localFertilizerInjString = generateFertilizerLocationString(mainProvider.selectionModel.data!.localFertilizer, 'location');
 
-    String centralFilterSiteString = generateFilterSiteString(mainProvider.selectionModel.data!.centralFilterSite, 'id');
-    String localFilterSiteString = generateFilterSiteString(mainProvider.selectionModel.data!.localFilter, 'id');
+    // String centralFilterSiteString = generateFilterSiteString(mainProvider.selectionModel.data!.centralFilterSite, 'id');
+    // String localFilterSiteString = generateFilterSiteString(mainProvider.selectionModel.data!.localFilter, 'id');
 
     List<String?> conditionList = mainProvider.sampleConditions?.condition
         .map((e) => e.value['sNo']?.toString())
@@ -442,21 +446,21 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
     conditionList = conditionList.map((value) => value ?? '0').toList();
     String conditionString = conditionList.join('_');
 
-    final selectedIds = mainProvider.selectionModel.data!.centralFilterSite?.where((element) => element.selected == true).map((element) => element.id ?? "").toList() ?? [];
-    List<String> generateFilterSelectionList() {
-      return List.generate(10, (index) {
-        return index < selectedIds.length ? '1' : '0';
-      });
-    }
-    String centralFilterSelection = generateFilterSelectionList().join('_');
+    // final selectedIds = mainProvider.selectionModel.data!.centralFilterSite?.where((element) => element.selected == true).map((element) => element.id ?? "").toList() ?? [];
+    // List<String> generateFilterSelectionList() {
+    //   return List.generate(10, (index) {
+    //     return index < selectedIds.length ? '1' : '0';
+    //   });
+    // }
+    // String centralFilterSelection = generateFilterSelectionList().join('_');
 
-    final selectedIds2 = mainProvider.selectionModel.data!.localFilter?.where((element) => element.selected == true).map((element) => element.id ?? "").toList() ?? [];
-    List<String> generateFilterSelectionList2() {
-      return List.generate(10, (index) {
-        return index < selectedIds2.length ? '1' : '0';
-      });
-    }
-    String localFilterSelection = generateFilterSelectionList2().join('_');
+    // final selectedIds2 = mainProvider.selectionModel.data!.localFilter?.where((element) => element.selected == true).map((element) => element.id ?? "").toList() ?? [];
+    // List<String> generateFilterSelectionList2() {
+    //   return List.generate(10, (index) {
+    //     return index < selectedIds2.length ? '1' : '0';
+    //   });
+    // }
+    // String localFilterSelection = generateFilterSelectionList2().join('_');
 
     var alarmToMqtt = mainProvider.alarmData?.general.map((e) => e.selected == true ? 1 : 0).toList();
     alarmToMqtt?.addAll(mainProvider.alarmData?.ecPh.map((e) => e.selected == true ? 1 : 0).toList() ?? []);
@@ -645,18 +649,18 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
       mainProvider.sampleScheduleModel!.selected == "SCHEDULE AS RUN LIST"
           ? sBRrtcIntervalString
           : sBDrtcIntervalString,
-      centralFertilizerSitesString,
-      localFertString,
-      centralFertilizerInjString,
-      localFertilizerInjString,
-      centralFilterSiteString,
-      localFilterSiteString,
+      // centralFertilizerSitesString,
+      // localFertString,
+      // centralFertilizerInjString,
+      // localFertilizerInjString,
+      // centralFilterSiteString,
+      // localFilterSiteString,
       mainProvider.selectedCentralFiltrationMode == "TIME" ? 1 : mainProvider.selectedCentralFiltrationMode == "DP" ? 2 : 3,
       mainProvider.selectedLocalFiltrationMode == "TIME" ? 1 : mainProvider.selectedLocalFiltrationMode == "DP" ? 2 : 3,
-      centralFilterSelection,
-      localFilterSelection,
+      // centralFilterSelection,
+      // localFilterSelection,
       mainProvider.centralFiltBegin ? 1 : 0,
-  mainProvider.localFiltBegin ? 1 : 0,
+      mainProvider.localFiltBegin ? 1 : 0,
       mainProvider.sampleConditions?.condition != null ? mainProvider.sampleConditions!.condition.any((element) => element.selected == true) ? 1 : 0 : 0,
       conditionString,
       alarmString
@@ -693,11 +697,14 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
                   "alarm": mainProvider.alarmData!.toJson(),
                   "programName": mainProvider.programName,
                   "priority": mainProvider.priority,
+                  "delayBetweenZones": mainProvider.programDetails!.delayBetweenZones,
+                  "adjustPercentage": mainProvider.programDetails!.adjustPercentage,
                   "incompleteRestart": mainProvider.isCompletionEnabled ? "1" : "0",
                   "programType": mainProvider.selectedProgramType,
                   "hardware": dataToMqtt
                 };
                 userData.addAll(dataToSend);
+                // print(mainProvider.selectionModel.data!.localFertilizerSet!.map((e) => e.toJson()));
               }
               else {
                 showAdaptiveDialog<Future>(
@@ -720,7 +727,7 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
               try {
                 final createUserProgram = await httpService.postRequest('createUserProgram', userData);
                 final response = jsonDecode(createUserProgram.body);
-                //mqttService.publish('get-tweet-response/86418005321234', userDataToMqtt.toString());
+                // mqttService.publish('get-tweet-response/86418005321234', userDataToMqtt.toString());
                 if(createUserProgram.statusCode == 200) {
                   ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(message: response['message']));
                 }
@@ -736,7 +743,7 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
           OutlinedButton(
             key: UniqueKey(),
             onPressed: () async{
-              //mqttService.publish('get-tweet-response/86418005321234', dataToMqtt.toString());
+              // mqttService.publish('get-tweet-response/86418005321234', dataToMqtt.toString());
               // print(dataToMqtt);
               ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(message: 'Sent successfully'));
             },

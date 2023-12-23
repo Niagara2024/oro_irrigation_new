@@ -1,6 +1,4 @@
- // To parse this JSON data, do
-//
-//     final rqadiationSet = rqadiationSetFromJson(jsonString);
+
 
 import 'dart:convert';
 
@@ -17,16 +15,16 @@ class RqadiationSet {
   });
 
   factory RqadiationSet.fromJson(Map<String, dynamic> json) => RqadiationSet(
-        data: json["data"] == null
-            ? []
-            : List<Datum>.from(json["data"]!.map((x) => Datum.fromJson(x))),
-      );
+    data: json["data"] == null
+        ? []
+        : List<Datum>.from(json["data"]!.map((x) => Datum.fromJson(x))),
+  );
 
   Map<String, dynamic> toJson() => {
-        "data": data == null
-            ? []
-            : List<dynamic>.from(data!.map((x) => x.toJson())),
-      };
+    "data": data == null
+        ? []
+        : List<dynamic>.from(data!.map((x) => x.toJson())),
+  };
 }
 
 class Datum {
@@ -65,38 +63,38 @@ class Datum {
   });
 
   factory Datum.fromJson(Map<String, dynamic> json) => Datum(
-        sNo: json["sNo"],
-        id: json["id"],
-        name: json["name"],
-        location: json["location"],
-        accumulated1: json["accumulated1"],
-        accumulated2: json["accumulated2"],
-        accumulated3: json["accumulated3"],
-        maxInterval1: json["maxInterval1"],
-        maxInterval2: json["maxInterval2"],
-        maxInterval3: json["maxInterval3"],
-        minInterval1: json["minInterval1"],
-        minInterval2: json["minInterval2"],
-        minInterval3: json["minInterval3"],
-        coefficient: json["coefficient"],
-        usedByProgram: json["usedByProgram"],
-      );
+    sNo: json["sNo"],
+    id: json["id"],
+    name: json["name"],
+    location: json["location"],
+    accumulated1: json["accumulated1"],
+    accumulated2: json["accumulated2"],
+    accumulated3: json["accumulated3"],
+    maxInterval1: json["maxInterval1"],
+    maxInterval2: json["maxInterval2"],
+    maxInterval3: json["maxInterval3"],
+    minInterval1: json["minInterval1"],
+    minInterval2: json["minInterval2"],
+    minInterval3: json["minInterval3"],
+    coefficient: json["coefficient"],
+    usedByProgram: json["usedByProgram"],
+  );
 
   Map<String, dynamic> toJson() => {
-        "sNo": sNo,
-        "id": id,
-        "name": name,
-        "location": location,
-        "accumulated1": accumulated1,
-        "accumulated2": accumulated2,
-        "accumulated3": accumulated3,
-        "maxInterval1": maxInterval1,
-        "maxInterval2": maxInterval2,
-        "maxInterval3": maxInterval3,
-        "minInterval1": minInterval1,
-        "minInterval2": minInterval2,
-        "minInterval3": minInterval3,
-        "coefficient": coefficient,
-        "usedByProgram": usedByProgram,
-      };
+    "sNo": sNo,
+    "id": id,
+    "name": name,
+    "location": location,
+    "accumulated1": accumulated1,
+    "accumulated2": accumulated2,
+    "accumulated3": accumulated3,
+    "maxInterval1": maxInterval1,
+    "maxInterval2": maxInterval2,
+    "maxInterval3": maxInterval3,
+    "minInterval1": minInterval1,
+    "minInterval2": minInterval2,
+    "minInterval3": minInterval3,
+    "coefficient": coefficient,
+    "usedByProgram": usedByProgram,
+  };
 }

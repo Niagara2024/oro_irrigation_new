@@ -1,5 +1,3 @@
-
-
 import 'dart:convert';
 
 FrostProtectionModel frostProtectionModelFromJson(String str) =>
@@ -22,24 +20,25 @@ class FrostProtectionModel {
         frostProtection: json['data']["frostProtection"] == null
             ? []
             : List<FrostProtection>.from(json['data']["frostProtection"]!
-                .map((x) => FrostProtection.fromJson(x))),
+            .map((x) => FrostProtection.fromJson(x))),
         rainDelay: json['data']["rainDelay"] == null
             ? []
-            : List<FrostProtection>.from(
-                json['data']["rainDelay"]!.map((x) => FrostProtection.fromJson(x))),
+            : List<FrostProtection>.from(json['data']["rainDelay"]!
+            .map((x) => FrostProtection.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
-        "frostProtection": frostProtection == null
-            ? []
-            : List<dynamic>.from(frostProtection!.map((x) => x.toJson())),
-        "rainDelay": rainDelay == null
-            ? []
-            : List<dynamic>.from(rainDelay!.map((x) => x.toJson())),
-      };
+    "frostProtection": frostProtection == null
+        ? []
+        : List<dynamic>.from(frostProtection!.map((x) => x.toJson())),
+    "rainDelay": rainDelay == null
+        ? []
+        : List<dynamic>.from(rainDelay!.map((x) => x.toJson())),
+  };
 }
 
 class FrostProtection {
+  int? sNo;
   String? title;
   int? widgetTypeId;
   String? iconCodePoint;
@@ -47,6 +46,7 @@ class FrostProtection {
   String? value;
 
   FrostProtection({
+    this.sNo,
     this.title,
     this.widgetTypeId,
     this.iconCodePoint,
@@ -56,6 +56,7 @@ class FrostProtection {
 
   factory FrostProtection.fromJson(Map<String, dynamic> json) =>
       FrostProtection(
+        sNo: json["sNo"],
         title: json["title"],
         widgetTypeId: json["widgetTypeId"],
         iconCodePoint: json["iconCodePoint"],
@@ -64,10 +65,11 @@ class FrostProtection {
       );
 
   Map<String, dynamic> toJson() => {
-        "title": title,
-        "widgetTypeId": widgetTypeId,
-        "iconCodePoint": iconCodePoint,
-        "iconFontFamily": iconFontFamily,
-        "value": value,
-      };
+    "sNo": sNo,
+    "title": title,
+    "widgetTypeId": widgetTypeId,
+    "iconCodePoint": iconCodePoint,
+    "iconFontFamily": iconFontFamily,
+    "value": value,
+  };
 }

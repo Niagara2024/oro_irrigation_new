@@ -46,7 +46,7 @@ class _AlarmScreenState extends State<AlarmScreen> {
                       ),
                       child: CustomSwitchTile(
                           title: title,
-                          //icon: icon.length > 6 ? SvgPicture.asset('assets/images/ProgramAlarmIcons/$icon') : Icon(IconData(int.parse(icon), fontFamily: fontFamily), color: Colors.black,),
+                          // icon: icon.length > 6 ? SvgPicture.asset('assets/images/ProgramAlarmIcons/$icon') : Icon(IconData(int.parse(icon), fontFamily: fontFamily), color: Colors.black,),
                           value: value,
                           onChanged: (newValue) {
                             alarmProvider.updateValueForGeneral(generalNotificationTypeId, newValue);

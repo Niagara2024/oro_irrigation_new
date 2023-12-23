@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class SequenceModel {
   List<dynamic> sequence;
   Default defaultData;
@@ -14,10 +12,7 @@ class SequenceModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      "sequence" : sequence,
-      "defaultData": defaultData.toJson()
-    };
+    return {"sequence": sequence, "defaultData": defaultData.toJson()};
   }
 
   dynamic toMqtt() {
@@ -34,20 +29,22 @@ class Default {
   List<Line> group;
   List<Valve> agitator;
 
-  Default({
-    required this.startTogether,
-    required this.line,
-    required this.group,
-    required this.longSequence,
-    required this.reuseValve,
-    required this.namedGroup,
-    required this.agitator
-  });
+  Default(
+      {required this.startTogether,
+        required this.line,
+        required this.group,
+        required this.longSequence,
+        required this.reuseValve,
+        required this.namedGroup,
+        required this.agitator});
 
   factory Default.fromJson(Map<String, dynamic> json) {
-    List<Line> lineList = List<Line>.from(json['line'].map((x) => Line.fromJson(x)));
-    List<Line> groupList = List<Line>.from(json['group'].map((x) => Line.fromJson(x)));
-    List<Valve> agitatorList = List<Valve>.from(json['agitator'].map((x) => Valve.fromJson(x)));
+    List<Line> lineList =
+    List<Line>.from(json['line'].map((x) => Line.fromJson(x)));
+    List<Line> groupList =
+    List<Line>.from(json['group'].map((x) => Line.fromJson(x)));
+    List<Valve> agitatorList =
+    List<Valve>.from(json['agitator'].map((x) => Valve.fromJson(x)));
 
     return Default(
       startTogether: json['startTogether'],
@@ -80,13 +77,20 @@ class Line {
   String name;
   List<Valve> valve;
 
-  Line({required this.sNo, required this.id, required this.location, required this.name, required this.valve});
+  Line(
+      {required this.sNo,
+        required this.id,
+        required this.location,
+        required this.name,
+        required this.valve});
 
   factory Line.fromJson(Map<String, dynamic> json) {
     var valveList = json['valve'] as List<dynamic>?;
 
     List<Valve> valves = valveList != null
-        ? valveList.map((e) => Valve.fromJson(e as Map<String, dynamic>)).toList()
+        ? valveList
+        .map((e) => Valve.fromJson(e as Map<String, dynamic>))
+        .toList()
         : [];
 
     return Line(
@@ -115,7 +119,11 @@ class Valve {
   String location;
   String name;
 
-  Valve({required this.sNo, required this.id, required this.location, required this.name});
+  Valve(
+      {required this.sNo,
+        required this.id,
+        required this.location,
+        required this.name});
 
   factory Valve.fromJson(Map<String, dynamic> json) {
     return Valve(
@@ -151,8 +159,10 @@ class SampleScheduleModel {
 
   factory SampleScheduleModel.fromJson(Map<String, dynamic> json) {
     return SampleScheduleModel(
-      scheduleAsRunList: ScheduleAsRunListModel.fromJson(json['data']['schedule']['scheduleAsRunList']),
-      scheduleByDays: ScheduleByDaysModel.fromJson(json['data']['schedule']['scheduleByDays']),
+      scheduleAsRunList: ScheduleAsRunListModel.fromJson(
+          json['data']['schedule']['scheduleAsRunList']),
+      scheduleByDays: ScheduleByDaysModel.fromJson(
+          json['data']['schedule']['scheduleByDays']),
       selected: json['data']['schedule']['selected'],
       defaultModel: DefaultModel.fromJson(json['data']['default']),
     );
@@ -251,7 +261,8 @@ class SampleConditions {
 
   factory SampleConditions.fromJson(Map<String, dynamic> json) {
     var conditionList = json['data']['condition'] as List;
-    List<Condition> conditions = conditionList.map((e) => Condition.fromJson(e)).toList();
+    List<Condition> conditions =
+    conditionList.map((e) => Condition.fromJson(e)).toList();
 
     return SampleConditions(
       condition: conditions,
@@ -315,8 +326,9 @@ class DefaultData {
 
   factory DefaultData.fromJson(Map<String, dynamic> json) {
     var conditionLibraryList = json['conditionLibrary'] as List;
-    List<ConditionLibraryItem> conditionLibraryItems =
-    conditionLibraryList.map((e) => ConditionLibraryItem.fromJson(e)).toList();
+    List<ConditionLibraryItem> conditionLibraryItems = conditionLibraryList
+        .map((e) => ConditionLibraryItem.fromJson(e))
+        .toList();
 
     return DefaultData(conditionLibrary: conditionLibraryItems);
   }
@@ -384,10 +396,6 @@ class ConditionLibraryItem {
   }
 }
 
-// SelectionModel selectionModelFromJson(String str) => SelectionModel.fromJson(json.decode(str));
-//
-// String selectionModelToJson(SelectionModel data) => json.encode(data.toJson());
-
 class SelectionModel {
   int? code;
   String? message;
@@ -416,44 +424,83 @@ class Data {
   List<NameData>? irrigationPump;
   List<NameData>? mainValve;
   List<NameData>? centralFertilizerSite;
-  List<NameData>? centralFertilizer;
-  List<NameData>? localFertilizer;
+  List<NameData>? centralFertilizerInjector;
+  List<NameData>? localFertilizerSite;
+  List<NameData>? localFertilizerInjector;
   List<NameData>? centralFilterSite;
   List<NameData>? localFilter;
   AdditionalData? additionalData;
+  List<FertilizerSet>? centralFertilizerSet;
+  List<FertilizerSet>? localFertilizerSet;
+  List<NameData>? ecSensor;
+  List<NameData>? phSensor;
 
-  Data({
-    this.irrigationPump,
-    this.mainValve,
-    this.centralFertilizerSite,
-    this.centralFertilizer,
-    this.localFertilizer,
-    this.centralFilterSite,
-    this.localFilter,
-    this.additionalData,
-  });
+  Data(
+      {this.irrigationPump,
+        this.mainValve,
+        this.centralFertilizerSite,
+        this.centralFertilizerInjector,
+        this.localFertilizerSite,
+        this.localFertilizerInjector,
+        this.centralFilterSite,
+        this.localFilter,
+        this.additionalData,
+        this.centralFertilizerSet,
+        this.localFertilizerSet,
+        this.ecSensor,
+        this.phSensor});
 
-  factory Data.fromJson(Map<String, dynamic> json) => Data(
-    irrigationPump: json["irrigationPump"] == null ? [] : List<NameData>.from(json["irrigationPump"]!.map((x) => NameData.fromJson(x))),
-    mainValve: json["mainValve"] == null ? [] : List<NameData>.from(json["mainValve"]!.map((x) => NameData.fromJson(x))),
-    centralFertilizerSite: json["centralFertilizerSite"] == null ? [] : List<NameData>.from(json["centralFertilizerSite"]!.map((x) => NameData.fromJson(x))),
-    centralFertilizer: json["centralFertilizerSite"] == null ? [] : List<NameData>.from(json["centralFertilizer"]!.map((x) => NameData.fromJson(x))),
-    localFertilizer: json["localFertilizer"] == null ? [] : List<NameData>.from(json["localFertilizer"]!.map((x) => NameData.fromJson(x))),
-    centralFilterSite: json["centralFilterSite"] == null ? [] : List<NameData>.from(json["centralFilterSite"]!.map((x) => NameData.fromJson(x))),
-    localFilter: json["localFilter"] == null ? [] : List<NameData>.from(json["localFilter"]!.map((x) => NameData.fromJson(x))),
-    additionalData: AdditionalData.fromJson(json['additionalData']),
-  );
+  factory Data.fromJson(Map<String, dynamic> json) {
+    return Data(
+      irrigationPump: json["irrigationPump"] == null ? [] : List<NameData>.from(json["irrigationPump"]!.map((x) => NameData.fromJson(x))),
+      mainValve: json["mainValve"] == null ? [] : List<NameData>.from(json["mainValve"]!.map((x) => NameData.fromJson(x))),
+      centralFertilizerSite: json["centralFertilizerSite"] == null ? [] : List<NameData>.from(json["centralFertilizerSite"]!.map((x) => NameData.fromJson(x))),
+      centralFertilizerInjector: json["centralFertilizerSite"] == null ? [] : List<NameData>.from(json["centralFertilizer"]!.map((x) => NameData.fromJson(x))),
+      localFertilizerSite: json["irrigationLine"] == null ? [] : List<NameData>.from(json["irrigationLine"]!.map((x) => NameData.fromJson(x))),
+      localFertilizerInjector: json["localFertilizer"] == null ? [] : List<NameData>.from(json["localFertilizer"]!.map((x) => NameData.fromJson(x))),
+      centralFilterSite: json["centralFilterSite"] == null ? [] : List<NameData>.from(json["centralFilterSite"]!.map((x) => NameData.fromJson(x))),
+      localFilter: json["localFilter"] == null ? [] : List<NameData>.from(json["localFilter"]!.map((x) => NameData.fromJson(x))),
+      additionalData: AdditionalData.fromJson(json['additionalData']),
+      centralFertilizerSet: json["centralFertilizerSet"] == null ? [] : List<FertilizerSet>.from(json["centralFertilizerSet"].map((x) => FertilizerSet.fromJson(x))),
+      localFertilizerSet: json["localFertilizerSet"] == null ? [] : List<FertilizerSet>.from(json["localFertilizerSet"].map((x) => FertilizerSet.fromJson(x))),
+      ecSensor: json["ecSensor"] == null ? [] : List<NameData>.from(json["ecSensor"]!.map((x) => NameData.fromJson(x))),
+      phSensor: json["phSensor"] == null ? [] : List<NameData>.from(json["phSensor"]!.map((x) => NameData.fromJson(x))),
+    );
+  }
 
-  Map<String, dynamic> toJson() => {
-    "irrigationPump": irrigationPump == null ? [] : List<dynamic>.from(irrigationPump!.map((x) => x.toJson())),
-    "mainValve": mainValve == null ? [] : List<dynamic>.from(mainValve!.map((x) => x.toJson())),
-    "centralFertilizerSite": centralFertilizerSite == null ? [] : List<dynamic>.from(centralFertilizerSite!.map((x) => x.toJson())),
-    "centralFertilizer": centralFertilizerSite == null ? [] : List<dynamic>.from(centralFertilizer!.map((x) => x.toJson())),
-    "localFertilizer": localFertilizer == null ? [] : List<dynamic>.from(localFertilizer!.map((x) => x.toJson())),
-    "centralFilterSite": centralFilterSite == null ? [] : List<dynamic>.from(centralFilterSite!.map((x) => x.toJson())),
-    "localFilter": localFilter == null ? [] : List<dynamic>.from(localFilter!.map((x) => x.toJson())),
-    "additionalData": additionalData
-  };
+  Map<String, dynamic> toJson() {
+    var centralSet = [];
+    var localSet = [];
+    for(var i = 0; i < centralFertilizerSet!.length; i++) {
+      for(var j = 0; j < centralFertilizerSet![i].recipe.length; j++) {
+        // centralFertilizerSet![i].recipe[j].toJson();
+        centralSet.add(centralFertilizerSet![i].recipe[j].toJson());
+      }
+    }
+    for(var i = 0; i < localFertilizerSet!.length; i++) {
+      for(var j = 0; j < localFertilizerSet![i].recipe.length; j++) {
+        // centralFertilizerSet![i].recipe[j].toJson();
+        localSet.add(localFertilizerSet![i].recipe[j].toJson());
+      }
+    }
+    return {
+      "irrigationPump": irrigationPump == null ? [] : List<dynamic>.from(irrigationPump!.map((x) => x.toJson())),
+      "mainValve": mainValve == null ? [] : List<dynamic>.from(mainValve!.map((x) => x.toJson())),
+      "centralFertilizerSite": centralFertilizerSite == null ? [] : List<dynamic>.from(centralFertilizerSite!.map((x) => x.toJson())),
+      "centralFertilizer": centralFertilizerSite == null ? [] : List<dynamic>.from(centralFertilizerInjector!.map((x) => x.toJson())),
+      "irrigationLine": localFertilizerSite == null ? [] : List<dynamic>.from(localFertilizerSite!.map((e) => e.toJson())),
+      "localFertilizer": localFertilizerInjector == null ? [] : List<dynamic>.from(localFertilizerInjector!.map((x) => x.toJson())),
+      "centralFilterSite": centralFilterSite == null ? [] : List<dynamic>.from(centralFilterSite!.map((x) => x.toJson())),
+      "localFilter": localFilter == null ? [] : List<dynamic>.from(localFilter!.map((x) => x.toJson())),
+      "additionalData": additionalData,
+      // "centralFertilizerSet": centralFertilizerSet == null ? [] : List<dynamic>.from(centralFertilizerSet!.map((e) => e.toJson())),
+      // "localFertilizerSet": localFertilizerSet == null ? [] : List<dynamic>.from(localFertilizerSet!.map((e) => e.toJson())),
+      "centralFertilizerSet": centralSet,
+      "localFertilizerSet": localSet,
+      "ecSensor": ecSensor == null ? [] : List<dynamic>.from(ecSensor!.map((x) => x.toJson())),
+      "phSensor": phSensor == null ? [] : List<dynamic>.from(phSensor!.map((x) => x.toJson())),
+    };
+  }
 }
 
 class NameData {
@@ -471,23 +518,21 @@ class NameData {
     this.selected,
   });
 
-  factory NameData.fromJson(Map<String, dynamic> json) =>
-      NameData(
-        sNo: json["sNo"],
-        id: json["id"],
-        location: json["location"],
-        name: json["name"],
-        selected: json["selected"],
-      );
+  factory NameData.fromJson(Map<String, dynamic> json) => NameData(
+    sNo: json["sNo"],
+    id: json["id"],
+    location: json["location"],
+    name: json["name"],
+    selected: json["selected"],
+  );
 
-  Map<String, dynamic> toJson() =>
-      {
-        "sNo": sNo,
-        "id": id,
-        "location": location,
-        "name": name,
-        "selected": selected,
-      };
+  Map<String, dynamic> toJson() => {
+    "sNo": sNo,
+    "id": id,
+    "location": location,
+    "name": name,
+    "selected": selected,
+  };
 }
 
 class AdditionalData {
@@ -496,30 +541,193 @@ class AdditionalData {
   bool centralFiltrationBeginningOnly;
   bool localFiltrationBeginningOnly;
   bool pumpStationMode;
+  bool programBasedSet;
 
-  AdditionalData({
-    required this.centralFiltrationOperationMode,
-    required this.localFiltrationOperationMode,
-    required this.centralFiltrationBeginningOnly,
-    required this.localFiltrationBeginningOnly,
-    required this.pumpStationMode
-  });
+  AdditionalData(
+      {required this.centralFiltrationOperationMode,
+        required this.localFiltrationOperationMode,
+        required this.centralFiltrationBeginningOnly,
+        required this.localFiltrationBeginningOnly,
+        required this.pumpStationMode,
+        required this.programBasedSet});
 
   factory AdditionalData.fromJson(Map<String, dynamic> json) => AdditionalData(
-      centralFiltrationOperationMode: json['centralFiltrationOperationMode'] ?? "TIME",
-      localFiltrationOperationMode: json['localFiltrationOperationMode'] ?? "TIME",
-      centralFiltrationBeginningOnly: json['centralFiltrationBeginningOnly'] ?? false,
-      localFiltrationBeginningOnly: json['localFiltrationBeginningOnly'] ?? false,
-      pumpStationMode: json['pumpStationMode'] ?? false
-  );
+      centralFiltrationOperationMode:
+      json['centralFiltrationOperationMode'] ?? "TIME",
+      localFiltrationOperationMode:
+      json['localFiltrationOperationMode'] ?? "TIME",
+      centralFiltrationBeginningOnly:
+      json['centralFiltrationBeginningOnly'] ?? false,
+      localFiltrationBeginningOnly:
+      json['localFiltrationBeginningOnly'] ?? false,
+      pumpStationMode: json['pumpStationMode'] ?? false,
+      programBasedSet: json['programBasedSet'] ?? false);
 
   Map<String, dynamic> toJson() => {
     "centralFiltrationOperationMode": centralFiltrationOperationMode,
     "localFiltrationOperationMode": localFiltrationOperationMode,
     "centralFiltrationBeginningOnly": centralFiltrationBeginningOnly,
     "localFiltrationBeginningOnly": localFiltrationBeginningOnly,
-    "pumpStationMode": pumpStationMode
+    "pumpStationMode": pumpStationMode,
+    "programBasedSet": programBasedSet
   };
+}
+
+class FertilizerSet {
+  int sNo;
+  String id;
+  String name;
+  String location;
+  List<Recipe> recipe;
+
+  FertilizerSet({
+    required this.sNo,
+    required this.id,
+    required this.name,
+    required this.location,
+    required this.recipe,
+  });
+
+  factory FertilizerSet.fromJson(Map<String, dynamic> json) {
+    List<Recipe> recipes = (json['recipe'] as List)
+        .map((recipeJson) => Recipe.fromJson(recipeJson))
+        .toList();
+
+    return FertilizerSet(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      location: json['location'],
+      recipe: recipes,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    List<Map<String, dynamic>> recipeList =
+    recipe.map((recipe) => recipe.toJson()).toList();
+
+    return {
+      "sNo": sNo,
+      "id": id,
+      "name": name,
+      "location": location,
+      "recipe": recipeList,
+    };
+  }
+}
+
+class Recipe {
+  int sNo;
+  String id;
+  String name;
+  String location;
+  bool selected;
+  String ec;
+  String ph;
+  List<Fertilizer> fertilizer;
+
+  Recipe({
+    required this.sNo,
+    required this.id,
+    required this.name,
+    required this.location,
+    required this.selected,
+    required this.ec,
+    required this.ph,
+    required this.fertilizer,
+  });
+
+  factory Recipe.fromJson(Map<String, dynamic> json) {
+    List<Fertilizer> fertilizers = (json['fertilizer'] as List)
+        .map((fertilizerJson) => Fertilizer.fromJson(fertilizerJson))
+        .toList();
+
+    return Recipe(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      location: json['location'],
+      selected: json['select'],
+      ec: json['Ec'] ?? "",
+      ph: json['Ph'] ?? "",
+      fertilizer: fertilizers,
+    );
+  }
+  Map<String, dynamic> toJson() {
+    List<Map<String, dynamic>> fertilizerList =
+    fertilizer.map((fertilizer) => fertilizer.toJson()).toList();
+
+    return {
+      "sNo": sNo,
+      "id": id,
+      "name": name,
+      "location": location,
+      "select": selected,
+      "ec": ec,
+      "ph": ph,
+      "fertilizer": fertilizerList,
+    };
+  }
+}
+
+class Fertilizer {
+  int sNo;
+  String id;
+  String name;
+  String location;
+  List<NameData> fertilizerMeter;
+  bool active;
+  String method;
+  String timeValue;
+  String quantityValue;
+  bool dmControl;
+
+  Fertilizer({
+    required this.sNo,
+    required this.id,
+    required this.name,
+    required this.location,
+    required this.fertilizerMeter,
+    required this.active,
+    required this.method,
+    required this.timeValue,
+    required this.quantityValue,
+    required this.dmControl,
+  });
+
+  factory Fertilizer.fromJson(Map<String, dynamic> json) {
+    List<NameData> meterList = (json['fertilizerMeter'] as List)
+        .map((meterJson) => NameData.fromJson(meterJson))
+        .toList();
+
+    return Fertilizer(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      location: json['location'],
+      fertilizerMeter: meterList,
+      active: json['active'],
+      method: json['method'],
+      timeValue: json['timeValue'],
+      quantityValue: json['quantityValue'],
+      dmControl: json['dmControl'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "sNo": sNo,
+      "id": id,
+      "name": name,
+      "location": location,
+      "fertilizerMeter": fertilizerMeter,
+      "active": active,
+      "method": method,
+      "timeValue": timeValue,
+      "quantityValue": quantityValue,
+      "dmControl": dmControl
+    };
+  }
 }
 
 class AlarmType {
@@ -600,14 +808,20 @@ class ProgramLibrary {
   int programLimit;
   int agitatorCount;
 
-  ProgramLibrary({required this.programType, required this.program, required this.programLimit, required this.agitatorCount});
+  ProgramLibrary(
+      {required this.programType,
+        required this.program,
+        required this.programLimit,
+        required this.agitatorCount});
 
   factory ProgramLibrary.fromJson(Map<String, dynamic> json) {
     return ProgramLibrary(
       programType: List<String>.from(json['data']['programType'] ?? []),
       programLimit: json['data']['programLimit'],
       agitatorCount: json['data']['agitatorCount'],
-      program: List<Program>.from((json['data']['program'] as List<dynamic>? ?? []).map((program) => Program.fromJson(program))),
+      program: List<Program>.from(
+          (json['data']['program'] as List<dynamic>? ?? [])
+              .map((program) => Program.fromJson(program))),
     );
   }
 }
@@ -622,16 +836,15 @@ class Program {
   dynamic sequence;
   Map<String, dynamic> schedule;
 
-  Program({
-    required this.programId,
-    required this.serialNumber,
-    required this.programName,
-    required this.defaultProgramName,
-    required this.programType,
-    required this.priority,
-    required this.sequence,
-    required this.schedule
-  });
+  Program(
+      {required this.programId,
+        required this.serialNumber,
+        required this.programName,
+        required this.defaultProgramName,
+        required this.programType,
+        required this.priority,
+        required this.sequence,
+        required this.schedule});
 
   factory Program.fromJson(Map<String, dynamic> json) {
     return Program(
@@ -642,8 +855,7 @@ class Program {
         programType: json['programType'],
         priority: json['priority'],
         sequence: json['sequence'],
-        schedule: json['schedule']
-    );
+        schedule: json['schedule']);
   }
 }
 
@@ -655,27 +867,32 @@ class ProgramDetails {
   String programType;
   int priority;
   bool completionOption;
+  String delayBetweenZones;
+  String adjustPercentage;
 
-  ProgramDetails({
-    // required this.programId,
-    required this.serialNumber,
-    required this.programName,
-    required this.defaultProgramName,
-    required this.programType,
-    required this.priority,
-    required this.completionOption
-  });
+  ProgramDetails(
+      {
+        // required this.programId,
+        required this.serialNumber,
+        required this.programName,
+        required this.defaultProgramName,
+        required this.programType,
+        required this.priority,
+        required this.completionOption,
+        required this.delayBetweenZones,
+        required this.adjustPercentage});
 
   factory ProgramDetails.fromJson(Map<String, dynamic> json) {
     return ProgramDetails(
       // programId: json['data']['programId'],
-      serialNumber: json['data']['serialNumber'] ?? 0,
-      programName: json['data']['programName'],
-      defaultProgramName: json['data']['defaultProgramName'],
-      programType: json['data']['programType'],
-      priority: json['data']['priority'],
-      completionOption: json['data']['incompleteRestart'] == "1" ? true : false,
+        serialNumber: json['data']['serialNumber'] ?? 0,
+        programName: json['data']['programName'],
+        defaultProgramName: json['data']['defaultProgramName'],
+        programType: json['data']['programType'],
+        priority: json['data']['priority'],
+        completionOption: json['data']['incompleteRestart'] == "1" ? true : false,
+        delayBetweenZones: json["data"]["delayBetweenZones"],
+        adjustPercentage: json["data"]["adjustPercentage"]
     );
   }
 }
-

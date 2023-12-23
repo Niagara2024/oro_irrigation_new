@@ -73,6 +73,8 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
   Widget build(BuildContext context) {
     if (_filterbackwash.data == null) {
       return const Center(child: CircularProgressIndicator());
+    } else if (_filterbackwash.data!.isEmpty) {
+      return const Center(child: Text('Currently No Filter Available'));
     } else {
       return DefaultTabController(
         length: _filterbackwash.data!.length ?? 0,
@@ -91,6 +93,7 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
                       isScrollable: true,
                       unselectedLabelColor: Colors.grey,
                       labelColor: myTheme.primaryColor,
+                      labelStyle: TextStyle(fontWeight: FontWeight.bold),
                       tabs: [
                         for (var i = 0; i < _filterbackwash.data!.length; i++)
                           Tab(
@@ -164,10 +167,11 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
                                     Listofvalue?[index].value = text;
                                   });
                                 },
+                                decoration: InputDecoration(hintText: '0'),
                                 inputFormatters: [
                                   FilteringTextInputFormatter.digitsOnly
                                 ],
-                                initialValue: Listofvalue?[index].value ?? '0',
+                                initialValue: Listofvalue?[index].value ?? '',
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return 'Warranty is required';
@@ -255,7 +259,7 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
                         child: ListTile(
                           title: Text('${Listofvalue?[index].title}'),
                           trailing: SizedBox(
-                            width: 100,
+                            width: 85,
                             child: Container(
                                 child: Center(
                                   child: InkWell(

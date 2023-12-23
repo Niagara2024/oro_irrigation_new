@@ -30,8 +30,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
@@ -98,6 +96,62 @@ flutter:
      - assets/images/oro_sense.png
      - assets/images/oro_rtu.png
      - assets/images/channel_img.png
+     - assets/images/river.png
+     - assets/images/co2.png
+     - assets/images/humidity.png
+     - assets/images/ldrSensor.png
+     - assets/images/leafWetness.png
+     - assets/images/lux.png
+     - assets/images/moisture.png
+     - assets/images/rainGauge.png
+     - assets/images/soilTemperature.png
+     - assets/images/temperature.png
+     - assets/images/windDirection.png
+     - assets/images/windSpeed.png
+     - assets/images/newConfig.png
+     - assets/images/sendToServer.png
+     - assets/images/success.png
+     - assets/images/analog_sensor.png
+     - assets/images/booster_pump.png
+     - assets/images/central_fertilizer_site.png
+     - assets/images/central_filtration_site.png
+     - assets/images/agitator.png
+     - assets/images/injector.png
+     - assets/images/filter.png
+     - assets/images/downstream_valve.png
+     - assets/images/fan.png
+     - assets/images/fogger.png
+     - assets/images/selector.png
+     - assets/images/water_meter.png
+     - assets/images/fertilizer_meter.png
+     - assets/images/pressure_switch.png
+     - assets/images/pressure_sensor.png
+     - assets/images/differential_pressure_sensor.png
+     - assets/images/ec_sensor.png
+     - assets/images/ph_sensor.png
+     - assets/images/temperature_sensor.png
+     - assets/images/soil_temperature_sensor.png
+     - assets/images/wind_direction_sensor.png
+     - assets/images/wind_speed_sensor.png
+     - assets/images/lux_sensor.png
+     - assets/images/ldr_sensor.png
+     - assets/images/humidity_sensor.png
+     - assets/images/leaf_wetness_sensor.png
+     - assets/images/rain_gauge_sensor.png
+     - assets/images/contact.png
+     - assets/images/irrigation_line.png
+     - assets/images/weather_station.png
+     - assets/images/condition.png
+     - assets/images/valve_group.png
+     - assets/images/virtual_water_meter.png
+     - assets/images/programs.png
+     - assets/images/radiation_sets.png
+     - assets/images/fertilization_sets.png
+     - assets/images/filter_sets.png
+     - assets/images/water_source.png
+     - assets/GiffFile/c2.gif
+
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

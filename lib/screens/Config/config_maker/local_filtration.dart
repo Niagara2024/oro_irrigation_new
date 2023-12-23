@@ -69,151 +69,13 @@ class LocalFiltrationTableState extends State<LocalFiltrationTable> {
             Container(
               child: Row(
                 children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Line',style: TextStyle(color: Colors.white),),
-                      ],
-                    ),
-                    decoration: BoxDecoration(
-                        color: Colors.blueGrey,
-                        border: Border(
-                          top: BorderSide(width: 1),
-                          bottom: BorderSide(width: 1),
-                          right: BorderSide(width: 1),
-                          left: BorderSide(width: 1),
-                        )
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Filters',style: TextStyle(color: Colors.white),),
-                          Text('(${configPvd.totalFilter})',style: TextStyle(color: Colors.white),),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('D.stream',style: TextStyle(color: Colors.white),),
-                          Text('Valve(${configPvd.total_D_s_valve})',style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('P_Sense',style: TextStyle(color: Colors.white),),
-                          Text('in(${configPvd.total_p_sensor})',style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('P_Sense',style: TextStyle(color: Colors.white),),
-                          Text('out(${configPvd.total_p_sensor})',style: TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Pressure',style: TextStyle(color: Colors.white),),
-                          Text('Switch(${configPvd.totalPressureSwitch})',style: TextStyle(color: Colors.white),),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 60,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Diff.Press',style: TextStyle(color: Colors.white),),
-                          Text('Sensor(${configPvd.totalDiffPressureSensor})',style: TextStyle(color: Colors.white),),
-                        ],
-                      ),
-                      decoration: BoxDecoration(
-                          color: Colors.blueGrey,
-                          border: Border(
-                            top: BorderSide(width: 1),
-                            bottom: BorderSide(width: 1),
-                            right: BorderSide(width: 1),
-                          )
-                      ),
-                    ),
-                  ),
+                  topBtmLftRgt('Line', ''),
+                  topBtmRgt('Filters','(${configPvd.totalFilter})'),
+                  topBtmRgt('D.stream','Valve(${configPvd.total_D_s_valve})'),
+                  topBtmRgt('P.Sense','in(${configPvd.total_p_sensor})'),
+                  topBtmRgt('P.Sense','out(${configPvd.total_p_sensor})'),
+                  topBtmRgt('Pressure','Switch(${configPvd.totalPressureSwitch})'),
+                  topBtmRgt('D.Press','Sensor(${configPvd.totalDiffPressureSensor})'),
 
                 ],
               ),
@@ -231,24 +93,25 @@ class LocalFiltrationTableState extends State<LocalFiltrationTable> {
                       width: width-20,
                       child: Row(
                         children: [
-                          Container(
-                            decoration: BoxDecoration(
-                                border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1))
-                            ),
-                            width: 60,
-                            height: 60,
-                            child: Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  if(configPvd.l_filtrationSelection == true || configPvd.l_filtrationSelectALL == true)
-                                    Checkbox(
-                                        value: configPvd.localFiltrationUpdated[index]['selection'] == 'select' ? true : false,
-                                        onChanged: (value){
-                                          configPvd.localFiltrationFunctionality(['selectLocalFiltration',index,value]);
-                                        }),
-                                  Text('${configPvd.localFiltrationUpdated[index]['line']}'),
-                                ],
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1))
+                              ),
+                             height: 50,
+                              child: Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    if(configPvd.l_filtrationSelection == true || configPvd.l_filtrationSelectALL == true)
+                                      Checkbox(
+                                          value: configPvd.localFiltrationUpdated[index]['selection'] == 'select' ? true : false,
+                                          onChanged: (value){
+                                            configPvd.localFiltrationFunctionality(['selectLocalFiltration',index,value]);
+                                          }),
+                                    Text('${configPvd.localFiltrationUpdated[index]['line']}'),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -258,7 +121,7 @@ class LocalFiltrationTableState extends State<LocalFiltrationTable> {
                                     border: Border(right: BorderSide(width: 1))
                                 ),
                                 width: double.infinity,
-                                height: 60,
+                               height: 50,
                                 child: Center(
                                   child: TextFieldForConfig(index: index, initialValue: configPvd.localFiltrationUpdated[index]['filter'], config: configPvd, purpose: 'localFiltrationFunctionality',),
                                 )
@@ -270,9 +133,9 @@ class LocalFiltrationTableState extends State<LocalFiltrationTable> {
                                   border: Border(right: BorderSide(width: 1))
                               ),
                               width: double.infinity,
-                              height: 60,
+                             height: 50,
                               child: (configPvd.total_D_s_valve == 0 && configPvd.localFiltrationUpdated[index]['dv'].isEmpty) ?
-                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                              notAvailable :
                               Checkbox(
                                   value: configPvd.localFiltrationUpdated[index]['dv'].isEmpty ? false : true,
                                   onChanged: (value){
@@ -286,9 +149,9 @@ class LocalFiltrationTableState extends State<LocalFiltrationTable> {
                                   border: Border(right: BorderSide(width: 1))
                               ),
                               width: double.infinity,
-                              height: 60,
+                             height: 50,
                               child: (configPvd.total_p_sensor == 0 && configPvd.localFiltrationUpdated[index]['pressureIn'].isEmpty) ?
-                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                              notAvailable :
                               Checkbox(
                                   value: configPvd.localFiltrationUpdated[index]['pressureIn'].isEmpty ? false : true,
                                   onChanged: (value){
@@ -302,9 +165,9 @@ class LocalFiltrationTableState extends State<LocalFiltrationTable> {
                                   border: Border(right: BorderSide(width: 1))
                               ),
                               width: double.infinity,
-                              height: 60,
+                             height: 50,
                               child: (configPvd.total_p_sensor == 0 && configPvd.localFiltrationUpdated[index]['pressureOut'].isEmpty) ?
-                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                              notAvailable :
                               Checkbox(
                                   value: configPvd.localFiltrationUpdated[index]['pressureOut'].isEmpty ? false : true,
                                   onChanged: (value){
@@ -318,9 +181,9 @@ class LocalFiltrationTableState extends State<LocalFiltrationTable> {
                                 border: Border(right: BorderSide(width: 1)),
                               ),
                               width: double.infinity,
-                              height: 60 ,
+                              height: 50 ,
                               child: (configPvd.totalPressureSwitch == 0 && configPvd.localFiltrationUpdated[index]['pressureSwitch'].isEmpty) ?
-                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                              notAvailable :
                               Checkbox(
                                   value: configPvd.localFiltrationUpdated[index]['pressureSwitch'].isEmpty ? false : true,
                                   onChanged: (value){
@@ -334,9 +197,9 @@ class LocalFiltrationTableState extends State<LocalFiltrationTable> {
                                 border: Border(right: BorderSide(width: 1)),
                               ),
                               width: double.infinity,
-                              height: 60 ,
+                              height: 50 ,
                               child: (configPvd.totalDiffPressureSensor == 0 && configPvd.localFiltrationUpdated[index]['diffPressureSensor'].isEmpty) ?
-                              Center(child: Text('N/A',style: TextStyle(fontSize: 12),)) :
+                              notAvailable :
                               Checkbox(
                                   value: configPvd.localFiltrationUpdated[index]['diffPressureSensor'].isEmpty ? false : true,
                                   onChanged: (value){

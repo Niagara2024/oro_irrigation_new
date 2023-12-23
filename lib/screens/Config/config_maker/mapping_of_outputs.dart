@@ -142,6 +142,9 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                       Column(
                         children: getAgitator(agitator(configPvd),configPvd),
                       ),
+                      Column(
+                        children: getSelector(selector(configPvd),configPvd),
+                      ),
                       SizedBox(height: 150,),
                     ],
                   ),
@@ -154,6 +157,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
     });
 
   }
+
   List<Widget> getIrrigationLine(List<Map<String,dynamic>> myList,ConfigMakerProvider configPvd){
     List<Widget> widgetList = [];
     for(var i = 0;i < myList.length;i++){
@@ -266,7 +270,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                         ),
                         height: 40,
                         child: Center(
-                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: ['-','ORO RTU','ORO Smart RTU','ORO Switch'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
                         ),
                       )
                   ),
@@ -339,7 +343,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                         ),
                         height: 40,
                         child: Center(
-                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: ['-','ORO RTU','ORO Smart RTU','ORO Switch'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
                         ),
                       )
                   ),
@@ -426,7 +430,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                           ),
                           height: 40,
                           child: Center(
-                              child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: myList[i]['map'][j]['oroPump'] == false ? ['-','ORO RTU','ORO Smart RTU','ORO Switch'] : ['-','ORO PUMP'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                              child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: myList[i]['map'][j]['oroPump'] == false ? getRtuName(configPvd) : ['-','ORO PUMP'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
                           ),
                         )
                     ),
@@ -513,7 +517,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                           ),
                           height: 40,
                           child: Center(
-                              child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: myList[i]['map'][j]['oroPump'] == false ? ['-','ORO RTU','ORO Smart RTU','ORO Switch'] : ['-','ORO PUMP'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                              child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: myList[i]['map'][j]['oroPump'] == false ? getRtuName(configPvd) : ['-','ORO PUMP'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
                           ),
                         )
                     ),
@@ -589,7 +593,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                         ),
                         height: 40,
                         child: Center(
-                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: ['-','ORO RTU','ORO Smart RTU','ORO Switch'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
                         ),
                       )
                   ),
@@ -622,6 +626,103 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
       }
     }
     return widgetList;
+  }
+  List<Widget> getSelector(List<Map<String,dynamic>> myList,ConfigMakerProvider configPvd){
+    List<Widget> widgetList = [];
+    for(var i = 0;i < myList.length;i++){
+      if(myList[i]['map'].length != 0){
+        widgetList.add(
+            Container(
+              width: double.infinity,
+              height: 40,
+              child: Center(
+                child: Text('${myList[i]['name']}',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),),
+              ),
+            )
+        );
+      }
+      for(var j = 0;j < myList[i]['map'].length;j++){
+        widgetList.add(
+            Container(
+              width: double.infinity,
+              height: 40,
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(width: 1)),
+                color: j % 2 == 0 ? Colors.white : Colors.white70,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(child: Text('${myList[i]['map'][j]['name']} ')),
+                      )
+                  ),
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                        ),
+                      )
+                  ),
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(
+                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['rfNo']}', itemList: getrefNoForOthers(configPvd,'${myList[i]['map'][j]['rtu']}'), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rfNo', index: -1),
+                        ),
+                      )
+                  ),
+                  Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                        ),
+                        height: 40,
+                        child: Center(
+                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['output']}', itemList: getOutPut(configPvd,'${myList[i]['map'][j]['rtu']}','${myList[i]['map'][j]['rfNo']}','${myList[i]['map'][j]['output']}',myList[i]['map'][j]['count']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/output', index: -1),
+                        ),
+                      )
+                  ),
+                ],
+              ),
+            )
+        );
+      }
+    }
+    return widgetList;
+  }
+  List<String> getRtuName(ConfigMakerProvider configPvd){
+    var list = ['-'];
+    if(configPvd.totalRTU != 0){
+      list.add('ORO RTU');
+    }
+    if(configPvd.totalOroSmartRTU != 0){
+      list.add('ORO Smart RTU');
+    }
+    if(configPvd.totalOroSwitch != 0){
+      list.add('ORO Switch');
+    }
+    if(configPvd.totalOroPump != 0){
+      list.add('ORO PUMP');
+    }
+    if(configPvd.totalOroLevel != 0){
+      list.add('ORO Level');
+    }
+    if(configPvd.totalOroSense != 0){
+      list.add('ORO Sense');
+    }
+    return list;
   }
   List<String> getrefNoForOthers(ConfigMakerProvider configPvd,String title){
     List<String> myList = ['-'];
@@ -768,6 +869,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
         }
       }
       filterList.addAll(filterOutPut(configPvd.totalAgitator,rtu,rf,output));
+      filterList.addAll(filterOutPut(configPvd.totalSelector,rtu,rf,output));
       for(var i in configPvd.centralFiltrationUpdated){
         filterList.addAll(filterOutPut(i['filterConnection'],rtu,rf,output));
         filterList.addAll(filterOutPut([i['dv']],rtu,rf,output));
@@ -798,7 +900,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
     }
     myList.insert(0, '-');
     print('getOutPut finished');
-    return myList;
+    return rf == '-' ? ['-'] : myList;
   }
   List<Map<String,dynamic>> irrigationLine(ConfigMakerProvider configPvd){
     List<Map<String,dynamic>> myList = [];
@@ -1247,6 +1349,32 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
             'rtu' :  configPvd.totalAgitator[i]['rtu'],
             'rfNo' : configPvd.totalAgitator[i]['rfNo'],
             'output' : configPvd.totalAgitator[i]['output'],
+          }
+      );
+    }
+    print('myLIST : $myList');
+    return myList;
+  }
+  List<Map<String,dynamic>> selector(ConfigMakerProvider configPvd){
+    List<Map<String,dynamic>> myList = [];
+    myList.add(
+        {
+          'name' : 'Selector',
+          'map' : [],
+        }
+    );
+    for(var i = 0;i < configPvd.totalSelector.length;i++){
+      myList[0]['map'].add(
+          {
+            'name' : 'Sl ${i+1}',
+            'type' : 'm_o_selector',
+            'agitator' : i,
+            'count' : i,
+            'connection' : 'totalSelector',
+            'sNo' :  configPvd.totalSelector[i]['sNo'],
+            'rtu' :  configPvd.totalSelector[i]['rtu'],
+            'rfNo' : configPvd.totalSelector[i]['rfNo'],
+            'output' : configPvd.totalSelector[i]['output'],
           }
       );
     }

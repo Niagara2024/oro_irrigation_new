@@ -6,7 +6,7 @@ class CustomSnackBar extends SnackBar {
     required String message,
   }) : super(
     key: key,
-    content: Text(message, style: TextStyle(fontSize: 16),),
+    content: Text(message, style: const TextStyle(fontSize: 16),),
     behavior: SnackBarBehavior.floating,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(10),

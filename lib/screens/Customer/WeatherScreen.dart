@@ -278,3 +278,57 @@ class _WeatherScreenState extends State<WeatherScreen> {
     );
   }
 }
+
+class AnimatedBackground extends StatefulWidget {
+  final Widget child;
+  final String assetImagePath;
+
+  AnimatedBackground({required this.child, required this.assetImagePath});
+
+  @override
+  _AnimatedBackgroundState createState() => _AnimatedBackgroundState();
+}
+
+class _AnimatedBackgroundState extends State<AnimatedBackground>
+    with SingleTickerProviderStateMixin {
+  late AnimationController controller;
+  late Animation<double> animation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 3),
+    );
+
+    animation = Tween<double>(begin: 0, end: 1).animate(controller);
+
+    controller.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Image.asset(
+            widget.assetImagePath,
+            fit: BoxFit.cover,
+          ),
+        ),
+        Center(
+          child: widget.child, // Child widget remains static
+        ),
+      ],
+    );
+  }
+}
+

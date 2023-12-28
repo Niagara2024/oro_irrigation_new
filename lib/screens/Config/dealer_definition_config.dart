@@ -101,7 +101,7 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
                         {"501": strPayload},
                       ]
                     });
-                    MqttWebClient().publishMessage('AppToFirmware/${widget.imeiNo}', payLoadFinal);
+                    //MqttWebClient().publishMessage('AppToFirmware/${widget.imeiNo}', payLoadFinal);
                     final sendData = jsonEncode(data.dealerDefinition);
                     Map<String, Object> body = {
                       "userId": widget.customerId,

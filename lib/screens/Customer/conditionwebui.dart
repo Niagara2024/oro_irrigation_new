@@ -8,7 +8,6 @@ import 'package:oro_irrigation_new/constants/theme.dart';
 
 import '../../Models/condition_model.dart';
 import '../../constants/http_service.dart';
-import '../../constants/mqtt_web_client.dart';
 import '../../constants/snack_bar.dart';
 import '../Config/dealer_definition_config.dart';
 
@@ -62,7 +61,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
   @override
   void initState() {
     super.initState();
-    MqttWebClient().init();
+    //MqttWebClient().init();
     initializeData();
   }
 
@@ -95,7 +94,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
         _conditionModel.data!.dropdown!.insert(0, '');
         // changeval();
         conditionLibrary = _conditionModel.data!.conditionProgram!;
-        MqttWebClient().onSubscribed('tweet/');
+        //MqttWebClient().onSubscribed('tweet/');
       });
     } else {
       //_showSnackBar(response.body);
@@ -1021,7 +1020,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
         {"708": Mqttsenddata},
       ]
     });
-    MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
+    //MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
   }
 
   String? getSNoByName(List<UserNames> data, String name) {

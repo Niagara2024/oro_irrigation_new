@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:oro_irrigation_new/constants/mqtt_web_client.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 
 import '../../Models/Customer/radiation_model.dart';
@@ -33,7 +32,7 @@ class _RadiationsetUIState extends State<RadiationsetUI>
   void initState() {
     super.initState();
     fetchData();
-    MqttWebClient().init();
+    //MqttWebClient().init();
   }
 
   Future<void> fetchData() async {
@@ -48,7 +47,7 @@ class _RadiationsetUIState extends State<RadiationsetUI>
         var jsondata1 = jsonDecode(response.body);
         _radiationSet = RqadiationSet.fromJson(jsondata1);
       });
-      MqttWebClient().onSubscribed('tweet/');
+      //MqttWebClient().onSubscribed('tweet/');
     } else {
       //_showSnackBar(response.body);
     }
@@ -460,7 +459,7 @@ class _RadiationsetUIState extends State<RadiationsetUI>
         {"1901": Mqttsenddata},
       ]
     });
-    MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
+    //MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
     Map<String, Object> body = {
       "userId": widget.userId,
       "controllerId": widget.controllerId,

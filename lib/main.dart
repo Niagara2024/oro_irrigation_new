@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
-import 'package:oro_irrigation_new/screens/dash_board.dart';
+import 'package:oro_irrigation_new/screens/DashBoard.dart';
 import 'package:oro_irrigation_new/screens/login_form.dart';
 import 'package:oro_irrigation_new/state_management/FertilizerSetProvider.dart';
 import 'package:oro_irrigation_new/state_management/GlobalFertLimitProvider.dart';
@@ -15,6 +15,7 @@ import 'package:oro_irrigation_new/state_management/overall_use.dart';
 import 'package:oro_irrigation_new/state_management/preferences_screen_main_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'Models/Customer/Dashboard/MqttPayloadModel.dart';
 import 'state_management/config_maker_provider.dart';
 
 void main() {
@@ -32,6 +33,7 @@ void main() {
       ChangeNotifierProvider(create: (context) => SelectedGroupProvider()),
       ChangeNotifierProvider(create: (context) => FertilizerSetProvider()),
       ChangeNotifierProvider(create: (context) => GlobalFertLimitProvider()),
+      ChangeNotifierProvider(create: (context) => MqttPayloadProviderModel())
 
       // ChangeNotifierProvider(create: (context) => MqttProvider(mqttClient: mqtt)),
     ],
@@ -58,7 +60,7 @@ class MyApp extends StatelessWidget
       routes: {
         '/': (context) => const Landing(),
         '/login': (context) => const LoginForm(),
-        '/dashboard': (context) => const DashBoard(),
+        '/dashboard': (context) => const MainDashBoard(),
       },
     );
   }

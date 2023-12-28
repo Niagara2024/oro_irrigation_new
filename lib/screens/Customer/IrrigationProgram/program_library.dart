@@ -93,12 +93,39 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
     return mainProvider.programLibrary?.program != null
         ? (mainProvider.programLibrary!.program.isNotEmpty
         ? _buildProgramListView(mainProvider, constraints)
-        : const Center(
+        : Center(
       child: Padding(
         padding: EdgeInsets.all(8.0),
-        child: Text(
-          "Programs not yet created, To create a program tap the '+' icon button",
-          textAlign: TextAlign.center,
+        child: Column(
+          children: [
+            Text(
+              "Programs not yet created, To create a program tap the '+' icon button",
+              textAlign: TextAlign.center,
+            ),
+            IconButton(
+              onPressed: () {
+                if (mainProvider.programLibrary?.agitatorCount != 0) {
+                  _showAdaptiveDialog(context, mainProvider);
+                } else {
+                  mainProvider.selectedProgramType = 'Irrigation Program';
+                  mainProvider.updateIsIrrigationProgram();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => IrrigationProgram(
+                        userId: widget.userId,
+                        controllerId: widget.controllerId,
+                        serialNumber: 0,
+                        conditionsLibraryIsNotEmpty:
+                        mainProvider.conditionsLibraryIsNotEmpty,
+                      ),
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(Icons.add),
+            )
+          ],
         ),
       ),
     ))

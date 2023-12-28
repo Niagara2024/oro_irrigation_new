@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 
 
 import '../../../constants/http_service.dart';
-import '../../../constants/mqtt_web_client.dart';
 import '../../../state_management/constant_provider.dart';
 import '../../../state_management/overall_use.dart';
 import 'AlarmInConstant.dart';
@@ -39,7 +38,7 @@ class _ConstantInConfigState extends State<ConstantInConfig> with SingleTickerPr
     // TODO: implement initState
     super.initState();
     myController = TabController(length: 14, vsync: this);
-    MqttWebClient().init();
+    //MqttWebClient().init();
     getUserConstant();
   }
 

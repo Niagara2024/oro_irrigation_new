@@ -11,10 +11,10 @@ class ProductListWithNode
     this.productDescription = '',
     this.modelName = '',
     this.modelDescription = '',
-    this.userDeviceListId = 0,
+    this.controllerId = 0,
   });
 
-  int userId, dealerId, productId, groupId, userDeviceListId;
+  int userId, dealerId, productId, groupId, controllerId;
   String groupName, categoryName, productDescription, modelName, modelDescription, deviceId;
 
 
@@ -29,7 +29,7 @@ class ProductListWithNode
     productDescription: json['productDescription'],
     modelName: json['modelName'],
     modelDescription: json['modelDescription'],
-    userDeviceListId: json['userDeviceListId'],
+    controllerId: json['controllerId'],
   );
 
   Map<String, dynamic> toJson() => {
@@ -43,6 +43,6 @@ class ProductListWithNode
     'productDescription': productDescription,
     'modelName': modelName,
     'modelDescription': modelDescription,
-    'userDeviceListId': userDeviceListId,
+    'controllerId': controllerId,
   };
 }

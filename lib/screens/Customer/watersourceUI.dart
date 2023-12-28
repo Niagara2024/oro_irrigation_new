@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:oro_irrigation_new/constants/http_service.dart';
-import 'package:oro_irrigation_new/constants/mqtt_web_client.dart';
 import 'package:oro_irrigation_new/constants/snack_bar.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/screens/Config/dealer_definition_config.dart';
@@ -31,7 +30,7 @@ class _watersourceUIState extends State<watersourceUI>
   @override
   void initState() {
     super.initState();
-    MqttWebClient().init();
+    //MqttWebClient().init();
     fetchData();
   }
 
@@ -47,7 +46,7 @@ class _watersourceUIState extends State<watersourceUI>
       setState(() {
         var jsondata1 = jsonDecode(response.body);
         _watersource = Watersource.fromJson(jsondata1);
-        MqttWebClient().onSubscribed('tweet/');
+        //MqttWebClient().onSubscribed('tweet/');
       });
     } else {
       //_showSnackBar(response.body);
@@ -352,7 +351,7 @@ class _watersourceUIState extends State<watersourceUI>
         {"1601": Mqttsenddata},
       ]
     });
-    MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
+    //MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
   }
 
   String toMqttformat(

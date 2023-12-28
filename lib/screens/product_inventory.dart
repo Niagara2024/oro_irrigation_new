@@ -577,7 +577,7 @@ class ProductInventoryState extends State<ProductInventory> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('MY PRODUCT'),
-        backgroundColor: myTheme.primaryColor.withOpacity(0.6),
+        backgroundColor: myTheme.primaryColor,
       ),
       body: Column(
         children: [
@@ -589,9 +589,9 @@ class ProductInventoryState extends State<ProductInventory> {
                 horizontalMargin: 12,
                 minWidth: 600,
                 dataRowHeight: 35.0,
-                headingRowHeight: 35,
-                headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
-                border: TableBorder.all(color: myTheme.primaryColor.withOpacity(0.2)),
+                headingRowHeight: 33,
+                headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.3)),
+                border: TableBorder.all(color: myTheme.primaryColor.withOpacity(0.3)),
                 columns: const [
                   DataColumn2(
                       label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),)),
@@ -652,66 +652,6 @@ class ProductInventoryState extends State<ProductInventory> {
           ),
         ],
       ),
-    );
-    return DataTable2(
-      columnSpacing: 12,
-      horizontalMargin: 12,
-      minWidth: 600,
-      dataRowHeight: 35.0,
-      headingRowHeight: 35,
-      headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
-      border: TableBorder.all(color: Colors.grey),
-      columns: const [
-        DataColumn2(
-            label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),)),
-            fixedWidth: 70
-        ),
-        DataColumn2(
-            label: Text('Category', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),),
-            size: ColumnSize.M
-        ),
-        DataColumn2(
-            label: Text('Model Name', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),),
-            size: ColumnSize.M
-        ),
-        DataColumn2(
-          label: Text('Device ID', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),),
-          fixedWidth: 170,
-        ),
-        DataColumn2(
-            label: Center(child: Text('Site Name', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),)),
-            size: ColumnSize.M
-        ),
-        DataColumn2(
-          label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),)),
-          fixedWidth: 90,
-        ),
-        DataColumn2(
-          label: Center(child: Text('Modify Date', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),)),
-          fixedWidth: 100,
-        ),
-      ],
-      rows: searched ? List<DataRow>.generate(filterProductInventoryListCus.length, (index) => DataRow(cells: [
-        DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14)))),
-        DataCell(Text(filterProductInventoryListCus[index].categoryName, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
-        DataCell(Text(filterProductInventoryListCus[index].model, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
-        DataCell(Text(filterProductInventoryListCus[index].deviceId, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
-        DataCell(Center(child: Text(filterProductInventoryListCus[index].siteName, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14)))),
-        DataCell(Center(child: filterProductInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))],):
-        const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))],))),
-        const DataCell(Center(child: Text('25-09-2023', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14)))),
-      ])):
-      List<DataRow>.generate(productInventoryListCus.length, (index) => DataRow(cells: [
-        DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13)))),
-        DataCell(Text(productInventoryListCus[index].categoryName, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))),
-        DataCell(Text(productInventoryListCus[index].model, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))),
-        DataCell(Text(productInventoryListCus[index].deviceId, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))),
-        DataCell(Center(child: Text(productInventoryListCus[index].productStatus==3? '-' : productInventoryListCus[index].siteName, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13)))),
-        DataCell(Center(child: productInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))],):
-        const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))],))),
-        const DataCell(Center(child: Text('25-09-2023', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13)))),
-
-      ])),
     );
   }
 

@@ -12,6 +12,7 @@ import 'package:intl/intl.dart';
 
 import '../../../Models/IrrigationModel/sequence_model.dart';
 import '../../../constants/http_service.dart';
+import '../../../constants/mqtt_web_client.dart';
 import '../../../state_management/irrigation_program_main_provider.dart';
 import '../../../widgets/SCustomWidgets/custom_alert_dialog.dart';
 import '../../../widgets/SCustomWidgets/custom_snack_bar.dart';
@@ -727,6 +728,7 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
               try {
                 final createUserProgram = await httpService.postRequest('createUserProgram', userData);
                 final response = jsonDecode(createUserProgram.body);
+               // MqttWebClient(onMqttPayloadReceived: (String ) {}).publishMessage('get-tweet-response/86418005321234', userDataToMqtt.toString());
                 // mqttService.publish('get-tweet-response/86418005321234', userDataToMqtt.toString());
                 if(createUserProgram.statusCode == 200) {
                   ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(message: response['message']));
@@ -743,6 +745,7 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
           OutlinedButton(
             key: UniqueKey(),
             onPressed: () async{
+              //MqttWebClient(onMqttPayloadReceived: (String ) {}).publishMessage('get-tweet-response/86418005321234', dataToMqtt.toString());
               // mqttService.publish('get-tweet-response/86418005321234', dataToMqtt.toString());
               // print(dataToMqtt);
               ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(message: 'Sent successfully'));

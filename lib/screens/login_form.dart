@@ -6,7 +6,7 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/http_service.dart';
-import 'dash_board.dart';
+import 'DashBoard.dart';
 
 TextEditingController _mobileNoController = TextEditingController();
 TextEditingController _passwordController = TextEditingController();
@@ -32,7 +32,7 @@ class LoginForm extends StatelessWidget
       theme: myTheme,
       routes: {
         '/': (context) => const Scaffold(body: MyStatefulWidget(),),
-        '/dashboard': (context) => const DashBoard(),
+        '/dashboard': (context) => const MainDashBoard(),
       },
     );
   }

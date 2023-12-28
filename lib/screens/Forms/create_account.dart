@@ -9,7 +9,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/country_list.dart';
 import '../../Models/state_list.dart';
 import '../../constants/http_service.dart';
-import '../../constants/mqtt_web_client.dart';
 import '../../constants/theme.dart';
 
 class CreateAccount extends StatefulWidget {
@@ -424,7 +423,7 @@ class _CreateAccountState extends State<CreateAccount> {
                                       var data = jsonDecode(response.body);
                                       if(data["code"]==200)
                                       {
-                                        MqttWebClient().publishMessage('tweet/$userMobileNo', 'updateCustomerAccount');
+                                        //MqttWebClient().publishMessage('tweet/$userMobileNo', 'updateCustomerAccount');
                                         if(mounted){
                                           Navigator.pop(context);
                                         }

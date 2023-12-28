@@ -53,6 +53,7 @@ dependencies:
   webview_flutter: ^2.0.10
   intl: ^0.18.1
   reorderable_grid_view: ^2.2.8
+  fl_chart: ^0.65.0
 
 dev_dependencies:
   flutter_test:

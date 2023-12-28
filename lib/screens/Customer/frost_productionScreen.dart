@@ -3,8 +3,6 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:oro_irrigation_new/constants/mqtt_web_client.dart';
-
 import '../../Models/Customer/frost_model.dart';
 import '../../constants/http_service.dart';
 import '../../constants/snack_bar.dart';
@@ -36,7 +34,7 @@ class _ConditionUIState extends State<FrostMobUI>
   void initState() {
     super.initState();
     fetchData();
-    MqttWebClient().init();
+   // MqttWebClient().init();
   }
 
   Future<void> fetchData() async {
@@ -51,7 +49,7 @@ class _ConditionUIState extends State<FrostMobUI>
         var jsondata1 = jsonDecode(response.body);
         _frostProtectionModel = frostProtectionModelFromJson(response.body);
       });
-      MqttWebClient().onSubscribed('tweet/');
+      //MqttWebClient().onSubscribed('tweet/');
     } else {
       //_showSnackBar(response.body);
     }
@@ -294,7 +292,7 @@ class _ConditionUIState extends State<FrostMobUI>
         {"$Mqttdatacode": Mqttsenddata},
       ]
     });
-    MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
+    //MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
 
     List<Map<String, dynamic>> frostProtection = _frostProtectionModel
         .frostProtection!

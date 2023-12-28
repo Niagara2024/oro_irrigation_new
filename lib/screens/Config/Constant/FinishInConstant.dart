@@ -5,7 +5,6 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:provider/provider.dart';
 
 import '../../../constants/http_service.dart';
-import '../../../constants/mqtt_web_client.dart';
 import '../../../constants/theme.dart';
 import '../../../state_management/constant_provider.dart';
 
@@ -92,7 +91,7 @@ class _FinishInConstantState extends State<FinishInConstant> {
                             }
                             print('jsonData : ${jsonData['code']}');
                             // constantPvd.sendDataToHW();
-                            MqttWebClient().publishMessage('AppToFirmware/${widget.controllerId}', jsonEncode(constantPvd.sendDataToHW()));
+                            //MqttWebClient().publishMessage('AppToFirmware/${widget.controllerId}', jsonEncode(constantPvd.sendDataToHW()));
                           }catch(e){
                             print(e.toString());
                           }

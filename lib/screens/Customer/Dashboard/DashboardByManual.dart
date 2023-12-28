@@ -90,7 +90,7 @@ class _DashboardByManualState extends State<DashboardByManual> {
     }
   }
 
-  Future<List<DashboardDataProvider>> fetchControllerData(id) async
+  Future<List<DashboardDataProvider>>fetchControllerData(id) async
   {
     Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.controllerID, "programId": id};
     //print(body);
@@ -545,7 +545,7 @@ class _DashboardByManualState extends State<DashboardByManual> {
       "800": [{"801": payload}]
     });
     print(payLoadFinal);
-    MqttWebClient().publishMessage('AppToFirmware/${widget.imeiNo}', payLoadFinal);
+    //MqttWebClient().publishMessage('AppToFirmware/${widget.imeiNo}', payLoadFinal);
   }
 
 }

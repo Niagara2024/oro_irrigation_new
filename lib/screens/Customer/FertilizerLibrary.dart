@@ -7,7 +7,6 @@ import 'package:oro_irrigation_new/state_management/FertilizerSetProvider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../constants/http_service.dart';
-import '../../../constants/mqtt_web_client.dart';
 import 'ListOfFertilizerInSet.dart';
 
 class FertilizerLibrary extends StatefulWidget {
@@ -25,7 +24,7 @@ class _FertilizerLibraryState extends State<FertilizerLibrary> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    MqttWebClient().init();
+    //MqttWebClient().init();
     if (mounted) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         getData();
@@ -94,7 +93,7 @@ class _FertilizerLibraryState extends State<FertilizerLibrary> {
                             fertSetPvd.editWantToSendData(3);
                           }
                           print('jsonData : ${jsonData['code']}');
-                          MqttWebClient().publishMessage('AppToFirmware/${widget.controllerId}', jsonEncode(fertSetPvd.hwPayload()));
+                         // MqttWebClient().publishMessage('AppToFirmware/${widget.controllerId}', jsonEncode(fertSetPvd.hwPayload()));
                         }catch(e){
                           print(e.toString());
                         }

@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../constants/http_service.dart';
-import '../../../constants/mqtt_web_client.dart';
 import '../../../state_management/overall_use.dart';
 import '../../../widgets/SCustomWidgets/custom_date_picker.dart';
 import '../../../widgets/time_picker.dart';
@@ -27,7 +26,7 @@ class _GlobalFertLimitState extends State<GlobalFertLimit> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    MqttWebClient().init();
+    //MqttWebClient().init();
   }
   @override
   Widget build(BuildContext context) {
@@ -52,7 +51,7 @@ class _GlobalFertLimitState extends State<GlobalFertLimit> {
             print(e.toString());
           }
           // store.writeDataInJsonFile('configFile', configPvd.sendData());
-          MqttWebClient().publishMessage('AppToFirmware/${widget.controllerId}', jsonEncode(gfertpvd.hwPayload()));
+          //MqttWebClient().publishMessage('AppToFirmware/${widget.controllerId}', jsonEncode(gfertpvd.hwPayload()));
         },
         child: Icon(Icons.send),
 

@@ -1,108 +1,149 @@
 
-
 import 'dart:async';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_browser_client.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
-final client = MqttBrowserClient('ws://192.168.1.141', '');
 
 class MqttWebClient {
 
-  Future<int> init() async
-  {
+  MqttBrowserClient client;
+  MqttWebClient({required this.onMqttPayloadReceived}) : client = MqttBrowserClient('ws://192.168.1.141/ws', '');
+
+  final Function(String) onMqttPayloadReceived;
+
+  Future<int> connectAndSubscribe() async {
+    client.logging(on: false);
     client.setProtocolV311();
-    client.keepAlivePeriod = 20;
-
-    client.connectTimeoutPeriod = 2000; // milliseconds
-
     client.port = 9001;
-    //client.onDisconnected = onDisconnected;
+    client.autoReconnect=true;
+    client.onDisconnected = onDisconnected;
     client.onConnected = onConnected;
     client.onSubscribed = onSubscribed;
-    client.pongCallback = pong;
-    client.websocketProtocols = MqttClientConstants.protocolsSingleDefault;
+
     final connMess = MqttConnectMessage()
         .withClientIdentifier('')
-        .withWillTopic('willtopic')
+        .withWillTopic('will-topic') // If you set this you must set a will message
         .withWillMessage('My Will message')
-        .startClean()
+        .startClean() // Non persistent session for testing
         .withWillQos(MqttQos.atLeastOnce);
-    print('EXAMPLE::Mosquitto client connecting....');
     client.connectionMessage = connMess;
-
-    try {
-      await client.connect();
-      print('yes it is connected');
-    } on Exception catch (e) {
-      print('EXAMPLE::client exception - $e');
-      client.disconnect();
-    }
-
-    /// Check we are connected
-    if (client.connectionStatus!.state == MqttConnectionState.connected) {
-      print('EXAMPLE::Mosquitto client connected');
-    } else {
-      print('Mosquitto client connection failed - disconnecting, status is ${client.connectionStatus}');
-      client.disconnect();
-    }
-    client.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
-      final recMess = c![0].payload as MqttPublishMessage;
-      final pt =  MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-    });
-    client.published!.listen((MqttPublishMessage message) {
-      print('topic is ${message.variableHeader!.topicName}, with Qos ${message.header!.qos}');
-    });
-
-    await MqttUtilities.asyncSleep(60);
-    await MqttUtilities.asyncSleep(2);
-
-    return 0;
-  }
-
-  Future<void> connectMqtt() async {
 
     try {
       await client.connect();
     } on Exception catch (e) {
       print('client exception - $e');
       client.disconnect();
+      return -1;
     }
 
-    /// Check we are connected
-    if (client.connectionStatus!.state == MqttConnectionState.connected) {
-      print('Mosquitto client connected');
-    } else {
-      /// Use status here rather than state if you also want the broker return code.
-      print('ERROR Mosquitto client connection failed - disconnecting, status is ${client.connectionStatus}');
-      client.disconnect();
-    }
-
+    //event listeners
     client.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
       final recMess = c![0].payload as MqttPublishMessage;
       final pt =  MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-
-      print('Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
-      print('');
+      onMqttPayloadReceived(pt);
     });
 
-    client.published!.listen((MqttPublishMessage message) {
-      print('Published notification:: topic is ${message.variableHeader!.topicName}, with Qos ${message.header!.qos}');
-    });
-
+    return 0;
   }
 
-  Future<void> publishMessage(String topic, String message, {bool retain = true}) async
-  {
-    if (client.connectionStatus?.state == MqttConnectionState.connected) {
-      print('Subscription confirmed for topic $topic');
+  /*Future<int> main() async {
+
+    if (client.connectionStatus!.state == MqttConnectionState.connected) {
+      print('connectionStatus successfully');
+    }
+    else{
+      client.logging(on: false);
+      client.setProtocolV311();
+      // client.keepAlivePeriod = 60;
+      // client.connectTimeoutPeriod = 2000; // milliseconds
+      // client.autoReconnect = true;
+      client.port = 9001;
+      client.onDisconnected = onDisconnected;
+      client.onConnected = onConnected;
+      client.onSubscribed = onSubscribed;
+      //client.pongCallback = pong;
+      // client.websocketProtocols = MqttClientConstants.protocolsSingleDefault;
+
+      final connMess = MqttConnectMessage()
+          .withClientIdentifier('Mqtt_MyClientUniqueId')
+          .withWillTopic('will-topic') // If you set this you must set a will message
+          .withWillMessage('My Will message')
+          .startClean() // Non persistent session for testing
+          .withWillQos(MqttQos.atLeastOnce);
+      print('Mosquitto client connecting....');
+      client.connectionMessage = connMess;
+
+
+      try {
+        await client.connect();
+      } on Exception catch (e) {
+        print('client exception - $e');
+        client.disconnect();
+        return -1;
+      }
+
+      /// Check we are connected
+      if (client.connectionStatus!.state == MqttConnectionState.connected) {
+        print('Mosquitto client connected');
+      } else {
+        print('ERROR Mosquitto client connection failed - disconnecting, status is ${client.connectionStatus}');
+        client.disconnect();
+        return -1;
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      List<String> userDeviceIDList = (prefs.getStringList('userDeviceIDList') ?? []);
+
+      for(int i=0; i<userDeviceIDList.length; i++){
+        String topic = userDeviceIDList[i];
+        print('Subscribing to the $topic topic');
+        client.subscribe(topic, MqttQos.atMostOnce);
+      }
+
+      /// Ok, lets try a subscription
+      /* print('Subscribing to the FirmwareToApp/E8FB1C3501D1 topic');
+    const topic = 'FirmwareToApp/E8FB1C3501D9'; // Not a wildcard topic
+    client.subscribe(topic, MqttQos.atMostOnce);*/
+
+      client.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
+        final recMess = c![0].payload as MqttPublishMessage;
+        final pt =  MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+
+        onMqttPayloadReceived(pt);
+
+        //mqttPayloadModel.updatePayload(pt.toString());
+        //print('Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
+        //print('');
+      });
+
+      client.published!.listen((MqttPublishMessage message) {
+        print('Published notification:: topic is ${message.variableHeader!.topicName}, with Qos ${message.header!.qos}');
+      });
+    }
+    return 0;
+  }*/
+
+  Future<void> subscribeTopic(String topic) async {
+    print('Subscribing to the ${topic} topic');
+    client.subscribe(topic, MqttQos.atMostOnce);
+  }
+
+  Future<void> unsubscribeTopic(String topic) async {
+    print('Un Subscribing to the ${topic} topic');
+    client.subscribe(topic, MqttQos.atMostOnce);
+  }
+
+  Future<void> publishMessage(String topic, String message) async {
+    if (client.connectionStatus!.state == MqttConnectionState.connected) {
       final builder = MqttClientPayloadBuilder();
       builder.addString(message);
       client.publishMessage(topic, MqttQos.exactlyOnce, builder.payload!);
     } else {
-      print("MQTT client is not connected.");
+      print('Cannot publish message, MQTT client is not connected');
+      reconnect();
     }
-
   }
 
   /// The subscribed callback
@@ -110,27 +151,50 @@ class MqttWebClient {
     print('Subscription confirmed for topic $topic');
   }
 
-  void unsubscribeFromTopic(String topic) {
-    print('Un Subscription confirmed for topic $topic');
+  /// The unsolicited disconnect callback
+  void onDisconnected() {
+    print('OnDisconnected client callback - Client disconnection');
+    //main();
+    if (client.connectionStatus!.disconnectionOrigin ==  MqttDisconnectionOrigin.solicited) {
+      print('OnDisconnected callback is solicited, this is correct');
+      //main();
+    }else{
+      reconnect();
+    }
   }
 
-  void onAutoReconnect() {
-    print('onAutoReconnect client callback - Client auto reconnection sequence will start');
-  }
-
-  /// The post auto re connect callback
-  void onAutoReconnected() {
-    print('onAutoReconnected client callback - Client auto reconnection sequence has completed');
+  Future<void> reconnect() async {
+    while (true) {
+      try {
+        await client.connect();
+        if (client.connectionStatus!.state == MqttConnectionState.connected) {
+          print('Reconnected successfully');
+          break;
+        }
+      } catch (e) {
+        print('Reconnection attempt failed: $e');
+      }
+      await Future.delayed(Duration(seconds: 5)); // Delay between reconnection attempts
+    }
   }
 
   /// The successful connect callback
-  void onConnected() {
+  Future<void> onConnected() async {
     print('OnConnected client callback - Client connection was sucessful');
+
+    final prefs = await SharedPreferences.getInstance();
+    List<String> userDeviceIDList = prefs.getStringList('userDeviceIDList') ?? [];
+    for (int i = 0; i < userDeviceIDList.length; i++) {
+      String topic = userDeviceIDList[i];
+      print('Subscribing to the $topic topic');
+      client.subscribe(topic, MqttQos.atMostOnce);
+    }
   }
 
   /// Pong callback
-  Future<void> pong() async {
+  void pong() {
     print('Ping response client callback invoked');
   }
+
 }
 

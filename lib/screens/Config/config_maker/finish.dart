@@ -161,7 +161,7 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
                           var jsonData = convert.jsonDecode(response.body);
                           print('response code : ${jsonData['code']}');
                           print('response data : $jsonData');
-                          MqttWebClient().publishMessage('AppToFirmware/${widget.controllerId}', convert.jsonEncode(configPvd.sendData()));
+                          //MqttWebClient().publishMessage('AppToFirmware/${widget.controllerId}', convert.jsonEncode(configPvd.sendData()));
                           if(jsonData['code'] == 200){
                             configPvd.editWantToSendData(2);
                           }else{

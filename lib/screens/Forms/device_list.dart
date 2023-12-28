@@ -6,11 +6,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../Models/ProductListWithNode.dart';
 import '../../Models/customer_list.dart';
 import '../../Models/customer_product.dart';
 import '../../Models/interface_model.dart';
-import '../../Models/model_added_nodes.dart';
+import '../../Models/CustomerSite.dart';
 import '../../Models/node_model.dart';
 import '../../Models/product_stock.dart';
 import '../../constants/http_service.dart';
@@ -83,7 +85,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
 
     for (int i=0; i < customerSiteList.length; i++) {
       Future.delayed(const Duration(milliseconds: 100), () async {
-        MqttWebClient().unsubscribeFromTopic('FirmwareToApp/${customerSiteList[i].deviceId}');
+        //MqttWebClient(onMqttPayloadReceived: (String ) {}).unsubscribeTopic('FirmwareToApp/${customerSiteList[i].deviceId}');
       });
     }
 
@@ -170,16 +172,21 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
     {
       customerSiteList.clear();
       usedNodeList.clear();
+      List<String> deviceIdList = [];
+      final prefs = await SharedPreferences.getInstance();
       var data = jsonDecode(response.body);
       if(data["code"]==200)
       {
         final cntList = data["data"] as List;
         for (int i=0; i < cntList.length; i++) {
           customerSiteList.add(ProductListWithNode.fromJson(cntList[i]));
+          deviceIdList.add('FirmwareToApp/${customerSiteList[i].deviceId}');
 
-          Future.delayed(const Duration(milliseconds: 100), () async {
-            MqttWebClient().onSubscribed('FirmwareToApp/${customerSiteList[i].deviceId}');
-          });
+          //MqttWebClient(onMqttPayloadReceived: (String) {}).onSubscribed('FirmwareToApp/${customerSiteList[i].deviceId}');
+
+          /*Future.delayed(const Duration(milliseconds: 100), () async {
+            MqttWebClient(onMqttPayloadReceived: (String) {}).subscribeTopic('FirmwareToApp/${customerSiteList[i].deviceId}');
+          });*/
 
           final nodeList = cntList[i]['nodeList'] as List;
           usedNodeList.add([]);
@@ -187,6 +194,13 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
             usedNodeList[i].add(NodeModel.fromJson(nodeList[j]));
           }
         }
+
+        await prefs.setStringList('userDeviceIDList', deviceIdList);
+        Future.delayed(const Duration(milliseconds: 500), () async {
+          //MqttWebClient(onMqttPayloadReceived:(reslt) {print(reslt)}).connectAndSubscribe();
+          MqttWebClient(onMqttPayloadReceived: (String ){}).connectAndSubscribe();
+        });
+
       }
       setState(() {
         customerSiteList;
@@ -892,7 +906,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                       Map<String, dynamic> body = {
                                         "userId": widget.customerID,
                                         "dealerId": widget.userID,
-                                        "masterId": widget.customerSiteList[currentSite].userDeviceListId,
+                                        "masterId": widget.customerSiteList[currentSite].controllerId,
                                         "groupId": widget.customerSiteList[currentSite].groupId,
                                         "products": selectedNodeList,
                                         "createUser": widget.userID,
@@ -1158,9 +1172,9 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                       ]
                                     });
 
-                                    print(body);
+                                    //print(body);
 
-                                    MqttWebClient().publishMessage('AppToFirmware/${widget.customerSiteList[siteIndex].deviceId}', payLoadFinal);
+                                    MqttWebClient(onMqttPayloadReceived:(String){}).publishMessage('AppToFirmware/${widget.customerSiteList[siteIndex].deviceId}', payLoadFinal);
 
                                     final response = await HttpService().putRequest("updateUserDeviceNodeList", body);
                                     if(response.statusCode == 200)
@@ -1185,7 +1199,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                     for(int i=0; i<widget.usedNodeList[siteIndex].length; i++){
                                       relayCnt = relayCnt + widget.usedNodeList[siteIndex][i].relayCount;
                                     }
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  ProductLimits(userID: widget.userID, customerID: widget.customerID, userType: 2, nodeCount: relayCnt, siteName: widget.customerSiteList[siteIndex].groupName, controllerId: widget.customerSiteList[siteIndex].userDeviceListId, deviceId: widget.customerSiteList[siteIndex].deviceId,)),);
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  ProductLimits(userID: widget.userID, customerID: widget.customerID, userType: 2, nodeCount: relayCnt, siteName: widget.customerSiteList[siteIndex].groupName, controllerId: widget.customerSiteList[siteIndex].controllerId, deviceId: widget.customerSiteList[siteIndex].deviceId,)),);
                                   },
                                   icon: const Icon(Icons.list_alt)),
                               const SizedBox(width: 20,),

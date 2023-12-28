@@ -81,7 +81,6 @@ class _ProgramScheduleState extends State<ProgramSchedule> {
                 }else {
                   _centerWidget = FertilizerLibrary(userId: widget.userId, controllerId: widget.controllerID, customerID: widget.customerID,);
                 }
-
               });
             },
           ),

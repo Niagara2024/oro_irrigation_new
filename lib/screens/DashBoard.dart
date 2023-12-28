@@ -4,14 +4,15 @@ import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/screens/Forms/create_account.dart';
 import 'package:oro_irrigation_new/screens/product_inventory.dart';
 import 'package:oro_irrigation_new/screens/web_view.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Models/Customer/Dashboard/MqttPayloadModel.dart';
 import '../constants/mqtt_web_client.dart';
-import 'Customer/Dashboard/FarmSettings.dart';
 import 'Customer/customer_home.dart';
 import 'my_preference.dart';
 import 'product_entry.dart';
-import 'home_page.dart';
+import 'AdminDealerHomePage.dart';
 import 'login_form.dart';
 
 
@@ -22,9 +23,9 @@ String selectedCategory = '';
 
 enum Calendar { day, week, month, year }
 
-class DashBoard extends StatelessWidget
+class MainDashBoard extends StatelessWidget
 {
-  const DashBoard({super.key});
+  const MainDashBoard({super.key});
 
   @override
   Widget build(BuildContext context)
@@ -63,14 +64,17 @@ class DashBoardMainState extends State<DashBoardMain> with TickerProviderStateMi
   String userName = '', userType = '', userCountryCode = '', userMobileNo = '';
   final List<Map> myProducts =  List.generate(5, (index) => {"id": index, "name": "Product $index"}).toList();
 
-
   @override
   void initState() {
     super.initState();
-    MqttWebClient().init();
     _executeSharedPreferences();
   }
 
+  void onMqttPayloadReceived(String newPayload) {
+    print('Received MQTT payload: $newPayload');
+    var provider = Provider.of<MqttPayloadProviderModel>(context,listen: false);
+    provider.updatePayload(newPayload);
+  }
 
   Future _executeSharedPreferences() async
   {
@@ -83,9 +87,15 @@ class DashBoardMainState extends State<DashBoardMain> with TickerProviderStateMi
       userID = int.parse(prefs.getString('userId') ?? "");
     });
 
-    Future.delayed(const Duration(milliseconds: 500), () async {
+    /*Future.delayed(const Duration(milliseconds: 500), () async {
       MqttWebClient().onSubscribed('tweet/$userMobileNo');
     });
+
+    Future.delayed(const Duration(milliseconds: 1500), () async {
+      MqttWebClient(onMqttPayloadReceived:onMqttPayloadReceived).main();
+    });*/
+
+    //MqttWebClient(onMqttPayloadReceived: (String ){}).connectAndSubscribe();
 
   }
 
@@ -172,45 +182,49 @@ class _DashboardWideState extends State<DashboardWide> {
   double groupAlignment = -1.0;
   Calendar calendarView = Calendar.day;
   Widget _centerWidget = const Center(child: Text('Loading'));
+  String currentTap = 'Dashboard';
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    loadFirstPage();
+    //MqttWebClient().init();
+    callCustomerDashboard();
   }
 
-  Future<void> loadFirstPage() async {
+  Future<void> callCustomerDashboard()
+  async {
+    await Future.delayed(const Duration(seconds: 2));
     if(widget.userType =='3'){
-      await Future.delayed(const Duration(seconds: 2));
-      setState(() {
-        _centerWidget = Center(child: CustomerHome(customerID: widget.userID, type: 0, customerName: '', userID: widget.userID,));
-      });
+      onOptionSelected('Dashboard');
     }
+  }
 
+  void onOptionSelected(String option) {
+    currentTap = option;
+    setState(() {
+      if (option == 'Dashboard') {
+        _centerWidget = CustomerHome(customerID: widget.userID, type: 0, customerName: '', userID: widget.userID);
+      } else if (option == 'My Product') {
+        _centerWidget = ProductInventory(userName: widget.userName);
+      } else if (option == 'Device Settings') {
+        //_centerWidget = FarmSettings(...);
+      }
+      // Add more conditions for additional options
+    });
   }
 
   @override
   Widget build(BuildContext context)
   {
+    //var prover = Provider.of<MqttPayloadProviderModel>(context);
+    //print(prover.payload);
+
     return widget.userType =='3'? Scaffold(
       body: Stack(
         children: [
           MyDrawer(
-            onOptionSelected: (option) {
-              setState(() {
-                if (option == 'Dashboard') {
-                  _centerWidget = CustomerHome(customerID: widget.userID, type: 0, customerName: '', userID: widget.userID,);
-                } else if (option == 'My Product') {
-                  _centerWidget = ProductInventory(userName: widget.userName);
-                }else if (option == 'Device Settings') {
-                  //_centerWidget = FarmSettings(siteID: customerSiteList[selectedTabIndex].groupId, siteName: customerSiteList[selectedTabIndex].groupName, controllerID: customerSiteList[selectedTabIndex].userDeviceListId, customerID: widget.customerID, imeiNo: customerSiteList[selectedTabIndex].deviceId, userId: widget.userID,);
-                }
-
-                // Add more conditions for additional options
-              });
-            },
-            userName: widget.userName, countryCode: widget.countryCode, phoneNo: widget.mobileNo,
+            userName: widget.userName, countryCode: widget.countryCode, phoneNo: widget.mobileNo, onOptionSelected: onOptionSelected, currentTap: currentTap,
           ),
           Padding(
             padding: const EdgeInsets.only(left: 250),
@@ -384,7 +398,7 @@ class _DashboardWideState extends State<DashboardWide> {
             ),
           ),
           Expanded(
-            child: _selectedIndex == 0 ? const HomePage() :
+            child: _selectedIndex == 0 ? const AdminDealerHomePage() :
             _selectedIndex == 1 ? ProductInventory(userName: widget.userName) :
             _selectedIndex == 2 ? widget.userType =='1'? const AllEntry() : const MyPreference(userID: 1,) : const MyWebView(),
           ),
@@ -392,25 +406,26 @@ class _DashboardWideState extends State<DashboardWide> {
       ),
     );
   }
+
 }
 
 class MyDrawer extends StatelessWidget {
   final Function(String) onOptionSelected;
-  const MyDrawer({super.key, required this.onOptionSelected, required this.userName, required this.countryCode, required this.phoneNo});
-  final String userName, countryCode, phoneNo;
+  const MyDrawer({super.key, required this.onOptionSelected, required this.userName, required this.countryCode, required this.phoneNo, required this.currentTap});
+  final String userName, countryCode, phoneNo, currentTap;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 250,
-      color: myTheme.primaryColor.withOpacity(0.2),
+      color: myTheme.primaryColor.withOpacity(0.9),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           DrawerHeader(
             decoration: BoxDecoration(
-              color: myTheme.primaryColor.withOpacity(0.5),
+              color: myTheme.primaryColor,
             ),
             child: Center(
               child: Column(
@@ -431,75 +446,27 @@ class MyDrawer extends StatelessWidget {
           ),
           const Padding(
             padding: EdgeInsets.only(left: 10, bottom: 5),
-            child: Text('HOME'),
+            child: Text('HOME', style: TextStyle(color: Colors.white)),
           ),
-          ListTile(
-            leading: Icon(Icons.dashboard_outlined, color: myTheme.primaryColor,),
-            title: const Text('Dashboard', style: TextStyle(fontSize: 14)),
-            onTap: () {
-              onOptionSelected('Dashboard');
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.devices_other, color: myTheme.primaryColor,),
-            title: const Text('My Product', style: TextStyle(fontSize: 14)),
-            onTap: () {
-              onOptionSelected('My Product');
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.my_library_books_outlined, color: myTheme.primaryColor,),
-            title: const Text('Report Overview', style: TextStyle(fontSize: 14)),
-            onTap: () {
-              onOptionSelected('Report Overview');
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.manage_history, color: myTheme.primaryColor,),
-            title: const Text('System logs', style: TextStyle(fontSize: 14)),
-            onTap: () {
-              onOptionSelected('System logs');
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.settings_outlined, color: myTheme.primaryColor,),
-            title: const Text('Device Settings', style: TextStyle(fontSize: 14)),
-            onTap: () {
-              onOptionSelected('Device Settings');
-            },
-          ),
+          buildCustomListTile('Dashboard', Icons.dashboard_outlined, 'Dashboard'),
+          buildCustomListTile('My Product', Icons.topic_outlined, 'My Product'),
+          buildCustomListTile('Report Overview', Icons.my_library_books_outlined, 'Report Overview'),
+          buildCustomListTile('Controller Logs', Icons.message_outlined, 'Controller Logs'),
+          buildCustomListTile('Device Settings', Icons.settings_outlined, 'Device Settings'),
           const Padding(
             padding: EdgeInsets.only(left: 10, top: 10, bottom: 5),
-            child: Text('ORGANIZATION'),
+            child: Text('ORGANIZATION', style: TextStyle(color: Colors.white)),
           ),
-          ListTile(
-            leading: Icon(Icons.info_outline, color: myTheme.primaryColor,),
-            title: const Text('App Info', style: TextStyle(fontSize: 14)),
-            onTap: () {
-              onOptionSelected('Device Settings');
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.help_outline, color: myTheme.primaryColor,),
-            title: const Text('Help & Support', style: TextStyle(fontSize: 14)),
-            onTap: () {
-              onOptionSelected('Device Settings');
-            },
-          ),
+          buildCustomListTile('App Info', Icons.info_outline, 'App Info'),
+          buildCustomListTile('Help & Support', Icons.help_outline, 'Help & Support'),
           const Padding(
             padding: EdgeInsets.only(left: 10, top: 10, bottom: 5),
-            child: Text('ACCOUNT'),
+            child: Text('ACCOUNT', style: TextStyle(color: Colors.white)),
           ),
+          buildCustomListTile('My Preference', Icons.settings_outlined, 'My Preference'),
           ListTile(
-            leading: Icon(Icons.settings_outlined, color: myTheme.primaryColor,),
-            title: const Text('My Preference', style: TextStyle(fontSize: 14)),
-            onTap: () {
-              onOptionSelected('Device Settings');
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.logout, color: Colors.red,),
-            title: const Text('Logout', style: TextStyle(fontSize: 14)),
+            leading: const Icon(Icons.logout, color: Colors.red,),
+            title: const Text('Logout', style: TextStyle(fontSize: 14, color: Colors.white)),
             onTap: () async {
               final prefs = await SharedPreferences.getInstance();
               await prefs.remove('userId');
@@ -507,7 +474,6 @@ class MyDrawer extends StatelessWidget {
               await prefs.remove('countryCode');
               await prefs.remove('mobileNumber');
               await prefs.remove('subscribeTopic');
-
               if (context.mounted){
                 Navigator.pushNamedAndRemoveUntil(context, '/login', ModalRoute.withName('/login'));
               }
@@ -515,6 +481,34 @@ class MyDrawer extends StatelessWidget {
           ),
           // Add more ListTile widgets for additional options
         ],
+      ),
+    );
+  }
+
+  Widget buildCustomListTile(String title, IconData icon, String tapOption) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8),
+      child: Container(
+        decoration: BoxDecoration(
+          color: currentTap == tapOption ? Colors.white : Colors.transparent,
+          borderRadius: const BorderRadius.only(topLeft: Radius.circular(30), bottomLeft: Radius.circular(30)), // Adjust the radius as needed
+        ),
+        child: ListTile(
+          leading: Icon(
+            icon,
+            color: currentTap == tapOption ? myTheme.primaryColor : Colors.white,
+          ),
+          title: Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              color: currentTap == tapOption ? myTheme.primaryColor : Colors.white,
+            ),
+          ),
+          onTap: () {
+            onOptionSelected(tapOption);
+          },
+        ),
       ),
     );
   }

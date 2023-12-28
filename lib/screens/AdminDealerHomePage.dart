@@ -16,16 +16,15 @@ import 'Forms/device_list.dart';
 enum Calendar { day, week, month, year }
 typedef CallbackFunction = void Function(String result);
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
-
+class AdminDealerHomePage extends StatefulWidget {
+  const AdminDealerHomePage({Key? key}) : super(key: key);
 
   @override
-  State<HomePage> createState() => HomePageState();
+  State<AdminDealerHomePage> createState() => AdminDealerHomePageHomePageState();
 
 }
 
-class HomePageState extends State<HomePage>
+class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
 {
   Calendar calendarView = Calendar.day;
   List<ProductStockModel> productStockList = <ProductStockModel>[];
@@ -81,10 +80,11 @@ class HomePageState extends State<HomePage>
         }
       }
 
-      setState(() {
-        productStockList;
-      });
-
+      if (mounted) {
+        setState(() {
+          productStockList;
+        });
+      }
     }
     else{
       //_showSnackBar(response.body);
@@ -108,8 +108,10 @@ class HomePageState extends State<HomePage>
         }
       }
 
-      setState(() {
-      });
+      if (mounted) {
+        setState(() {
+        });
+      }
 
     }
     else{

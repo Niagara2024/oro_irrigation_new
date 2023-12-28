@@ -3,12 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:oro_irrigation_new/constants/http_service.dart';
-import 'package:oro_irrigation_new/constants/mqtt_web_client.dart';
 import 'package:oro_irrigation_new/constants/snack_bar.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/screens/Config/dealer_definition_config.dart';
 
 import '../../Models/Customer/back_wash_model.dart';
+import '../../constants/mqtt_web_client.dart';
 
 class FilterBackwashUI extends StatefulWidget {
   const FilterBackwashUI(
@@ -31,7 +31,7 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
   @override
   void initState() {
     super.initState();
-    MqttWebClient().init();
+    //MqttWebClient().init();
     fetchData();
   }
 
@@ -46,7 +46,7 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
       setState(() {
         var jsondata1 = jsonDecode(response.body);
         _filterbackwash = Filterbackwash.fromJson(jsondata1);
-        MqttWebClient().onSubscribed('tweet/');
+        //MqttWebClient().onSubscribed('tweet/');
       });
     } else {
       //_showSnackBar(response.body);
@@ -365,7 +365,7 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
         {"901": Mqttsenddata},
       ]
     });
-    MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
+    //MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
   }
 
   String toMqttformat(

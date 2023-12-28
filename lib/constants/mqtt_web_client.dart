@@ -4,28 +4,25 @@ import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_browser_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
 class MqttWebClient {
 
   MqttBrowserClient client;
-  MqttWebClient({required this.onMqttPayloadReceived}) : client = MqttBrowserClient('ws://192.168.1.141/ws', '');
+  MqttWebClient({required this.onMqttPayloadReceived}) : client = MqttBrowserClient('ws://3.0.229.165', 'client-1');
 
   final Function(String) onMqttPayloadReceived;
 
   Future<int> connectAndSubscribe() async {
     client.logging(on: false);
-    client.setProtocolV311();
-    client.port = 9001;
-    client.autoReconnect=true;
+    client.setProtocolV31();
+    client.keepAlivePeriod = 20;
+    client.port = 1883;
     client.onDisconnected = onDisconnected;
     client.onConnected = onConnected;
     client.onSubscribed = onSubscribed;
+    client.pongCallback = pong;
 
     final connMess = MqttConnectMessage()
-        .withClientIdentifier('')
-        .withWillTopic('will-topic') // If you set this you must set a will message
-        .withWillMessage('My Will message')
+        .withClientIdentifier('client-1').authenticateAs('niagara', 'niagara@123')
         .startClean() // Non persistent session for testing
         .withWillQos(MqttQos.atLeastOnce);
     client.connectionMessage = connMess;
@@ -142,7 +139,7 @@ class MqttWebClient {
       client.publishMessage(topic, MqttQos.exactlyOnce, builder.payload!);
     } else {
       print('Cannot publish message, MQTT client is not connected');
-      reconnect();
+     // reconnect();
     }
   }
 
@@ -159,7 +156,7 @@ class MqttWebClient {
       print('OnDisconnected callback is solicited, this is correct');
       //main();
     }else{
-      reconnect();
+      //reconnect();
     }
   }
 

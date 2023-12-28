@@ -8,7 +8,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Models/Customer/Dashboard/MqttPayloadModel.dart';
+import '../constants/MQTTManager.dart';
 import '../constants/mqtt_web_client.dart';
+import '../state_management/MQTTAppState.dart';
 import 'Customer/customer_home.dart';
 import 'my_preference.dart';
 import 'product_entry.dart';
@@ -64,6 +66,8 @@ class DashBoardMainState extends State<DashBoardMain> with TickerProviderStateMi
   String userName = '', userType = '', userCountryCode = '', userMobileNo = '';
   final List<Map> myProducts =  List.generate(5, (index) => {"id": index, "name": "Product $index"}).toList();
 
+
+
   @override
   void initState() {
     super.initState();
@@ -97,7 +101,15 @@ class DashBoardMainState extends State<DashBoardMain> with TickerProviderStateMi
 
     //MqttWebClient(onMqttPayloadReceived: (String ){}).connectAndSubscribe();
 
+
+    //manager = MQTTManager();
+    // _configureAndConnect();
+
+
+
   }
+
+
 
 
   @override
@@ -184,12 +196,31 @@ class _DashboardWideState extends State<DashboardWide> {
   Widget _centerWidget = const Center(child: Text('Loading'));
   String currentTap = 'Dashboard';
 
+  late MQTTAppState currentAppState;
+  late MQTTManager manager;
+
+  void _configureAndConnect() {
+    // ignore: flutter_style_todos
+    // TODO: Use UUID
+    manager = MQTTManager(
+        host: 'ws://192.168.1.141',
+        topic: 'FirmwareToApp/E8FB1C3501D9',
+        identifier: 'flutterPrefix',
+        state: currentAppState);
+    manager.initializeMQTTClient();
+    manager.connect();
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     //MqttWebClient().init();
     callCustomerDashboard();
+
+    Future.delayed(const Duration(milliseconds: 5000), () async {
+      _configureAndConnect();
+    });
   }
 
   Future<void> callCustomerDashboard()
@@ -219,6 +250,10 @@ class _DashboardWideState extends State<DashboardWide> {
   {
     //var prover = Provider.of<MqttPayloadProviderModel>(context);
     //print(prover.payload);
+    final MQTTAppState appState = Provider.of<MQTTAppState>(context);
+    currentAppState = appState;
+    print(currentAppState);
+
 
     return widget.userType =='3'? Scaffold(
       body: Stack(

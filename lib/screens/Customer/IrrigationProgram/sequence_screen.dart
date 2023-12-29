@@ -6,6 +6,7 @@ import '../../../state_management/irrigation_program_main_provider.dart';
 import '../../../widgets/SCustomWidgets/custom_alert_dialog.dart';
 import '../../../widgets/SCustomWidgets/custom_train_widget.dart';
 
+
 class SequenceScreen extends StatefulWidget {
   final int userId;
   final int controllerId;
@@ -183,13 +184,27 @@ class _SequenceScreenState extends State<SequenceScreen> {
                                                       ).toJson()).toList();
                                                       sequenceProvider.valveSelection(valve, 0, index, true,
                                                           widget.serialNumber == 0 ? sequenceProvider.serialNumberCreation : widget.serialNumber);
-                                                      if (sequenceProvider.isRecentlySelected) {
+                                                      if (sequenceProvider.groupAdding) {
                                                         showAdaptiveDialog(
                                                           context: context,
                                                           builder: (BuildContext context) {
                                                             return CustomAlertDialog(
                                                               title: 'Warning',
-                                                              content: "Valve ${groupValve.name} is recently added and it cannot be added again next to it",
+                                                              content: "Group added cannot be added into group",
+                                                              actions: [
+                                                                TextButton(child: const Text("OK"), onPressed: () => Navigator.of(context).pop(),),
+                                                              ],
+                                                            );
+                                                          },
+                                                        );
+                                                      }
+                                                      else if (sequenceProvider.isReuseValve) {
+                                                        showAdaptiveDialog(
+                                                          context: context,
+                                                          builder: (BuildContext context) {
+                                                            return CustomAlertDialog(
+                                                              title: 'Warning',
+                                                              content: "Enable 'Reuse valve' option in the dealer definition to reuse the valves in the sequence",
                                                               actions: [
                                                                 TextButton(child: const Text("OK"), onPressed: () => Navigator.of(context).pop(),),
                                                               ],
@@ -290,7 +305,8 @@ class _SequenceScreenState extends State<SequenceScreen> {
                                                     _scrollController.animateTo(targetOffset, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
                                                     sequenceProvider.valveSelection(valve.toJson(), lineIndex, index, false, widget.serialNumber == 0
                                                         ? sequenceProvider.serialNumberCreation
-                                                        : widget.serialNumber);
+                                                        : widget.serialNumber,
+                                                    );
                                                     if (sequenceProvider.isRecentlySelected) {
                                                       showAdaptiveDialog(
                                                         context: context,
@@ -326,6 +342,19 @@ class _SequenceScreenState extends State<SequenceScreen> {
                                                           return CustomAlertDialog(
                                                             title: 'Warning',
                                                             content: "Enable 'Reuse valve' option in the dealer definition to reuse the valves in the sequence",
+                                                            actions: [
+                                                              TextButton(child: const Text("OK"), onPressed: () => Navigator.of(context).pop(),),
+                                                            ],
+                                                          );
+                                                        },
+                                                      );
+                                                    } else if (sequenceProvider.groupAdding) {
+                                                      showAdaptiveDialog(
+                                                        context: context,
+                                                        builder: (BuildContext context) {
+                                                          return CustomAlertDialog(
+                                                            title: 'Warning',
+                                                            content: "Group added cannot be added into group",
                                                             actions: [
                                                               TextButton(child: const Text("OK"), onPressed: () => Navigator.of(context).pop(),),
                                                             ],

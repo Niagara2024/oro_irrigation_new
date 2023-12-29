@@ -8,8 +8,8 @@ import '../../../Models/Customer/Dashboard/DashBoardValve.dart';
 import '../../../Models/Customer/Dashboard/FertilizerChanel.dart';
 import '../../../Models/Customer/Dashboard/LineOrSequence.dart';
 import '../../../Models/Customer/Dashboard/ProgramList.dart';
+import '../../../constants/MQTTManager.dart';
 import '../../../constants/http_service.dart';
-import '../../../constants/mqtt_web_client.dart';
 import '../../../constants/snack_bar.dart';
 import '../../../constants/theme.dart';
 
@@ -544,8 +544,8 @@ class _DashboardByManualState extends State<DashboardByManual> {
     String payLoadFinal = jsonEncode({
       "800": [{"801": payload}]
     });
-    print(payLoadFinal);
-    //MqttWebClient().publishMessage('AppToFirmware/${widget.imeiNo}', payLoadFinal);
+    //print(payLoadFinal);
+    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
   }
 
 }

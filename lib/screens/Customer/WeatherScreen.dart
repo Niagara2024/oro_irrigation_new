@@ -55,7 +55,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
     } else {
       return Scaffold(
         body: AnimatedBackground(
-          assetImagePath: 'assets/images/c2.gif',
+          assetImagePath: 'assets/GiffFile/c2.gif',
           child: SingleChildScrollView(
             child: Container(
               // color: Colors.black12,
@@ -79,9 +79,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => WeatherBar(
-                                    tempdata: weatherData['hourly']
-                                    ['temperature_2m'],
-                                    timedata: [],
+                                      tempdata: weatherData['hourly']
+                                      ['temperature_2m'],
+                                      timedata: [],title: 'UV Reports'
                                   )),
                             );
                           },
@@ -101,7 +101,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                       tempdata: weatherData['hourly']
                                       ['rain'],
                                       timedata: weatherData['hourly']
-                                      ['time'],
+                                      ['time'],title: 'RAIN RATE REPORT',
                                     )),
                               );
                             },
@@ -115,7 +115,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                   builder: (context) => WeatherReport(
                                     tempdata: weatherData['hourly']
                                     ['relative_humidity_2m'],
-                                    timedata: weatherData['hourly']['time'],
+                                    timedata: weatherData['hourly']['time'],title: 'HUMIDITY REPORT',
                                   )),
                             );
                           },
@@ -130,13 +130,13 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                   builder: (context) => WeatherReport(
                                     tempdata: weatherData['hourly']
                                     ['dew_point_2m'],
-                                    timedata: weatherData['hourly']['time'],
+                                    timedata: weatherData['hourly']['time'],title: 'DEW POINT REPORT',
                                   )),
                             );
                           },
                           child: weather(
                               'becoming "sticky" with muggy evenings',
-                              'DEV POINT',
+                              'DEW POINT',
                               '${weatherData['hourly']['dew_point_2m'][0]}',
                               '°C'),
                         ),
@@ -149,7 +149,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                       tempdata: weatherData['hourly']
                                       ['wind_speed_10m'],
                                       timedata: weatherData['hourly']
-                                      ['time'],
+                                      ['time'],title: 'WIND SPEED REPORT',
                                     )),
                               );
                             },
@@ -502,4 +502,3 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
     );
   }
 }
-

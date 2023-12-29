@@ -7,6 +7,7 @@ import 'package:oro_irrigation_new/constants/theme.dart';
 
 import '../../constants/http_service.dart';
 import '../../constants/snack_bar.dart';
+import '../../widgets/FontSizeUtils.dart';
 
 class VirtualMeterScreen extends StatefulWidget {
   const VirtualMeterScreen({
@@ -28,7 +29,7 @@ class _VirtualMeterScreenState extends State<VirtualMeterScreen>
     'Name',
     'Function',
     'Formula',
-    'ProtectionLimit',
+    'Protection Limit',
     'Object',
     'Action',
     'Radio',
@@ -153,8 +154,9 @@ class _VirtualMeterScreenState extends State<VirtualMeterScreen>
                       label: Center(
                           child: Text(
                             conditionhdrlist[i].toString(),
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16),
+                            style:  TextStyle(
+                              fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
+                              fontWeight: FontWeight.bold,),
                             softWrap: true,
                           )),
                     ),
@@ -248,7 +250,7 @@ class _VirtualMeterScreenState extends State<VirtualMeterScreen>
                                     : formulajson[index]['action'],
                               ),
                             )
-                          else if (conditionhdrlist[i] == 'ProtectionLimit')
+                          else if (conditionhdrlist[i] == 'Protection Limit')
                               DataCell(onTap: () {
                                 setState(() {
                                   Selectindexrow = index;
@@ -458,7 +460,8 @@ class _VirtualMeterScreenState extends State<VirtualMeterScreen>
                                       label: Center(
                                           child: Text(
                                             formulaEditlist[i].toString(),
-                                            style: const TextStyle(
+                                            style:  TextStyle(
+                                                fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
                                                 fontWeight: FontWeight.bold),
                                             softWrap: true,
                                           )),

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/src/response.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:search_page/search_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Models/customer_product.dart';
 import '../Models/product_inventrory_model.dart';
@@ -37,7 +38,6 @@ class ProductInventoryState extends State<ProductInventory> {
 
   List<String> jsonDataByImeiNo = [];
   String searchedChipName = '';
-  bool searchActive = false;
   bool filterActive = false;
   bool searched = false;
 
@@ -144,7 +144,6 @@ class ProductInventoryState extends State<ProductInventory> {
 
       setState(() {
         jsonDataMap = json.decode(response.body);
-
         List<dynamic> dynamicImeiList = jsonDCode['imei'];
         jsonDataByImeiNo = List<String>.from(dynamicImeiList);
       });
@@ -168,7 +167,6 @@ class ProductInventoryState extends State<ProductInventory> {
           }else{
             filterProductInventoryList = (jsonDecode(response.body)["data"] as List).map((data) => ProductListModel.fromJson(data)).toList();
           }
-
         });
       }
     } else {
@@ -273,11 +271,6 @@ class ProductInventoryState extends State<ProductInventory> {
                   icon: const Icon(Icons.filter_alt_outlined),
                   tooltip: 'filter by category or model',
                   itemBuilder: (BuildContext context) {
-
-                    setState(() {
-                      searchActive = false;
-                    });
-
                     List<PopupMenuEntry<dynamic>> menuItems = [];
                     menuItems.add(
                       const PopupMenuItem<dynamic>(
@@ -295,14 +288,12 @@ class ProductInventoryState extends State<ProductInventory> {
                         );
                       }),
                     );
-
                     menuItems.add(
                       const PopupMenuItem<dynamic>(
                         enabled: false,
                         child: Text("Model"),
                       ),
                     );
-
                     List<dynamic> modelItems = jsonDataMap['data']['model'];
                     menuItems.addAll(
                       modelItems.map((dynamic item) {
@@ -338,8 +329,37 @@ class ProductInventoryState extends State<ProductInventory> {
                   tooltip: 'search by imei number',
                   onPressed: () {
                     setState(() {
-                      searchActive = true;
-                      searchedChipName = '';
+                      showSearch(
+                        context: context,
+                        delegate: SearchPage<String>(
+                          items: jsonDataByImeiNo,
+                          searchLabel: 'Search items',
+                          searchStyle: const TextStyle(color: Colors.white),
+                          itemEndsWith: true,
+                          suggestion: const Center(
+                            child: Text('Filter items by typing'),
+                          ),
+                          failure: const Center(
+                            child: Text('No items found'),
+                          ),
+                          filter: (String term) {
+                            return jsonDataByImeiNo.where((item) => item.toLowerCase().contains(term.toLowerCase())).toList();
+                          },
+                          builder: (String item) {
+                            return ListTile(
+                              title: Text(item),
+                              onTap: () {
+                                Navigator.of(context).pop(item);
+                                setState(() {
+                                  filterActive = true;
+                                  searchedChipName = item;
+                                  fetchFilterData(null, null, item);
+                                });
+                              },
+                            );
+                          },
+                        ),
+                      );
                     });
                   },
                 )
@@ -348,60 +368,7 @@ class ProductInventoryState extends State<ProductInventory> {
           ),
         ),
         SizedBox(height: 2, child: Container(color: Colors.grey.shade200,)),
-        searchActive ? Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SearchAnchor(
-            viewHintText: 'Search by IMEi Number',
-            builder: (BuildContext context, SearchController controller) {
-              return SearchBar(
-                hintText: 'Search by IMEi Number',
-                controller: controller,
-                onTap: () {
-                  filterActive = true;
-                  controller.openView();
-                },
-                onChanged: (val) {
-                  print(val);
-                },
-                onSubmitted: (val) {
-                  print(val);
-                },
-                leading: const Icon(Icons.search),
-                trailing: <Widget>[
-                  Tooltip(
-                    message: 'Close',
-                    child: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          filterActive = false;
-                          searchActive = false;
-                          searched = false;
-                          filterProductInventoryList.clear();
-                        });
-                      },
-                      icon: const Icon(Icons.close),
-                    ),
-                  ),
-                ],
-              );
-            },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return List<ListTile>.generate(jsonDataByImeiNo.length, (int index) {
-                final String item = jsonDataByImeiNo[index];
-                return ListTile(
-                  title: Text(item),
-                  onTap: () {
-                    setState(() {
-                      controller.closeView(item);
-                      searched = true;
-                      fetchFilterData(null, null, item);
-                    });
-                  },
-                );
-              });
-            },
-          ),
-        ) : searchedChipName == ''? const SizedBox() : Row(
+        searchedChipName != ''? Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
@@ -419,11 +386,11 @@ class ProductInventoryState extends State<ProductInventory> {
                   }),
             ),
           ],
-        ),
+        ) :
+        const SizedBox(),
       ],
     );
   }
-
 
   Widget buildAdminOrDealerDataTable()
   {

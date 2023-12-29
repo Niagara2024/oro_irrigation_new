@@ -2,17 +2,20 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:oro_irrigation_new/constants/MQTTManager.dart';
 import 'package:oro_irrigation_new/constants/http_service.dart';
 import 'package:oro_irrigation_new/constants/snack_bar.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/screens/Config/dealer_definition_config.dart';
 
 import '../../Models/WaterSource.dart';
+import '../../widgets/FontSizeUtils.dart';
+
 
 class watersourceUI extends StatefulWidget {
   const watersourceUI(
-      {Key? key, required this.userId, required this.controllerId});
-  final userId, controllerId;
+      {Key? key, required this.userId, required this.controllerId, required this.deviceID});
+  final userId, controllerId, deviceID;
 
   @override
   State<watersourceUI> createState() => _watersourceUIState();
@@ -26,12 +29,11 @@ class _watersourceUIState extends State<watersourceUI>
   int tabclickindex = 0;
   List<String> dropdownlist = ["Static", "Flow", "Nominal"];
   final _formKey = GlobalKey<FormState>();
-
   @override
   void initState() {
     super.initState();
-    //MqttWebClient().init();
     fetchData();
+
   }
 
   Future<void> fetchData() async {
@@ -46,7 +48,6 @@ class _watersourceUIState extends State<watersourceUI>
       setState(() {
         var jsondata1 = jsonDecode(response.body);
         _watersource = Watersource.fromJson(jsondata1);
-        //MqttWebClient().onSubscribed('tweet/');
       });
     } else {
       //_showSnackBar(response.body);
@@ -65,7 +66,6 @@ class _watersourceUIState extends State<watersourceUI>
       final minute = _selectedTime.minute.toString().padLeft(2, '0');
       return '$hour:$minute';
     }
-
     return null;
   }
 
@@ -119,7 +119,7 @@ class _watersourceUIState extends State<watersourceUI>
                     // ),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(15.0),
+                      borderRadius: BorderRadius.circular(1.0),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.grey.withOpacity(0.5),
@@ -169,17 +169,19 @@ class _watersourceUIState extends State<watersourceUI>
     return Column(
       children: [
         Card(
-          elevation: 4,
+          // elevation: 4,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
+            borderRadius: BorderRadius.circular(0.1),
           ),
           child: ListTile(
               title: Text(sourcename ?? '',
-                  style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold)),
+                style: TextStyle(
+                  fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
+                  fontWeight: FontWeight.normal,
+                ),
+                softWrap: true,),
               trailing: Text(sourceid ?? '',
-                  style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold))),
+                  style:  TextStyle(fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16, fontWeight: FontWeight.bold))),
         ),
         Expanded(
           child: ListView.builder(
@@ -191,7 +193,10 @@ class _watersourceUIState extends State<watersourceUI>
                     Card(
                       elevation: 0.1,
                       child: ListTile(
-                        title: Text('${Listofvalue?[index].title}'),
+                        title: Text('${Listofvalue?[index].title}',
+                            style: TextStyle(
+                              fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
+                              fontWeight: FontWeight.normal,)),
                         trailing: SizedBox(
                             width: 100,
                             child: TextFormField(
@@ -229,7 +234,9 @@ class _watersourceUIState extends State<watersourceUI>
                     Card(
                       elevation: 0.1,
                       child: ListTile(
-                        title: Text('${Listofvalue?[index].title}'),
+                        title: Text('${Listofvalue?[index].title}',style: TextStyle(
+                          fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
+                          fontWeight: FontWeight.normal,)),
                         trailing: MySwitch(
                           value: Listofvalue?[index].value == '1',
                           onChanged: ((value) {
@@ -256,7 +263,9 @@ class _watersourceUIState extends State<watersourceUI>
                       child: Card(
                         elevation: 0.1,
                         child: ListTile(
-                          title: Text('${Listofvalue?[index].title}'),
+                          title: Text('${Listofvalue?[index].title}',style: TextStyle(
+                            fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
+                            fontWeight: FontWeight.normal,)),
                           trailing: Container(
                             color: Colors.white70,
                             width: 100,
@@ -290,7 +299,9 @@ class _watersourceUIState extends State<watersourceUI>
                   children: [
                     Card(
                       child: ListTile(
-                        title: Text('${Listofvalue?[index].title}'),
+                        title: Text('${Listofvalue?[index].title}',style: TextStyle(
+                          fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
+                          fontWeight: FontWeight.normal,)),
                         trailing: SizedBox(
                           width: 100,
                           child: Container(
@@ -351,7 +362,7 @@ class _watersourceUIState extends State<watersourceUI>
         {"1601": Mqttsenddata},
       ]
     });
-    //MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
+    MQTTManager().publish('AppToFirmware/${widget.deviceID}', payLoadFinal);
   }
 
   String toMqttformat(

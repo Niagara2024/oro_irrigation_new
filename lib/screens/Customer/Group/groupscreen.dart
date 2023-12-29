@@ -44,29 +44,6 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
     }
   }
 
-  // datainit() {
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {
-  //     print('mounted.staret');
-  //     if (mounted) {
-  //       setState(() {
-  //         fetchData();
-  //         _timer = Timer(Duration(milliseconds: 500), () {
-  //           // valueAssign();
-  //           // selectvalvelistvalue();
-  //
-  //           groupNamesnew = _groupedname.data?.group;
-  //           var groupselect =
-  //               Provider.of<SelectedGroupProvider>(context, listen: false);
-  //
-  //           if (_groupedname.data!.group!.isNotEmpty) {
-  //             selectedGroupnew = groupNamesnew!.first.id!;
-  //             groupselect.updateSelectedGroup(groupNamesnew!.first.name!);
-  //           }
-  //         });
-  //       });
-  //     }
-  //   });
-  // }
 
   @override
   void dispose() {
@@ -206,7 +183,14 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 //TODO:- SelectvalveNAme
-                selectvalveName(context),
+                // selectvalveName(context),
+                // const Divider(
+                //   height: 20,
+                //   color: Colors.grey,
+                //   thickness: 2,
+                //   indent: 20,
+                //   endIndent: 20,
+                // ),
                 //TODO:- icon Group Details Icon
                 Container(
                     height: 60,
@@ -303,15 +287,16 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              '${groupselect.selectedGroup} :',
+              '${groupselect.selectedGroup} : ',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
+            groupselect.selectedvalve.length > 0 ?
             Chip(
               label: Text(
                 '${groupselect.selectedvalve.join(' & ')}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis),
               ),
-            ),
+            ) : Container(),
           ],
         ));
     //Group Details Icon
@@ -320,13 +305,14 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
   @override
   Widget groupnamenew(BuildContext context) {
     var groupselect = Provider.of<SelectedGroupProvider>(context, listen: true);
+
     return Column(
       children: [
         Wrap(
           children: groupNamesnew?.map((group) {
             return Padding(
               padding: EdgeInsets.all(8.0),
-              child: FilterChip(
+              child: group.name!.length > 0 ? FilterChip(
                 label: Text(group.name ?? ''),
                 backgroundColor: groupselect.selectedGroup == group.id
                     ? Colors.amber
@@ -345,7 +331,7 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
                     });
                   });
                 },
-              ),
+              ) : Container(),
             );
           }).toList() ??
               [],

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../state_management/irrigation_program_main_provider.dart';
 
+
 class ConditionsScreen extends StatefulWidget {
   final int userId;
   final int controllerId;
@@ -44,12 +45,16 @@ class _ConditionsScreenState extends State<ConditionsScreen> {
                         borderRadius: BorderRadius.circular(15)
                     ),
                     child: ListTile(
-                      title: Text(title, style: Theme.of(context).textTheme.bodyLarge,),
-                      subtitle: Text('${(conditionsProvider.sampleConditions!.condition[conditionTypeIndex].value['name'] != null)
-                          ? conditionsProvider.sampleConditions!.condition[conditionTypeIndex].value['name'] : 'Tap to select condition'}',),
+                      title: Text(title, style: TextStyle(color: selected ? Colors.black : Colors.grey, fontWeight: FontWeight.bold),),
+                      subtitle: Text(
+                        '${(conditionsProvider.sampleConditions!.condition[conditionTypeIndex].value['name'] != null)
+                            ? conditionsProvider.sampleConditions!.condition[conditionTypeIndex].value['name']
+                            : 'Tap to select condition'}',
+                        style: TextStyle(color: selected ? Colors.black : Colors.grey),
+                      ),
                       leading: CircleAvatar(
                         backgroundColor: Theme.of(context).colorScheme.secondary,
-                        //child: Icon(IconData(int.parse(iconCode), fontFamily: iconFontFamily), color: Colors.black,),
+                        child: Icon(Icons.facebook, color: Colors.black,),
                       ),
                       trailing: Checkbox(
                         value: selected,
@@ -58,32 +63,34 @@ class _ConditionsScreenState extends State<ConditionsScreen> {
                         },
                       ),
                       onTap: () {
-                        showAdaptiveDialog(
-                            context: context,
-                            builder: (BuildContext dialogContext) => Consumer<IrrigationProgramMainProvider>(
-                              builder: (context, conditionsProvider, child) {
-                                return AlertDialog(
-                                  content: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: conditionsProvider.sampleConditions!.defaultData.conditionLibrary.asMap().entries.map((conditions) {
-                                      final conditionName = conditions.value.name;
-                                      final conditionSno = conditions.value.sNo;
-                                      var conditionNameIndex = conditions.key;
-                                      return RadioListTile(
-                                          title: Text(conditionName),
-                                          value: conditionName,
-                                          groupValue: conditionsProvider.sampleConditions!.condition[conditionTypeIndex].value['name'],
-                                          onChanged: (newValue) {
-                                            conditionsProvider.updateConditions(title, conditionSno, newValue, conditionTypeIndex);
-                                            Navigator.of(context).pop();
-                                          }
-                                      );
-                                    }).toList(),
-                                  ),
-                                );
-                              },
-                            )
-                        );
+                        if(selected) {
+                          showAdaptiveDialog(
+                              context: context,
+                              builder: (BuildContext dialogContext) => Consumer<IrrigationProgramMainProvider>(
+                                builder: (context, conditionsProvider, child) {
+                                  return AlertDialog(
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: conditionsProvider.sampleConditions!.defaultData.conditionLibrary.asMap().entries.map((conditions) {
+                                        final conditionName = conditions.value.name;
+                                        final conditionSno = conditions.value.sNo;
+                                        var conditionNameIndex = conditions.key;
+                                        return RadioListTile(
+                                            title: Text(conditionName),
+                                            value: conditionName,
+                                            groupValue: conditionsProvider.sampleConditions!.condition[conditionTypeIndex].value['name'],
+                                            onChanged: (newValue) {
+                                              conditionsProvider.updateConditions(title, conditionSno, newValue, conditionTypeIndex);
+                                              Navigator.of(context).pop();
+                                            }
+                                        );
+                                      }).toList(),
+                                    ),
+                                  );
+                                },
+                              )
+                          );
+                        }
                       },
                     ),
                   ),

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../Models/IrrigationModel/sequence_model.dart';
 import '../constants/http_service.dart';
 
+
 class IrrigationProgramMainProvider extends ChangeNotifier {
   int _selectedTabIndex = 0;
   int get selectedTabIndex => _selectedTabIndex;
@@ -71,6 +72,7 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
   bool isReuseValve = true;
   bool isContains = false;
   bool isAgitator = false;
+  bool groupAdding = false;
 
   void updateIsAgitator() {
     isAgitator = true;
@@ -80,6 +82,7 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
   void updateSequencedValves(valves, valueToShow, titleIndex, serialNumber, sNo, isGroup) {
     if (isSingleValveMode) {
       handleSingleValveMode(valves, valueToShow, serialNumber, sNo, isGroup);
+      groupAdding = false;
     } else {
       handleMultipleValvesMode(valves, valueToShow, titleIndex, serialNumber, sNo, isGroup);
     }
@@ -87,40 +90,17 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
 
   void handleSingleValveMode(valves, valueToShow, serialNumber, sNo, isGroup) {
     if (selectedProgramType == 'Agitator Program') {
-      _irrigationLine!.sequence.add({
-        "sNo": sNo,
-        "id": 'SEQ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo',
-        "name": 'Sequence ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo',
-        "location": '',
-        "valve": isGroup ? valves : [valves],
-        "selected": [valves["name"]]
-      });
-      zoneSnoList.add('${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo');
-      zoneNameList.add('Sequence ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo');
-      programSNoList.add('${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo');
+      addSequence(valves, valueToShow, serialNumber, sNo, isGroup);
     } else {
       handleNonAgitatorSingleValveMode(valves, valueToShow, serialNumber, sNo, isGroup);
     }
   }
 
   void handleNonAgitatorSingleValveMode(valves, valueToShow, serialNumber, sNo, isGroup) {
-    int length = _irrigationLine!.sequence.isNotEmpty
-        ? _irrigationLine!.sequence[0]['valve'].length
-        : 0;
-
-    bool isContains = checkValveContainment(valves, length);
+    bool isContains = checkValveContainment(valves, isGroup);
 
     if (irrigationLine!.defaultData.reuseValve || !isContains) {
-      _irrigationLine!.sequence.add({
-        "sNo": sNo,
-        "id": 'SEQ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo',
-        "name": 'Sequence ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo',
-        "location": '',
-        "valve": isGroup ? valves : [valves],
-        "selected": [valueToShow]
-      });
-      zoneSnoList.add('${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo');
-      zoneNameList.add('Sequence ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo');
+      addSequence(valves, valueToShow, serialNumber, sNo, isGroup);
       isStartTogether = false;
       isReuseValve = false;
     } else {
@@ -128,35 +108,52 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
     }
   }
 
-  bool checkValveContainment(valves, int length) {
-    for (var i = 0; i < length; i++) {
-      if(valves.runtimeType != List<Map<String, dynamic>>) {
-        if (_irrigationLine!.sequence.any((item) => item['valve'].length > i && item['valve'][i]['sNo']! == valves['sNo'])) {
+  bool checkValveContainment(valves, isGroup) {
+    for (var item in _irrigationLine!.sequence) {
+      if (!isGroup) {
+        if (item['valve'].any((valve) => valve['sNo']! == valves['sNo'])) {
           return true;
-        } else {
-          return false;
+        }
+      } else if (isGroup) {
+        for(var valveInGroup in valves){
+          if(item['valve'].any((valve) => valve['sNo']! == valveInGroup["sNo"])) {
+            return true;
+          }
         }
       }
     }
     return false;
   }
-
   void handleMultipleValvesMode(valves, valueToShow, titleIndex, serialNumber, sNo, isGroup) {
     if (_irrigationLine!.sequence.isEmpty && !isAgitator) {
-      _irrigationLine!.sequence.add({
-        "sNo": sNo,
-        "id": 'SEQ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo',
-        "name": 'Sequence ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo',
-        "location": '',
-        "valve": isGroup ? valves : [valves],
-        "selected": [valueToShow]
-      });
-      zoneSnoList.add('${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo');
-      zoneNameList.add('Sequence ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo');
+      addSequence(valves, valueToShow, serialNumber, sNo, isGroup);
       isStartTogether = false;
     } else {
-      handleNonEmptySequence(valves, valueToShow, titleIndex, isGroup);
+      var lastIndex = _irrigationLine!.sequence.length - 1;
+      var selectedLength = _irrigationLine!.sequence[lastIndex]["selected"].length - 1;
+
+      if (!_irrigationLine!.sequence[lastIndex]["selected"][selectedLength].startsWith("G")) {
+        handleNonEmptySequence(valves, valueToShow, titleIndex, isGroup);
+        groupAdding = false;
+      } else {
+        groupAdding = true;
+      }
     }
+  }
+
+  void addSequence(valves, valueToShow, serialNumber, sNo, isGroup) {
+    _irrigationLine!.sequence.add({
+      "sNo": sNo,
+      "id": 'SEQ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo',
+      "name": 'Sequence ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo',
+      "location": '',
+      "valve": isGroup ? valves : [valves],
+      "selected": [valueToShow]
+    });
+    zoneSnoList.add('${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo');
+    zoneNameList.add('Sequence ${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo');
+    programSNoList.add('${serialNumber == 0 ? serialNumberCreation : serialNumber}.$sNo');
+    notifyListeners();
   }
 
   void handleNonEmptySequence(valves, valueToShow, titleIndex, isGroup) {
@@ -164,7 +161,6 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
 
     if (lastIndex >= 0) {
       dynamic lastItem = _irrigationLine!.sequence[lastIndex];
-      print(lastItem);
       List? sNoList = lastItem["valve"];
       isSameLine = lastItem['selected']!.every((item) {
         String itemString = item.toString();
@@ -216,8 +212,8 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
 
   void handleSameLine(valves, sNoList, valueToShow, lastItem, titleIndex, isGroup) {
     print("handleSameLine");
-    if(!irrigationLine!.defaultData.startTogether) {
-      if(!isGroup) {
+    if (!irrigationLine!.defaultData.startTogether) {
+      if (!isGroup) {
         if (!sNoList!.any((element) => element['sNo'] == valves['sNo'])) {
           isReuseValve = false;
           sNoList?.add(valves);
@@ -225,7 +221,7 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
           selectedList?.add(valueToShow);
           isStartTogether = false;
         } else {
-          if(irrigationLine!.defaultData.reuseValve) {
+          if (irrigationLine!.defaultData.reuseValve) {
             sNoList?.add(valves);
             List<String>? selectedList = lastItem["selected"]?.cast<String>();
             selectedList?.add(valueToShow);
@@ -234,8 +230,7 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
             isReuseValve = true;
           }
         }
-      }
-      else {
+      } else {
         isStartTogether = false;
       }
     } else {
@@ -298,7 +293,7 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
 
     return bigScreen
         ? _irrigationLine!.sequence.any((list) => list['valve']!.any((v) => v['name'] == valve))
-        : _irrigationLine!.sequence.any((list) => list['selected']!.contains(valueToShow));
+        : _irrigationLine!.sequence.any((list) => list['selected']!.contains(valueToShow)) || _irrigationLine!.sequence.any((list) => list['valve']!.any((v) => v['name'] == valve));
   }
 
 
@@ -351,10 +346,10 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
   }
 
   void updateRtcProperty(newTime, selectedRtc, property, scheduleType) {
-    // print(scheduleType);
-    // print(selectedRtc);
-    // print(property);
-    // print(newTime);
+    print(scheduleType);
+    print(selectedRtc);
+    print(property);
+    print(newTime);
     if(scheduleType == sampleScheduleModel!.scheduleAsRunList){
       final selectedRtcKey = sampleScheduleModel!.scheduleAsRunList.rtc.keys.toList()[selectedRtcIndex1];
       sampleScheduleModel!.scheduleAsRunList.rtc[selectedRtcKey][property] = newTime;
@@ -1020,7 +1015,6 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
             }
           }
         }
-
       }
       var totalFlowRate = 0;
       for(var flwRate in nominalFlowRate){
@@ -1386,23 +1380,33 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
         }
         break;
       case 'Central Fertilizer Set':
-        selectionModel.data!.centralFertilizerSet!.forEach((fertilizerSet) {
+        for (var fertilizerSet in selectionModel.data!.centralFertilizerSet!) {
           bool hasSelectedSite = selectionModel.data!.centralFertilizerSite!
-              .any((site) => site.id == fertilizerSet.recipe.first.location && site.selected == true);
+              .any((site) => site.id == (fertilizerSet.recipe.isNotEmpty
+              ? fertilizerSet.recipe.first.location
+              : null) && site.selected == true);
 
           if (hasSelectedSite) {
-            for (var i = 0; i < fertilizerSet.recipe.length; i++) {
-              if(fertilizerSet.recipe[i].id == id) {
-                fertilizerSet.recipe[i].selected = !fertilizerSet.recipe[i].selected;
+            if (fertilizerSet.recipe.any((element) => element.selected == true)) {
+              if(fertilizerSet.recipe.firstWhere((element) => element.selected == true).id == id){
+                fertilizerSet.recipe.firstWhere((element) => element.id == id).selected = false;
+              } else {
+                fertilizerSet.recipe.firstWhere((element) => element.selected == true).selected = false;
+                fertilizerSet.recipe.firstWhere((element) => element.id == id).selected = true;
               }
+            } else {
+              fertilizerSet.recipe.firstWhere((element) => element.id == id).selected = true;
             }
           }
-        });
+        }
+
         break;
       case 'Local Fertilizer Set':
         selectionModel.data!.localFertilizerSet!.forEach((fertilizerSet) {
           bool hasSelectedSite = selectionModel.data!.localFertilizerSite!
-              .any((site) => site.id == fertilizerSet.recipe.first.location && site.selected == true);
+              .any((site) => site.id == (fertilizerSet.recipe.isNotEmpty
+              ? fertilizerSet.recipe.first.location
+              : null) && site.selected == true);
 
           if (hasSelectedSite) {
             for (var i = 0; i < fertilizerSet.recipe.length; i++) {
@@ -1455,6 +1459,9 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
         } else {
           selectionModel.data!.localFertilizerSite![index].selected = true;
         }
+        break;
+      case 'Local Fertilizer Injector':
+        selectionModel.data!.localFertilizerInjector![index].selected = !selectionModel.data!.localFertilizerInjector![index].selected!;
         break;
       case 'Central Filter':
         selectionModel.data!.centralFilterSite![index].selected = !selectionModel.data!.centralFilterSite![index].selected!;
@@ -1554,7 +1561,11 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
         priorityList = List.generate(_programLibrary!.program.length, (index) => (index + 1));
         priority = _programDetails!.priority;
         // if(_programDetails != null) {
-        programName = (_programDetails!.programName == '' || _programDetails!.programName.isEmpty) ?  "Program $programCount" : _programDetails!.programName;
+        programName = serialNumber == 0
+            ? "Program $programCount"
+            : _programDetails!.programName.isEmpty
+            ? _programDetails!.defaultProgramName
+            : _programDetails!.programName;
         // } else {
         //   programName = _programDetails!.defaultProgramName;
         // }
@@ -1652,7 +1663,7 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
 
   void updateProgramName(dynamic newValue, String type) {
     switch (type) {
-      case 'programName':programName = newValue != ''? newValue : programName;
+      case 'programName':programName = newValue != '' ? newValue : programName;
       break;
       case 'priority':priority = int.tryParse(newValue) ?? 0;
       break;

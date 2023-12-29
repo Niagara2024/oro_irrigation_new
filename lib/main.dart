@@ -6,7 +6,7 @@ import 'package:oro_irrigation_new/screens/DashBoard.dart';
 import 'package:oro_irrigation_new/screens/login_form.dart';
 import 'package:oro_irrigation_new/state_management/FertilizerSetProvider.dart';
 import 'package:oro_irrigation_new/state_management/GlobalFertLimitProvider.dart';
-import 'package:oro_irrigation_new/state_management/MQTTAppState.dart';
+import 'package:oro_irrigation_new/state_management/MqttPayloadProvider.dart';
 import 'package:oro_irrigation_new/state_management/SelectedGroupProvider.dart';
 import 'package:oro_irrigation_new/state_management/constant_provider.dart';
 import 'package:oro_irrigation_new/state_management/data_acquisition_provider.dart';
@@ -14,9 +14,9 @@ import 'package:oro_irrigation_new/state_management/irrigation_program_main_prov
 import 'package:oro_irrigation_new/state_management/mqtt_message_provider.dart';
 import 'package:oro_irrigation_new/state_management/overall_use.dart';
 import 'package:oro_irrigation_new/state_management/preferences_screen_main_provider.dart';
+import 'package:oro_irrigation_new/state_management/system_definition_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'Models/Customer/Dashboard/MqttPayloadModel.dart';
 import 'state_management/config_maker_provider.dart';
 
 void main() {
@@ -25,21 +25,18 @@ void main() {
       ChangeNotifierProvider(create: (context) => ConfigMakerProvider()),
       ChangeNotifierProvider(create: (context) => PreferencesMainProvider()),
       ChangeNotifierProvider(create: (context) => DataAcquisitionProvider()),
-      ChangeNotifierProvider(create: (context) => ConstantProvider()),
       ChangeNotifierProvider(create: (context) => OverAllUse()),
       ChangeNotifierProvider(create: (context) => MessageProvider()),
       ChangeNotifierProvider(create: (context) => IrrigationProgramMainProvider()),
-      ChangeNotifierProvider(create: (context) => OverAllUse()),
       ChangeNotifierProvider(create: (context) => ConstantProvider()),
       ChangeNotifierProvider(create: (context) => SelectedGroupProvider()),
       ChangeNotifierProvider(create: (context) => FertilizerSetProvider()),
       ChangeNotifierProvider(create: (context) => GlobalFertLimitProvider()),
-      ChangeNotifierProvider(create: (context) => MqttPayloadProviderModel()),
-      ChangeNotifierProvider(create: (context) => MQTTAppState()),
+      ChangeNotifierProvider(create: (context) => MqttPayloadProvider()),
+      ChangeNotifierProvider(create: (context) => SystemDefinitionProvider()),
 
-      // ChangeNotifierProvider(create: (context) => MqttProvider(mqttClient: mqtt)),
     ],
-    child: MyApp(),
+    child: const MyApp(),
   )
   );
 }

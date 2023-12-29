@@ -3,16 +3,15 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/program_library.dart';
 import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/schedule_screen.dart';
 import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/selection_screen.dart';
 import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/sequence_screen.dart';
 import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/water_fert_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-
 import '../../../Models/IrrigationModel/sequence_model.dart';
 import '../../../constants/http_service.dart';
-import '../../../constants/mqtt_web_client.dart';
 import '../../../state_management/irrigation_program_main_provider.dart';
 import '../../../widgets/SCustomWidgets/custom_alert_dialog.dart';
 import '../../../widgets/SCustomWidgets/custom_snack_bar.dart';
@@ -49,7 +48,7 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
   dynamic apiData = {};
   dynamic waterAndFertData = [];
 
-  // MqttService mqttService = MqttService();
+ // MqttService mqttService = MqttService();
 
   @override
   void initState() {
@@ -705,6 +704,25 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
                   "hardware": dataToMqtt
                 };
                 userData.addAll(dataToSend);
+                var userDataToMqtt = {
+                  "userId": widget.userId,
+                  "controllerId": widget.controllerId,
+                };
+                try {
+                  final createUserProgram = await httpService.postRequest('createUserProgram', userData);
+                  final response = jsonDecode(createUserProgram.body);
+                  //mqttService.publish('get-tweet-response/86418005321234', userDataToMqtt.toString());
+                  if(createUserProgram.statusCode == 200) {
+                    ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(message: response['message']));
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProgramLibraryScreen(userId: widget.userId, controllerId: widget.controllerId,)),
+                    );
+                  }
+                } catch (error) {
+                  ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(message: 'Failed to update because of $error'));
+                  print("Error: $error");
+                }
                 // print(mainProvider.selectionModel.data!.localFertilizerSet!.map((e) => e.toJson()));
               }
               else {
@@ -721,22 +739,6 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
                   },
                 );
               }
-              var userDataToMqtt = {
-                "userId": widget.userId,
-                "controllerId": widget.controllerId,
-              };
-              try {
-                final createUserProgram = await httpService.postRequest('createUserProgram', userData);
-                final response = jsonDecode(createUserProgram.body);
-               // MqttWebClient(onMqttPayloadReceived: (String ) {}).publishMessage('get-tweet-response/86418005321234', userDataToMqtt.toString());
-                // mqttService.publish('get-tweet-response/86418005321234', userDataToMqtt.toString());
-                if(createUserProgram.statusCode == 200) {
-                  ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(message: response['message']));
-                }
-              } catch (error) {
-                ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(message: 'Failed to update because of $error'));
-                print("Error: $error");
-              }
             },
             // child: const Icon(Icons.send),
             child: const Text('http'),
@@ -745,8 +747,7 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
           OutlinedButton(
             key: UniqueKey(),
             onPressed: () async{
-              //MqttWebClient(onMqttPayloadReceived: (String ) {}).publishMessage('get-tweet-response/86418005321234', dataToMqtt.toString());
-              // mqttService.publish('get-tweet-response/86418005321234', dataToMqtt.toString());
+              //mqttService.publish('get-tweet-response/86418005321234', dataToMqtt.toString());
               // print(dataToMqtt);
               ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(message: 'Sent successfully'));
             },

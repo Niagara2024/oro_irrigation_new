@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../Models/IrrigationModel/sequence_model.dart';
+
 import '../../../state_management/irrigation_program_main_provider.dart';
 import '../../../widgets/SCustomWidgets/custom_animated_switcher.dart';
 import '../../../widgets/SCustomWidgets/custom_list_tile.dart';
@@ -23,8 +23,7 @@ class _SelectionScreenState extends State<SelectionScreen> {
   @override
   Widget build(BuildContext context) {
     final selectionPvd = Provider.of<IrrigationProgramMainProvider>(context,listen: true);
-    Widget buildCard(itemList, List<NameData> itemList2, List<Recipe> itemList3,
-        String title, String subtitle, String subtitle2, String subtitle3) {
+    Widget buildCard(itemList, String subtitle,) {
 
       return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
@@ -50,6 +49,8 @@ class _SelectionScreenState extends State<SelectionScreen> {
                                 && subtitle != "EC Sensors For central"
                                 && subtitle != "Local Fertilizer Set"
                                 && subtitle != "Central Fertilizer Set"
+                                && subtitle != "Central Fertilizer Injector"
+                                && subtitle != "Local Fertilizer Injector"
                                 && subtitle != "pH Sensors For central"
                                 && subtitle != "pH Sensors For local") ?
                             ListView.builder(
@@ -94,6 +95,7 @@ class _SelectionScreenState extends State<SelectionScreen> {
                                 })
                               ],
                             )
+                          // Container()
                         ),
                       ],
                     ),
@@ -150,57 +152,78 @@ class _SelectionScreenState extends State<SelectionScreen> {
     }
 
     if (selectionPvd.selectionModel.data == null) {
-      return const Center(
-          child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     } else {
       return LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
-            var centralSetCondition = selectionPvd.selectionModel.data!.centralFertilizerSet!
+            var centralSetCondition = (selectionPvd.selectionModel.data!.centralFertilizerSet!.isNotEmpty) ?
+            selectionPvd.selectionModel.data!.centralFertilizerSet!
                 .where((fertilizerSet) =>
                 selectionPvd.selectionModel.data!.centralFertilizerSite!
                     .any((site) =>
-                site.id == fertilizerSet.recipe.first.location &&
+                site.id == (fertilizerSet.recipe.isNotEmpty
+                    ? fertilizerSet.recipe.first.location
+                    : null) &&
                     site.selected == true))
-                .isNotEmpty;
-            var localSetCondition = selectionPvd.selectionModel.data!.localFertilizerSet!
+                .isNotEmpty : false;
+            var centralInjectorCondition = (selectionPvd.selectionModel.data!.centralFertilizerSet!.isNotEmpty) ?
+            selectionPvd.selectionModel.data!.centralFertilizerInjector!
+                .where((injector) =>
+                selectionPvd.selectionModel.data!.centralFertilizerSite!
+                    .any((site) =>
+                site.id ==  injector.location && site.selected == true)).isNotEmpty : false;
+            var localInjectorCondition = (selectionPvd.selectionModel.data!.localFertilizerSite!.isNotEmpty) ?
+            selectionPvd.selectionModel.data!.localFertilizerInjector!
+                .where((injector) =>
+                selectionPvd.selectionModel.data!.localFertilizerSite!
+                    .any((site) =>
+                site.id ==  injector.location && site.selected == true)).isNotEmpty : false;
+            var localSetCondition = selectionPvd.selectionModel.data!.localFertilizerSet!.isNotEmpty
+                ? selectionPvd.selectionModel.data!.localFertilizerSet!
                 .where((fertilizerSet) =>
                 selectionPvd.selectionModel.data!.localFertilizerSite!
                     .any((site) =>
-                site.id == fertilizerSet.recipe.first.location &&
+                site.id == (fertilizerSet.recipe.isNotEmpty
+                    ? fertilizerSet.recipe.first.location
+                    : null) &&
                     site.selected == true))
-                .isNotEmpty;
-            var ecSensorSelectionCentralCondition = selectionPvd.selectionModel.data!.ecSensor!
+                .isNotEmpty
+                : false;
+            var ecSensorSelectionCentralCondition = selectionPvd.selectionModel.data!.ecSensor!.isNotEmpty ?
+            selectionPvd.selectionModel.data!.ecSensor!
                 .where((ecSensor) => selectionPvd.selectionModel.data!.centralFertilizerSite!
-                .any((site) => site.id == ecSensor.location && site.selected == true)).isNotEmpty;
-            var ecSensorSelectionLocalCondition = selectionPvd.selectionModel.data!.ecSensor!
+                .any((site) => site.id == ecSensor.location && site.selected == true)).isNotEmpty : false;
+            var ecSensorSelectionLocalCondition = selectionPvd.selectionModel.data!.ecSensor!.isNotEmpty ?
+            selectionPvd.selectionModel.data!.ecSensor!
                 .where((ecSensor) => selectionPvd.selectionModel.data!.localFertilizerSite!
-                .any((site) => site.id == ecSensor.location && site.selected == true)).isNotEmpty;
-            var pHSensorSelectionCentralCondition = selectionPvd.selectionModel.data!.phSensor!
+                .any((site) => site.id == ecSensor.location && site.selected == true)).isNotEmpty : false;
+            var pHSensorSelectionCentralCondition = selectionPvd.selectionModel.data!.phSensor!.isNotEmpty ?
+            selectionPvd.selectionModel.data!.phSensor!
                 .where((phSensor) => selectionPvd.selectionModel.data!.centralFertilizerSite!
-                .any((site) => site.id == phSensor.location && site.selected == true)).isNotEmpty;
-            var pHSensorSelectionLocalCondition = selectionPvd.selectionModel.data!.phSensor!
+                .any((site) => site.id == phSensor.location && site.selected == true)).isNotEmpty : false;
+            var pHSensorSelectionLocalCondition = selectionPvd.selectionModel.data!.phSensor!.isNotEmpty ?selectionPvd.selectionModel.data!.phSensor!
                 .where((phSensor) => selectionPvd.selectionModel.data!.localFertilizerSite!
-                .any((site) => site.id == phSensor.location && site.selected == true)).isNotEmpty;
+                .any((site) => site.id == phSensor.location && site.selected == true)).isNotEmpty : false;
+            // print(centralInjectorCondition);
             return ListView(
               padding: constraints.maxWidth > 550 ? EdgeInsets.symmetric(horizontal: constraints.maxWidth * 0.025) : EdgeInsets.zero,
               shrinkWrap: true,
               children: [
                 const SizedBox(height: 10),
+                selectionPvd.selectionModel.data!.mainValve!.isNotEmpty ?
                 Column(
                   children: [
                     const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 10),
                       child: Text("MAIN VALVE SELECTION",),
                     ),
-                    selectionPvd.selectionModel.data!.mainValve!.isNotEmpty
-                        ?
                     buildCard(
-                        selectionPvd.selectionModel.data!.mainValve!, [], [], 'MAIN VALVE',
-                        'List of Valves', '', '')
-                        : Container(),
+                      selectionPvd.selectionModel.data!.mainValve!,
+                      'List of Valves',),
                     const SizedBox(height: 10),
                   ],
-                ),
+                ) : Container(),
+                selectionPvd.selectionModel.data!.irrigationPump!.isNotEmpty ?
                 Column(
                   children: [
                     const Padding(
@@ -219,14 +242,11 @@ class _SelectionScreenState extends State<SelectionScreen> {
                     selectionPvd.selectionModel.data!.irrigationPump!.isNotEmpty
                         ? CustomAnimatedSwitcher(
                       condition: !selectionPvd.isPumpStationMode,
-                      child: buildCard(
-                          selectionPvd.selectionModel.data!.irrigationPump!, [], [], 'PUMP SELECTION',
-                          'List of Pump', '', ''),
-                    )
+                      child: buildCard(selectionPvd.selectionModel.data!.irrigationPump!, 'List of Pump',),)
                         : Container(),
                     !selectionPvd.isPumpStationMode ? const SizedBox(height: 10) : Container(),
                   ],
-                ),
+                ) : Container(),
                 selectionPvd.selectionModel.data!.centralFertilizerSite!.isNotEmpty ?
                 Column(
                   children: [
@@ -235,28 +255,38 @@ class _SelectionScreenState extends State<SelectionScreen> {
                       child: Text("FERTILIZER SELECTION"),
                     ),
                     (selectionPvd.selectionModel.data!.centralFertilizerSite!.isNotEmpty)
-                        ?
-                    buildCard(
-                        selectionPvd.selectionModel.data!.centralFertilizerSite!,[],[],'FERTILIZER SELECTION', 'Central Fertilizer Site', '', ''
-                    )
+                        ? buildCard(selectionPvd.selectionModel.data!.centralFertilizerSite!,'Central Fertilizer Site',)
                         : Container(),
                     (selectionPvd.selectionModel.data!.centralFertilizerInjector!.isNotEmpty)
-                        ? buildCard(
-                        selectionPvd.selectionModel.data!.centralFertilizerInjector!,[],[],'', 'Central Fertilizer Injector', '', '')
-                        : Container(),
+                        ? CustomAnimatedSwitcher(
+                      condition: centralInjectorCondition,
+                      child: buildCard(
+                          selectionPvd.selectionModel.data!.centralFertilizerInjector!
+                              .where((injector) =>
+                              selectionPvd.selectionModel.data!.centralFertilizerSite!
+                                  .any((site) =>
+                              site.id ==  injector.location && site.selected == true)).expand((element) => [element]),'Central Fertilizer Injector'),
+                    ) : Container(),
                     (selectionPvd.selectionModel.data!.localFertilizerSite!.isNotEmpty)
                         ? buildCard(
-                        selectionPvd.selectionModel.data!.localFertilizerSite!,[],[],'', 'Local Fertilizer Site', '', '') : Container(),
+                      selectionPvd.selectionModel.data!.localFertilizerSite!,'Local Fertilizer Site',) : Container(),
                     (selectionPvd.selectionModel.data!.localFertilizerInjector!.isNotEmpty)
-                        ? buildCard(
-                        selectionPvd.selectionModel.data!.localFertilizerInjector!,[],[],'', 'Local Fertilizer', '', '')
+                        ? CustomAnimatedSwitcher(
+                      condition: localInjectorCondition,
+                      child: buildCard(
+                        selectionPvd.selectionModel.data!.centralFertilizerInjector!
+                            .where((injector) =>
+                            selectionPvd.selectionModel.data!.centralFertilizerSite!
+                                .any((site) =>
+                            site.id ==  injector.location && site.selected == true)).expand((element) => [element]),'Local Fertilizer Injector',),
+                    )
                         : Container(),
                     (selectionPvd.selectionModel.data!.localFertilizerInjector!.isNotEmpty) ? const SizedBox(height: 10,) : Container(),
                   ],
                 ) : Container(),
-                (selectionPvd.selectionModel.data!.centralFertilizerSet!.isNotEmpty && selectionPvd.selectionModel.data!.localFertilizerSet!.isNotEmpty) ?
+                (selectionPvd.selectionModel.data!.centralFertilizerSet!.isNotEmpty || selectionPvd.selectionModel.data!.localFertilizerSet!.isNotEmpty) ?
                 CustomAnimatedSwitcher(
-                  condition: selectionPvd.selectionModel.data!.centralFertilizerSite!.any((site) => site.selected == true),
+                  condition: centralSetCondition || localSetCondition,
                   child: Column(
                     children: [
                       const Padding(
@@ -280,10 +310,11 @@ class _SelectionScreenState extends State<SelectionScreen> {
                               .where((fertilizerSet) =>
                               selectionPvd.selectionModel.data!.centralFertilizerSite!
                                   .any((site) =>
-                              site.id == fertilizerSet.recipe.first.location && site.selected == true)
+                              site.id == (fertilizerSet.recipe.isNotEmpty
+                                  ? fertilizerSet.recipe.first.location
+                                  : null) && site.selected == true)
                           ).map((fertilizerSet) => fertilizerSet.recipe)
-                              .expand((recipeList) => recipeList),
-                          [], [], '', 'Central Fertilizer Set', '', '',
+                              .expand((recipeList) => recipeList),'Central Fertilizer Set',
                         ),
                       ) : Container(),
                       CustomAnimatedSwitcher(
@@ -293,10 +324,11 @@ class _SelectionScreenState extends State<SelectionScreen> {
                               .where((fertilizerSet) =>
                               selectionPvd.selectionModel.data!.localFertilizerSite!
                                   .any((site) =>
-                              site.id == fertilizerSet.recipe.first.location && site.selected == true)
+                              site.id == (fertilizerSet.recipe.isNotEmpty
+                                  ? fertilizerSet.recipe.first.location
+                                  : null) && site.selected == true)
                           ).map((fertilizerSet) => fertilizerSet.recipe)
-                              .expand((recipeList) => recipeList),
-                          [], [], '', 'Local Fertilizer Set', '', '',
+                              .expand((recipeList) => recipeList),'Local Fertilizer Set',
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -319,8 +351,7 @@ class _SelectionScreenState extends State<SelectionScreen> {
                         child: buildCard(
                           selectionPvd.selectionModel.data!.ecSensor!.where((ecSensor) =>
                               selectionPvd.selectionModel.data!.centralFertilizerSite!.any((site) =>
-                              site.id == ecSensor.location && site.selected == true)),
-                          [], [], '', 'EC Sensors For central', '', '',
+                              site.id == ecSensor.location && site.selected == true)),'EC Sensors For central',
                         ),
                       ),
                       CustomAnimatedSwitcher(
@@ -328,8 +359,7 @@ class _SelectionScreenState extends State<SelectionScreen> {
                         child: buildCard(
                           selectionPvd.selectionModel.data!.ecSensor!.where((ecSensor) =>
                               selectionPvd.selectionModel.data!.localFertilizerSite!.any((site) =>
-                              site.id == ecSensor.location && site.selected == true)),
-                          [], [], '', 'EC Sensors For local', '', '',
+                              site.id == ecSensor.location && site.selected == true)),'EC Sensors For local',
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -352,8 +382,7 @@ class _SelectionScreenState extends State<SelectionScreen> {
                         child: buildCard(
                           selectionPvd.selectionModel.data!.phSensor!.where((phSensor) =>
                               selectionPvd.selectionModel.data!.centralFertilizerSite!.any((site) =>
-                              site.id == phSensor.location && site.selected == true)),
-                          [], [], '', 'pH Sensors For central', '', '',
+                              site.id == phSensor.location && site.selected == true)),'pH Sensors For central',
                         ),
                       ),
                       CustomAnimatedSwitcher(
@@ -361,15 +390,13 @@ class _SelectionScreenState extends State<SelectionScreen> {
                         child: buildCard(
                           selectionPvd.selectionModel.data!.phSensor!.where((phSensor) =>
                               selectionPvd.selectionModel.data!.localFertilizerSite!.any((site) =>
-                              site.id == phSensor.location && site.selected == true)),
-                          [], [], '', 'pH Sensors For local', '', '',
+                              site.id == phSensor.location && site.selected == true)),'pH Sensors For local',
                         ),
                       ),
                       const SizedBox(height: 10),
                     ],
                   ),
-                )
-                    : Container(),
+                ) : Container(),
                 (selectionPvd.selectionModel.data!.centralFilterSite!.isNotEmpty || selectionPvd.selectionModel.data!.localFilter!.isNotEmpty) ?
                 Column(
                   children: [
@@ -379,13 +406,11 @@ class _SelectionScreenState extends State<SelectionScreen> {
                     ),
                     (selectionPvd.selectionModel.data!.centralFilterSite!.isNotEmpty || selectionPvd.selectionModel.data!.localFilter!.isNotEmpty)
                         ? buildCard(
-                        selectionPvd.selectionModel.data!.centralFilterSite!,
-                        selectionPvd.selectionModel.data!.localFilter!, [],'FILTER SELECTION',
-                        'Central Filter', 'Local Filter', '')
+                      selectionPvd.selectionModel.data!.centralFilterSite!, 'Central Filter',)
                         : Container(),
                     (selectionPvd.selectionModel.data!.localFilter!.isNotEmpty)
                         ? buildCard(
-                        selectionPvd.selectionModel.data!.localFilter!,[],[],'', 'Local Filter', '', '')
+                      selectionPvd.selectionModel.data!.localFilter!,'Local Filter',)
                         : Container(),
                     buildDropdownContainer(
                         "Central Filtration Operation Mode",

@@ -3,14 +3,11 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import 'package:provider/provider.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
-import '../../Models/Customer/Dashboard/MqttPayloadModel.dart';
 import '../../Models/Customer/Dashboard/ProgramList.dart';
 import '../../Models/CustomerSite.dart';
-import '../../Models/node_model.dart';
+import '../../constants/MQTTManager.dart';
 import '../../constants/http_service.dart';
-import '../../constants/mqtt_web_client.dart';
 import '../../constants/theme.dart';
 import 'Dashboard/DashboardByManual.dart';
 import 'Dashboard/DashboardByProgram.dart';
@@ -43,9 +40,6 @@ class _CustomerHomeState extends State<CustomerHome>
     indicatorViewShow();
     getCustomerSite();
 
-    Future.delayed(const Duration(milliseconds: 100), () async {
-      //MqttWebClient().onSubscribed('FirmwareToApp/E8FB1C3501D1');
-    });
   }
 
   Future<void> getCustomerSite() async
@@ -69,6 +63,7 @@ class _CustomerHomeState extends State<CustomerHome>
           }
         }
         getProgramList(customerSiteList[0].controllerId ?? 0);
+        MQTTManager().subscribeToTopic('FirmwareToApp/${customerSiteList[0].deviceId}');
         indicatorViewHide();
       }
       setState(() {
@@ -104,8 +99,7 @@ class _CustomerHomeState extends State<CustomerHome>
 
   @override
   Widget build(BuildContext context) {
-    var provider = Provider.of<MqttPayloadProviderModel>(context,listen: true);
-    print('payload:${provider.payload}');
+
     final mediaQuery = MediaQuery.of(context);
     if(widget.type==0){
       return visibleLoading? Visibility(
@@ -125,6 +119,15 @@ class _CustomerHomeState extends State<CustomerHome>
             title: const Text('DASHBOARD'),
             backgroundColor: myTheme.primaryColor,
             actions: [
+              IconButton(tooltip: 'Set serial for all Nodes', icon: const Icon(Icons.format_list_numbered), onPressed: () async {
+                String payLoadFinal = jsonEncode({
+                  "2300": [
+                    {"2301": ""},
+                  ]
+                });
+                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${customerSiteList[0].deviceId}');
+              }),
+              const SizedBox(width: 5,),
               IconButton(tooltip: 'Refresh', icon: const Icon(Icons.refresh), onPressed: () async {
                 //getControllerDashboardDetails(0, ddSelection);
               }),
@@ -133,7 +136,7 @@ class _CustomerHomeState extends State<CustomerHome>
                 Navigator.push(context, MaterialPageRoute(builder: (context) =>  DashboardByManual(siteID: customerSiteList[0].siteId, siteName: customerSiteList[0].siteName, controllerID: customerSiteList[0].controllerId, customerID: widget.customerID, imeiNo: customerSiteList[0].deviceId, programList: programList,)),);
               }),
               const SizedBox(width: 5,),
-              IconButton(tooltip: 'Planing', icon: const Icon(Icons.list_alt), onPressed: () async {
+              IconButton(tooltip: 'Planning', icon: const Icon(Icons.list_alt), onPressed: () async {
                 Navigator.push(context, MaterialPageRoute(builder: (context) =>  ProgramSchedule(customerID: widget.customerID, controllerID: customerSiteList[0].controllerId, siteName: customerSiteList[0].siteName, imeiNumber: customerSiteList[0].deviceId, userId:  widget.customerID,)),);
               }),
               const SizedBox(width: 10,),
@@ -455,8 +458,8 @@ class _CustomerHomeState extends State<CustomerHome>
                             ),
                           ],
                           rows: List<DataRow>.generate(usedNodeList[0].length, (index) => DataRow(cells: [
-                            DataCell(Center(child: Text('${index + 1}', style: TextStyle(fontWeight: FontWeight.normal),))),
-                            DataCell(Center(child: CircleAvatar(radius: 7, backgroundColor: Colors.green.shade200,))),
+                            DataCell(Center(child: Text('${index + 1}', style: const TextStyle(fontWeight: FontWeight.normal),))),
+                            DataCell(Center(child: CircleAvatar(radius: 7, backgroundColor: Colors.green.shade500,))),
                             DataCell(Center(child: Text('${usedNodeList[0][index].referenceNumber}', style: TextStyle(fontWeight: FontWeight.normal)))),
                             DataCell(Text(usedNodeList[0][index].categoryName, style: TextStyle(fontWeight: FontWeight.normal)),),
                             DataCell(Center(child: IconButton(icon: Icon(Icons.info_outline, color: myTheme.primaryColor,),onPressed: (){},iconSize: 20,))),

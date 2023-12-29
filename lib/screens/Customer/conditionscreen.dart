@@ -2,13 +2,15 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:oro_irrigation_new/constants/MQTTManager.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 
 import '../../Models/condition_model.dart';
 import '../../constants/http_service.dart';
-import '../../constants/snack_bar.dart';
+ import '../../constants/snack_bar.dart';
 import '../Config/dealer_definition_config.dart';
 import 'conditionwebui.dart';
+enum Calendar { Program, Moisture, Level }
 
 class ConditionScreen extends StatefulWidget {
   const ConditionScreen(
@@ -96,7 +98,7 @@ class _ConditionUIState extends State<ConditionUI>
   String zonestr = '';
   String selectedOperator = '';
   List<ConditionLibrary>? conditionLibrary = [];
-
+  Calendar selectedSegment = Calendar.Program;
   List<String> operatorList = ['&&', '||', '^'];
   final _formKey = GlobalKey<FormState>();
   List<String> conditionList = [];
@@ -298,11 +300,11 @@ class _ConditionUIState extends State<ConditionUI>
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Scaffold(
-            appBar: AppBar(
-              title: const Text('Conditions Library'),
-              backgroundColor: Color.fromARGB(255, 31, 164, 231),
-              //  _currentSelection == 0 ? rain() : buildFrostselection(),
-            ),
+            // appBar: AppBar(
+            //   title: const Text('Conditions Library'),
+            //   backgroundColor: Color.fromARGB(255, 31, 164, 231),
+            //   //  _currentSelection == 0 ? rain() : buildFrostselection(),
+            // ),
             body: buildcodition(context),
             floatingActionButton: FloatingActionButton(
               onPressed: () async {
@@ -339,21 +341,68 @@ class _ConditionUIState extends State<ConditionUI>
           const SizedBox(
             height: 16,
           ),
-          CupertinoSegmentedControl<int>(
-            children: _segmenttab,
-            onValueChanged: (value) {
+          // CupertinoSegmentedControl<int>(
+          //   children: _segmenttab,
+          //   onValueChanged: (value) {
+          //     setState(() {
+          //       _currentSelection = value!;
+          //       if (value == 0) {
+          //         conditionLibrary = _conditionModel.data!.conditionProgram!;
+          //       } else if (value == 1) {
+          //         conditionLibrary = _conditionModel.data!.conditionMoisture!;
+          //       } else {
+          //         conditionLibrary = _conditionModel.data!.conditionLevel!;
+          //       }
+          //     });
+          //   },
+          //   groupValue: _currentSelection,
+          // ),
+          SegmentedButton<Calendar>(
+            style: ButtonStyle(
+              backgroundColor: MaterialStatePropertyAll(
+                  myTheme.primaryColor.withOpacity(0.1)),
+              iconColor: MaterialStateProperty.all(myTheme.primaryColor),
+            ),
+            segments: const <ButtonSegment<Calendar>>[
+              ButtonSegment<Calendar>(
+                  value: Calendar.Program,
+                  label: Text('Program'),
+                  icon: Icon(Icons.list_alt)),
+              ButtonSegment<Calendar>(
+                  value: Calendar.Moisture,
+                  label: Text('Moisture'),
+                  icon: Icon(Icons.water_drop_outlined)),
+              ButtonSegment<Calendar>(
+                  value: Calendar.Level,
+                  label: Text('Level'),
+                  icon: Icon(Icons.water_outlined)),
+            ],
+            //   selected: {selectedSegment},
+            //   onSelectionChanged: (Set<Calendar> newSelection) {
+            //     setState(() {
+            //       selectedSegment = newSelection.first;
+            //     });
+            //   },
+            // ),
+
+            selected: <Calendar>{selectedSegment},
+            onSelectionChanged: (Set<Calendar> newSelection) {
               setState(() {
-                _currentSelection = value!;
-                if (value == 0) {
-                  conditionLibrary = _conditionModel.data!.conditionProgram!;
-                } else if (value == 1) {
-                  conditionLibrary = _conditionModel.data!.conditionMoisture!;
+                print('selectedSegment$selectedSegment');
+                selectedSegment = newSelection.first;
+
+                if (selectedSegment == Calendar.Program) {
+                  conditionLibrary =
+                  _conditionModel.data!.conditionProgram!;
+                } else if (selectedSegment == Calendar.Moisture) {
+                  conditionLibrary =
+                  _conditionModel.data!.conditionMoisture!;
                 } else {
-                  conditionLibrary = _conditionModel.data!.conditionLevel!;
+                  conditionLibrary =
+                  _conditionModel.data!.conditionLevel!;
                 }
               });
             },
-            groupValue: _currentSelection,
           ),
           Expanded(
             child: DefaultTabController(
@@ -923,7 +972,7 @@ class _ConditionUIState extends State<ConditionUI>
         {"708": Mqttsenddata},
       ]
     });
-    // MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
+    MQTTManager().publish('AppToFirmware/${widget.imeiNo}', payLoadFinal);
   }
 
   List<String> filterlist(List<String> conditionlist, String removevalue) {

@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../../state_management/irrigation_program_main_provider.dart';
 import '../../../widgets/SCustomWidgets/custom_list_tile.dart';
 
-
 class AlarmScreen extends StatefulWidget {
   final int userId;
   final int controllerId;
@@ -46,7 +45,7 @@ class _AlarmScreenState extends State<AlarmScreen> {
                       ),
                       child: CustomSwitchTile(
                           title: title,
-                          // icon: icon.length > 6 ? SvgPicture.asset('assets/images/ProgramAlarmIcons/$icon') : Icon(IconData(int.parse(icon), fontFamily: fontFamily), color: Colors.black,),
+                          //icon: icon.length > 6 ? SvgPicture.asset('assets/images/ProgramAlarmIcons/$icon') : Icon(IconData(int.parse(icon), fontFamily: fontFamily), color: Colors.black,),
                           value: value,
                           onChanged: (newValue) {
                             alarmProvider.updateValueForGeneral(generalNotificationTypeId, newValue);
@@ -76,7 +75,7 @@ class _AlarmScreenState extends State<AlarmScreen> {
                       ),
                       child: CustomSwitchTile(
                           title: title,
-                          //icon: icon.length > 6 ? Image.asset('assets/images/ProgramAlarmIcons/$icon') : Icon(IconData(int.parse(icon), fontFamily: fontFamily), color: Colors.black,),
+                          icon: icon.length > 6 ? Image.asset('assets/images/ProgramAlarmIcons/$icon') : Icon(Icons.account_balance_outlined, color: Colors.black,),
                           value: value,
                           onChanged: (newValue) {
                             alarmProvider.updateValueForEcPh(notificationTypeId, newValue);

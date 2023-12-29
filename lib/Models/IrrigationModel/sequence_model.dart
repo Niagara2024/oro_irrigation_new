@@ -622,6 +622,7 @@ class Recipe {
   String name;
   String location;
   bool selected;
+  bool select;
   String ec;
   String ph;
   List<Fertilizer> fertilizer;
@@ -635,6 +636,7 @@ class Recipe {
     required this.ec,
     required this.ph,
     required this.fertilizer,
+    required this.select
   });
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
@@ -647,7 +649,8 @@ class Recipe {
       id: json['id'],
       name: json['name'],
       location: json['location'],
-      selected: json['select'],
+      selected: json['selected'] ?? false,
+      select: json['select'],
       ec: json['Ec'] ?? "",
       ph: json['Ph'] ?? "",
       fertilizer: fertilizers,
@@ -662,7 +665,8 @@ class Recipe {
       "id": id,
       "name": name,
       "location": location,
-      "select": selected,
+      "select": select,
+      "selected": selected,
       "ec": ec,
       "ph": ph,
       "fertilizer": fertilizerList,

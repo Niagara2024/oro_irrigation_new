@@ -5,9 +5,12 @@ import 'package:provider/provider.dart';
 import '../../../state_management/irrigation_program_main_provider.dart';
 import '../../../widgets/SCustomWidgets/custom_alert_dialog.dart';
 import '../../../widgets/SCustomWidgets/custom_date_picker.dart';
+import '../../../widgets/SCustomWidgets/custom_drop_down.dart';
 import '../../../widgets/SCustomWidgets/custom_list_tile.dart';
+import '../../../widgets/SCustomWidgets/custom_native_time_picker.dart';
 import '../../../widgets/SCustomWidgets/custom_tab.dart';
 import '../../../widgets/SCustomWidgets/custom_train_widget.dart';
+
 
 class ScheduleScreen extends StatefulWidget {
   final int userId;
@@ -56,7 +59,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
     setState(() {
       if (rtcType.length < 6) {
         rtcType.addAll({
-          "rtc${rtcType.length + 1}": {"onTime": "00:00", "offTime": "00:00", "interval": "00:00", "noOfCycles": "00", "maxTime": "00:00", "condition": false}
+          "rtc${rtcType.length + 1}": {"onTime": "00:00", "offTime": "00:00", "interval": "00:00", "noOfCycles": "0", "maxTime": "00:00", "condition": false}
         });
         if(rtcType == runListRtc) {
           _tabController1 = TabController(length: rtcType.length, vsync: this)..addListener(() {
@@ -257,7 +260,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
                             color: Colors.white,
                             shape: BoxShape.rectangle,
                             borderRadius: BorderRadius.circular(10),
-
                           ),
                           child: Tab(
                             text: constraints.maxWidth > 800 ? 'RTC ${rtcIndex + 1}' : '${rtcIndex + 1}',
@@ -303,56 +305,33 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
                         Map<String, dynamic> rtcValueString = rtcValue.value;
                         final scheduleData = scheduleType.schedule;
 
-                        final onTime = (rtcValueString['onTime'] == null || rtcValueString['onTime'] == '')
-                            ? '00:00'
-                            : rtcValueString['onTime'];
-                        final offTime = scheduleProvider.sampleScheduleModel?.defaultModel.rtcOffTime ? (rtcValueString['offTime'] == null || rtcValueString['offTime'] == '')
-                            ? '00:00'
-                            : rtcValueString['offTime'] : '00:00';
-                        final interval = (rtcValueString['interval'] == null || rtcValueString['interval'] == '')
-                            ? '00:00'
-                            : rtcValueString['interval'];
-                        final noOfCycles = (rtcValueString['noOfCycles'] == null || rtcValueString['noOfCycles'] == '')
-                            ? '00'
-                            : rtcValueString['noOfCycles'];
-                        final maxTime = scheduleProvider.sampleScheduleModel?.defaultModel.rtcMaxTime ? (rtcValueString['maxTime'] == null || rtcValueString['maxTime'] == '')
-                            ? '00:00'
-                            : rtcValueString['maxTime'] : '00:00';
-                        final condition = (rtcValueString['condition'] == null || rtcValueString['condition'] == '')
-                            ? false
-                            : rtcValueString['condition'];
+                        final onTime = rtcValueString['onTime'];
+                        final offTime = scheduleProvider.sampleScheduleModel!.defaultModel.rtcOffTime ? rtcValueString['offTime'] : '00:00';
+                        final interval = rtcValueString['interval'];
+                        final noOfCycles = rtcValueString['noOfCycles'];
+                        final maxTime = scheduleProvider.sampleScheduleModel!.defaultModel.rtcMaxTime ? rtcValueString['maxTime'] : '00:00';
+                        final condition = rtcValueString['condition'];
                         final noOfDays = (scheduleData['noOfDays'] == null || scheduleData['noOfDays'] == '')
                             ? '0'
                             : scheduleData['noOfDays'];
-                        final startDate = (scheduleData['startDate'] == null || scheduleData['startDate'] == '')
-                            ? DateTime.now()
-                            : scheduleData['startDate'];
-                        final type = (scheduleData['type'] == null || scheduleData['type'] == '')
-                            ? []
-                            : scheduleData['type'];
-                        final runListLimit = (scheduleProvider.sampleScheduleModel?.defaultModel.runListLimit == null || scheduleProvider.sampleScheduleModel?.defaultModel.runListLimit == '')
-                            ? '0'
-                            : scheduleProvider.sampleScheduleModel?.defaultModel.runListLimit;
-                        final runDays = (scheduleData['runDays'] == null || scheduleData['runDays'] == '')
-                            ? '00'
-                            : scheduleData['runDays'];
-                        final skipDays = (scheduleData['skipDays'] == null || scheduleData['skipDays'] == '')
-                            ? '00'
-                            : scheduleData['skipDays'];
+                        final startDate = scheduleData['startDate'];
+                        final type = scheduleData['type'];
+                        final runListLimit = scheduleProvider.sampleScheduleModel?.defaultModel.runListLimit;
+                        final runDays = scheduleData['runDays'];
+                        final skipDays = scheduleData['skipDays'];
 
                         // print(startDate);
                         // print(DateTime.parse(startDate));
                         // List<String> days = List.generate(int.parse(noOfDays != '' ? noOfDays : '0'), (index) => 'DAY ${index + 1}');
                         String getWeekday(int weekday) {
                           const daysInWeek = 7;
-                          List<String> weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                          List<String> weekdays = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
                           int adjustedWeekday = (weekday - 1 + daysInWeek) % daysInWeek;
 
-                          // print(adjustedWeekday);
                           return weekdays[adjustedWeekday];
                         }
 
-                        List<String> days2 = List.generate(int.parse(noOfDays != '' ? noOfDays : '0'), (index) {
+                        List<String> days2 = List.generate(int.parse(noOfDays), (index) {
                           DateTime currentDate = DateTime.parse(startDate).add(Duration(days: index));
                           return getWeekday(currentDate.weekday);
                         });
@@ -361,7 +340,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
                           padding: const EdgeInsets.symmetric(horizontal: 5),
                           children: [
                             const SizedBox(height: 10,),
-                            Text('RTC ${selectedRtcIndex+1}'),
+                            constraints.maxWidth < 600 ? Text('RTC ${selectedRtcIndex+1}') : Container(),
+                            constraints.maxWidth < 600 ?
                             Card(
                               surfaceTintColor: Colors.white,
                               shape: RoundedRectangleBorder(
@@ -379,12 +359,12 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
                                             scheduleProvider.updateRtcProperty(newTime, selectedRtc, 'onTime', scheduleType);
                                           },
                                           isSeconds: false,
-                                          is24HourMode: true,
+                                          is24HourMode: false,
                                           isNative: true,
                                           icon: Icons.timer_outlined,
                                         ),
                                         Visibility(
-                                          visible: scheduleProvider.sampleScheduleModel?.defaultModel.rtcOffTime,
+                                          visible: scheduleProvider.sampleScheduleModel!.defaultModel.rtcOffTime,
                                           child: CustomTimerTile(
                                             subtitle: 'RTC OFF TIME',
                                             initialValue: offTime,
@@ -423,7 +403,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
                                           icon: Icons.safety_check,
                                         ),
                                         Visibility(
-                                          visible: scheduleProvider.sampleScheduleModel?.defaultModel.rtcOffTime,
+                                          visible: scheduleProvider.sampleScheduleModel!.defaultModel.rtcMaxTime,
                                           child: CustomTimerTile(
                                             subtitle: 'MAXIMUM TIME',
                                             initialValue: maxTime,
@@ -449,10 +429,129 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
                                   ).toList()
                                 ],
                               ),
+                            ) :
+                            Card(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(0)
+                              ),
+                              child: Column(
+                                children: [
+                                  Table(
+                                    children: [
+                                      TableRow(
+                                          children: [
+                                            buildTableCellHeadings("RTC ${selectedRtcIndex+1}",
+                                                const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                                                null,
+                                                false, false, false
+                                            ),
+                                          ],
+                                          decoration: BoxDecoration(
+                                              color: Theme.of(context).primaryColor
+                                          )
+                                      )
+                                    ],
+                                  ),
+                                  Table(
+                                    children: [
+                                      TableRow(
+                                          children: [
+                                            buildTableCellHeadings('RTC ON TIME', null, null, true, false, true,),
+                                            if(scheduleProvider.sampleScheduleModel!.defaultModel.rtcOffTime)
+                                              buildTableCellHeadings('RTC OFF TIME', null, null, true, true, true),
+                                            buildTableCellHeadings('INTERVAL', null, null, true, true, true),
+                                            buildTableCellHeadings('NO OF CYCLES', null, null, true, true, true),
+                                            if(scheduleProvider.sampleScheduleModel!.defaultModel.rtcMaxTime)
+                                              buildTableCellHeadings('MAXIMUM TIME', null, null, true, true, true),
+                                            buildTableCellHeadings('CONDITIONS', null, null, true, true, false),
+                                          ],
+                                          decoration: const BoxDecoration(
+                                            color: Colors.white,
+                                          )
+                                      ),
+                                      TableRow(
+                                          children: [
+                                            buildTableCellHeadings('null', null,
+                                                CustomNativeTimePicker(
+                                                  initialValue: onTime,
+                                                  is24HourMode: false,
+                                                  onChanged: (newTime) => scheduleProvider.updateRtcProperty(newTime, selectedRtc, 'onTime', scheduleType),
+                                                ),
+                                                false, false, true
+                                            ),
+                                            if(scheduleProvider.sampleScheduleModel!.defaultModel.rtcOffTime)
+                                              buildTableCellHeadings(
+                                                  'null', null,
+                                                  CustomNativeTimePicker(
+                                                    initialValue: offTime,
+                                                    is24HourMode: false,
+                                                    onChanged: (newTime) => scheduleProvider.updateRtcProperty(newTime, selectedRtc, 'offTime', scheduleType),
+                                                  ),
+                                                  false, true, true
+                                              ),
+                                            buildTableCellHeadings(
+                                                'null', null,
+                                                CustomNativeTimePicker(
+                                                  initialValue: interval,
+                                                  is24HourMode: true,
+                                                  onChanged: (newTime) => scheduleProvider.updateRtcProperty(newTime, selectedRtc, 'interval', scheduleType),
+                                                ),
+                                                false, true, true
+                                            ),
+                                            buildTableCellHeadings(
+                                                'null', null,
+                                                SizedBox(
+                                                  height: 30,
+                                                  width: constraints.maxWidth * 0.05,
+                                                  child: TextFormField(
+                                                    textAlign: TextAlign.center,
+                                                    initialValue: noOfCycles,
+                                                    keyboardType: TextInputType.number,
+                                                    inputFormatters: [
+                                                      FilteringTextInputFormatter.deny(RegExp('[^0-9]')),
+                                                      LengthLimitingTextInputFormatter(2),
+                                                    ],
+                                                    onChanged: (newValue){
+                                                      scheduleProvider.updateRtcProperty(newValue, selectedRtc, 'noOfCycles', scheduleType);
+                                                    },
+                                                  ),
+                                                ),
+                                                false, true, true
+                                            ),
+                                            if(scheduleProvider.sampleScheduleModel!.defaultModel.rtcMaxTime)
+                                              buildTableCellHeadings(
+                                                  'null', null,
+                                                  CustomNativeTimePicker(
+                                                    initialValue: maxTime,
+                                                    is24HourMode: true,
+                                                    onChanged: (newTime) => scheduleProvider.updateRtcProperty(newTime, selectedRtc, 'maxTime', scheduleType),
+                                                  ),
+                                                  false, true, true
+                                              ),
+                                            buildTableCellHeadings(
+                                                'null', null,
+                                                Switch(
+                                                  value: condition,
+                                                  onChanged: (newValue){
+                                                    scheduleProvider.updateRtcProperty(newValue, selectedRtc, 'condition', scheduleType);
+                                                  },
+                                                ),
+                                                false, true, false
+                                            )
+                                          ],
+                                          decoration: const BoxDecoration(
+                                              color: Colors.white
+                                          )
+                                      )
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                             if(scheduleProvider.selectedScheduleType == scheduleProvider.scheduleTypes[1])
                               const SizedBox(height: 10,),
                             if(scheduleProvider.selectedScheduleType == scheduleProvider.scheduleTypes[1])
+                              constraints.maxWidth < 600 ?
                               Card(
                                 surfaceTintColor: Colors.white,
                                 shape: RoundedRectangleBorder(
@@ -539,9 +638,100 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
                                     )
                                   ],
                                 ),
+                              ) :
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Card(
+                                    surfaceTintColor: Colors.white,
+                                    child: SizedBox(
+                                      width: constraints.maxWidth * 0.3,
+                                      child: CustomTile(
+                                        title: 'Number of days',
+                                        content: Icons.format_list_numbered,
+                                        trailing: SizedBox(
+                                          width: 50,
+                                          child: InkWell(
+                                            onTap: () {
+                                              _textEditingController.text = noOfDays;
+                                              _textEditingController.selection = TextSelection(
+                                                baseOffset: 0,
+                                                extentOffset: _textEditingController.text.length,
+                                              );
+                                              showAdaptiveDialog(
+                                                  context: context,
+                                                  builder: (ctx) => Consumer<IrrigationProgramMainProvider>(
+                                                    builder: (context, scheduleProvider, child) {
+                                                      return AlertDialog(
+                                                        title: const Text("Number of days"),
+                                                        content: TextFormField(
+                                                          keyboardType: TextInputType.number,
+                                                          inputFormatters: [
+                                                            FilteringTextInputFormatter.deny(RegExp('[^0-9a-zA-Z]')),
+                                                            LengthLimitingTextInputFormatter(2),
+                                                          ],
+                                                          controller: _textEditingController,
+                                                          autofocus: true,
+                                                          onChanged: (newValue) {
+                                                            tempNoOfDays = newValue;
+                                                            scheduleProvider.validateInputAndSetErrorText(tempNoOfDays, runListLimit);
+                                                            scheduleProvider.initializeDropdownValues(
+                                                                tempNoOfDays == '' ? '0' : tempNoOfDays, noOfDays, type);
+                                                          },
+                                                          decoration: InputDecoration(
+                                                            errorText: scheduleProvider.errorText,
+                                                          ),
+                                                        ),
+                                                        actions: <Widget>[
+                                                          TextButton(
+                                                            onPressed: () => Navigator.of(ctx).pop(),
+                                                            child: const Text("CANCEL", style: TextStyle(color: Colors.red),),
+                                                          ),
+                                                          TextButton(
+                                                            onPressed: () {
+                                                              if (scheduleProvider.errorText == null) {
+                                                                Navigator.of(context).pop();
+                                                                scheduleProvider.updateNumberOfDays(tempNoOfDays, 'noOfDays', scheduleType);
+                                                              }
+                                                            },
+                                                            child: const Text("OKAY"),
+                                                          ),
+                                                        ],
+                                                      );
+                                                    },
+                                                  )
+                                              );
+                                            },
+                                            child: Text(noOfDays, style: Theme.of(context).textTheme.bodyMedium,),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 20,),
+                                  Card(
+                                    surfaceTintColor: Colors.white,
+                                    child: SizedBox(
+                                      width: constraints.maxWidth * 0.3,
+                                      child: CustomTile(
+                                        title: 'Start date',
+                                        content: Icons.calendar_month,
+                                        trailing: IntrinsicWidth(
+                                            child: DatePickerField(
+                                              value: DateTime.parse(startDate),
+                                              onChanged: (newDate) {
+                                                scheduleProvider.updateStartDate(newDate, scheduleType);
+                                              },
+                                            )
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             const SizedBox(height: 10,),
                             if(scheduleProvider.selectedScheduleType == scheduleProvider.scheduleTypes[1])
+                              constraints.maxWidth < 700 ?
                               Visibility(
                                 visible: noOfDays != '00',
                                 child: Card(
@@ -556,29 +746,76 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
                                       width: 250,
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                        children: [
-                                          for(int i = 0; i < 4; i++)
-                                            CircleAvatar(
-                                              radius: 22,
-                                              backgroundColor: scheduleProvider.selectedButtonIndex == i
-                                                  ? Theme.of(context).colorScheme.secondary
-                                                  : Theme.of(context).primaryColor,
-                                              child: IconButton(
-                                                icon: Icon([
+                                        children: List.generate(scheduleProvider.scheduleOptions.length, (i) {
+                                          bool areAllItemsSame = scheduleProvider.sampleScheduleModel?.scheduleAsRunList!.schedule['type']!.every((item) {
+                                            return item == scheduleProvider.scheduleOptions[i];
+                                          });
+                                          return CircleAvatar(
+                                            radius: 22,
+                                            backgroundColor: (scheduleProvider.selectedButtonIndex == i || areAllItemsSame)
+                                                ? Theme.of(context).colorScheme.secondary
+                                                : Theme.of(context).primaryColor,
+                                            child: IconButton(
+                                              icon: Icon(
+                                                [
                                                   Icons.playlist_remove_outlined,
-                                                  Icons.timer, Icons.water_drop,
-                                                  Icons.local_florist_rounded,][i],
-                                                  color: scheduleProvider.selectedButtonIndex == i
-                                                      ? Colors.black
-                                                      : Colors.white,
-                                                ),
-                                                onPressed: () {
-                                                  scheduleProvider.setAllSame(i);
-                                                },
+                                                  Icons.timer,
+                                                  Icons.water_drop,
+                                                  Icons.local_florist_rounded,
+                                                ][i],
+                                                color: (scheduleProvider.selectedButtonIndex == i || areAllItemsSame)
+                                                    ? Colors.black
+                                                    : Colors.white,
                                               ),
-                                            )
-                                        ],
+                                              onPressed: () {
+                                                scheduleProvider.setAllSame(i);
+                                              },
+                                            ),
+                                          );
+                                        }),
                                       ),
+                                    ),
+                                  ),
+                                ),
+                              ) :
+                              Visibility(
+                                visible: int.parse(noOfDays) != 0,
+                                child: Card(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(0)
+                                  ),
+                                  surfaceTintColor: Colors.white,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Text("Set All Days", style: Theme.of(context).textTheme.bodyLarge,),
+                                        for(int i = 0; i < scheduleProvider.scheduleOptions.length; i++)
+                                          OutlinedButton(
+                                            onPressed: () => scheduleProvider.setAllSame(i),
+                                            style: ButtonStyle(
+                                              backgroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+                                                bool areAllItemsSame = scheduleProvider.sampleScheduleModel?.scheduleAsRunList!.schedule['type']!.every((item) {
+                                                  return item == scheduleProvider.scheduleOptions[i];
+                                                });
+                                                if (scheduleProvider.selectedButtonIndex == i || areAllItemsSame) {
+                                                  return Theme.of(context).colorScheme.secondary;
+                                                } else {
+                                                  return Colors.white;
+                                                }
+                                              }),
+                                              foregroundColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+                                                if (scheduleProvider.selectedButtonIndex == i) {
+                                                  return Colors.black;
+                                                } else {
+                                                  return Colors.black;
+                                                }
+                                              }),
+                                            ),
+                                            child: Text(scheduleProvider.scheduleOptions[i]),
+                                          ),
+                                      ],
                                     ),
                                   ),
                                 ),
@@ -586,6 +823,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
                             if(scheduleProvider.selectedScheduleType == scheduleProvider.scheduleTypes[1])
                               const SizedBox(height: 10,),
                             if(scheduleProvider.selectedScheduleType == scheduleProvider.scheduleTypes[1])
+                              constraints.maxWidth < 600 ?
                               Card(
                                 surfaceTintColor: Colors.white,
                                 shape: RoundedRectangleBorder(
@@ -611,10 +849,94 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
                                     )
                                   ],
                                 ),
-                              ),
+                              ) :
+                              int.parse(noOfDays) != 0 ?
+                              Card(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(0)
+                                ),
+                                surfaceTintColor: Colors.transparent,
+                                child: Center(
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                              color: Theme.of(context).primaryColor
+                                          ),
+                                          child: Row(
+                                            children: List.generate(
+                                              int.parse(noOfDays),
+                                                  (index) =>
+                                                  Container(
+                                                    width: int.parse(noOfDays) <= 5 ? constraints.maxWidth * 0.185 : constraints.maxWidth * 0.15,
+                                                    decoration: BoxDecoration(
+                                                        border: Border(
+                                                            left: index != 0 ? const BorderSide(width: 0.3, color: Colors.white) : BorderSide.none,
+                                                            right: index != int.parse(noOfDays) - 1 ? const BorderSide(width: 0.3, color: Colors.white) : BorderSide.none
+                                                        )
+                                                    ),
+                                                    padding: const EdgeInsets.all(8),
+                                                    child: Center(
+                                                      child: Row(
+                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                        children: [
+                                                          CircleAvatar(
+                                                            backgroundColor: Theme.of(context).colorScheme.secondary,
+                                                            radius: 15,
+                                                            child: Text('${index + 1}', style: const TextStyle(color: Colors.black)),
+                                                          ),
+                                                          SizedBox(width: constraints.maxWidth * 0.015),
+                                                          Text(days2[index], style: const TextStyle(color: Colors.white)),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                            ),
+                                          ),
+                                        ),
+                                        Container(
+                                          decoration: const BoxDecoration(
+                                              color: Colors.white
+                                          ),
+                                          child: Row(
+                                            children: List.generate(
+                                              int.parse(noOfDays),
+                                                  (index) =>
+                                                  Container(
+                                                    width: int.parse(noOfDays) <= 5 ? constraints.maxWidth * 0.185 : constraints.maxWidth * 0.15,
+                                                    decoration: BoxDecoration(
+                                                        border: Border(
+                                                            left: index != 0 ? const BorderSide(width: 0.3) : BorderSide.none,
+                                                            right: index != int.parse(noOfDays) - 1 ? const BorderSide(width: 0.3) : BorderSide.none
+                                                        )
+                                                    ),
+                                                    padding: const EdgeInsets.all(8),
+                                                    child: Center(
+                                                        child: SizedBox(
+                                                          width: constraints.maxWidth * 0.1,
+                                                          child: CustomDropdownWidget(
+                                                            dropdownItems: scheduleProvider.scheduleOptions,
+                                                            selectedValue: type[index],
+                                                            onChanged: (newValue) => scheduleProvider.updateDropdownValue(index, newValue),
+                                                            includeNoneOption: true,
+                                                          ),
+                                                        )
+                                                    ),
+                                                  ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ) : Container(),
                             if(scheduleProvider.selectedScheduleType == scheduleProvider.scheduleTypes[1])
                               const SizedBox(height: 10,),
                             if(scheduleProvider.selectedScheduleType == scheduleProvider.scheduleTypes[2])
+                              constraints.maxWidth < 600 ?
                               Card(
                                 surfaceTintColor: Colors.white,
                                 shape: RoundedRectangleBorder(
@@ -669,6 +991,93 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
                                     )
                                   ],
                                 ),
+                              ) :
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                    width: constraints.maxWidth * 0.3,
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(0),
+                                        boxShadow: [
+                                          const BoxShadow(
+                                              color: Colors.black12,
+                                              spreadRadius: 3,
+                                              blurRadius: 5
+                                          )
+                                        ]
+                                    ),
+                                    child: CustomTile(
+                                      title: 'Start date',
+                                      content: Icons.calendar_month,
+                                      trailing: IntrinsicWidth(
+                                          child: DatePickerField(
+                                            value: DateTime.parse(startDate),
+                                            onChanged: (newDate ) {
+                                              scheduleProvider.updateStartDate(newDate, scheduleType);
+                                            },
+                                          )
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    width: constraints.maxWidth * 0.3,
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(0),
+                                        boxShadow: [
+                                          const BoxShadow(
+                                              color: Colors.black12,
+                                              spreadRadius: 3,
+                                              blurRadius: 5
+                                          )
+                                        ]
+                                    ),
+                                    child: CustomTextFormTile(
+                                      subtitle: 'RUN DAYS',
+                                      hintText: '00',
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.deny(RegExp('[^0-9]')),
+                                        LengthLimitingTextInputFormatter(2),
+                                      ],
+                                      initialValue: runDays,
+                                      onChanged: (newValue){
+                                        scheduleProvider.updateNumberOfDays(newValue, 'runDays', scheduleType);
+                                      },
+                                      icon: Icons.directions_run,
+                                    ),
+                                  ),
+                                  Container(
+                                    width: constraints.maxWidth * 0.3,
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(0),
+                                        boxShadow: [
+                                          const BoxShadow(
+                                              color: Colors.black12,
+                                              spreadRadius: 3,
+                                              blurRadius: 5
+                                          )
+                                        ]
+                                    ),
+                                    child: CustomTextFormTile(
+                                      subtitle: 'SKIP DAYS',
+                                      hintText: '00',
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.deny(RegExp('[^0-9]')),
+                                        LengthLimitingTextInputFormatter(2),
+                                      ],
+                                      initialValue: skipDays,
+                                      onChanged: (newValue){
+                                        scheduleProvider.updateNumberOfDays(newValue, 'skipDays', scheduleType);
+                                      },
+                                      icon: Icons.skip_next,
+                                    ),
+                                  ),
+                                ],
                               ),
                             if(scheduleProvider.selectedScheduleType == scheduleProvider.scheduleTypes[2])
                               const SizedBox(height: 10,),
@@ -685,6 +1094,26 @@ class _ScheduleScreenState extends State<ScheduleScreen> with TickerProviderStat
               ),
             )
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildTableCellHeadings(headings, style, child, bottom, left, right) {
+    return TableCell(
+      child: Container(
+        height: 40,
+        decoration: BoxDecoration(
+            border: Border(
+              left: left ? const BorderSide(width: 0.5) : BorderSide.none,
+              right: right ? const BorderSide(width: 0.5) : BorderSide.none,
+              bottom: bottom ? const BorderSide(width: 0.5) : BorderSide.none,
+            )
+        ),
+        padding: const EdgeInsets.all(8.0),
+        child: Center(
+          child: child ?? Text(headings, style: style ?? TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold,),
+          ),
         ),
       ),
     );

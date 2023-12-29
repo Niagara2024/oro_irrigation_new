@@ -37,48 +37,51 @@ class _DoneScreenState extends State<DoneScreen> {
                     borderRadius: BorderRadius.circular(15)
                 ),
                 child: CustomTile(
-                  title: 'PROGRAM NAME',
+                  title: 'Program Name',
                   content: Icons.perm_device_info,
                   showSubTitle: true,
-                  subtitle: widget.serialNumber == 0
+                  subtitle: tempProgramName != '' ? tempProgramName : widget.serialNumber == 0
                       ? "Program ${doneProvider.programCount}"
                       : doneProvider.programDetails!.programName.isNotEmpty ? programName : doneProvider.programDetails!.defaultProgramName,
-                  trailing: InkWell(
-                    child: Icon(Icons.drive_file_rename_outline_rounded, color: Theme.of(context).primaryColor,),
-                    onTap: () {
-                      _textEditingController.text = doneProvider.programDetails!.programName.isNotEmpty
-                          ? programName
-                          : doneProvider.programDetails!.defaultProgramName;
-                      _textEditingController.selection = TextSelection(
-                        baseOffset: 0,
-                        extentOffset: _textEditingController.text.length,
-                      );
-                      showDialog(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: const Text("Edit program name"),
-                          content: TextFormField(
-                            autofocus: true,
-                            controller: _textEditingController,
-                            onChanged: (newValue) => tempProgramName = newValue,
-                            inputFormatters: [LengthLimitingTextInputFormatter(20)],
+                  trailing: SizedBox(
+                    width: constraints.maxWidth < 550 ? 80 : 100,
+                    child: InkWell(
+                      child: Icon(Icons.drive_file_rename_outline_rounded, color: Theme.of(context).primaryColor,),
+                      onTap: () {
+                        _textEditingController.text = widget.serialNumber == 0
+                            ? "Program ${doneProvider.programCount}"
+                            : doneProvider.programDetails!.programName.isNotEmpty ? programName : doneProvider.programDetails!.defaultProgramName;
+                        _textEditingController.selection = TextSelection(
+                          baseOffset: 0,
+                          extentOffset: _textEditingController.text.length,
+                        );
+                        showDialog(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text("Edit program name"),
+                            content: TextFormField(
+                              autofocus: true,
+                              controller: _textEditingController,
+                              onChanged: (newValue) => tempProgramName = newValue,
+                              inputFormatters: [LengthLimitingTextInputFormatter(20)],
+                            ),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(),
+                                child: const Text("CANCEL", style: TextStyle(color: Colors.red),),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(ctx).pop();
+                                  doneProvider.updateProgramName(tempProgramName, 'programName');
+                                },
+                                child: const Text("OKAY", style: TextStyle(color: Colors.green),),
+                              ),
+                            ],
                           ),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () => Navigator.of(ctx).pop(),
-                              child: const Text("CANCEL", style: TextStyle(color: Colors.red),),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(ctx).pop();
-                                doneProvider.updateProgramName(tempProgramName, 'programName');
-                              },
-                              child: const Text("OKAY", style: TextStyle(color: Colors.green),),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -89,7 +92,7 @@ class _DoneScreenState extends State<DoneScreen> {
                     borderRadius: BorderRadius.circular(15)
                 ),
                 child: CustomDropdownTile(
-                    width: 70,
+                    width: constraints.maxWidth < 550 ? 80 : 100,
                     title: 'Priority',
                     subtitle: 'Description',
                     showSubTitle: true,
@@ -106,7 +109,9 @@ class _DoneScreenState extends State<DoneScreen> {
                     borderRadius: BorderRadius.circular(15)
                 ),
                 child: CustomTimerTile(
-                  subtitle: 'DELAY B/W ZONES',
+                  subtitle: 'Delay Between Zones',
+                  showSubTitle: true,
+                  subtitle2: "Description",
                   initialValue: doneProvider.delayBetweenZones != "" ? doneProvider.delayBetweenZones : "00:00",
                   onChanged: (newTime){
                     doneProvider.updateProgramName(newTime, 'delayBetweenZones');
@@ -124,7 +129,8 @@ class _DoneScreenState extends State<DoneScreen> {
                     borderRadius: BorderRadius.circular(15)
                 ),
                 child: CustomTextFormTile(
-                  subtitle: 'WATER ADJUST PERCENTAGE',
+                  subtitle: 'Water Adjust Percentage',
+                  subtitle2: "Description",
                   initialValue: doneProvider.adjustPercentage != "" ? doneProvider.adjustPercentage : "100",
                   hintText: '0%',
                   keyboardType: TextInputType.number,
@@ -146,6 +152,7 @@ class _DoneScreenState extends State<DoneScreen> {
     );
   }
 }
+
 class PercentageInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -159,7 +166,7 @@ class PercentageInputFormatter extends TextInputFormatter {
       return TextEditingValue(
         text: '0%',
         selection: TextSelection.fromPosition(
-          TextPosition(offset: '0%'.length),
+          const TextPosition(offset: '0%'.length),
         ),
       );
     } else {
@@ -179,7 +186,7 @@ class PercentageInputFormatter extends TextInputFormatter {
         return TextEditingValue(
           text: formattedValue.substring(0, 5),
           selection: TextSelection.fromPosition(
-            TextPosition(offset: 5),
+            const TextPosition(offset: 5),
           ),
         );
       }

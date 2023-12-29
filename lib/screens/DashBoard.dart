@@ -7,10 +7,8 @@ import 'package:oro_irrigation_new/screens/web_view.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../Models/Customer/Dashboard/MqttPayloadModel.dart';
 import '../constants/MQTTManager.dart';
-import '../constants/mqtt_web_client.dart';
-import '../state_management/MQTTAppState.dart';
+import '../state_management/MqttPayloadProvider.dart';
 import 'Customer/customer_home.dart';
 import 'my_preference.dart';
 import 'product_entry.dart';
@@ -66,19 +64,19 @@ class DashBoardMainState extends State<DashBoardMain> with TickerProviderStateMi
   String userName = '', userType = '', userCountryCode = '', userMobileNo = '';
   final List<Map> myProducts =  List.generate(5, (index) => {"id": index, "name": "Product $index"}).toList();
 
-
+  late MqttPayloadProvider payloadProvider;
+  late MQTTManager manager;
 
   @override
   void initState() {
     super.initState();
+    manager = MQTTManager();
     _executeSharedPreferences();
+    Future.delayed(const Duration(milliseconds: 1500), () async {
+      mqttConfigureAndConnect();
+    });
   }
 
-  void onMqttPayloadReceived(String newPayload) {
-    print('Received MQTT payload: $newPayload');
-    var provider = Provider.of<MqttPayloadProviderModel>(context,listen: false);
-    provider.updatePayload(newPayload);
-  }
 
   Future _executeSharedPreferences() async
   {
@@ -91,30 +89,18 @@ class DashBoardMainState extends State<DashBoardMain> with TickerProviderStateMi
       userID = int.parse(prefs.getString('userId') ?? "");
     });
 
-    /*Future.delayed(const Duration(milliseconds: 500), () async {
-      MqttWebClient().onSubscribed('tweet/$userMobileNo');
-    });
-
-    Future.delayed(const Duration(milliseconds: 1500), () async {
-      MqttWebClient(onMqttPayloadReceived:onMqttPayloadReceived).main();
-    });*/
-
-    //MqttWebClient(onMqttPayloadReceived: (String ){}).connectAndSubscribe();
-
-
-    //manager = MQTTManager();
-    // _configureAndConnect();
-
-
-
   }
 
-
-
+  void mqttConfigureAndConnect() {
+    manager.initializeMQTTClient(state: payloadProvider);
+    manager.connect();
+  }
 
   @override
   Widget build(BuildContext context)
   {
+    payloadProvider = Provider.of<MqttPayloadProvider>(context,listen: false);
+
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints)
@@ -131,12 +117,10 @@ class DashBoardMainState extends State<DashBoardMain> with TickerProviderStateMi
     );
   }
 
-
   @override
   void dispose() {
-      super.dispose();
+    super.dispose();
   }
-
 
 }
 
@@ -196,35 +180,14 @@ class _DashboardWideState extends State<DashboardWide> {
   Widget _centerWidget = const Center(child: Text('Loading'));
   String currentTap = 'Dashboard';
 
-  late MQTTAppState currentAppState;
-  late MQTTManager manager;
-
-  void _configureAndConnect() {
-    // ignore: flutter_style_todos
-    // TODO: Use UUID
-    manager = MQTTManager(
-        host: 'ws://192.168.1.141',
-        topic: 'FirmwareToApp/E8FB1C3501D9',
-        identifier: 'flutterPrefix',
-        state: currentAppState);
-    manager.initializeMQTTClient();
-    manager.connect();
-  }
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    //MqttWebClient().init();
     callCustomerDashboard();
-
-    Future.delayed(const Duration(milliseconds: 5000), () async {
-      _configureAndConnect();
-    });
   }
 
-  Future<void> callCustomerDashboard()
-  async {
+  Future<void> callCustomerDashboard()  async {
     await Future.delayed(const Duration(seconds: 2));
     if(widget.userType =='3'){
       onOptionSelected('Dashboard');
@@ -248,12 +211,7 @@ class _DashboardWideState extends State<DashboardWide> {
   @override
   Widget build(BuildContext context)
   {
-    //var prover = Provider.of<MqttPayloadProviderModel>(context);
-    //print(prover.payload);
-    final MQTTAppState appState = Provider.of<MQTTAppState>(context);
-    currentAppState = appState;
-    print(currentAppState);
-
+    //var appState = Provider.of<MqttPayloadProvider>(context,listen: true);
 
     return widget.userType =='3'? Scaffold(
       body: Stack(
@@ -272,8 +230,7 @@ class _DashboardWideState extends State<DashboardWide> {
       ),
     ):
     Scaffold(
-      appBar:
-      widget.userType =='1'?  AppBar(
+      appBar: widget.userType =='1'?  AppBar(
         title: Text (appBarTitle),
         actions: _selectedIndex==0?[
           IconButton(tooltip: 'Create Dealer account', icon: const Icon(Icons.person_add_outlined), color: Colors.white, onPressed: () async
@@ -291,7 +248,7 @@ class _DashboardWideState extends State<DashboardWide> {
         ] : [],
       ) :
       AppBar(
-        title: Text (appBarTitle),
+        title: const Text ('Dashboard'),
         actions: _selectedIndex==0?[
           IconButton(tooltip: 'Create customer account', icon: const Icon(Icons.person_add_outlined), color: Colors.white, onPressed: () async
           {

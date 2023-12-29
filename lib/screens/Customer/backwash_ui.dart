@@ -6,9 +6,8 @@ import 'package:oro_irrigation_new/constants/http_service.dart';
 import 'package:oro_irrigation_new/constants/snack_bar.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/screens/Config/dealer_definition_config.dart';
-
 import '../../Models/Customer/back_wash_model.dart';
-import '../../constants/mqtt_web_client.dart';
+import '../../widgets/FontSizeUtils.dart';
 
 class FilterBackwashUI extends StatefulWidget {
   const FilterBackwashUI(
@@ -157,7 +156,10 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
                     children: [
                       Card(
                         child: ListTile(
-                          title: Text('${Listofvalue?[index].title}'),
+                          title: Text('${Listofvalue?[index].title}',style:  TextStyle(
+                            fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
+                            fontWeight: FontWeight.bold,),
+                            softWrap: true,),
                           trailing: SizedBox(
                               width: 100,
                               child: TextFormField(
@@ -192,7 +194,10 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
                     children: [
                       Card(
                         child: ListTile(
-                          title: Text('${Listofvalue?[index].title}'),
+                          title: Text('${Listofvalue?[index].title}',style:  TextStyle(
+                            fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
+                            fontWeight: FontWeight.bold,),
+                            softWrap: true,),
                           trailing: MySwitch(
                             value: Listofvalue?[index].value == '1',
                             onChanged: ((value) {
@@ -223,7 +228,10 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
                       Container(
                         child: Card(
                           child: ListTile(
-                            title: Text('${Listofvalue?[index].title}'),
+                            title: Text('${Listofvalue?[index].title}',style:  TextStyle(
+                              fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
+                              fontWeight: FontWeight.bold,),
+                              softWrap: true,),
                             trailing: Container(
                               color: Colors.white70,
                               width: 180,
@@ -257,7 +265,10 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
                     children: [
                       Card(
                         child: ListTile(
-                          title: Text('${Listofvalue?[index].title}'),
+                          title: Text('${Listofvalue?[index].title}',style:  TextStyle(
+                            fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
+                            fontWeight: FontWeight.bold,),
+                            softWrap: true,),
                           trailing: SizedBox(
                             width: 85,
                             child: Container(
@@ -299,7 +310,10 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
                                   Card(
                                     child: ListTile(
                                       title: Text(
-                                          '${Listofvalue?[index].value[flusingindex]['name']}'),
+                                        '${Listofvalue?[index].value[flusingindex]['name']}',style:  TextStyle(
+                                        fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
+                                        fontWeight: FontWeight.bold,),
+                                        softWrap: true,),
                                       trailing: SizedBox(
                                         width: 80,
                                         child: Container(

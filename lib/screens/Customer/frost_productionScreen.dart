@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../../Models/Customer/frost_model.dart';
 import '../../constants/http_service.dart';
 import '../../constants/snack_bar.dart';
+import '../../widgets/FontSizeUtils.dart';
 import '../Config/dealer_definition_config.dart';
 
 class FrostMobUI extends StatefulWidget {
@@ -34,7 +35,7 @@ class _ConditionUIState extends State<FrostMobUI>
   void initState() {
     super.initState();
     fetchData();
-   // MqttWebClient().init();
+    // MqttWebClient().init();
   }
 
   Future<void> fetchData() async {
@@ -117,7 +118,10 @@ class _ConditionUIState extends State<FrostMobUI>
             return Container(
                 child: Card(
                   child: ListTile(
-                    title: Text('${Listofvalue?[index].title}'),
+                    title: Text('${Listofvalue?[index].title}',style:  TextStyle(
+                      fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
+                      fontWeight: FontWeight.normal,),
+                      softWrap: true,),
                     trailing: SizedBox(
                         width: 50,
                         child: TextFormField(
@@ -157,7 +161,10 @@ class _ConditionUIState extends State<FrostMobUI>
             return Container(
               child: Card(
                 child: ListTile(
-                  title: Text('${Listofvalue?[index].title}'),
+                  title: Text('${Listofvalue?[index].title}',style:  TextStyle(
+                    fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
+                    fontWeight: FontWeight.normal,),
+                    softWrap: true,),
                   // leading:
                   //     Icon(IconData(iconcode, fontFamily: iconfontfamily)),
                   trailing: MySwitch(
@@ -200,7 +207,10 @@ class _ConditionUIState extends State<FrostMobUI>
           if (Listofvalue?[index].widgetTypeId == 1) {
             return Card(
               child: ListTile(
-                title: Text('${Listofvalue?[index].title}'),
+                title: Text('${Listofvalue?[index].title}',style:  TextStyle(
+                  fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
+                  fontWeight: FontWeight.normal,),
+                  softWrap: true,),
                 trailing: SizedBox(
                     width: 50,
                     child: TextFormField(
@@ -246,7 +256,10 @@ class _ConditionUIState extends State<FrostMobUI>
             return Container(
               child: Card(
                 child: ListTile(
-                  title: Text('${Listofvalue?[index].title}'),
+                  title: Text('${Listofvalue?[index].title}',style:  TextStyle(
+                    fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
+                    fontWeight: FontWeight.normal,),
+                    softWrap: true,),
                   // leading:
                   //     Icon(IconData(iconcode, fontFamily: iconfontfamily)),
                   trailing: MySwitch(

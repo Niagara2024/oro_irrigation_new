@@ -54,6 +54,7 @@ dependencies:
   intl: ^0.18.1
   reorderable_grid_view: ^2.2.8
   fl_chart: ^0.65.0
+  search_page: ^2.3.0
 
 dev_dependencies:
   flutter_test:

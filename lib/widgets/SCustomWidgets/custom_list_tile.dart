@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'custom_drop_down.dart';
+import 'custom_native_time_picker.dart';
 import 'custom_time_picker.dart';
 
 class CustomSwitchTile extends StatelessWidget {
@@ -35,9 +36,14 @@ class CustomSwitchTile extends StatelessWidget {
       contentPadding: showSubTitle ? const EdgeInsets.symmetric(horizontal: 10) : const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       leading: showCircleAvatar ? CircleAvatar(backgroundColor: Theme.of(context).colorScheme.secondary, child: icon) : null,
       title: Text(title, style: Theme.of(context).textTheme.bodyLarge),
-      trailing: Switch(
-        value: value,
-        onChanged: onChanged,
+      trailing: SizedBox(
+        width: MediaQuery.of(context).size.width < 550 ? 80 : 100,
+        child: Center(
+          child: Switch(
+            value: value,
+            onChanged: onChanged,
+          ),
+        ),
       ),
     );
   }
@@ -75,85 +81,42 @@ class CustomTimerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      shape: RoundedRectangleBorder(
-        borderRadius: borderRadius ?? BorderRadius.zero,
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      leading: leading ??
-          CircleAvatar(
-              backgroundColor: Theme.of(context).colorScheme.secondary,
-              child: Icon(icon, color: Colors.black)),
-      title: Text(subtitle, style: Theme.of(context).textTheme.bodyLarge),
-      subtitle: showSubTitle ? Text(subtitle ?? '') : null,
-      trailing: isNative
-          ? InkWell(
-        child: Text(initialValue, style: Theme.of(context).textTheme.bodyMedium),
-        onTap: () async {
-          TimeOfDay? selectedTime;
-
-          if (initialValue != '') {
-            try {
-              List<String> timeParts = initialValue.split(' ');
-
-              if (timeParts.length == 2) {
-                String time = timeParts[0];
-                String period = timeParts[1];
-
-                List<String> timeDigits = time.split(':');
-                if (timeDigits.length == 2) {
-                  int hour = int.parse(timeDigits[0]);
-                  int minute = int.parse(timeDigits[1]);
-
-                  if (!is24HourMode) {
-                    if (period.toLowerCase() == 'pm' && hour < 12) {
-                      hour += 12;
-                    } else if (period.toLowerCase() == 'am' && hour == 12) {
-                      hour = 0;
-                    }
-                  }
-
-                  selectedTime = TimeOfDay(hour: hour, minute: minute);
-                } else {
-                  print("Invalid time format");
-                }
-              } else {
-                print("Invalid time format");
-              }
-            } catch (e) {
-              print("Error parsing time: $e");
-            }
-          } else {
-            selectedTime = TimeOfDay.fromDateTime(DateTime.now());
-          }
-
-          selectedTime = await showTimePicker(
-            context: context,
-            initialTime: selectedTime ?? TimeOfDay.now(),
-            builder: (BuildContext context, Widget? child) {
-              return MediaQuery(
-                data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: is24HourMode),
-                child: child!,
-              );
-            },
+    return LayoutBuilder(
+        builder: (context, BoxConstraints constraints) {
+          return ListTile(
+            shape: RoundedRectangleBorder(
+              borderRadius: borderRadius ?? BorderRadius.zero,
+            ),
+            contentPadding: showSubTitle ? const EdgeInsets.symmetric(horizontal: 10) : const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            leading: leading ??
+                CircleAvatar(
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    child: Icon(icon, color: Colors.black)),
+            title: Text(subtitle, style: Theme.of(context).textTheme.bodyLarge),
+            subtitle: showSubTitle ? Text(subtitle2 ?? '') : null,
+            trailing: isNative
+                ? SizedBox(
+              width: constraints.maxWidth < 550 ? 80 : 100,
+              child: Center(
+                child: CustomNativeTimePicker(
+                  initialValue: initialValue,
+                  is24HourMode: is24HourMode,
+                  onChanged: onChanged,
+                ),
+              ),
+            ) :
+            SizedBox(
+              width: constraints.maxWidth < 550 ? 80 : 100,
+              child: CustomTimePicker(
+                initialTime: initialValue,
+                onChanged: onChanged,
+                isSeconds: isSeconds,
+                is24HourMode: is24HourMode,
+              ),
+            ),
+            tileColor: tileColor,
           );
-
-          if (selectedTime != null) {
-            String formattedTime = is24HourMode
-                ? "${selectedTime.hour}:${selectedTime.minute}"
-                : selectedTime.format(context);
-
-            onChanged(formattedTime);
-          }
-        },
-      )
-          : CustomTimePicker(
-        initialTime: initialValue,
-        onChanged: onChanged,
-        isSeconds: isSeconds,
-        is24HourMode: is24HourMode,
-      ),
-      tileColor: tileColor,
+        }
     );
   }
 }
@@ -172,6 +135,7 @@ class CustomTextFormTile extends StatelessWidget {
   final Color? tileColor;
   final bool trailing;
   final String? trailingText;
+  final String? subtitle2;
 
   const CustomTextFormTile({super.key,
     required this.subtitle,
@@ -186,49 +150,58 @@ class CustomTextFormTile extends StatelessWidget {
     this.initialValue,
     this.tileColor,
     this.trailing = false,
-    this.trailingText
+    this.trailingText,
+    this.subtitle2
   });
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      shape: RoundedRectangleBorder(
-        borderRadius: borderRadius ?? BorderRadius.zero,
-      ),
-      contentPadding: const EdgeInsets.all(8),
-      leading: CircleAvatar(backgroundColor: Theme.of(context).colorScheme.secondary, child: Icon(icon, color: Colors.black)),
-      title: Text(subtitle, style: Theme.of(context).textTheme.bodyLarge),
-      subtitle: errorText != null ?Text(errorText!, style: const TextStyle(color: Colors.red, fontSize: 12),) : null,
-      trailing: SizedBox(
-        width: 80,
-        child: Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                initialValue: initialValue,
-                textAlign: TextAlign.center,
-                controller: controller,
-                keyboardType: keyboardType,
-                inputFormatters: inputFormatters,
-                decoration: InputDecoration(
-                  hintText: hintText,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 5),
-                  // errorText: errorText
+    return LayoutBuilder(
+        builder: (context, BoxConstraints constraints) {
+          return  ListTile(
+            shape: RoundedRectangleBorder(
+              borderRadius: borderRadius ?? BorderRadius.zero,
+            ),
+            contentPadding: subtitle2 != null ? const EdgeInsets.symmetric(horizontal: 10) : const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            leading: CircleAvatar(backgroundColor: Theme.of(context).colorScheme.secondary, child: Icon(icon, color: Colors.black)),
+            title: Text(subtitle, style: Theme.of(context).textTheme.bodyLarge),
+            subtitle: subtitle2 != null ? Text(subtitle2 ?? "") : errorText != null ? Text(errorText!, style: const TextStyle(color: Colors.red, fontSize: 12),) : null,
+            trailing: SizedBox(
+              width: constraints.maxWidth < 550 ? 80 : 80,
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        initialValue: initialValue,
+                        textAlign: TextAlign.center,
+                        controller: controller,
+                        keyboardType: keyboardType,
+                        inputFormatters: inputFormatters,
+                        decoration: InputDecoration(
+                          hintText: hintText,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 5),
+                          // errorText: errorText
+                        ),
+                        onChanged: onChanged,
+                      ),
+                    ),
+                    if (trailing) Text(trailingText ?? "", style: Theme.of(context).textTheme.bodyMedium,),
+                  ],
                 ),
-                onChanged: onChanged,
               ),
             ),
-            if (trailing) Text(trailingText ?? "", style: Theme.of(context).textTheme.bodyMedium,),
-          ],
-        ),
-      ),
-      tileColor: tileColor,
+            tileColor: tileColor,
+          );
+        }
     );
   }
 }
 
 class CustomCheckBoxListTile extends StatelessWidget {
   final String subtitle;
+  final String? subtitle2;
   final bool value;
   final Function(bool?) onChanged;
   final IconData? icon;
@@ -245,7 +218,8 @@ class CustomCheckBoxListTile extends StatelessWidget {
     this.borderRadius,
     this.image,
     this.content,
-    this.showCircleAvatar = true
+    this.showCircleAvatar = true,
+    this.subtitle2
   });
 
   @override
@@ -267,10 +241,16 @@ class CustomCheckBoxListTile extends StatelessWidget {
           ),
         ),
       ) : null,
+      subtitle: subtitle2 != null ? Text(subtitle): null,
       title: Text(subtitle, style: Theme.of(context).textTheme.bodyLarge),
-      trailing: Checkbox(
-        value: value,
-        onChanged: onChanged,
+      trailing: SizedBox(
+        width: MediaQuery.of(context).size.width < 550 ? 80 : 100,
+        child: Center(
+          child: Checkbox(
+            value: value,
+            onChanged: onChanged,
+          ),
+        ),
       ),
     );
   }
@@ -392,11 +372,13 @@ class CustomDropdownTile extends StatelessWidget {
       title: Text(title, style: titleColor ?? Theme.of(context).textTheme.bodyLarge, textAlign: textAlign),
       trailing: SizedBox(
         width: width,
-        child: CustomDropdownWidget(
-          dropdownItems: dropdownItems,
-          selectedValue: selectedValue,
-          onChanged: onChanged,
-          includeNoneOption: includeNoneOption,
+        child: Center(
+          child: CustomDropdownWidget(
+            dropdownItems: dropdownItems,
+            selectedValue: selectedValue,
+            onChanged: onChanged,
+            includeNoneOption: includeNoneOption,
+          ),
         ),
       ),
       tileColor: tileColor,

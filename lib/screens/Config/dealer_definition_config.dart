@@ -4,10 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
-
 import '../../Models/dd_config.dart';
+import '../../constants/MQTTManager.dart';
 import '../../constants/http_service.dart';
-import '../../constants/mqtt_web_client.dart';
 
 class DealerDefinitionInConfig extends StatefulWidget {
   const DealerDefinitionInConfig({Key? key, required this.userId, required this.customerId, required this.controllerId, required this.imeiNo}) : super(key: key);
@@ -101,7 +100,9 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
                         {"501": strPayload},
                       ]
                     });
-                    //MqttWebClient().publishMessage('AppToFirmware/${widget.imeiNo}', payLoadFinal);
+
+                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
+
                     final sendData = jsonEncode(data.dealerDefinition);
                     Map<String, Object> body = {
                       "userId": widget.customerId,

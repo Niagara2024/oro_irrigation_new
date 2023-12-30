@@ -4,15 +4,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../Models/Customer/frost_model.dart';
+import '../../constants/MQTTManager.dart';
 import '../../constants/http_service.dart';
 import '../../constants/snack_bar.dart';
+import '../../constants/theme.dart';
 import '../../widgets/FontSizeUtils.dart';
 import '../Config/dealer_definition_config.dart';
+enum SegmentController { Frost, Rain, }
+
 
 class FrostMobUI extends StatefulWidget {
   const FrostMobUI(
-      {Key? key, required this.userId, required this.controllerId});
-  final userId, controllerId;
+      {Key? key, required this.userId, required this.controllerId, this.deviceID});
+  final userId, controllerId,deviceID;
 
   @override
   State<FrostMobUI> createState() => _ConditionUIState();
@@ -25,6 +29,8 @@ class _ConditionUIState extends State<FrostMobUI>
   final _formKey = GlobalKey<FormState>();
   List<String> conditionList = [];
   int _currentSelection = 0;
+  SegmentController selectedSegment = SegmentController.Frost;
+
 
   final Map<int, Widget> _children = {
     0: const Text(' Frost Protection '),
@@ -72,16 +78,43 @@ class _ConditionUIState extends State<FrostMobUI>
             key: _formKey,
             child: Column(
               children: [
-                const SizedBox(height: 16),
-                CupertinoSegmentedControl<int>(
-                  children: _children,
-                  onValueChanged: (value) {
+                const SizedBox(height: 10),
+                SegmentedButton<SegmentController>(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStatePropertyAll(
+                        myTheme.primaryColor.withOpacity(0.1)),
+                    iconColor: MaterialStateProperty.all(myTheme.primaryColor),
+                  ),
+                  segments: const <ButtonSegment<SegmentController>>[
+                    ButtonSegment<SegmentController>(
+                        value: SegmentController.Frost,
+                        label: Text('Frost Protection'),
+                        icon: Icon(Icons.festival_rounded)),
+                    ButtonSegment<SegmentController>(
+                        value: SegmentController.Rain,
+                        label: Text('Rain Delay'),
+                        icon: Icon(Icons.water_drop)),
+
+                  ],
+
+                  selected: <SegmentController>{selectedSegment},
+                  onSelectionChanged: (Set<SegmentController> newSelection) {
                     setState(() {
-                      _currentSelection = value!;
+                      print('selectedSegment$selectedSegment');
+                      selectedSegment = newSelection.first;
+
+                      if (selectedSegment == SegmentController.Frost) {
+                        _currentSelection = 0;
+                        buildFrostselection();
+                      }  else {
+                        _currentSelection = 1;
+
+                        rain();
+                      }
                     });
                   },
-                  groupValue: _currentSelection,
                 ),
+                const SizedBox(height: 10),
                 _currentSelection == 0 ? rain() : buildFrostselection(),
               ],
             ),
@@ -99,6 +132,7 @@ class _ConditionUIState extends State<FrostMobUI>
       );
     }
   }
+
 
   Widget buildFrostselection() {
     print('buildFrostselection');
@@ -305,7 +339,7 @@ class _ConditionUIState extends State<FrostMobUI>
         {"$Mqttdatacode": Mqttsenddata},
       ]
     });
-    //MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
+    MQTTManager().publish('AppToFirmware/${widget.deviceID}', payLoadFinal);
 
     List<Map<String, dynamic>> frostProtection = _frostProtectionModel
         .frostProtection!

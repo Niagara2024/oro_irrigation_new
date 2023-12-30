@@ -707,8 +707,14 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
     if(configPvd.totalRTU != 0){
       list.add('ORO RTU');
     }
+    if(configPvd.totalRtuPlus != 0){
+      list.add('O-RTU-Plus');
+    }
     if(configPvd.totalOroSmartRTU != 0){
       list.add('ORO Smart RTU');
+    }
+    if(configPvd.totalOroSmartRtuPlus != 0){
+      list.add('O-S-RTU-Plus');
     }
     if(configPvd.totalOroSwitch != 0){
       list.add('ORO Switch');
@@ -716,9 +722,13 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
     if(configPvd.totalOroPump != 0){
       list.add('ORO PUMP');
     }
+    if(configPvd.oPumpPlus.length != 0){
+      list.add('O-Pump-Plus');
+    }
     if(configPvd.totalOroLevel != 0){
       list.add('ORO Level');
     }
+
     if(configPvd.totalOroSense != 0){
       list.add('ORO Sense');
     }
@@ -728,6 +738,11 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
     List<String> myList = ['-'];
     if(title == 'ORO Smart RTU'){
       var list = configPvd.oSrtu;
+      for(var i in list){
+        myList.add('$i');
+      }
+    }else if(title == 'O-S-RTU-Plus'){
+      var list = configPvd.oSrtuPlus;
       for(var i in list){
         myList.add('$i');
       }
@@ -746,8 +761,18 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
       for(var i in list){
         myList.add('$i');
       }
+    }else if(title == 'O-RTU-Plus'){
+      var list = configPvd.oRtuPlus;
+      for(var i in list){
+        myList.add('$i');
+      }
     }else if(title == 'ORO PUMP'){
       var list = configPvd.oPump;
+      for(var i in list){
+        myList.add('$i');
+      }
+    }else if(title == 'O-Pump-Plus'){
+      var list = configPvd.oPumpPlus;
       for(var i in list){
         myList.add('$i');
       }
@@ -760,6 +785,10 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
       for(var i in configPvd.irrigationLines[line]['myOroSmartRtu']){
         myList.add('${i}');
       }
+    }else if(title == 'O-S-RTU-Plus'){
+      for(var i in configPvd.irrigationLines[line]['myOroSmartRtuPlus']){
+        myList.add('${i}');
+      }
     }else if(title == 'ORO Switch'){
       for(var i in configPvd.irrigationLines[line]['myOROswitch']){
         myList.add('${i}');
@@ -770,6 +799,10 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
       }
     }else if(title == 'ORO RTU'){
       for(var i in configPvd.irrigationLines[line]['myRTU']){
+        myList.add('${i}');
+      }
+    }else if(title == 'O-RTU-Plus'){
+      for(var i in configPvd.irrigationLines[line]['myRtuPlus']){
         myList.add('${i}');
       }
     }
@@ -810,11 +843,23 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
       for(var i = 0;i < 8;i++){
         myList.add('${i+1}');
       }
+    }else if(rtu == 'O-RTU-Plus'){
+      for(var i = 0;i < 8;i++){
+        myList.add('${i+1}');
+      }
     }else if(rtu == 'ORO PUMP'){
       for(var i = 0;i < 4;i++){
         myList.add('${i+1}');
       }
+    }else if(rtu == 'O-Pump-Plus'){
+      for(var i = 0;i < 4;i++){
+        myList.add('${i+1}');
+      }
     }else if(rtu == 'ORO Smart RTU'){
+      for(var i = 0;i < 16;i++){
+        myList.add('${i+1}');
+      }
+    }else if(rtu == 'O-S-RTU-Plus'){
       for(var i = 0;i < 16;i++){
         myList.add('${i+1}');
       }
@@ -1143,7 +1188,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
             'map' : [],
           }
       );
-      if(configPvd.sourcePumpUpdated[i]['oro_pump'] == false){
+      if(configPvd.sourcePumpUpdated[i]['oro_pump'] == false && configPvd.sourcePumpUpdated[i]['oro_pump_plus'] == false){
         myList[i]['map'].add(
             {
               'oroPump' : configPvd.sourcePumpUpdated[i]['oro_pump'] == true ? true : false,
@@ -1160,11 +1205,11 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
         );
       }
 
-      if(configPvd.sourcePumpUpdated[i]['oro_pump'] == true){
+      if(configPvd.sourcePumpUpdated[i]['oro_pump'] == true || configPvd.sourcePumpUpdated[i]['oro_pump_plus'] == true){
         if(configPvd.sourcePumpUpdated[i]['on'] != null){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.sourcePumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.sourcePumpUpdated[i]['oro_pump'] == true || configPvd.sourcePumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'on',
                 'type' : 'm_o_sourcePump',
                 'pump' : i,
@@ -1180,7 +1225,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
         if(configPvd.sourcePumpUpdated[i]['off'] != null){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.sourcePumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.sourcePumpUpdated[i]['oro_pump'] == true || configPvd.sourcePumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'off',
                 'type' : 'm_o_sourcePump',
                 'pump' : i,
@@ -1196,7 +1241,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
         if(configPvd.sourcePumpUpdated[i]['scr'] != null){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.sourcePumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.sourcePumpUpdated[i]['oro_pump'] == true || configPvd.sourcePumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'scr',
                 'type' : 'm_o_sourcePump',
                 'pump' : i,
@@ -1212,7 +1257,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
         if(configPvd.sourcePumpUpdated[i]['ecr'] != null){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.sourcePumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.sourcePumpUpdated[i]['oro_pump'] == true || configPvd.sourcePumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'ecr',
                 'type' : 'm_o_sourcePump',
                 'pump' : i,
@@ -1238,10 +1283,10 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
             'map' : [],
           }
       );
-      if(configPvd.irrigationPumpUpdated[i]['oro_pump'] == false){
+      if(configPvd.irrigationPumpUpdated[i]['oro_pump'] == false && configPvd.irrigationPumpUpdated[i]['oro_pump_plus'] == false){
         myList[i]['map'].add(
             {
-              'oroPump' : configPvd.irrigationPumpUpdated[i]['oro_pump'] == true ? true : false,
+              'oroPump' : (configPvd.irrigationPumpUpdated[i]['oro_pump'] == true || configPvd.irrigationPumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
               'name' : 'pump',
               'type' : 'm_o_irrigationPump',
               'pump' : i,
@@ -1256,11 +1301,11 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
         );
       }
 
-      if(configPvd.irrigationPumpUpdated[i]['oro_pump'] == true){
+      if(configPvd.irrigationPumpUpdated[i]['oro_pump'] == true || configPvd.irrigationPumpUpdated[i]['oro_pump_plus'] == true){
         if(configPvd.irrigationPumpUpdated[i]['on'] != null){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.irrigationPumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.irrigationPumpUpdated[i]['oro_pump'] == true || configPvd.irrigationPumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'on',
                 'type' : 'm_o_irrigationPump',
                 'pump' : i,
@@ -1277,7 +1322,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
         if(configPvd.irrigationPumpUpdated[i]['off'] != null){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.irrigationPumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.irrigationPumpUpdated[i]['oro_pump'] == true || configPvd.irrigationPumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'off',
                 'type' : 'm_o_irrigationPump',
                 'pump' : i,
@@ -1294,7 +1339,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
         if(configPvd.irrigationPumpUpdated[i]['scr'] != null){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.irrigationPumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.irrigationPumpUpdated[i]['oro_pump'] == true || configPvd.irrigationPumpUpdated[i]['oro_pump_plus'] == true) == true ? true : false,
                 'name' : 'scr',
                 'type' : 'm_o_irrigationPump',
                 'pump' : i,
@@ -1311,7 +1356,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
         if(configPvd.irrigationPumpUpdated[i]['ecr'] != null){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.irrigationPumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.irrigationPumpUpdated[i]['oro_pump'] == true || configPvd.irrigationPumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'ecr',
                 'type' : 'm_o_irrigationPump',
                 'pump' : i,

@@ -183,6 +183,7 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                   topBtmRgt('Water','Source(${configPvd.totalWaterSource.length})'),
                   topBtmRgt('Water','Meter(${configPvd.totalWaterMeter})'),
                   topBtmRgt('ORO','pump'),
+                  topBtmRgt('ORO Pump','Plus'),
                   topBtmRgt('Relay','count'),
                   topBtmRgt('Level','Type'),
                   topBtmRgt('Top','tank(high)'),
@@ -249,7 +250,7 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                                 ),
                                 width: double.infinity,
                                 height: 50,
-                                child: (configPvd.totalWaterMeter == 0 && configPvd.sourcePumpUpdated[index]['waterMeter'].isEmpty) ?
+                                child: (configPvd.sourcePumpUpdated[index]['oro_pump_plus'] == true || (configPvd.totalWaterMeter == 0 && configPvd.sourcePumpUpdated[index]['waterMeter'].isEmpty)) ?
                                 notAvailable :
                                 Checkbox(
                                     value: configPvd.sourcePumpUpdated[index]['waterMeter'].isEmpty ? false : true,
@@ -274,14 +275,16 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                             ),
                             Expanded(
                               child: Container(
-                                  decoration: BoxDecoration(
-                                      border: Border(right: BorderSide(width: 1))
-                                  ),
-                                  width: double.infinity,
-                                  height: 50,
-                                  child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == false) ?
-                                  notAvailable :
-                                  MyDropDown(initialValue: configPvd.sourcePumpUpdated[index]['relayCount'], itemList: ['1','2','3','4'], pvdName: 'editRelayCount_sp', index: index)
+                                decoration: BoxDecoration(
+                                    border: Border(right: BorderSide(width: 1))
+                                ),
+                                width: double.infinity,
+                                height: 50,
+                                child: Checkbox(
+                                    value: configPvd.sourcePumpUpdated[index]['oro_pump_plus'],
+                                    onChanged: (value){
+                                      configPvd.sourcePumpFunctionality(['editOroPumpPlus',index,value]);
+                                    }),
                               ),
                             ),
                             Expanded(
@@ -291,7 +294,18 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                                   ),
                                   width: double.infinity,
                                   height: 50,
-                                  child: MyDropDown(initialValue: configPvd.sourcePumpUpdated[index]['levelType'], itemList: ['-','ADC level','RS485 level','float level'], pvdName: 'editLevelType_sp', index: index)
+                                  child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == true || configPvd.sourcePumpUpdated[index]['oro_pump_plus'] == true) ?
+                                  MyDropDown(initialValue: configPvd.sourcePumpUpdated[index]['relayCount'], itemList: ['1','2','3','4'], pvdName: 'editRelayCount_sp', index: index) : notAvailable
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                      border: Border(right: BorderSide(width: 1))
+                                  ),
+                                  width: double.infinity,
+                                  height: 50,
+                                  child: configPvd.sourcePumpUpdated[index]['oro_pump_plus'] == true ? MyDropDown(initialValue: configPvd.sourcePumpUpdated[index]['levelType'], itemList: ['-','ADC level','RS485 level','float level'], pvdName: 'editLevelType_sp', index: index) : notAvailable
                               ),
                             ),
                             Expanded(

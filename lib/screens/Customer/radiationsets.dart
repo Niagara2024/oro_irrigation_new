@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:oro_irrigation_new/constants/MQTTManager.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 
 import '../../Models/Customer/radiation_model.dart';
@@ -11,8 +12,8 @@ import '../../constants/snack_bar.dart';
 
 class RadiationsetUI extends StatefulWidget {
   const RadiationsetUI(
-      {Key? key, required this.userId, required this.controllerId});
-  final userId, controllerId;
+      {Key? key, required this.userId, required this.controllerId, this.deviceId});
+  final userId, controllerId,deviceId;
 
   @override
   State<RadiationsetUI> createState() => _RadiationsetUIState();
@@ -131,9 +132,11 @@ class _RadiationsetUIState extends State<RadiationsetUI>
         SingleChildScrollView(
           // scrollDirection: Axis.horizontal,
           child: Container(
-            height: MediaQuery.of(context).size.height - 150,
+            height: MediaQuery.of(context).size.height - 250,
             width: MediaQuery.of(context).size.width,
             child: DataTable2(
+              dataRowHeight: 40.0,
+              headingRowHeight: 50.0,
               headingRowColor: MaterialStateProperty.all<Color>(
                   primaryColorDark.withOpacity(0.2)),
               fixedCornerColor: myTheme.primaryColor,
@@ -459,7 +462,7 @@ class _RadiationsetUIState extends State<RadiationsetUI>
         {"1901": Mqttsenddata},
       ]
     });
-    //MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
+    MQTTManager().publish(payLoadFinal,'AppToFirmware/${widget.deviceId}');
     Map<String, Object> body = {
       "userId": widget.userId,
       "controllerId": widget.controllerId,

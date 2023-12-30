@@ -130,7 +130,7 @@ class _NarrowOtpViewState extends State<NarrowOtpView> {
                             SizedBox(height: 50,
                               child: InternationalPhoneNumberInput(
                                 onInputChanged: (PhoneNumber number) {
-                                  print(number.phoneNumber);
+                                  //print(number.phoneNumber);
                                 },
                                 selectorConfig: const SelectorConfig(
                                   selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
@@ -381,7 +381,7 @@ class _OTPViewWideState extends State<OTPViewWide>
                                             }),
                                       ),
                                       onInputChanged: (PhoneNumber number) {
-                                        print(number);
+                                        //print(number);
                                       },
                                       selectorConfig: const SelectorConfig(
                                         selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
@@ -398,7 +398,7 @@ class _OTPViewWideState extends State<OTPViewWide>
                                       keyboardType:
                                       const TextInputType.numberWithOptions(signed: true, decimal: true),
                                       onSaved: (PhoneNumber number) {
-                                        print('On Saved: $number');
+                                        //print('On Saved: $number');
                                       },
                                     ),
                                   ),
@@ -453,7 +453,7 @@ class _OTPViewWideState extends State<OTPViewWide>
                                             'password': _passwordController.text,
                                           };
                                           final response = await HttpService().postRequest("userSignIn", body);
-                                          print(response.body);
+                                          //print(response.body);
                                           if(response.statusCode == 200)
                                           {
                                             var data = jsonDecode(response.body);

@@ -135,8 +135,7 @@ class ProductInventoryState extends State<ProductInventory> {
     }
   }
 
-  Future<void> fetchCatModAndImeiData() async
-  {
+  Future<void> fetchCatModAndImeiData() async {
     final body = userType == 1 ? {"fromUserId": null, "toUserId": null} : {"fromUserId": null, "toUserId": userID};
     final response = await HttpService().postRequest("getFilterCategoryModelAndImei", body);
     if (response.statusCode == 200) {
@@ -152,8 +151,7 @@ class ProductInventoryState extends State<ProductInventory> {
     }
   }
 
-  Future<void> fetchFilterData(dynamic categoryId, dynamic modelId, dynamic deviceId) async
-  {
+  Future<void> fetchFilterData(dynamic categoryId, dynamic modelId, dynamic deviceId) async {
     final body = userType == 1 ? {"fromUserId": null, "toUserId": null, "categoryId": categoryId, "modelId": modelId, "deviceId": deviceId} : {"fromUserId": null, "toUserId": userID, "categoryId": categoryId, "modelId": modelId, "deviceId": deviceId};
     final response = await HttpService().postRequest("getFilteredProduct", body);
     if (response.statusCode == 200)
@@ -174,8 +172,7 @@ class ProductInventoryState extends State<ProductInventory> {
     }
   }
 
-  Future<void> getProductStock() async
-  {
+  Future<void> getProductStock() async {
     Map<String, dynamic> body = {"fromUserId" : null, "toUserId" : userID};
     final response = await HttpService().postRequest("getProductStock", body);
     if (response.statusCode == 200)
@@ -204,7 +201,6 @@ class ProductInventoryState extends State<ProductInventory> {
       //_showSnackBar(response.body);
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -557,8 +553,8 @@ class ProductInventoryState extends State<ProductInventory> {
                 minWidth: 600,
                 dataRowHeight: 35.0,
                 headingRowHeight: 33,
-                headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.3)),
-                border: TableBorder.all(color: myTheme.primaryColor.withOpacity(0.3)),
+                headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
+                border: TableBorder.all(color: Colors.grey),
                 columns: const [
                   DataColumn2(
                       label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),)),
@@ -590,14 +586,14 @@ class ProductInventoryState extends State<ProductInventory> {
                   ),
                 ],
                 rows: searched ? List<DataRow>.generate(filterProductInventoryListCus.length, (index) => DataRow(cells: [
-                  DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14)))),
-                  DataCell(Text(filterProductInventoryListCus[index].categoryName, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
-                  DataCell(Text(filterProductInventoryListCus[index].model, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
-                  DataCell(Text(filterProductInventoryListCus[index].deviceId, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
-                  DataCell(Center(child: Text(filterProductInventoryListCus[index].siteName, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14)))),
-                  DataCell(Center(child: filterProductInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))],):
-                  const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))],))),
-                  const DataCell(Center(child: Text('25-09-2023', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14)))),
+                  DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}'))),
+                  DataCell(Text(filterProductInventoryListCus[index].categoryName)),
+                  DataCell(Text(filterProductInventoryListCus[index].model)),
+                  DataCell(Text(filterProductInventoryListCus[index].deviceId)),
+                  DataCell(Center(child: Text(filterProductInventoryListCus[index].siteName))),
+                  DataCell(Center(child: filterProductInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free')],):
+                  const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active')],))),
+                  const DataCell(Center(child: Text('25-09-2023'))),
                 ])):
                 List<DataRow>.generate(productInventoryListCus.length, (index) => DataRow(cells: [
                   DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13)))),
@@ -608,7 +604,6 @@ class ProductInventoryState extends State<ProductInventory> {
                   DataCell(Center(child: productInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))],):
                   const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))],))),
                   const DataCell(Center(child: Text('25-09-2023', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13)))),
-
                 ])),
               ),
             ),

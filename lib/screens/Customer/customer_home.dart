@@ -51,6 +51,7 @@ class _CustomerHomeState extends State<CustomerHome>
       customerSiteList.clear();
       usedNodeList.clear();
       var data = jsonDecode(response.body);
+      print(data);
       if(data["code"]==200)
       {
         final cntList = data["data"] as List;
@@ -80,6 +81,7 @@ class _CustomerHomeState extends State<CustomerHome>
     programList.clear();
     try {
       Map<String, Object> body = {"userId": widget.customerID, "controllerId": controllerId};
+      print(body);
       final response = await HttpService().postRequest("getUserProgramNameList", body);
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
@@ -95,6 +97,28 @@ class _CustomerHomeState extends State<CustomerHome>
       print('Error: $e');
     }
 
+  }
+
+
+
+  void _showPopover(BuildContext context, String message) {
+    final RenderBox renderBox = context.findRenderObject() as RenderBox;
+
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        renderBox.localToGlobal(Offset.zero).dx,
+        renderBox.localToGlobal(Offset.zero).dy,
+        renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)).dx,
+        renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)).dy,
+      ),
+      items: [
+        PopupMenuItem(
+          child: Text(message),
+        ),
+      ],
+      elevation: 8.0,
+    );
   }
 
   @override
@@ -459,10 +483,20 @@ class _CustomerHomeState extends State<CustomerHome>
                           ],
                           rows: List<DataRow>.generate(usedNodeList[0].length, (index) => DataRow(cells: [
                             DataCell(Center(child: Text('${index + 1}', style: const TextStyle(fontWeight: FontWeight.normal),))),
-                            DataCell(Center(child: CircleAvatar(radius: 7, backgroundColor: Colors.green.shade500,))),
+                            DataCell(Center(child: CircleAvatar(radius: 7, backgroundColor: Colors.green.shade400,))),
                             DataCell(Center(child: Text('${usedNodeList[0][index].referenceNumber}', style: TextStyle(fontWeight: FontWeight.normal)))),
                             DataCell(Text(usedNodeList[0][index].categoryName, style: TextStyle(fontWeight: FontWeight.normal)),),
-                            DataCell(Center(child: IconButton(icon: Icon(Icons.info_outline, color: myTheme.primaryColor,),onPressed: (){},iconSize: 20,))),
+                            DataCell(Center(child: PopupMenuButton(
+                              icon: Icon(Icons.info_outline, color: myTheme.primaryColor),
+                              tooltip: 'View details',
+                              itemBuilder: (context) {
+                                return [
+                                  PopupMenuItem(
+                                    child: Container(color:  myTheme.primaryColor.withOpacity(0.7), width: 300, height: 300,),
+                                  ),
+                                ];
+                              },
+                            ))),
                           ])),
                         ),
                       )
@@ -684,6 +718,7 @@ class _CustomerHomeState extends State<CustomerHome>
   }
 
 }
+
 class Person {
   String name;
   int age;
@@ -694,4 +729,6 @@ class Person {
     return {'name': name, 'age': age};
   }
 }
+
+
 

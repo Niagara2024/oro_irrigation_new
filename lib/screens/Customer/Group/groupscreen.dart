@@ -97,7 +97,7 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
       context: context,
       builder: (BuildContext context) {
         return DetailsSection(
-          data: jsondata['group']!,
+          data: _groupedname.data!.toJson(),
           onClose: () {
             Navigator.of(context).pop();
           },
@@ -192,22 +192,18 @@ class MyGroupScreenState extends State<MyGroupScreen> with ChangeNotifier {
                 //   endIndent: 20,
                 // ),
                 //TODO:- icon Group Details Icon
-                Container(
-                    height: 60,
-                    width: MediaQuery.of(context).size.width,
-                    padding: const EdgeInsets.all(16),
-                    child: ListTile(
-                      title: const Text('List of Groups'),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.info),
-                        onPressed: () {
-                          jsondata['group']!.isNotEmpty
-                              ? _showDetailsScreen(context)
-                              : _showAlertDialog(context, 'Warnning',
-                              'Currently no group available', false);
-                        },
-                      ),
-                    )),
+                ListTile(
+                  title: const Text('List of Groups'),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.info),
+                    onPressed: () {
+                      _groupedname.data!.group!.isNotEmpty
+                          ? _showDetailsScreen(context)
+                          : _showAlertDialog(context, 'Warnning',
+                          'Currently no group available', false);
+                    },
+                  ),
+                ),
                 //TODO:- Group
                 groupnamenew(context),
                 //TODO:- Line

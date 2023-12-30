@@ -144,146 +144,144 @@ class _SystemDefinitionState extends State<SystemDefinition> {
                   ),
               ],
             ) :
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8)
-                      ),
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        children: [
-                          Container(
-                              padding: const EdgeInsets.all(8),
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                  color: Theme.of(context).primaryColor.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(8)
-                              ),
-                              child: Text("Energy save functions", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),)
-                          ),
-                          const SizedBox(height: 20,),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              SizedBox(width: constraints.maxWidth * 0.02,),
-                              Checkbox(
-                                  value: systemDefinitionProvider.energySaveSettings!.energySaveFunction,
-                                  onChanged: (newValue) => systemDefinitionProvider.updateValues(newValue, "energySaveFunction")
-                              ),
-                              SizedBox(width: constraints.maxWidth * 0.02,),
-                              const Text("Start day time"),
-                              SizedBox(width: constraints.maxWidth * 0.05,),
-                              buildTimePicker(systemDefinitionProvider.energySaveSettings!.startDayTime, (newValue) {
-                                systemDefinitionProvider.updateValues(newValue, "startDayTime");
-                              }, false),
-                              SizedBox(width: constraints.maxWidth * 0.05),
-                              const Text("Stop day time"),
-                              SizedBox(width: constraints.maxWidth * 0.05,),
-                              buildTimePicker(systemDefinitionProvider.energySaveSettings!.stopDayTime, (newValue) {
-                                systemDefinitionProvider.updateValues(newValue, "stopDayTime");
-                              },false),
-                            ],
-                          ),
-                          const SizedBox(height: 20,),
-                          Row(
-                            children: [
-                              SizedBox(width: constraints.maxWidth * 0.02,),
-                              Checkbox(
-                                  value: systemDefinitionProvider.energySaveSettings!.energySaveFunction,
-                                  onChanged: (newValue) => systemDefinitionProvider.updateValues(newValue, "energySaveFunction")
-                              ),
-                              SizedBox(width: constraints.maxWidth * 0.02,),
-                              const Text("Pause mainline on energy save period"),
-                            ],
-                          ),
-                          const SizedBox(height: 20,),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Column(
-                                children: [
-                                  Text("Days", style: Theme.of(context).textTheme.bodyLarge,),
-                                  const SizedBox(height: 10,),
-                                  Text("From", style: Theme.of(context).textTheme.bodyLarge),
-                                  const SizedBox(height: 10,),
-                                  Text("To", style: Theme.of(context).textTheme.bodyLarge),
-                                ],
-                              ),
-                              for(var i = 0; i < 7; i++)
-                                buildDayTimePicker(
-                                    systemDefinitionProvider.days[i],
-                                    systemDefinitionProvider.daysFromAndToTimes()[i],
-                                    systemDefinitionProvider.values[i],
-                                    systemDefinitionProvider.isSelectedList()[i],
-                                    constraints
-                                )
-                            ],
-                          )
-                        ],
-                      ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8)
                     ),
-                    const SizedBox(height: 10,),
-                    Container(
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8)
-                      ),
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        children: [
-                          Container(
-                              padding: const EdgeInsets.all(8),
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                  color: Theme.of(context).primaryColor.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(8)
-                              ),
-                              child: Text("Power off recovery ", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),)
-                          ),
-                          const SizedBox(height: 20,),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  SizedBox(width: constraints.maxWidth * 0.02,),
-                                  const Text("When the power is out for longer than"),
-                                  SizedBox(width: constraints.maxWidth * 0.02,),
-                                  buildTimePicker(systemDefinitionProvider.powerOffRecoveryModel!.duration, (newValue) {
-                                    systemDefinitionProvider.updateValues(newValue, "duration");
-                                  }, true),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: List.generate(systemDefinitionProvider.options.length, (index) {
-                                  return Row(
-                                    children: [
-                                      Checkbox(
-                                        value: systemDefinitionProvider.powerOffRecoveryModel!.selectedOption.contains(systemDefinitionProvider.options[index])
-                                            ? true : false,
-                                        onChanged: (newValue) {
-                                          systemDefinitionProvider.updateCheckBoxesForOption(newValue, systemDefinitionProvider.options[index], index);
-                                        },
-                                      ),
-                                      Text(systemDefinitionProvider.options[index]),
-                                      const SizedBox(width: 20,)
-                                    ],
-                                  );
-                                }).toList(),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    )
-                  ],
-                ),
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      children: [
+                        Container(
+                            padding: const EdgeInsets.all(8),
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(8)
+                            ),
+                            child: Text("Energy save functions", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),)
+                        ),
+                        const SizedBox(height: 20,),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(width: constraints.maxWidth * 0.02,),
+                            Checkbox(
+                                value: systemDefinitionProvider.energySaveSettings!.energySaveFunction,
+                                onChanged: (newValue) => systemDefinitionProvider.updateValues(newValue, "energySaveFunction")
+                            ),
+                            SizedBox(width: constraints.maxWidth * 0.02,),
+                            const Text("Start day time"),
+                            SizedBox(width: constraints.maxWidth * 0.05,),
+                            buildTimePicker(systemDefinitionProvider.energySaveSettings!.startDayTime, (newValue) {
+                              systemDefinitionProvider.updateValues(newValue, "startDayTime");
+                            }, false),
+                            SizedBox(width: constraints.maxWidth * 0.05),
+                            const Text("Stop day time"),
+                            SizedBox(width: constraints.maxWidth * 0.05,),
+                            buildTimePicker(systemDefinitionProvider.energySaveSettings!.stopDayTime, (newValue) {
+                              systemDefinitionProvider.updateValues(newValue, "stopDayTime");
+                            },false),
+                          ],
+                        ),
+                        const SizedBox(height: 20,),
+                        Row(
+                          children: [
+                            SizedBox(width: constraints.maxWidth * 0.02,),
+                            Checkbox(
+                                value: systemDefinitionProvider.energySaveSettings!.energySaveFunction,
+                                onChanged: (newValue) => systemDefinitionProvider.updateValues(newValue, "energySaveFunction")
+                            ),
+                            SizedBox(width: constraints.maxWidth * 0.02,),
+                            const Text("Pause mainline on energy save period"),
+                          ],
+                        ),
+                        const SizedBox(height: 20,),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Column(
+                              children: [
+                                Text("Days", style: Theme.of(context).textTheme.bodyLarge,),
+                                const SizedBox(height: 10,),
+                                Text("From", style: Theme.of(context).textTheme.bodyLarge),
+                                const SizedBox(height: 10,),
+                                Text("To", style: Theme.of(context).textTheme.bodyLarge),
+                              ],
+                            ),
+                            for(var i = 0; i < 7; i++)
+                              buildDayTimePicker(
+                                  systemDefinitionProvider.days[i],
+                                  systemDefinitionProvider.daysFromAndToTimes()[i],
+                                  systemDefinitionProvider.values[i],
+                                  systemDefinitionProvider.isSelectedList()[i],
+                                  constraints
+                              )
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10,),
+                  Container(
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8)
+                    ),
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      children: [
+                        Container(
+                            padding: const EdgeInsets.all(8),
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(8)
+                            ),
+                            child: Text("Power off recovery ", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),)
+                        ),
+                        const SizedBox(height: 20,),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                SizedBox(width: constraints.maxWidth * 0.02,),
+                                const Text("When the power is out for longer than"),
+                                SizedBox(width: constraints.maxWidth * 0.02,),
+                                buildTimePicker(systemDefinitionProvider.powerOffRecoveryModel!.duration, (newValue) {
+                                  systemDefinitionProvider.updateValues(newValue, "duration");
+                                }, true),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: List.generate(systemDefinitionProvider.options.length, (index) {
+                                return Row(
+                                  children: [
+                                    Checkbox(
+                                      value: systemDefinitionProvider.powerOffRecoveryModel!.selectedOption.contains(systemDefinitionProvider.options[index])
+                                          ? true : false,
+                                      onChanged: (newValue) {
+                                        systemDefinitionProvider.updateCheckBoxesForOption(newValue, systemDefinitionProvider.options[index], index);
+                                      },
+                                    ),
+                                    Text(systemDefinitionProvider.options[index]),
+                                    const SizedBox(width: 20,)
+                                  ],
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  )
+                ],
               ),
             ),
             floatingActionButton: FloatingActionButton(

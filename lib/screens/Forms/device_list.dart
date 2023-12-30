@@ -60,7 +60,6 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   final List<InterfaceModel> interfaceType = <InterfaceModel>[];
   List<int> selectedProduct = [];
 
-  final MQTTManager _mqttManager = MQTTManager();
 
   @override
   void initState() {
@@ -109,7 +108,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
 
   Future<void> getMyAllProduct() async
   {
-    final body = widget.userType == 1 ? {"fromUserId": widget.userID, "toUserId": widget.customerID} : {"fromUserId": widget.userID, "toUserId": widget.customerID};
+    final body = widget.userType == 1 ? {"fromUserId": widget.userID, "toUserId": widget.customerID ,"set":1, "limit":100} : {"fromUserId": widget.userID, "toUserId": widget.customerID, "set":1, "limit":100};
     print(body);
     final response = await HttpService().postRequest("getCustomerProduct", body);
     if (response.statusCode == 200)
@@ -175,7 +174,12 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
         final cntList = data["data"] as List;
         for (int i=0; i < cntList.length; i++) {
           customerSiteList.add(ProductListWithNode.fromJson(cntList[i]));
-          _mqttManager.subscribeToTopic('FirmwareToApp/${customerSiteList[i].deviceId}');
+          try {
+            MQTTManager().subscribeToTopic('FirmwareToApp/${customerSiteList[i].deviceId}'); // This won't be executed due to the exception
+          } catch (e, stackTrace) {
+            print('Error: $e');
+            print('Stack Trace: $stackTrace');
+          }
 
           final nodeList = cntList[i]['nodeList'] as List;
           usedNodeList.add([]);
@@ -811,7 +815,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                   for(int i=0; i<nodeStockSelection.length; i++)
                                   {
                                     if(nodeStockSelection[i]==1){
-                                      Map<String, dynamic> myMap = {"productId": widget.nodeStockList[i].productId.toString(), 'categoryName': widget.nodeStockList[i].categoryName, 'referenceNumber': 0};
+                                      Map<String, dynamic> myMap = {"productId": widget.nodeStockList[i].productId.toString(), 'categoryName': widget.nodeStockList[i].categoryName, 'referenceNumber': 0, 'serialNumber': i+1};
                                       selectedNodeList.add(myMap);
                                     }
                                   }
@@ -895,7 +899,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                         "createUser": widget.userID,
                                       };
 
-                                      final response = await HttpService().postRequest("createUserDeviceListWithMaster", body);
+                                      final response = await HttpService().postRequest("createUserNodeListWithMaster", body);
                                       print(response.body);
                                       if(response.statusCode == 200)
                                       {
@@ -1032,10 +1036,12 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                             value: widget.usedNodeList[siteIndex][index].interface,
                                             style: const TextStyle(fontSize: 12),
                                             onChanged: (newValue) {
+                                              print(newValue);
+                                              print(index);
                                               setState(() {
                                                 widget.usedNodeList[siteIndex][index].interface = newValue!;
                                                 int index1 = widget.interfaceType.indexWhere((model) => model.interface == newValue);
-                                                widget.usedNodeList[siteIndex][index1].interfaceTypeId = widget.interfaceType[index1].interfaceTypeId;
+                                                widget.usedNodeList[siteIndex][index].interfaceTypeId = widget.interfaceType[index1].interfaceTypeId;
                                               });
                                             },
                                             items: widget.interfaceType.map((interface) {
@@ -1114,7 +1120,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                   onPressed: () async {
                                     List<dynamic> updatedInterface = [];
                                     for(int i=0; i<widget.usedNodeList[siteIndex].length; i++){
-                                      Map<String, dynamic> myMap = {"productId": widget.usedNodeList[siteIndex][i].productId,
+                                      Map<String, dynamic> myMap = {"serialNumber": i+1, "productId": widget.usedNodeList[siteIndex][i].productId,
                                         'interfaceTypeId': widget.usedNodeList[siteIndex][i].interfaceTypeId, 'interfaceInterval': widget.usedNodeList[siteIndex][i].interfaceInterval};
                                       updatedInterface.add(myMap);
                                     }
@@ -1159,6 +1165,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                     MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.customerSiteList[siteIndex].deviceId}');
 
                                     final response = await HttpService().putRequest("updateUserDeviceNodeList", body);
+                                    //print(body);
                                     if(response.statusCode == 200)
                                     {
                                       var data = jsonDecode(response.body);

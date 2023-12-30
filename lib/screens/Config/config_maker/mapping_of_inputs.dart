@@ -993,14 +993,23 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
     if(configPvd.totalRTU != 0){
       list.add('ORO RTU');
     }
+    if(configPvd.totalRtuPlus != 0){
+      list.add('O-RTU-Plus');
+    }
     if(configPvd.totalOroSmartRTU != 0){
       list.add('ORO Smart RTU');
+    }
+    if(configPvd.totalOroSmartRtuPlus != 0){
+      list.add('O-S-RTU-Plus');
     }
     if(configPvd.totalOroSwitch != 0){
       list.add('ORO Switch');
     }
     if(configPvd.totalOroPump != 0){
       list.add('ORO PUMP');
+    }
+    if(configPvd.oPumpPlus.length != 0){
+      list.add('O-Pump-Plus');
     }
     if(configPvd.totalOroLevel != 0){
       list.add('ORO Level');
@@ -1014,6 +1023,11 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
     List<String> myList = ['-'];
     if(title == 'ORO Smart RTU'){
       var list = configPvd.oSrtu;
+      for(var i in list){
+        myList.add('$i');
+      }
+    }else if(title == 'O-S-RTU-Plus'){
+      var list = configPvd.oSrtuPlus;
       for(var i in list){
         myList.add('$i');
       }
@@ -1032,8 +1046,12 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
       for(var i in list){
         myList.add('$i');
       }
-    }else if(title == 'ORO PUMP'){
-      print('paru : ${oroPump}');
+    }else if(title == 'O-RTU-Plus'){
+      var list = configPvd.oRtuPlus;
+      for(var i in list){
+        myList.add('$i');
+      }
+    }else if(title == 'ORO PUMP' || title == 'O-Pump-Plus'){
       if(oroPump != null){
         if(oroPump['pump'] == 'sourcePump'){
           if(configPvd.sourcePumpUpdated[oroPump['count']]['on'] != null){
@@ -1067,6 +1085,10 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
       for(var i in configPvd.irrigationLines[line]['myOroSmartRtu']){
         myList.add('${i}');
       }
+    }else if(title == 'O-S-RTU-Plus'){
+      for(var i in configPvd.irrigationLines[line]['myOroSmartRtuPlus']){
+        myList.add('${i}');
+      }
     }else if(title == 'ORO Switch'){
       for(var i in configPvd.irrigationLines[line]['myOROswitch']){
         myList.add('${i}');
@@ -1077,6 +1099,10 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
       }
     }else if(title == 'ORO RTU'){
       for(var i in configPvd.irrigationLines[line]['myRTU']){
+        myList.add('${i}');
+      }
+    }else if(title == 'O-RTU-Plus'){
+      for(var i in configPvd.irrigationLines[line]['myRtuPlus']){
         myList.add('${i}');
       }
     }else if(title == 'ORO Level'){
@@ -1185,7 +1211,15 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
       for(var i = 0;i < 8;i++){
         myList.add('${i+1}');
       }
+    }else if(rtu == 'O-RTU-Plus'){
+      for(var i = 0;i < 8;i++){
+        myList.add('${i+1}');
+      }
     }else if(rtu == 'ORO PUMP'){
+      for(var i = 0;i < 4;i++){
+        myList.add('${i+1}');
+      }
+    }else if(rtu == 'O-Pump-Plus'){
       for(var i = 0;i < 4;i++){
         myList.add('${i+1}');
       }
@@ -1198,6 +1232,10 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
         myList.add('${i+1}');
       }
     }else if(rtu == 'ORO Smart RTU'){
+      for(var i = 0;i < 16;i++){
+        myList.add('${i+1}');
+      }
+    }else if(rtu == 'O-S-RTU-Plus'){
       for(var i = 0;i < 16;i++){
         myList.add('${i+1}');
       }
@@ -1755,7 +1793,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
       if(configPvd.sourcePumpUpdated[i]['waterMeter'].isNotEmpty){
         myList[i]['map'].add(
             {
-              'oroPump' : configPvd.sourcePumpUpdated[i]['oro_pump'] == true ? true : false,
+              'oroPump' : (configPvd.sourcePumpUpdated[i]['oro_pump'] == true || configPvd.sourcePumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
               'name' : 'water meter',
               'type' : 'm_i_sourcePump',
               'pump' : i,
@@ -1774,7 +1812,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
           print('it is not empty');
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.sourcePumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.sourcePumpUpdated[i]['oro_pump'] == true || configPvd.sourcePumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'Tt high',
                 'type' : 'm_i_sourcePump',
                 'pump' : i,
@@ -1793,7 +1831,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
         if(configPvd.sourcePumpUpdated[i]['TopTankLow'].isNotEmpty){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.sourcePumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.sourcePumpUpdated[i]['oro_pump'] == true || configPvd.sourcePumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'Tt low',
                 'type' : 'm_i_sourcePump',
                 'pump' : i,
@@ -1812,7 +1850,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
         if(configPvd.sourcePumpUpdated[i]['SumpTankHigh'].isNotEmpty){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.sourcePumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.sourcePumpUpdated[i]['oro_pump'] == true || configPvd.sourcePumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'St high',
                 'type' : 'm_i_sourcePump',
                 'pump' : i,
@@ -1831,7 +1869,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
         if(configPvd.sourcePumpUpdated[i]['SumpTankLow'].isNotEmpty){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.sourcePumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.sourcePumpUpdated[i]['oro_pump'] == true || configPvd.sourcePumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'St low',
                 'type' : 'm_i_sourcePump',
                 'pump' : i,
@@ -1850,7 +1888,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
         if(configPvd.sourcePumpUpdated[i]['levelSensor'].isNotEmpty){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.sourcePumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.sourcePumpUpdated[i]['oro_pump'] == true || configPvd.sourcePumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'level Sensor',
                 'type' : 'm_i_sourcePump',
                 'pump' : i,
@@ -1869,7 +1907,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
         if(configPvd.sourcePumpUpdated[i]['c1'].isNotEmpty){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.sourcePumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.sourcePumpUpdated[i]['oro_pump'] == true || configPvd.sourcePumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'c1',
                 'type' : 'm_i_sourcePump',
                 'pump' : i,
@@ -1888,7 +1926,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
         if(configPvd.sourcePumpUpdated[i]['c2'].isNotEmpty){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.sourcePumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.sourcePumpUpdated[i]['oro_pump'] == true || configPvd.sourcePumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'c2',
                 'type' : 'm_i_sourcePump',
                 'pump' : i,
@@ -1907,7 +1945,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
         if(configPvd.sourcePumpUpdated[i]['c3'].isNotEmpty){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.sourcePumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.sourcePumpUpdated[i]['oro_pump'] == true || configPvd.sourcePumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'c3',
                 'type' : 'm_i_sourcePump',
                 'pump' : i,
@@ -1939,7 +1977,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
       if(configPvd.irrigationPumpUpdated[i]['waterMeter'].isNotEmpty){
         myList[i]['map'].add(
             {
-              'oroPump' : configPvd.irrigationPumpUpdated[i]['oro_pump'] == true ? true : false,
+              'oroPump' : (configPvd.irrigationPumpUpdated[i]['oro_pump'] == true || configPvd.irrigationPumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
               'name' : 'water meter',
               'type' : 'm_i_irrigationPump',
               'pump' : i,
@@ -1957,7 +1995,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
         if(configPvd.irrigationPumpUpdated[i]['levelSensor'].isNotEmpty){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.irrigationPumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.irrigationPumpUpdated[i]['oro_pump'] == true || configPvd.irrigationPumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'level Sensor',
                 'type' : 'm_i_irrigationPump',
                 'pump' : i,
@@ -1976,7 +2014,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
         if(configPvd.irrigationPumpUpdated[i]['TopTankHigh'].isNotEmpty){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.irrigationPumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.irrigationPumpUpdated[i]['oro_pump'] == true || configPvd.irrigationPumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'Tt high',
                 'type' : 'm_i_irrigationPump',
                 'pump' : i,
@@ -1995,7 +2033,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
         if(configPvd.irrigationPumpUpdated[i]['TopTankLow'].isNotEmpty){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.irrigationPumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.irrigationPumpUpdated[i]['oro_pump'] == true || configPvd.irrigationPumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'Tt low',
                 'type' : 'm_i_irrigationPump',
                 'pump' : i,
@@ -2014,7 +2052,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
         if(configPvd.irrigationPumpUpdated[i]['SumpTankHigh'].isNotEmpty){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.irrigationPumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.irrigationPumpUpdated[i]['oro_pump'] == true || configPvd.irrigationPumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'St high',
                 'type' : 'm_i_irrigationPump',
                 'pump' : i,
@@ -2033,7 +2071,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
         if(configPvd.irrigationPumpUpdated[i]['SumpTankLow'].isNotEmpty){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.irrigationPumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.irrigationPumpUpdated[i]['oro_pump'] == true || configPvd.irrigationPumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'St low',
                 'type' : 'm_i_irrigationPump',
                 'pump' : i,
@@ -2052,7 +2090,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
         if(configPvd.irrigationPumpUpdated[i]['c1'].isNotEmpty){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.irrigationPumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.irrigationPumpUpdated[i]['oro_pump'] == true || configPvd.irrigationPumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'c1',
                 'type' : 'm_i_irrigationPump',
                 'pump' : i,
@@ -2071,7 +2109,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
         if(configPvd.irrigationPumpUpdated[i]['c2'].isNotEmpty){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.irrigationPumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.irrigationPumpUpdated[i]['oro_pump'] == true || configPvd.irrigationPumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'c2',
                 'type' : 'm_i_irrigationPump',
                 'pump' : i,
@@ -2090,7 +2128,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
         if(configPvd.irrigationPumpUpdated[i]['c3'].isNotEmpty){
           myList[i]['map'].add(
               {
-                'oroPump' : configPvd.irrigationPumpUpdated[i]['oro_pump'] == true ? true : false,
+                'oroPump' : (configPvd.irrigationPumpUpdated[i]['oro_pump'] == true || configPvd.irrigationPumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
                 'name' : 'c3',
                 'type' : 'm_i_irrigationPump',
                 'pump' : i,

@@ -836,7 +836,7 @@ class Program {
   String programName;
   String defaultProgramName;
   String programType;
-  int priority;
+  String priority;
   dynamic sequence;
   Map<String, dynamic> schedule;
 
@@ -869,7 +869,7 @@ class ProgramDetails {
   String programName;
   String defaultProgramName;
   String programType;
-  int priority;
+  String priority;
   bool completionOption;
   String delayBetweenZones;
   String adjustPercentage;

@@ -103,9 +103,11 @@ class ConfigMakerProvider extends ChangeNotifier{
   int totalLocalFiltration = 0;
   int totalLocalDosing = 0;
   int totalRTU = 0;
+  int totalRtuPlus = 0;
   int totalOroSwitch = 0;
   int totalOroSense = 0;
   int totalOroSmartRTU = 0;
+  int totalOroSmartRtuPlus = 0;
   int totalOroLevel = 0;
   int totalOroPump = 0;
   int totalOroExtend = 0;
@@ -123,23 +125,23 @@ class ConfigMakerProvider extends ChangeNotifier{
   int totalFan = 0;
   int totalFogger = 0;
   List<dynamic> oRtu = [];
+  List<dynamic> oRtuPlus = [];
   List<dynamic> oSrtu = [];
+  List<dynamic> oSrtuPlus = [];
   List<dynamic> oSwitch = [];
   List<dynamic> oSense = [];
   List<dynamic> oLevel = [];
   List<dynamic> oPump = [];
+  List<dynamic> oPumpPlus = [];
   List<dynamic> oExtend = [];
   List<dynamic> rtuForLine = [];
+  List<dynamic> rtuPlusForLine = [];
   List<dynamic> OroExtendForLine = [];
   List<dynamic> switchForLine = [];
   List<dynamic> OroSmartRtuForLine = [];
+  List<dynamic> OroSmartRtuPlusForLine = [];
   List<dynamic> OroSenseForLine = [];
   List<dynamic> OroLevelForLine = [];
-  List<dynamic> rtuForLine_others = [];
-  List<dynamic> switchForLine_others = [];
-  List<dynamic> OroSmartRtuForLine_others = [];
-  List<dynamic> OroSenseForLine_others = [];
-  List<dynamic> OroLevelForLine_others = [];
   bool sourcePumpSelection = false;
   bool sourcePumpSelectAll = false;
   List<dynamic> waterSource = [];
@@ -401,6 +403,7 @@ class ConfigMakerProvider extends ChangeNotifier{
             'current_selection' : '-',
           };
           i['oro_pump'] = false;
+          i['oro_pump_plus'] = false;
           i['levelType'] = '-';
           i['levelSensor'] = {};
           i['selection'] = 'unselect';
@@ -425,6 +428,7 @@ class ConfigMakerProvider extends ChangeNotifier{
             'current_selection' : '-',
           },
           'oro_pump' : false,
+          'oro_pump_plus' : false,
           'levelType' : '-',
           'levelSensor' : {},
           'selection' : 'unselect',
@@ -686,6 +690,9 @@ class ConfigMakerProvider extends ChangeNotifier{
       }
       case ('editOroPump') : {
         if(list[2] == true){
+          if(sourcePumpUpdated[list[1]]['oro_pump_plus'] == true){
+            sourcePumpUpdated[list[1]]['oro_pump_plus'] = false;
+          }
           sourcePumpUpdated[list[1]].remove('pumpConnection');
           sourcePumpUpdated[list[1]]['relayCount'] = '1';
 
@@ -738,6 +745,67 @@ class ConfigMakerProvider extends ChangeNotifier{
           sourcePumpUpdated[list[1]].remove('c3');
         }
         sourcePumpUpdated[list[1]]['oro_pump'] = list[2];
+        break;
+      }
+      case ('editOroPumpPlus') : {
+        if(list[2] == true){
+          sourcePumpFunctionality(['editWaterMeter',list[1],false]);
+          if(sourcePumpUpdated[list[1]]['oro_pump'] == true){
+            sourcePumpUpdated[list[1]]['oro_pump'] = false;
+          }
+          sourcePumpUpdated[list[1]].remove('pumpConnection');
+          sourcePumpUpdated[list[1]]['relayCount'] = '1';
+
+          sourcePumpUpdated[list[1]]['relayCount'] = '1';
+          sourcePumpUpdated[list[1]]['on'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'O-Pump-Plus',
+            'rfNo' : '-',
+            'output' : '-',
+            'output_type' : '1',
+            'current_selection' : '-',
+          };
+          sourcePumpUpdated[list[1]]['c1'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'O-Pump-Plus',
+            'rfNo' : '${sourcePumpUpdated[list[1]]['on']['rfNo']}',
+            'input' : '-',
+            'input_type' : '-',
+          };
+          sourcePumpUpdated[list[1]]['c2'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'O-Pump-Plus',
+            'rfNo' : '${sourcePumpUpdated[list[1]]['on']['rfNo']}',
+            'input' : '-',
+            'input_type' : '-',
+          };
+          sourcePumpUpdated[list[1]]['c3'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'O-Pump-Plus',
+            'rfNo' : '${sourcePumpUpdated[list[1]]['on']['rfNo']}',
+            'input' : '-',
+            'input_type' : '-',
+          };
+        }else{
+          sourcePumpFunctionality(['editLevelType_sp',list[1],'-']);
+          sourcePumpUpdated[list[1]]['pumpConnection'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : '-',
+            'rfNo' : '-',
+            'output' : '-',
+            'output_type' : '1',
+            'current_selection' : '-',
+          };
+
+          sourcePumpUpdated[list[1]].remove('on');
+          sourcePumpUpdated[list[1]].remove('off');
+          sourcePumpUpdated[list[1]].remove('scr');
+          sourcePumpUpdated[list[1]].remove('ecr');
+          sourcePumpUpdated[list[1]].remove('c1');
+          sourcePumpUpdated[list[1]].remove('c2');
+          sourcePumpUpdated[list[1]].remove('c3');
+        }
+        sourcePumpUpdated[list[1]]['oro_pump_plus'] = list[2];
         break;
       }
       case ('editWaterSource_sp') : {
@@ -1058,7 +1126,12 @@ class ConfigMakerProvider extends ChangeNotifier{
       }
       case ('editOroPump') : {
         if(list[2] == true){
+          if(irrigationPumpUpdated[list[1]]['oro_pump_plus'] == true){
+            irrigationPumpUpdated[list[1]]['oro_pump_plus'] = false;
+          }
           irrigationPumpUpdated[list[1]].remove('pumpConnection');
+          irrigationPumpUpdated[list[1]]['relayCount'] = '1';
+
           irrigationPumpUpdated[list[1]]['relayCount'] = '1';
           irrigationPumpUpdated[list[1]]['on'] = {
             'sNo' : returnI_O_AutoIncrement(),
@@ -1098,6 +1171,7 @@ class ConfigMakerProvider extends ChangeNotifier{
             'output_type' : '1',
             'current_selection' : '-',
           };
+
           irrigationPumpUpdated[list[1]].remove('on');
           irrigationPumpUpdated[list[1]].remove('off');
           irrigationPumpUpdated[list[1]].remove('scr');
@@ -1107,6 +1181,67 @@ class ConfigMakerProvider extends ChangeNotifier{
           irrigationPumpUpdated[list[1]].remove('c3');
         }
         irrigationPumpUpdated[list[1]]['oro_pump'] = list[2];
+        break;
+      }
+      case ('editOroPumpPlus') : {
+        if(list[2] == true){
+          irrigationPumpFunctionality(['editWaterMeter',list[1],false]);
+          if(irrigationPumpUpdated[list[1]]['oro_pump'] == true){
+            irrigationPumpUpdated[list[1]]['oro_pump'] = false;
+          }
+          irrigationPumpUpdated[list[1]].remove('pumpConnection');
+          irrigationPumpUpdated[list[1]]['relayCount'] = '1';
+
+          irrigationPumpUpdated[list[1]]['relayCount'] = '1';
+          irrigationPumpUpdated[list[1]]['on'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'O-Pump-Plus',
+            'rfNo' : '-',
+            'output' : '-',
+            'output_type' : '1',
+            'current_selection' : '-',
+          };
+          irrigationPumpUpdated[list[1]]['c1'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'O-Pump-Plus',
+            'rfNo' : '${irrigationPumpUpdated[list[1]]['on']['rfNo']}',
+            'input' : '-',
+            'input_type' : '-',
+          };
+          irrigationPumpUpdated[list[1]]['c2'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'O-Pump-Plus',
+            'rfNo' : '${irrigationPumpUpdated[list[1]]['on']['rfNo']}',
+            'input' : '-',
+            'input_type' : '-',
+          };
+          irrigationPumpUpdated[list[1]]['c3'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : 'O-Pump-Plus',
+            'rfNo' : '${irrigationPumpUpdated[list[1]]['on']['rfNo']}',
+            'input' : '-',
+            'input_type' : '-',
+          };
+        }else{
+          irrigationPumpFunctionality(['editLevelType_ip',list[1],'-']);
+          irrigationPumpUpdated[list[1]]['pumpConnection'] = {
+            'sNo' : returnI_O_AutoIncrement(),
+            'rtu' : '-',
+            'rfNo' : '-',
+            'output' : '-',
+            'output_type' : '1',
+            'current_selection' : '-',
+          };
+
+          irrigationPumpUpdated[list[1]].remove('on');
+          irrigationPumpUpdated[list[1]].remove('off');
+          irrigationPumpUpdated[list[1]].remove('scr');
+          irrigationPumpUpdated[list[1]].remove('ecr');
+          irrigationPumpUpdated[list[1]].remove('c1');
+          irrigationPumpUpdated[list[1]].remove('c2');
+          irrigationPumpUpdated[list[1]].remove('c3');
+        }
+        irrigationPumpUpdated[list[1]]['oro_pump_plus'] = list[2];
         break;
       }
       default : {
@@ -1927,27 +2062,6 @@ class ConfigMakerProvider extends ChangeNotifier{
     }
     notifyListeners();
   }
-  void editRfList1(){
-    OroSmartRtuForLine = List.from(OroSmartRtuForLine_others);
-    rtuForLine = List.from(rtuForLine_others);
-    switchForLine = List.from(switchForLine_others);
-    OroSenseForLine = List.from(OroSenseForLine_others);
-    for(var i = 0;i < irrigationLines.length;i++){
-      for(var j in irrigationLines[i]['myOroSmartRtu']){
-        OroSmartRtuForLine.remove(j);
-      }
-      for(var j in irrigationLines[i]['myRTU']){
-        rtuForLine.remove(j);
-      }
-      for(var j in irrigationLines[i]['myOROswitch']){
-        switchForLine.remove(j);
-      }
-      for(var j in irrigationLines[i]['myOROsense']){
-        OroSenseForLine.remove(j);
-      }
-    }
-    notifyListeners();
-  }
   void updateIfRefNoEmptyChild(List<dynamic> data,String rtu,List<dynamic> rf,List<dynamic> updatedRF){
     for(var i in data){
       if(rf.length == 0){
@@ -2028,14 +2142,18 @@ class ConfigMakerProvider extends ChangeNotifier{
               i['irrigationPump'] = '-';
               i['water_meter'] = {};
               i['ORO_Smart_RTU'] = '';
+              i['ORO_Smart_RTU_Plus'] = '';
               i['RTU'] = '';
+              i['RTU_Plus'] = '';
               i['ORO_switch'] = '';
               i['ORO_sense'] = '';
               i['ORO_level'] = '';
               i['isSelected'] = 'unselect';
               i['myRTU_list'] = ['-'];
               i['myOroSmartRtu'] = [];
+              i['myOroSmartRtuPlus'] = [];
               i['myRTU'] = [];
+              i['myRtuPlus'] = [];
               i['myOROswitch'] = [];
               i['myOROsense'] = [];
               i['myOROlevel'] = [];
@@ -2076,14 +2194,18 @@ class ConfigMakerProvider extends ChangeNotifier{
               'irrigationPump' : '-',
               'water_meter' : {},
               'ORO_Smart_RTU' : '',
+              'ORO_Smart_RTU_Plus' : '',
               'RTU' : '',
+              'RTU_Plus' : '',
               'ORO_switch' : '',
               'ORO_sense' : '',
               'ORO_level' : '',
               'isSelected' : 'unselect',
               'myRTU_list' : ['-'],
               'myOroSmartRtu' : [],
+              'myOroSmartRtuPlus' : [],
               'myRTU' : [],
+              'myRtuPlus' : [],
               'myOROswitch' : [],
               'myOROsense' : [],
               'myOROlevel' : [],
@@ -2554,6 +2676,130 @@ class ConfigMakerProvider extends ChangeNotifier{
           }
         }
         updateIfRefNoEmpty(list[1],'ORO Smart RTU',irrigationLines[list[1]]['myOroSmartRtu']);
+        break;
+      }
+      case ('editOroSmartRtuPlus'): {
+        if(totalOroSmartRtuPlus > -1){
+          if(irrigationLines[list[1]]['ORO_Smart_RTU_Plus'] != ''){
+            totalOroSmartRtuPlus = totalOroSmartRtuPlus + int.parse(irrigationLines[list[1]]['ORO_Smart_RTU_Plus']);
+            if(list[2] == ''){
+              totalOroSmartRtuPlus = totalOroSmartRtuPlus - 0;
+            }else{
+              if(list[2] == '0'){
+                totalOroSmartRtuPlus = totalOroSmartRtuPlus - 1;
+              }else{
+                totalOroSmartRtuPlus = totalOroSmartRtuPlus - int.parse(list[2]);
+              }
+
+            }
+          }else{
+            if(list[2] == '0'){
+              totalOroSmartRtuPlus = totalOroSmartRtuPlus - 1;
+            }else{
+              totalOroSmartRtuPlus = totalOroSmartRtuPlus - int.parse(list[2]);
+            }
+          }
+          irrigationLines[list[1]]['ORO_Smart_RTU_Plus'] = list[2];
+          if(irrigationLines[list[1]]['myOroSmartRtuPlus'].length < int.parse(list[2] == '' ? '0' : list[2])){
+            int beforeLength = irrigationLines[list[1]]['myOroSmartRtuPlus'].length;
+            for(var i = 0;i < int.parse(list[2]) - beforeLength;i++){
+              irrigationLines[list[1]]['myOroSmartRtuPlus'].add(OroSmartRtuPlusForLine[i]);
+            }
+            for(var i in  irrigationLines[list[1]]['myOroSmartRtuPlus']){
+              if(OroSmartRtuPlusForLine.contains(i)){
+                OroSmartRtuPlusForLine.remove(i);
+              }
+            }
+          }else if(list[2] != ''){
+            var list1 = [];
+            for(var i = 0;i< int.parse(list[2]);i++){
+              list1.add(irrigationLines[list[1]]['myOroSmartRtuPlus'][0]);
+              irrigationLines[list[1]]['myOroSmartRtuPlus'].remove(irrigationLines[list[1]]['myOroSmartRtuPlus'][0]);
+            }
+            for(var i in irrigationLines[list[1]]['myOroSmartRtuPlus']){
+              OroSmartRtuPlusForLine.add(i);
+            }
+            irrigationLines[list[1]]['myOroSmartRtuPlus'] = list1;
+            OroSmartRtuPlusForLine.sort();
+          }else{
+            OroSmartRtuPlusForLine += irrigationLines[list[1]]['myOroSmartRtuPlus'];
+            irrigationLines[list[1]]['myOroSmartRtuPlus'] = [];
+            OroSmartRtuPlusForLine.sort();
+          }
+          ///////////////////////////////////////////////////////////////////////////////////
+          if(irrigationLines[list[1]]['ORO_Smart_RTU_Plus'] == ''){
+            if(irrigationLines[list[1]]['myRTU_list'].contains('O-S-RTU-Plus')){
+              irrigationLines[list[1]]['myRTU_list'].remove('O-S-RTU-Plus');
+            }
+          }else{
+            if(!irrigationLines[list[1]]['myRTU_list'].contains('O-S-RTU-Plus')){
+              irrigationLines[list[1]]['myRTU_list'].add('O-S-RTU-Plus');
+            }
+          }
+        }
+        updateIfRefNoEmpty(list[1],'O-S-RTU-Plus',irrigationLines[list[1]]['myOroSmartRtuPlus']);
+        break;
+      }
+      case ('editRtuPlus'): {
+        if(totalRtuPlus > -1){
+          if(irrigationLines[list[1]]['RTU_Plus'] != ''){
+            totalRtuPlus = totalRtuPlus + int.parse(irrigationLines[list[1]]['RTU_Plus']);
+            if(list[2] == ''){
+              totalRtuPlus = totalRtuPlus - 0;
+            }else{
+              if(list[2] == '0'){
+                totalRtuPlus = totalRtuPlus - 1;
+              }else{
+                totalRtuPlus = totalRtuPlus - int.parse(list[2]);
+              }
+
+            }
+          }else{
+            if(list[2] == '0'){
+              totalRtuPlus = totalRtuPlus - 1;
+            }else{
+              totalRtuPlus = totalRtuPlus - int.parse(list[2]);
+            }
+          }
+          irrigationLines[list[1]]['RTU_Plus'] = list[2];
+          if(irrigationLines[list[1]]['myRtuPlus'].length < int.parse(list[2] == '' ? '0' : list[2])){
+            int beforeLength = irrigationLines[list[1]]['myRtuPlus'].length;
+            for(var i = 0;i < int.parse(list[2]) - beforeLength;i++){
+              irrigationLines[list[1]]['myRtuPlus'].add(rtuPlusForLine[i]);
+            }
+            for(var i in  irrigationLines[list[1]]['myRtuPlus']){
+              if(rtuPlusForLine.contains(i)){
+                rtuPlusForLine.remove(i);
+              }
+            }
+          }else if(list[2] != ''){
+            var list1 = [];
+            for(var i = 0;i< int.parse(list[2]);i++){
+              list1.add(irrigationLines[list[1]]['myRtuPlus'][0]);
+              irrigationLines[list[1]]['myRtuPlus'].remove(irrigationLines[list[1]]['myRtuPlus'][0]);
+            }
+            for(var i in irrigationLines[list[1]]['myRtuPlus']){
+              rtuPlusForLine.add(i);
+            }
+            irrigationLines[list[1]]['myRtuPlus'] = list1;
+            rtuPlusForLine.sort();
+          }else{
+            rtuPlusForLine += irrigationLines[list[1]]['myRtuPlus'];
+            irrigationLines[list[1]]['myRtuPlus'] = [];
+            rtuPlusForLine.sort();
+          }
+          ///////////////////////////////////////////////////////////////////////////////////
+          if(irrigationLines[list[1]]['RTU_Plus'] == ''){
+            if(irrigationLines[list[1]]['myRTU_list'].contains('O-RTU-Plus')){
+              irrigationLines[list[1]]['myRTU_list'].remove('O-RTU-Plus');
+            }
+          }else{
+            if(!irrigationLines[list[1]]['myRTU_list'].contains('O-RTU-Plus')){
+              irrigationLines[list[1]]['myRTU_list'].add('O-RTU-Plus');
+            }
+          }
+        }
+        updateIfRefNoEmpty(list[1],'O-RTU-Plus',irrigationLines[list[1]]['myRtuPlus']);
         break;
       }
       case ('editRTU'): {
@@ -4218,7 +4464,7 @@ class ConfigMakerProvider extends ChangeNotifier{
               for(var i in rf.value){
                 oLevel.add('$i');
               }
-            }else if(rf.key == '7'){
+            }else if(rf.key == '12'){
               OroSmartRtuForLine = rf.value;
               totalOroSmartRTU = rf.value.length;
               for(var i in rf.value){
@@ -4230,7 +4476,7 @@ class ConfigMakerProvider extends ChangeNotifier{
               for(var i in rf.value){
                 oSwitch.add('$i');
               }
-            }else if(rf.key == '8'){
+            }else if(rf.key == '13'){
               rtuForLine = rf.value;
               totalRTU = rf.value.length;
               for(var i in rf.value){
@@ -4257,6 +4503,22 @@ class ConfigMakerProvider extends ChangeNotifier{
               oRoWeatherForStation = rf.value;
               for(var i in rf.value){
                 oWeather.add('$i');
+              }
+            }else if(rf.key == '7'){
+              OroSmartRtuPlusForLine = rf.value;
+              totalOroSmartRtuPlus = rf.value.length;
+              for(var i in rf.value){
+                oSrtuPlus.add('$i');
+              }
+            }else if(rf.key == '8'){
+              rtuPlusForLine = rf.value;
+              totalRtuPlus = rf.value.length;
+              for(var i in rf.value){
+                oRtuPlus.add('$i');
+              }
+            }else if(rf.key == '4'){
+              for(var i in rf.value){
+                oPumpPlus.add('$i');
               }
             }
           }
@@ -4305,7 +4567,10 @@ class ConfigMakerProvider extends ChangeNotifier{
                 }
                 break;
               case 12:
+                print('totalSelector1 : $totalSelector');
+
                 for (var k = 0; k < j['quantity']; k++) {
+                  print(k);
                   totalSelector.add({
                     'sNo': returnI_O_AutoIncrement(),
                     'rtu': '-',
@@ -4314,6 +4579,7 @@ class ConfigMakerProvider extends ChangeNotifier{
                     'output_type': '-',
                   });
                 }
+                print('totalSelector : $totalSelector');
                 break;
               case 13:
                 totalWaterMeter = j['quantity'];

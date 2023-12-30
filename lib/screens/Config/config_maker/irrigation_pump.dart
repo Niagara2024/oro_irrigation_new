@@ -185,6 +185,7 @@ class _IrrigationPumpTableState extends State<IrrigationPumpTable> {
                   topBtmLftRgt('Irrigation', 'Pump(${configPvd.totalIrrigationPump})'),
                   topBtmRgt('Water','Meter(${configPvd.totalWaterMeter})'),
                   topBtmRgt('ORO','pump'),
+                  topBtmRgt('ORO Pump','Plus'),
                   topBtmRgt('Relay','count'),
                   topBtmRgt('Level','Type'),
                   topBtmRgt('Top','tank(high)'),
@@ -266,14 +267,16 @@ class _IrrigationPumpTableState extends State<IrrigationPumpTable> {
                             ),
                             Expanded(
                               child: Container(
-                                  decoration: BoxDecoration(
-                                      border: Border(right: BorderSide(width: 1))
-                                  ),
-                                  width: double.infinity,
-                                  height: 50,
-                                  child: (configPvd.irrigationPumpUpdated[index]['oro_pump'] == false) ?
-                                  notAvailable :
-                                  MyDropDown(initialValue: configPvd.irrigationPumpUpdated[index]['relayCount'], itemList: ['1','2','3','4'], pvdName: 'editRelayCount_ip', index: index)
+                                decoration: BoxDecoration(
+                                    border: Border(right: BorderSide(width: 1))
+                                ),
+                                width: double.infinity,
+                                height: 50,
+                                child: Checkbox(
+                                    value: configPvd.irrigationPumpUpdated[index]['oro_pump_plus'],
+                                    onChanged: (value){
+                                      configPvd.irrigationPumpFunctionality(['editOroPumpPlus',index,value]);
+                                    }),
                               ),
                             ),
                             Expanded(
@@ -283,7 +286,18 @@ class _IrrigationPumpTableState extends State<IrrigationPumpTable> {
                                   ),
                                   width: double.infinity,
                                   height: 50,
-                                  child: MyDropDown(initialValue: configPvd.irrigationPumpUpdated[index]['levelType'], itemList: ['-','ADC level','RS485 level','float level'], pvdName: 'editLevelType_ip', index: index)
+                                  child: (configPvd.irrigationPumpUpdated[index]['oro_pump'] == true || configPvd.irrigationPumpUpdated[index]['oro_pump_plus'] == true) ?
+                                  MyDropDown(initialValue: configPvd.irrigationPumpUpdated[index]['relayCount'], itemList: ['1','2','3','4'], pvdName: 'editRelayCount_ip', index: index) : notAvailable
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                      border: Border(right: BorderSide(width: 1))
+                                  ),
+                                  width: double.infinity,
+                                  height: 50,
+                                  child: configPvd.irrigationPumpUpdated[index]['oro_pump_plus'] == true ? MyDropDown(initialValue: configPvd.irrigationPumpUpdated[index]['levelType'], itemList: ['-','ADC level','RS485 level','float level'], pvdName: 'editLevelType_ip', index: index) : notAvailable
                               ),
                             ),
                             Expanded(

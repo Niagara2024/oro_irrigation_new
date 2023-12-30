@@ -408,71 +408,74 @@ class MyDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 250,
-      color: myTheme.primaryColor.withOpacity(0.9),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: myTheme.primaryColor,
-            ),
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircleAvatar(
-                    radius: 40,
-                    backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
-                    backgroundColor: Colors.transparent,
-                  ),
-                  const SizedBox(height: 3,),
-                  Text(userName, style: const TextStyle(fontSize: 17, color: Colors.white)),
-                  const SizedBox(height: 3,),
-                  Text('+$countryCode $phoneNo', style: const TextStyle(fontSize: 14, color: Colors.white)),
-                ],
+    return SingleChildScrollView(
+      child: Container(
+        width: 250,
+        height: MediaQuery.of(context).size.height < 700 ? 700 : MediaQuery.of(context).size.height,
+        color: myTheme.primaryColor.withOpacity(0.9),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: myTheme.primaryColor,
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircleAvatar(
+                      radius: 40,
+                      backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
+                      backgroundColor: Colors.transparent,
+                    ),
+                    const SizedBox(height: 3,),
+                    Text(userName, style: const TextStyle(fontSize: 17, color: Colors.white)),
+                    const SizedBox(height: 3,),
+                    Text('+$countryCode $phoneNo', style: const TextStyle(fontSize: 14, color: Colors.white)),
+                  ],
+                ),
               ),
             ),
-          ),
-          const Padding(
-            padding: EdgeInsets.only(left: 10, bottom: 5),
-            child: Text('HOME', style: TextStyle(color: Colors.white)),
-          ),
-          buildCustomListTile('Dashboard', Icons.dashboard_outlined, 'Dashboard'),
-          buildCustomListTile('My Product', Icons.topic_outlined, 'My Product'),
-          buildCustomListTile('Report Overview', Icons.my_library_books_outlined, 'Report Overview'),
-          buildCustomListTile('Controller Logs', Icons.message_outlined, 'Controller Logs'),
-          buildCustomListTile('Device Settings', Icons.settings_outlined, 'Device Settings'),
-          const Padding(
-            padding: EdgeInsets.only(left: 10, top: 10, bottom: 5),
-            child: Text('ORGANIZATION', style: TextStyle(color: Colors.white)),
-          ),
-          buildCustomListTile('App Info', Icons.info_outline, 'App Info'),
-          buildCustomListTile('Help & Support', Icons.help_outline, 'Help & Support'),
-          const Padding(
-            padding: EdgeInsets.only(left: 10, top: 10, bottom: 5),
-            child: Text('ACCOUNT', style: TextStyle(color: Colors.white)),
-          ),
-          buildCustomListTile('My Preference', Icons.settings_outlined, 'My Preference'),
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red,),
-            title: const Text('Logout', style: TextStyle(fontSize: 14, color: Colors.white)),
-            onTap: () async {
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.remove('userId');
-              await prefs.remove('userName');
-              await prefs.remove('countryCode');
-              await prefs.remove('mobileNumber');
-              await prefs.remove('subscribeTopic');
-              if (context.mounted){
-                Navigator.pushNamedAndRemoveUntil(context, '/login', ModalRoute.withName('/login'));
-              }
-            },
-          ),
-          // Add more ListTile widgets for additional options
-        ],
+            const Padding(
+              padding: EdgeInsets.only(left: 10, bottom: 5),
+              child: Text('HOME', style: TextStyle(color: Colors.white)),
+            ),
+            buildCustomListTile('Dashboard', Icons.dashboard_outlined, 'Dashboard'),
+            buildCustomListTile('My Product', Icons.topic_outlined, 'My Product'),
+            buildCustomListTile('Report Overview', Icons.my_library_books_outlined, 'Report Overview'),
+            buildCustomListTile('Controller Logs', Icons.message_outlined, 'Controller Logs'),
+            buildCustomListTile('Device Settings', Icons.settings_outlined, 'Device Settings'),
+            const Padding(
+              padding: EdgeInsets.only(left: 10, top: 10, bottom: 5),
+              child: Text('ORGANIZATION', style: TextStyle(color: Colors.white)),
+            ),
+            buildCustomListTile('App Info', Icons.info_outline, 'App Info'),
+            buildCustomListTile('Help & Support', Icons.help_outline, 'Help & Support'),
+            const Padding(
+              padding: EdgeInsets.only(left: 10, top: 10, bottom: 5),
+              child: Text('ACCOUNT', style: TextStyle(color: Colors.white)),
+            ),
+            buildCustomListTile('My Preference', Icons.settings_outlined, 'My Preference'),
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.red,),
+              title: const Text('Logout', style: TextStyle(fontSize: 14, color: Colors.white)),
+              onTap: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.remove('userId');
+                await prefs.remove('userName');
+                await prefs.remove('countryCode');
+                await prefs.remove('mobileNumber');
+                await prefs.remove('subscribeTopic');
+                if (context.mounted){
+                  Navigator.pushNamedAndRemoveUntil(context, '/login', ModalRoute.withName('/login'));
+                }
+              },
+            ),
+            // Add more ListTile widgets for additional options
+          ],
+        ),
       ),
     );
   }

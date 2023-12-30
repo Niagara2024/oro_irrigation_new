@@ -177,57 +177,55 @@ class _WeatherScreenState extends State<WeatherScreen> {
   }
 
   Widget Temprature() {
-    return Expanded(
-      child: Container(
-        height: 120,
-        width: MediaQuery.of(context).size.width * 0.5,
-        decoration: BoxDecoration(
-          color: Colors.transparent.withAlpha(90),
-          border: Border.all(color: Colors.black12),
-          borderRadius: BorderRadius.all(Radius.circular(5)),
-        ),
-        child: Center(
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            const Text(
-                'Cloudy Conditions will continue for the rest of the day. wind gusts are up to 15 kph.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white)),
-            Container(
-              color: Colors.white,
-              height: 0.5,
-              width: double.infinity,
-            ),
-            Expanded(
-              child: Container(
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: weatherData['hourly']['time'].length,
-                  itemBuilder: (context, index) {
-                    List<String> part =
-                    weatherData['hourly']['time'][index].split('T');
-                    List<String> parts = part.isNotEmpty
-                        ? weatherData['hourly']['time'][index].split('T')
-                        : ['00:00', '00:00'];
-                    return Tab(
-                        '${parts[1]}',
-                        '${weatherData['hourly']['temperature_2m'][index]}',
-                        '');
-                  },
-                  separatorBuilder: (BuildContext context, int index) {
-                    return const Divider(
-                      color: Colors.grey,
-                      thickness: 10,
-                      height: 0,
-                    );
-                  },
-                ),
+    return Container(
+      height: 120,
+      width: MediaQuery.of(context).size.width * 0.5,
+      decoration: BoxDecoration(
+        color: Colors.transparent.withAlpha(90),
+        border: Border.all(color: Colors.black12),
+        borderRadius: BorderRadius.all(Radius.circular(5)),
+      ),
+      child: Center(
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          const Text(
+              'Cloudy Conditions will continue for the rest of the day. wind gusts are up to 15 kph.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white)),
+          Container(
+            color: Colors.white,
+            height: 0.5,
+            width: double.infinity,
+          ),
+          Expanded(
+            child: Container(
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: weatherData['hourly']['time'].length,
+                itemBuilder: (context, index) {
+                  List<String> part =
+                  weatherData['hourly']['time'][index].split('T');
+                  List<String> parts = part.isNotEmpty
+                      ? weatherData['hourly']['time'][index].split('T')
+                      : ['00:00', '00:00'];
+                  return Tab(
+                      '${parts[1]}',
+                      '${weatherData['hourly']['temperature_2m'][index]}',
+                      '');
+                },
+                separatorBuilder: (BuildContext context, int index) {
+                  return const Divider(
+                    color: Colors.grey,
+                    thickness: 10,
+                    height: 0,
+                  );
+                },
               ),
             ),
-          ]),
-        ),
+          ),
+        ]),
       ),
     );
   }
@@ -331,20 +329,27 @@ class _WeatherScreenState extends State<WeatherScreen> {
     );
   }
 
+
   void showAlert(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Hourly report'),
+          title: ListTile(title: const Text('HOURLY REPORTS',textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              )),trailing: IconButton(onPressed: (){
+            Navigator.of(context).pop();
+          }, icon: Icon(Icons.close),color: Colors.red,),),
           actions: <Widget>[
+
             Container(color: Colors.lightBlue, child: Temprature()),
           ],
         );
       },
     );
   }
-
   // TODO: implement widget
   Widget Tab(String Time, String temp, String type) {
     return Padding(

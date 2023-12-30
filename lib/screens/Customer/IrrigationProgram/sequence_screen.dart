@@ -190,7 +190,7 @@ class _SequenceScreenState extends State<SequenceScreen> {
                                                           builder: (BuildContext context) {
                                                             return CustomAlertDialog(
                                                               title: 'Warning',
-                                                              content: "Group added cannot be added into group",
+                                                              content: "Group cannot be added into group",
                                                               actions: [
                                                                 TextButton(child: const Text("OK"), onPressed: () => Navigator.of(context).pop(),),
                                                               ],

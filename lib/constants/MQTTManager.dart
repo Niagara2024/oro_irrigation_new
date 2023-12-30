@@ -1,5 +1,6 @@
 import 'package:mqtt_client/mqtt_browser_client.dart';
 import 'package:mqtt_client/mqtt_client.dart';
+import 'package:uuid/uuid.dart';
 import '../state_management/MqttPayloadProvider.dart';
 
 class MQTTManager {
@@ -17,9 +18,13 @@ class MQTTManager {
   bool get isConnected => _client?.connectionStatus?.state == MqttConnectionState.connected;
 
   void initializeMQTTClient({MqttPayloadProvider? state}) {
+
+    String uniqueId = const Uuid().v4();
+    print('Unique ID: $uniqueId');
+
     if (_client == null) {
       _currentState = state;
-      _client = MqttBrowserClient('ws://192.168.1.141', 'flutter_identifier');
+      _client = MqttBrowserClient('ws://192.168.1.141', uniqueId);
       _client!.port = 9001;
       _client!.keepAlivePeriod = 20;
       _client!.onDisconnected = onDisconnected;
@@ -29,7 +34,7 @@ class MQTTManager {
       _client!.onSubscribed = onSubscribed;
 
       final MqttConnectMessage connMess = MqttConnectMessage()
-          .withClientIdentifier('flutter_identifier')
+          .withClientIdentifier(uniqueId)
           .withWillTopic('will-topic')
           .withWillMessage('My Will message')
           .startClean()
@@ -46,8 +51,9 @@ class MQTTManager {
         print('Mosquitto start client connecting....');
         _currentState?.setAppConnectionState(MQTTConnectionState.connecting);
         await _client!.connect();
-      } on Exception catch (e) {
-        print('client exception - $e');
+      } on Exception catch (e, stackTrace) {
+        print('Client exception - $e');
+        print('StackTrace: $stackTrace');
         disconnect();
       }
     }
@@ -59,7 +65,7 @@ class MQTTManager {
   }
 
   void subscribeToTopic(String topic) {
-    assert(isConnected);
+
     _client!.subscribe(topic, MqttQos.atLeastOnce);
 
     _client!.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
@@ -93,10 +99,11 @@ class MQTTManager {
       print('OnDisconnected callback is solicited, this is correct');
     }
     _currentState?.setAppConnectionState(MQTTConnectionState.disconnected);
+    //initializeMQTTClient();
   }
 
-  /// The successful connect callback
   void onConnected() {
+    assert(isConnected);
     _currentState?.setAppConnectionState(MQTTConnectionState.connected);
     print('Mosquitto client connected....');
   }

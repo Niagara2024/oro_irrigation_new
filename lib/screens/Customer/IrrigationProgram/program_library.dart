@@ -100,15 +100,55 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
     return mainProvider.programLibrary?.program != null
         ? (mainProvider.programLibrary!.program.isNotEmpty
         ? _buildProgramListView(mainProvider, constraints)
-        : const Center(
-      child: Padding(
-        padding: EdgeInsets.all(8.0),
-        child: Text(
-          "Programs not yet created, To create a program tap the '+' icon button",
-          textAlign: TextAlign.center,
-        ),
-      ),
-    ))
+        : Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  "Programs not yet created, To create a program tap the '+' icon button",
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 10,),
+                IconButton(
+                  onPressed: () {
+                    if (mainProvider.programLibrary?.agitatorCount != 0) {
+                      _showAdaptiveDialog(context, mainProvider);
+                    } else {
+                      mainProvider.selectedProgramType = 'Irrigation Program';
+                      mainProvider.updateIsIrrigationProgram();
+                      mainProvider.programLibrary!.program.length <= mainProvider.programLibrary!.programLimit ?
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => IrrigationProgram(
+                            userId: widget.userId,
+                            controllerId: widget.controllerId,
+                            serialNumber: mainProvider.programLibrary!.program.any((element) => element.programName.isEmpty)
+                                ? mainProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty).serialNumber : 0,
+                            conditionsLibraryIsNotEmpty: mainProvider.conditionsLibraryIsNotEmpty,
+                            programType: mainProvider.programLibrary!.program.any((element) => element.programName.isEmpty)
+                                ? mainProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty).programType : null,
+                          ),
+                        ),
+                      ) :
+                      CustomAlertDialog(
+                          title: "Alert",
+                          content: "The program limit is exceeded as defined in the Constants!",
+                          actions: [
+                            TextButton(onPressed: () => Navigator.of(context).pop(), child: Text("OK"))
+                          ]
+                      );
+                    }
+                  },
+                  icon: Icon(Icons.add),
+                )
+              ],
+            ),
+          ),
+        ))
         : const Center(child: CircularProgressIndicator());
   }
 
@@ -625,12 +665,8 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
                           subtitle: 'Description',
                           showSubTitle: false,
                           content: Icons.priority_high,
-                          dropdownItems: mainProvider.priorityList
-                              .map((item) => item.toString())
-                              .toList(),
-                          selectedValue: program.priority != 0
-                              ? program.priority.toString()
-                              : 'None',
+                          dropdownItems: mainProvider.priorityList.map((item) => item).toList(),
+                          selectedValue: program.priority,
                           onChanged: (newValue) {
                             mainProvider.updatePriority(newValue, index);
                             _programNameFocusNode.unfocus();

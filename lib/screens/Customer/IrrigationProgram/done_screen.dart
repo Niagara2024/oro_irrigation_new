@@ -97,9 +97,10 @@ class _DoneScreenState extends State<DoneScreen> {
                     subtitle: 'Description',
                     showSubTitle: true,
                     content: Icons.priority_high,
-                    dropdownItems: doneProvider.priorityList.map((item) => item.toString()).toList(),
-                    selectedValue: doneProvider.priority != 0 ? doneProvider.priority.toString() :'None',
-                    onChanged: (newValue) => doneProvider.updateProgramName(newValue, 'priority')
+                    dropdownItems: doneProvider.priorityList.map((item) => item).toList(),
+                    selectedValue: doneProvider.priority,
+                    onChanged: (newValue) => doneProvider.updateProgramName(newValue, 'priority'),
+                  includeNoneOption: true,
                 ),
               ),
               const SizedBox(height: 5,),

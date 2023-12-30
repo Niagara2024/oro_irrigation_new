@@ -84,7 +84,12 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
       handleSingleValveMode(valves, valueToShow, serialNumber, sNo, isGroup);
       groupAdding = false;
     } else {
-      handleMultipleValvesMode(valves, valueToShow, titleIndex, serialNumber, sNo, isGroup);
+      if(!isGroup && isMultipleValveMode) {
+        handleMultipleValvesMode(valves, valueToShow, titleIndex, serialNumber, sNo, isGroup);
+        groupAdding = false;
+      } else{
+        groupAdding = true;
+      }
     }
   }
 
@@ -1527,13 +1532,11 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
   int programCount = 0;
   String programName = '';
   String defaultProgramName = '';
-  int priority = 0;
-  List<String> priorityList2 = ["High", "Low"];
+  String priority = '';
+  List<String> priorityList = ["High", "Low"];
   bool isCompletionEnabled = false;
-  List<int> priorityList = [];
   List<String> programTypes = [];
   String selectedProgramType = '';
-
   int serialNumberCreation = 0;
   bool irrigationProgramType = false;
 
@@ -1558,8 +1561,7 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
         _programDetails = ProgramDetails.fromJson(convertedJson);
         programCount = _programLibrary!.program.isEmpty ? 1 : _programLibrary!.program.length + 1;
         serialNumberCreation = _programLibrary!.program.length + 1;
-        priorityList = List.generate(_programLibrary!.program.length, (index) => (index + 1));
-        priority = _programDetails!.priority;
+        priority = _programDetails!.priority != "" ? _programDetails!.priority : "None";
         // if(_programDetails != null) {
         programName = serialNumber == 0
             ? "Program $programCount"
@@ -1614,8 +1616,7 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
         final responseJson = getUserProgramName.body;
         final convertedJson = jsonDecode(responseJson);
         _programLibrary = ProgramLibrary.fromJson(convertedJson);
-        priorityList = List.generate(_programLibrary!.program.length, (index) => (index + 1));
-        priority = _programDetails?.priority ?? 0;
+        priority = _programDetails?.priority != "" ? _programDetails?.priority ?? "None" : "None";
         agitatorCountIsNotZero = convertedJson['data']['agitatorCount'] != 0 ? true : false;
         conditionsLibraryIsNotEmpty = convertedJson['data']['conditionLibraryCount'] != 0 ? true : false;
         // irrigationProgramType = _programLibrary?.program[serialNumber].programType == "Irrigation Program" ? true : false;
@@ -1657,7 +1658,7 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
   }
 
   void updatePriority(newValue, index) {
-    _programLibrary?.program[index].priority = int.tryParse(newValue) ?? 0;
+    _programLibrary?.program[index].priority = newValue;
     notifyListeners();
   }
 
@@ -1665,7 +1666,7 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
     switch (type) {
       case 'programName':programName = newValue != '' ? newValue : programName;
       break;
-      case 'priority':priority = int.tryParse(newValue) ?? 0;
+      case 'priority':priority = newValue;
       break;
       case 'completion':isCompletionEnabled = newValue as bool;
       break;
@@ -1751,7 +1752,7 @@ class IrrigationProgramMainProvider extends ChangeNotifier {
 
   //TODO: UPDATE PROGRAM DETAILS
   Future<String> updateUserProgramDetails(
-      int userId, int controllerId, int serialNumber, int programId, String programName, int priority) async {
+      int userId, int controllerId, int serialNumber, int programId, String programName, String priority) async {
     try {
       Map<String, dynamic> userData = {
         "userId": userId,

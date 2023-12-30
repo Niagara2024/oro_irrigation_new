@@ -10,7 +10,6 @@ class DashboardNode
     this.categoryName ='',
     this.deviceId = '',
     this.deviceName ='',
-    //this.nodeStatus = '',
   });
 
   factory DashboardNode.fromJson(Map<String, dynamic> json) => DashboardNode(
@@ -20,7 +19,6 @@ class DashboardNode
     categoryName: json['categoryName'],
     deviceId: json['deviceId'],
     deviceName: json['deviceName'],
-    //nodeStatus: json['nodeStatus'],
   );
 
 }

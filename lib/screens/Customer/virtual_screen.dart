@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 
+import '../../constants/MQTTManager.dart';
 import '../../constants/http_service.dart';
 import '../../constants/snack_bar.dart';
 import '../../widgets/FontSizeUtils.dart';
@@ -13,9 +14,9 @@ class VirtualMeterScreen extends StatefulWidget {
   const VirtualMeterScreen({
     super.key,
     required this.userId,
-    required this.controllerId,
+    required this.controllerId, required this.deviceId,
   });
-  final userId, controllerId;
+  final userId, controllerId, deviceId;
 
   @override
   State<VirtualMeterScreen> createState() => _VirtualMeterScreenState();
@@ -690,25 +691,34 @@ class _VirtualMeterScreenState extends State<VirtualMeterScreen>
           context, jsonDataresponse['message'], response.statusCode);
       if (jsonDataresponse['code'] == 200) {
         initializeData();
+
+        var mqttpaylod = toMqttformat(jsondata['plan']);
+        String payLoadFinal = jsonEncode({
+          "1500": [
+            {"15001": mqttpaylod},
+          ]
+        });
+        MQTTManager().publish(payLoadFinal,'AppToFirmware/${widget.deviceId}');
+
       }
     } else {
       print('else $jsondata');
     }
   }
 
-  double? _fontSizeheading() {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double fontSize = (screenWidth / 100) + 5;
-    return fontSize <= 9 ? 11 : fontSize;
+  String toMqttformat(
+      List<dynamic>? data,
+      ) {
+    String Mqttdata = '';
+    for (var i = 0; i < data!.length; i++) {
+      //print('${data[i]}');
+      Mqttdata +=
+      '${data[i]['sNo']},${data[i]['id']},${data[i]['location']},${data[i]['name']},${data[i]['function']},${data[i]['formula']},${data[i]['protectionLimit']},${data[i]['object']},${data[i]['action']},${data[i]['radio']};';
+    }
+    //print('Mqttdata');
+    return Mqttdata;
   }
 
-  double? _fontSizelabel() {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double fontSize = (screenWidth / 100) + 3;
-    return fontSize <= 9
-        ? 10
-        : fontSize > 14
-        ? 14
-        : fontSize;
-  }
+
+
 }

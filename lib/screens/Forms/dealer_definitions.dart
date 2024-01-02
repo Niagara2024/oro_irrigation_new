@@ -80,10 +80,12 @@ class _DealerDefinitionsState extends State<DealerDefinitions> {
   Future<void> getDealerDefinitionList() async {
     Map<String, Object> body = {};
     final response = await HttpService().postRequest("getDealerDefinition", body);
+
     if (response.statusCode == 200) {
       ddList.clear();
       var data = jsonDecode(response.body);
       final cntList = data["data"] as List;
+      print(cntList);
 
       for (int i = 0; i < cntList.length; i++) {
         ddList.add(DDModel.fromJson(cntList[i]));

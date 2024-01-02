@@ -136,9 +136,8 @@ class _ConfigMakerScreenState extends State<ConfigMakerScreen> with SingleTicker
           ),
         );
       }else{
-        return  ConfigMakerForWeb(userID: widget.userID, customerID: widget.customerID, siteId: widget.siteID,);
+        return  ConfigMakerForWeb(userID: widget.userID, customerID: widget.customerID, siteId: widget.siteID, deviceID: widget.imeiNumber,);
       }
     },);
   }
 }
-

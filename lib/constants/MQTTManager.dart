@@ -5,7 +5,7 @@ import '../state_management/MqttPayloadProvider.dart';
 
 class MQTTManager {
   static MQTTManager? _instance;
-  MqttPayloadProvider? _currentState;
+  MqttPayloadProvider? providerState;
   MqttBrowserClient? _client;
 
   factory MQTTManager() {
@@ -23,7 +23,7 @@ class MQTTManager {
     print('Unique ID: $uniqueId');
 
     if (_client == null) {
-      _currentState = state;
+      providerState = state;
       _client = MqttBrowserClient('ws://192.168.1.141', uniqueId);
       _client!.port = 9001;
       _client!.keepAlivePeriod = 20;
@@ -49,7 +49,7 @@ class MQTTManager {
     if (!isConnected) {
       try {
         print('Mosquitto start client connecting....');
-        _currentState?.setAppConnectionState(MQTTConnectionState.connecting);
+        providerState?.setAppConnectionState(MQTTConnectionState.connecting);
         await _client!.connect();
       } on Exception catch (e, stackTrace) {
         print('Client exception - $e');
@@ -72,10 +72,11 @@ class MQTTManager {
       final MqttPublishMessage recMess = c![0].payload as MqttPublishMessage;
 
       final String pt = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-      _currentState?.setReceivedText(pt);
+      providerState?.setReceivedText(pt);
 
-      print('Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
-      print('');
+     // print('Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
+      //print('');
+
     });
 
   }
@@ -98,13 +99,12 @@ class MQTTManager {
     if (_client!.connectionStatus!.returnCode == MqttConnectReturnCode.noneSpecified) {
       print('OnDisconnected callback is solicited, this is correct');
     }
-    _currentState?.setAppConnectionState(MQTTConnectionState.disconnected);
-    //initializeMQTTClient();
+    providerState?.setAppConnectionState(MQTTConnectionState.disconnected);
   }
 
   void onConnected() {
     assert(isConnected);
-    _currentState?.setAppConnectionState(MQTTConnectionState.connected);
+    providerState?.setAppConnectionState(MQTTConnectionState.connected);
     print('Mosquitto client connected....');
   }
 }

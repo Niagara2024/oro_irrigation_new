@@ -620,7 +620,7 @@ class ConfigMakerProvider extends ChangeNotifier{
           if(sourcePumpUpdated[list[1]]['off'] == null){
             sourcePumpUpdated[list[1]]['off'] = {
               'sNo' : returnI_O_AutoIncrement(),
-              'rtu' : 'ORO PUMP',
+              'rtu' : 'ORO Pump',
               'rfNo' : sourcePumpUpdated[list[1]]['on']['rfNo'],
               'output' : '-',
               'output_type' : '1',
@@ -634,7 +634,7 @@ class ConfigMakerProvider extends ChangeNotifier{
           if(sourcePumpUpdated[list[1]]['off'] == null){
             sourcePumpUpdated[list[1]]['off'] = {
               'sNo' : returnI_O_AutoIncrement(),
-              'rtu' : 'ORO PUMP',
+              'rtu' : 'ORO Pump',
               'rfNo' : sourcePumpUpdated[list[1]]['on']['rfNo'],
               'output' : '-',
               'output_type' : '1',
@@ -644,7 +644,7 @@ class ConfigMakerProvider extends ChangeNotifier{
           if(sourcePumpUpdated[list[1]]['scr'] == null){
             sourcePumpUpdated[list[1]]['scr'] = {
               'sNo' : returnI_O_AutoIncrement(),
-              'rtu' : 'ORO PUMP',
+              'rtu' : 'ORO Pump',
               'rfNo' : sourcePumpUpdated[list[1]]['on']['rfNo'],
               'output' : '-',
               'output_type' : '1',
@@ -657,7 +657,7 @@ class ConfigMakerProvider extends ChangeNotifier{
           if(sourcePumpUpdated[list[1]]['off'] == null){
             sourcePumpUpdated[list[1]]['off'] = {
               'sNo' : returnI_O_AutoIncrement(),
-              'rtu' : 'ORO PUMP',
+              'rtu' : 'ORO Pump',
               'rfNo' : sourcePumpUpdated[list[1]]['on']['rfNo'],
               'output' : '-',
               'output_type' : '1',
@@ -667,7 +667,7 @@ class ConfigMakerProvider extends ChangeNotifier{
           if(sourcePumpUpdated[list[1]]['scr'] == null){
             sourcePumpUpdated[list[1]]['scr'] = {
               'sNo' : returnI_O_AutoIncrement(),
-              'rtu' : 'ORO PUMP',
+              'rtu' : 'ORO Pump',
               'rfNo' : sourcePumpUpdated[list[1]]['on']['rfNo'],
               'output' : '-',
               'output_type' : '1',
@@ -677,7 +677,7 @@ class ConfigMakerProvider extends ChangeNotifier{
           if(sourcePumpUpdated[list[1]]['ecr'] == null){
             sourcePumpUpdated[list[1]]['ecr'] = {
               'sNo' : returnI_O_AutoIncrement(),
-              'rtu' : 'ORO PUMP',
+              'rtu' : 'ORO Pump',
               'rfNo' : sourcePumpUpdated[list[1]]['on']['rfNo'],
               'output' : '-',
               'output_type' : '1',
@@ -693,13 +693,16 @@ class ConfigMakerProvider extends ChangeNotifier{
           if(sourcePumpUpdated[list[1]]['oro_pump_plus'] == true){
             sourcePumpUpdated[list[1]]['oro_pump_plus'] = false;
           }
+          if(sourcePumpUpdated[list[1]]['waterMeter'].isNotEmpty){
+            sourcePumpFunctionality(['editWaterMeter',list[1],false]);
+          }
           sourcePumpUpdated[list[1]].remove('pumpConnection');
           sourcePumpUpdated[list[1]]['relayCount'] = '1';
 
           sourcePumpUpdated[list[1]]['relayCount'] = '1';
           sourcePumpUpdated[list[1]]['on'] = {
             'sNo' : returnI_O_AutoIncrement(),
-            'rtu' : 'ORO PUMP',
+            'rtu' : 'ORO Pump',
             'rfNo' : '-',
             'output' : '-',
             'output_type' : '1',
@@ -707,26 +710,27 @@ class ConfigMakerProvider extends ChangeNotifier{
           };
           sourcePumpUpdated[list[1]]['c1'] = {
             'sNo' : returnI_O_AutoIncrement(),
-            'rtu' : 'ORO PUMP',
+            'rtu' : 'ORO Pump',
             'rfNo' : '${sourcePumpUpdated[list[1]]['on']['rfNo']}',
             'input' : '-',
             'input_type' : '-',
           };
           sourcePumpUpdated[list[1]]['c2'] = {
             'sNo' : returnI_O_AutoIncrement(),
-            'rtu' : 'ORO PUMP',
+            'rtu' : 'ORO Pump',
             'rfNo' : '${sourcePumpUpdated[list[1]]['on']['rfNo']}',
             'input' : '-',
             'input_type' : '-',
           };
           sourcePumpUpdated[list[1]]['c3'] = {
             'sNo' : returnI_O_AutoIncrement(),
-            'rtu' : 'ORO PUMP',
+            'rtu' : 'ORO Pump',
             'rfNo' : '${sourcePumpUpdated[list[1]]['on']['rfNo']}',
             'input' : '-',
             'input_type' : '-',
           };
         }else{
+
           sourcePumpUpdated[list[1]]['pumpConnection'] = {
             'sNo' : returnI_O_AutoIncrement(),
             'rtu' : '-',
@@ -749,7 +753,6 @@ class ConfigMakerProvider extends ChangeNotifier{
       }
       case ('editOroPumpPlus') : {
         if(list[2] == true){
-          sourcePumpFunctionality(['editWaterMeter',list[1],false]);
           if(sourcePumpUpdated[list[1]]['oro_pump'] == true){
             sourcePumpUpdated[list[1]]['oro_pump'] = false;
           }
@@ -857,6 +860,7 @@ class ConfigMakerProvider extends ChangeNotifier{
     switch (list[0]){
       case 'addIrrigationPump': {
         addingPump(irrigationPumpUpdated,totalIrrigationPump,false,false);
+        print('pumpData : ${jsonEncode(irrigationPumpUpdated)}');
         break;
       }
       case ('addBatch') : {
@@ -977,6 +981,9 @@ class ConfigMakerProvider extends ChangeNotifier{
         for (var selectedPump in selectedPumps) {
           if(isNew == false){
             irrigationPumpUpdated[irrigationPumpUpdated.indexOf(selectedPump)]['deleted'] = true;
+            // irrigationPumpUpdated[irrigationPumpUpdated.indexOf(selectedPump)]['rtu'] = '-';
+            // irrigationPumpUpdated[irrigationPumpUpdated.indexOf(selectedPump)]['rfNo'] = '-';
+            // irrigationPumpUpdated[irrigationPumpUpdated.indexOf(selectedPump)]['output'] = '-';
           }else{
             irrigationPumpUpdated.remove(selectedPump);
           }
@@ -1056,7 +1063,7 @@ class ConfigMakerProvider extends ChangeNotifier{
           if(irrigationPumpUpdated[list[1]]['off'] == null){
             irrigationPumpUpdated[list[1]]['off'] = {
               'sNo' : returnI_O_AutoIncrement(),
-              'rtu' : 'ORO PUMP',
+              'rtu' : 'ORO Pump',
               'rfNo' : irrigationPumpUpdated[list[1]]['on']['rfNo'],
               'output' : '-',
               'output_type' : '1',
@@ -1070,7 +1077,7 @@ class ConfigMakerProvider extends ChangeNotifier{
           if(irrigationPumpUpdated[list[1]]['off'] == null){
             irrigationPumpUpdated[list[1]]['off'] = {
               'sNo' : returnI_O_AutoIncrement(),
-              'rtu' : 'ORO PUMP',
+              'rtu' : 'ORO Pump',
               'rfNo' : irrigationPumpUpdated[list[1]]['on']['rfNo'],
               'output' : '-',
               'output_type' : '1',
@@ -1080,7 +1087,7 @@ class ConfigMakerProvider extends ChangeNotifier{
           if(irrigationPumpUpdated[list[1]]['scr'] == null){
             irrigationPumpUpdated[list[1]]['scr'] = {
               'sNo' : returnI_O_AutoIncrement(),
-              'rtu' : 'ORO PUMP',
+              'rtu' : 'ORO Pump',
               'rfNo' : irrigationPumpUpdated[list[1]]['on']['rfNo'],
               'output' : '-',
               'output_type' : '1',
@@ -1093,7 +1100,7 @@ class ConfigMakerProvider extends ChangeNotifier{
           if(irrigationPumpUpdated[list[1]]['off'] == null){
             irrigationPumpUpdated[list[1]]['off'] = {
               'sNo' : returnI_O_AutoIncrement(),
-              'rtu' : 'ORO PUMP',
+              'rtu' : 'ORO Pump',
               'rfNo' : irrigationPumpUpdated[list[1]]['on']['rfNo'],
               'output' : '-',
               'output_type' : '1',
@@ -1103,7 +1110,7 @@ class ConfigMakerProvider extends ChangeNotifier{
           if(irrigationPumpUpdated[list[1]]['scr'] == null){
             irrigationPumpUpdated[list[1]]['scr'] = {
               'sNo' : returnI_O_AutoIncrement(),
-              'rtu' : 'ORO PUMP',
+              'rtu' : 'ORO Pump',
               'rfNo' : irrigationPumpUpdated[list[1]]['on']['rfNo'],
               'output' : '-',
               'output_type' : '1',
@@ -1113,7 +1120,7 @@ class ConfigMakerProvider extends ChangeNotifier{
           if(irrigationPumpUpdated[list[1]]['ecr'] == null){
             irrigationPumpUpdated[list[1]]['ecr'] = {
               'sNo' : returnI_O_AutoIncrement(),
-              'rtu' : 'ORO PUMP',
+              'rtu' : 'ORO Pump',
               'rfNo' : irrigationPumpUpdated[list[1]]['on']['rfNo'],
               'output' : '-',
               'output_type' : '1',
@@ -1129,13 +1136,16 @@ class ConfigMakerProvider extends ChangeNotifier{
           if(irrigationPumpUpdated[list[1]]['oro_pump_plus'] == true){
             irrigationPumpUpdated[list[1]]['oro_pump_plus'] = false;
           }
+          if(irrigationPumpUpdated[list[1]]['waterMeter'].isNotEmpty){
+            irrigationPumpFunctionality(['editWaterMeter',list[1],false]);
+          }
           irrigationPumpUpdated[list[1]].remove('pumpConnection');
           irrigationPumpUpdated[list[1]]['relayCount'] = '1';
 
           irrigationPumpUpdated[list[1]]['relayCount'] = '1';
           irrigationPumpUpdated[list[1]]['on'] = {
             'sNo' : returnI_O_AutoIncrement(),
-            'rtu' : 'ORO PUMP',
+            'rtu' : 'ORO Pump',
             'rfNo' : '-',
             'output' : '-',
             'output_type' : '1',
@@ -1143,21 +1153,21 @@ class ConfigMakerProvider extends ChangeNotifier{
           };
           irrigationPumpUpdated[list[1]]['c1'] = {
             'sNo' : returnI_O_AutoIncrement(),
-            'rtu' : 'ORO PUMP',
+            'rtu' : 'ORO Pump',
             'rfNo' : '${irrigationPumpUpdated[list[1]]['on']['rfNo']}',
             'input' : '-',
             'input_type' : '-',
           };
           irrigationPumpUpdated[list[1]]['c2'] = {
             'sNo' : returnI_O_AutoIncrement(),
-            'rtu' : 'ORO PUMP',
+            'rtu' : 'ORO Pump',
             'rfNo' : '${irrigationPumpUpdated[list[1]]['on']['rfNo']}',
             'input' : '-',
             'input_type' : '-',
           };
           irrigationPumpUpdated[list[1]]['c3'] = {
             'sNo' : returnI_O_AutoIncrement(),
-            'rtu' : 'ORO PUMP',
+            'rtu' : 'ORO Pump',
             'rfNo' : '${irrigationPumpUpdated[list[1]]['on']['rfNo']}',
             'input' : '-',
             'input_type' : '-',
@@ -1367,7 +1377,8 @@ class ConfigMakerProvider extends ChangeNotifier{
                 'ecConnection' : [],
                 'ph' : '',
                 'phConnection' : [],
-                'pressureSwitch' : {}
+                'pressureSwitch' : {},
+                'deleted' : false
               });
             }
           }
@@ -1730,6 +1741,7 @@ class ConfigMakerProvider extends ChangeNotifier{
                   'pressureOut' : {},
                   'pressureSwitch' : {},
                   'diffPressureSensor' : {},
+                  'deleted' : false,
                 }
             );
           }
@@ -1779,6 +1791,7 @@ class ConfigMakerProvider extends ChangeNotifier{
                     'pressureOut' : {},
                     'pressureSwitch' : {},
                     'diffPressureSensor' : {},
+                    'deleted' : false,
                   }
               );
             }
@@ -2666,16 +2679,16 @@ class ConfigMakerProvider extends ChangeNotifier{
           }
           ///////////////////////////////////////////////////////////////////////////////////
           if(irrigationLines[list[1]]['ORO_Smart_RTU'] == ''){
-            if(irrigationLines[list[1]]['myRTU_list'].contains('ORO Smart RTU')){
-              irrigationLines[list[1]]['myRTU_list'].remove('ORO Smart RTU');
+            if(irrigationLines[list[1]]['myRTU_list'].contains('ORO Smart')){
+              irrigationLines[list[1]]['myRTU_list'].remove('ORO Smart');
             }
           }else{
-            if(!irrigationLines[list[1]]['myRTU_list'].contains('ORO Smart RTU')){
-              irrigationLines[list[1]]['myRTU_list'].add('ORO Smart RTU');
+            if(!irrigationLines[list[1]]['myRTU_list'].contains('ORO Smart')){
+              irrigationLines[list[1]]['myRTU_list'].add('ORO Smart');
             }
           }
         }
-        updateIfRefNoEmpty(list[1],'ORO Smart RTU',irrigationLines[list[1]]['myOroSmartRtu']);
+        updateIfRefNoEmpty(list[1],'ORO Smart',irrigationLines[list[1]]['myOroSmartRtu']);
         break;
       }
       case ('editOroSmartRtuPlus'): {
@@ -2728,16 +2741,16 @@ class ConfigMakerProvider extends ChangeNotifier{
           }
           ///////////////////////////////////////////////////////////////////////////////////
           if(irrigationLines[list[1]]['ORO_Smart_RTU_Plus'] == ''){
-            if(irrigationLines[list[1]]['myRTU_list'].contains('O-S-RTU-Plus')){
-              irrigationLines[list[1]]['myRTU_list'].remove('O-S-RTU-Plus');
+            if(irrigationLines[list[1]]['myRTU_list'].contains('O-Smart-Plus')){
+              irrigationLines[list[1]]['myRTU_list'].remove('O-Smart-Plus');
             }
           }else{
-            if(!irrigationLines[list[1]]['myRTU_list'].contains('O-S-RTU-Plus')){
-              irrigationLines[list[1]]['myRTU_list'].add('O-S-RTU-Plus');
+            if(!irrigationLines[list[1]]['myRTU_list'].contains('O-Smart-Plus')){
+              irrigationLines[list[1]]['myRTU_list'].add('O-Smart-Plus');
             }
           }
         }
-        updateIfRefNoEmpty(list[1],'O-S-RTU-Plus',irrigationLines[list[1]]['myOroSmartRtuPlus']);
+        updateIfRefNoEmpty(list[1],'O-Smart-Plus',irrigationLines[list[1]]['myOroSmartRtuPlus']);
         break;
       }
       case ('editRtuPlus'): {
@@ -4324,7 +4337,7 @@ class ConfigMakerProvider extends ChangeNotifier{
   }
   //TODO: returnDeviceType
   String returnDeviceType(String title){
-    if(title == 'ORO Smart RTU'){
+    if(title == 'ORO Smart'){
       return '2';
     }else if(title == 'ORO RTU'){
       return '3';
@@ -4767,18 +4780,22 @@ class ConfigMakerProvider extends ChangeNotifier{
   }
   //TODO: returnDeviceType_HW
   String returnDeviceType_HW(String title){
-    if(title == 'ORO Smart RTU'){
+    if(title == 'ORO Smart'){
+      return '12';
+    }else if(title == 'O-Smart-Plus'){
       return '7';
     }else if(title == 'ORO RTU'){
+      return '13';
+    }else if(title == 'O-RTU-Plus'){
       return '8';
     }else if(title == 'ORO Switch'){
       return '9';
     }else if(title == 'ORO Sense'){
       return '10';
-    }else if(title == 'ORO Sense'){
+    }else if(title == 'ORO Pump'){
       return '3';
-    }else if(title == 'ORO PUMP'){
-      return '3';
+    }else if(title == 'O-Pump-Plus'){
+      return '4';
     }else{
       return '0';
     }
@@ -4884,7 +4901,7 @@ class ConfigMakerProvider extends ChangeNotifier{
         {'206' : ''},
       ],
     };
-    if(sourcePumpUpdated.length != 0){
+    if(sourcePumpUpdated.isNotEmpty){
       for(var i = 0;i < sourcePumpUpdated.length;i++){
         configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('SP.${i+1}',sourcePumpUpdated[i]['pumpConnection'],'output')}' ;
         configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('SP.${i+1}.1',sourcePumpUpdated[i]['on'],'output')}' ;
@@ -4903,7 +4920,7 @@ class ConfigMakerProvider extends ChangeNotifier{
 
       }
     }
-    if(irrigationPumpUpdated.length != 0){
+    if(irrigationPumpUpdated.isNotEmpty){
       for(var i = 0;i < irrigationPumpUpdated.length;i++){
         configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('IP.${i+1}',irrigationPumpUpdated[i]['pumpConnection'],'output')}' ;
         configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('IP.${i+1}.1',irrigationPumpUpdated[i]['on'],'output')}' ;
@@ -4921,7 +4938,7 @@ class ConfigMakerProvider extends ChangeNotifier{
         configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('IC.${i+1}.3',irrigationPumpUpdated[i]['c3'],'input')}' ;
       }
     }
-    if(centralDosingUpdated != 0){
+    if(centralDosingUpdated.isNotEmpty){
       for(var i = 0;i < centralDosingUpdated.length;i++){
 
         for(var bp = 0;bp < centralDosingUpdated[i]['boosterConnection'].length;bp++){
@@ -4948,9 +4965,8 @@ class ConfigMakerProvider extends ChangeNotifier{
         }
       }
     }
-    if(centralFiltrationUpdated != 0){
+    if(centralFiltrationUpdated.isNotEmpty){
       for(var i = 0;i < centralFiltrationUpdated.length;i++){
-
         for(var fl = 0;fl < centralFiltrationUpdated[i]['filterConnection'].length;fl++){
           configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FL.1.${i+1}.${fl + 1}',centralFiltrationUpdated[i]['filterConnection'][fl],'output')}' ;
         }
@@ -4972,7 +4988,7 @@ class ConfigMakerProvider extends ChangeNotifier{
         }
       }
     }
-    if(irrigationLines != 0){
+    if(irrigationLines.isNotEmpty){
       for(var i = 0;i < irrigationLines.length;i++){
         for(var il = 0;il < irrigationLines[i]['valveConnection'].length;il++){
           configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('VL.${i+1}.${il + 1}',irrigationLines[i]['valveConnection'][il],'output')}' ;
@@ -5124,9 +5140,11 @@ class ConfigMakerProvider extends ChangeNotifier{
     totalLocalFiltration = oldData['productLimit']['totalLocalFiltration'];
     totalLocalDosing = oldData['productLimit']['totalLocalDosing'];
     totalRTU = oldData['productLimit']['totalRTU'];
+    totalRtuPlus = oldData['productLimit']['totalRtuPlus'];
     totalOroSwitch = oldData['productLimit']['totalOroSwitch'];
     totalOroSense = oldData['productLimit']['totalOroSense'];
     totalOroSmartRTU = oldData['productLimit']['totalOroSmartRTU'];
+    totalOroSmartRtuPlus = oldData['productLimit']['totalOroSmartRtuPlus'];
     totalOroLevel = oldData['productLimit']['totalOroLevel'];
     totalOroPump = oldData['productLimit']['totalOroPump'];
     totalOroExtend = oldData['productLimit']['totalOroExtend'];
@@ -5142,16 +5160,21 @@ class ConfigMakerProvider extends ChangeNotifier{
     totalFan = oldData['productLimit']['totalFan'];
     totalFogger = oldData['productLimit']['totalFogger'];
     oRtu = oldData['productLimit']['oRtu'];
+    oRtuPlus = oldData['productLimit']['oRtuPlus'];
     oSrtu = oldData['productLimit']['oSrtu'];
+    oSrtuPlus = oldData['productLimit']['oSrtuPlus'];
     oSwitch = oldData['productLimit']['oSwitch'];
     oSense = oldData['productLimit']['oSense'];
     oLevel = oldData['productLimit']['oLevel'];
     oPump = oldData['productLimit']['oPump'];
+    oPumpPlus = oldData['productLimit']['oPumpPlus'];
     oExtend = oldData['productLimit']['oExtend'];
     rtuForLine = oldData['productLimit']['rtuForLine'];
+    rtuPlusForLine = oldData['productLimit']['rtuPlusForLine'];
     OroExtendForLine = oldData['productLimit']['OroExtendForLine'];
     switchForLine = oldData['productLimit']['switchForLine'];
     OroSmartRtuForLine = oldData['productLimit']['OroSmartRtuForLine'];
+    OroSmartRtuPlusForLine = oldData['productLimit']['OroSmartRtuPlusForLine'];
     OroSenseForLine = oldData['productLimit']['OroSenseForLine'];
     OroLevelForLine = oldData['productLimit']['OroLevelForLine'];
     waterSource = oldData['productLimit']['waterSource'];

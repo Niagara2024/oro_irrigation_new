@@ -10,6 +10,7 @@ import 'FertilizerLibrary.dart';
 import 'GlobalFertLimit.dart';
 import 'Group/groupscreen.dart';
 import 'IrrigationProgram/program_library.dart';
+import 'IrrigationProgram/program_queue_screen.dart';
 import 'backwash_ui.dart';
 import 'conditionscreen.dart';
 import 'frost_productionScreen.dart';
@@ -58,8 +59,7 @@ class _ProgramScheduleState extends State<ProgramSchedule> with SingleTickerProv
           unselectedLabelColor: Colors.grey,
           indicatorColor: Colors.white,
           tabs: const [
-            Tab(text :'Dashboard', icon: Icon(Icons.dashboard_outlined)),
-            Tab(text :'Irrigation Program', icon: Icon(Icons.water_drop_outlined)),
+            Tab(text :'Irrigation Program', icon: Icon(Icons.dashboard_outlined)),
             Tab(text :'Water source', icon: Icon(Icons.water)),
             Tab(text :'Virtual Water Meter', icon: Icon(Icons.gas_meter_outlined)),
             Tab(text :'Radiation set', icon: Icon(Icons.waves)),
@@ -72,26 +72,27 @@ class _ProgramScheduleState extends State<ProgramSchedule> with SingleTickerProv
             Tab(text :'Global Limit', icon: Icon(Icons.settings_outlined)),
             Tab(text :'Weather', icon: Icon(Icons.ac_unit_rounded)),
             Tab(text :'System Definition', icon: Icon(Icons.power_outlined)),
+            Tab(text :'Program Queue', icon: Icon(Icons.question_answer_outlined)),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
-          const Center(child: Text('Dashboard')),
           ProgramLibraryScreen(userId: widget.customerID, controllerId: widget.controllerID),
           watersourceUI(userId: widget.customerID, controllerId: widget.controllerID, deviceID: widget.imeiNumber,),
           VirtualMeterScreen(userId: widget.customerID, controllerId: widget.controllerID, deviceId: widget.imeiNumber,),
-          RadiationsetUI(userId: widget.customerID, controllerId: widget.controllerID),
+          RadiationsetUI(userId: widget.customerID, controllerId: widget.controllerID,deviceId:widget.imeiNumber,),
           const Center(child: Text('Satellite')),
           MyGroupScreen(userId: widget.customerID, controllerId: widget.controllerID),
           ConditionScreen(userId: widget.customerID, controllerId: widget.controllerID, imeiNo: widget.imeiNumber),
           FrostMobUI(userId: widget.customerID, controllerId: widget.controllerID,deviceID: widget.imeiNumber,),
-          FilterBackwashUI(userId: widget.customerID, controllerId: widget.controllerID),
+          FilterBackwashUI(userId: widget.customerID, controllerId: widget.controllerID,deviceID: widget.imeiNumber,),
           FertilizerLibrary(userId: widget.userId, controllerId: widget.controllerID, customerID: widget.customerID),
           GlobalFertLimit(userId: widget.userId, controllerId: widget.controllerID, customerId: widget.customerID,),
           WeatherScreen(userId: widget.userId, controllerId: widget.controllerID),
           SystemDefinition(userId: widget.userId, controllerId: widget.controllerID),
+          ProgramQueueScreen(userId: widget.userId, controllerId: widget.controllerID),
         ],
       ),
     );

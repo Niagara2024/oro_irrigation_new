@@ -250,7 +250,7 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                                 ),
                                 width: double.infinity,
                                 height: 50,
-                                child: (configPvd.sourcePumpUpdated[index]['oro_pump_plus'] == true || (configPvd.totalWaterMeter == 0 && configPvd.sourcePumpUpdated[index]['waterMeter'].isEmpty)) ?
+                                child: (configPvd.sourcePumpUpdated[index]['oro_pump'] == true || (configPvd.totalWaterMeter == 0 && configPvd.sourcePumpUpdated[index]['waterMeter'].isEmpty)) ?
                                 notAvailable :
                                 Checkbox(
                                     value: configPvd.sourcePumpUpdated[index]['waterMeter'].isEmpty ? false : true,

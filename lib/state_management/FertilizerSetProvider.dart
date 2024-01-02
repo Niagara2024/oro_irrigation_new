@@ -210,4 +210,15 @@ class FertilizerSetProvider extends ChangeNotifier{
     return {'2000' : [{'2001' : payload}]};
   }
 
+  void clearProvider(){
+    listOfRecipe = [];
+    listOfSite = [];
+    selectFunction = 0;
+    sample = [];
+    selectedSite = 0;
+    wantToSendData = 0;
+    autoIncrement = 0;
+    notifyListeners();
+  }
+
 }

@@ -43,6 +43,17 @@ class _TextFieldForFlexibleConfigState extends State<TextFieldForFlexibleConfig>
             widget.config.irrigationLinesFunctionality(['editOroSmartRtu',widget.index,myController.text]);
             break;
           }
+          case ('irrigationLinesFunctionality/OroSmartRtuPlus'):{
+            var total = widget.config.totalOroSmartRtuPlus + int.parse(widget.config.irrigationLines[widget.index]['ORO_Smart_RTU_Plus'] == '' ? '0' : widget.config.irrigationLines[widget.index]['ORO_Smart_RTU_Plus']);
+            total = total - int.parse(myController.text == '' ? '0' : myController.text);
+            if(total < 0){
+              setState(() {
+                myController.text = (int.parse(myController.text) + total).toString();
+              });
+            }
+            widget.config.irrigationLinesFunctionality(['editOroSmartRtuPlus',widget.index,myController.text]);
+            break;
+          }
           case ('irrigationLinesFunctionality/RTU'):{
             var total = widget.config.totalRTU + int.parse(widget.config.irrigationLines[widget.index]['RTU'] == '' ? '0' : widget.config.irrigationLines[widget.index]['RTU']);
             total = total - int.parse(myController.text == '' ? '0' : myController.text);
@@ -52,6 +63,17 @@ class _TextFieldForFlexibleConfigState extends State<TextFieldForFlexibleConfig>
               });
             }
             widget.config.irrigationLinesFunctionality(['editRTU',widget.index,myController.text]);
+            break;
+          }
+          case ('irrigationLinesFunctionality/RTU_Plus'):{
+            var total = widget.config.totalRtuPlus + int.parse(widget.config.irrigationLines[widget.index]['RTU_Plus'] == '' ? '0' : widget.config.irrigationLines[widget.index]['RTU_Plus']);
+            total = total - int.parse(myController.text == '' ? '0' : myController.text);
+            if(total < 0){
+              setState(() {
+                myController.text = (int.parse(myController.text) + total).toString();
+              });
+            }
+            widget.config.irrigationLinesFunctionality(['editRtuPlus',widget.index,myController.text]);
             break;
           }
           case ('irrigationLinesFunctionality/0roSwitch'):{

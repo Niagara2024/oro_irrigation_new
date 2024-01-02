@@ -55,7 +55,7 @@ class _DashboardByProgramState extends State<DashboardByProgram>
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
       indicatorViewHide();
-      //print(jsonResponse);
+      print(jsonResponse);
       if (jsonResponse['data'] != null) {
         dynamic data = jsonResponse['data'];
         if (data is Map<String, dynamic>) {
@@ -112,62 +112,93 @@ class _DashboardByProgramState extends State<DashboardByProgram>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (dashBoardData.isNotEmpty)
-                            const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text('Source Pump'),
-                            ),
-                          SizedBox(
-                            height: (dashBoardData[0].sourcePump.length % 5 == 0
-                          ? dashBoardData[0].sourcePump.length ~/ 5 * 70
-                              : (dashBoardData[0].sourcePump.length ~/ 5 + 1) * 70),
-                            child: DisplaySourcePump(sourcePump: dashBoardData[0].sourcePump, type: 0,),
-                          ),
-                          const Divider(height: 0),
+                            dashBoardData[0].sourcePump.isNotEmpty?
+                            Column(
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text('Source Pump'),
+                                    ),
+                                    SizedBox(
+                                      height: (dashBoardData[0].sourcePump.length % 5 == 0
+                                          ? dashBoardData[0].sourcePump.length ~/ 5 * 70
+                                          : (dashBoardData[0].sourcePump.length ~/ 5 + 1) * 70),
+                                      child: DisplaySourcePump(sourcePump: dashBoardData[0].sourcePump, type: 0,),
+                                    ),
+                                    const Divider(height: 0),
+                                  ],
+                                ):
+                            Container(),
                           if (dashBoardData.isNotEmpty)
-                            const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text('Irrigation Pump'),
-                            ),// Add this condition
-                          SizedBox(
-                            height: (dashBoardData[0].irrigationPump.length % 5 == 0
-                                ? dashBoardData[0].irrigationPump.length ~/ 5 * 70
-                                : (dashBoardData[0].irrigationPump.length ~/ 5 + 1) * 70),
-                            child: DisplayIrrigationPump(irrigationPump: dashBoardData[0].irrigationPump,),
-                          ),
-                          const Divider(height: 0),
+                            dashBoardData[0].irrigationPump.isNotEmpty?
+                            Column(
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Text('Irrigation Pump'),
+                                ),// Add this condition
+                                SizedBox(
+                                  height: (dashBoardData[0].irrigationPump.length % 5 == 0
+                                      ? dashBoardData[0].irrigationPump.length ~/ 5 * 70
+                                      : (dashBoardData[0].irrigationPump.length ~/ 5 + 1) * 70),
+                                  child: DisplayIrrigationPump(irrigationPump: dashBoardData[0].irrigationPump,),
+                                ),
+                                const Divider(height: 0),
+                              ],
+                            ):
+                            Container(),
                           if (dashBoardData.isNotEmpty)
-                            const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text('Main Valve'),
-                            ),// Add this condition
-                          SizedBox(
-                            height: (dashBoardData[0].mainValve.length % 5 == 0
-                                ? dashBoardData[0].mainValve.length ~/ 5 * 70
-                                : (dashBoardData[0].mainValve.length ~/ 5 + 1) * 70),
-                            child: DisplayMainValve(mainValve: dashBoardData[0].mainValve,),
-                          ),
-                          const Divider(height: 0),
+                            dashBoardData[0].mainValve.isNotEmpty?
+                            Column(
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Text('Main Valve'),
+                                ),// Add this condition
+                                SizedBox(
+                                  height: (dashBoardData[0].mainValve.length % 5 == 0
+                                      ? dashBoardData[0].mainValve.length ~/ 5 * 70
+                                      : (dashBoardData[0].mainValve.length ~/ 5 + 1) * 70),
+                                  child: DisplayMainValve(mainValve: dashBoardData[0].mainValve,),
+                                ),
+                                const Divider(height: 0),
+                              ],
+                            ):
+                            Container(),
                           if (dashBoardData.isNotEmpty)
-                            const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text('Central Filter Site'),
-                            ),
-                          SizedBox(
-                            height: (dashBoardData[0].centralFilterSite.length % 5 == 0
-                                ? dashBoardData[0].centralFilterSite.length ~/ 5 * 70
-                                : (dashBoardData[0].centralFilterSite.length ~/ 5 + 1) * 70),
-                            child: DisplayCentralFilterSite(centralFilterSite: dashBoardData[0].centralFilterSite,),
-                          ),
-                          const Divider(height: 0),
+                            dashBoardData[0].centralFilterSite.isNotEmpty?
+                            Column(
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Text('Central Filter Site'),
+                                ),
+                                SizedBox(
+                                  height: (dashBoardData[0].centralFilterSite.length % 5 == 0
+                                      ? dashBoardData[0].centralFilterSite.length ~/ 5 * 70
+                                      : (dashBoardData[0].centralFilterSite.length ~/ 5 + 1) * 70),
+                                  child: DisplayCentralFilterSite(centralFilterSite: dashBoardData[0].centralFilterSite,),
+                                ),
+                                const Divider(height: 0),
+                              ],
+                            ):
+                            Container(),
                           if (dashBoardData.isNotEmpty)
-                            const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text('Central Fertilizer Site'),
-                            ),
-                          SizedBox(
-                            height: dashBoardData[0].centralFertilizerSite.length * 170,
-                            child: DisplayCentralFertilizerSite(centralFertilizationSite: dashBoardData[0].centralFertilizerSite,),
-                          ),
+                            dashBoardData[0].centralFertilizerSite.isNotEmpty?
+                            Column(
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Text('Central Fertilizer Site'),
+                                ),
+                                SizedBox(
+                                  height: dashBoardData[0].centralFertilizerSite.length * 170,
+                                  child: DisplayCentralFertilizerSite(centralFertilizationSite: dashBoardData[0].centralFertilizerSite,),
+                                ),
+                                const Divider(height: 0),
+                              ],
+                            ):
+                            Container(),
                         ],
                       ),
                     ),

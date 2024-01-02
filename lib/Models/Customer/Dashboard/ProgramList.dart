@@ -4,14 +4,13 @@ class ProgramList {
   final String programName;
   final String defaultProgramName;
   final String programType;
-  final int priority;
+  final String priority;
   final String startDate;
   final String startTime;
   final int sequenceCount;
   final String scheduleType;
   final String firstSequence;
   final String duration;
-
 
   ProgramList({
     required this.programId,

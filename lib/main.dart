@@ -14,6 +14,7 @@ import 'package:oro_irrigation_new/state_management/irrigation_program_main_prov
 import 'package:oro_irrigation_new/state_management/mqtt_message_provider.dart';
 import 'package:oro_irrigation_new/state_management/overall_use.dart';
 import 'package:oro_irrigation_new/state_management/preferences_screen_main_provider.dart';
+import 'package:oro_irrigation_new/state_management/program_queue_provider.dart';
 import 'package:oro_irrigation_new/state_management/system_definition_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,6 +35,7 @@ void main() {
       ChangeNotifierProvider(create: (context) => GlobalFertLimitProvider()),
       ChangeNotifierProvider(create: (context) => MqttPayloadProvider()),
       ChangeNotifierProvider(create: (context) => SystemDefinitionProvider()),
+      ChangeNotifierProvider(create: (context) => ProgramQueueProvider()),
 
     ],
     child: const MyApp(),

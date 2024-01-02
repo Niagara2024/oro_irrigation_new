@@ -10,8 +10,7 @@ class FontSizeUtils {
         : fontSize > 15
         ? 15
         : fontSize;
-    print('Heading $fontSize');
-    return 13;
+     return 13;
   }
 
   static double? fontSizeLabel(BuildContext context) {
@@ -23,7 +22,6 @@ class FontSizeUtils {
         : fontSize > 14
         ? 14
         : fontSize;
-    print('Label $fontSize');
-    return 12;
+     return 12;
   }
 }

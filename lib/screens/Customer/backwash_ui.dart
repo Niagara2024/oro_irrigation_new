@@ -7,12 +7,13 @@ import 'package:oro_irrigation_new/constants/snack_bar.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/screens/Config/dealer_definition_config.dart';
 import '../../Models/Customer/back_wash_model.dart';
+import '../../constants/MQTTManager.dart';
 import '../../widgets/FontSizeUtils.dart';
 
 class FilterBackwashUI extends StatefulWidget {
   const FilterBackwashUI(
-      {Key? key, required this.userId, required this.controllerId});
-  final userId, controllerId;
+      {Key? key, required this.userId, required this.controllerId, this.deviceID});
+  final userId, controllerId,deviceID;
 
   @override
   State<FilterBackwashUI> createState() => _FilterBackwashUIState();
@@ -379,7 +380,7 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
         {"901": Mqttsenddata},
       ]
     });
-    //MqttWebClient().publishMessage('AppToFirmware/E8FB1C3501D1', payLoadFinal);
+    MQTTManager().publish('AppToFirmware/${widget.deviceID}', payLoadFinal);
   }
 
   String toMqttformat(

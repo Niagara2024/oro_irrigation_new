@@ -27,6 +27,7 @@ class _FertilizerLibraryState extends State<FertilizerLibrary> {
     //MqttWebClient().init();
     if (mounted) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        Provider.of<FertilizerSetProvider>(context, listen: false).clearProvider();
         getData();
       });
     }
@@ -159,6 +160,7 @@ class _FertilizerLibraryState extends State<FertilizerLibrary> {
         child: Column(
           children: [
             TabBar(
+              isScrollable: true,
                 tabs: [
                   for(var i = 0;i < fertSetPvd.listOfRecipe.length;i++)
                     Tab(

@@ -25,11 +25,10 @@ class DDModel
     widget: json['widget'],
     widgetTypeId: json['widgetTypeId'],
     dropdownValues: json['dropdownValues'],
-    categoryName: json['categoryName'],
-    iconCodePoint: json['iconCodePoint'],
-    iconFontFamily: json['iconFontFamily'],
+    categoryName: json['categoryName'] ?? '',
+    iconCodePoint: json['iconCodePoint'] ?? '',
+    iconFontFamily: json['iconFontFamily'] ?? '',
     active: json['active'],
   );
-
 
 }

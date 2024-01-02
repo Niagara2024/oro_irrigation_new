@@ -161,72 +161,74 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
   List<Widget> getIrrigationLine(List<Map<String,dynamic>> myList,ConfigMakerProvider configPvd){
     List<Widget> widgetList = [];
     for(var i = 0;i < myList.length;i++){
-      widgetList.add(
-          Container(
-            width: double.infinity,
-            height: 40,
-            child: Center(
-              child: Text('${myList[i]['name']}',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),),
-            ),
-          )
-      );
-      for(var j = 0;j < myList[i]['map'].length;j++){
+      if(!myList[i]['map'][0]['deleted']){
         widgetList.add(
             Container(
               width: double.infinity,
               height: 40,
-              decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(width: 1)),
-                color: j % 2 == 0 ? Colors.white : Colors.white70,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                        ),
-                        height: 40,
-                        child: Center(child: Text('${myList[i]['map'][j]['name']} ${myList[i]['map'][j]['count'] == -1 ? 1 : myList[i]['map'][j]['count'] + 1}')),
-                      )
-                  ),
-                  Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                        ),
-                        height: 40,
-                        child: Center(
-                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: configPvd.irrigationLines[myList[i]['map'][j]['line']]['myRTU_list'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
-                        ),
-                      )
-                  ),
-                  Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                        ),
-                        height: 40,
-                        child: Center(
-                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['rfNo']}', itemList: getrefNo(i,configPvd,'${myList[i]['map'][j]['rtu']}'), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rfNo', index: -1),
-                        ),
-                      )
-                  ),
-                  Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                        ),
-                        height: 40,
-                        child: Center(
-                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['output']}', itemList: getOutPut(configPvd,'${myList[i]['map'][j]['rtu']}','${myList[i]['map'][j]['rfNo']}','${myList[i]['map'][j]['output']}',myList[i]['map'][j]['count']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/output', index: -1),
-                        ),
-                      )
-                  ),
-                ],
+              child: Center(
+                child: Text('${myList[i]['name']}',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),),
               ),
             )
         );
+        for(var j = 0;j < myList[i]['map'].length;j++){
+          widgetList.add(
+              Container(
+                width: double.infinity,
+                height: 40,
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(width: 1)),
+                  color: j % 2 == 0 ? Colors.white : Colors.white70,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(child: Text('${myList[i]['map'][j]['name']} ${myList[i]['map'][j]['count'] == -1 ? 1 : myList[i]['map'][j]['count'] + 1}')),
+                        )
+                    ),
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(
+                              child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: configPvd.irrigationLines[myList[i]['map'][j]['line']]['myRTU_list'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                          ),
+                        )
+                    ),
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rfNo']}', itemList: getrefNo(i,configPvd,'${myList[i]['map'][j]['rtu']}'), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rfNo', index: -1),
+                          ),
+                        )
+                    ),
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['output']}', itemList: getOutPut(configPvd,'${myList[i]['map'][j]['rtu']}','${myList[i]['map'][j]['rfNo']}','${myList[i]['map'][j]['output']}',myList[i]['map'][j]['count']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/output', index: -1),
+                          ),
+                        )
+                    ),
+                  ],
+                ),
+              )
+          );
+        }
       }
     }
     return widgetList;
@@ -234,321 +236,333 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
   List<Widget> getCentralDosing(List<Map<String,dynamic>> myList,ConfigMakerProvider configPvd){
     List<Widget> widgetList = [];
     for(var i = 0;i < myList.length;i++){
-      widgetList.add(
-          Container(
-            width: double.infinity,
-            height: 40,
-            child: Center(
-              child: Text('${myList[i]['name']}',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),),
-            ),
-          )
-      );
-      for(var j = 0;j < myList[i]['map'].length;j++){
+      if(!myList[i]['map'][0]['deleted']){
         widgetList.add(
             Container(
               width: double.infinity,
               height: 40,
-              decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(width: 1)),
-                color: j % 2 == 0 ? Colors.yellow.shade50 : Colors.yellow.shade100,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                        ),
-                        height: 40,
-                        child: Center(child: Text('${myList[i]['map'][j]['name']} ${myList[i]['map'][j]['count'] == -1 ? 1 : myList[i]['map'][j]['count'] + 1}')),
-                      )
-                  ),
-                  Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                        ),
-                        height: 40,
-                        child: Center(
-                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
-                        ),
-                      )
-                  ),
-                  Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                        ),
-                        height: 40,
-                        child: Center(
-                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['rfNo']}', itemList: getrefNoForOthers(configPvd,'${myList[i]['map'][j]['rtu']}'), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rfNo', index: -1),
-                        ),
-                      )
-                  ),
-                  Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                        ),
-                        height: 40,
-                        child: Center(
-                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['output']}', itemList: getOutPut(configPvd,'${myList[i]['map'][j]['rtu']}','${myList[i]['map'][j]['rfNo']}','${myList[i]['map'][j]['output']}',myList[i]['map'][j]['count']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/output', index: -1),
-                        ),
-                      )
-                  ),
-                ],
+              child: Center(
+                child: Text('${myList[i]['name']}',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),),
               ),
             )
         );
+        for(var j = 0;j < myList[i]['map'].length;j++){
+          widgetList.add(
+              Container(
+                width: double.infinity,
+                height: 40,
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(width: 1)),
+                  color: j % 2 == 0 ? Colors.yellow.shade50 : Colors.yellow.shade100,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(child: Text('${myList[i]['map'][j]['name']} ${myList[i]['map'][j]['count'] == -1 ? 1 : myList[i]['map'][j]['count'] + 1}')),
+                        )
+                    ),
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(
+                              child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                          ),
+                        )
+                    ),
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rfNo']}', itemList: getrefNoForOthers(configPvd,'${myList[i]['map'][j]['rtu']}'), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rfNo', index: -1),
+                          ),
+                        )
+                    ),
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['output']}', itemList: getOutPut(configPvd,'${myList[i]['map'][j]['rtu']}','${myList[i]['map'][j]['rfNo']}','${myList[i]['map'][j]['output']}',myList[i]['map'][j]['count']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/output', index: -1),
+                          ),
+                        )
+                    ),
+                  ],
+                ),
+              )
+          );
+        }
       }
+
     }
     return widgetList;
   }
   List<Widget> getCentralFiltration(List<Map<String,dynamic>> myList,ConfigMakerProvider configPvd){
     List<Widget> widgetList = [];
     for(var i = 0;i < myList.length;i++){
-      widgetList.add(
-          Container(
-            width: double.infinity,
-            height: 40,
-            child: Center(
-              child: Text('${myList[i]['name']}',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),),
-            ),
-          )
-      );
-      for(var j = 0;j < myList[i]['map'].length;j++){
+      if(!myList[i]['map'][0]['deleted']){
         widgetList.add(
             Container(
               width: double.infinity,
               height: 40,
-              decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(width: 1)),
-                color: j % 2 == 0 ? Colors.green.shade50 : Colors.green.shade100,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                        ),
-                        height: 40,
-                        child: Center(child: Text('${myList[i]['map'][j]['name']} ${myList[i]['map'][j]['count'] == -1 ? 1 : myList[i]['map'][j]['count'] + 1}')),
-                      )
-                  ),
-                  Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                        ),
-                        height: 40,
-                        child: Center(
-                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
-                        ),
-                      )
-                  ),
-                  Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                        ),
-                        height: 40,
-                        child: Center(
-                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['rfNo']}', itemList: getrefNoForOthers(configPvd,'${myList[i]['map'][j]['rtu']}'), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rfNo', index: -1),
-                        ),
-                      )
-                  ),
-                  Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                        ),
-                        height: 40,
-                        child: Center(
-                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['output']}', itemList: getOutPut(configPvd,'${myList[i]['map'][j]['rtu']}','${myList[i]['map'][j]['rfNo']}','${myList[i]['map'][j]['output']}',myList[i]['map'][j]['count']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/output', index: -1),
-                        ),
-                      )
-                  ),
-
-                ],
+              child: Center(
+                child: Text('${myList[i]['name']}',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),),
               ),
             )
         );
+        for(var j = 0;j < myList[i]['map'].length;j++){
+          widgetList.add(
+              Container(
+                width: double.infinity,
+                height: 40,
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(width: 1)),
+                  color: j % 2 == 0 ? Colors.green.shade50 : Colors.green.shade100,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(child: Text('${myList[i]['map'][j]['name']} ${myList[i]['map'][j]['count'] == -1 ? 1 : myList[i]['map'][j]['count'] + 1}')),
+                        )
+                    ),
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(
+                              child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                          ),
+                        )
+                    ),
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rfNo']}', itemList: getrefNoForOthers(configPvd,'${myList[i]['map'][j]['rtu']}'), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rfNo', index: -1),
+                          ),
+                        )
+                    ),
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['output']}', itemList: getOutPut(configPvd,'${myList[i]['map'][j]['rtu']}','${myList[i]['map'][j]['rfNo']}','${myList[i]['map'][j]['output']}',myList[i]['map'][j]['count']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/output', index: -1),
+                          ),
+                        )
+                    ),
+
+                  ],
+                ),
+              )
+          );
+        }
       }
+
     }
     return widgetList;
   }
   List<Widget> getSourcePump(List<Map<String,dynamic>> myList,ConfigMakerProvider configPvd){
     List<Widget> widgetList = [];
     for(var i = 0;i < myList.length;i++){
-      widgetList.add(
-          Container(
-            width: double.infinity,
-            height: 40,
-            child: Center(
-              child: Text('${myList[i]['name']}',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),),
-            ),
-          )
-      );
-      for(var j = 0;j < myList[i]['map'].length;j++){
+      if(!myList[i]['map'][0]['deleted']){
         widgetList.add(
             Container(
               width: double.infinity,
               height: 40,
-              decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(width: 1)),
-                color: j % 2 == 0 ? Colors.lightGreen.shade50 : Colors.lightGreen.shade100,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                        ),
-                        height: 40,
-                        child: Center(child: Text('${myList[i]['map'][j]['name']} ${myList[i]['map'][j]['count'] == -1 ? '' : myList[i]['map'][j]['count'] + 1}')),
-                      )
-                  ),
-                  if(myList[i]['map'][j]['oroPump'] == true)
-                    Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                          ),
-                          height: 40,
-                          child: Center(
-                            child: Text('${myList[i]['map'][j]['rtu']}',style: TextStyle(fontSize: 11),),
-                          ),
-                        )
-                    )
-                  else
-                    Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                          ),
-                          height: 40,
-                          child: Center(
-                              child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: myList[i]['map'][j]['oroPump'] == false ? getRtuName(configPvd) : ['-','ORO PUMP'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
-                          ),
-                        )
-                    ),
-                  Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                        ),
-                        height: 40,
-                        child: Center(
-                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['rfNo']}', itemList: getrefNoForOthers(configPvd,'${myList[i]['map'][j]['rtu']}'), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rfNo', index: -1),
-                        ),
-                      )
-                  ),
-                  Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                        ),
-                        height: 40,
-                        child: Center(
-                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['output']}', itemList: getOutPut(configPvd,'${myList[i]['map'][j]['rtu']}','${myList[i]['map'][j]['rfNo']}','${myList[i]['map'][j]['output']}',myList[i]['map'][j]['count']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/output', index: -1),
-                        ),
-                      )
-                  ),
-
-                ],
+              child: Center(
+                child: Text('${myList[i]['name']}',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),),
               ),
             )
         );
+        for(var j = 0;j < myList[i]['map'].length;j++){
+          widgetList.add(
+              Container(
+                width: double.infinity,
+                height: 40,
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(width: 1)),
+                  color: j % 2 == 0 ? Colors.lightGreen.shade50 : Colors.lightGreen.shade100,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(child: Text('${myList[i]['map'][j]['name']} ${myList[i]['map'][j]['count'] == -1 ? '' : myList[i]['map'][j]['count'] + 1}')),
+                        )
+                    ),
+                    if(myList[i]['map'][j]['oroPump'] == true)
+                      Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                                border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                            ),
+                            height: 40,
+                            child: Center(
+                              child: Text('${myList[i]['map'][j]['rtu']}',style: TextStyle(fontSize: 11),),
+                            ),
+                          )
+                      )
+                    else
+                      Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                                border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                            ),
+                            height: 40,
+                            child: Center(
+                                child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: myList[i]['map'][j]['oroPump'] == false ? getRtuName(configPvd) : ['-','ORO Pump'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                            ),
+                          )
+                      ),
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rfNo']}', itemList: getrefNoForOthers(configPvd,'${myList[i]['map'][j]['rtu']}'), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rfNo', index: -1),
+                          ),
+                        )
+                    ),
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['output']}', itemList: getOutPut(configPvd,'${myList[i]['map'][j]['rtu']}','${myList[i]['map'][j]['rfNo']}','${myList[i]['map'][j]['output']}',myList[i]['map'][j]['count']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/output', index: -1),
+                          ),
+                        )
+                    ),
+
+                  ],
+                ),
+              )
+          );
+        }
       }
+
     }
     return widgetList;
   }
   List<Widget> getIrrigationPump(List<Map<String,dynamic>> myList,ConfigMakerProvider configPvd){
     List<Widget> widgetList = [];
     for(var i = 0;i < myList.length;i++){
-      widgetList.add(
-          Container(
-            width: double.infinity,
-            height: 40,
-            child: Center(
-              child: Text('${myList[i]['name']}',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),),
-            ),
-          )
-      );
-      for(var j = 0;j < myList[i]['map'].length;j++){
+      if(!myList[i]['map'][0]['deleted']){
         widgetList.add(
             Container(
               width: double.infinity,
               height: 40,
-              decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(width: 1)),
-                color: j % 2 == 0 ? Colors.brown.shade50 : Colors.brown.shade100,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                        ),
-                        height: 40,
-                        child: Center(child: Text('${myList[i]['map'][j]['name']} ${myList[i]['map'][j]['count'] == -1 ? '' : myList[i]['map'][j]['count'] + 1}')),
-                      )
-                  ),
-                  if(myList[i]['map'][j]['oroPump'] == true)
-                    Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                          ),
-                          height: 40,
-                          child: Center(
-                            child: Text('${myList[i]['map'][j]['rtu']}',style: TextStyle(fontSize: 11),),
-                          ),
-                        )
-                    )
-                  else
-                    Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                          ),
-                          height: 40,
-                          child: Center(
-                              child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: myList[i]['map'][j]['oroPump'] == false ? getRtuName(configPvd) : ['-','ORO PUMP'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
-                          ),
-                        )
-                    ),
-                  Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                        ),
-                        height: 40,
-                        child: Center(
-                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['rfNo']}', itemList: getrefNoForOthers(configPvd,'${myList[i]['map'][j]['rtu']}'), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rfNo', index: -1),
-                        ),
-                      )
-                  ),
-                  Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
-                        ),
-                        height: 40,
-                        child: Center(
-                          child: MyDropDown(initialValue: '${myList[i]['map'][j]['output']}', itemList: getOutPut(configPvd,'${myList[i]['map'][j]['rtu']}','${myList[i]['map'][j]['rfNo']}','${myList[i]['map'][j]['output']}',myList[i]['map'][j]['count']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/output', index: -1),
-                        ),
-                      )
-                  ),
-
-                ],
+              child: Center(
+                child: Text('${myList[i]['name']}',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),),
               ),
             )
         );
+        for(var j = 0;j < myList[i]['map'].length;j++){
+          widgetList.add(
+              Container(
+                width: double.infinity,
+                height: 40,
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(width: 1)),
+                  color: j % 2 == 0 ? Colors.brown.shade50 : Colors.brown.shade100,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(child: Text('${myList[i]['map'][j]['name']} ${myList[i]['map'][j]['count'] == -1 ? '' : myList[i]['map'][j]['count'] + 1}')),
+                        )
+                    ),
+                    if(myList[i]['map'][j]['oroPump'] == true)
+                      Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                                border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                            ),
+                            height: 40,
+                            child: Center(
+                              child: Text('${myList[i]['map'][j]['rtu']}',style: TextStyle(fontSize: 11),),
+                            ),
+                          )
+                      )
+                    else
+                      Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                                border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                            ),
+                            height: 40,
+                            child: Center(
+                                child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: myList[i]['map'][j]['oroPump'] == false ? getRtuName(configPvd) : ['-','ORO Pump'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                            ),
+                          )
+                      ),
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rfNo']}', itemList: getrefNoForOthers(configPvd,'${myList[i]['map'][j]['rtu']}'), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rfNo', index: -1),
+                          ),
+                        )
+                    ),
+                    Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border(right: BorderSide(width: 1),top: BorderSide(width: j == 0 ? 1 : 0))
+                          ),
+                          height: 40,
+                          child: Center(
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['output']}', itemList: getOutPut(configPvd,'${myList[i]['map'][j]['rtu']}','${myList[i]['map'][j]['rfNo']}','${myList[i]['map'][j]['output']}',myList[i]['map'][j]['count']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/output', index: -1),
+                          ),
+                        )
+                    ),
+
+                  ],
+                ),
+              )
+          );
+        }
       }
+
     }
     return widgetList;
   }
@@ -711,16 +725,16 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
       list.add('O-RTU-Plus');
     }
     if(configPvd.totalOroSmartRTU != 0){
-      list.add('ORO Smart RTU');
+      list.add('ORO Smart');
     }
     if(configPvd.totalOroSmartRtuPlus != 0){
-      list.add('O-S-RTU-Plus');
+      list.add('O-Smart-Plus');
     }
     if(configPvd.totalOroSwitch != 0){
       list.add('ORO Switch');
     }
     if(configPvd.totalOroPump != 0){
-      list.add('ORO PUMP');
+      list.add('ORO Pump');
     }
     if(configPvd.oPumpPlus.length != 0){
       list.add('O-Pump-Plus');
@@ -736,12 +750,12 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
   }
   List<String> getrefNoForOthers(ConfigMakerProvider configPvd,String title){
     List<String> myList = ['-'];
-    if(title == 'ORO Smart RTU'){
+    if(title == 'ORO Smart'){
       var list = configPvd.oSrtu;
       for(var i in list){
         myList.add('$i');
       }
-    }else if(title == 'O-S-RTU-Plus'){
+    }else if(title == 'O-Smart-Plus'){
       var list = configPvd.oSrtuPlus;
       for(var i in list){
         myList.add('$i');
@@ -766,7 +780,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
       for(var i in list){
         myList.add('$i');
       }
-    }else if(title == 'ORO PUMP'){
+    }else if(title == 'ORO Pump'){
       var list = configPvd.oPump;
       for(var i in list){
         myList.add('$i');
@@ -781,11 +795,11 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
   }
   List<String> getrefNo(int line,ConfigMakerProvider configPvd,String title){
     List<String> myList = ['-'];
-    if(title == 'ORO Smart RTU'){
+    if(title == 'ORO Smart'){
       for(var i in configPvd.irrigationLines[line]['myOroSmartRtu']){
         myList.add('${i}');
       }
-    }else if(title == 'O-S-RTU-Plus'){
+    }else if(title == 'O-Smart-Plus'){
       for(var i in configPvd.irrigationLines[line]['myOroSmartRtuPlus']){
         myList.add('${i}');
       }
@@ -847,7 +861,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
       for(var i = 0;i < 8;i++){
         myList.add('${i+1}');
       }
-    }else if(rtu == 'ORO PUMP'){
+    }else if(rtu == 'ORO Pump'){
       for(var i = 0;i < 4;i++){
         myList.add('${i+1}');
       }
@@ -855,11 +869,11 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
       for(var i = 0;i < 4;i++){
         myList.add('${i+1}');
       }
-    }else if(rtu == 'ORO Smart RTU'){
+    }else if(rtu == 'ORO Smart'){
       for(var i = 0;i < 16;i++){
         myList.add('${i+1}');
       }
-    }else if(rtu == 'O-S-RTU-Plus'){
+    }else if(rtu == 'O-Smart-Plus'){
       for(var i = 0;i < 16;i++){
         myList.add('${i+1}');
       }
@@ -968,6 +982,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
               'rtu' :  configPvd.irrigationLines[i]['valveConnection'][valve]['rtu'],
               'rfNo' : configPvd.irrigationLines[i]['valveConnection'][valve]['rfNo'],
               'output' : configPvd.irrigationLines[i]['valveConnection'][valve]['output'],
+              'deleted' : configPvd.irrigationLines[i]['deleted'],
             }
         );
       }
@@ -983,6 +998,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
               'rtu' :  configPvd.irrigationLines[i]['main_valveConnection'][mainValve]['rtu'],
               'rfNo' : configPvd.irrigationLines[i]['main_valveConnection'][mainValve]['rfNo'],
               'output' : configPvd.irrigationLines[i]['main_valveConnection'][mainValve]['output'],
+              'deleted' : configPvd.irrigationLines[i]['deleted'],
             }
         );
       }
@@ -998,6 +1014,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
               'rtu' :  configPvd.irrigationLines[i]['foggerConnection'][fogger]['rtu'],
               'rfNo' : configPvd.irrigationLines[i]['foggerConnection'][fogger]['rfNo'],
               'output' : configPvd.irrigationLines[i]['foggerConnection'][fogger]['output'],
+              'deleted' : configPvd.irrigationLines[i]['deleted'],
             }
         );
       }
@@ -1013,6 +1030,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
               'rtu' :  configPvd.irrigationLines[i]['fanConnection'][fan]['rtu'],
               'rfNo' : configPvd.irrigationLines[i]['fanConnection'][fan]['rfNo'],
               'output' : configPvd.irrigationLines[i]['fanConnection'][fan]['output'],
+              'deleted' : configPvd.irrigationLines[i]['deleted'],
             }
         );
       }
@@ -1031,6 +1049,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                     'rtu' :  configPvd.localDosingUpdated[ld]['injector'][injector]['rtu'],
                     'rfNo' : configPvd.localDosingUpdated[ld]['injector'][injector]['rfNo'],
                     'output' : configPvd.localDosingUpdated[ld]['injector'][injector]['output'],
+                    'deleted' : configPvd.irrigationLines[i]['deleted'],
                   }
               );
             }
@@ -1046,6 +1065,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                     'rtu' :  configPvd.localDosingUpdated[ld]['boosterConnection'][boosterPump]['rtu'],
                     'rfNo' : configPvd.localDosingUpdated[ld]['boosterConnection'][boosterPump]['rfNo'],
                     'output' : configPvd.localDosingUpdated[ld]['boosterConnection'][boosterPump]['output'],
+                    'deleted' : configPvd.irrigationLines[i]['deleted'],
                   }
               );
             }
@@ -1068,6 +1088,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                     'rtu' :  configPvd.localFiltrationUpdated[ld]['filterConnection'][filter]['rtu'],
                     'rfNo' : configPvd.localFiltrationUpdated[ld]['filterConnection'][filter]['rfNo'],
                     'output' : configPvd.localFiltrationUpdated[ld]['filterConnection'][filter]['output'],
+                    'deleted' : configPvd.irrigationLines[i]['deleted'],
                   }
               );
             }
@@ -1083,6 +1104,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                     'rtu' :  configPvd.localFiltrationUpdated[ld]['dv']['rtu'],
                     'rfNo' : configPvd.localFiltrationUpdated[ld]['dv']['rfNo'],
                     'output' : configPvd.localFiltrationUpdated[ld]['dv']['output'],
+                    'deleted' : configPvd.irrigationLines[i]['deleted'],
                   }
               );
             }
@@ -1116,6 +1138,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
               'rtu' :  configPvd.centralDosingUpdated[i]['injector'][injector]['rtu'],
               'rfNo' : configPvd.centralDosingUpdated[i]['injector'][injector]['rfNo'],
               'output' : configPvd.centralDosingUpdated[i]['injector'][injector]['output'],
+              'deleted' : configPvd.centralDosingUpdated[i]['deleted'],
             }
         );
       }
@@ -1131,6 +1154,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
               'rtu' :  configPvd.centralDosingUpdated[i]['boosterConnection'][boosterPump]['rtu'],
               'rfNo' : configPvd.centralDosingUpdated[i]['boosterConnection'][boosterPump]['rfNo'],
               'output' : configPvd.centralDosingUpdated[i]['boosterConnection'][boosterPump]['output'],
+              'deleted' : configPvd.centralDosingUpdated[i]['deleted'],
             }
         );
       }
@@ -1158,6 +1182,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
               'rtu' :  configPvd.centralFiltrationUpdated[i]['filterConnection'][filter]['rtu'],
               'rfNo' : configPvd.centralFiltrationUpdated[i]['filterConnection'][filter]['rfNo'],
               'output' : configPvd.centralFiltrationUpdated[i]['filterConnection'][filter]['output'],
+              'deleted' : configPvd.centralFiltrationUpdated[i]['deleted'],
             }
         );
       }
@@ -1173,6 +1198,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
               'rtu' :  configPvd.centralFiltrationUpdated[i]['dv']['rtu'],
               'rfNo' : configPvd.centralFiltrationUpdated[i]['dv']['rfNo'],
               'output' : configPvd.centralFiltrationUpdated[i]['dv']['output'],
+              'deleted' : configPvd.centralFiltrationUpdated[i]['deleted'],
             }
         );
       }
@@ -1201,6 +1227,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
               'rtu' :  configPvd.sourcePumpUpdated[i]['pumpConnection']['rtu'],
               'rfNo' : configPvd.sourcePumpUpdated[i]['pumpConnection']['rfNo'],
               'output' : configPvd.sourcePumpUpdated[i]['pumpConnection']['output'],
+              'deleted' : configPvd.sourcePumpUpdated[i]['deleted'],
             }
         );
       }
@@ -1219,6 +1246,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                 'rtu' :  configPvd.sourcePumpUpdated[i]['on']['rtu'],
                 'rfNo' : configPvd.sourcePumpUpdated[i]['on']['rfNo'],
                 'output' : configPvd.sourcePumpUpdated[i]['on']['output'],
+                'deleted' : configPvd.sourcePumpUpdated[i]['deleted'],
               }
           );
         }
@@ -1235,6 +1263,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                 'rtu' :  configPvd.sourcePumpUpdated[i]['off']['rtu'],
                 'rfNo' : configPvd.sourcePumpUpdated[i]['off']['rfNo'],
                 'output' : configPvd.sourcePumpUpdated[i]['off']['output'],
+                'deleted' : configPvd.sourcePumpUpdated[i]['deleted'],
               }
           );
         }
@@ -1251,6 +1280,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                 'rtu' :  configPvd.sourcePumpUpdated[i]['scr']['rtu'],
                 'rfNo' : configPvd.sourcePumpUpdated[i]['scr']['rfNo'],
                 'output' : configPvd.sourcePumpUpdated[i]['scr']['output'],
+                'deleted' : configPvd.sourcePumpUpdated[i]['deleted'],
               }
           );
         }
@@ -1267,6 +1297,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                 'rtu' :  configPvd.sourcePumpUpdated[i]['ecr']['rtu'],
                 'rfNo' : configPvd.sourcePumpUpdated[i]['ecr']['rfNo'],
                 'output' : configPvd.sourcePumpUpdated[i]['ecr']['output'],
+                'deleted' : configPvd.sourcePumpUpdated[i]['deleted'],
               }
           );
         }
@@ -1296,7 +1327,8 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
               'rtu' :  configPvd.irrigationPumpUpdated[i]['pumpConnection']['rtu'],
               'rfNo' : configPvd.irrigationPumpUpdated[i]['pumpConnection']['rfNo'],
               'output' : configPvd.irrigationPumpUpdated[i]['pumpConnection']['output'],
-              'c-type' : configPvd.irrigationPumpUpdated[i]['pumpConnection']['current_selection']
+              'c-type' : configPvd.irrigationPumpUpdated[i]['pumpConnection']['current_selection'],
+              'deleted' : configPvd.irrigationPumpUpdated[i]['deleted']
             }
         );
       }
@@ -1315,7 +1347,8 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                 'rtu' :  configPvd.irrigationPumpUpdated[i]['on']['rtu'],
                 'rfNo' : configPvd.irrigationPumpUpdated[i]['on']['rfNo'],
                 'output' : configPvd.irrigationPumpUpdated[i]['on']['output'],
-                'c-type' : configPvd.irrigationPumpUpdated[i]['on']['current_selection']
+                'c-type' : configPvd.irrigationPumpUpdated[i]['on']['current_selection'],
+                'deleted' : configPvd.irrigationPumpUpdated[i]['deleted']
               }
           );
         }
@@ -1332,7 +1365,8 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                 'rtu' :  configPvd.irrigationPumpUpdated[i]['off']['rtu'],
                 'rfNo' : configPvd.irrigationPumpUpdated[i]['off']['rfNo'],
                 'output' : configPvd.irrigationPumpUpdated[i]['off']['output'],
-                'c-type' : configPvd.irrigationPumpUpdated[i]['off']['current_selection']
+                'c-type' : configPvd.irrigationPumpUpdated[i]['off']['current_selection'],
+                'deleted' : configPvd.irrigationPumpUpdated[i]['deleted']
               }
           );
         }
@@ -1349,7 +1383,9 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                 'rtu' :  configPvd.irrigationPumpUpdated[i]['scr']['rtu'],
                 'rfNo' : configPvd.irrigationPumpUpdated[i]['scr']['rfNo'],
                 'output' : configPvd.irrigationPumpUpdated[i]['scr']['output'],
-                'c-type' : configPvd.irrigationPumpUpdated[i]['scr']['current_selection']
+                'c-type' : configPvd.irrigationPumpUpdated[i]['scr']['current_selection'],
+                'deleted' : configPvd.irrigationPumpUpdated[i]['deleted']
+
               }
           );
         }
@@ -1366,7 +1402,8 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                 'rtu' :  configPvd.irrigationPumpUpdated[i]['ecr']['rtu'],
                 'rfNo' : configPvd.irrigationPumpUpdated[i]['ecr']['rfNo'],
                 'output' : configPvd.irrigationPumpUpdated[i]['ecr']['output'],
-                'c-type' : configPvd.irrigationPumpUpdated[i]['ecr']['current_selection']
+                'c-type' : configPvd.irrigationPumpUpdated[i]['ecr']['current_selection'],
+                'deleted' : configPvd.irrigationPumpUpdated[i]['deleted']
               }
           );
         }

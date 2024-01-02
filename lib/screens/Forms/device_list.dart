@@ -6,14 +6,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Models/ProductListWithNode.dart';
 import '../../Models/customer_list.dart';
 import '../../Models/customer_product.dart';
 import '../../Models/interface_model.dart';
-import '../../Models/CustomerSite.dart';
 import '../../Models/node_model.dart';
 import '../../Models/product_stock.dart';
 import '../../constants/MQTTManager.dart';

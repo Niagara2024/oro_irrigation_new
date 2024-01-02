@@ -242,7 +242,7 @@ class _IrrigationPumpTableState extends State<IrrigationPumpTable> {
                                 ),
                                 width: double.infinity,
                                 height: 50,
-                                child: (configPvd.totalWaterMeter == 0 && configPvd.irrigationPumpUpdated[index]['waterMeter'].isEmpty) ?
+                                child: (configPvd.irrigationPumpUpdated[index]['oro_pump'] == true || (configPvd.totalWaterMeter == 0 && configPvd.irrigationPumpUpdated[index]['waterMeter'].isEmpty)) ?
                                 notAvailable :
                                 Checkbox(
                                     value: configPvd.irrigationPumpUpdated[index]['waterMeter'].isEmpty ? false : true,

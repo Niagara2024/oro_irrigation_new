@@ -4,8 +4,9 @@ import 'dart:convert';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:oro_irrigation_new/screens/Customer/weather_barchart.dart';
 import 'package:oro_irrigation_new/screens/Customer/weather_report.dart';
+
+import '../../constants/theme.dart';
 
 class WeatherScreen extends StatefulWidget {
   const WeatherScreen(
@@ -62,6 +63,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
+                  // Temprature(),
                   Container(
                     padding: EdgeInsets.all(8.0),
                     child: weathermain(),
@@ -78,35 +80,47 @@ class _WeatherScreenState extends State<WeatherScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => WeatherBar(
-                                      tempdata: weatherData['hourly']
-                                      ['temperature_2m'],
-                                      timedata: [],title: 'UV Reports'
+                                  builder: (context) => WeatherReport(
+                                    tempdata: weatherData['hourly']
+                                    ['temperature_2m'],
+                                    timedata: weatherData['hourly']['time'],title: 'UV Reports',titletype: 'UV RADIATIONS ',
                                   )),
                             );
-                          },
-                          child: weather(
-                              'To Hot',
-                              'UV INDEX',
-                              '${weatherData['daily']['uv_index_max'][0]}',
-                              'mW / m2'),
+                          }, child: weather(
+                            'To Hot',
+                            'UV INDEX',
+                            '${weatherData['daily']['uv_index_max'][0]}',
+                            'mW / m2'),
                         ),
-                        weather('Normal', 'MOISTURE', '140 ', 'kPA'),
+                        GestureDetector(child: weather('Normal', 'MOISTURE', '140 ', 'kPA'),onTap: () {
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //       builder: (context) => SFReport(
+                          //         tempdata: weatherData['hourly']
+                          //         ['rain'],
+                          //         timedata: weatherData['hourly']
+                          //         ['time'],title: 'SF REPORT',titletype: 'SF REPORT ',
+                          //       )),
+                          // );
+                        },),
                         GestureDetector(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => WeatherReport(
-                                      tempdata: weatherData['hourly']
-                                      ['rain'],
-                                      timedata: weatherData['hourly']
-                                      ['time'],title: 'RAIN RATE REPORT',
-                                    )),
-                              );
+                              // Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //       builder: (context) => SFReportnew()
+                              //           //WeatherReport(
+                              //       //   tempdata: weatherData['hourly']
+                              //       //   ['rain'],
+                              //       //   timedata: weatherData['hourly']
+                              //       //   ['time'],title: 'RAIN RATE REPORT',titletype: 'RAIN RATE ',
+                              //       // )
+                              // ),
+                              // );
                             },
                             child: weather(
-                                'To Heavy', 'RAIN RATE', '40 ', 'mm/hr')),
+                                'To Heavy', 'RAIN RATE', '12 ', 'mm/hr')),
                         GestureDetector(
                           onTap: () {
                             Navigator.push(
@@ -115,7 +129,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                   builder: (context) => WeatherReport(
                                     tempdata: weatherData['hourly']
                                     ['relative_humidity_2m'],
-                                    timedata: weatherData['hourly']['time'],title: 'HUMIDITY REPORT',
+                                    timedata: weatherData['hourly']['time'],title: 'HUMIDITY REPORT',titletype: 'HUMIDITY ',
                                   )),
                             );
                           },
@@ -130,7 +144,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                   builder: (context) => WeatherReport(
                                     tempdata: weatherData['hourly']
                                     ['dew_point_2m'],
-                                    timedata: weatherData['hourly']['time'],title: 'DEW POINT REPORT',
+                                    timedata: weatherData['hourly']['time'],title: 'DEW POINT REPORT',titletype: 'DEW POINT ',
                                   )),
                             );
                           },
@@ -149,7 +163,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                       tempdata: weatherData['hourly']
                                       ['wind_speed_10m'],
                                       timedata: weatherData['hourly']
-                                      ['time'],title: 'WIND SPEED REPORT',
+                                      ['time'],title: 'WIND SPEED REPORT',titletype: 'WIND SPEED ',
                                     )),
                               );
                             },
@@ -181,7 +195,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
       height: 120,
       width: MediaQuery.of(context).size.width * 0.5,
       decoration: BoxDecoration(
-        color: Colors.transparent.withAlpha(90),
+        color: Colors.white70.withAlpha(90),
         border: Border.all(color: Colors.black12),
         borderRadius: BorderRadius.all(Radius.circular(5)),
       ),
@@ -219,6 +233,58 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   return const Divider(
                     color: Colors.grey,
                     thickness: 10,
+                    height: 0,
+                  );
+                },
+              ),
+            ),
+          ),
+        ]),
+      ),
+    );
+  }
+  Widget Temprature1() {
+    return Container(
+      height:  MediaQuery.of(context).size.width * 0.3,
+      width: 500,
+      // decoration: BoxDecoration(
+      //   color: Colors.transparent.withAlpha(90),
+      //   border: Border.all(color: Colors.black12),
+      //   borderRadius: BorderRadius.all(Radius.circular(5)),
+      // ),
+      child: Center(
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          const Text(
+              'Cloudy Conditions will continue for the rest of the day. wind gusts are up to 15 kph.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white)),
+          Container(
+            color: Colors.white,
+            height: 0.5,
+            width: double.infinity,
+          ),
+          Expanded(
+            child: Container(
+              child: ListView.separated(
+                itemCount: 24,
+                itemBuilder: (context, index) {
+                  List<String> part =
+                  weatherData['hourly']['time'][index].split('T');
+                  List<String> parts = part.isNotEmpty
+                      ? weatherData['hourly']['time'][index].split('T')
+                      : ['00:00', '00:00'];
+                  return Tab(
+                      '${parts[1]}',
+                      '${weatherData['hourly']['temperature_2m'][index]}',
+                      '');
+                },
+                separatorBuilder: (BuildContext context, int index) {
+                  return  Divider(
+                    color: Colors.lightBlue.shade50,
+                    thickness: 1,
                     height: 0,
                   );
                 },
@@ -283,6 +349,16 @@ class _WeatherScreenState extends State<WeatherScreen> {
     return GestureDetector(
       onTap: () {
         showAlert(context);
+        //   Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //       builder: (context) => WeatherReport(
+        //         tempdata: weatherData['hourly']
+        //         ['temperature_2m'],
+        //         timedata: weatherData['hourly']['time'],title: 'Temperature',titletype: 'Temperature',
+        //       )),
+        // );
+
       },
       child: Container(
         height: 160,
@@ -329,7 +405,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
     );
   }
 
-
   void showAlert(BuildContext context) {
     showDialog(
       context: context,
@@ -343,8 +418,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
             Navigator.of(context).pop();
           }, icon: Icon(Icons.close),color: Colors.red,),),
           actions: <Widget>[
-
-            Container(color: Colors.lightBlue, child: Temprature()),
+            Container(child: Temprature1(),decoration: BoxDecoration(color: Colors.blue.withOpacity(0.5),borderRadius: BorderRadius.all(Radius.circular(5)),)),
           ],
         );
       },
@@ -352,6 +426,19 @@ class _WeatherScreenState extends State<WeatherScreen> {
   }
   // TODO: implement widget
   Widget Tab(String Time, String temp, String type) {
+    double? temp1 = double.tryParse(temp);
+    String iconimg = 'assets/images/w04.png';
+    if(temp1! < 19)
+    {
+      iconimg = 'assets/images/w19.gif';
+    }
+    else if(temp1! < 21){
+      iconimg = 'assets/images/w04.png';
+    }
+    else
+    {
+      iconimg = 'assets/images/w52.gif';
+    }
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
@@ -359,12 +446,40 @@ class _WeatherScreenState extends State<WeatherScreen> {
           SizedBox(
             height: 20,
           ),
-          Text(Time, style: TextStyle(color: Colors.white)),
-          Container(
-            // height: 53,
-            // width: 50,
-            child: Text('$temp°C', style: TextStyle(color: Colors.white)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text(Time, style: TextStyle(color: Colors.white)),
+              SizedBox(height: 50,width: 50,child: Image.asset(iconimg),),
+              // Image.asset(
+              //   'assets/images/w04.png',
+              //   width: 50,
+              //   height: 50,
+              //   color: Colors.blue,
+              //     fit: BoxFit.fill
+              // ),
+
+              Expanded(
+                child: Container(
+                  color: Colors.white,
+                  child: LinearProgressIndicator(
+                    backgroundColor: myTheme.primaryColor.withOpacity(0.3),
+                    color: Colors.amber,
+                    minHeight: 7,
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    value: (double.tryParse(temp)!/100), // Update this value to reflect loading progress
+                  ),
+                ),
+              ),
+              Text(' $temp°C', style: TextStyle(color: Colors.white)),
+            ],
           ),
+
+          // Container(
+          //   // height: 53,
+          //   // width: 50,
+          //   child: Text('$temp°C', style: TextStyle(color: Colors.white)),
+          // ),
         ],
       ),
     );
@@ -473,7 +588,6 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
   @override
   void initState() {
     super.initState();
-
     controller = AnimationController(
       vsync: this,
       duration: Duration(seconds: 3),

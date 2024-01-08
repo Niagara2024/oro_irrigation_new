@@ -7,7 +7,7 @@ class DashboardModel {
   final String categoryName;
   final String modelName;
   final List<String> categoryList;
-  final List<NodeModel> nodeList;
+  List<NodeModel> nodeList;
 
   DashboardModel({
     required this.controllerId,
@@ -50,10 +50,10 @@ class NodeModel {
   final String deviceId;
   final String deviceName;
   final int referenceNumber;
-  final int SVolt;
-  final int BatVolt;
-  final int RlyStatus;
-  final int Sensor;
+  double SVolt;
+  double BatVolt;
+  int RlyStatus;
+  int Sensor;
   int Status;
 
   NodeModel({

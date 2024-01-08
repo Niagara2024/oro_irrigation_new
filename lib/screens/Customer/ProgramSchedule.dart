@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:oro_irrigation_new/screens/Customer/ConfigDashboard/configMakerView.dart';
 import 'package:oro_irrigation_new/screens/Customer/WeatherScreen.dart';
 import 'package:oro_irrigation_new/screens/Customer/radiationsets.dart';
 import 'package:oro_irrigation_new/screens/Customer/system_definition_screen.dart';
@@ -11,6 +12,7 @@ import 'GlobalFertLimit.dart';
 import 'Group/groupscreen.dart';
 import 'IrrigationProgram/program_library.dart';
 import 'IrrigationProgram/program_queue_screen.dart';
+import 'ScheduleView.dart';
 import 'backwash_ui.dart';
 import 'conditionscreen.dart';
 import 'frost_productionScreen.dart';
@@ -38,7 +40,7 @@ class _ProgramScheduleState extends State<ProgramSchedule> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 14, vsync: this);
+    _tabController = TabController(length: 15, vsync: this);
   }
 
   @override
@@ -73,6 +75,7 @@ class _ProgramScheduleState extends State<ProgramSchedule> with SingleTickerProv
             Tab(text :'Weather', icon: Icon(Icons.ac_unit_rounded)),
             Tab(text :'System Definition', icon: Icon(Icons.power_outlined)),
             Tab(text :'Program Queue', icon: Icon(Icons.question_answer_outlined)),
+            Tab(text :'Schedule View', icon: Icon(Icons.question_answer_outlined)),
           ],
         ),
       ),
@@ -92,7 +95,8 @@ class _ProgramScheduleState extends State<ProgramSchedule> with SingleTickerProv
           GlobalFertLimit(userId: widget.userId, controllerId: widget.controllerID, customerId: widget.customerID,),
           WeatherScreen(userId: widget.userId, controllerId: widget.controllerID),
           SystemDefinition(userId: widget.userId, controllerId: widget.controllerID),
-          ProgramQueueScreen(userId: widget.userId, controllerId: widget.controllerID),
+          ProgramQueueScreen(userId: widget.userId, controllerId: widget.controllerID, cutomerId: widget.customerID,),
+          ScheduleViewScreen(),
         ],
       ),
     );

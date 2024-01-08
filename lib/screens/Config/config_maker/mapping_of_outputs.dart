@@ -198,7 +198,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                           ),
                           height: 40,
                           child: Center(
-                              child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: configPvd.irrigationLines[myList[i]['map'][j]['line']]['myRTU_list'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                              child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
                           ),
                         )
                     ),
@@ -209,7 +209,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                           ),
                           height: 40,
                           child: Center(
-                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rfNo']}', itemList: getrefNo(i,configPvd,'${myList[i]['map'][j]['rtu']}'), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rfNo', index: -1),
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rfNo']}', itemList: getrefNoForOthers(configPvd,'${myList[i]['map'][j]['rtu']}'), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rfNo', index: -1),
                           ),
                         )
                     ),
@@ -793,36 +793,36 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
     }
     return myList;
   }
-  List<String> getrefNo(int line,ConfigMakerProvider configPvd,String title){
-    List<String> myList = ['-'];
-    if(title == 'ORO Smart'){
-      for(var i in configPvd.irrigationLines[line]['myOroSmartRtu']){
-        myList.add('${i}');
-      }
-    }else if(title == 'O-Smart-Plus'){
-      for(var i in configPvd.irrigationLines[line]['myOroSmartRtuPlus']){
-        myList.add('${i}');
-      }
-    }else if(title == 'ORO Switch'){
-      for(var i in configPvd.irrigationLines[line]['myOROswitch']){
-        myList.add('${i}');
-      }
-    }else if(title == 'ORO Sense'){
-      for(var i in configPvd.irrigationLines[line]['myOROsense']){
-        myList.add('${i}');
-      }
-    }else if(title == 'ORO RTU'){
-      for(var i in configPvd.irrigationLines[line]['myRTU']){
-        myList.add('${i}');
-      }
-    }else if(title == 'O-RTU-Plus'){
-      for(var i in configPvd.irrigationLines[line]['myRtuPlus']){
-        myList.add('${i}');
-      }
-    }
-
-    return myList;
-  }
+  // List<String> getrefNo(int line,ConfigMakerProvider configPvd,String title){
+  //   List<String> myList = ['-'];
+  //   if(title == 'ORO Smart'){
+  //     for(var i in configPvd.irrigationLines[line]['myOroSmartRtu']){
+  //       myList.add('${i}');
+  //     }
+  //   }else if(title == 'O-Smart-Plus'){
+  //     for(var i in configPvd.irrigationLines[line]['myOroSmartRtuPlus']){
+  //       myList.add('${i}');
+  //     }
+  //   }else if(title == 'ORO Switch'){
+  //     for(var i in configPvd.irrigationLines[line]['myOROswitch']){
+  //       myList.add('${i}');
+  //     }
+  //   }else if(title == 'ORO Sense'){
+  //     for(var i in configPvd.irrigationLines[line]['myOROsense']){
+  //       myList.add('${i}');
+  //     }
+  //   }else if(title == 'ORO RTU'){
+  //     for(var i in configPvd.irrigationLines[line]['myRTU']){
+  //       myList.add('${i}');
+  //     }
+  //   }else if(title == 'O-RTU-Plus'){
+  //     for(var i in configPvd.irrigationLines[line]['myRtuPlus']){
+  //       myList.add('${i}');
+  //     }
+  //   }
+  //
+  //   return myList;
+  // }
   List<String> filterOutPut(List<dynamic> data,String rtu,String rf,String output){
     List<String> list = [];
     for(var i in data){

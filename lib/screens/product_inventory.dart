@@ -412,7 +412,7 @@ class ProductInventoryState extends State<ProductInventory> {
             size: ColumnSize.M
         ),
         DataColumn2(
-          label: Text('IMEI Number', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+          label: Text('Device Id', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
           fixedWidth: 170,
         ),
         DataColumn2(
@@ -447,28 +447,60 @@ class ProductInventoryState extends State<ProductInventory> {
         DataCell(Text(filterProductInventoryList[index].deviceId)),
         DataCell(Center(child: Text(filterProductInventoryList[index].dateOfManufacturing))),
         DataCell(Center(child: Text('${filterProductInventoryList[index].warrantyMonths}'))),
-        DataCell(Center(child: userType==filterProductInventoryList[index].productStatus? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('In Stock')],):
-        const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active')],))),
+        DataCell(
+            Center(
+              child: userType == 1? Row(
+                children: [
+                  CircleAvatar(radius: 5,
+                    backgroundColor:
+                    filterProductInventoryList[index].productStatus==1? Colors.pink:
+                    filterProductInventoryList[index].productStatus==2? Colors.blue:
+                    filterProductInventoryList[index].productStatus==3? Colors.purple:
+                    filterProductInventoryList[index].productStatus==4? Colors.yellow:
+                    filterProductInventoryList[index].productStatus==5? Colors.deepOrangeAccent:
+                    Colors.green,
+                  ),
+                  const SizedBox(width: 5,),
+                  filterProductInventoryList[index].productStatus==1? const Text('In-Stock'):
+                  filterProductInventoryList[index].productStatus==2? const Text('Stock'):
+                  filterProductInventoryList[index].productStatus==3? const Text('Sold-Out'):
+                  filterProductInventoryList[index].productStatus==4? const Text('Pending'):
+                  filterProductInventoryList[index].productStatus==5? const Text('Installed'):
+                  const Text('Active'),
+                ],
+              ):
+              Row(
+                children: [
+                  CircleAvatar(radius: 5,
+                    backgroundColor:
+                    filterProductInventoryList[index].productStatus==1? Colors.pink:
+                    filterProductInventoryList[index].productStatus==2? Colors.purple:
+                    filterProductInventoryList[index].productStatus==3? Colors.yellow:
+                    filterProductInventoryList[index].productStatus==4? Colors.deepOrangeAccent:
+                    Colors.green,
+                  ),
+                  const SizedBox(width: 5,),
+                  filterProductInventoryList[index].productStatus==2? const Text('In-Stock'):
+                  filterProductInventoryList[index].productStatus==3? const Text('Sold-Out'):
+                  filterProductInventoryList[index].productStatus==4? const Text('Pending'):
+                  filterProductInventoryList[index].productStatus==5? const Text('Installed'):
+                  const Text('Active'),
+                ],
+              ),
+            )
+        ),
         DataCell(Center(child: widget.userName==filterProductInventoryList[index].latestBuyer? Text('-'):Text(filterProductInventoryList[index].latestBuyer))),
         const DataCell(Center(child: Text('25-09-2023'))),
-        DataCell(Center(child: PopupMenuButton<SampleItem>(
-          initialValue: selectedMenu,
-          onSelected: (SampleItem item) {
-            setState(() {
-              selectedMenu = item;
-            });
-          },
-          itemBuilder: (BuildContext context) => <PopupMenuEntry<SampleItem>>[
-            const PopupMenuItem<SampleItem>(
-              value: SampleItem.itemOne,
-              child: Text('Delete'),
-            ),
-            const PopupMenuItem<SampleItem>(
-              value: SampleItem.itemTwo,
-              child: Text('Replace'),
-            ),
-          ],
-        )))
+        userType == 1 ? DataCell(Center(child: IconButton(tooltip:'Edit product', onPressed: () {
+          getModelByActiveList(context, filterProductInventoryList[index].categoryId, filterProductInventoryList[index].categoryName,
+              filterProductInventoryList[index].modelName, filterProductInventoryList[index].modelId, filterProductInventoryList[index].deviceId,
+              filterProductInventoryList[index].warrantyMonths, filterProductInventoryList[index].productId);
+        }, icon: const Icon(Icons.edit_outlined),))):
+        DataCell(Center(child: IconButton(tooltip:'replace product',onPressed: () {
+          _displayReplaceProductDialog(context, filterProductInventoryList[index].categoryId, filterProductInventoryList[index].categoryName,
+              filterProductInventoryList[index].modelName, filterProductInventoryList[index].modelId, filterProductInventoryList[index].deviceId,
+              filterProductInventoryList[index].warrantyMonths, filterProductInventoryList[index].productId, filterProductInventoryList[index].buyerId);
+        }, icon: const Icon(Icons.repeat),)))
       ])):
       List<DataRow>.generate(productInventoryList.length, (index) => DataRow(cells: [
         DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}'))),
@@ -557,31 +589,31 @@ class ProductInventoryState extends State<ProductInventory> {
                 border: TableBorder.all(color: Colors.grey),
                 columns: const [
                   DataColumn2(
-                      label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),)),
+                      label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
                       fixedWidth: 70
                   ),
                   DataColumn2(
-                      label: Text('Category', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),),
+                      label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
                       size: ColumnSize.M
                   ),
                   DataColumn2(
-                      label: Text('Model Name', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),),
+                      label: Text('Model Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
                       size: ColumnSize.M
                   ),
                   DataColumn2(
-                    label: Text('Device ID', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),),
+                    label: Text('Device ID', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
                     fixedWidth: 170,
                   ),
                   DataColumn2(
-                      label: Center(child: Text('Site Name', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),)),
+                      label: Center(child: Text('Site Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
                       size: ColumnSize.M
                   ),
                   DataColumn2(
-                    label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),)),
+                    label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
                     fixedWidth: 90,
                   ),
                   DataColumn2(
-                    label: Center(child: Text('Modify Date', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14),)),
+                    label: Center(child: Text('Modify Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
                     fixedWidth: 100,
                   ),
                 ],
@@ -596,14 +628,14 @@ class ProductInventoryState extends State<ProductInventory> {
                   const DataCell(Center(child: Text('25-09-2023'))),
                 ])):
                 List<DataRow>.generate(productInventoryListCus.length, (index) => DataRow(cells: [
-                  DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13)))),
-                  DataCell(Text(productInventoryListCus[index].categoryName, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))),
-                  DataCell(Text(productInventoryListCus[index].model, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))),
-                  DataCell(Text(productInventoryListCus[index].deviceId, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))),
-                  DataCell(Center(child: Text(productInventoryListCus[index].productStatus==3? '-' : productInventoryListCus[index].siteName, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13)))),
-                  DataCell(Center(child: productInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))],):
-                  const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))],))),
-                  const DataCell(Center(child: Text('25-09-2023', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13)))),
+                  DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
+                  DataCell(Text(productInventoryListCus[index].categoryName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+                  DataCell(Text(productInventoryListCus[index].model, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+                  DataCell(Text(productInventoryListCus[index].deviceId, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+                  DataCell(Center(child: Text(productInventoryListCus[index].productStatus==3? '-' : productInventoryListCus[index].siteName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
+                  DataCell(Center(child: productInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))],):
+                  const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))],))),
+                  const DataCell(Center(child: Text('25-09-2023', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
                 ])),
               ),
             ),
@@ -802,22 +834,26 @@ class ProductInventoryState extends State<ProductInventory> {
                   if (formKey.currentState!.validate())
                   {
                     final body = {"productId": productId, "modelId": mdlId, "deviceId": ctrlIMI.text, "warrantyMonths": ctrlWrM.text, 'modifyUser': userID};
-                    print(body);
                     final response = await HttpService().putRequest("updateProduct", body);
                     print(response.body);
                     if (response.statusCode == 200)
                     {
                       if(jsonDecode(response.body)["code"]==200)
                       {
-                        setState(() {
-                          Navigator.pop(context);
+                        if(searched){
+                          fetchFilterData(catId, null, null);
+                        }else{
                           getProductList(currentSet, batchSize);
                           _showSnackBar(jsonDecode(response.body)["message"]);
-                        });
+                        }
                       }else{
-                        Navigator.pop(context);
                         _showSnackBar(jsonDecode(response.body)["message"]);
                       }
+
+                      if(mounted){
+                        Navigator.pop(context);
+                      }
+
                     } else {
                       throw Exception('Failed to load data');
                     }
@@ -914,23 +950,23 @@ class ProductInventoryState extends State<ProductInventory> {
                 child: const Text('Replace'),
                 onPressed: () async {
                   final body = {"userId": customerId, "oldDeviceId": imeiNo, "newDeviceId": txtEdControllerIMEi.text, 'modifyUser': userID};
-                  print(body);
                   final response = await HttpService().postRequest("replaceProduct", body);
-                  print(response.body);
                   if (response.statusCode == 200)
                   {
                     if(jsonDecode(response.body)["code"]==200)
                     {
-                      setState(() {
-                        Navigator.pop(context);
-                        getProductStock();
-                        getProductList(currentSet, batchSize);
-                        _showSnackBar(jsonDecode(response.body)["message"]);
-                      });
+                      getProductStock();
+                      getProductList(currentSet, batchSize);
+                      _showSnackBar(jsonDecode(response.body)["message"]);
+
                     }else{
-                      Navigator.pop(context);
                       _showSnackBar(jsonDecode(response.body)["message"]);
                     }
+
+                    if(mounted){
+                      Navigator.pop(context);
+                    }
+
                   } else {
                     throw Exception('Failed to load data');
                   }

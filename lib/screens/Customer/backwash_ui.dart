@@ -380,7 +380,8 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
         {"901": Mqttsenddata},
       ]
     });
-    MQTTManager().publish('AppToFirmware/${widget.deviceID}', payLoadFinal);
+
+    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceID}');
   }
 
   String toMqttformat(

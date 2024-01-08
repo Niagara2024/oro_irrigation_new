@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:oro_irrigation_new/constants/MQTTManager.dart';
 import 'package:provider/provider.dart';
 
 import '../../../constants/http_service.dart';
@@ -10,8 +11,9 @@ import '../../../widgets/SCustomWidgets/custom_tab.dart';
 
 
 class DataAcquisitionMain extends StatefulWidget {
-  const DataAcquisitionMain({super.key, required this.customerID, required this.controllerID, required this.userId});
+  const DataAcquisitionMain({super.key, required this.customerID, required this.controllerID, required this.userId, required this.deviceID});
   final int customerID, controllerID, userId;
+  final String deviceID;
 
   @override
   State<DataAcquisitionMain> createState() => _DataAcquisitionMainState();
@@ -194,12 +196,14 @@ class _DataAcquisitionMainState extends State<DataAcquisitionMain> with SingleTi
                   onPressed: () async {
                     final dataAcquisition = Provider.of<DataAcquisitionProvider>(context, listen: false).dataModel;
                     Map<String, dynamic> jsonData = {
-                      "createUser" : widget.customerID,
-                      "userId": widget.controllerID,
-                      "controllerId": widget.userId,
+                      "createUser" : widget.userId,
+                      "userId": widget.customerID,
+                      "controllerId": widget.controllerID,
                       "dataAcquisitions": dataAcquisition!.toJson(),
                     };
-                    print(dataAcquisition.toMqtt().join(';'));
+                    //print(dataAcquisition.toMqtt().join(';'));
+                    MQTTManager().publish(dataAcquisition.toMqtt().join(';'), 'AppToFirmware/${widget.deviceID}');
+
                     try {
                       final crateDataAcquisition = await httpService.postRequest('createUserDataAcquisition', jsonData);
                       final message = jsonDecode(crateDataAcquisition.body);

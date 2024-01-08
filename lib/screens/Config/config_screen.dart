@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:oro_irrigation_new/screens/Config/Constant/constant_tab_bar_view.dart';
+import 'package:oro_irrigation_new/screens/Config/reset_Accumulation.dart';
 import 'DataAc/data_acquisition_main.dart';
 import 'Preference/preference_main_screen.dart';
 import 'dealer_definition_config.dart';
@@ -18,10 +19,9 @@ class ConfigScreen extends StatefulWidget {
 
 class _ConfigScreenState extends State<ConfigScreen> with SingleTickerProviderStateMixin
 {
-  static List<Object> configList = ['Names', 'Preferences','Constant', 'Dealer definition', 'Data acquisition','Geography'];
+  static List<Object> configList = ['Names', 'Preferences','Constant', 'Dealer definition', 'Data acquisition','Reset Accumulation', 'Geography'];
   final _configTabs = List.generate(configList.length, (index) => configList[index]);
   late final TabController _tabCont;
-
   int nvRSelection = 0;
 
   @override
@@ -66,6 +66,10 @@ class _ConfigScreenState extends State<ConfigScreen> with SingleTickerProviderSt
               label: Text('Data acquisition'),
             ),
             NavigationRailDestination(
+              icon: Icon(Icons.reset_tv),
+              label: Text('Reset Accumulation'),
+            ),
+            NavigationRailDestination(
               icon: Icon(Icons.location_on_outlined),
               label: Text('Geography'),
             ),
@@ -82,7 +86,9 @@ class _ConfigScreenState extends State<ConfigScreen> with SingleTickerProviderSt
             ConstantInConfig(userId: widget.userID, customerId: widget.customerID, controllerId: widget.controllerId):
             nvRSelection == 3 ?
             DealerDefinitionInConfig(userId: widget.userID,  customerId: widget.customerID, controllerId: widget.controllerId, imeiNo: widget.imeiNumber,):
-            DataAcquisitionMain(customerID: widget.customerID, controllerID: widget.controllerId, userId: widget.userID,),
+            nvRSelection == 4 ?
+            DataAcquisitionMain(customerID: widget.customerID, controllerID: widget.controllerId, userId: widget.userID, deviceID: widget.imeiNumber,):
+            Reset_Accumalation(controllerId: widget.controllerId, userId: widget.customerID, deviceID:  widget.imeiNumber),
           ),
         ),
       ],
@@ -102,11 +108,11 @@ class ConfigPage extends StatelessWidget
    if(label.toString()=='Names'){
       return Names(userID: userID,  customerID: customerID, controllerId: controllerId);
     }else if(label.toString()=='Dealer definition'){
-      return DealerDefinitionInConfig(userId: userID,  customerId: customerID, controllerId: controllerId, imeiNo: imeiNumber,);
+      return DealerDefinitionInConfig(userId: userID,  customerId: customerID, controllerId: controllerId, imeiNo: imeiNumber);
     }else if(label.toString()=='Preferences'){
       return PreferencesScreen(customerID: customerID, controllerID: controllerId, userID: userID,);
     }else if(label.toString()=='Data acquisition'){
-      return DataAcquisitionMain(customerID: customerID, controllerID: controllerId, userId: userID,);
+      return DataAcquisitionMain(customerID: customerID, controllerID: controllerId, userId: userID, deviceID: imeiNumber);
     }else if(label.toString()=='Constant'){
       return ConstantInConfig(userId: userID, customerId: customerID, controllerId: controllerId);
     }

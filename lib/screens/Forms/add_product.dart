@@ -172,7 +172,7 @@ class _AddProductState extends State<AddProduct> {
                                       size: ColumnSize.M
                                   ),
                                   DataColumn2(
-                                    label: Text('IMEI Number', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+                                    label: Text('Device Id', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
                                     fixedWidth: 170,
                                   ),
                                   DataColumn2(

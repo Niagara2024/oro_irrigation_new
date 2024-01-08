@@ -29,10 +29,23 @@ class ProgramQueueData {
 
   factory ProgramQueueData.fromJson(Map<String, dynamic> json) {
     return ProgramQueueData(
-      low: json['Low'] == null?  [] : List<ProgramQueue>.from(json['Low'].map((x) => ProgramQueue.fromJson(x))),
-      high: json['High'] == null?  [] : List<ProgramQueue>.from(json['High'].map((x) => ProgramQueue.fromJson(x))),
+      low: (json['Low'] != null)
+          ? List<ProgramQueue>.from(json['Low'].map((x) => ProgramQueue.fromJson(x)))
+          : [],
+      high: (json['High'] != null)
+          ? List<ProgramQueue>.from(json['High'].map((x) => ProgramQueue.fromJson(x)))
+          : [],
     );
+  }
 
+  dynamic toJson() {
+    Map<dynamic, dynamic> combinedMap = {};
+    List<Map<String, dynamic>> programQueue = [];
+
+    high.forEach((e) => programQueue.add(e.toJson()));
+    low.forEach((e) => programQueue.add(e.toJson()));
+
+    return programQueue;
   }
 }
 
@@ -71,5 +84,19 @@ class ProgramQueue {
       priority: json['priority'],
       startTime: json['startTime'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "programQueueId": programQueueId,
+      "userId": userId,
+      "controllerId": controllerId,
+      "serialNumber": serialNumber,
+      "programName": programName,
+      "defaultProgramName": defaultProgramName,
+      "programType": programType,
+      "priority": priority,
+      "startTime": startTime
+    };
   }
 }

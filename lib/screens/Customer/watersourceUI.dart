@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:oro_irrigation_new/constants/MQTTManager.dart';
@@ -11,10 +12,12 @@ import 'package:oro_irrigation_new/screens/Config/dealer_definition_config.dart'
 import '../../Models/WaterSource.dart';
 import '../../widgets/FontSizeUtils.dart';
 
-
 class watersourceUI extends StatefulWidget {
   const watersourceUI(
-      {Key? key, required this.userId, required this.controllerId, required this.deviceID});
+      {Key? key,
+        required this.userId,
+        required this.controllerId,
+        required this.deviceID});
   final userId, controllerId, deviceID;
 
   @override
@@ -33,7 +36,6 @@ class _watersourceUIState extends State<watersourceUI>
   void initState() {
     super.initState();
     fetchData();
-
   }
 
   Future<void> fetchData() async {
@@ -117,18 +119,18 @@ class _watersourceUIState extends State<watersourceUI>
                     //     // width: 10.0, // Border width
                     //   ),
                     // ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(1.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 5,
-                          blurRadius: 7,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                    ),
+                    // decoration: BoxDecoration(
+                    //   color: Colors.white.withOpacity(0.1),
+                    //   borderRadius: BorderRadius.circular(1.0),
+                    //   boxShadow: [
+                    //     BoxShadow(
+                    //       color: Colors.blueGrey.shade100,
+                    //       spreadRadius: 5,
+                    //       blurRadius: 7,
+                    //       offset: Offset(0, 3),
+                    //     ),
+                    //   ],
+                    // ),
                     child: TabBarView(children: [
                       for (var i = 0; i < _watersource.data!.length; i++)
                         buildTab(
@@ -166,178 +168,406 @@ class _watersourceUIState extends State<watersourceUI>
   changeval(int Selectindexrow) {}
   Widget buildTab(
       List<Source>? Listofvalue, int i, String sourceid, String sourcename) {
-    return Column(
-      children: [
-        Card(
-          // elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(0.1),
-          ),
-          child: ListTile(
-              title: Text(sourcename ?? '',
-                style: TextStyle(
-                  fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
-                  fontWeight: FontWeight.normal,
-                ),
-                softWrap: true,),
-              trailing: Text(sourceid ?? '',
-                  style:  TextStyle(fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16, fontWeight: FontWeight.bold))),
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: Listofvalue?.length ?? 0,
-            itemBuilder: (context, index) {
-              if (Listofvalue?[index].widgetTypeId == 1) {
-                return Column(
-                  children: [
-                    Card(
-                      elevation: 0.1,
-                      child: ListTile(
-                        title: Text('${Listofvalue?[index].title}',
-                            style: TextStyle(
-                              fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
-                              fontWeight: FontWeight.normal,)),
-                        trailing: SizedBox(
-                            width: 100,
-                            child: TextFormField(
-                              textAlign: TextAlign.center,
-                              onChanged: (text) {
-                                setState(() {
-                                  Listofvalue?[index].value = text;
-                                });
-                              },
-                              decoration: InputDecoration(hintText: '0'),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
-                              ],
-                              initialValue: Listofvalue?[index].value == ''
-                                  ? ''
-                                  : Listofvalue?[index].value,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Warranty is required';
-                                } else {
-                                  setState(() {
-                                    Listofvalue?[index].value = value;
-                                  });
-                                }
-                                return null;
-                              },
-                            )),
+    if (MediaQuery.of(context).size.width > 600) {
+      String? dropdownval = Listofvalue?[0].value;
+      dropdownlist.contains(dropdownval) == true
+          ? dropdownval
+          : dropdownval = 'Static';
+      return Container(
+        child: DataTable2(
+            headingRowColor: MaterialStateProperty.all<Color>(
+                primaryColorDark.withOpacity(0.2)),
+            // fixedCornerColor: myTheme.primaryColor,
+            columnSpacing: 12,
+            horizontalMargin: 12,
+            minWidth: 600,
+            border: TableBorder.all(width: 0.5),
+            // fixedColumnsColor: Colors.amber,
+            headingRowHeight: 50,
+            columns: [
+              DataColumn2(
+                fixedWidth: 70,
+                label: Center(
+                    child: Text(
+                      'Sno',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ),
-                  ],
-                );
-              } else if (Listofvalue?[index].widgetTypeId == 2) {
-                return Column(
-                  children: [
-                    Card(
-                      elevation: 0.1,
-                      child: ListTile(
-                        title: Text('${Listofvalue?[index].title}',style: TextStyle(
-                          fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
-                          fontWeight: FontWeight.normal,)),
-                        trailing: MySwitch(
-                          value: Listofvalue?[index].value == '1',
-                          onChanged: ((value) {
-                            setState(() {
-                              Listofvalue?[index].value = !value ? '0' : '1';
-                            });
-                            // Listofvalue?[index].value = value;
-                          }),
-                        ),
+                      softWrap: true,
+                    )),
+              ),
+              DataColumn2(
+                label: Center(
+                    child: Text(
+                      'Water Source Name',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ),
-                  ],
-                );
-              } else if (Listofvalue?[index].widgetTypeId == 3) {
-                print(Listofvalue?[index].value);
-                String? dropdownval = Listofvalue?[index].value;
-                dropdownlist.contains(dropdownval) == true
-                    ? dropdownval
-                    : dropdownval = 'Static';
+                      softWrap: true,
+                    )),
+              ),
+              DataColumn2(
+                fixedWidth: 150,
+                label: Center(
+                    child: Text(
+                      'VALUE',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      softWrap: true,
+                    )),
+              ),
+            ],
+            rows: [
 
-                return Column(
-                  children: [
-                    Container(
-                      child: Card(
+              DataRow(cells: [
+                DataCell(Center(child: Text("${Listofvalue?[0].sNo}",))),
+                DataCell(Center(
+                  child: Text(
+                    "${Listofvalue?[0].title}",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                )),
+                DataCell(DropdownButton(
+                    items: dropdownlist.map((String items) {
+                      return DropdownMenuItem(
+                        value: items,
+                        child: Container(
+                            padding: EdgeInsets.only(left: 10),
+                            child: Text(items)),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        Listofvalue?[0].value = value!;
+                        dropdownval = Listofvalue?[0].value;
+                      });
+                    },
+                    value: Listofvalue?[0].value == ''
+                        ? dropdownlist[0]
+                        : Listofvalue?[0].value)),
+              ]),
+              DataRow(cells: [
+                DataCell(Center(child: Text("${Listofvalue?[1].sNo}",))),
+                DataCell(Center(
+                  child: Text(
+                    "${Listofvalue?[1].title}",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                )),
+                DataCell(
+                  TextFormField(
+                    textAlign: TextAlign.center,
+                    onChanged: (text) {
+                      setState(() {
+                        Listofvalue?[1].value = text;
+                      });
+                    },
+                    decoration: InputDecoration(hintText: '0'),
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    initialValue: Listofvalue?[1].value == ''
+                        ? ''
+                        : Listofvalue?[1].value,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Warranty is required';
+                      } else {
+                        setState(() {
+                          Listofvalue?[1].value = value;
+                        });
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+              ]),
+              DataRow(cells: [
+                DataCell(Center(child: Text("${Listofvalue?[2].sNo}",))),
+                DataCell(Center(
+                  child: Text(
+                    "${Listofvalue?[2].title}",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                )),
+                DataCell(
+                  TextFormField(
+                    textAlign: TextAlign.center,
+                    onChanged: (text) {
+                      setState(() {
+                        Listofvalue?[2].value = text;
+                      });
+                    },
+                    decoration: InputDecoration(hintText: '0'),
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    initialValue: Listofvalue?[2].value == ''
+                        ? ''
+                        : Listofvalue?[2].value,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Warranty is required';
+                      } else {
+                        setState(() {
+                          Listofvalue?[2].value = value;
+                        });
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+              ]),
+              DataRow(cells: [
+                DataCell(Center(child: Text("${Listofvalue?[3].sNo}",))),
+                DataCell(Center(
+                  child: Text(
+                    "${Listofvalue?[3].title}",
+                    style: TextStyle(
+                      fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                )),
+                DataCell(
+                  TextFormField(
+                    textAlign: TextAlign.center,
+                    onChanged: (text) {
+                      setState(() {
+                        Listofvalue?[3].value = text;
+                      });
+                    },
+                    decoration: InputDecoration(hintText: '0'),
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    initialValue: Listofvalue?[3].value == ''
+                        ? ''
+                        : Listofvalue?[3].value,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Warranty is required';
+                      } else {
+                        setState(() {
+                          Listofvalue?[3].value = value;
+                        });
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+              ]),
+            ]),
+      );
+    } else {
+      return Column(
+        children: [
+          Card(
+            // elevation: 4,
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(0.1),
+            ),
+            child: ListTile(
+                title: Text(
+                  sourcename ?? '',
+                  style: TextStyle(
+                    fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  softWrap: true,
+                ),
+                trailing: Text(sourceid ?? '',
+                    style: TextStyle(
+                        fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
+                        fontWeight: FontWeight.bold))),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: Listofvalue?.length ?? 0,
+              itemBuilder: (context, index) {
+                if (Listofvalue?[index].widgetTypeId == 1) {
+                  return Column(
+                    children: [
+                      Card(
+                        color: Colors.white,
                         elevation: 0.1,
                         child: ListTile(
-                          title: Text('${Listofvalue?[index].title}',style: TextStyle(
-                            fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
-                            fontWeight: FontWeight.normal,)),
-                          trailing: Container(
-                            color: Colors.white70,
-                            width: 100,
-                            child: DropdownButton(
-                                items: dropdownlist.map((String items) {
-                                  return DropdownMenuItem(
-                                    value: items,
-                                    child: Container(
-                                        padding: EdgeInsets.only(left: 10),
-                                        child: Text(items)),
-                                  );
-                                }).toList(),
-                                onChanged: (value) {
+                          title: Text('${Listofvalue?[index].title}',
+                              style: TextStyle(
+                                fontSize:
+                                FontSizeUtils.fontSizeLabel(context) ?? 16,
+                                fontWeight: FontWeight.bold,
+                              )),
+                          trailing: SizedBox(
+                              width: 100,
+                              child: TextFormField(
+                                textAlign: TextAlign.center,
+                                onChanged: (text) {
                                   setState(() {
-                                    Listofvalue?[index].value = value!;
-                                    dropdownval = Listofvalue?[index].value;
+                                    Listofvalue?[index].value = text;
                                   });
                                 },
-                                value: Listofvalue?[index].value == ''
-                                    ? dropdownlist[0]
-                                    : Listofvalue?[index].value),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              } else if (Listofvalue?[index].widgetTypeId == 5) {
-                String? dropdownval = Listofvalue?[index].value;
-                return Column(
-                  children: [
-                    Card(
-                      child: ListTile(
-                        title: Text('${Listofvalue?[index].title}',style: TextStyle(
-                          fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
-                          fontWeight: FontWeight.normal,)),
-                        trailing: SizedBox(
-                          width: 100,
-                          child: Container(
-                              child: Center(
-                                child: InkWell(
-                                  child: Text(
-                                    '${Listofvalue?[index].value}' != ''
-                                        ? '${Listofvalue?[index].value}'
-                                        : '00:00',
-                                    style: const TextStyle(fontSize: 20),
-                                  ),
-                                  onTap: () async {
-                                    String? time = await _selectTime(context);
+                                decoration: InputDecoration(hintText: '0'),
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly
+                                ],
+                                initialValue: Listofvalue?[index].value == ''
+                                    ? ''
+                                    : Listofvalue?[index].value,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Warranty is required';
+                                  } else {
                                     setState(() {
-                                      if (time != null) {
-                                        Listofvalue?[index].value = time;
-                                      }
+                                      Listofvalue?[index].value = value;
                                     });
-                                  },
-                                ),
+                                  }
+                                  return null;
+                                },
                               )),
                         ),
                       ),
-                    ),
-                  ],
-                );
-              } else {
-                return Column(
-                  children: [Container()],
-                );
-              }
-            },
+                    ],
+                  );
+                } else if (Listofvalue?[index].widgetTypeId == 2) {
+                  return Column(
+                    children: [
+                      Card(
+                        color: Colors.white,
+                        elevation: 0.1,
+                        child: ListTile(
+                          title: Text('${Listofvalue?[index].title}',
+                              style: TextStyle(
+                                fontSize:
+                                FontSizeUtils.fontSizeLabel(context) ?? 16,
+                                fontWeight: FontWeight.bold,
+                              )),
+                          trailing: MySwitch(
+                            value: Listofvalue?[index].value == '1',
+                            onChanged: ((value) {
+                              setState(() {
+                                Listofvalue?[index].value = !value ? '0' : '1';
+                              });
+                              // Listofvalue?[index].value = value;
+                            }),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                } else if (Listofvalue?[index].widgetTypeId == 3) {
+                  print(Listofvalue?[index].value);
+                  String? dropdownval = Listofvalue?[index].value;
+                  dropdownlist.contains(dropdownval) == true
+                      ? dropdownval
+                      : dropdownval = 'Static';
+
+                  return Column(
+                    children: [
+                      Container(
+                        child: Card(
+                          color: Colors.white,
+                          elevation: 0.1,
+                          child: ListTile(
+                            title: Text('${Listofvalue?[index].title}',
+                                style: TextStyle(
+                                  fontSize:
+                                  FontSizeUtils.fontSizeLabel(context) ??
+                                      16,
+                                  fontWeight: FontWeight.bold,
+                                )),
+                            trailing: Container(
+                              color: Colors.white70,
+                              width: 100,
+                              child: DropdownButton(
+                                  items: dropdownlist.map((String items) {
+                                    return DropdownMenuItem(
+                                      value: items,
+                                      child: Container(
+                                          padding: EdgeInsets.only(left: 10),
+                                          child: Text(items)),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      Listofvalue?[index].value = value!;
+                                      dropdownval = Listofvalue?[index].value;
+                                    });
+                                  },
+                                  value: Listofvalue?[index].value == ''
+                                      ? dropdownlist[0]
+                                      : Listofvalue?[index].value),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                } else if (Listofvalue?[index].widgetTypeId == 5) {
+                  String? dropdownval = Listofvalue?[index].value;
+                  return Column(
+                    children: [
+                      Card(
+                        color: Colors.white,
+                        child: ListTile(
+                          title: Text('${Listofvalue?[index].title}',
+                              style: TextStyle(
+                                fontSize:
+                                FontSizeUtils.fontSizeLabel(context) ?? 16,
+                                fontWeight: FontWeight.bold,
+                              )),
+                          trailing: SizedBox(
+                            width: 100,
+                            child: Container(
+                                child: Center(
+                                  child: InkWell(
+                                    child: Text(
+                                      '${Listofvalue?[index].value}' != ''
+                                          ? '${Listofvalue?[index].value}'
+                                          : '00:00',
+                                      style: const TextStyle(fontSize: 20),
+                                    ),
+                                    onTap: () async {
+                                      String? time = await _selectTime(context);
+                                      setState(() {
+                                        if (time != null) {
+                                          Listofvalue?[index].value = time;
+                                        }
+                                      });
+                                    },
+                                  ),
+                                )),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                } else {
+                  return Column(
+                    children: [Container()],
+                  );
+                }
+              },
+            ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    }
   }
 
   updateradiationset() async {
@@ -362,7 +592,7 @@ class _watersourceUIState extends State<watersourceUI>
         {"1601": Mqttsenddata},
       ]
     });
-    MQTTManager().publish('AppToFirmware/${widget.deviceID}', payLoadFinal);
+    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceID}');
   }
 
   String toMqttformat(

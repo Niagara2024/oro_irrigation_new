@@ -32,7 +32,10 @@ class _DashboardByManualState extends State<DashboardByManual> {
   bool visibleLoading = false;
   int ddSelection = 0;
   int segmentIndex = 0;
-  String flowOrDuration = '0';
+  String strFlow = '0';
+  String strDuration = '00:00';
+
+  late List<Map<String,dynamic>> standaloneSelection  = [];
 
   @override
   void initState() {
@@ -70,13 +73,15 @@ class _DashboardByManualState extends State<DashboardByManual> {
 
   Future<void> payloadCallbackFunction(segIndex, value) async
   {
-    print(segIndex);
-    print(value);
     segmentIndex = segIndex;
-    flowOrDuration = value;
+    if (value.contains(':')) {
+      strDuration = value;
+    } else {
+      strFlow = value;
+    }
   }
 
-  Future<void> getControllerDashboardDetails(id, selection, ) async
+  Future<void> getControllerDashboardDetails(id, selection) async
   {
     ddSelection = selection;
     indicatorViewShow();
@@ -93,9 +98,7 @@ class _DashboardByManualState extends State<DashboardByManual> {
   Future<List<DashboardDataProvider>>fetchControllerData(id) async
   {
     Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.controllerID, "programId": id};
-    //print(body);
     final response = await HttpService().postRequest("getCustomerDashboardByManual", body);
-
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
       //print(jsonResponse);
@@ -471,11 +474,13 @@ class _DashboardByManualState extends State<DashboardByManual> {
                     IconButton(
                         tooltip: 'Motor ON',
                         onPressed: () {
+                          standaloneSelection.clear();
                           String strSldSourcePump = buildSelectedItemsString(dashBoardData[0].sourcePump);
                           String strSldIrrigationPump = buildSelectedItemsString(dashBoardData[0].irrigationPump);
                           String strSldMainValve = buildSelectedItemsString(dashBoardData[0].mainValve);
                           String strSldCtrlFilter = buildSelectedItemsString(dashBoardData[0].centralFilterSite);
                           //String strSldCtrlFrtChanel = buildSelectedItemsString(dashBoardData[0].centralFertilizerSite[0].fertilizer);
+
 
                           String strSldValve = '';
                           Map<String, List<DashBoardValve>> groupedValves = {};
@@ -486,6 +491,14 @@ class _DashboardByManualState extends State<DashboardByManual> {
                               for (int j = 0; j < valves.length; j++) {
                                 if (valves[j].isOn) {
                                   strSldValve += '${valves[j].sNo}_';
+
+                                  standaloneSelection.add({
+                                    'id': valves[j].id,
+                                    'sNo': valves[j].sNo,
+                                    'name': valves[j].name,
+                                    'location': valves[j].location,
+                                    'selected': valves[j].isOn,
+                                  });
                                 }
                               }
                             });
@@ -504,7 +517,27 @@ class _DashboardByManualState extends State<DashboardByManual> {
                             GlobalSnackBar.show(context, 'Valve is not open, please open it and try again', 200);
                           }else{
                             String finalResult = nonEmptyStrings.where((s) => s.isNotEmpty).join('_');
-                            functionSendPayloadToMqtt(segmentIndex, flowOrDuration, finalResult);
+
+                            if(segmentIndex==0){
+                              functionSendPayloadToMqtt(segmentIndex, '0', finalResult);
+                            }else if(segmentIndex==1){
+                              functionSendPayloadToMqtt(segmentIndex, strDuration, finalResult);
+                            }else{
+                              functionSendPayloadToMqtt(segmentIndex, strFlow, finalResult);
+                            }
+
+
+                            String timeRrFlow = '';
+
+                            Map<String, dynamic> manualOperation = {
+                              "method": segmentIndex,
+                              "time": strDuration,
+                              "flow": strFlow,
+                              "selected": standaloneSelection,
+                            };
+
+                            sentManualModeToServer(manualOperation);
+                            standaloneSelection.clear();
                           }
 
                           /*if (strSldIrrigationPump.isEmpty) {
@@ -552,6 +585,20 @@ class _DashboardByManualState extends State<DashboardByManual> {
     );
   }
 
+  Future<void> sentManualModeToServer(manualOperation) async {
+    try {
+      final body = {"userId": widget.customerID, "controllerId": widget.controllerID, "manualOperation": manualOperation, "createUser": widget.customerID};
+      final response = await HttpService().postRequest("createUserManualOperation", body);
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        GlobalSnackBar.show(context, jsonResponse['message'], jsonResponse['code']);
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+
+  }
+
   Map<String, List<DashBoardValve>> groupValvesByLocation(List<DashBoardValve> valves) {
     Map<String, List<DashBoardValve>> groupedValves = {};
     for (var valve in valves) {
@@ -580,6 +627,15 @@ class _DashboardByManualState extends State<DashboardByManual> {
     for (int i = 0; i < itemList.length; i++) {
       if (itemList[i].selected) {
         result += '${itemList[i].sNo}_';
+
+        standaloneSelection.add({
+          'id': itemList[i].id,
+          'sNo': itemList[i].sNo,
+          'name': itemList[i].name,
+          'location': itemList[i].location,
+          'selected': itemList[i].selected,
+        });
+
       }
     }
     return result.isNotEmpty ? result.substring(0, result.length - 1) : '';
@@ -590,7 +646,6 @@ class _DashboardByManualState extends State<DashboardByManual> {
     String payLoadFinal = jsonEncode({
       "800": [{"801": payload}]
     });
-    print(payLoadFinal);
     MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
   }
 

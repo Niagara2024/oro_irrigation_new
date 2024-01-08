@@ -114,24 +114,26 @@ class _DashboardByProgramState extends State<DashboardByProgram>
                           if (dashBoardData.isNotEmpty)
                             dashBoardData[0].sourcePump.isNotEmpty?
                             Column(
-                                  children: [
-                                    const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text('Source Pump'),
-                                    ),
-                                    SizedBox(
-                                      height: (dashBoardData[0].sourcePump.length % 5 == 0
-                                          ? dashBoardData[0].sourcePump.length ~/ 5 * 70
-                                          : (dashBoardData[0].sourcePump.length ~/ 5 + 1) * 70),
-                                      child: DisplaySourcePump(sourcePump: dashBoardData[0].sourcePump, type: 0,),
-                                    ),
-                                    const Divider(height: 0),
-                                  ],
-                                ):
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Text('Source Pump'),
+                                ),
+                                SizedBox(
+                                  height: (dashBoardData[0].sourcePump.length % 5 == 0
+                                      ? dashBoardData[0].sourcePump.length ~/ 5 * 70
+                                      : (dashBoardData[0].sourcePump.length ~/ 5 + 1) * 70),
+                                  child: DisplaySourcePump(sourcePump: dashBoardData[0].sourcePump, type: 0,),
+                                ),
+                                const Divider(height: 0),
+                              ],
+                            ):
                             Container(),
                           if (dashBoardData.isNotEmpty)
                             dashBoardData[0].irrigationPump.isNotEmpty?
                             Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Padding(
                                   padding: EdgeInsets.all(8.0),
@@ -150,6 +152,7 @@ class _DashboardByProgramState extends State<DashboardByProgram>
                           if (dashBoardData.isNotEmpty)
                             dashBoardData[0].mainValve.isNotEmpty?
                             Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Padding(
                                   padding: EdgeInsets.all(8.0),
@@ -168,6 +171,7 @@ class _DashboardByProgramState extends State<DashboardByProgram>
                           if (dashBoardData.isNotEmpty)
                             dashBoardData[0].centralFilterSite.isNotEmpty?
                             Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Padding(
                                   padding: EdgeInsets.all(8.0),
@@ -186,6 +190,7 @@ class _DashboardByProgramState extends State<DashboardByProgram>
                           if (dashBoardData.isNotEmpty)
                             dashBoardData[0].centralFertilizerSite.isNotEmpty?
                             Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Padding(
                                   padding: EdgeInsets.all(8.0),

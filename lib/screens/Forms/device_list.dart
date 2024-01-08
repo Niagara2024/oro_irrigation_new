@@ -17,6 +17,7 @@ import '../../Models/product_stock.dart';
 import '../../constants/MQTTManager.dart';
 import '../../constants/http_service.dart';
 import '../Config/product_limit.dart';
+import '../Customer/ConfigDashboard/configMakerView.dart';
 import '../Customer/customer_home.dart';
 
 enum MasterController {gem1, gem2, gem3, gem4, gem5, gem6, gem7, gem8, gem9, gem10,}
@@ -165,7 +166,6 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
     {
       customerSiteList.clear();
       usedNodeList.clear();
-      final prefs = await SharedPreferences.getInstance();
       var data = jsonDecode(response.body);
       if(data["code"]==200)
       {
@@ -934,7 +934,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                           builder: (BuildContext context, void Function(void Function()) setState) {
                             return CheckboxListTile(
                               title: Text(widget.nodeStockList[nodeIndex].categoryName),
-                              subtitle: Text('${widget.nodeStockList[nodeIndex].imeiNo}'),
+                              subtitle: Text(widget.nodeStockList[nodeIndex].imeiNo),
                               value: checkboxValueNode,
                               onChanged:(bool? value) { setState(() {
                                 checkboxValueNode = value!;
@@ -977,7 +977,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                     ),
                                     const SizedBox(height: 5,),
                                     Text(widget.customerSiteList[siteIndex].categoryName,style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                                    Text('IMEi Number : ${widget.customerSiteList[siteIndex].deviceId.toString()}', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                    Text('Device Id : ${widget.customerSiteList[siteIndex].deviceId.toString()}', style: const TextStyle(fontWeight: FontWeight.normal),),
                                     Text('Model Name  : ${widget.customerSiteList[siteIndex].modelName}', style: const TextStyle(fontWeight: FontWeight.normal),),
                                   ],
                                 ),
@@ -1008,7 +1008,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                           size: ColumnSize.M
                                       ),
                                       DataColumn2(
-                                        label: Text('IMEI Number', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+                                        label: Text('Device Id', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
                                         fixedWidth: 170,
                                       ),
                                       DataColumn2(
@@ -1034,12 +1034,10 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                             value: widget.usedNodeList[siteIndex][index].interface,
                                             style: const TextStyle(fontSize: 12),
                                             onChanged: (newValue) {
-                                              print(newValue);
-                                              print(index);
                                               setState(() {
                                                 widget.usedNodeList[siteIndex][index].interface = newValue!;
-                                                int index1 = widget.interfaceType.indexWhere((model) => model.interface == newValue);
-                                                widget.usedNodeList[siteIndex][index].interfaceTypeId = widget.interfaceType[index1].interfaceTypeId;
+                                                int infIndex = widget.interfaceType.indexWhere((model) => model.interface == newValue);
+                                                widget.usedNodeList[siteIndex][index].interfaceTypeId = widget.interfaceType[infIndex].interfaceTypeId;
                                               });
                                             },
                                             items: widget.interfaceType.map((interface) {
@@ -1113,6 +1111,13 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
+                              IconButton(
+                                  tooltip : 'view config overview',
+                                  onPressed: () async {
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  ConfigMakerView(userID: widget.userID, siteID: widget.customerSiteList[siteIndex].controllerId, customerID: widget.customerID)),);
+                                  },
+                                  icon: const Icon(Icons.view_list_outlined)),
+                              const SizedBox(width: 10,),
                               IconButton(
                                   tooltip : 'Send to target',
                                   onPressed: () async {
@@ -1190,6 +1195,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                   },
                                   icon: const Icon(Icons.list_alt)),
                               const SizedBox(width: 20,),
+
                             ],
                           ),
                         ),
@@ -1328,7 +1334,7 @@ class UserCard extends StatelessWidget
         ),
       ),
       onTap: (){
-        Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerHome(customerID: user[index].userId, type: 1, customerName: user[index].userName, userID: user[index].userId,)),);
+        Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerHome(customerID: user[index].userId, type: 1, customerName: user[index].userName, userID: user[index].userId, siteList: const [],)),);
       },
     );
   }

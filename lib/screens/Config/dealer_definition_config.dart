@@ -9,24 +9,35 @@ import '../../constants/MQTTManager.dart';
 import '../../constants/http_service.dart';
 
 class DealerDefinitionInConfig extends StatefulWidget {
-  const DealerDefinitionInConfig({Key? key, required this.userId, required this.customerId, required this.controllerId, required this.imeiNo}) : super(key: key);
+  const DealerDefinitionInConfig(
+      {Key? key,
+        required this.userId,
+        required this.customerId,
+        required this.controllerId,
+        required this.imeiNo})
+      : super(key: key);
   final int userId, customerId, controllerId;
   final String imeiNo;
 
   @override
-  State<DealerDefinitionInConfig> createState() => DealerDefinitionInConfigState();
-
+  State<DealerDefinitionInConfig> createState() =>
+      DealerDefinitionInConfigState();
 }
 
 class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
-
-  DataModelDDConfig data = DataModelDDConfig(categories: [], dealerDefinition: {});
+  DataModelDDConfig data =
+  DataModelDDConfig(categories: [], dealerDefinition: {});
   bool visibleLoading = false;
 
   @override
   Widget build(BuildContext context) {
     if (MediaQuery.sizeOf(context).width <= 600) {
-      return MyContainerWithTabs(data: data, userID: widget.userId, customerID: widget.customerId, controllerId: widget.controllerId,);
+      return MyContainerWithTabs(
+        data: data,
+        userID: widget.userId,
+        customerID: widget.customerId,
+        controllerId: widget.controllerId,
+      );
     } else {
       return wideLayout(data, context);
     }
@@ -38,16 +49,16 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
     fetchData();
   }
 
-
-  Future<void> fetchData() async
-  {
+  Future<void> fetchData() async {
     indicatorViewShow();
     await Future.delayed(const Duration(milliseconds: 500));
-    Map<String, Object> body = {"userId": widget.customerId, "controllerId": widget.controllerId};
-    //print(body);
-    final response =   await HttpService().postRequest("getUserDealerDefinition", body);
+    Map<String, Object> body = {
+      "userId": widget.customerId,
+      "controllerId": widget.controllerId
+    };
+    final response =
+    await HttpService().postRequest("getUserDealerDefinition", body);
     final jsonData = json.decode(response.body);
-    //print(jsonData);
     try {
       setState(() {
         data = DataModelDDConfig.fromJson(jsonData);
@@ -58,21 +69,23 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
     }
   }
 
-  Widget wideLayout(DataModelDDConfig data, BuildContext context)
-  {
+  Widget wideLayout(DataModelDDConfig data, BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    return visibleLoading? Center(
+    return visibleLoading
+        ? Center(
       child: Visibility(
         visible: visibleLoading,
         child: Container(
-          padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 115, 0, mediaQuery.size.width/2 - 115, 0),
+          padding: EdgeInsets.fromLTRB(mediaQuery.size.width / 2 - 115, 0,
+              mediaQuery.size.width / 2 - 115, 0),
           child: const LoadingIndicator(
             indicatorType: Indicator.ballPulse,
           ),
         ),
       ),
-    ) : Container(
-      color:  Colors.white,
+    )
+        : Container(
+      color: Colors.white,
       child: Column(
         children: [
           Expanded(
@@ -93,16 +106,15 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
               children: [
                 TextButton.icon(
                   onPressed: () async {
-                    print('saveDataFunction');
+                    // print('saveDataFunction');
                     String strPayload = Mqttdata(data);
                     String payLoadFinal = jsonEncode({
                       "500": [
                         {"501": strPayload},
                       ]
                     });
-
-                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
-
+                    MQTTManager().publish(
+                        payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
                     final sendData = jsonEncode(data.dealerDefinition);
                     Map<String, Object> body = {
                       "userId": widget.customerId,
@@ -110,15 +122,13 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
                       "dealerDefinition": sendData,
                       "createUser": widget.userId
                     };
-                    final response = await HttpService().postRequest("createUserDealerDefinition", body);
-                    if(response.statusCode == 200)
-                    {
+                    final response = await HttpService()
+                        .postRequest("createUserDealerDefinition", body);
+                    if (response.statusCode == 200) {
                       var data = jsonDecode(response.body);
-                      if(data["code"]==200)
-                      {
+                      if (data["code"] == 200) {
                         _showSnackBar(data["message"]);
-                      }
-                      else{
+                      } else {
                         _showSnackBar(data["message"]);
                       }
                     }
@@ -129,7 +139,9 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(width: 20,)
+                const SizedBox(
+                  width: 20,
+                )
               ],
             ),
           ),
@@ -150,10 +162,11 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
     return mqttFormatData;
   }
 
-  Widget buildCategoryContainer(Category category, DataModelDDConfig data)
-  {
-    if(data.categories.isEmpty){
-      return const Center(child: CircularProgressIndicator(),);
+  Widget buildCategoryContainer(Category category, DataModelDDConfig data) {
+    if (data.categories.isEmpty) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
     }
     return Container(
       width: 350.0,
@@ -182,9 +195,12 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
       color: myTheme.primaryColor.withOpacity(0.3),
       child: Column(
         children: [
-          const SizedBox(height: 10,),
+          const SizedBox(
+            height: 10,
+          ),
           Center(
-            child: Text(categoryName, style: const TextStyle(color: Colors.black)),
+            child:
+            Text(categoryName, style: const TextStyle(color: Colors.black)),
           ),
         ],
       ),
@@ -195,20 +211,23 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
     return ListView.builder(
       itemCount: data.dealerDefinition['${category.categoryId}']?.length ?? 0,
       itemBuilder: (context, index) {
-        final definition = data.dealerDefinition['${category.categoryId}']?[index];
+        final definition =
+        data.dealerDefinition['${category.categoryId}']?[index];
         return buildDealerDefinitionItem(definition, category);
       },
     );
   }
 
-  Widget buildDealerDefinitionItem(DealerDefinition? definition, Category category)
-  {
-    final dropdownlist = StringToList().stringtolist('${definition?.dropdownValues}', ',');
+  Widget buildDealerDefinitionItem(
+      DealerDefinition? definition, Category category) {
+    final dropdownlist =
+    StringToList().stringtolist('${definition?.dropdownValues}', ',');
     int iconcode = int.parse(definition?.iconCodePoint ?? "0xe123");
     String iconfontfamily = definition?.iconFontFamily ?? "MaterialIcons";
 
     if (definition?.widgetTypeId == 3) {
-      return buildDropdownItem(definition, dropdownlist, iconcode, iconfontfamily);
+      return buildDropdownItem(
+          definition, dropdownlist, iconcode, iconfontfamily);
     } else if (definition?.widgetTypeId == 1) {
       return buildTextFieldItem(definition, iconcode, iconfontfamily);
     } else {
@@ -216,18 +235,26 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
     }
   }
 
-  Widget buildDropdownItem(DealerDefinition? definition, List<String> dropdownlist, int iconcode, String iconfontfamily) {
+  Widget buildDropdownItem(DealerDefinition? definition,
+      List<String> dropdownlist, int iconcode, String iconfontfamily) {
     return Column(
       children: [
         ListTile(
-         // leading: Icon(IconData(iconcode, fontFamily: iconfontfamily)),
-          title: Text('${definition?.parameter}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),),
-          subtitle: Text('${definition?.description}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.normal)),
+          // leading: Icon(IconData(iconcode, fontFamily: iconfontfamily)),
+          title: Text(
+            '${definition?.parameter}',
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
+          ),
+          subtitle: Text('${definition?.description}',
+              style:
+              const TextStyle(fontSize: 11, fontWeight: FontWeight.normal)),
           trailing: DropdownButton(
             items: dropdownlist.map((String items) {
               return DropdownMenuItem(
                 value: items,
-                child: Container(padding: const EdgeInsets.only(left: 10), child: Text(items)),
+                child: Container(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: Text(items)),
               );
             }).toList(),
             onChanged: (value) {
@@ -235,20 +262,28 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
                 definition?.value = value!;
               });
             },
-            value: definition?.value == '' ? dropdownlist[0].toString() : definition?.value,
+            value: definition?.value == ''
+                ? dropdownlist[0].toString()
+                : definition?.value,
           ),
         ),
       ],
     );
   }
 
-  Widget buildTextFieldItem(DealerDefinition? definition, int iconcode, String iconfontfamily) {
+  Widget buildTextFieldItem(
+      DealerDefinition? definition, int iconcode, String iconfontfamily) {
     return Column(
       children: [
         ListTile(
           //leading: Icon(IconData(iconcode, fontFamily: iconfontfamily)),
-          title: Text('${definition?.parameter}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),),
-          subtitle: Text('${definition?.description}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.normal)),
+          title: Text(
+            '${definition?.parameter}',
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
+          ),
+          subtitle: Text('${definition?.description}',
+              style:
+              const TextStyle(fontSize: 11, fontWeight: FontWeight.normal)),
           trailing: SizedBox(
             width: 50,
             child: CustomTextField(
@@ -275,26 +310,93 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
     );
   }
 
-  Widget buildSwitchItem(DealerDefinition? definition, int iconcode, String iconfontfamily)
-  {
-    return Column(
-      children: [
-        ListTile(
-          //leading: Icon(IconData(iconcode, fontFamily: iconfontfamily)),
-          title: Text('${definition?.parameter}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),),
-          subtitle: Text('${definition?.description}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.normal)),
-          trailing: MySwitch(
-            value: definition?.value == '1',
-            onChanged: ((value) {
-              setState(() {
-                definition?.value = !value ? '0' : '1';
-              });
-            }),
-          ),
-        ),
+  Widget buildSwitchItem(
+      DealerDefinition? definition, int iconcode, String iconfontfamily) {
 
-      ],
-    );
+    int? rtcindex = data.dealerDefinition["1"]?.indexWhere((element) => element.dealerDefinitionId == 62);
+    int? rtcmaxindex = data.dealerDefinition["1"]?.indexWhere((element) => element.dealerDefinitionId == 63);
+    if (definition?.dealerDefinitionId == 62 ||
+        definition?.dealerDefinitionId == 63) {
+      if (definition?.dealerDefinitionId == 62){
+        return Column(
+          children: [
+            ListTile(
+              title: Text(
+                '${definition?.parameter}',
+                style: const TextStyle(
+                    fontSize: 14, fontWeight: FontWeight.normal),
+              ),
+              subtitle: Text('${definition?.description}',
+                  style: const TextStyle(
+                      fontSize: 11, fontWeight: FontWeight.normal)),
+              trailing: MySwitch(
+                value: definition?.value == '1',
+                onChanged: ((value) {
+                  setState(() {
+                    definition?.value = !value ? '0' : '1';
+                    if (value) {
+                      data.dealerDefinition["1"]![rtcmaxindex!].value = '0';
+                    }
+                  });
+                }),
+              ),
+            ),
+          ],
+        );
+      }
+      else {
+        return Column(
+          children: [
+            ListTile(
+              title: Text(
+                '${definition?.parameter}',
+                style:
+                const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
+              ),
+              subtitle: Text('${definition?.description}',
+                  style: const TextStyle(
+                      fontSize: 11, fontWeight: FontWeight.normal)),
+              trailing: MySwitch(
+                value: definition?.value == '1',
+                onChanged: ((value) {
+                  setState(() {
+                    definition?.value = !value ? '0' : '1';
+                    if (value) {
+                      data.dealerDefinition["1"]![rtcindex!].value = '0';
+                    }
+                  });
+                }),
+              ),
+            ),
+          ],
+        );
+      }
+    }else {
+      return Column(
+        children: [
+          ListTile(
+            //leading: Icon(IconData(iconcode, fontFamily: iconfontfamily)),
+
+            title: Text(
+              '${definition?.parameter}',
+              style:
+              const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
+            ),
+            subtitle: Text('${definition?.description}',
+                style: const TextStyle(
+                    fontSize: 11, fontWeight: FontWeight.normal)),
+            trailing: MySwitch(
+              value: definition?.value == '1',
+              onChanged: ((value) {
+                setState(() {
+                  definition?.value = !value ? '0' : '1';
+                });
+              }),
+            ),
+          ),
+        ],
+      );
+    }
   }
 
   void indicatorViewShow() {
@@ -319,9 +421,13 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
   }
 }
 
-class MyContainerWithTabs extends StatefulWidget
-{
-  const MyContainerWithTabs({super.key, required this.data, required this.userID, required this.customerID, required this.controllerId});
+class MyContainerWithTabs extends StatefulWidget {
+  const MyContainerWithTabs(
+      {super.key,
+        required this.data,
+        required this.userID,
+        required this.customerID,
+        required this.controllerId});
   final DataModelDDConfig data;
   final int userID, customerID, controllerId;
 
@@ -329,13 +435,11 @@ class MyContainerWithTabs extends StatefulWidget
   State<MyContainerWithTabs> createState() => _MyContainerWithTabsState();
 }
 
-class _MyContainerWithTabsState extends State<MyContainerWithTabs>
-{
+class _MyContainerWithTabsState extends State<MyContainerWithTabs> {
   @override
-  Widget build(BuildContext context)
-  {
+  Widget build(BuildContext context) {
     return Container(
-      color:  Colors.blueGrey.shade50,
+      color: Colors.blueGrey.shade50,
       child: Column(
         children: [
           Expanded(
@@ -348,23 +452,31 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
                     child: Column(
                       children: [
                         TabBar(
-                          indicatorColor: const Color.fromARGB(255, 175, 73, 73),
+                          indicatorColor:
+                          const Color.fromARGB(255, 175, 73, 73),
                           isScrollable: true,
                           tabs: [
-                            for (var i = 0; i < widget.data.categories.length; i++)
-                              Tab(text: widget.data.categories[i].categoryName,),
+                            for (var i = 0;
+                            i < widget.data.categories.length;
+                            i++)
+                              Tab(
+                                text: widget.data.categories[i].categoryName,
+                              ),
                           ],
-                          onTap: (value) {
-                          },
+                          onTap: (value) {},
                         ),
                         const SizedBox(height: 10.0),
                         SizedBox(
-                          height: MediaQuery.sizeOf(context).height-265,
+                          height: MediaQuery.sizeOf(context).height - 265,
                           child: TabBarView(
                             children: [
-                              for (var i = 0; i < widget.data.categories.length; i++)
-                                widget.data.categories[i].categoryName.isEmpty ? Container()
-                                    : buildTab(widget.data.dealerDefinition['${widget.data.categories[i].categoryId}']),
+                              for (var i = 0;
+                              i < widget.data.categories.length;
+                              i++)
+                                widget.data.categories[i].categoryName.isEmpty
+                                    ? Container()
+                                    : buildTab(widget.data.dealerDefinition[
+                                '${widget.data.categories[i].categoryId}']),
                             ],
                           ),
                         ),
@@ -390,15 +502,13 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
                       "dealerDefinition": sendData,
                       "createUser": widget.userID
                     };
-                    final response = await HttpService().postRequest("createUserDealerDefinition", body);
-                    if(response.statusCode == 200)
-                    {
+                    final response = await HttpService()
+                        .postRequest("createUserDealerDefinition", body);
+                    if (response.statusCode == 200) {
                       var data = jsonDecode(response.body);
-                      if(data["code"]==200)
-                      {
+                      if (data["code"] == 200) {
                         _showSnackBar(data["message"]);
-                      }
-                      else{
+                      } else {
                         _showSnackBar(data["message"]);
                       }
                     }
@@ -409,7 +519,9 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(width: 20,)
+                const SizedBox(
+                  width: 20,
+                )
               ],
             ),
           ),
@@ -418,8 +530,7 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
     );
   }
 
-  Widget buildTab(List<DealerDefinition>? Listofvalue)
-  {
+  Widget buildTab(List<DealerDefinition>? Listofvalue) {
     return Column(
       children: [
         Expanded(
@@ -444,7 +555,7 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
                           'Details: ${Listofvalue?[index].description}',
                           style: const TextStyle(fontSize: 11),
                         ),
-                       // leading: Icon(IconData(iconcode, fontFamily: iconfontfamily)),
+                        // leading: Icon(IconData(iconcode, fontFamily: iconfontfamily)),
                         trailing: Container(
                           color: Colors.white,
                           width: 140,
@@ -545,7 +656,6 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
         ),
       ],
     );
-
   }
 
   void _showSnackBar(String message) {
@@ -556,9 +666,7 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
       ),
     );
   }
-
 }
-
 
 class StringToList {
   List<String> stringtolist(
@@ -596,8 +704,7 @@ class _CustomSwitchState extends State<MySwitch> {
   }
 }
 
-class CustomTextField extends StatelessWidget
-{
+class CustomTextField extends StatelessWidget {
   final TextEditingController? controller;
   final String? labelText;
   final String? initialValue;
@@ -607,7 +714,8 @@ class CustomTextField extends StatelessWidget
   final ValueChanged<String>? onChanged;
   final String? Function(String?)? validator;
 
-  const CustomTextField({super.key,
+  const CustomTextField({
+    super.key,
     this.controller,
     this.labelText,
     this.initialValue,

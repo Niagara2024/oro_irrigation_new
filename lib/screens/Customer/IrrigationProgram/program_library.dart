@@ -665,6 +665,7 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
                           subtitle: 'Description',
                           showSubTitle: false,
                           content: Icons.priority_high,
+                          includeNoneOption: false,
                           dropdownItems: mainProvider.priorityList.map((item) => item).toList(),
                           selectedValue: program.priority,
                           onChanged: (newValue) {

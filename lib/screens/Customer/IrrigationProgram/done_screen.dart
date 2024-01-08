@@ -100,7 +100,7 @@ class _DoneScreenState extends State<DoneScreen> {
                     dropdownItems: doneProvider.priorityList.map((item) => item).toList(),
                     selectedValue: doneProvider.priority,
                     onChanged: (newValue) => doneProvider.updateProgramName(newValue, 'priority'),
-                  includeNoneOption: true,
+                  includeNoneOption: false,
                 ),
               ),
               const SizedBox(height: 5,),

@@ -1054,7 +1054,8 @@ class _ConditionwebUIState extends State<ConditionwebUI>
         {"708": Mqttsenddata},
       ]
     });
-    MQTTManager().publish('AppToFirmware/${widget.imeiNo}', payLoadFinal);
+
+    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
   }
 
   String? getSNoByName(List<UserNames> data, String name) {

@@ -972,7 +972,7 @@ class _ConditionUIState extends State<ConditionUI>
         {"708": Mqttsenddata},
       ]
     });
-    MQTTManager().publish('AppToFirmware/${widget.imeiNo}', payLoadFinal);
+    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}' );
   }
 
   List<String> filterlist(List<String> conditionlist, String removevalue) {

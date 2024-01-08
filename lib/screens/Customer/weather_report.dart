@@ -4,10 +4,10 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'dart:math' as math;
 import '../../constants/theme.dart';
 
-enum Segment { Weekly, Monthly, Yearly }
+enum Segment { Hourly, Weekly, Monthly }
 
-class WeatherReport extends StatelessWidget {
-  WeatherReport(
+class WeatherReportbar extends StatelessWidget {
+  WeatherReportbar(
       {super.key,
         required this.tempdata,
         required this.timedata,required this.title,
@@ -33,7 +33,7 @@ class ScrollableChart extends StatefulWidget {
   ScrollableChart({super.key, required this.tempdata, required this.timedata,required this.titletype});
   List tempdata = [];
   List timedata = [];
-  Segment selectedSegment = Segment.Weekly;
+  Segment selectedSegment = Segment.Hourly;
   String titletype;
 
   @override
@@ -42,19 +42,48 @@ class ScrollableChart extends StatefulWidget {
 
 class _ScrollableChartState extends State<ScrollableChart> {
   @override
-  Widget build1(BuildContext context) {
+
+  @override
+  Widget build(BuildContext context) {
     List<SalesData> chartData = [];
+    List week = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    List Month = ['Jan','Feb','Mar','Apr','May','June','July','Aug','Sep','Oct','Nov','Dec'];
     List<String> charList = widget.titletype.split('');
     for (int index = 0; index < widget.tempdata.length; index++) {
       List<String> part = widget.timedata[index].split('T');
-      String replacedValue = part[1];
+      String replacedValue =  part[1];
       chartData.add(SalesData(replacedValue, widget.tempdata[index]));
     }
-    if (widget.selectedSegment == Segment.Weekly) {
-      chartData = chartData.sublist(0, 7);
-    } else if (widget.selectedSegment == Segment.Monthly) {
-      chartData = chartData.sublist(0, 30);
+    //      String replacedValue = '${part[1]} $index';?
+    String yaxixname = 'Hours';
+    print('selectedSegment ${widget.selectedSegment}');
+    print(chartData);
+    if (widget.selectedSegment == Segment.Hourly) {
+      yaxixname = 'Hours';
+      chartData = chartData.sublist(0, 24);
+    } else if (widget.selectedSegment == Segment.Weekly) {
+      yaxixname = 'Days';
+      chartData = [];
+      // chartData = chartData.sublist(0, 7);
+      for (int index = 0; index < 7; index++) {
+        String replacedValue = '${week[index]}' ;
+        chartData.add(SalesData(replacedValue, widget.tempdata[index]));
+      }
     }
+    else
+    {
+      chartData = [];
+      for (int index = 0; index < 30; index++) {
+        String replacedValue = '${index+1}' ;
+        chartData.add(SalesData(replacedValue, widget.tempdata[index]));
+      }
+
+      // chartData = chartData.sublist(0, 30);
+      yaxixname = 'Days';
+    }
+    print('chartData');
+    print(chartData);
+    // }
     return Column(
       children: [
         SizedBox(
@@ -68,172 +97,119 @@ class _ScrollableChartState extends State<ScrollableChart> {
           ),
           segments: const <ButtonSegment<Segment>>[
             ButtonSegment<Segment>(
+                value: Segment.Hourly,
+                label: Text('Hourly'),
+                icon: Icon(Icons.calendar_today_outlined)),
+            ButtonSegment<Segment>(
                 value: Segment.Weekly,
                 label: Text('Weekly'),
-                icon: Icon(Icons.calendar_today_outlined)),
+                icon: Icon(Icons.calendar_view_week)),
             ButtonSegment<Segment>(
                 value: Segment.Monthly,
                 label: Text('Monthly'),
-                icon: Icon(Icons.calendar_view_week)),
-            ButtonSegment<Segment>(
-                value: Segment.Yearly,
-                label: Text('Yearly'),
                 icon: Icon(Icons.calendar_month)),
           ],
           selected: <Segment>{widget.selectedSegment},
           onSelectionChanged: (Set<Segment> newSelection) {
             setState(() {
-              print('selectedSegment$widget.selectedSegment');
+              print('selectedSegment${widget.selectedSegment}');
               widget.selectedSegment = newSelection.first;
             });
           },
         ),
-        Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 20,
-                child: Column(
-                  children: [
-                    for (var i in charList)
-                      Text(i)
-                  ],
-                ),
+        SizedBox(
+          height: 10,
+        ),
+        Expanded(
+          child: Center(
+            child: widget.selectedSegment == Segment.Hourly ? SfCartesianChart(
+              backgroundColor: Colors.grey[200], // Background color
+              enableSideBySideSeriesPlacement: true,
+              borderColor: Colors.blue, // Border color
+              borderWidth: 1.5, // Border width
+              plotAreaBackgroundColor: Colors.white,
+              plotAreaBorderColor: Colors.grey[400],
+              plotAreaBorderWidth: 0.5,
+
+              onMarkerRender: (MarkerRenderArgs markerRenderArgs) {
+                markerRenderArgs.color = Colors.red;
+                markerRenderArgs.borderWidth = 2;
+              },
+              palette: const <Color>[
+                Colors.blue,
+                Colors.green,
+                Colors.orange,
+              ],
+              // Add your chart properties and data here
+              zoomPanBehavior: ZoomPanBehavior(
+                enablePinching: true,
+                enablePanning: true,
+                enableDoubleTapZooming: true,
+
               ),
-              Column(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
-                          spreadRadius: 5,
-                          blurRadius: 7,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    width: MediaQuery.of(context).size.width -
-                        100, // chartData.length * 20 < MediaQuery.of(context).size.width ? MediaQuery.of(context).size.width : chartData.length * 20, // Set width to ensure chart's width
-                    height: 400,
-                    child: LineChart(
-                      LineChartData(
-                        minX: 0,
-                        minY: 0,
-                        lineBarsData: [
-                          LineChartBarData(
-                            // spots: chartData,
-                            isCurved: false,
-                            color: Colors.blue,
-                            barWidth: 1,
-                            isStrokeCapRound: true,
-                            belowBarData: BarAreaData(show: true),
-                          ),
-                        ],
-                        borderData: FlBorderData(show: true),
-                        gridData: FlGridData(show: true),
-                        // rangeAnnotations: RangeAnnotations(),
-                      ),
-                    ),
+              // Axis names
+
+              primaryXAxis: CategoryAxis(title: AxisTitle(text: yaxixname),autoScrollingMode: AutoScrollingMode.start ),
+              primaryYAxis: NumericAxis(title: AxisTitle(text: widget.titletype)),
+              series: <ChartSeries>[
+                LineSeries<SalesData, String>(
+                  dataSource: chartData,
+                  dataLabelSettings: DataLabelSettings(isVisible: true),
+                  xValueMapper: (SalesData sales, _) => sales.year,
+                  yValueMapper: (SalesData sales, _) => sales.sales,
+                  name: 'name',
+                  yAxisName:'Sales',
+                  xAxisName:'Year',
+                  isVisibleInLegend: true,
+                  legendItemText: 'graph',
+                  markerSettings: const MarkerSettings(
+                    isVisible: true,
+                    color: Colors.blue,
+                    height: 10,
+                    width: 10,
+                    shape: DataMarkerType.circle,
                   ),
-                  Text('Hours')
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    List<SalesData> chartData = [];
-    List<String> charList = widget.titletype.split('');
-    for (int index = 0; index < widget.tempdata.length; index++) {
-      List<String> part = widget.timedata[index].split('T');
-      String replacedValue = part[1];
-      chartData.add(SalesData(replacedValue, widget.tempdata[index]));
-    }
-    //      String replacedValue = '${part[1]} $index';
-    // if (widget.selectedSegment == Segment.Weekly) {
-    //   chartData = chartData.sublist(0, 7);
-    // } else if (widget.selectedSegment == Segment.Monthly) {
-
-    chartData = chartData.sublist(0, 24);
-    if(widget.titletype == 'Temperature')
-    {
-      chartData = chartData.sublist(8, 24);
-    }
-    // }
-    return Center(
-      child: Expanded(
-        child: Container(
-          // Adjust the container size as needed
-          // width: 800,
-          // height: 800,
-          child: SfCartesianChart(
-            backgroundColor: Colors.grey[200], // Background color
-            enableSideBySideSeriesPlacement: true,
-            borderColor: Colors.blue, // Border color
-            borderWidth: 1.5, // Border width
-            plotAreaBackgroundColor: Colors.white,
-            plotAreaBorderColor: Colors.grey[400],
-            plotAreaBorderWidth: 0.5,
-            onMarkerRender: (MarkerRenderArgs markerRenderArgs) {
-              markerRenderArgs.color = Colors.red; // Custom marker color
-              markerRenderArgs.borderWidth = 2; // Custom marker border width
-            },
-            palette: <Color>[
-              Colors.blue,
-              Colors.green,
-              Colors.orange,
-            ],
-            // Add your chart properties and data here
-            zoomPanBehavior: ZoomPanBehavior(
-              enablePinching: true,
-              enablePanning: true,
-              enableDoubleTapZooming: true,
-
-            ),
-            // Axis names
-
-            primaryXAxis: CategoryAxis(title: AxisTitle(text: 'Hours'),autoScrollingMode: AutoScrollingMode.start ),
-            primaryYAxis: NumericAxis(title: AxisTitle(text: widget.titletype)),
-            series: <ChartSeries>[
-              LineSeries<SalesData, String>(
-                dataSource: chartData,
-                dataLabelSettings: DataLabelSettings(isVisible: true),
-                xValueMapper: (SalesData sales, _) => sales.year,
-                yValueMapper: (SalesData sales, _) => sales.sales,
-                name: 'name',
-                yAxisName:'Sales',
-                xAxisName:'Year',
-                isVisibleInLegend: true,
-                legendItemText: 'graph',
-                markerSettings: MarkerSettings(
-                  isVisible: true,
-                  color: Colors.blue,
-                  height: 10,
-                  width: 10,
-                  shape: DataMarkerType.circle,
                 ),
+              ],
+              tooltipBehavior: TooltipBehavior(
+                enable: true,
+                header: widget.titletype,
+                duration: 0.5,
 
               ),
-            ],
-            tooltipBehavior: TooltipBehavior(
-              enable: true,
-              header: widget.titletype,
-              duration: 0.5,
+            ) : SfCartesianChart(
+                backgroundColor: Colors.grey[200],
+                enableSideBySideSeriesPlacement: true,
+                borderColor: Colors.blue, // Border color
+                borderWidth: 1.5, // Border width
+                plotAreaBackgroundColor: Colors.white,
+                plotAreaBorderColor: Colors.grey[400],
+                plotAreaBorderWidth: 0.5,
+                primaryXAxis: CategoryAxis(title: AxisTitle(text: yaxixname),autoScrollingMode: AutoScrollingMode.start ),
+                primaryYAxis: NumericAxis(title: AxisTitle(text: widget.titletype)),
+                // primaryXAxis: CategoryAxis(),
+                // primaryYAxis: NumericAxis(minimum: 0, maximum: 40, interval: 10),
+                tooltipBehavior: TooltipBehavior(
+                  enable: true,
+                  header: widget.titletype,
+                  duration: 1.0,
 
-            ),
+                ),
+                series: <ChartSeries>[
+                  ColumnSeries<SalesData, String>(
+                      width: 0.2,
+                      dataSource: chartData,
+                      xValueMapper: (SalesData sales, _) => sales.year,
+                      yValueMapper: (SalesData sales, _) => sales.sales,
+                      name: widget.titletype,
+                      color: Color.fromRGBO(8, 142, 255, 1))
+                ]) ,
+
           ),
         ),
-      ),
 
+      ],
     );
   }
 }

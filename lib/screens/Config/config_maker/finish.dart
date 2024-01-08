@@ -3,18 +3,20 @@ import 'dart:html' as html;
 
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import 'package:oro_irrigation_new/constants/MQTTManager.dart';
+import 'package:mqtt_client/mqtt_browser_client.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
+
 import '../../../Models/create_json_file.dart';
+import '../../../constants/MQTTManager.dart';
 import '../../../constants/http_service.dart';
 import '../../../state_management/config_maker_provider.dart';
 
 
 class FinishPageConfigMaker extends StatefulWidget {
-  const FinishPageConfigMaker({super.key, required this.userId, required this.customerID, required this.controllerId, required this.deviceUDID});
+  const FinishPageConfigMaker({super.key, required this.userId, required this.customerID, required this.controllerId,required this.imeiNo});
   final int userId, controllerId, customerID;
-  final String deviceUDID;
+  final String imeiNo;
 
   @override
   State<FinishPageConfigMaker> createState() => _FinishPageConfigMakerState();
@@ -29,9 +31,9 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
       child: Center(
         child: InkWell(
           onTap: ()async{
-            print('userId : ${widget.customerID}');
-            print('createUser : ${widget.customerID}');
-            print('controllerId : ${widget.controllerId}');
+            //print('userId : ${widget.customerID}');
+            //print('createUser : ${widget.customerID}');
+            //print('controllerId : ${widget.controllerId}');
             showDialog(context: context, builder: (context){
               return Consumer<ConfigMakerProvider>(builder: (context,configPvd,child){
                 return AlertDialog(
@@ -85,7 +87,6 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
                                 'totalWaterMeter' : configPvd.totalWaterMeter,
                                 'totalPressureSwitch' : configPvd.totalPressureSwitch,
                                 'totalDiffPressureSensor' : configPvd.totalDiffPressureSensor,
-                                'totalWaterMeter' : configPvd.totalWaterMeter,
                                 'totalSourcePump' : configPvd.totalSourcePump,
                                 'totalIrrigationPump' : configPvd.totalIrrigationPump,
                                 'totalInjector' : configPvd.totalInjector,
@@ -168,12 +169,15 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
                             var jsonData = convert.jsonDecode(response.body);
                             //print('response code : ${jsonData['code']}');
                             //print('response data : $jsonData');
-                            //print('Device id : ${widget.deviceUDID}');
-                            MQTTManager().publish(convert.jsonEncode(configPvd.sendData()), 'AppToFirmware/${widget.deviceUDID}');
+                            //print('AppToFirmware/${widget.controllerId}');
+                            //print('AppToFirmware/${widget.imeiNo}');
+                            MQTTManager().publish(convert.jsonEncode(configPvd.sendData()),'AppToFirmware/${widget.imeiNo}');
+                            // MqttWebClient().publishMessage('AppToFirmware/${widget.imeiNo}', convert.jsonEncode(configPvd.sendData()));
                             if(jsonData['code'] == 200){
-                              Future.delayed(const Duration(seconds: 1), () {
+                              Future.delayed(Duration(seconds: 1), () {
                                 configPvd.editWantToSendData(2);
                               });
+
                             }else{
                               configPvd.editWantToSendData(3);
                             }

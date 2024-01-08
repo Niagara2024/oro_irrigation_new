@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/screens/Forms/create_account.dart';
 import 'package:oro_irrigation_new/screens/product_inventory.dart';
@@ -7,8 +9,12 @@ import 'package:oro_irrigation_new/screens/web_view.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Models/Customer/Dashboard/DashboardNode.dart';
 import '../constants/MQTTManager.dart';
+import '../constants/http_service.dart';
 import '../state_management/MqttPayloadProvider.dart';
+import 'Customer/Dashboard/SentAndReceived.dart';
+import 'Customer/Dashboard/FarmSettings.dart';
 import 'Customer/customer_home.dart';
 import 'my_preference.dart';
 import 'product_entry.dart';
@@ -88,7 +94,6 @@ class DashBoardMainState extends State<DashBoardMain> with TickerProviderStateMi
       userMobileNo = (prefs.getString('mobileNumber') ?? "");
       userID = int.parse(prefs.getString('userId') ?? "");
     });
-
   }
 
   void mqttConfigureAndConnect() {
@@ -100,7 +105,6 @@ class DashBoardMainState extends State<DashBoardMain> with TickerProviderStateMi
   Widget build(BuildContext context)
   {
     payloadProvider = Provider.of<MqttPayloadProvider>(context,listen: false);
-
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints)
@@ -110,7 +114,7 @@ class DashBoardMainState extends State<DashBoardMain> with TickerProviderStateMi
           } else if (constraints.maxWidth > 600 && constraints.maxWidth < 900) {
             return const DashboardMiddle();//pad or tap
           } else {
-            return DashboardWide(userName: userName, userType: userType, countryCode: userCountryCode, mobileNo: userMobileNo, userID: userID,);//desktop or web
+            return DashboardWide(userName: userName, userType: userType, countryCode: userCountryCode, mobileNo: userMobileNo, userID: userID, screenWidth: MediaQuery.sizeOf(context).width,);//desktop or web
           }
         },
       ),
@@ -163,9 +167,10 @@ class _DashboardMiddleState extends State<DashboardMiddle> {
 
 class DashboardWide extends StatefulWidget
 {
-  const DashboardWide({Key? key, required this.userName, required this.userType, required this.countryCode,  required this.mobileNo, required this.userID}) : super(key: key);
+  const DashboardWide({Key? key, required this.userName, required this.userType, required this.countryCode,  required this.mobileNo, required this.userID, required this.screenWidth}) : super(key: key);
   final String userType, userName, countryCode, mobileNo;
   final int userID;
+  final double screenWidth;
 
   @override
   State<DashboardWide> createState() => _DashboardWideState();
@@ -177,14 +182,49 @@ class _DashboardWideState extends State<DashboardWide> {
   NavigationRailLabelType labelType = NavigationRailLabelType.all;
   double groupAlignment = -1.0;
   Calendar calendarView = Calendar.day;
-  Widget _centerWidget = const Center(child: Text('Loading'));
+  late Widget _centerWidget;
   String currentTap = 'Dashboard';
+
+  List<DashboardModel> siteList = [];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    callCustomerDashboard();
+    getCustomerSite();
+  }
+
+  Future<void> getCustomerSite() async
+  {
+    _centerWidget = Center(child: Container(
+      color: Colors.white,
+      padding: EdgeInsets.symmetric(horizontal: widget.screenWidth/2 - 160),
+      child: const LoadingIndicator(
+        indicatorType: Indicator.ballPulse,
+      ),
+    ));
+
+    final prefs = await SharedPreferences.getInstance();
+    Map<String, Object> body = {"userId" : int.parse(prefs.getString('userId') ?? "")};
+    final response = await HttpService().postRequest("getUserDeviceListForCustomer", body);
+    if (response.statusCode == 200)
+    {
+      siteList.clear();
+      var data = jsonDecode(response.body);
+      if(data["code"]==200)
+      {
+        final cntList = data["data"] as List;
+        try {
+          siteList = cntList.map((json) => DashboardModel.fromJson(json)).toList();
+        } catch (e) {
+          print('Error: $e');
+        }
+      }
+      callCustomerDashboard();
+    }
+    else{
+      //_showSnackBar(response.body);
+    }
   }
 
   Future<void> callCustomerDashboard()  async {
@@ -198,21 +238,23 @@ class _DashboardWideState extends State<DashboardWide> {
     currentTap = option;
     setState(() {
       if (option == 'Dashboard') {
-        _centerWidget = CustomerHome(customerID: widget.userID, type: 0, customerName: '', userID: widget.userID);
+        _centerWidget = CustomerHome(customerID: widget.userID, type: 0, customerName: '', userID: widget.userID, siteList: siteList,);
       } else if (option == 'My Product') {
         _centerWidget = ProductInventory(userName: widget.userName);
       } else if (option == 'Device Settings') {
-        //_centerWidget = FarmSettings(...);
+        _centerWidget = FarmSettings(customerID: widget.userID, siteList: siteList,);
       }
+      else if (option == 'Sent And Received') {
+        _centerWidget = SentAndReceived(customerID: widget.userID, siteList: siteList,);
+      }
+
       // Add more conditions for additional options
     });
   }
 
   @override
-  Widget build(BuildContext context)
-  {
+  Widget build(BuildContext context)  {
     //var appState = Provider.of<MqttPayloadProvider>(context,listen: true);
-
     return widget.userType =='3'? Scaffold(
       body: Stack(
         children: [
@@ -411,19 +453,20 @@ class MyDrawer extends StatelessWidget {
     return SingleChildScrollView(
       child: Container(
         width: 250,
-        height: MediaQuery.of(context).size.height < 700 ? 700 : MediaQuery.of(context).size.height,
+        height: MediaQuery.of(context).size.height < 750 ? 750 : MediaQuery.of(context).size.height,
         color: myTheme.primaryColor.withOpacity(0.9),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: myTheme.primaryColor,
-              ),
-              child: Center(
+            Container(
+              color: myTheme.primaryColor,
+              width: 250,
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const CircleAvatar(
                       radius: 40,
@@ -439,12 +482,13 @@ class MyDrawer extends StatelessWidget {
               ),
             ),
             const Padding(
-              padding: EdgeInsets.only(left: 10, bottom: 5),
+              padding: EdgeInsets.only(left: 10, bottom: 5, top: 10),
               child: Text('HOME', style: TextStyle(color: Colors.white)),
             ),
             buildCustomListTile('Dashboard', Icons.dashboard_outlined, 'Dashboard'),
             buildCustomListTile('My Product', Icons.topic_outlined, 'My Product'),
             buildCustomListTile('Report Overview', Icons.my_library_books_outlined, 'Report Overview'),
+            buildCustomListTile('Sent And Received', Icons.question_answer_outlined, 'Sent And Received'),
             buildCustomListTile('Controller Logs', Icons.message_outlined, 'Controller Logs'),
             buildCustomListTile('Device Settings', Icons.settings_outlined, 'Device Settings'),
             const Padding(

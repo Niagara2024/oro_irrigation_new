@@ -42,6 +42,7 @@ class _ConfigMakerScreenState extends State<ConfigMakerScreen> with SingleTicker
     getConfigData();
     controller = TabController(length: 12, vsync: this, initialIndex: 0);
     controller.addListener(_handleTabSelection);
+    // MqttWebClient().init();
 
 
   }
@@ -136,8 +137,9 @@ class _ConfigMakerScreenState extends State<ConfigMakerScreen> with SingleTicker
           ),
         );
       }else{
-        return  ConfigMakerForWeb(userID: widget.userID, customerID: widget.customerID, siteId: widget.siteID, deviceID: widget.imeiNumber,);
+        return  ConfigMakerForWeb(userID: widget.userID, customerID: widget.customerID, siteId: widget.siteID, imeiNo: widget.imeiNumber,);
       }
     },);
   }
 }
+

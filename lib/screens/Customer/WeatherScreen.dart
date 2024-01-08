@@ -75,12 +75,12 @@ class _WeatherScreenState extends State<WeatherScreen> {
                       runSpacing: 12,
                       children: [
                         //dew_point_2m hourly
-                        GestureDetector(
+                        InkWell(
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => WeatherReport(
+                                  builder: (context) => WeatherReportbar(
                                     tempdata: weatherData['hourly']
                                     ['temperature_2m'],
                                     timedata: weatherData['hourly']['time'],title: 'UV Reports',titletype: 'UV RADIATIONS ',
@@ -93,16 +93,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
                             'mW / m2'),
                         ),
                         GestureDetector(child: weather('Normal', 'MOISTURE', '140 ', 'kPA'),onTap: () {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //       builder: (context) => SFReport(
-                          //         tempdata: weatherData['hourly']
-                          //         ['rain'],
-                          //         timedata: weatherData['hourly']
-                          //         ['time'],title: 'SF REPORT',titletype: 'SF REPORT ',
-                          //       )),
-                          // );
                         },),
                         GestureDetector(
                             onTap: () {
@@ -121,12 +111,12 @@ class _WeatherScreenState extends State<WeatherScreen> {
                             },
                             child: weather(
                                 'To Heavy', 'RAIN RATE', '12 ', 'mm/hr')),
-                        GestureDetector(
+                        InkWell(
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => WeatherReport(
+                                  builder: (context) => WeatherReportbar(
                                     tempdata: weatherData['hourly']
                                     ['relative_humidity_2m'],
                                     timedata: weatherData['hourly']['time'],title: 'HUMIDITY REPORT',titletype: 'HUMIDITY ',
@@ -136,12 +126,12 @@ class _WeatherScreenState extends State<WeatherScreen> {
                           child: weather('Tropical wet and dry', 'HUMIDITY',
                               '70', '(g/m3)'),
                         ),
-                        GestureDetector(
+                        InkWell(
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => WeatherReport(
+                                  builder: (context) => WeatherReportbar(
                                     tempdata: weatherData['hourly']
                                     ['dew_point_2m'],
                                     timedata: weatherData['hourly']['time'],title: 'DEW POINT REPORT',titletype: 'DEW POINT ',
@@ -154,12 +144,12 @@ class _WeatherScreenState extends State<WeatherScreen> {
                               '${weatherData['hourly']['dew_point_2m'][0]}',
                               '°C'),
                         ),
-                        GestureDetector(
+                        InkWell(
                             onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => WeatherReport(
+                                    builder: (context) => WeatherReportbar(
                                       tempdata: weatherData['hourly']
                                       ['wind_speed_10m'],
                                       timedata: weatherData['hourly']
@@ -245,7 +235,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
   }
   Widget Temprature1() {
     return Container(
-      height:  MediaQuery.of(context).size.width * 0.3,
+      height:  MediaQuery.of(context).size.width * 0.35,
       width: 500,
       // decoration: BoxDecoration(
       //   color: Colors.transparent.withAlpha(90),
@@ -346,7 +336,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
   Widget weathermain() {
     DateTime currentDateTime = DateTime.now();
 
-    return GestureDetector(
+    return InkWell(
       onTap: () {
         showAlert(context);
         //   Navigator.push(
@@ -418,7 +408,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
             Navigator.of(context).pop();
           }, icon: Icon(Icons.close),color: Colors.red,),),
           actions: <Widget>[
-            Container(child: Temprature1(),decoration: BoxDecoration(color: Colors.blue.withOpacity(0.5),borderRadius: BorderRadius.all(Radius.circular(5)),)),
+            Container(child: Temprature1(),decoration: BoxDecoration(color: Colors.lightBlue,borderRadius: BorderRadius.all(Radius.circular(5)),)),
           ],
         );
       },

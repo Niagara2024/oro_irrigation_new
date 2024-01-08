@@ -1,72 +1,88 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../../../Models/Customer/program_queue_model.dart';
 import '../../../constants/http_service.dart';
 import '../../../state_management/program_queue_provider.dart';
+import '../../../widgets/SCustomWidgets/custom_snack_bar.dart';
 
 
 class ProgramQueueScreen extends StatefulWidget {
   final int userId;
-  final int controllerId;
+  final int controllerId, cutomerId;
 
-  const ProgramQueueScreen({Key? key, required this.userId, required this.controllerId}) : super(key: key);
+  const ProgramQueueScreen({Key? key, required this.userId, required this.controllerId, required this.cutomerId}) : super(key: key);
 
   @override
   _ProgramQueueScreenState createState() => _ProgramQueueScreenState();
 }
 
 class _ProgramQueueScreenState extends State<ProgramQueueScreen> {
-  final programQueueProvider = ProgramQueueProvider();
+  late ProgramQueueProvider programQueueProvider;
+  HttpService httpService = HttpService();
 
   @override
   void initState() {
     super.initState();
-    if(mounted){
+    programQueueProvider = Provider.of<ProgramQueueProvider>(context, listen: false);
+    if(mounted) {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        getUserProgramQueueData(widget.userId, widget.controllerId);
+        programQueueProvider.getUserProgramQueueData(widget.userId, widget.controllerId);
       });
-    }
-  }
-
-  Future<void> getUserProgramQueueData(userId, controllerId) async {
-    try {
-      HttpService httpService = HttpService();
-      var userData = {
-        "userId": userId,
-        "controllerId": controllerId,
-      };
-
-      var getUserProgramQueue = await httpService.postRequest("getUserProgramQueue", userData);
-
-      if (getUserProgramQueue.statusCode == 200) {
-        final responseJson = getUserProgramQueue.body;
-        final convertedJson = jsonDecode(responseJson);
-        setState(() {
-          programQueueProvider.updateData(convertedJson);
-
-        });
-      }
-    } catch (e) {
-      log('Error: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _buildBody(),
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          OutlinedButton(onPressed: (){}, child: const Text("REMOVE")),
-          const SizedBox(width: 20,),
-          OutlinedButton(onPressed: (){}, child: const Text("Move To High Priority")),
-          const SizedBox(width: 20,),
-        ],
-      ),
+    return Consumer<ProgramQueueProvider>(
+        builder: (context, programQueueProvider, _) {
+          return Scaffold(
+            body: _buildBody(),
+            floatingActionButton: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Visibility(
+                  visible: programQueueProvider.select || programQueueProvider.select2,
+                  child: OutlinedButton(
+                      onPressed: programQueueProvider.selectedIndexes1.isNotEmpty || programQueueProvider.selectedIndexes2.isNotEmpty ? (){
+                        programQueueProvider.updatePriority();
+                      } : null,
+                      child: Text(
+                        programQueueProvider.select ? "Move To Low Priority" : "Move To High Priority",
+                        style: TextStyle(color: programQueueProvider.selectedIndexes1.isNotEmpty || programQueueProvider.selectedIndexes2.isNotEmpty ? null : Colors.grey),
+                      )
+                  ),
+                ),
+                const SizedBox(width: 20,),
+                OutlinedButton(
+                    onPressed: () async{
+                      Map<String, dynamic> userData = {
+                        "userId": widget.cutomerId,
+                        "controllerId": widget.controllerId,
+                        "createUser": widget.userId
+                      };
+                      userData.addAll({
+                        "programQueue": programQueueProvider.programQueueResponse!.data.toJson()
+                      });
+                      try {
+                        final createUserProgramQueue = await httpService.postRequest('createUserProgramQueue', userData);
+                        final response = jsonDecode(createUserProgramQueue.body);
+                        if(createUserProgramQueue.statusCode == 200) {
+                          ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(message: response['message']));
+                        }
+                      } catch (error) {
+                        ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(message: 'Failed to update because of $error'));
+                        print("Error: $error");
+                      }
+                    },
+                    child: const Text("SEND")
+                ),
+                const SizedBox(width: 20,),
+              ],
+            ),
+          );
+        }
     );
   }
 
@@ -74,14 +90,18 @@ class _ProgramQueueScreenState extends State<ProgramQueueScreen> {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         return programQueueProvider.programQueueResponse?.data != null
-            ? Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              _buildColumn(context, programQueueProvider.programQueueResponse!.data.low, "NORMAL PRIORITY"),
-              _buildColumn(context, programQueueProvider.programQueueResponse!.data.high, "HIGH PRIORITY"),
-            ],
-          ),
+            ? Consumer<ProgramQueueProvider>(
+            builder: (context, programQueueProvider, _) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    _buildColumn(context, programQueueProvider.programQueueResponse!.data.low, "NORMAL PRIORITY"),
+                    _buildColumn(context, programQueueProvider.programQueueResponse!.data.high, "HIGH PRIORITY"),
+                  ],
+                ),
+              );
+            }
         )
             : const Center(child: CircularProgressIndicator());
       },
@@ -92,16 +112,54 @@ class _ProgramQueueScreenState extends State<ProgramQueueScreen> {
     return Expanded(
       child: Container(
         decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8)
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
         ),
         margin: const EdgeInsets.symmetric(horizontal: 10),
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Column(
           children: [
-            _buildCategory(context, priorityType),
+            priorityType == "HIGH PRIORITY"
+                ? _buildCategory(
+                context,
+                priorityType,
+                programQueueProvider,
+                    () {
+                  programQueueProvider.updateSelection();
+                  if(!programQueueProvider.select) {
+                    programQueueProvider.selectedIndexes1.clear();
+                    programQueueProvider.selectAll = false;
+                  }
+                },
+                programQueueProvider.select,
+                    () {
+                  programQueueProvider.updateSelectAll();
+                  programQueueProvider.toggleSelectAll(programQueueProvider.programQueueResponse!.data.high.length);
+                },
+                programQueueProvider.selectAll,
+                programQueueProvider.programQueueResponse!.data.high.isEmpty || programQueueProvider.select2 ? true : false
+            )
+                : _buildCategory(
+                context,
+                priorityType,
+                programQueueProvider,
+                    () {
+                  programQueueProvider.updateSelection2();
+                  if(!programQueueProvider.select2) {
+                    programQueueProvider.selectedIndexes2.clear();
+                    programQueueProvider.selectAll2 = false;
+                  }
+                },
+                programQueueProvider.select2,
+                    () {
+                  programQueueProvider.updateSelectAll2();
+                  programQueueProvider.toggleSelectAll2(programQueueProvider.programQueueResponse!.data.low.length);
+                },
+                programQueueProvider.selectAll2,
+                programQueueProvider.programQueueResponse!.data.low.isEmpty || programQueueProvider.select ? true : false
+            ),
             _buildHeaderRow(context),
-            _buildProgramList(context, programs),
+            _buildProgramList(context, programs, programQueueProvider, priorityType),
           ],
         ),
       ),
@@ -145,7 +203,7 @@ class _ProgramQueueScreenState extends State<ProgramQueueScreen> {
     );
   }
 
-  Widget _buildCategory(BuildContext context, String text) {
+  Widget _buildCategory(BuildContext context, String text, programQueueProvider, VoidCallback onPressed, bool visible, VoidCallback onPressed2, allSelection, ignoring) {
     return Container(
       padding: const EdgeInsets.all(10),
       child: Row(
@@ -155,50 +213,82 @@ class _ProgramQueueScreenState extends State<ProgramQueueScreen> {
             text,
             style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 18),
           ),
-          OutlinedButton(onPressed: (){}, child: const Text("REMOVE ALL"))
+          // OutlinedButton(onPressed: (){}, child: const Text("REMOVE ALL")),
+          OutlinedButton(
+            onPressed: ignoring ? null : onPressed,
+            child: Text(visible ? "CANCEL" : "SELECT",
+              style: TextStyle(color: visible ? Colors.red : ignoring ? Colors.grey : null),),
+          ),
+          visible ? OutlinedButton(
+            onPressed: onPressed2,
+            child: Text(allSelection ? "UNSELECT ALL" : "SELECT ALL", style: TextStyle(color: allSelection ? Colors.red : null),),
+          ) : Container()
         ],
       ),
     );
   }
 
-  Widget _buildProgramList(BuildContext context, programs) {
+  Widget _buildProgramList(BuildContext context, programs, programQueueProvider, priorityType) {
     return Expanded(
       child: ListView.builder(
         itemCount: programs.length,
         itemBuilder: (context, index) {
           final program = programs[index];
-          return InkWell(
-            onTap: (){
-
-            },
-            child: Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)
+          return Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              // side: index == programQueueProvider.selectedIndex ? BorderSide(color: Theme.of(context).primaryColor) : BorderSide.none
+            ),
+            elevation: priorityType == "HIGH PRIORITY"
+                ? programQueueProvider.selectedIndexes1.contains(index) ? 10 : 3
+                : programQueueProvider.selectedIndexes2.contains(index) ? 10 : 3,
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
               ),
-              // surfaceTintColor: Colors.white.withOpacity(0.1),
-              child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  // border: Border.all(color: Theme.of(context).primaryColor),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildProgramInfo(context, CircleAvatar(backgroundColor: Theme.of(context).colorScheme.secondary,child: Text('${program.programQueueId}', style: const TextStyle(color: Colors.black),),)),
-                    _buildProgramInfo(context, '${program.programName}'),
-                    _buildProgramInfo(context, '${program.startTime}'),
-                    // _buildProgramInfo(
-                    //   context,
-                    //   CustomNativeTimePicker(
-                    //     initialValue: program.startTime,
-                    //     onChanged: (newTime) {},
-                    //     is24HourMode: true,
-                    //   ),
-                    // ),
-                  ],
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildProgramInfo(
+                    context,
+                    CircleAvatar(
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      child: Text(
+                        '${program.programQueueId}',
+                        style: const TextStyle(color: Colors.black),
+                      ),
+                    ),
+                  ),
+                  _buildProgramInfo(context, '${program.programName}'),
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildProgramInfo(context, '${program.startTime}'),
+                        Visibility(
+                            visible: priorityType == "HIGH PRIORITY"
+                                ? programQueueProvider.select : programQueueProvider.select2,
+                            child: Checkbox(
+                                value: priorityType == "HIGH PRIORITY" ? programQueueProvider.selectedIndexes1.contains(index) : programQueueProvider.selectedIndexes2.contains(index),
+                                onChanged: (newValue){
+                                  priorityType == "HIGH PRIORITY" ? programQueueProvider.toggleSelectIndex(index) : programQueueProvider.toggleSelectIndex2(index);
+                                }
+                            )
+                        )
+                      ],
+                    ),
+                  )
+                  // _buildProgramInfo(
+                  //   context,
+                  //   CustomNativeTimePicker(
+                  //     initialValue: program.startTime,
+                  //     onChanged: (newTime) {},
+                  //     is24HourMode: true,
+                  //   ),
+                  // ),
+                ],
               ),
             ),
           );
@@ -215,4 +305,3 @@ class _ProgramQueueScreenState extends State<ProgramQueueScreen> {
     );
   }
 }
-

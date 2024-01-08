@@ -98,7 +98,7 @@ class LocalFiltrationTableState extends State<LocalFiltrationTable> {
                               decoration: BoxDecoration(
                                   border: Border(left: BorderSide(width: 1),right: BorderSide(width: 1))
                               ),
-                              height: 50,
+                             height: 50,
                               child: Center(
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -121,7 +121,7 @@ class LocalFiltrationTableState extends State<LocalFiltrationTable> {
                                     border: Border(right: BorderSide(width: 1))
                                 ),
                                 width: double.infinity,
-                                height: 50,
+                               height: 50,
                                 child: Center(
                                   child: TextFieldForConfig(index: index, initialValue: configPvd.localFiltrationUpdated[index]['filter'], config: configPvd, purpose: 'localFiltrationFunctionality',),
                                 )
@@ -133,7 +133,7 @@ class LocalFiltrationTableState extends State<LocalFiltrationTable> {
                                   border: Border(right: BorderSide(width: 1))
                               ),
                               width: double.infinity,
-                              height: 50,
+                             height: 50,
                               child: (configPvd.total_D_s_valve == 0 && configPvd.localFiltrationUpdated[index]['dv'].isEmpty) ?
                               notAvailable :
                               Checkbox(
@@ -149,7 +149,7 @@ class LocalFiltrationTableState extends State<LocalFiltrationTable> {
                                   border: Border(right: BorderSide(width: 1))
                               ),
                               width: double.infinity,
-                              height: 50,
+                             height: 50,
                               child: (configPvd.total_p_sensor == 0 && configPvd.localFiltrationUpdated[index]['pressureIn'].isEmpty) ?
                               notAvailable :
                               Checkbox(
@@ -165,7 +165,7 @@ class LocalFiltrationTableState extends State<LocalFiltrationTable> {
                                   border: Border(right: BorderSide(width: 1))
                               ),
                               width: double.infinity,
-                              height: 50,
+                             height: 50,
                               child: (configPvd.total_p_sensor == 0 && configPvd.localFiltrationUpdated[index]['pressureOut'].isEmpty) ?
                               notAvailable :
                               Checkbox(

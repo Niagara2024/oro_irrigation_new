@@ -214,13 +214,13 @@ class _IrrigationLineTableState extends State<IrrigationLineTable> {
                                 fixTopBtmRgt('P.Sensor','Out(${configPvd.total_p_sensor})'),
                                 fixTopBtmRgt('Irr.','Pump'),
                                 fixTopBtmRgt('Water','Meter(${configPvd.totalWaterMeter})'),
-                                fixTopBtmRgt('ORO Smart','(${configPvd.totalOroSmartRTU})'),
-                                fixTopBtmRgt('ORO Smart','Plus(${configPvd.totalOroSmartRtuPlus})'),
-                                fixTopBtmRgt('RTU','(${configPvd.totalRTU})'),
-                                fixTopBtmRgt('RTU_Plus','(${configPvd.totalRtuPlus})'),
-                                fixTopBtmRgt('ORO','Switch(${configPvd.totalOroSwitch})'),
-                                fixTopBtmRgt('ORO','Sense(${configPvd.totalOroSense})'),
-                                fixTopBtmRgt('ORO','Level(${configPvd.totalOroLevel})'),
+                                // fixTopBtmRgt('ORO Smart','(${configPvd.totalOroSmartRTU})'),
+                                // fixTopBtmRgt('ORO Smart','Plus(${configPvd.totalOroSmartRtuPlus})'),
+                                // fixTopBtmRgt('RTU','(${configPvd.totalRTU})'),
+                                // fixTopBtmRgt('RTU_Plus','(${configPvd.totalRtuPlus})'),
+                                // fixTopBtmRgt('ORO','Switch(${configPvd.totalOroSwitch})'),
+                                // fixTopBtmRgt('ORO','Sense(${configPvd.totalOroSense})'),
+                                // fixTopBtmRgt('ORO','Level(${configPvd.totalOroLevel})'),
                               ],
                             ),
                           ),
@@ -457,132 +457,132 @@ class _IrrigationLineTableState extends State<IrrigationLineTable> {
                                                         configPvd.irrigationLinesFunctionality(['editWaterMeter',i,value]);
                                                       }),
                                                 ),
-                                                configPvd.totalOroSmartRTU == 0 && configPvd.irrigationLines[i]['ORO_Smart_RTU'] == '' ?
-                                                Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border(right: BorderSide(width: 1)),
-                                                  ),
-                                                  padding: EdgeInsets.all(5),
-                                                  width: 80,
-                                                  height: 50,
-                                                  child: notAvailable,
-                                                ) : Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border(right: BorderSide(width: 1)),
-                                                  ),
-                                                  padding: EdgeInsets.symmetric(horizontal: 5),
-                                                  width: 80,
-                                                  height: 50,
-                                                  child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['ORO_Smart_RTU']}', config: configPvd, purpose: 'irrigationLinesFunctionality/OroSmartRtu',)),
-                                                ),
-                                                configPvd.totalOroSmartRtuPlus == 0 && configPvd.irrigationLines[i]['ORO_Smart_RTU_Plus'] == '' ?
-                                                Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border(right: BorderSide(width: 1)),
-                                                  ),
-                                                  padding: EdgeInsets.all(5),
-                                                  width: 80,
-                                                  height: 50,
-                                                  child: notAvailable,
-                                                ) : Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border(right: BorderSide(width: 1)),
-                                                  ),
-                                                  padding: EdgeInsets.symmetric(horizontal: 5),
-                                                  width: 80,
-                                                  height: 50,
-                                                  child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['ORO_Smart_RTU_Plus']}', config: configPvd, purpose: 'irrigationLinesFunctionality/OroSmartRtuPlus',)),
-                                                ),
-                                                configPvd.totalRTU == 0 && configPvd.irrigationLines[i]['RTU'] == '' ?
-                                                Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border(right: BorderSide(width: 1)),
-                                                  ),
-                                                  padding: EdgeInsets.all(5),
-                                                  width: 80,
-                                                  height: 50,
-                                                  child: notAvailable,
-                                                ) : Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border(right: BorderSide(width: 1)),
-                                                  ),
-                                                  padding: EdgeInsets.all(5),
-                                                  width: 80,
-                                                  height: 50,
-                                                  child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['RTU']}', config: configPvd, purpose: 'irrigationLinesFunctionality/RTU',)),
-                                                ),
-                                                configPvd.totalRtuPlus == 0 && configPvd.irrigationLines[i]['RTU_Plus'] == '' ?
-                                                Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border(right: BorderSide(width: 1)),
-                                                  ),
-                                                  padding: EdgeInsets.all(5),
-                                                  width: 80,
-                                                  height: 50,
-                                                  child: notAvailable,
-                                                ) : Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border(right: BorderSide(width: 1)),
-                                                  ),
-                                                  padding: EdgeInsets.all(5),
-                                                  width: 80,
-                                                  height: 50,
-                                                  child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['RTU_Plus']}', config: configPvd, purpose: 'irrigationLinesFunctionality/RTU_Plus',)),
-                                                ),
-                                                configPvd.totalOroSwitch == 0 && configPvd.irrigationLines[i]['ORO_switch'] == '' ?
-                                                Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border(right: BorderSide(width: 1)),
-                                                  ),
-                                                  padding: EdgeInsets.all(5),
-                                                  width: 80,
-                                                  height: 50,
-                                                  child: notAvailable,
-                                                ) : Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border(right: BorderSide(width: 1)),
-                                                  ),
-                                                  padding: EdgeInsets.all(5),
-                                                  width: 80,
-                                                  height: 50,
-                                                  child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['ORO_switch']}', config: configPvd, purpose: 'irrigationLinesFunctionality/0roSwitch',)),
-                                                ),
-                                                configPvd.totalOroSense == 0 && configPvd.irrigationLines[i]['ORO_sense'] == '' ?
-                                                Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border(right: BorderSide(width: 1)),
-                                                  ),
-                                                  padding: EdgeInsets.all(5),
-                                                  width: 80,
-                                                  height: 50,
-                                                  child: notAvailable,
-                                                ) : Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border(right: BorderSide(width: 1)),
-                                                  ),
-                                                  padding: EdgeInsets.symmetric(horizontal: 5),
-                                                  width: 80,
-                                                  height: 50,
-                                                  child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['ORO_sense']}', config: configPvd, purpose: 'irrigationLinesFunctionality/0roSense',)),
-                                                ),
-                                                configPvd.totalOroLevel == 0 && configPvd.irrigationLines[i]['ORO_level'] == '' ?
-                                                Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border(right: BorderSide(width: 1)),
-                                                  ),
-                                                  padding: EdgeInsets.all(5),
-                                                  width: 80,
-                                                  height: 50,
-                                                  child: notAvailable,
-                                                ) : Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border(right: BorderSide(width: 1)),
-                                                  ),
-                                                  padding: EdgeInsets.symmetric(horizontal: 5),
-                                                  width: 80,
-                                                  height: 50,
-                                                  child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['ORO_level']}', config: configPvd, purpose: 'irrigationLinesFunctionality/0roLevel',)),
-                                                ),
+                                                // configPvd.totalOroSmartRTU == 0 && configPvd.irrigationLines[i]['ORO_Smart_RTU'] == '' ?
+                                                // Container(
+                                                //   decoration: BoxDecoration(
+                                                //     border: Border(right: BorderSide(width: 1)),
+                                                //   ),
+                                                //   padding: EdgeInsets.all(5),
+                                                //   width: 80,
+                                                //   height: 50,
+                                                //   child: notAvailable,
+                                                // ) : Container(
+                                                //   decoration: BoxDecoration(
+                                                //     border: Border(right: BorderSide(width: 1)),
+                                                //   ),
+                                                //   padding: EdgeInsets.symmetric(horizontal: 5),
+                                                //   width: 80,
+                                                //   height: 50,
+                                                //   child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['ORO_Smart_RTU']}', config: configPvd, purpose: 'irrigationLinesFunctionality/OroSmartRtu',)),
+                                                // ),
+                                                // configPvd.totalOroSmartRtuPlus == 0 && configPvd.irrigationLines[i]['ORO_Smart_RTU_Plus'] == '' ?
+                                                // Container(
+                                                //   decoration: BoxDecoration(
+                                                //     border: Border(right: BorderSide(width: 1)),
+                                                //   ),
+                                                //   padding: EdgeInsets.all(5),
+                                                //   width: 80,
+                                                //   height: 50,
+                                                //   child: notAvailable,
+                                                // ) : Container(
+                                                //   decoration: BoxDecoration(
+                                                //     border: Border(right: BorderSide(width: 1)),
+                                                //   ),
+                                                //   padding: EdgeInsets.symmetric(horizontal: 5),
+                                                //   width: 80,
+                                                //   height: 50,
+                                                //   child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['ORO_Smart_RTU_Plus']}', config: configPvd, purpose: 'irrigationLinesFunctionality/OroSmartRtuPlus',)),
+                                                // ),
+                                                // configPvd.totalRTU == 0 && configPvd.irrigationLines[i]['RTU'] == '' ?
+                                                // Container(
+                                                //   decoration: BoxDecoration(
+                                                //     border: Border(right: BorderSide(width: 1)),
+                                                //   ),
+                                                //   padding: EdgeInsets.all(5),
+                                                //   width: 80,
+                                                //   height: 50,
+                                                //   child: notAvailable,
+                                                // ) : Container(
+                                                //   decoration: BoxDecoration(
+                                                //     border: Border(right: BorderSide(width: 1)),
+                                                //   ),
+                                                //   padding: EdgeInsets.all(5),
+                                                //   width: 80,
+                                                //   height: 50,
+                                                //   child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['RTU']}', config: configPvd, purpose: 'irrigationLinesFunctionality/RTU',)),
+                                                // ),
+                                                // configPvd.totalRtuPlus == 0 && configPvd.irrigationLines[i]['RTU_Plus'] == '' ?
+                                                // Container(
+                                                //   decoration: BoxDecoration(
+                                                //     border: Border(right: BorderSide(width: 1)),
+                                                //   ),
+                                                //   padding: EdgeInsets.all(5),
+                                                //   width: 80,
+                                                //   height: 50,
+                                                //   child: notAvailable,
+                                                // ) : Container(
+                                                //   decoration: BoxDecoration(
+                                                //     border: Border(right: BorderSide(width: 1)),
+                                                //   ),
+                                                //   padding: EdgeInsets.all(5),
+                                                //   width: 80,
+                                                //   height: 50,
+                                                //   child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['RTU_Plus']}', config: configPvd, purpose: 'irrigationLinesFunctionality/RTU_Plus',)),
+                                                // ),
+                                                // configPvd.totalOroSwitch == 0 && configPvd.irrigationLines[i]['ORO_switch'] == '' ?
+                                                // Container(
+                                                //   decoration: BoxDecoration(
+                                                //     border: Border(right: BorderSide(width: 1)),
+                                                //   ),
+                                                //   padding: EdgeInsets.all(5),
+                                                //   width: 80,
+                                                //   height: 50,
+                                                //   child: notAvailable,
+                                                // ) : Container(
+                                                //   decoration: BoxDecoration(
+                                                //     border: Border(right: BorderSide(width: 1)),
+                                                //   ),
+                                                //   padding: EdgeInsets.all(5),
+                                                //   width: 80,
+                                                //   height: 50,
+                                                //   child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['ORO_switch']}', config: configPvd, purpose: 'irrigationLinesFunctionality/0roSwitch',)),
+                                                // ),
+                                                // configPvd.totalOroSense == 0 && configPvd.irrigationLines[i]['ORO_sense'] == '' ?
+                                                // Container(
+                                                //   decoration: BoxDecoration(
+                                                //     border: Border(right: BorderSide(width: 1)),
+                                                //   ),
+                                                //   padding: EdgeInsets.all(5),
+                                                //   width: 80,
+                                                //   height: 50,
+                                                //   child: notAvailable,
+                                                // ) : Container(
+                                                //   decoration: BoxDecoration(
+                                                //     border: Border(right: BorderSide(width: 1)),
+                                                //   ),
+                                                //   padding: EdgeInsets.symmetric(horizontal: 5),
+                                                //   width: 80,
+                                                //   height: 50,
+                                                //   child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['ORO_sense']}', config: configPvd, purpose: 'irrigationLinesFunctionality/0roSense',)),
+                                                // ),
+                                                // configPvd.totalOroLevel == 0 && configPvd.irrigationLines[i]['ORO_level'] == '' ?
+                                                // Container(
+                                                //   decoration: BoxDecoration(
+                                                //     border: Border(right: BorderSide(width: 1)),
+                                                //   ),
+                                                //   padding: EdgeInsets.all(5),
+                                                //   width: 80,
+                                                //   height: 50,
+                                                //   child: notAvailable,
+                                                // ) : Container(
+                                                //   decoration: BoxDecoration(
+                                                //     border: Border(right: BorderSide(width: 1)),
+                                                //   ),
+                                                //   padding: EdgeInsets.symmetric(horizontal: 5),
+                                                //   width: 80,
+                                                //   height: 50,
+                                                //   child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['ORO_level']}', config: configPvd, purpose: 'irrigationLinesFunctionality/0roLevel',)),
+                                                // ),
                                               ],
                                             ),
                                           ),

@@ -19,9 +19,9 @@ import 'mapping_of_inputs.dart';
 import 'mapping_of_outputs.dart';
 
 class ConfigMakerForWeb extends StatefulWidget {
-  const ConfigMakerForWeb({super.key, required this.userID, required this.customerID, required this.siteId, required this.deviceID});
+  const ConfigMakerForWeb({super.key, required this.userID, required this.customerID, required this.siteId, required this.imeiNo});
   final int userID, siteId, customerID;
-  final String deviceID;
+  final String imeiNo;
 
   @override
   State<ConfigMakerForWeb> createState() => _ConfigMakerForWebState();
@@ -67,8 +67,7 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
         return  MappingOfInputsTable(configPvd: configPvd,);
       }
       case (11):{
-        print(widget.deviceID);
-        return  FinishPageConfigMaker(userId: widget.userID, customerID: widget.customerID, controllerId: widget.siteId, deviceUDID: widget.deviceID);
+        return  FinishPageConfigMaker(userId: widget.userID, customerID: widget.customerID, controllerId: widget.siteId,imeiNo: widget.imeiNo,);
       }
       default : {
         Container();
@@ -144,43 +143,43 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
                           Column(
                             children: [
                               InkWell(
-                                  onTap: (){
+                                onTap: (){
+                                  setState(() {
+                                    configPvd.selectedTab = i;
+                                  });
+                                  configPvd.editSelectedTab(configPvd.selectedTab);
+                                  if(configPvd.selectedTab != 5){
+                                    // configPvd.editLoadIL(false);
+                                  }
+                                },
+                                onHover: (value){
+                                  if(value == true){
                                     setState(() {
-                                      configPvd.selectedTab = i;
+                                      hoverTab = i;
                                     });
-                                    configPvd.editSelectedTab(configPvd.selectedTab);
-                                    if(configPvd.selectedTab != 5){
-                                      // configPvd.editLoadIL(false);
-                                    }
-                                  },
-                                  onHover: (value){
-                                    if(value == true){
-                                      setState(() {
-                                        hoverTab = i;
-                                      });
-                                    }else{
-                                      setState(() {
-                                        hoverTab = -1;
-                                      });
-                                    }
-                                  },
-                                  child: Container(
-                                    height: 45,
-                                    decoration: BoxDecoration(
-                                      color: hoverTab == i ||configPvd.selectedTab == i ? myTheme.primaryColor : null,
-                                    ),
-                                    // padding: EdgeInsets.all(10),
-                                    margin: EdgeInsets.symmetric(vertical: 2),
-                                    width: double.infinity,
-                                    child: Row(
-                                        children: [
-                                          SizedBox(width: 20,),
-                                          Icon(configPvd.tabs[i][2],color: hoverTab == i ? Colors.white : configPvd.selectedTab == i ? Colors.white : Colors.black87,),
-                                          SizedBox(width: 20,),
-                                          Text('${configPvd.tabs[i][0]} ${configPvd.tabs[i][1]}',style: TextStyle(color: hoverTab == i ? Colors.white : configPvd.selectedTab == i ? Colors.white : Colors.black87,fontWeight: FontWeight.bold),)
-                                        ]
-                                    ),
-                                  )
+                                  }else{
+                                    setState(() {
+                                      hoverTab = -1;
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  height: 45,
+                                  decoration: BoxDecoration(
+                                    color: hoverTab == i ||configPvd.selectedTab == i ? myTheme.primaryColor : null,
+                                  ),
+                                  // padding: EdgeInsets.all(10),
+                                  margin: EdgeInsets.symmetric(vertical: 2),
+                                  width: double.infinity,
+                                  child: Row(
+                                      children: [
+                                        SizedBox(width: 20,),
+                                        Icon(configPvd.tabs[i][2],color: hoverTab == i ? Colors.white : configPvd.selectedTab == i ? Colors.white : Colors.black87,),
+                                        SizedBox(width: 20,),
+                                        Text('${configPvd.tabs[i][0]} ${configPvd.tabs[i][1]}',style: TextStyle(color: hoverTab == i ? Colors.white : configPvd.selectedTab == i ? Colors.white : Colors.black87,fontWeight: FontWeight.bold),)
+                                      ]
+                                  ),
+                                )
                               ),
                             ],
                           ),

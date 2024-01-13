@@ -240,9 +240,11 @@ class _ProductLimitsState extends State<ProductLimits> {
     {
       productLimits.clear();
       var data = jsonDecode(response.body);
+
       if(data["code"]==200)
       {
         final cntList = data["data"] as List;
+        //print(cntList);
         myControllers = [];
         for (int i=0; i < cntList.length; i++) {
           productLimits.add(MdlProductLimit.fromJson(cntList[i]));
@@ -565,7 +567,6 @@ class _ProductLimitsState extends State<ProductLimits> {
                                                     } else {
                                                       filledRelayCount = myControllers.fold<int>(0,(sum, controller) => sum + (int.tryParse(controller.text) ?? 0),);
                                                     }
-
                                                   });
                                                 },
                                               ),

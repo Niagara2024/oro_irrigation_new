@@ -31,9 +31,9 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
       child: Center(
         child: InkWell(
           onTap: ()async{
-            //print('userId : ${widget.customerID}');
-            //print('createUser : ${widget.customerID}');
-            //print('controllerId : ${widget.controllerId}');
+            print('userId : ${widget.customerID}');
+            print('createUser : ${widget.customerID}');
+            print('controllerId : ${widget.controllerId}');
             showDialog(context: context, builder: (context){
               return Consumer<ConfigMakerProvider>(builder: (context,configPvd,child){
                 return AlertDialog(
@@ -147,6 +147,7 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
                                 'irrigation_pump_list' : configPvd.irrigation_pump_list,
                                 'water_source_list' : configPvd.water_source_list,
                                 'I_O_autoIncrement' : configPvd.I_O_autoIncrement,
+                                'oldData' : configPvd.serverData['productLimit'],
                               },
                               "sourcePump" : configPvd.sourcePumpUpdated,
                               "irrigationPump" : configPvd.irrigationPumpUpdated,
@@ -162,7 +163,7 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
                               'names' : configPvd.configFinish(),
                               'isNewConfig' : configPvd.isNew == true ? '1' : '0',
                             };
-                            //print('response body : $body');
+                           // print('response body : $body');
                             HttpService service = HttpService();
                             var response = await service.postRequest('createUserConfigMaker', body);
                             // print(configPvd.sendData());
@@ -173,7 +174,7 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
                             //print('AppToFirmware/${widget.imeiNo}');
                             MQTTManager().publish(convert.jsonEncode(configPvd.sendData()),'AppToFirmware/${widget.imeiNo}');
                             // MqttWebClient().publishMessage('AppToFirmware/${widget.imeiNo}', convert.jsonEncode(configPvd.sendData()));
-                            if(jsonData['code'] == 200){
+                            if(jsonData['code']  == 200){
                               Future.delayed(Duration(seconds: 1), () {
                                 configPvd.editWantToSendData(2);
                               });
@@ -183,6 +184,9 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
                             }
                           }catch(e){
                             print(e.toString());
+                            Future.delayed(Duration(seconds: 1), () {
+                              configPvd.editWantToSendData(3);
+                            });
                           }
                           CreateJsonFile store = CreateJsonFile();
                           // store.writeDataInJsonFile('configFile', configPvd.sendData());

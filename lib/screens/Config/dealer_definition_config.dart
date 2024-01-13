@@ -115,11 +115,15 @@ class DealerDefinitionInConfigState extends State<DealerDefinitionInConfig> {
                     });
                     MQTTManager().publish(
                         payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
-                    final sendData = jsonEncode(data.dealerDefinition);
+
+                    Map<String, dynamic> dealerDefinitionJson = {};
+                    data.dealerDefinition.forEach((key, value) {
+                      dealerDefinitionJson[key] = value.map((item) => item.toJson()).toList();
+                    });
                     Map<String, Object> body = {
                       "userId": widget.customerId,
                       "controllerId": widget.controllerId,
-                      "dealerDefinition": sendData,
+                      "dealerDefinition": dealerDefinitionJson,
                       "createUser": widget.userId
                     };
                     final response = await HttpService()

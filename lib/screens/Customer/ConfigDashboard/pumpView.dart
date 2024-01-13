@@ -190,7 +190,8 @@ class _PumpViewState extends State<PumpView> {
                             if(widget.sourcePump[index]['waterMeter'] != null)
                               if(widget.sourcePump[index]['waterMeter'].isNotEmpty)
                                 if(widget.sourcePump[index]['visible'])
-                                  object('waterMeter',false,widget.sourcePump[index]['waterMeter'],Colors.purple.shade50)
+                                  object('waterMeter',false,widget.sourcePump[index]['waterMeter'],Colors.purple.shade50),
+                            SizedBox(height: 40,)
                           ],
                         ),
                       );
@@ -260,7 +261,8 @@ Widget connectionName(data,Color color){
             color: Colors.black87,
           ),
         ),
-        Text(data,style: TextStyle(color: Colors.black87,fontWeight: FontWeight.w100,fontSize: 13))
+        SizedBox(width: 10,),
+        Expanded(child: Text(data,style: TextStyle(color: Colors.black87,fontWeight: FontWeight.w100,fontSize: 13), overflow: TextOverflow.ellipsis,))
       ],
     ),
   );

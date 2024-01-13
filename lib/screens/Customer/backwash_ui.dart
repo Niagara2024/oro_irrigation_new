@@ -71,7 +71,10 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
 
   @override
   Widget build(BuildContext context) {
-    if (_filterbackwash.data == null) {
+    if (_filterbackwash.code != 200) {
+      return Center(child: Text( _filterbackwash.message ?? 'Currently No Filter Available'));
+    }
+    else if (_filterbackwash.data == null) {
       return const Center(child: CircularProgressIndicator());
     } else if (_filterbackwash.data!.isEmpty) {
       return const Center(child: Text('Currently No Filter Available'));
@@ -150,12 +153,13 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
         children: [
           Expanded(
             child: ListView.builder(
+
               itemCount: Listofvalue?.length ?? 0,
               itemBuilder: (context, index) {
                 if (Listofvalue?[index].widgetTypeId == 1) {
                   return Column(
                     children: [
-                      Card(
+                      Card( color: index % 2 == 0 ?  primaryColorMedium : Colors.white,
                         child: ListTile(
                           title: Text('${Listofvalue?[index].title}',style:  TextStyle(
                             fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
@@ -193,7 +197,7 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
                 } else if (Listofvalue?[index].widgetTypeId == 2) {
                   return Column(
                     children: [
-                      Card(
+                      Card( color: index % 2 == 0 ?  primaryColorMedium : Colors.white,
                         child: ListTile(
                           title: Text('${Listofvalue?[index].title}',style:  TextStyle(
                             fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
@@ -227,7 +231,7 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
                   return Column(
                     children: [
                       Container(
-                        child: Card(
+                        child: Card( color: index % 2 == 0 ?  primaryColorMedium : Colors.white,
                           child: ListTile(
                             title: Text('${Listofvalue?[index].title}',style:  TextStyle(
                               fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
@@ -264,7 +268,7 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
                     Listofvalue?[index].title != "FLUSHING TIME") {
                   return Column(
                     children: [
-                      Card(
+                      Card( color: index % 2 == 0 ?  primaryColorMedium : Colors.white,
                         child: ListTile(
                           title: Text('${Listofvalue?[index].title}',style:  TextStyle(
                             fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
@@ -308,7 +312,7 @@ class _FilterBackwashUIState extends State<FilterBackwashUI>
                             itemBuilder: (context, flusingindex) {
                               return Column(
                                 children: [
-                                  Card(
+                                  Card( color: index % 2 == 0 ? primaryColorMedium : Colors.white,
                                     child: ListTile(
                                       title: Text(
                                         '${Listofvalue?[index].value[flusingindex]['name']}',style:  TextStyle(

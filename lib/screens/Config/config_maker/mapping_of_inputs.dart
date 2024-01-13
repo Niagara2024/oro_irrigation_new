@@ -135,6 +135,19 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
                       ),
                     ),
                   ),
+                  Container(
+                    width: 40,
+                    height: 60,
+                    child: Center(),
+                    decoration: BoxDecoration(
+                        color: Colors.blueGrey,
+                        border: Border(
+                          top: BorderSide(width: 1),
+                          bottom: BorderSide(width: 1),
+                          right: BorderSide(width: 1),
+                        )
+                    ),
+                  ),
 
                 ],
               ),
@@ -253,7 +266,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
                             ),
                             height: 40,
                             child: Center(
-                                child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: configPvd.irrigationLines[myList[i]['map'][j]['line']]['myRTU_list'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                                child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
                             ),
                           )
                       ),
@@ -1097,8 +1110,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
     return myList;
   }
   List<String> getrefNo(int line,ConfigMakerProvider configPvd,String title){
-    print('line : $line');
-    print(title);
     List<String> myList = ['-'];
     if(title == 'ORO Smart'){
       for(var i in configPvd.irrigationLines[line]['myOroSmartRtu']){
@@ -1129,16 +1140,12 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
         myList.add('${i}');
       }
     }
-    print('myList : ${myList}');
     return myList;
   }
   List<String> filterInPut(List<dynamic> data,String rtu,String rf,String input){
     List<String> list = [];
     for(var i in data){
-      print('data : $data');
-      print(rtu);
-      print(rf);
-      print(input);
+
       if((i['rtu'] == rtu) && (i['rfNo'] == rf)){
         if(i['input'] != '-' && input != i['input']){
           list.add(i['input']);
@@ -1148,7 +1155,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
     return list;
   }
   List<String> getInPutForct(ConfigMakerProvider configPvd,String rtu, String rf, String input,int index ,String connection) {
-    print('connection : ${connection}');
     List<String> myList = ['-','1','2','3',];
     for(var i in configPvd.sourcePumpUpdated){
       if(i['c1'] != null){
@@ -1223,7 +1229,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
     return rf == '-' ? ['-'] : myList;
   }
   List<String> getInPut(ConfigMakerProvider configPvd,String rtu, String rf, String input,int index) {
-    print('getInPut function');
     List<String> myList = [];
     List<String> filterList = [];
     if(rtu == 'ORO RTU'){
@@ -1251,7 +1256,7 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
         myList.add('${i+1}');
       }
     }else if(rtu == 'ORO Smart'){
-      for(var i = 0;i < 16;i++){
+      for(var i = 0;i < 8;i++){
         myList.add('${i+1}');
       }
     }else if(rtu == 'O-Smart-Plus'){
@@ -1379,14 +1384,12 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
 
       }
     }
-    print('filter : ${filterList}');
     for(var i in filterList){
       if(myList.contains(i)){
         myList.remove(i);
       }
     }
     myList.insert(0, '-');
-    print('muList : ${myList}');
     return rf == '-' ? ['-'] : myList;
   }
   List<Map<String,dynamic>> irrigationLine(ConfigMakerProvider configPvd){
@@ -1638,7 +1641,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
           }
         }
       }
-      print('mylist : ${jsonEncode(myList)}');
     }
     return myList;
   }
@@ -1852,7 +1854,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
       }
       if(configPvd.sourcePumpUpdated[i]['TopTankHigh'] != null){
         if(configPvd.sourcePumpUpdated[i]['TopTankHigh'].isNotEmpty){
-          print('it is not empty');
           myList[i]['map'].add(
               {
                 'oroPump' : (configPvd.sourcePumpUpdated[i]['oro_pump'] == true || configPvd.sourcePumpUpdated[i]['oro_pump_plus'] == true) ? true : false,
@@ -2013,7 +2014,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
       }
 
     }
-    print('see : ${myList}');
     return myList;
   }
   List<Map<String,dynamic>> irrigationPump(ConfigMakerProvider configPvd){
@@ -2205,7 +2205,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
       }
 
     }
-    print('myLIST : $myList');
     return myList;
   }
   List<Map<String,dynamic>> analogSensor(ConfigMakerProvider configPvd){
@@ -2234,7 +2233,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
 
 
     }
-    print('myLIST : $myList');
     return myList;
   }
   List<Map<String,dynamic>> contact(ConfigMakerProvider configPvd){
@@ -2261,7 +2259,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
           }
       );
     }
-    print('myLIST : $myList');
     return myList;
   }
   List<Map<String,dynamic>> temperature(ConfigMakerProvider configPvd){
@@ -2288,7 +2285,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
           }
       );
     }
-    print('myLIST : $myList');
     return myList;
   }
   List<Map<String,dynamic>> soilTemperature(ConfigMakerProvider configPvd){
@@ -2315,7 +2311,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
           }
       );
     }
-    print('myLIST : $myList');
     return myList;
   }
   List<Map<String,dynamic>> humidity(ConfigMakerProvider configPvd){
@@ -2342,7 +2337,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
           }
       );
     }
-    print('myLIST : $myList');
     return myList;
   }
   List<Map<String,dynamic>> co2(ConfigMakerProvider configPvd){
@@ -2369,7 +2363,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
           }
       );
     }
-    print('myLIST : $myList');
     return myList;
   }
   List<Map<String,dynamic>> windSpeed(ConfigMakerProvider configPvd){
@@ -2396,7 +2389,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
           }
       );
     }
-    print('myLIST : $myList');
     return myList;
   }
   List<Map<String,dynamic>> windDirection(ConfigMakerProvider configPvd){
@@ -2423,7 +2415,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
           }
       );
     }
-    print('myLIST : $myList');
     return myList;
   }
   List<Map<String,dynamic>> lux(ConfigMakerProvider configPvd){
@@ -2450,7 +2441,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
           }
       );
     }
-    print('myLIST : $myList');
     return myList;
   }
   List<Map<String,dynamic>> ldr(ConfigMakerProvider configPvd){
@@ -2477,7 +2467,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
           }
       );
     }
-    print('myLIST : $myList');
     return myList;
   }
   List<Map<String,dynamic>> rainGauge(ConfigMakerProvider configPvd){
@@ -2504,7 +2493,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
           }
       );
     }
-    print('myLIST : $myList');
     return myList;
   }
   List<Map<String,dynamic>> leafWetness(ConfigMakerProvider configPvd){
@@ -2531,7 +2519,6 @@ class _MappingOfInputsTableState extends State<MappingOfInputsTable> {
           }
       );
     }
-    print('myLIST : $myList');
     return myList;
   }
 

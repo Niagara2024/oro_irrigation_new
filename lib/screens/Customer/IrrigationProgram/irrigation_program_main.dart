@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:oro_irrigation_new/constants/MQTTManager.dart';
 import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/program_library.dart';
 import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/schedule_screen.dart';
 import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/selection_screen.dart';
@@ -25,13 +26,14 @@ class IrrigationProgram extends StatefulWidget {
   final int controllerId;
   final int serialNumber;
   final String? programType;
+  final String deviceId;
   final bool? conditionsLibraryIsNotEmpty;
   const IrrigationProgram({Key? irrigationProgramKey,
     required this.userId,
     required this.controllerId,
     required this.serialNumber,
     this.programType,
-    this.conditionsLibraryIsNotEmpty}) :super(key: irrigationProgramKey);
+    this.conditionsLibraryIsNotEmpty, required this.deviceId}) :super(key: irrigationProgramKey);
 
   @override
   State<IrrigationProgram> createState() => _IrrigationProgramState();
@@ -48,7 +50,6 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
   dynamic apiData = {};
   dynamic waterAndFertData = [];
 
- // MqttService mqttService = MqttService();
 
   @override
   void initState() {
@@ -82,16 +83,22 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
   }
 
   void getData(IrrigationProgramMainProvider programPvd, userId, controllerId, serialNumber)async{
+    programPvd.clearWaterFert();
     try{
       HttpService service = HttpService();
+      var fert = await service.postRequest('getUserPlanningFertilizerSet', {'userId' : userId,'controllerId' : controllerId, 'serialNumber': serialNumber});
       var response = await service.postRequest('getUserProgramWaterAndFert', {'userId' : userId,'controllerId' : controllerId, 'serialNumber': serialNumber});
+      var response1 = await service.postRequest('getUserConstant', {'userId' : userId,'controllerId' : controllerId, 'serialNumber': serialNumber});
       var jsonData = response.body;
+      var jsonData1 = response1.body;
+      var jsonData2 = fert.body;
       var myData = jsonDecode(jsonData);
-      setState(() {
-        apiData = myData['data']['default'];
-        programPvd.waterAndFertData = myData['data']['waterAndFert'];
-      });
-      programPvd.editApiData(apiData);
+      var myData1 = jsonDecode(jsonData1);
+      var myData2 = jsonDecode(jsonData2);
+      programPvd.editApiData(myData['data']['default']);
+      programPvd.editSequenceData(myData['data']['waterAndFert']);
+      programPvd.editRecipe(myData2['data']['fertilizerSet']['fertilizerSet']);
+      programPvd.editConstantSetting(myData1['data']['constant']);
     }catch(e){
       log(e.toString());
     }
@@ -182,10 +189,10 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
                 ) : null,
                 actions: [
                   if (selectedIndex == 0) ...[
-                    _buildIconButton(mainProvider.isSingleValveMode, Icons.fiber_manual_record_outlined, mainProvider.enableSingleValveMode),
-                    _buildIconButton(mainProvider.isMultipleValveMode, Icons.join_full_outlined, mainProvider.enableMultipleValveMode),
+                    _buildIconButton(mainProvider.isSingleValveMode, Icons.fiber_manual_record_outlined, mainProvider.enableSingleValveMode, "Enable Single Valve mode"),
+                    _buildIconButton(mainProvider.isMultipleValveMode, Icons.join_full_outlined, mainProvider.enableMultipleValveMode, "Enable Multiple Valve mode"),
                     // _buildIconButton(mainProvider.isNext, Icons.queue_play_next, mainProvider.enableSkipNex),
-                    _buildIconButton(mainProvider.isDelete, Icons.delete, mainProvider.deleteFunction),
+                    _buildIconButton(mainProvider.isDelete, Icons.delete, mainProvider.deleteFunction, "Delete the sequence"),
                     const SizedBox(width: 10),
                   ],
                 ],
@@ -622,7 +629,8 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
       mainProvider.programName,
       // formattedSNo,
       mainProvider.isPumpStationMode ? 1 : 0,
-      selectedPump, mainValve, mainProvider.priority, mainProvider.sampleScheduleModel!.selected == "NO SCHEDULE"
+      selectedPump, mainValve, mainProvider.priority,
+      mainProvider.sampleScheduleModel!.selected == "NO SCHEDULE"
           ? 1
           : mainProvider.sampleScheduleModel!.selected == "SCHEDULE AS RUN LIST"
           ? 2 : 3,
@@ -711,13 +719,10 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
                 try {
                   final createUserProgram = await httpService.postRequest('createUserProgram', userData);
                   final response = jsonDecode(createUserProgram.body);
-                  //mqttService.publish('get-tweet-response/86418005321234', userDataToMqtt.toString());
+                  MQTTManager().publish(userDataToMqtt.toString(), 'AppToFirmware/${widget.deviceId}');
                   if(createUserProgram.statusCode == 200) {
                     ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(message: response['message']));
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => ProgramLibraryScreen(userId: widget.userId, controllerId: widget.controllerId,)),
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  ProgramLibraryScreen(userId: widget.userId, controllerId: widget.controllerId, deviceId: widget.deviceId,)),);
                   }
                 } catch (error) {
                   ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(message: 'Failed to update because of $error'));
@@ -747,8 +752,8 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
           OutlinedButton(
             key: UniqueKey(),
             onPressed: () async{
-              //mqttService.publish('get-tweet-response/86418005321234', dataToMqtt.toString());
-              // print(dataToMqtt);
+              // MQTTManager().publish(dataToMqtt.toString(), 'AppToFirmware/12345');
+              print(dataToMqtt);
               ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(message: 'Sent successfully'));
             },
             child: const Text('Mqtt'),
@@ -776,7 +781,7 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
     }
   }
 
-  Widget _buildIconButton(bool isActive, IconData iconData, VoidCallback onPressed) {
+  Widget _buildIconButton(bool isActive, IconData iconData, VoidCallback onPressed, toolTip) {
     final mainProvider = Provider.of<IrrigationProgramMainProvider>(context);
 
     return Container(
@@ -785,6 +790,7 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
         shape: BoxShape.circle,
       ),
       child: IconButton(
+        tooltip: toolTip,
         onPressed: () {
           if (iconData == Icons.delete) {
             showAdaptiveDialog(

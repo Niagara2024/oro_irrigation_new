@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:oro_irrigation_new/constants/MQTTManager.dart';
 import 'package:oro_irrigation_new/screens/Config/Preference/pump_screen.dart';
 import 'package:oro_irrigation_new/screens/Config/Preference/settings_screen.dart';
 import 'package:provider/provider.dart';
@@ -14,9 +15,8 @@ import 'general_screen.dart';
 import 'notification_screen.dart';
 
 class PreferencesScreen extends StatefulWidget {
-  const PreferencesScreen({super.key, this.customerID, this.controllerID, this.userID});
-
-  final customerID,controllerID,userID;
+  const PreferencesScreen({super.key, this.customerID, this.controllerID, this.userID, required this.deviceId});
+  final dynamic customerID,controllerID,userID, deviceId;
 
   @override
   State<PreferencesScreen> createState() => _PreferencesScreenState();
@@ -26,7 +26,6 @@ class _PreferencesScreenState extends State<PreferencesScreen> with TickerProvid
   late TabController _tabController;
   final HttpService httpService = HttpService();
   bool settingsSelected = false;
-  // final MqttService mqttService = MqttService();
 
   @override
   void initState() {
@@ -161,6 +160,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> with TickerProvid
                     // print(userData);
                     // print(dataToSend.eventNotifications.map((e) => e.value));
                     // mqttService.publish('get-tweet-response/86418005321234', '${dataToSend.toMqtt()}');
+                    MQTTManager().publish('${dataToSend.toMqtt()}', 'AppToFirmware/${widget.deviceId}');
                     try {
                       final createUserPreference = await httpService.postRequest('createUserPreference', userData);
                       final message = jsonDecode(createUserPreference.body);

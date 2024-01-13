@@ -311,14 +311,13 @@ class _ConditionwebUIState extends State<ConditionwebUI>
           children: [
             Expanded(
               child: DataTable2(
-                  headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
+                  headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark),
                   columnSpacing: 12,
                   horizontalMargin: 12,
                   minWidth: 1000,
                   border: TableBorder.all(),
                   columns: [
                     for (int i = 0; i < conditionhdrlist.length; i++)
-
                       i == 0 ?
                       DataColumn2(
                         fixedWidth: 60,
@@ -326,8 +325,8 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                             child: Text(
                               conditionhdrlist[i].toString(),
                               style: TextStyle(
-                                fontSize: _fontSizeheading(),
-                                fontWeight: FontWeight.bold,
+                                  fontSize: _fontSizeheading(),
+                                  fontWeight: FontWeight.bold,color: Colors.white
                               ),
                               softWrap: true,
                             )),
@@ -339,8 +338,8 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                             child: Text(
                               conditionhdrlist[i].toString(),
                               style: TextStyle(
-                                fontSize: _fontSizeheading(),
-                                fontWeight: FontWeight.bold,
+                                  fontSize: _fontSizeheading(),
+                                  fontWeight: FontWeight.bold,color: Colors.white
                               ),
                               softWrap: true,
                             )),
@@ -351,8 +350,8 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                             child: Text(
                               conditionhdrlist[i].toString(),
                               style: TextStyle(
-                                fontSize: _fontSizeheading(),
-                                fontWeight: FontWeight.bold,
+                                  fontSize: _fontSizeheading(),
+                                  fontWeight: FontWeight.bold,color: Colors.white
                               ),
                               softWrap: true,
                             )),
@@ -363,10 +362,9 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                           (index) => DataRow(
                         color: MaterialStateColor.resolveWith((states) {
                           if (index == Selectindexrow) {
-                            return Color.fromARGB(255, 240, 234, 160)
-                                .withOpacity(0.5); // Selected row color
+                            return primaryColorDark.withOpacity(0.5); // Selected row color
                           }
-                          return Colors.white;
+                          return primaryColorDark.withOpacity(0.05) ;
                         }),
                         cells: [
                           for (int i = 0;
@@ -597,7 +595,6 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                 Selectindexrow,
               ),
             )
-
           ],
           //  )
           // floatingActionButton: FloatingActionButton(
@@ -672,10 +669,13 @@ class _ConditionwebUIState extends State<ConditionwebUI>
             Container(
               height: 40,
               width: double.infinity,
-              color: Colors.amber.shade200,
+              color: primaryColorDark,
               child: Center(
                   child: Text(
                     '$title',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
                   )),
             ),
             // const Text('When in Used'),
@@ -1169,6 +1169,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
       }
       Mqttdata +=
       '${data[i].sNo},${data[i].name},$enablevalue,${data[i].duration}:00,${data[i].fromTime}:00,${data[i].untilTime}:00,$Notifigation,$conditionIsTrueWhenvalue;';
+      // S_No,Name,ConditonOnOff,ScanTime,StartTime,StopTime,NotificationOnOff,ConditionCategory,Object_Condition1,Operator,SetValue_Condition2
     }
     return Mqttdata;
   }

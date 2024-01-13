@@ -94,6 +94,7 @@ class _VirtualMeterScreenState extends State<VirtualMeterScreen>
   }
 
   Widget build(BuildContext context) {
+
     if (jsondata == null) {
       return const Center(child: CircularProgressIndicator());
     } else if (jsondata['plan'].isEmpty || virtualMeterjson.isEmpty || formulajson.isEmpty) {
@@ -142,7 +143,7 @@ class _VirtualMeterScreenState extends State<VirtualMeterScreen>
             ),
             child: DataTable2(
                 headingRowColor: MaterialStateProperty.all<Color>(
-                    primaryColorDark.withOpacity(0.2)),
+                    primaryColorDark),
                 fixedCornerColor: myTheme.primaryColor,
                 columnSpacing: 12,
                 horizontalMargin: 12,
@@ -156,8 +157,8 @@ class _VirtualMeterScreenState extends State<VirtualMeterScreen>
                           child: Text(
                             conditionhdrlist[i].toString(),
                             style:  TextStyle(
-                              fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
-                              fontWeight: FontWeight.bold,),
+                                fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
+                                fontWeight: FontWeight.bold, color: Colors.white),
                             softWrap: true,
                           )),
                     ),
@@ -167,10 +168,10 @@ class _VirtualMeterScreenState extends State<VirtualMeterScreen>
                         (index) => DataRow(
                       color: MaterialStateColor.resolveWith((states) {
                         if (index == Selectindexrow) {
-                          return Colors.blue
-                              .withOpacity(0.5); // Selected row color
+                          return primaryColorDark.withOpacity(0.5); // Selected row color
+                        }else {
+                          return Colors.white;
                         }
-                        return Colors.white;
                       }),
                       cells: [
                         for (int i = 0; i < conditionhdrlist.length; i++)
@@ -403,10 +404,13 @@ class _VirtualMeterScreenState extends State<VirtualMeterScreen>
                 Container(
                   height: 40,
                   width: double.infinity,
-                  color: Colors.amber,
+                  color: primaryColorDark,
                   child: const Center(
                       child: Text(
                         'Formula Editor',
+                        style:TextStyle(
+                          color: Colors.white, // Set the text color to white
+                        ),
                       )),
                 ),
                 formulastr.isNotEmpty
@@ -445,7 +449,7 @@ class _VirtualMeterScreenState extends State<VirtualMeterScreen>
                             child: DataTable2(
                                 headingRowColor:
                                 MaterialStateProperty.all<Color>(
-                                    primaryColorDark.withOpacity(0.2)),
+                                    primaryColorDark.withOpacity(0.5)),
                                 showBottomBorder: true,
                                 columnSpacing: 12,
                                 horizontalMargin: 12,
@@ -712,13 +716,14 @@ class _VirtualMeterScreenState extends State<VirtualMeterScreen>
     String Mqttdata = '';
     for (var i = 0; i < data!.length; i++) {
       //print('${data[i]}');
+      // Mqttdata +=
+      // '${data[i]['sNo']},${data[i]['id']},${data[i]['location']},${data[i]['name']},${data[i]['function']},${data[i]['formula']},${data[i]['protectionLimit']},${data[i]['object']},${data[i]['action']},${data[i]['radio']};';
       Mqttdata +=
-      '${data[i]['sNo']},${data[i]['id']},${data[i]['location']},${data[i]['name']},${data[i]['function']},${data[i]['formula']},${data[i]['protectionLimit']},${data[i]['object']},${data[i]['action']},${data[i]['radio']};';
+      '${data[i]['sNo']},${data[i]['id']},${data[i]['name']}${data[i]['formula']},${data[i]['protectionLimit']},${data[i]['object']},${data[i]['action']},${data[i]['radio']};';
+
     }
     //print('Mqttdata');
     return Mqttdata;
   }
-
-
 
 }

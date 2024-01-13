@@ -1,20 +1,25 @@
 import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../Models/names_model.dart';
 import '../../constants/http_service.dart';
 import '../../constants/theme.dart';
 
 class Names extends StatefulWidget {
-  const Names({Key? key, required this.userID, required this.customerID, required this.controllerId,});
+  const Names({
+    Key? key,
+    required this.userID,
+    required this.customerID,
+    required this.controllerId,
+  });
   final int userID, customerID, controllerId;
 
   @override
   State<Names> createState() => _NamesState();
 }
 
-class _NamesState extends State<Names>  with TickerProviderStateMixin
-{
+class _NamesState extends State<Names> with TickerProviderStateMixin {
   List<NamesModel> _namesList = <NamesModel>[];
 
   @override
@@ -30,15 +35,23 @@ class _NamesState extends State<Names>  with TickerProviderStateMixin
     print('customerID ID:${widget.customerID}');
     //print(_namesList);
 
-    return MyContainerWithTabs(names: _namesList, userID: widget.userID, controllerId: widget.controllerId, customerID: widget.customerID,);
+    return MyContainerWithTabs(
+      names: _namesList,
+      userID: widget.userID,
+      controllerId: widget.controllerId,
+      customerID: widget.customerID,
+    );
   }
 
   Future<void> fetchData() async {
-    final response = await HttpService().postRequest("getUserName", {"userId": widget.customerID, "controllerId": widget.controllerId});
+    final response = await HttpService().postRequest("getUserName",
+        {"userId": widget.customerID, "controllerId": widget.controllerId});
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       setState(() {
-        _namesList = List.from(data["data"]).map((item) => NamesModel.fromJson(item)).toList();
+        _namesList = List.from(data["data"])
+            .map((item) => NamesModel.fromJson(item))
+            .toList();
       });
     } else {
       _showSnackBar(response.body);
@@ -55,9 +68,13 @@ class _NamesState extends State<Names>  with TickerProviderStateMixin
   }
 }
 
-class MyContainerWithTabs extends StatefulWidget
-{
-  const MyContainerWithTabs({super.key, required this.names, required this.userID, required this.customerID, required this.controllerId});
+class MyContainerWithTabs extends StatefulWidget {
+  const MyContainerWithTabs(
+      {super.key,
+        required this.names,
+        required this.userID,
+        required this.customerID,
+        required this.controllerId});
   final List<NamesModel> names;
   final int userID, customerID, controllerId;
 
@@ -65,13 +82,13 @@ class MyContainerWithTabs extends StatefulWidget
   State<MyContainerWithTabs> createState() => _MyContainerWithTabsState();
 }
 
-class _MyContainerWithTabsState extends State<MyContainerWithTabs>
-{
+class _MyContainerWithTabsState extends State<MyContainerWithTabs> {
+  final TextEditingController _textController = TextEditingController();
+
   @override
-  Widget build(BuildContext context)
-  {
+  Widget build(BuildContext context) {
     return Container(
-      color:  Colors.white,
+      color: Colors.white,
       child: Column(
         children: [
           Expanded(
@@ -84,18 +101,21 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
                     isScrollable: true,
                     tabs: [
                       for (var i = 0; i < widget.names.length; i++)
-                        Tab(text: widget.names[i].nameDescription ?? '',),
+                        Tab(
+                          text: widget.names[i].nameDescription ?? '',
+                        ),
                     ],
-                    onTap: (value) {
-                    },
+                    onTap: (value) {},
                   ),
                   const SizedBox(height: 10.0),
                   SizedBox(
-                    height: MediaQuery.sizeOf(context).height-300,
+                    height: MediaQuery.sizeOf(context).height - 300,
                     child: TabBarView(
                       children: [
                         for (int i = 0; i < widget.names.length; i++)
-                          widget.names[i].userName != null && widget.names.isNotEmpty? buildTab(widget.names[i].userName!)
+                          widget.names[i].userName != null &&
+                              widget.names.isNotEmpty
+                              ? buildTab(widget.names[i].userName!)
                               : const Center(child: Text('No Record found')),
                       ],
                     ),
@@ -112,22 +132,21 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
               children: [
                 TextButton.icon(
                   onPressed: () async {
-                    List<Map<String, dynamic>> nameListJson =  widget.names.map((name) => name.toJson()).toList();
+                    List<Map<String, dynamic>> nameListJson =
+                    widget.names.map((name) => name.toJson()).toList();
                     Map<String, dynamic> body = {
                       "userId": widget.customerID,
                       "controllerId": widget.controllerId,
                       "userNameList": nameListJson,
                       "createUser": widget.userID
                     };
-                    final response = await HttpService().postRequest("createUserName", body);
-                    if(response.statusCode == 200)
-                    {
+                    final response =
+                    await HttpService().postRequest("createUserName", body);
+                    if (response.statusCode == 200) {
                       var data = jsonDecode(response.body);
-                      if(data["code"]==200)
-                      {
+                      if (data["code"] == 200) {
                         _showSnackBar(data["message"]);
-                      }
-                      else{
+                      } else {
                         _showSnackBar(data["message"]);
                       }
                     }
@@ -138,7 +157,9 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(width: 20,)
+                const SizedBox(
+                  width: 20,
+                )
               ],
             ),
           ),
@@ -147,11 +168,9 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
     );
   }
 
-  Widget buildTab(List<dynamic> nameList)
-  {
+  Widget buildTab(List<dynamic> nameList) {
     if (nameList.isNotEmpty && nameList[0].containsKey('location')) {
-      if(nameList[0]['location'] == '')
-      {
+      if (nameList[0]['location'] == '') {
         return Padding(
           padding: const EdgeInsets.only(right: 10, left: 10),
           child: DataTable2(
@@ -160,50 +179,58 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
               minWidth: 600,
               headingRowHeight: 40,
               dataRowHeight: 40,
-              headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
+              headingRowColor: MaterialStateProperty.all<Color>(
+                  primaryColorDark.withOpacity(0.2)),
               border: TableBorder.all(width: 1),
               columns: const [
                 DataColumn2(
-                    label: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold),),
-                    size: ColumnSize.M
-                ),
+                    label: Text(
+                      'S.No',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    size: ColumnSize.M),
                 DataColumn2(
-                    label: Text('Id', style: TextStyle(fontWeight: FontWeight.bold),),
-                    size: ColumnSize.M
-                ),
+                    label: Text(
+                      'Id',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    size: ColumnSize.M),
                 DataColumn2(
-                    label: Text('Name', style: TextStyle(fontWeight: FontWeight.bold),),
-                    size: ColumnSize.L
-                ),
+                    label: Text(
+                      'Name',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    size: ColumnSize.L),
               ],
-              rows: List<DataRow>.generate(nameList.length, (index) => DataRow(cells: [
-                DataCell(Text('${index+1}')),
-                DataCell(Text(nameList[index]['id'])),
-                DataCell(
-                  TextFormField(
-                    initialValue: nameList[index]['name'],
-                    onChanged: (val){
-                      setState(() {
-                        for (var element in nameList) {
-                          if (element['name'] == val) {
-                            _showSnackBar("Name Already Exists");
-                            break;
-                          } else {
-                            nameList[index]['name'] = val;
-                            break;
-                          }
-                        }
-                      });
-                    },
-                    decoration: InputDecoration(
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: myTheme.primaryColor,
+              rows: List<DataRow>.generate(
+                  nameList.length,
+                      (index) => DataRow(cells: [
+                    DataCell(Text('${index + 1}')),
+                    DataCell(Text(nameList[index]['id'])),
+                    DataCell(
+                      TextFormField(
+                        maxLength: 40,
+                        initialValue: nameList[index]['name'],
+                        onChanged: (val) {
+                          setState(() {
+                            for (var element in nameList) {
+                              if (element['name'] == val) {
+                                _showSnackBar("Name Already Exists");
+                                break;
+                              } else {
+                                nameList[index]['name'] = val;
+                                break;
+
+                              }
+                            }
+                          });
+                        },
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
                         ),
                       ),
                     ),
-                  ),
-                ),
-              ]))),
+                  ]))),
         );
       }
       return Padding(
@@ -214,45 +241,74 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
             minWidth: 580,
             headingRowHeight: 40,
             dataRowHeight: 40,
-            headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
+            headingRowColor: MaterialStateProperty.all<Color>(
+                primaryColorDark.withOpacity(0.2)),
             border: TableBorder.all(width: 1),
             columns: const [
               DataColumn2(
-                  label: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold),),
-                  size: ColumnSize.M
-              ),
+                  label: Text(
+                    'S.No',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  size: ColumnSize.M),
               DataColumn2(
-                  label: Text('Id', style: TextStyle(fontWeight: FontWeight.bold),),
-                  size: ColumnSize.M
-              ),
+                  label: Text(
+                    'Id',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  size: ColumnSize.M),
               DataColumn2(
-                  label: Text('Location', style: TextStyle(fontWeight: FontWeight.bold),),
-                  size: ColumnSize.L
-              ),
+                  label: Text(
+                    'Location',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  size: ColumnSize.L),
               DataColumn2(
-                  label: Text('Name', style: TextStyle(fontWeight: FontWeight.bold),),
-                  size: ColumnSize.L
-              ),
+                  label: Text(
+                    'Name',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  size: ColumnSize.L),
             ],
-            rows: List<DataRow>.generate(nameList.length, (index) => DataRow(cells: [
-              DataCell(Text('${index+1}')),
-              DataCell(Text(nameList[index]['id'])),
-              DataCell(Text(nameList[index]['location'])),
-              DataCell(TextFormField(
-                initialValue: nameList[index]['name'],
-                onChanged: (val){
-                  setState(() {
-                    nameList[index]['name'] = val;
-                  });
-                },
-                decoration: InputDecoration(
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: myTheme.primaryColor,
+            rows: List<DataRow>.generate(
+                nameList.length,
+                    (index) => DataRow(cells: [
+                  DataCell(Text('${index + 1}')),
+                  DataCell(Text(nameList[index]['id'])),
+                  DataCell(Text(nameList[index]['location'])),
+                  DataCell(
+
+                    TextFormField(
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(50), // Limit input to 50 characters
+                      ],
+                      maxLength: 40,
+                      initialValue: nameList[index]['name'],
+                      onChanged: (val) {
+                        setState(() {
+                          for (var element in nameList) {
+                            if (element['name'] == val) {
+                              _showSnackBar("Name Already Exists");
+                              break;
+                            } else {
+                              nameList[index]['name'] = val;
+                              break;
+
+                            }
+                          }
+                        });
+                      },
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        // focusedBorder: UnderlineInputBorder(
+                        //   borderSide: BorderSide(
+                        //     color: myTheme.primaryColor,
+                        //   ),
+                        // ),
+                      ),
                     ),
                   ),
-                ),
-              ),),
-            ]))),
+                ]))),
       );
     } else {
       return const Center(child: Text('No Record found'));
@@ -267,5 +323,4 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs>
       ),
     );
   }
-
 }

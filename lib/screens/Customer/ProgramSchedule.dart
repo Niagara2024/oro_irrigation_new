@@ -82,7 +82,7 @@ class _ProgramScheduleState extends State<ProgramSchedule> with SingleTickerProv
       body: TabBarView(
         controller: _tabController,
         children: [
-          ProgramLibraryScreen(userId: widget.customerID, controllerId: widget.controllerID),
+          ProgramLibraryScreen(userId: widget.customerID, controllerId: widget.controllerID, deviceId: widget.imeiNumber,),
           watersourceUI(userId: widget.customerID, controllerId: widget.controllerID, deviceID: widget.imeiNumber,),
           VirtualMeterScreen(userId: widget.customerID, controllerId: widget.controllerID, deviceId: widget.imeiNumber,),
           RadiationsetUI(userId: widget.customerID, controllerId: widget.controllerID,deviceId:widget.imeiNumber,),
@@ -96,7 +96,7 @@ class _ProgramScheduleState extends State<ProgramSchedule> with SingleTickerProv
           WeatherScreen(userId: widget.userId, controllerId: widget.controllerID),
           SystemDefinition(userId: widget.userId, controllerId: widget.controllerID),
           ProgramQueueScreen(userId: widget.userId, controllerId: widget.controllerID, cutomerId: widget.customerID,),
-          ScheduleViewScreen(),
+          const ScheduleViewScreen(),
         ],
       ),
     );

@@ -5,6 +5,7 @@ import '../../../state_management/irrigation_program_main_provider.dart';
 import '../../../widgets/SCustomWidgets/custom_animated_switcher.dart';
 import '../../../widgets/SCustomWidgets/custom_list_tile.dart';
 
+
 class SelectionScreen extends StatefulWidget {
   final int userId;
   final int controllerId;
@@ -257,31 +258,49 @@ class _SelectionScreenState extends State<SelectionScreen> {
                     (selectionPvd.selectionModel.data!.centralFertilizerSite!.isNotEmpty)
                         ? buildCard(selectionPvd.selectionModel.data!.centralFertilizerSite!,'Central Fertilizer Site',)
                         : Container(),
-                    (selectionPvd.selectionModel.data!.centralFertilizerInjector!.isNotEmpty)
-                        ? CustomAnimatedSwitcher(
-                      condition: centralInjectorCondition,
-                      child: buildCard(
-                          selectionPvd.selectionModel.data!.centralFertilizerInjector!
-                              .where((injector) =>
-                              selectionPvd.selectionModel.data!.centralFertilizerSite!
-                                  .any((site) =>
-                              site.id ==  injector.location && site.selected == true)).expand((element) => [element]),'Central Fertilizer Injector'),
-                    ) : Container(),
                     (selectionPvd.selectionModel.data!.localFertilizerSite!.isNotEmpty)
-                        ? buildCard(
-                      selectionPvd.selectionModel.data!.localFertilizerSite!,'Local Fertilizer Site',) : Container(),
-                    (selectionPvd.selectionModel.data!.localFertilizerInjector!.isNotEmpty)
-                        ? CustomAnimatedSwitcher(
-                      condition: localInjectorCondition,
-                      child: buildCard(
-                        selectionPvd.selectionModel.data!.centralFertilizerInjector!
-                            .where((injector) =>
-                            selectionPvd.selectionModel.data!.centralFertilizerSite!
-                                .any((site) =>
-                            site.id ==  injector.location && site.selected == true)).expand((element) => [element]),'Local Fertilizer Injector',),
-                    )
-                        : Container(),
-                    (selectionPvd.selectionModel.data!.localFertilizerInjector!.isNotEmpty) ? const SizedBox(height: 10,) : Container(),
+                        ? buildCard(selectionPvd.selectionModel.data!.localFertilizerSite!,'Local Fertilizer Site',) : Container(),
+                    CustomAnimatedSwitcher(
+                        condition: (selectionPvd.selectionModel.data!.centralFertilizerInjector!.isNotEmpty
+                            && selectionPvd.selectionModel.data!.centralFertilizerSite!.any((element) => element.selected == true))
+                            || (selectionPvd.selectionModel.data!.localFertilizerInjector!.isNotEmpty
+                                && selectionPvd.selectionModel.data!.localFertilizerSite!.any((element) => element.selected == true)),
+                        child: Column(
+                          children: [
+                            buildSwitchContainer(
+                                "Program based Injector selection",
+                                selectionPvd.isProgramBasedInjector,
+                                    (newValue) => selectionPvd.updatePumpStationMode(newValue, "Program based Injector selection"),
+                                Icons.toggle_on,
+                                selectionPvd.isProgramBasedInjector ? "Program based Injector selection is enabled" : "Zone based Injector selection is enabled",
+                                false
+                            ),
+                            (selectionPvd.selectionModel.data!.centralFertilizerInjector!.isNotEmpty)
+                                ? CustomAnimatedSwitcher(
+                              condition: centralInjectorCondition && selectionPvd.isProgramBasedInjector,
+                              child: buildCard(
+                                  selectionPvd.selectionModel.data!.centralFertilizerInjector!
+                                      .where((injector) =>
+                                      selectionPvd.selectionModel.data!.centralFertilizerSite!
+                                          .any((site) =>
+                                      site.id ==  injector.location && site.selected == true)).expand((element) => [element]),'Central Fertilizer Injector'),
+                            )
+                                : Container(),
+                            (selectionPvd.selectionModel.data!.localFertilizerInjector!.isNotEmpty)
+                                ? CustomAnimatedSwitcher(
+                              condition: localInjectorCondition && selectionPvd.isProgramBasedInjector,
+                              child: buildCard(
+                                selectionPvd.selectionModel.data!.localFertilizerInjector!
+                                    .where((injector) =>
+                                    selectionPvd.selectionModel.data!.localFertilizerSite!
+                                        .any((site) =>
+                                    site.id ==  injector.location && site.selected == true)).expand((element) => [element]),'Local Fertilizer Injector',),
+                            )
+                                : Container(),
+                            (selectionPvd.selectionModel.data!.localFertilizerInjector!.isNotEmpty) ? const SizedBox(height: 10,) : Container(),
+                          ],
+                        )
+                    ),
                   ],
                 ) : Container(),
                 (selectionPvd.selectionModel.data!.centralFertilizerSet!.isNotEmpty || selectionPvd.selectionModel.data!.localFertilizerSet!.isNotEmpty) ?

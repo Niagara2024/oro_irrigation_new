@@ -167,6 +167,11 @@ flutter:
      - assets/images/dp_irr_pump_3.png
      - assets/images/weather_view.jpg
      - assets/images/irrigation_image.jpg
+     - assets/GiffFile/water_drop_animation.gif
+     - assets/images/relief_valve.png
+     - assets/images/channel.png
+     - assets/images/company_logo.png
+
 
 
 

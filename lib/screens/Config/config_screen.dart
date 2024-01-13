@@ -81,9 +81,9 @@ class _ConfigScreenState extends State<ConfigScreen> with SingleTickerProviderSt
             child: nvRSelection == 0 ?
             Names(userID: widget.userID,  customerID: widget.customerID, controllerId: widget.controllerId):
             nvRSelection == 1 ?
-            PreferencesScreen(customerID: widget.customerID, controllerID: widget.controllerId, userID: widget.userID,):
+            PreferencesScreen(customerID: widget.customerID, controllerID: widget.controllerId, userID: widget.userID, deviceId: widget.imeiNumber):
             nvRSelection == 2 ?
-            ConstantInConfig(userId: widget.userID, customerId: widget.customerID, controllerId: widget.controllerId):
+            ConstantInConfig(userId: widget.userID, customerId: widget.customerID, controllerId: widget.controllerId, deviceId: widget.imeiNumber):
             nvRSelection == 3 ?
             DealerDefinitionInConfig(userId: widget.userID,  customerId: widget.customerID, controllerId: widget.controllerId, imeiNo: widget.imeiNumber,):
             nvRSelection == 4 ?
@@ -110,11 +110,11 @@ class ConfigPage extends StatelessWidget
     }else if(label.toString()=='Dealer definition'){
       return DealerDefinitionInConfig(userId: userID,  customerId: customerID, controllerId: controllerId, imeiNo: imeiNumber);
     }else if(label.toString()=='Preferences'){
-      return PreferencesScreen(customerID: customerID, controllerID: controllerId, userID: userID,);
+      return PreferencesScreen(customerID: customerID, controllerID: controllerId, userID: userID, deviceId: imeiNumber);
     }else if(label.toString()=='Data acquisition'){
       return DataAcquisitionMain(customerID: customerID, controllerID: controllerId, userId: userID, deviceID: imeiNumber);
     }else if(label.toString()=='Constant'){
-      return ConstantInConfig(userId: userID, customerId: customerID, controllerId: controllerId);
+      return ConstantInConfig(userId: userID, customerId: customerID, controllerId: controllerId, deviceId: imeiNumber);
     }
 
     return Center(child: Text('Page of $label'));

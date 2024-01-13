@@ -26,7 +26,7 @@ class MQTTManager {
       providerState = state;
       _client = MqttBrowserClient('ws://192.168.1.141', uniqueId);
       _client!.port = 9001;
-      _client!.keepAlivePeriod = 20;
+      _client!.keepAlivePeriod = 60;
       _client!.onDisconnected = onDisconnected;
       _client!.logging(on: false);
 
@@ -100,6 +100,12 @@ class MQTTManager {
       print('OnDisconnected callback is solicited, this is correct');
     }
     providerState?.setAppConnectionState(MQTTConnectionState.disconnected);
+
+    // Attempt reconnection after a delay
+    Future.delayed(const Duration(seconds: 03), () {
+      //_client!.disconnect();
+      //connect();
+    });
   }
 
   void onConnected() {

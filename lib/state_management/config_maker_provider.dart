@@ -1288,6 +1288,31 @@ class ConfigMakerProvider extends ChangeNotifier{
   //TODO: centralDosingFunctionality
   void centralDosingFunctionality(List<dynamic> list){
     switch (list[0]){
+      case ('deleteFromMapio') : {
+        if(list[2] == 'injector'){
+          if(centralDosingUpdated[list[1]]['injector'].length != 1){
+            if(remover(centralDosingUpdated,list[1],'injector',list[3])){
+              totalInjector += 1;
+            }
+          }
+        }
+        else if(list[2] == 'boosterConnection'){
+          if(remover(centralDosingUpdated,list[1],'boosterConnection',list[3],'boosterPump')){
+            totalBooster += 1;
+          }
+          for(var inj in centralDosingUpdated[list[1]]['injector']){
+            if(centralDosingUpdated[list[1]]['boosterConnection'].isEmpty){
+              inj['Which_Booster_Pump'] = '-';
+            }else{
+              if(inj['Which_Booster_Pump'].contains('${centralDosingUpdated[list[1]]['boosterConnection'] + 1}')){
+                inj['Which_Booster_Pump'] = '-';
+              }
+            }
+          }
+
+        }
+        break;
+      }
       case ('addCentralDosing') : {
         if(totalCentralDosing > 0 && totalInjector > 0){
           var add = false;
@@ -1702,6 +1727,16 @@ class ConfigMakerProvider extends ChangeNotifier{
   //TODO: centralFiltrationFunctionality
   void centralFiltrationFunctionality(List<dynamic> list){
     switch (list[0]){
+      case ('deleteFromMapio') : {
+        if(list[2] == 'filterConnection'){
+          if(centralFiltrationUpdated[list[1]]['filterConnection'].length != 1){
+            if(remover(centralFiltrationUpdated,list[1],'filterConnection',list[3],'filter')){
+              totalFilter += 1;
+            }
+          }
+        }
+        break;
+      }
       case ('addCentralFiltration') : {
         if(totalCentralFiltration > 0 && totalFilter > 0){
           var add = false;
@@ -2146,9 +2181,95 @@ class ConfigMakerProvider extends ChangeNotifier{
       }
     }
   }
+  bool remover(data,lineIndex,connection,sno,[value]){
+    bool delete = false;
+    for(var i in data[lineIndex][connection]){
+      if(i['sNo'] == sno){
+        if(connection == 'injector'){
+          if(i['levelSensor'].isNotEmpty){
+            totalLevelSensor += 1;
+          }
+          if(i['dosingMeter'].isNotEmpty){
+            totalDosingMeter += 1;
+          }
+        }
+        data[lineIndex][connection].remove(i);
+        if(value != null){
+          data[lineIndex][value] = '${int.parse(data[lineIndex][value]) - 1}';
+          data[lineIndex][value] = data[lineIndex][value] == '0' ? '' : data[lineIndex][value];
+        }
+        delete = true;
+        break;
+      }
+    }
+    notifyListeners();
+    return delete;
+  }
+
   //TODO: irrigationLinesFunctionality
   void irrigationLinesFunctionality(List<dynamic> list){
     switch (list[0]){
+      case ('deleteFromMapio') : {
+        print(list);
+        if(list[2] == 'valveConnection'){
+          if(irrigationLines[list[1]]['valveConnection'].length != 1){
+            if(remover(irrigationLines,list[1],'valveConnection',list[3],'valve')){
+              totalValve += 1;
+            }
+          }
+        }else if(list[2] == 'main_valveConnection'){
+          if(remover(irrigationLines,list[1],'main_valveConnection',list[3],'main_valve')){
+            totalMainValve += 1;
+          }
+        }else if(list[2] == 'foggerConnection'){
+          if(remover(irrigationLines,list[1],'foggerConnection',list[3],'fogger')){
+            totalFogger += 1;
+          }
+        }else if(list[2] == 'fanConnection'){
+          if(remover(irrigationLines,list[1],'fanConnection',list[3],'fan')){
+            totalFan += 1;
+          }
+        }else if(list[2] == 'injector'){
+          for(var i in localDosingUpdated){
+            if(i['sNo'] == irrigationLines[list[1]]['sNo']){
+              if(i['injector'].length != 1){
+                if(remover(localDosingUpdated,localDosingUpdated.indexOf(i),'injector',list[3])){
+                  totalInjector += 1;
+                }
+              }
+
+            }
+          }
+        }else if(list[2] == 'boosterConnection'){
+          for(var i in localDosingUpdated){
+            if(i['sNo'] == irrigationLines[list[1]]['sNo']){
+              if(remover(localDosingUpdated,localDosingUpdated.indexOf(i),'boosterConnection',list[3],'boosterPump')){
+                totalBooster += 1;
+              }
+            }
+            for(var inj in i['injector']){
+              if(i['boosterConnection'].isEmpty){
+                inj['Which_Booster_Pump'] = '-';
+              }else{
+                if(inj['Which_Booster_Pump'].contains('${i['boosterConnection'].length + 1}')){
+                  inj['Which_Booster_Pump'] = '-';
+                }
+              }
+            }
+          }
+        }else if(list[2] == 'filterConnection'){
+          for(var i in localFiltrationUpdated){
+            if(i['sNo'] == irrigationLines[list[1]]['sNo']){
+              if(i['filterConnection'].length != 1){
+                if(remover(localFiltrationUpdated,localFiltrationUpdated.indexOf(i),'filterConnection',list[3],'filter')){
+                  totalFilter += 1;
+                }
+              }
+            }
+          }
+        }
+        break;
+      }
       case ('addIrrigationLine'): {
         if(totalIrrigationLine > 0 && totalValve > 0){
           var add = false;
@@ -4755,83 +4876,107 @@ class ConfigMakerProvider extends ChangeNotifier{
                 break;
               case 25:
                 totalWindDirection = j['quantity'];
-                connWindDirection.add({
-                  'sNo': returnI_O_AutoIncrement(),
-                  'rtu': '-',
-                  'rfNo': '-',
-                  'input': '-',
-                  'input_type': '-',
-                });
+                for(var i = 0;i < j['quantity'];i++){
+                  connWindDirection.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+
                 break;
               case 26:
                 totalWindSpeed = j['quantity'];
-                connWindSpeed.add({
-                  'sNo': returnI_O_AutoIncrement(),
-                  'rtu': '-',
-                  'rfNo': '-',
-                  'input': '-',
-                  'input_type': '-',
-                });
+                for(var i = 0;i < j['quantity'];i++){
+                  connWindSpeed.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+
                 break;
               case 27:
                 totalCo2 = j['quantity'];
-                connCo2.add({
-                  'sNo': returnI_O_AutoIncrement(),
-                  'rtu': '-',
-                  'rfNo': '-',
-                  'input': '-',
-                  'input_type': '-',
-                });
+                for(var i = 0;i < j['quantity'];i++){
+                  connCo2.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+
                 break;
               case 28:
                 totalLux = j['quantity'];
-                connLux.add({
-                  'sNo': returnI_O_AutoIncrement(),
-                  'rtu': '-',
-                  'rfNo': '-',
-                  'input': '-',
-                  'input_type': '-',
-                });
+                for(var i = 0;i < j['quantity'];i++){
+                  connLux.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+
                 break;
               case 29:
                 totalLdr = j['quantity'];
-                connLdr.add({
-                  'sNo': returnI_O_AutoIncrement(),
-                  'rtu': '-',
-                  'rfNo': '-',
-                  'input': '-',
-                  'input_type': '-',
-                });
+                for(var i = 0;i < j['quantity'];i++){
+                  connLdr.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+
                 break;
               case 30:
                 totalHumidity = j['quantity'];
-                connHumidity.add({
-                  'sNo': returnI_O_AutoIncrement(),
-                  'rtu': '-',
-                  'rfNo': '-',
-                  'input': '-',
-                  'input_type': '-',
-                });
+                for(var i = 0;i < j['quantity'];i++){
+                  connHumidity.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+
                 break;
               case 31:
                 totalLeafWetness = j['quantity'];
-                connLeafWetness.add({
-                  'sNo': returnI_O_AutoIncrement(),
-                  'rtu': '-',
-                  'rfNo': '-',
-                  'input': '-',
-                  'input_type': '-',
-                });
+                for(var i = 0;i < j['quantity'];i++){
+                  connLeafWetness.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+
                 break;
               case 32:
                 totalRainGauge = j['quantity'];
-                connRainGauge.add({
-                  'sNo': returnI_O_AutoIncrement(),
-                  'rtu': '-',
-                  'rfNo': '-',
-                  'input': '-',
-                  'input_type': '-',
-                });
+                for(var i = 0;i < j['quantity'];i++){
+                  connRainGauge.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+
                 break;
               case 33:
                 for (var k = 0; k < j['quantity']; k++) {
@@ -4998,13 +5143,11 @@ class ConfigMakerProvider extends ChangeNotifier{
         {'206' : ''},
       ],
     };
-    int pump = 0;
     if(sourcePumpUpdated.isNotEmpty){
       for(var i = 0;i < sourcePumpUpdated.length;i++){
         if(!sourcePumpUpdated[i]['deleted']){
-          // pump += 1;
-          // configData['200'][5]['201'] += '${putEnd(configData['200'][5]['201'])}'
-          //     '${sourcePumpUpdated[i]['sNo']},${1},${pump},'
+          // configData['200'][0]['201'] += '${putEnd(configData['200'][0]['201'])}'
+          //     '${sourcePumpUpdated[i]['sNo']},${1},${i+1},'
           //     '${sourcePumpUpdated[i]['waterMeter'].isEmpty ? 0 : 1},'
           //     '${sourcePumpUpdated[i]['oro_pump'] == true ? 1 : 0},'
           //     '${sourcePumpUpdated[i]['oro_pump_plus'] == true ? 1 : 0},'
@@ -5033,9 +5176,8 @@ class ConfigMakerProvider extends ChangeNotifier{
     if(irrigationPumpUpdated.isNotEmpty){
       for(var i = 0;i < irrigationPumpUpdated.length;i++){
         if(!irrigationPumpUpdated[i]['deleted']){
-          // pump += 1;
-          // configData['200'][5]['201'] += '${putEnd(configData['200'][5]['201'])}'
-          //     '${irrigationPumpUpdated[i]['sNo']},${2},$pump,'
+          // configData['200'][0]['201'] += '${putEnd(configData['200'][0]['201'])}'
+          //     '${irrigationPumpUpdated[i]['sNo']},${2},${i+1},'
           //     '${irrigationPumpUpdated[i]['waterMeter'].isEmpty ? 0 : 1},'
           //     '${irrigationPumpUpdated[i]['oro_pump'] == true ? 1 : 0},'
           //     '${irrigationPumpUpdated[i]['oro_pump_plus'] == true ? 1 : 0},'
@@ -5068,6 +5210,17 @@ class ConfigMakerProvider extends ChangeNotifier{
             configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FB.1.${i+1}.${bp + 1}',centralDosingUpdated[i]['boosterConnection'][bp],'output')}' ;
           }
           for(var inj = 0;inj < centralDosingUpdated[i]['injector'].length;inj++){
+            // configData['200'][2]['203'] += '${putEnd(configData['200'][2]['203'])},'
+            //     '${centralDosingUpdated[i]['injector'][inj]['sNo']},1.${i+1},'
+            //     '${centralDosingUpdated[i]['boosterConnection'].length},'
+            //     '${centralDosingUpdated[i]['ecConnection'].length},'
+            //     '${centralDosingUpdated[i]['phConnection'].length},'
+            //     '${centralDosingUpdated[i]['pressureSwitch'].isEmpty ? 0 : 1},${inj + 1},'
+            //     '${centralDosingUpdated[i]['injector'][inj]['injectorType'] == 'Venturi' ? 0 : 1},'
+            //     '${centralDosingUpdated[i]['injector'][inj]['levelSensor'].isEmpty ? 0 : 1},'
+            //     '${centralDosingUpdated[i]['injector'][inj]['Which_Booster_Pump'] == '-' ? 0 : centralDosingUpdated[i]['injector'][inj]['Which_Booster_Pump'].split('BP ')[1]},'
+            //     '${centralDosingUpdated[i]['injector'][inj]['dosingMeter'].isEmpty ? 0 : 1}' ;
+
             configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FC.1.${i+1}.${inj + 1}',centralDosingUpdated[i]['injector'][inj],'output')}' ;
             if(centralDosingUpdated[i]['injector'][inj]['dosingMeter'].isNotEmpty){
               configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FM.1.${i+1}.${inj + 1}',centralDosingUpdated[i]['injector'][inj]['dosingMeter'],'input')}' ;
@@ -5092,6 +5245,14 @@ class ConfigMakerProvider extends ChangeNotifier{
     if(centralFiltrationUpdated.isNotEmpty){
       for(var i = 0;i < centralFiltrationUpdated.length;i++){
         if(!centralFiltrationUpdated[i]['deleted']){
+          // configData['200'][3]['204'] += '${putEnd(configData['200'][3]['204'])},'
+          //     '${centralFiltrationUpdated[i]['sNo']},1.${i+1},'
+          //     '${centralFiltrationUpdated[i]['filterConnection'].length},'
+          //     '${centralFiltrationUpdated[i]['dv'].isEmpty ? 0 : 1},'
+          //     '${centralFiltrationUpdated[i]['pressureIn'].isEmpty ? 0 : 1},'
+          //     '${centralFiltrationUpdated[i]['pressureOut'].isEmpty ? 0 : 1},'
+          //     '${centralFiltrationUpdated[i]['diffPressureSensor'].isEmpty ? 0 : 1},'
+          //     '${centralFiltrationUpdated[i]['pressureSwitch'].isEmpty ? 0 : 1},' ;
           for(var fl = 0;fl < centralFiltrationUpdated[i]['filterConnection'].length;fl++){
             configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FL.1.${i+1}.${fl + 1}',centralFiltrationUpdated[i]['filterConnection'][fl],'output')}' ;
           }
@@ -5117,6 +5278,15 @@ class ConfigMakerProvider extends ChangeNotifier{
     if(irrigationLines.isNotEmpty){
       for(var i = 0;i < irrigationLines.length;i++){
         if(!irrigationLines[i]['deleted']){
+          // configData['200'][1]['202'] += '${putEnd(configData['200'][0]['201'])}'
+          //     '${irrigationLines[i]['sNo']},,${irrigationLines[i]['valve']},${irrigationLines[i]['main_valve']},'
+          //     '${irrigationLines[i]['fan']},${irrigationLines[i]['fogger']},${irrigationLines[i]['moistureSensor']},'
+          //     '${irrigationLines[i]['levelSensor']},${irrigationLines[i]['Local_dosing_site'] == true ? 1 : 0},'
+          //     '${irrigationLines[i]['local_filtration_site'] == true ? 1 : 0},'
+          //     '${irrigationLines[i]['pressureIn'].isEmpty ? 0 : 1},${irrigationLines[i]['pressureOut'].isEmpty ? 0 : 1},'
+          //     '${irrigationLines[i]['irrigationPump']},'
+          //     '${irrigationLines[i]['water_meter'].isEmpty ? 0 : 1}'
+          //     ',,,,,,' ;
           for(var il = 0;il < irrigationLines[i]['valveConnection'].length;il++){
             configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('VL.${i+1}.${il + 1}',irrigationLines[i]['valveConnection'][il],'output')}' ;
           }
@@ -5151,16 +5321,26 @@ class ConfigMakerProvider extends ChangeNotifier{
                   configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FB.2.${i+1}.${bp + 1}',localDosingUpdated[ld]['boosterConnection'][bp],'output')}' ;
                 }
                 for(var inj = 0;inj < localDosingUpdated[ld]['injector'].length;inj++){
+                  // configData['200'][2]['203'] += '${putEnd(configData['200'][2]['203'])},'
+                  //     '${localDosingUpdated[ld]['injector'][inj]['sNo']},2.${i+1},'
+                  //     '${localDosingUpdated[ld]['boosterConnection'].length},'
+                  //     '${localDosingUpdated[ld]['ecConnection'].length},'
+                  //     '${localDosingUpdated[ld]['phConnection'].length},'
+                  //     '${localDosingUpdated[ld]['pressureSwitch'].isEmpty ? 0 : 1},${inj + 1},'
+                  //     '${localDosingUpdated[ld]['injector'][inj]['injectorType'] == 'Venturi' ? 0 : 1},'
+                  //     '${localDosingUpdated[ld]['injector'][inj]['levelSensor'].isEmpty ? 0 : 1},'
+                  //     '${localDosingUpdated[ld]['injector'][inj]['Which_Booster_Pump'] == '-' ? 0 : localDosingUpdated[ld]['injector'][inj]['Which_Booster_Pump'].split('BP ')[1]},'
+                  //     '${localDosingUpdated[ld]['injector'][inj]['dosingMeter'].isEmpty ? 0 : 1}' ;
                   configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FC.2.${i+1}.${inj + 1}',localDosingUpdated[ld]['injector'][inj],'output')}' ;
                   if(localDosingUpdated[ld]['injector'][inj]['dosingMeter'].isNotEmpty){
                     configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FM.2.${i+1}.${inj + 1}',localDosingUpdated[ld]['injector'][inj]['dosingMeter'],'input')}' ;
                   }
-                  if(localDosingUpdated[i]['injector'][inj]['levelSensor'].isNotEmpty){
-                    configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('LS.2.${i+1}.${inj + 1}',localDosingUpdated[i]['injector'][inj]['levelSensor'],'input')}' ;
+                  if(localDosingUpdated[ld]['injector'][inj]['levelSensor'].isNotEmpty){
+                    configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('LS.2.${i+1}.${inj + 1}',localDosingUpdated[ld]['injector'][inj]['levelSensor'],'input')}' ;
                   }
                 }
-                if(localDosingUpdated[i]['pressureSwitch'].isNotEmpty){
-                  configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('PSW.2.${i+1}',localDosingUpdated[i]['pressureSwitch'],'input')}' ;
+                if(localDosingUpdated[ld]['pressureSwitch'].isNotEmpty){
+                  configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('PSW.2.${i+1}',localDosingUpdated[ld]['pressureSwitch'],'input')}' ;
                 }
                 for(var bp = 0;bp < localDosingUpdated[ld]['ecConnection'].length;bp++){
                   configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('EC.2.${i+1}.${bp + 1}',localDosingUpdated[ld]['ecConnection'][bp],'input')}' ;
@@ -5175,14 +5355,22 @@ class ConfigMakerProvider extends ChangeNotifier{
           if(irrigationLines[i]['local_filtration_site'] == true){
             for(var lf = 0; lf < localFiltrationUpdated.length;lf++){
               if(localFiltrationUpdated[lf]['sNo'] == irrigationLines[i]['sNo']){
+                // configData['200'][3]['204'] += '${putEnd(configData['200'][3]['204'])},'
+                //     '${localFiltrationUpdated[lf]['sNo']},2.${i+1},'
+                //     '${localFiltrationUpdated[lf]['filterConnection'].length},'
+                //     '${localFiltrationUpdated[lf]['dv'].isEmpty ? 0 : 1},'
+                //     '${localFiltrationUpdated[lf]['pressureIn'].isEmpty ? 0 : 1},'
+                //     '${localFiltrationUpdated[lf]['pressureOut'].isEmpty ? 0 : 1},'
+                //     '${localFiltrationUpdated[lf]['diffPressureSensor'].isEmpty ? 0 : 1},'
+                //     '${localFiltrationUpdated[lf]['pressureSwitch'].isEmpty ? 0 : 1},' ;
                 for(var fl = 0;fl < localFiltrationUpdated[lf]['filterConnection'].length;fl++){
                   configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('FL.2.${i+1}.${fl + 1}',localFiltrationUpdated[lf]['filterConnection'][fl],'output')}' ;
                 }
-                if(localFiltrationUpdated[i]['pressureSwitch'].isNotEmpty){
-                  configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('PSW.2.${i+1}',localFiltrationUpdated[i]['pressureSwitch'],'input')}' ;
+                if(localFiltrationUpdated[lf]['pressureSwitch'].isNotEmpty){
+                  configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('PSW.2.${i+1}',localFiltrationUpdated[lf]['pressureSwitch'],'input')}' ;
                 }
-                if(localFiltrationUpdated[i]['diffPressureSensor'].isNotEmpty){
-                  configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('DPS.2.${i+1}',localFiltrationUpdated[i]['diffPressureSensor'],'input')}' ;
+                if(localFiltrationUpdated[lf]['diffPressureSensor'].isNotEmpty){
+                  configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('DPS.2.${i+1}',localFiltrationUpdated[lf]['diffPressureSensor'],'input')}' ;
                 }
                 if(localFiltrationUpdated[lf]['dv'].isNotEmpty){
                   configData['200'][5]['206'] += '${putEnd(configData['200'][5]['206'])}${insertHardwareData('DV.2.${i+1}',localFiltrationUpdated[lf]['dv'],'output')}' ;
@@ -5200,6 +5388,20 @@ class ConfigMakerProvider extends ChangeNotifier{
         }
       }
     }
+    // for(var i = 0;i < weatherStation.length;i++){
+    //   configData['200'][4]['205'] += '${putEnd(configData['200'][5]['206'])},'
+    //       '${weatherStation[i]['sNo']},${1},${1},'
+    //       '${weatherStation[i]['sNo']},${2},${1},'
+    //       '${weatherStation[i]['sNo']},${3},${1},'
+    //       '${weatherStation[i]['sNo']},${4},${1},'
+    //       '${weatherStation[i]['sNo']},${5},${1},'
+    //       '${weatherStation[i]['sNo']},${6},${1},'
+    //       '${weatherStation[i]['sNo']},${7},${1},'
+    //       '${weatherStation[i]['sNo']},${8},${1},'
+    //       '${weatherStation[i]['sNo']},${9},${1},'
+    //       '${weatherStation[i]['sNo']},${10},${1},'
+    //       '${weatherStation[i]['sNo']},${11},${1}' ;
+    // }
     print('hw : ${jsonEncode(configData)}');
     return configData;
   }
@@ -5319,6 +5521,403 @@ class ConfigMakerProvider extends ChangeNotifier{
     irrigationLines = oldData['irrigationLine'];
     localDosingUpdated = oldData['localFertilizer'];
     localFiltrationUpdated = oldData['localFilter'];
+    print('finish');
+    for(var i in serverData.entries){
+      if (i.key == 'productLimit') {
+        var oldLimit = {};
+        for(var i in oldData['productLimit']['oldData']){
+          oldLimit[i['productTypeId']] = i['quantity'];
+        }
+        print('oldLimit : ${oldLimit}');
+        for (var j in i.value) {
+          switch (j['productTypeId']) {
+            case 1:
+              if(oldLimit[1] < j['quantity']){
+                totalSourcePump += j['quantity'] - oldLimit[1] as int;
+              }else{
+                totalSourcePump -= oldLimit[1] - j['quantity'] as int;
+              }
+              break;
+            case 2:
+              if(oldLimit[2] < j['quantity']){
+                totalIrrigationPump += j['quantity'] - oldLimit[2] as int;
+              }else{
+                totalIrrigationPump -= oldLimit[2] - j['quantity'] as int;
+              }
+              break;
+            case 3:
+              if(oldLimit[3] < j['quantity']){
+                totalBooster += j['quantity'] - oldLimit[3] as int;
+              }else{
+                totalBooster -= oldLimit[3] - j['quantity'] as int;
+              }
+              break;
+            case 4:
+              if(oldLimit[4] < j['quantity']){
+                totalInjector += j['quantity'] - oldLimit[4] as int;
+              }else{
+                totalInjector -= oldLimit[4] - j['quantity'] as int;
+              }
+              break;
+            case 5:
+              if(oldLimit[5] < j['quantity']){
+                totalFilter += j['quantity'] - oldLimit[5] as int;
+              }else{
+                totalFilter -= oldLimit[5] - j['quantity'] as int;
+              }
+              break;
+            case 6:
+              if(oldLimit[6] < j['quantity']){
+                totalValve += j['quantity'] - oldLimit[6] as int;
+              }else{
+                totalValve -= oldLimit[6] - j['quantity'] as int;
+              }
+              break;
+            case 7:
+              if(oldLimit[7] < j['quantity']){
+                totalMainValve += j['quantity'] - oldLimit[7] as int;
+              }else{
+                totalMainValve -= oldLimit[7] - j['quantity'] as int;
+              }
+              break;
+            case 8:
+              if(oldLimit[8] < j['quantity']){
+                total_D_s_valve += j['quantity'] - oldLimit[8] as int;
+              }else{
+                total_D_s_valve -= oldLimit[8] - j['quantity'] as int;
+              }
+            case 9:
+              if(oldLimit[9] < j['quantity']){
+                totalFan += j['quantity'] - oldLimit[9] as int;
+              }else{
+                totalFan -= oldLimit[9] - j['quantity'] as int;
+              }
+              break;
+            case 10:
+              if(oldLimit[10] < j['quantity']){
+                totalFogger += j['quantity'] - oldLimit[10] as int;
+              }else{
+                totalFogger -= oldLimit[10] - j['quantity'] as int;
+              }
+              break;
+            case 11:
+              if(oldLimit[11] < j['quantity']){
+                for (var k = 0; k < j['quantity'] - oldLimit[11]; k++) {
+                  totalAgitator.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'output': '-',
+                    'output_type': '-',
+                  });
+                }
+              }else{
+                for (var k = 0; k < oldLimit[11] - j['quantity']; k++) {
+                  totalAgitator.removeLast();
+                }
+              }
+              break;
+            case 12:
+
+              if(oldLimit[12] < j['quantity']){
+                for (var k = 0; k < j['quantity'] - oldLimit[12]; k++) {
+                  totalSelector.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'output': '-',
+                    'output_type': '-',
+                  });
+                }
+              }else{
+                for (var k = 0; k < oldLimit[12] - j['quantity']; k++) {
+                  totalSelector.removeLast();
+                }
+              }
+              break;
+            case 13:
+              if(oldLimit[13] < j['quantity']){
+                totalWaterMeter += j['quantity'] - oldLimit[13] as int;
+              }else{
+                totalWaterMeter -= oldLimit[13] - j['quantity'] as int;
+              }
+              break;
+            case 14:
+              if(oldLimit[14] < j['quantity']){
+                totalDosingMeter += j['quantity'] - oldLimit[14] as int;
+              }else{
+                totalDosingMeter -= oldLimit[14] - j['quantity'] as int;
+              }
+              break;
+            case 15:
+              if(oldLimit[15] < j['quantity']){
+                totalPressureSwitch += j['quantity'] - oldLimit[15] as int;
+              }else{
+                totalPressureSwitch -= oldLimit[15] - j['quantity'] as int;
+              }
+              break;
+            case 16:
+              if(oldLimit[16] < j['quantity']){
+                total_p_sensor += j['quantity'] - oldLimit[16] as int;
+              }else{
+                total_p_sensor -= oldLimit[16] - j['quantity'] as int;
+              }
+              break;
+            case 17:
+              if(oldLimit[17] < j['quantity']){
+                totalDiffPressureSensor += j['quantity'] - oldLimit[17] as int;
+              }else{
+                totalDiffPressureSensor -= oldLimit[17] - j['quantity'] as int;
+              }
+              break;
+            case 18:
+              if(oldLimit[18] < j['quantity']){
+                totalMoistureSensor += j['quantity'] - oldLimit[18] as int;
+              }else{
+                totalMoistureSensor -= oldLimit[18] - j['quantity'] as int;
+              }
+              break;
+            case 19:
+              if(oldLimit[19] < j['quantity']){
+                totalLevelSensor += j['quantity'] - oldLimit[19] as int;
+              }else{
+                totalLevelSensor -= oldLimit[19] - j['quantity'] as int;
+              }
+              break;
+            case 20:
+
+              if(oldLimit[20] < j['quantity']){
+                for (var k = 0; k < j['quantity'] - oldLimit[20]; k++) {
+                  totalAnalogSensor.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+              }else{
+                for (var k = 0; k < oldLimit[20] - j['quantity']; k++) {
+                  totalAnalogSensor.removeLast();
+                }
+              }
+              break;
+            case 21:
+              if(oldLimit[21] < j['quantity']){
+                totalEcSensor += j['quantity'] - oldLimit[21] as int;
+              }
+              break;
+            case 22:
+              if(oldLimit[22] < j['quantity']){
+                totalPhSensor += j['quantity'] - oldLimit[22] as int;
+              }
+              break;
+            case 23:
+              if(oldLimit[23] < j['quantity']){
+                totalTempSensor += j['quantity'] - oldLimit[23] as int;
+                for (var k = 0; k < totalTempSensor; k++) {
+                  connTempSensor.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+              }else{
+                totalTempSensor -= oldLimit[23] - j['quantity'] as int;
+                for (var k = 0; k < oldLimit[23] - j['quantity']; k++) {
+                  connTempSensor.removeLast();
+                }
+              }
+
+              break;
+            case 24:
+              if(oldLimit[24] < j['quantity']){
+                totalSoilTempSensor += j['quantity'] - oldLimit[24] as int;
+                for (var k = 0; k < totalSoilTempSensor; k++) {
+                  connSoilTempSensor.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+              }else{
+                totalSoilTempSensor -= oldLimit[24] - j['quantity'] as int;
+                for (var k = 0; k < oldLimit[24] - j['quantity']; k++) {
+                  connSoilTempSensor.removeLast();
+                }
+              }
+              break;
+            case 25:
+              if(oldLimit[25] < j['quantity']){
+                totalWindDirection += j['quantity'] - oldLimit[25] as int;
+                for (var k = 0; k < totalWindDirection; k++) {
+                  connWindDirection.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+              }else{
+                totalWindDirection -= oldLimit[25] - j['quantity'] as int;
+                for (var k = 0; k < oldLimit[25] - j['quantity']; k++) {
+                  connWindDirection.removeLast();
+                }
+              }
+              break;
+            case 26:
+
+              if(oldLimit[26] < j['quantity']){
+                totalWindSpeed += j['quantity'] - oldLimit[26] as int;
+                for (var k = 0; k < totalWindSpeed; k++) {
+                  connWindSpeed.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+              }
+              break;
+            case 27:
+              if(oldLimit[27] < j['quantity']){
+                totalCo2 += j['quantity'] - oldLimit[27] as int;
+                for (var k = 0; k < totalCo2; k++) {
+                  connCo2.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+              }
+              break;
+            case 28:
+
+              if(oldLimit[28] < j['quantity']){
+                totalLux += j['quantity'] - oldLimit[28] as int;
+                for (var k = 0; k < totalLux; k++) {
+                  connLux.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+              }
+              break;
+            case 29:
+              if(oldLimit[29] < j['quantity']){
+                totalLdr += j['quantity'] - oldLimit[29] as int;
+                for (var k = 0; k < totalLdr; k++) {
+                  connLdr.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+              }
+              break;
+            case 30:
+
+              if(oldLimit[30] < j['quantity']){
+                totalHumidity += j['quantity'] - oldLimit[30] as int;
+                for (var k = 0; k < totalHumidity; k++) {
+                  connHumidity.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+              }
+              break;
+            case 31:
+              if(oldLimit[31] < j['quantity']){
+                totalLeafWetness += j['quantity'] - oldLimit[31] as int;
+                for (var k = 0; k < totalLeafWetness; k++) {
+                  connLeafWetness.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+              }
+              break;
+            case 32:
+
+              if(oldLimit[32] < j['quantity']){
+                totalRainGauge += j['quantity'] - oldLimit[32] as int;
+                for (var k = 0; k < totalRainGauge; k++) {
+                  connRainGauge.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+              }
+              break;
+            case 33:
+              if(oldLimit[33] < j['quantity']){
+                for (var k = 0; k < j['quantity'] - oldLimit[33]; k++) {
+                  totalContact.add({
+                    'sNo': returnI_O_AutoIncrement(),
+                    'rtu': '-',
+                    'rfNo': '-',
+                    'input': '-',
+                    'input_type': '-',
+                  });
+                }
+              }
+              break;
+            case 34:
+              if(oldLimit[34] < j['quantity']){
+                totalIrrigationLine += j['quantity'] - oldLimit[34] as int;
+              }
+              break;
+            case 35:
+              if(oldLimit[35] < j['quantity']){
+                totalCentralDosing += j['quantity'] - oldLimit[35] as int;
+              }
+              break;
+            case 36:
+              if(oldLimit[36] < j['quantity']){
+                totalCentralFiltration += j['quantity'] - oldLimit[36] as int;
+              }
+              break;
+            case 45:
+              var src = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
+              if(oldLimit[45] < j['quantity']){
+                for(var i = totalWaterSource.length;i < j['quantity'] - oldLimit[45];i++){
+                  totalWaterSource.add({
+                    'sNo' : returnI_O_AutoIncrement(),
+                    'id' : 'WS${i+1}',
+                    'name' : 'Water Source ${src[i]}',
+                    'location' : ''
+                  });
+                  waterSource.add(src[i]);
+                }
+              }
+              break;
+          }
+        }
+      }
+    }
     notifyListeners();
   }
   String spName = 'Source Pump';

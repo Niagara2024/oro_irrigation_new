@@ -12,9 +12,10 @@ import 'irrigation_program_main.dart';
 class ProgramLibraryScreen extends StatefulWidget {
   final int userId;
   final int controllerId;
+  final String deviceId;
 
   const ProgramLibraryScreen(
-      {Key? programLibraryKey, required this.userId, required this.controllerId})
+      {Key? programLibraryKey, required this.userId, required this.controllerId, required this.deviceId})
       : super(key: programLibraryKey);
 
   @override
@@ -62,28 +63,7 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
                   } else {
                     mainProvider.selectedProgramType = 'Irrigation Program';
                     mainProvider.updateIsIrrigationProgram();
-                    mainProvider.programLibrary!.program.length <= mainProvider.programLibrary!.programLimit ?
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => IrrigationProgram(
-                          userId: widget.userId,
-                          controllerId: widget.controllerId,
-                          serialNumber: mainProvider.programLibrary!.program.any((element) => element.programName.isEmpty)
-                              ? mainProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty).serialNumber : 0,
-                          conditionsLibraryIsNotEmpty: mainProvider.conditionsLibraryIsNotEmpty,
-                          programType: mainProvider.programLibrary!.program.any((element) => element.programName.isEmpty)
-                              ? mainProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty).programType : null,
-                        ),
-                      ),
-                    ) :
-                    CustomAlertDialog(
-                        title: "Alert",
-                        content: "The program limit is exceeded as defined in the Constants!",
-                        actions: [
-                          TextButton(onPressed: () => Navigator.of(context).pop(), child: Text("OK"))
-                        ]
-                    );
+                    _navigateProgramOnCondition(mainProvider);
                   }
                 },
                 icon: const Icon(Icons.add),
@@ -96,59 +76,68 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
     );
   }
 
+  void _navigation(IrrigationProgramMainProvider mainProvider) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => IrrigationProgram(
+          userId: widget.userId,
+          controllerId: widget.controllerId,
+          serialNumber: mainProvider.programLibrary!.program.any((element) => element.programName.isEmpty)
+              ? mainProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty).serialNumber : 0,
+          conditionsLibraryIsNotEmpty: mainProvider.conditionsLibraryIsNotEmpty,
+          programType: mainProvider.programLibrary!.program.any((element) => element.programName.isEmpty)
+              ? mainProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty).programType : null, deviceId: widget.deviceId,
+        ),
+      ),
+    );
+  }
+
+  void _programAlert() {
+    showAdaptiveDialog(context: context, builder: (context) => CustomAlertDialog(
+        title: "Alert",
+        content: "The program limit is exceeded as defined in the Constants!",
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(), child: Text("OK"))
+        ]
+    ));
+  }
+
+  void _navigateProgramOnCondition(IrrigationProgramMainProvider mainProvider) {
+    mainProvider.programLibrary!.program.where((element) => element.programName.isNotEmpty).length < mainProvider.programLibrary!.programLimit
+        ? _navigation(mainProvider) : _programAlert();
+  }
+
   Widget _buildProgramList(IrrigationProgramMainProvider mainProvider, constraints) {
     return mainProvider.programLibrary?.program != null
         ? (mainProvider.programLibrary!.program.isNotEmpty
         ? _buildProgramListView(mainProvider, constraints)
-        : Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "Programs not yet created, To create a program tap the '+' icon button",
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 10,),
-                IconButton(
-                  onPressed: () {
-                    if (mainProvider.programLibrary?.agitatorCount != 0) {
-                      _showAdaptiveDialog(context, mainProvider);
-                    } else {
-                      mainProvider.selectedProgramType = 'Irrigation Program';
-                      mainProvider.updateIsIrrigationProgram();
-                      mainProvider.programLibrary!.program.length <= mainProvider.programLibrary!.programLimit ?
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => IrrigationProgram(
-                            userId: widget.userId,
-                            controllerId: widget.controllerId,
-                            serialNumber: mainProvider.programLibrary!.program.any((element) => element.programName.isEmpty)
-                                ? mainProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty).serialNumber : 0,
-                            conditionsLibraryIsNotEmpty: mainProvider.conditionsLibraryIsNotEmpty,
-                            programType: mainProvider.programLibrary!.program.any((element) => element.programName.isEmpty)
-                                ? mainProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty).programType : null,
-                          ),
-                        ),
-                      ) :
-                      CustomAlertDialog(
-                          title: "Alert",
-                          content: "The program limit is exceeded as defined in the Constants!",
-                          actions: [
-                            TextButton(onPressed: () => Navigator.of(context).pop(), child: Text("OK"))
-                          ]
-                      );
-                    }
-                  },
-                  icon: Icon(Icons.add),
-                )
-              ],
+        : Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              "Programs not yet created",
+              textAlign: TextAlign.center,
             ),
           ),
-        ))
+          OutlinedButton(
+            onPressed: () {
+              if (mainProvider.programLibrary?.agitatorCount != 0) {
+                _showAdaptiveDialog(context, mainProvider);
+              } else {
+                mainProvider.selectedProgramType = 'Irrigation Program';
+                mainProvider.updateIsIrrigationProgram();
+                _navigateProgramOnCondition(mainProvider);
+              }
+            },
+            child: const Text("Create new Program"),
+          )
+        ],
+      ),
+    ))
         : const Center(child: CircularProgressIndicator());
   }
 
@@ -170,28 +159,7 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
                 } else {
                   mainProvider.selectedProgramType = 'Irrigation Program';
                   mainProvider.updateIsIrrigationProgram();
-                  mainProvider.programLibrary!.program.length <= mainProvider.programLibrary!.programLimit ?
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => IrrigationProgram(
-                        userId: widget.userId,
-                        controllerId: widget.controllerId,
-                        serialNumber: mainProvider.programLibrary!.program.any((element) => element.programName.isEmpty)
-                            ? mainProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty).serialNumber : 0,
-                        conditionsLibraryIsNotEmpty: mainProvider.conditionsLibraryIsNotEmpty,
-                        programType: mainProvider.programLibrary!.program.any((element) => element.programName.isEmpty)
-                            ? mainProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty).programType : null,
-                      ),
-                    ),
-                  ) :
-                  CustomAlertDialog(
-                      title: "Alert",
-                      content: "The program limit is exceeded as defined in the Constants!",
-                      actions: [
-                        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text("OK"))
-                      ]
-                  );
+                  _navigateProgramOnCondition(mainProvider);
                 }
               },
               child: const Text("Create new Program"),
@@ -204,28 +172,7 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
                 } else {
                   mainProvider.selectedProgramType = 'Irrigation Program';
                   mainProvider.updateIsIrrigationProgram();
-                  mainProvider.programLibrary!.program.length <= mainProvider.programLibrary!.programLimit ?
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => IrrigationProgram(
-                        userId: widget.userId,
-                        controllerId: widget.controllerId,
-                        serialNumber: mainProvider.programLibrary!.program.any((element) => element.programName.isEmpty)
-                            ? mainProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty).serialNumber : 0,
-                        conditionsLibraryIsNotEmpty: mainProvider.conditionsLibraryIsNotEmpty,
-                        programType: mainProvider.programLibrary!.program.any((element) => element.programName.isEmpty)
-                            ? mainProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty).programType : null,
-                      ),
-                    ),
-                  ) :
-                  CustomAlertDialog(
-                      title: "Alert",
-                      content: "The program limit is exceeded as defined in the Constants!",
-                      actions: [
-                        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text("OK"))
-                      ]
-                  );
+                  _navigateProgramOnCondition(mainProvider);
                 }
               },
               icon: const Icon(Icons.add),
@@ -247,28 +194,7 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
                 } else {
                   mainProvider.selectedProgramType = 'Irrigation Program';
                   mainProvider.updateIsIrrigationProgram();
-                  mainProvider.programLibrary!.program.length <= mainProvider.programLibrary!.programLimit ?
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => IrrigationProgram(
-                        userId: widget.userId,
-                        controllerId: widget.controllerId,
-                        serialNumber: mainProvider.programLibrary!.program.any((element) => element.programName.isEmpty)
-                            ? mainProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty).serialNumber : 0,
-                        conditionsLibraryIsNotEmpty: mainProvider.conditionsLibraryIsNotEmpty,
-                        programType: mainProvider.programLibrary!.program.any((element) => element.programName.isEmpty)
-                            ? mainProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty).programType : null,
-                      ),
-                    ),
-                  ) :
-                  CustomAlertDialog(
-                      title: "Alert",
-                      content: "The program limit is exceeded as defined in the Constants!",
-                      actions: [
-                        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text("OK"))
-                      ]
-                  );
+                  _navigateProgramOnCondition(mainProvider);
                 }
               },
               child: const Text("Create new Program"),
@@ -393,7 +319,7 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
           controllerId: widget.controllerId,
           serialNumber: program.serialNumber,
           programType: program.programType,
-          conditionsLibraryIsNotEmpty: mainProvider.conditionsLibraryIsNotEmpty,
+          conditionsLibraryIsNotEmpty: mainProvider.conditionsLibraryIsNotEmpty, deviceId: widget.deviceId,
         ),
       ),
     );
@@ -665,13 +591,13 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
                           subtitle: 'Description',
                           showSubTitle: false,
                           content: Icons.priority_high,
-                          includeNoneOption: false,
                           dropdownItems: mainProvider.priorityList.map((item) => item).toList(),
                           selectedValue: program.priority,
                           onChanged: (newValue) {
                             mainProvider.updatePriority(newValue, index);
                             _programNameFocusNode.unfocus();
                           },
+                          includeNoneOption: false,
                         ),
                       ),
                     ],
@@ -772,7 +698,7 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
       builder: (BuildContext dialogContext) =>
           Consumer<IrrigationProgramMainProvider>(
             builder: (context, programProvider, child) {
-              if(programProvider.programLibrary!.program.length <= programProvider.programLibrary!.programLimit){
+              if(programProvider.programLibrary!.program.where((element) => element.programName.isNotEmpty).length < programProvider.programLibrary!.programLimit){
                 return AlertDialog(
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -803,7 +729,7 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
                                       ? programProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty && element.programType == "Irrigation Program").serialNumber : 0,
                                   conditionsLibraryIsNotEmpty: programProvider.conditionsLibraryIsNotEmpty,
                                   programType: programProvider.programLibrary!.program.any((element) => element.programName.isEmpty && element.programType == "Irrigation Program")
-                                      ? programProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty && element.programType == "Irrigation Program").programType : programProvider.selectedProgramType,
+                                      ? programProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty && element.programType == "Irrigation Program").programType : programProvider.selectedProgramType, deviceId: widget.deviceId,
                                 ),
                               ),
                             );
@@ -820,7 +746,7 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
                                   conditionsLibraryIsNotEmpty: programProvider.conditionsLibraryIsNotEmpty,
                                   programType: programProvider.programLibrary!.program.any((element) => element.programName.isEmpty && element.programType == "Agitator Program")
                                       ? programProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty
-                                      && element.programType == "Agitator Program").programType : null,
+                                      && element.programType == "Agitator Program").programType : null, deviceId: widget.deviceId,
                                 ),
                               ),
                             );

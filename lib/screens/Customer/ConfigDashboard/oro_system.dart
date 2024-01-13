@@ -16,8 +16,50 @@ class ConnectedCircles extends StatelessWidget {
               image: AssetImage('assets/images/irrigation_image.jpg')
           )
       ),
-      child: CustomPaint(
-        painter: CirclesPainter(myList: list),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          // Container(
+          //   width: 300,
+          //   height: 300,
+          //   child: Column(
+          //     children: [
+          //       ListTile(
+          //         leading: Icon(Icons.square,color: Colors.teal,),
+          //         title: Text('ORO PUMP'),
+          //       ),
+          //       ListTile(
+          //         leading: Icon(Icons.square,color: Colors.teal,),
+          //         title: Text('ORO PUMP'),
+          //       ),
+          //       ListTile(
+          //         leading: Icon(Icons.square,color: Colors.teal,),
+          //         title: Text('ORO PUMP'),
+          //       ),
+          //       ListTile(
+          //         leading: Icon(Icons.square,color: Colors.teal,),
+          //         title: Text('ORO PUMP'),
+          //       ),
+          //       ListTile(
+          //         leading: Icon(Icons.square,color: Colors.teal,),
+          //         title: Text('ORO PUMP'),
+          //       ),
+          //       ListTile(
+          //         leading: Icon(Icons.square,color: Colors.teal,),
+          //         title: Text('ORO PUMP'),
+          //       ),
+          //
+          //     ],
+          //   ),
+          // ),
+          Container(
+            width: 300,
+            height: 300,
+            child: CustomPaint(
+              painter: CirclesPainter(myList: list),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -31,8 +73,8 @@ class CirclesPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final double centerX = size.width / 2;
     final double centerY = size.height / 2;
-    final double mainCircleRadius = 100.0;
-    final double connectedCircleRadius = 60.0;
+    final double mainCircleRadius = 50.0;
+    final double connectedCircleRadius = 50.0;
     final double lineOffset = 10.0; // Adjust this value to control the line offset
     final int numberOfCircles = myList.length;
 
@@ -41,16 +83,35 @@ class CirclesPainter extends CustomPainter {
     final textStyle = TextStyle(color: Colors.black, fontSize: 14.0);
     for (int i = 0; i < numberOfCircles; i++) {
       final angle = (i * 2 * pi) / numberOfCircles;
-      final x = centerX + cos(angle) * (mainCircleRadius + connectedCircleRadius * 2.5);
-      final y = centerY + sin(angle) * (mainCircleRadius + connectedCircleRadius * 2.5);
+      final x = centerX + cos(angle) * (mainCircleRadius + connectedCircleRadius * 2);
+      final y = centerY + sin(angle) * (mainCircleRadius + connectedCircleRadius * 2);
 
       // Draw surrounding circle
-      canvas.drawCircle(Offset(x, y), connectedCircleRadius, connectedCirclePaint);
+      if(i == 0){
+        canvas.drawCircle(Offset(x, y), connectedCircleRadius, connectedCirclePaint);
+
+      }else if(i == 1){
+        canvas.drawCircle(Offset(x, y), connectedCircleRadius, Paint()..color = Colors.teal.shade100);
+      }else if(i == 2){
+        canvas.drawCircle(Offset(x, y), connectedCircleRadius, Paint()..color = Colors.brown.shade100);
+      }else if(i == 3){
+        canvas.drawCircle(Offset(x, y), connectedCircleRadius, Paint()..color = Colors.yellow.shade100);
+      }else if(i == 4){
+        canvas.drawCircle(Offset(x, y), connectedCircleRadius, Paint()..color = Colors.blue.shade100);
+      }else if(i == 5){
+        canvas.drawCircle(Offset(x, y), connectedCircleRadius, Paint()..color = Colors.cyan.shade100);
+      }else if(i == 6){
+        canvas.drawCircle(Offset(x, y), connectedCircleRadius, Paint()..color = Colors.green.shade100);
+      }else{
+        canvas.drawCircle(Offset(x, y), connectedCircleRadius, Paint()..color = Colors.red.shade100);
+
+      }
 
       // Display name for the surrounding circles
       final text = '${myList[i]['name']}(${myList[i]['count']})';
+      // final text = '${myList[i]['count']}';
       final textPainter = TextPainter(
-        text: TextSpan(text: text, style: textStyle),
+        text: TextSpan(text: text, style: TextStyle(fontSize: 12)),
         textAlign: TextAlign.center,
         textDirection: TextDirection.ltr,
       );

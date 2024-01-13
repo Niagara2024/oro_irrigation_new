@@ -156,6 +156,7 @@ class _CreateAccountState extends State<CreateAccount> {
                       if(value==null ||value.isEmpty){
                         return 'Please fill out this field';
                       }
+                      return null;
                     },
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
@@ -173,6 +174,7 @@ class _CreateAccountState extends State<CreateAccount> {
                       if(value==null ||value.isEmpty){
                         return 'Please fill out this field';
                       }
+                      return null;
                     },
                     inputDecoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
@@ -185,7 +187,6 @@ class _CreateAccountState extends State<CreateAccount> {
                           }),
                     ),
                     onInputChanged: (PhoneNumber number) {
-
                     },
 
                     selectorConfig: const SelectorConfig(
@@ -213,6 +214,7 @@ class _CreateAccountState extends State<CreateAccount> {
                       if(value==null ||value.isEmpty){
                         return 'Please fill out this field';
                       }
+                      return null;
                     },
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
@@ -230,7 +232,7 @@ class _CreateAccountState extends State<CreateAccount> {
                         controller: ddCountryList,
                         errorText: showConError ? 'Select Country' : null,
                         hintText: 'Country',
-                        width: 297,
+                        width: 296,
                         //label: const Text('Category'),
                         dropdownMenuEntries: selectedCountry,
                         inputDecorationTheme: const InputDecorationTheme(
@@ -257,7 +259,7 @@ class _CreateAccountState extends State<CreateAccount> {
                         controller: ddStateList,
                         errorText: showConError ? 'Select State' : null,
                         hintText: 'State',
-                        width: 297,
+                        width: 296,
                         //label: const Text('Category'),
                         dropdownMenuEntries: selectedState,
                         inputDecorationTheme: const InputDecorationTheme(

@@ -73,7 +73,10 @@ class _watersourceUIState extends State<watersourceUI>
 
   @override
   Widget build(BuildContext context) {
-    if (_watersource.data == null) {
+    if (_watersource.code != 200) {
+      return Center(child: Text( _watersource.message ?? 'Currently No Water source Available'));
+    }
+    else if (_watersource.data == null) {
       return const Center(child: CircularProgressIndicator());
     } else if (_watersource.data!.isEmpty) {
       return const Center(child: Text('Currently No Water source Available'));
@@ -176,7 +179,7 @@ class _watersourceUIState extends State<watersourceUI>
       return Container(
         child: DataTable2(
             headingRowColor: MaterialStateProperty.all<Color>(
-                primaryColorDark.withOpacity(0.2)),
+                primaryColorDark),
             // fixedCornerColor: myTheme.primaryColor,
             columnSpacing: 12,
             horizontalMargin: 12,
@@ -192,8 +195,9 @@ class _watersourceUIState extends State<watersourceUI>
                       'Sno',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
-                        fontWeight: FontWeight.bold,
+                          fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white
                       ),
                       softWrap: true,
                     )),
@@ -204,8 +208,9 @@ class _watersourceUIState extends State<watersourceUI>
                       'Water Source Name',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
-                        fontWeight: FontWeight.bold,
+                          fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white
                       ),
                       softWrap: true,
                     )),
@@ -217,8 +222,9 @@ class _watersourceUIState extends State<watersourceUI>
                       'VALUE',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
-                        fontWeight: FontWeight.bold,
+                          fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white
                       ),
                       softWrap: true,
                     )),
@@ -226,7 +232,7 @@ class _watersourceUIState extends State<watersourceUI>
             ],
             rows: [
 
-              DataRow(cells: [
+              DataRow(color: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),cells: [
                 DataCell(Center(child: Text("${Listofvalue?[0].sNo}",))),
                 DataCell(Center(
                   child: Text(
@@ -257,7 +263,7 @@ class _watersourceUIState extends State<watersourceUI>
                         ? dropdownlist[0]
                         : Listofvalue?[0].value)),
               ]),
-              DataRow(cells: [
+              DataRow(color: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),cells: [
                 DataCell(Center(child: Text("${Listofvalue?[1].sNo}",))),
                 DataCell(Center(
                   child: Text(
@@ -295,7 +301,7 @@ class _watersourceUIState extends State<watersourceUI>
                   ),
                 ),
               ]),
-              DataRow(cells: [
+              DataRow(color: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),cells: [
                 DataCell(Center(child: Text("${Listofvalue?[2].sNo}",))),
                 DataCell(Center(
                   child: Text(
@@ -333,7 +339,7 @@ class _watersourceUIState extends State<watersourceUI>
                   ),
                 ),
               ]),
-              DataRow(cells: [
+              DataRow(color: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),cells: [
                 DataCell(Center(child: Text("${Listofvalue?[3].sNo}",))),
                 DataCell(Center(
                   child: Text(
@@ -607,6 +613,8 @@ class _watersourceUIState extends State<watersourceUI>
 
       String name = '${data[i].name}';
 
+      String location = '${data[i].location}';
+
       String mode = '0';
       if (data[i].source![0].value!! == 'Static') {
         mode = '1';
@@ -627,7 +635,7 @@ class _watersourceUIState extends State<watersourceUI>
           ? '00:00:00'
           : '${data[i].source![3].value!}:00';
 
-      Mqttdata += '$sno,$id,$name,$mode,$Pump,$line,$flow;';
+      Mqttdata += '$sno,$id,$name,$Pump,$location,$line,$flow,$mode;';
     }
     return Mqttdata;
   }

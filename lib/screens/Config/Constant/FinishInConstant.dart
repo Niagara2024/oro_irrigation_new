@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:oro_irrigation_new/constants/MQTTManager.dart';
 import 'package:provider/provider.dart';
 
 import '../../../constants/http_service.dart';
@@ -9,8 +10,9 @@ import '../../../constants/theme.dart';
 import '../../../state_management/constant_provider.dart';
 
 class FinishInConstant extends StatefulWidget {
-  const FinishInConstant({super.key, required this.userId, required this.controllerId, required this.customerId});
+  const FinishInConstant({super.key, required this.userId, required this.controllerId, required this.customerId, required this.deviceId});
   final userId, controllerId, customerId;
+  final String deviceId;
 
   @override
   State<FinishInConstant> createState() => _FinishInConstantState();
@@ -91,7 +93,7 @@ class _FinishInConstantState extends State<FinishInConstant> {
                             }
                             print('jsonData : ${jsonData['code']}');
                             // constantPvd.sendDataToHW();
-                            //MqttWebClient().publishMessage('AppToFirmware/${widget.controllerId}', jsonEncode(constantPvd.sendDataToHW()));
+                            MQTTManager().publish(jsonEncode(constantPvd.sendDataToHW()), 'AppToFirmware/${widget.deviceId}');
                           }catch(e){
                             print(e.toString());
                           }

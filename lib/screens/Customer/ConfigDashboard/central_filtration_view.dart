@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oro_irrigation_new/screens/Customer/ConfigDashboard/pumpView.dart';
+import 'package:oro_irrigation_new/screens/Customer/configDashboard/pumpView.dart';
 
 import '../../../constants/theme.dart';
 
@@ -120,19 +120,22 @@ class _CentralFiltrationViewState extends State<CentralFiltrationView> {
                                 ],
                               ),
                             ),
+                            const SizedBox(height: 5,),
 
                             expandAndCollaps(index,'filterVisible','filter','filter'),
                             if(widget.centralFiltration[index]['visible'])
                               if(widget.centralFiltration[index]['filterVisible'])
                                 for(var i = 0;i < widget.centralFiltration[index]['filterConnection'].length;i++)
                                   object('${widget.centralFiltration[index]['filterConnection'][i]['name']}',true,widget.centralFiltration[index]['filterConnection'][i],index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+                            const SizedBox(height: 5,),
 
                             if(check([widget.centralFiltration[index]['dv']],false))
-                              expandAndCollaps(index,'dvVisible','downstream_valve','downstream valve'),
+                              expandAndCollaps(index,'dvVisible','relief_valve','downstream valve'),
                             if(check([widget.centralFiltration[index]['dv']],false))
                               if(widget.centralFiltration[index]['visible'])
                                 if(widget.centralFiltration[index]['dvVisible'])
                                   object('dv',true,widget.centralFiltration[index]['dv'],index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+                            const SizedBox(height: 5,),
 
                             if(check([widget.centralFiltration[index]['pressureIn']],false) == true || check([widget.centralFiltration[index]['pressureOut']],false) || check([widget.centralFiltration[index]['diffPressureSensor']],false))
                               expandAndCollaps(index,'psVisible','pressure_sensor','pressure sensor'),
@@ -148,6 +151,7 @@ class _CentralFiltrationViewState extends State<CentralFiltrationView> {
                               if(widget.centralFiltration[index]['visible'])
                                 if(widget.centralFiltration[index]['psVisible'])
                                   object('Diff. Pressure Sensor',false,widget.centralFiltration[index]['diffPressureSensor'],index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+                            const SizedBox(height: 5,),
 
                             if(check([widget.centralFiltration[index]['pressureSwitch']],false))
                               expandAndCollaps(index,'pSwitchVisible','pressure_switch','pressure switch'),
@@ -184,10 +188,11 @@ class _CentralFiltrationViewState extends State<CentralFiltrationView> {
                 }, icon: Icon(widget.centralFiltration[index][title] == true ? Icons.add_box_rounded : Icons.indeterminate_check_box)
             ),
             SizedBox(
-              width: 35,
-              height: 35,
+              width: 30,
+              height: 30,
               child: Image.asset('assets/images/$image.png'),
             ),
+            SizedBox(width: 5,),
             Text('$name')
           ],
         ),

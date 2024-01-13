@@ -144,7 +144,7 @@ class _ConditionUIState extends State<FrostMobUI>
         child: Container(
             child: DataTable2(
               headingRowColor: MaterialStateProperty.all<Color>(
-                  primaryColorDark.withOpacity(0.2)),
+                  primaryColorDark),
               // fixedCornerColor: myTheme.primaryColor,
               columnSpacing: 12,
               horizontalMargin: 12,
@@ -160,8 +160,9 @@ class _ConditionUIState extends State<FrostMobUI>
                         'Sno',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
-                          fontWeight: FontWeight.bold,
+                            fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white
                         ),
                         softWrap: true,
                       )),
@@ -172,8 +173,8 @@ class _ConditionUIState extends State<FrostMobUI>
                         'Names',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
-                          fontWeight: FontWeight.bold,
+                            fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
+                            fontWeight: FontWeight.bold, color: Colors.white
                         ),
                         softWrap: true,
                       )),
@@ -185,73 +186,74 @@ class _ConditionUIState extends State<FrostMobUI>
                         'VALUE',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
-                          fontWeight: FontWeight.bold,
+                            fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
+                            fontWeight: FontWeight.bold, color: Colors.white
                         ),
                         softWrap: true,
                       )),
                 ),
               ],
-              rows: List<DataRow>.generate(Listofvalue!.length, (index) => DataRow(cells: [
-                DataCell(Center(child: Text('${index + 1}'))),
-                DataCell(Center(child: Text(Listofvalue![index].title!))),
-                DataCell(Center(child: Listofvalue![index].widgetTypeId == 2 ?  Container(
-                  child: ListTile(
-                    trailing: MySwitch(
-                      value: Listofvalue[index].value == '1',
-                      onChanged: ((value) {
-                        setState(() {
-                          Listofvalue[index].value = !value ? '0' : '1';
-                          _frostProtectionModel.frostProtection![index].value = !value ? '0' : '1';
-                        });
-                        // Listofvalue?[index].value = value;
-                      }),
-                    ),
-                  ),
-                ) :  Container(
-                    child: ListTile(
-                      trailing: SizedBox(
-                          width: 100,
-                          child: Center(
-                            child: TextFormField(
-                              textAlign: TextAlign.center,
-                              onChanged: (text) {
-                                setState(() {
-                                  _currentSelection == 0
-                                      ? _frostProtectionModel
-                                      .frostProtection![index].value = text
-                                      : _frostProtectionModel.rainDelay![index]
-                                      .value =
-                                      text;
-                                });
-                              },
-                              decoration: InputDecoration(hintText: '0'),
-                              initialValue:
-                              '${Listofvalue?[index].value == ''
-                                  ? ''
-                                  : Listofvalue?[index].value}' ??
-                                  '',
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Value is required';
-                                } else {
-                                  setState(() {
-                                    _currentSelection == 0
-                                        ? _frostProtectionModel
-                                        .frostProtection![index].value = value
-                                        : _frostProtectionModel
-                                        .rainDelay![index].value = value;
-                                  });
-                                }
-                                return null;
-                              },
-                            ),
-                          )),
-                    )))),
-              ])),
+              rows: List<DataRow>.generate(Listofvalue!.length, (index) => DataRow(
+                  color: index % 2 == 0 ? MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.05))
+                      : MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
+                  cells: [
+                    DataCell(Center(child: Text('${index + 1}'))),
+                    DataCell(Center(child: Text(Listofvalue![index].title!))),
+                    DataCell(Center(child: Listofvalue![index].widgetTypeId == 2 ?  Container(
+                      child: MySwitch(
+                        value: Listofvalue[index].value == '1',
+                        onChanged: ((value) {
+                          setState(() {
+                            Listofvalue[index].value = !value ? '0' : '1';
+                            _frostProtectionModel.frostProtection![index].value = !value ? '0' : '1';
+                          });
+                          // Listofvalue?[index].value = value;
+                        }),
+                      ),
+                    )  :  Container(
+                        child: ListTile(
+                          trailing: SizedBox(
+                              width: 100,
+                              child: Center(
+                                child: TextFormField(
+                                  textAlign: TextAlign.center,
+                                  onChanged: (text) {
+                                    setState(() {
+                                      _currentSelection == 0
+                                          ? _frostProtectionModel
+                                          .frostProtection![index].value = text
+                                          : _frostProtectionModel.rainDelay![index]
+                                          .value =
+                                          text;
+                                    });
+                                  },
+                                  decoration: InputDecoration(hintText: '0'),
+                                  initialValue:
+                                  '${Listofvalue?[index].value == ''
+                                      ? ''
+                                      : Listofvalue?[index].value}' ??
+                                      '',
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly
+                                  ],
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Value is required';
+                                    } else {
+                                      setState(() {
+                                        _currentSelection == 0
+                                            ? _frostProtectionModel
+                                            .frostProtection![index].value = value
+                                            : _frostProtectionModel
+                                            .rainDelay![index].value = value;
+                                      });
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              )),
+                        )))),
+                  ])),
 
             )),
       );
@@ -366,7 +368,7 @@ class _ConditionUIState extends State<FrostMobUI>
         child: Container(
             child: DataTable2(
               headingRowColor: MaterialStateProperty.all<Color>(
-                  primaryColorDark.withOpacity(0.2)),
+                  primaryColorDark),
               // fixedCornerColor: myTheme.primaryColor,
               columnSpacing: 12,
               horizontalMargin: 12,
@@ -382,8 +384,9 @@ class _ConditionUIState extends State<FrostMobUI>
                         'Sno',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
-                          fontWeight: FontWeight.bold,
+                            fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white
                         ),
                         softWrap: true,
                       )),
@@ -394,9 +397,9 @@ class _ConditionUIState extends State<FrostMobUI>
                         'Names',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: FontSizeUtils.fontSizeHeading(context) ??
-                              16,
-                          fontWeight: FontWeight.bold,
+                            fontSize: FontSizeUtils.fontSizeHeading(context) ??
+                                16,
+                            fontWeight: FontWeight.bold, color: Colors.white
                         ),
                         softWrap: true,
                       )),
@@ -408,16 +411,17 @@ class _ConditionUIState extends State<FrostMobUI>
                         'VALUE',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: FontSizeUtils.fontSizeHeading(context) ??
-                              16,
-                          fontWeight: FontWeight.bold,
+                            fontSize: FontSizeUtils.fontSizeHeading(context) ??
+                                16,
+                            fontWeight: FontWeight.bold, color: Colors.white
                         ),
                         softWrap: true,
                       )),
                 ),
               ],
               rows: List<DataRow>.generate(Listofvalue!.length, (index) =>
-                  DataRow(cells: [
+                  DataRow(  color: index % 2 == 0 ? MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.05))
+                      : MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),cells: [
                     DataCell(Center(child: Text('${index + 1}'))),
                     DataCell(Center(child: Text(Listofvalue![index].title!))),
                     DataCell(Center(

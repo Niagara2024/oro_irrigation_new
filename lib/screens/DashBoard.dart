@@ -8,7 +8,6 @@ import 'package:oro_irrigation_new/screens/product_inventory.dart';
 import 'package:oro_irrigation_new/screens/web_view.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../Models/Customer/Dashboard/DashboardNode.dart';
 import '../constants/MQTTManager.dart';
 import '../constants/http_service.dart';
@@ -184,13 +183,13 @@ class _DashboardWideState extends State<DashboardWide> {
   Calendar calendarView = Calendar.day;
   late Widget _centerWidget;
   String currentTap = 'Dashboard';
-
   List<DashboardModel> siteList = [];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
     getCustomerSite();
   }
 
@@ -247,7 +246,6 @@ class _DashboardWideState extends State<DashboardWide> {
       else if (option == 'Sent And Received') {
         _centerWidget = SentAndReceived(customerID: widget.userID, siteList: siteList,);
       }
-
       // Add more conditions for additional options
     });
   }
@@ -255,6 +253,151 @@ class _DashboardWideState extends State<DashboardWide> {
   @override
   Widget build(BuildContext context)  {
     //var appState = Provider.of<MqttPayloadProvider>(context,listen: true);
+    return Scaffold(
+      backgroundColor: myTheme.primaryColor.withOpacity(0.1),
+      body: widget.userType =='3'? Stack(
+        children: [
+          MyDrawer(
+            userName: widget.userName, countryCode: widget.countryCode, phoneNo: widget.mobileNo, onOptionSelected: onOptionSelected, currentTap: currentTap,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 250),
+            child: Container(
+                color:Colors.white,
+                child: _centerWidget
+            ),
+          ),
+        ],
+      ):
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          NavigationRail(
+            selectedIndex: _selectedIndex,
+            backgroundColor: Colors.white,
+            labelType: NavigationRailLabelType.all,
+            indicatorColor: Colors.black,
+            indicatorShape: const CircleBorder(side: BorderSide(color: Colors.black12)),
+            //unselectedIconTheme: const IconThemeData(color: Colors.grey),
+            elevation: 5,
+            leading: Column(
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundImage: AssetImage("assets/images/company_logo.png"),
+                  backgroundColor: Colors.white,
+                ),
+                Divider()
+              ],
+            ),
+            trailing: Expanded(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: IconButton(tooltip: 'Logout', icon: const Icon(Icons.logout, color: Colors.redAccent,),
+                    onPressed: () async {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.remove('userId');
+                      await prefs.remove('userName');
+                      await prefs.remove('countryCode');
+                      await prefs.remove('mobileNumber');
+                      await prefs.remove('subscribeTopic');
+                      if (mounted){
+                        Navigator.pushNamedAndRemoveUntil(context, '/login', ModalRoute.withName('/login'));
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ),
+            onDestinationSelected: (int index) {
+              setState(() {
+                _selectedIndex = index;
+                if(_selectedIndex==0){
+                  appBarTitle = 'Home';
+                }else if(_selectedIndex==1){
+                  appBarTitle = 'Product';
+                }else{
+                  appBarTitle = 'My Preference';
+                }
+              });
+            },
+            destinations: widget.userType == '1'? <NavigationRailDestination>[
+              const NavigationRailDestination(
+                padding: EdgeInsets.only(top: 5),
+                icon: Icon(Icons.dashboard_outlined),
+                selectedIcon: Icon(Icons.dashboard_outlined, color: Color(0xFF0D5D9A),),
+                label: Text(''),
+              ),
+              const NavigationRailDestination(
+                icon: Icon(Icons.add_chart),
+                selectedIcon: Icon(Icons.add_chart, color: Color(0xFF0D5D9A),),
+                label: Text(''),
+              ),
+              const NavigationRailDestination(
+                icon: Icon(Icons.topic_outlined),
+                selectedIcon: Icon(Icons.topic_outlined, color: Color(0xFF0D5D9A),),
+                label: Text(''),
+              ),
+              const NavigationRailDestination(
+                icon: Icon(Icons.settings_outlined),
+                selectedIcon: Icon(Icons.settings_outlined, color: Color(0xFF0D5D9A),),
+                label: Text(''),
+              ),
+              const NavigationRailDestination(
+                icon: Icon(Icons.info_outline),
+                selectedIcon: Icon(Icons.info_outline, color: Color(0xFF0D5D9A),),
+                label: Text(''),
+              ),
+              const NavigationRailDestination(
+                icon: Icon(Icons.help_outline),
+                selectedIcon: Icon(Icons.help_outline, color: Color(0xFF0D5D9A),),
+                label: Text(''),
+              ),
+            ]:
+            <NavigationRailDestination>[
+              const NavigationRailDestination(
+                padding: EdgeInsets.only(top: 5),
+                icon: Icon(Icons.dashboard_outlined),
+                selectedIcon: Icon(Icons.dashboard_outlined, color: Color(0xFF0D5D9A),),
+                label: Text(''),
+              ),
+              const NavigationRailDestination(
+                icon: Icon(Icons.add_chart),
+                selectedIcon: Icon(Icons.add_chart, color: Color(0xFF0D5D9A),),
+                label: Text(''),
+              ),
+              const NavigationRailDestination(
+                icon: Icon(Icons.settings_outlined),
+                selectedIcon: Icon(Icons.settings_outlined, color: Color(0xFF0D5D9A),),
+                label: Text(''),
+              ),
+              const NavigationRailDestination(
+                icon: Icon(Icons.info_outline),
+                selectedIcon: Icon(Icons.info_outline, color: Color(0xFF0D5D9A),),
+                label: Text(''),
+              ),
+              const NavigationRailDestination(
+                icon: Icon(Icons.help_outline),
+                selectedIcon: Icon(Icons.help_outline, color: Color(0xFF0D5D9A),),
+                label: Text(''),
+              ),
+            ],
+          ),
+          Expanded(
+            child: widget.userType =='1'? _selectedIndex == 0 ? AdminDealerHomePage(userName: widget.userName, countryCode: widget.countryCode, mobileNo: widget.mobileNo) :
+            _selectedIndex == 1 ? ProductInventory(userName: widget.userName) :
+            _selectedIndex == 2 ? const AllEntry() : _selectedIndex == 3 ? const MyPreference(userID: 1,) : const MyWebView():
+
+            _selectedIndex == 0 ? AdminDealerHomePage(userName: widget.userName, countryCode: widget.countryCode, mobileNo: widget.mobileNo) :
+            _selectedIndex == 1 ? ProductInventory(userName: widget.userName) :
+            _selectedIndex == 2 ? widget.userType =='1'? const AllEntry() : const MyPreference(userID: 1,) : const MyWebView(),
+          ),
+        ],
+      )
+    );
+
     return widget.userType =='3'? Scaffold(
       body: Stack(
         children: [
@@ -432,7 +575,7 @@ class _DashboardWideState extends State<DashboardWide> {
             ),
           ),
           Expanded(
-            child: _selectedIndex == 0 ? const AdminDealerHomePage() :
+            child: _selectedIndex == 0 ? const AdminDealerHomePage(userName: '', countryCode: '', mobileNo: '',) :
             _selectedIndex == 1 ? ProductInventory(userName: widget.userName) :
             _selectedIndex == 2 ? widget.userType =='1'? const AllEntry() : const MyPreference(userID: 1,) : const MyWebView(),
           ),

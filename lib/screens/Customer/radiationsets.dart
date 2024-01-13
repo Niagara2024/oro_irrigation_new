@@ -71,6 +71,7 @@ class _RadiationsetUIState extends State<RadiationsetUI>
 
   @override
   Widget build(BuildContext context) {
+
     if (_radiationSet.data == null) {
       return Center(child: CircularProgressIndicator());
     } else if (_radiationSet.data!.isEmpty) {
@@ -155,7 +156,8 @@ class _RadiationsetUIState extends State<RadiationsetUI>
               child: DataTable2(
                 dataRowHeight: 40.0,
                 headingRowHeight: 50.0,
-                headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
+                headingRowColor: MaterialStateProperty.all<Color>(
+                    primaryColorDark),
                 fixedCornerColor: myTheme.primaryColor,
                 // border: TableBorder.all(),
                 columns: [
@@ -166,8 +168,9 @@ class _RadiationsetUIState extends State<RadiationsetUI>
                         softWrap: true,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
-                          fontWeight: FontWeight.bold,),
+                            fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
                       )),
                   DataColumn2(
                       size: ColumnSize.L,
@@ -177,8 +180,8 @@ class _RadiationsetUIState extends State<RadiationsetUI>
                           textAlign: TextAlign.right,
                           softWrap: true,
                           style: TextStyle(
-                            fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
-                            fontWeight: FontWeight.bold,),
+                              fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
+                              fontWeight: FontWeight.bold,color: Colors.white),
                         ),
                       )),
                   DataColumn2(
@@ -189,8 +192,8 @@ class _RadiationsetUIState extends State<RadiationsetUI>
                           textAlign: TextAlign.right,
                           softWrap: true,
                           style: TextStyle(
-                            fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
-                            fontWeight: FontWeight.bold,),
+                              fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
+                              fontWeight: FontWeight.bold,color: Colors.white),
                         ),
                       )),
                   DataColumn2(
@@ -203,72 +206,73 @@ class _RadiationsetUIState extends State<RadiationsetUI>
                           textAlign: TextAlign.right,
                           softWrap: true,
                           style: TextStyle(
-                            fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
-                            fontWeight: FontWeight.bold,),
+                              fontSize: FontSizeUtils.fontSizeHeading(context) ?? 16,
+                              fontWeight: FontWeight.bold,color: Colors.white),
                         ),
                       ),
                     ),
                   ),
                 ],
                 rows: [
-                  DataRow(cells: [
-                    DataCell(Text(
-                      "Accumulated radiation threshold ",
-                      style: TextStyle(
-                        fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
-                        fontWeight: FontWeight.bold,),
-                    )),
-                    DataCell(
-                      onTap: () {
-                        setState(() {});
-                      },
-                      TextFormField(
-                        decoration: InputDecoration(border: InputBorder.none,hintText: '0'),
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                        initialValue: list![i].accumulated1 != ''
-                            ? list![i].accumulated1
-                            : '',
-                        textAlign: TextAlign.center,
+                  DataRow(color: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
+                      cells: [
+                        DataCell(Text(
+                          "Accumulated radiation threshold ",
+                          style: TextStyle(
+                            fontSize: FontSizeUtils.fontSizeLabel(context) ?? 16,
+                            fontWeight: FontWeight.bold,),
+                        )),
+                        DataCell(
+                          onTap: () {
+                            setState(() {});
+                          },
+                          TextFormField(
+                            decoration: InputDecoration(border: InputBorder.none,hintText: '0'),
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            initialValue: list![i].accumulated1 != ''
+                                ? list![i].accumulated1
+                                : '',
+                            textAlign: TextAlign.center,
 
-                        onChanged: (value) {
-                          setState(() {
-                            list[i].accumulated1 = value;
-                          });
-                        },
-                      ),
-                    ),
-                    DataCell(
-                      TextFormField(
-                        decoration: InputDecoration(border: InputBorder.none, hintText: '0'),
-                        initialValue: list[i].accumulated2 != ''
-                            ? list[i].accumulated2
-                            : '',
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                        textAlign: TextAlign.center,
-                        onChanged: (value) {
-                          setState(() {
-                            list[i].accumulated2 = value;
-                          });
-                        },
-                      ),
-                    ),
-                    DataCell(
-                      TextFormField(
-                        decoration: InputDecoration(border: InputBorder.none, hintText: '0'),
-                        initialValue: list[i].accumulated3 != ''
-                            ? list[i].accumulated3
-                            : '',
-                        textAlign: TextAlign.center,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                        onChanged: (value) {
-                          setState(() {
-                            list[i].accumulated3 = value;
-                          });
-                        },
-                      ),
-                    ),
-                  ]),
-                  DataRow(cells: [
+                            onChanged: (value) {
+                              setState(() {
+                                list[i].accumulated1 = value;
+                              });
+                            },
+                          ),
+                        ),
+                        DataCell(
+                          TextFormField(
+                            decoration: InputDecoration(border: InputBorder.none, hintText: '0'),
+                            initialValue: list[i].accumulated2 != ''
+                                ? list[i].accumulated2
+                                : '',
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            textAlign: TextAlign.center,
+                            onChanged: (value) {
+                              setState(() {
+                                list[i].accumulated2 = value;
+                              });
+                            },
+                          ),
+                        ),
+                        DataCell(
+                          TextFormField(
+                            decoration: InputDecoration(border: InputBorder.none, hintText: '0'),
+                            initialValue: list[i].accumulated3 != ''
+                                ? list[i].accumulated3
+                                : '',
+                            textAlign: TextAlign.center,
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            onChanged: (value) {
+                              setState(() {
+                                list[i].accumulated3 = value;
+                              });
+                            },
+                          ),
+                        ),
+                      ]),
+                  DataRow(color: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),cells: [
                     DataCell(Text(
                       "Min interval (hh:mm)",
                       style: TextStyle(
@@ -336,7 +340,7 @@ class _RadiationsetUIState extends State<RadiationsetUI>
                       ),
                     ),
                   ]),
-                  DataRow(cells: [
+                  DataRow(color: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),cells: [
                     DataCell(Text(
                       "Max interval (hh:mm)",
                       style: TextStyle(
@@ -404,7 +408,7 @@ class _RadiationsetUIState extends State<RadiationsetUI>
                       ),
                     ),
                   ]),
-                  DataRow(cells: [
+                  DataRow(color: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),cells: [
                     DataCell(Text(
                       " Co - efficient",
                       style: TextStyle(
@@ -442,7 +446,7 @@ class _RadiationsetUIState extends State<RadiationsetUI>
                       ),
                     ),
                   ]),
-                  DataRow(cells: [
+                  DataRow(color: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),cells: [
                     DataCell(Text(
                       " Used by program",
                       style: TextStyle(

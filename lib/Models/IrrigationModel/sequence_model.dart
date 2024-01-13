@@ -542,6 +542,7 @@ class AdditionalData {
   bool localFiltrationBeginningOnly;
   bool pumpStationMode;
   bool programBasedSet;
+  bool programBasedInjector;
 
   AdditionalData(
       {required this.centralFiltrationOperationMode,
@@ -549,19 +550,21 @@ class AdditionalData {
         required this.centralFiltrationBeginningOnly,
         required this.localFiltrationBeginningOnly,
         required this.pumpStationMode,
-        required this.programBasedSet});
+        required this.programBasedSet,
+        required this.programBasedInjector});
 
   factory AdditionalData.fromJson(Map<String, dynamic> json) => AdditionalData(
-      centralFiltrationOperationMode:
-      json['centralFiltrationOperationMode'] ?? "TIME",
-      localFiltrationOperationMode:
-      json['localFiltrationOperationMode'] ?? "TIME",
-      centralFiltrationBeginningOnly:
-      json['centralFiltrationBeginningOnly'] ?? false,
-      localFiltrationBeginningOnly:
-      json['localFiltrationBeginningOnly'] ?? false,
-      pumpStationMode: json['pumpStationMode'] ?? false,
-      programBasedSet: json['programBasedSet'] ?? false);
+    centralFiltrationOperationMode:
+    json['centralFiltrationOperationMode'] ?? "TIME",
+    localFiltrationOperationMode:
+    json['localFiltrationOperationMode'] ?? "TIME",
+    centralFiltrationBeginningOnly:
+    json['centralFiltrationBeginningOnly'] ?? false,
+    localFiltrationBeginningOnly:
+    json['localFiltrationBeginningOnly'] ?? false,
+    pumpStationMode: json['pumpStationMode'] ?? false,
+    programBasedSet: json['programBasedSet'] ?? false,
+    programBasedInjector: json['programBasedInjector'] ?? false,);
 
   Map<String, dynamic> toJson() => {
     "centralFiltrationOperationMode": centralFiltrationOperationMode,
@@ -569,7 +572,8 @@ class AdditionalData {
     "centralFiltrationBeginningOnly": centralFiltrationBeginningOnly,
     "localFiltrationBeginningOnly": localFiltrationBeginningOnly,
     "pumpStationMode": pumpStationMode,
-    "programBasedSet": programBasedSet
+    "programBasedSet": programBasedSet,
+    "programBasedInjector": programBasedInjector
   };
 }
 
@@ -650,7 +654,7 @@ class Recipe {
       name: json['name'],
       location: json['location'],
       selected: json['selected'] ?? false,
-      select: json['select'],
+      select: json['select'] ?? false,
       ec: json['Ec'] ?? "",
       ph: json['Ph'] ?? "",
       fertilizer: fertilizers,

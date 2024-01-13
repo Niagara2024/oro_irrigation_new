@@ -870,7 +870,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
         myList.add('${i+1}');
       }
     }else if(rtu == 'ORO Smart'){
-      for(var i = 0;i < 16;i++){
+      for(var i = 0;i < 8;i++){
         myList.add('${i+1}');
       }
     }else if(rtu == 'O-Smart-Plus'){

@@ -805,124 +805,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                 child: const Text('ADD'),
                                 onPressed: () async
                                 {
-                                  List<int> oldNodeListRfNo = [];
-                                  int refNo = 0;
-                                  String refNoUpdatingNode = '';
-
-                                  List<dynamic> selectedNodeList = [];
-                                  for(int i=0; i<nodeStockSelection.length; i++)
-                                  {
-                                    if(nodeStockSelection[i]==1){
-                                      Map<String, dynamic> myMap = {"productId": widget.nodeStockList[i].productId.toString(), 'categoryName': widget.nodeStockList[i].categoryName, 'referenceNumber': 0, 'serialNumber': i+1};
-                                      selectedNodeList.add(myMap);
-                                    }
-                                  }
-
-                                  if(selectedNodeList.isNotEmpty)
-                                  {
-                                    for(int i = 0; i < selectedNodeList.length; i++)
-                                    {
-                                      if(refNoUpdatingNode != selectedNodeList[i]['categoryName'])
-                                      {
-                                        refNoUpdatingNode = selectedNodeList[i]['categoryName'];
-                                        var contain = widget.usedNodeList[currentSite].where((element) => element.categoryName == refNoUpdatingNode);
-                                        if (contain.isNotEmpty)
-                                        {
-                                          for(int j = 0; j < widget.usedNodeList[currentSite].length; j++)
-                                          {
-                                            if(widget.usedNodeList[currentSite][j].categoryName == refNoUpdatingNode)
-                                            {
-                                              oldNodeListRfNo.add(widget.usedNodeList[currentSite][j].referenceNumber);
-                                            }
-                                          }
-                                          List missingRN = missingArray(oldNodeListRfNo);
-                                          if(missingRN.isNotEmpty)
-                                          {
-                                            refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
-                                            for(int k = 0; k < selectedNodeList.length; k++)
-                                            {
-                                              if(missingRN.isNotEmpty)
-                                              {
-                                                if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
-                                                {
-                                                  selectedNodeList[k]['referenceNumber'] = missingRN[0];
-                                                  missingRN.removeAt(0);
-                                                }
-                                              }else{
-                                                refNo = refNo+1;
-                                                selectedNodeList[k]['referenceNumber'] = refNo;
-                                              }
-                                            }
-                                          }
-                                          else
-                                          {
-                                            refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
-                                            for(int k = 0; k < selectedNodeList.length; k++)
-                                            {
-                                              if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
-                                              {
-                                                refNo = refNo+1;
-                                                selectedNodeList[k]['referenceNumber'] = refNo;
-                                              }
-                                            }
-                                          }
-                                        }
-                                        else
-                                        {
-                                          refNo = 0;
-                                          for(int k = 0; k < selectedNodeList.length; k++)
-                                          {
-                                            if(refNoUpdatingNode == selectedNodeList[k]['categoryName'])
-                                            {
-                                              refNo = refNo+1;
-                                              selectedNodeList[k]['referenceNumber'] = refNo;
-                                            }
-                                          }
-                                        }
-                                      }
-                                      else{
-                                      }
-                                    }
-
-                                    //print(selectedNodeList);
-
-                                    if(selectedNodeList.isNotEmpty)
-                                    {
-                                      Map<String, dynamic> body = {
-                                        "userId": widget.customerID,
-                                        "dealerId": widget.userID,
-                                        "masterId": widget.customerSiteList[currentSite].controllerId,
-                                        "groupId": widget.customerSiteList[currentSite].groupId,
-                                        "products": selectedNodeList,
-                                        "createUser": widget.userID,
-                                      };
-
-                                      final response = await HttpService().postRequest("createUserNodeListWithMaster", body);
-                                      print(response.body);
-                                      if(response.statusCode == 200)
-                                      {
-                                        var data = jsonDecode(response.body);
-                                        if(data["code"]==200)
-                                        {
-                                          setState(() {
-                                            selectedNodeList.clear();
-                                            nodeStockSelection.clear();
-                                            checkboxValueNode = false;
-                                          });
-
-                                          widget.getCustomerSite();
-                                          widget.getNodeStockList();
-                                          Navigator.pop(context);
-                                        }
-                                        else{
-                                          //_showSnackBar(data["message"]);
-                                          //_showAlertDialog('Warning', data["message"]);
-                                        }
-                                      }
-                                    }
-
-                                  }
-
+                                  generateRFNumber();
                                 },
                               ),
                             ],
@@ -1082,7 +965,6 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                               {
                                                 widget.usedNodeList[siteIndex].removeWhere((node) => node.userDeviceListId == widget.usedNodeList[siteIndex][index].userDeviceListId);
                                                 _showSnackBar(data["message"]);
-
                                                 setState(() {
                                                   checkboxValueNode = false;
                                                 });
@@ -1091,6 +973,8 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
                                               else{
                                                 _showSnackBar(data["message"]);
                                               }
+
+                                              //generateRFNumber();
                                             }
 
                                           }, icon: const Icon(Icons.delete_outline, color: Colors.red,)),
@@ -1135,7 +1019,7 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
 
                                     List<dynamic> payLoad = [];
                                     payLoad.add('${1},${widget.customerSiteList[siteIndex].categoryName},${'1'}, ${'1'}, ${widget.customerSiteList[siteIndex].deviceId.toString()},'
-                                        '${'1'},${"00:00:30"};');
+                                        '${'0'},${"00:00:30"};');
 
                                     for(int i=0; i<widget.usedNodeList[siteIndex].length; i++){
 
@@ -1228,6 +1112,127 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
     }
 
     return Center(child: Text('Page of ${widget.label}'));
+  }
+
+  Future<void> generateRFNumber() async
+  {
+    print('generateRFNumber');
+    List<int> oldNodeListRfNo = [];
+    int refNo = 0;
+    String refNoUpdatingNode = '';
+
+    List<dynamic> selectedNodeList = [];
+    for(int i=0; i<nodeStockSelection.length; i++)
+    {
+      if(nodeStockSelection[i]==1){
+        Map<String, dynamic> myMap = {"productId": widget.nodeStockList[i].productId.toString(), 'categoryName': widget.nodeStockList[i].categoryName, 'referenceNumber': 0, 'serialNumber': i+1};
+        selectedNodeList.add(myMap);
+      }
+    }
+
+    if(selectedNodeList.isNotEmpty)
+    {
+      for(int i = 0; i < selectedNodeList.length; i++)
+      {
+        if(refNoUpdatingNode != selectedNodeList[i]['categoryName'])
+        {
+          refNoUpdatingNode = selectedNodeList[i]['categoryName'];
+          var contain = widget.usedNodeList[currentSite].where((element) => element.categoryName == refNoUpdatingNode);
+          if (contain.isNotEmpty)
+          {
+            for(int j = 0; j < widget.usedNodeList[currentSite].length; j++)
+            {
+              if(widget.usedNodeList[currentSite][j].categoryName == refNoUpdatingNode)
+              {
+                oldNodeListRfNo.add(widget.usedNodeList[currentSite][j].referenceNumber);
+              }
+            }
+            List missingRN = missingArray(oldNodeListRfNo);
+            if(missingRN.isNotEmpty)
+            {
+              refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
+              for(int k = 0; k < selectedNodeList.length; k++)
+              {
+                if(missingRN.isNotEmpty)
+                {
+                  if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
+                  {
+                    selectedNodeList[k]['referenceNumber'] = missingRN[0];
+                    missingRN.removeAt(0);
+                  }
+                }else{
+                  refNo = refNo+1;
+                  selectedNodeList[k]['referenceNumber'] = refNo;
+                }
+              }
+            }
+            else
+            {
+              refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
+              for(int k = 0; k < selectedNodeList.length; k++)
+              {
+                if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
+                {
+                  refNo = refNo+1;
+                  selectedNodeList[k]['referenceNumber'] = refNo;
+                }
+              }
+            }
+          }
+          else
+          {
+            refNo = 0;
+            for(int k = 0; k < selectedNodeList.length; k++)
+            {
+              if(refNoUpdatingNode == selectedNodeList[k]['categoryName'])
+              {
+                refNo = refNo+1;
+                selectedNodeList[k]['referenceNumber'] = refNo;
+              }
+            }
+          }
+        }
+        else{
+        }
+      }
+
+      print(selectedNodeList);
+
+      if(selectedNodeList.isNotEmpty)
+      {
+        Map<String, dynamic> body = {
+          "userId": widget.customerID,
+          "dealerId": widget.userID,
+          "masterId": widget.customerSiteList[currentSite].controllerId,
+          "groupId": widget.customerSiteList[currentSite].groupId,
+          "products": selectedNodeList,
+          "createUser": widget.userID,
+        };
+
+        final response = await HttpService().postRequest("createUserNodeListWithMaster", body);
+        print(response.body);
+        if(response.statusCode == 200)
+        {
+          var data = jsonDecode(response.body);
+          if(data["code"]==200)
+          {
+            setState(() {
+              selectedNodeList.clear();
+              nodeStockSelection.clear();
+              checkboxValueNode = false;
+            });
+
+            widget.getCustomerSite();
+            widget.getNodeStockList();
+            Navigator.pop(context);
+          }
+          else{
+            //_showSnackBar(data["message"]);
+            //_showAlertDialog('Warning', data["message"]);
+          }
+        }
+      }
+    }
   }
 
   void _showSnackBar(String message) {

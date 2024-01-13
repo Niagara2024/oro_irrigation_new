@@ -24,8 +24,8 @@ import 'main_valve_in_constant.dart';
 import 'moisture_sensor_in_constant.dart';
 
 class ConstantInConfig extends StatefulWidget {
-  const ConstantInConfig({super.key, required this.userId, required this.controllerId, required this.customerId});
-  final userId, controllerId, customerId;
+  const ConstantInConfig({super.key, required this.userId, required this.controllerId, required this.customerId, required this.deviceId});
+  final dynamic userId, controllerId, customerId, deviceId;
 
   @override
   State<ConstantInConfig> createState() => _ConstantInConfigState();
@@ -151,7 +151,7 @@ class _ConstantInConfigState extends State<ConstantInConfig> with SingleTickerPr
                       const LevelSensorInConstant(),
                       const AlarmInConstant(),
                       const CriticalAlarmInConstant(),
-                      FinishInConstant(userId: widget.userId, controllerId: widget.controllerId, customerId: widget.customerId,)
+                      FinishInConstant(userId: widget.userId, controllerId: widget.controllerId, customerId: widget.customerId, deviceId: widget.deviceId,)
                     ]
                 ),
               )

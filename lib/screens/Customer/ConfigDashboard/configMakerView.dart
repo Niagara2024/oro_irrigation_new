@@ -1,14 +1,15 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:oro_irrigation_new/screens/Customer/ConfigDashboard/pumpView.dart';
-import 'package:oro_irrigation_new/screens/Customer/ConfigDashboard/weather_station_view.dart';
+import 'package:oro_irrigation_new/screens/Customer/configDashboard/central_dosing_view.dart';
 import 'package:oro_irrigation_new/screens/Customer/configDashboard/central_filtration_view.dart';
 import 'package:oro_irrigation_new/screens/Customer/configDashboard/irrigationLineView.dart';
+import 'package:oro_irrigation_new/screens/Customer/configDashboard/pumpView.dart';
+import 'package:oro_irrigation_new/screens/Customer/configDashboard/weather_station_view.dart';
 
 import '../../../constants/http_service.dart';
-import 'central_dosing_view.dart';
 import 'oro_system.dart';
+import 'others_view.dart';
 
 class ConfigMakerView extends StatefulWidget {
   const ConfigMakerView({super.key, required this.userID, required this.customerID, required this.siteID});
@@ -25,6 +26,7 @@ class _ConfigMakerViewState extends State<ConfigMakerView> {
   dynamic centralFiltration = [];
   dynamic irrigationLines = [];
   dynamic weatherStation = [];
+  dynamic others = {};
   dynamic referenceList = [];
   @override
   void initState() {
@@ -62,34 +64,34 @@ class _ConfigMakerViewState extends State<ConfigMakerView> {
       print('myjson : ${jsonData}');
       setState(() {
         if(jsonData['data']['referenceNo']['3'] != null){
-          referenceList.add({'name' : 'ORO PUMP','count' : jsonData['data']['referenceNo']['3'].length});
+          referenceList.add({'name' : 'PUMP','count' : jsonData['data']['referenceNo']['3'].length});
         }
         if(jsonData['data']['referenceNo']['4'] != null){
-          referenceList.add({'name' : 'O-PUMP-PLUS','count' : jsonData['data']['referenceNo']['4'].length});
+          referenceList.add({'name' : 'PUMP-PLUS','count' : jsonData['data']['referenceNo']['4'].length});
         }
         if(jsonData['data']['referenceNo']['6'] != null){
-          referenceList.add({'name' : 'ORO LEVEL','count' : jsonData['data']['referenceNo']['6'].length});
+          referenceList.add({'name' : 'LEVEL','count' : jsonData['data']['referenceNo']['6'].length});
         }
         if(jsonData['data']['referenceNo']['7'] != null){
-          referenceList.add({'name' : 'O-SMART-PLUS','count' : jsonData['data']['referenceNo']['7'].length});
+          referenceList.add({'name' : 'SMART-PLUS','count' : jsonData['data']['referenceNo']['7'].length});
         }
         if(jsonData['data']['referenceNo']['8'] != null){
-          referenceList.add({'name' : 'O-RTU-PLUS','count' : jsonData['data']['referenceNo']['8'].length});
+          referenceList.add({'name' : 'RTU-PLUS','count' : jsonData['data']['referenceNo']['8'].length});
         }
         if(jsonData['data']['referenceNo']['9'] != null){
-          referenceList.add({'name' : 'ORO SWITCH','count' : jsonData['data']['referenceNo']['9'].length});
+          referenceList.add({'name' : 'SWITCH','count' : jsonData['data']['referenceNo']['9'].length});
         }
         if(jsonData['data']['referenceNo']['12'] != null){
-          referenceList.add({'name' : 'ORO SMART','count' : jsonData['data']['referenceNo']['12'].length});
+          referenceList.add({'name' : 'SMART','count' : jsonData['data']['referenceNo']['12'].length});
         }
         if(jsonData['data']['referenceNo']['13'] != null){
-          referenceList.add({'name' : 'ORO RTU','count' : jsonData['data']['referenceNo']['13'].length});
+          referenceList.add({'name' : 'RTU','count' : jsonData['data']['referenceNo']['13'].length});
         }
         if(jsonData['data']['referenceNo']['10'] != null){
-          referenceList.add({'name' : 'ORO SENSE','count' : jsonData['data']['referenceNo']['10'].length});
+          referenceList.add({'name' : 'SENSE','count' : jsonData['data']['referenceNo']['10'].length});
         }
         if(jsonData['data']['referenceNo']['11'] != null){
-          referenceList.add({'name' : 'ORO EXTEND','count' : jsonData['data']['referenceNo']['11'].length});
+          referenceList.add({'name' : 'EXTEND','count' : jsonData['data']['referenceNo']['11'].length});
         }
         for(var pump in jsonData['data']['configMaker']['sourcePump']){
           sp : for(var pumpName in namesData['data']){
@@ -119,6 +121,48 @@ class _ConfigMakerViewState extends State<ConfigMakerView> {
             }
           }
         }
+        others['connTempSensor'] = jsonData['data']['configMaker']['productLimit']['connTempSensor'];
+        others['connTempSensorVisible'] = true;
+        getName(others['connTempSensor'],namesData['data']);
+        others['connSoilTempSensor'] = jsonData['data']['configMaker']['productLimit']['connSoilTempSensor'];
+        getName(others['connSoilTempSensor'],namesData['data']);
+        others['connSoilTempSensorVisible'] = true;
+        others['connHumidity'] = jsonData['data']['configMaker']['productLimit']['connHumidity'];
+        getName(others['connHumidity'],namesData['data']);
+        others['connHumidityVisible'] = true;
+        others['connCo2'] = jsonData['data']['configMaker']['productLimit']['connCo2'];
+        getName(others['connCo2'],namesData['data']);
+        others['connCo2Visible'] = true;
+        others['connLux'] = jsonData['data']['configMaker']['productLimit']['connLux'];
+        getName(others['connLux'],namesData['data']);
+        others['connLuxVisible'] = true;
+        others['connLdr'] = jsonData['data']['configMaker']['productLimit']['connLdr'];
+        getName(others['connLdr'],namesData['data']);
+        others['connLdrVisible'] = true;
+        others['connWindSpeed'] = jsonData['data']['configMaker']['productLimit']['connWindSpeed'];
+        getName(others['connWindSpeed'],namesData['data']);
+        others['connWindSpeedVisible'] = true;
+        others['connWindDirection'] = jsonData['data']['configMaker']['productLimit']['connWindDirection'];
+        getName(others['connWindDirection'],namesData['data']);
+        others['connWindDirectionVisible'] = true;
+        others['connRainGauge'] = jsonData['data']['configMaker']['productLimit']['connRainGauge'];
+        getName(others['connRainGauge'],namesData['data']);
+        others['connRainGaugeVisible'] = true;
+        others['connLeafWetness'] = jsonData['data']['configMaker']['productLimit']['connLeafWetness'];
+        getName(others['connLeafWetness'],namesData['data']);
+        others['connLeafWetnessVisible'] = true;
+        others['totalAnalogSensor'] = jsonData['data']['configMaker']['productLimit']['totalAnalogSensor'];
+        getName(others['totalAnalogSensor'],namesData['data']);
+        others['totalAnalogSensorVisible'] = true;
+        others['totalContact'] = jsonData['data']['configMaker']['productLimit']['totalContact'];
+        getName(others['totalContact'],namesData['data']);
+        others['totalContactVisible'] = true;
+        others['totalAgitator'] = jsonData['data']['configMaker']['productLimit']['totalAgitator'];
+        getName(others['totalAgitator'],namesData['data']);
+        others['totalAgitatorVisible'] = true;
+        others['totalSelector'] = jsonData['data']['configMaker']['productLimit']['totalSelector'];
+        getName(others['totalSelector'],namesData['data']);
+        others['totalSelectorVisible'] = true;
         irrigationLines = jsonData['data']['configMaker']['irrigationLine'];
         getName(irrigationLines,namesData['data']);
         for(var line in irrigationLines){
@@ -240,9 +284,12 @@ class _ConfigMakerViewState extends State<ConfigMakerView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Config View')),
+      // backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: Text('ConfigMaker View'),
+      ),
       body: DefaultTabController(
-        length: 7,
+        length: 8,
         child: Column(
           children: [
             TabBar(
@@ -268,6 +315,9 @@ class _ConfigMakerViewState extends State<ConfigMakerView> {
                   Tab(
                     child: Text('Weather Station'),
                   ),
+                  Tab(
+                    child: Text('Others'),
+                  ),
 
                 ]
             ),
@@ -286,6 +336,7 @@ class _ConfigMakerViewState extends State<ConfigMakerView> {
                       CentralFiltrationView(centralFiltration: centralFiltration),
                       IrrigationLinesView(irrigationLine: irrigationLines),
                       WeatherStationView(weatherStation: weatherStation),
+                      OthersView(others: others)
 
                     ],
                   ),

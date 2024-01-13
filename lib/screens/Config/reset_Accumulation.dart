@@ -56,7 +56,10 @@ class _Reset_AccumalationState extends State<Reset_Accumalation>
 
   @override
   Widget build(BuildContext context) {
-    if (_resetModel.data == null) {
+
+    if (_resetModel.code != 200) {
+      return  Center(child: Text(_resetModel.message ?? 'Currently No data Available'));
+    }   else if (_resetModel.data == null) {
       return const Center(child: CircularProgressIndicator());
     } else if (_resetModel.data!.accumulation!.isEmpty) {
       return const Center(child: Text('Currently No data Available'));

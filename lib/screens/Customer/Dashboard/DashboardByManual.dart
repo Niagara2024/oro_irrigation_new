@@ -14,13 +14,14 @@ import '../../../constants/snack_bar.dart';
 import '../../../constants/theme.dart';
 
 
-enum Segment {manual, duration, flow}
+enum Segment {duration, flow, manual}
 
 class DashboardByManual extends StatefulWidget {
-  const DashboardByManual({Key? key, required this.customerID, required this.siteID, required this.controllerID, required this.siteName, required this.imeiNo, required this.programList}) : super(key: key);
+  const DashboardByManual({Key? key, required this.customerID, required this.siteID, required this.controllerID, required this.siteName, required this.imeiNo, required this.programList, required this.callbackFunction}) : super(key: key);
   final int customerID, siteID, controllerID;
   final String siteName, imeiNo;
   final List<ProgramList> programList;
+  final void Function() callbackFunction;
 
   @override
   State<DashboardByManual> createState() => _DashboardByManualState();
@@ -103,7 +104,6 @@ class _DashboardByManualState extends State<DashboardByManual> {
       final jsonResponse = json.decode(response.body);
       //print(jsonResponse);
       indicatorViewHide();
-
       if (jsonResponse['data'] != null) {
         dynamic data = jsonResponse['data'];
         if (data is Map<String, dynamic>) {
@@ -472,7 +472,7 @@ class _DashboardByManualState extends State<DashboardByManual> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     IconButton(
-                        tooltip: 'Motor ON',
+                        tooltip: 'Start',
                         onPressed: () {
                           standaloneSelection.clear();
                           String strSldSourcePump = buildSelectedItemsString(dashBoardData[0].sourcePump);
@@ -480,7 +480,6 @@ class _DashboardByManualState extends State<DashboardByManual> {
                           String strSldMainValve = buildSelectedItemsString(dashBoardData[0].mainValve);
                           String strSldCtrlFilter = buildSelectedItemsString(dashBoardData[0].centralFilterSite);
                           //String strSldCtrlFrtChanel = buildSelectedItemsString(dashBoardData[0].centralFertilizerSite[0].fertilizer);
-
 
                           String strSldValve = '';
                           Map<String, List<DashBoardValve>> groupedValves = {};
@@ -513,67 +512,35 @@ class _DashboardByManualState extends State<DashboardByManual> {
                             strSldValve
                           ];
 
-                          if (strSldValve.isEmpty) {
-                            GlobalSnackBar.show(context, 'Valve is not open, please open it and try again', 200);
+                          if (strSldIrrigationPump.isNotEmpty && strSldValve.isEmpty) {
+                            showDialog<String>(
+                                context: context,
+                                builder: (BuildContext dgContext) => AlertDialog(
+                                  title: const Text('StandAlone'),
+                                  content: const Text('Valve is not open! Are you sure! You want to Start the Selected Pump?'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(dgContext, 'Cancel'),
+                                      child: const Text('No'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        sendCommandToController(nonEmptyStrings);
+                                        Navigator.pop(dgContext, 'OK');
+                                      },
+                                      child: const Text('Yes'),
+                                    ),
+                                  ],
+                                )
+                            );
                           }else{
-                            String finalResult = nonEmptyStrings.where((s) => s.isNotEmpty).join('_');
-
-                            if(segmentIndex==0){
-                              functionSendPayloadToMqtt(segmentIndex, '0', finalResult);
-                            }else if(segmentIndex==1){
-                              functionSendPayloadToMqtt(segmentIndex, strDuration, finalResult);
-                            }else{
-                              functionSendPayloadToMqtt(segmentIndex, strFlow, finalResult);
-                            }
-
-
-                            String timeRrFlow = '';
-
-                            Map<String, dynamic> manualOperation = {
-                              "method": segmentIndex,
-                              "time": strDuration,
-                              "flow": strFlow,
-                              "selected": standaloneSelection,
-                            };
-
-                            sentManualModeToServer(manualOperation);
-                            standaloneSelection.clear();
+                            sendCommandToController(nonEmptyStrings);
                           }
-
-                          /*if (strSldIrrigationPump.isEmpty) {
-                            GlobalSnackBar.show(context, 'Please select your Irrigation Pump and try again', 200);
-                          }else if (dashBoardData[0].mainValve.isNotEmpty) {
-                            if(strSldMainValve.isEmpty) {
-                              GlobalSnackBar.show(context, 'Please select your Main Valve and try again', 200);
-                            }else if (strSldValve.isEmpty) {
-                              GlobalSnackBar.show(context, 'Valve is not open, please open it and try again', 200);
-                            }
-                            else{
-                              String finalResult = nonEmptyStrings.where((s) => s.isNotEmpty).join('_');
-                              functionSendPayloadToMqtt(segmentIndex, flowOrDuration, finalResult);
-                            }
-                          }else if (strSldValve.isEmpty) {
-                            GlobalSnackBar.show(context, 'Valve is not open, please open it and try again', 200);
-                          }else{
-                            String finalResult = nonEmptyStrings.where((s) => s.isNotEmpty).join('_');
-                            functionSendPayloadToMqtt(segmentIndex, flowOrDuration, finalResult);
-                          }*/
-
                         },
                         icon: Icon(
-                          Icons.play_circle_outline,
+                          Icons.not_started_outlined,
                           size: 30,
                           color: myTheme.primaryColor,
-                        )),
-                    IconButton(
-                        tooltip: 'stop',
-                        onPressed: () {
-                          debugPrint("Bookmark button pressed");
-                        },
-                        icon: const Icon(
-                          Icons.stop_circle_outlined,
-                          size: 30,
-                          color: Colors.red,
                         )),
                   ],
                 ),
@@ -585,18 +552,44 @@ class _DashboardByManualState extends State<DashboardByManual> {
     );
   }
 
-  Future<void> sentManualModeToServer(manualOperation) async {
+  void sendCommandToController(List<String> nonEmptyStrings){
+    String finalResult = nonEmptyStrings.where((s) => s.isNotEmpty).join('_');
+    if(segmentIndex==0){
+      functionSendPayloadToMqtt(segmentIndex, '0', finalResult);
+    }else if(segmentIndex==1){
+      functionSendPayloadToMqtt(segmentIndex, strDuration, finalResult);
+    }else{
+      functionSendPayloadToMqtt(segmentIndex, strFlow, finalResult);
+    }
+
+    Map<String, dynamic> manualOperation = {
+      "method": segmentIndex+1,
+      "time": strDuration,
+      "flow": strFlow,
+      "selected": standaloneSelection,
+    };
+
+    sentManualModeToServer(manualOperation);
+    standaloneSelection.clear();
+    widget.callbackFunction();
+
+    Future.delayed(const Duration(seconds: 03), () {
+      Navigator.pop(context);
+    });
+
+  }
+
+  Future<void>sentManualModeToServer(manualOperation) async {
     try {
       final body = {"userId": widget.customerID, "controllerId": widget.controllerID, "manualOperation": manualOperation, "createUser": widget.customerID};
       final response = await HttpService().postRequest("createUserManualOperation", body);
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
-        GlobalSnackBar.show(context, jsonResponse['message'], jsonResponse['code']);
+        //GlobalSnackBar.show(context, jsonResponse['message'], jsonResponse['code']);
       }
     } catch (e) {
       print('Error: $e');
     }
-
   }
 
   Map<String, List<DashBoardValve>> groupValvesByLocation(List<DashBoardValve> valves) {
@@ -627,7 +620,6 @@ class _DashboardByManualState extends State<DashboardByManual> {
     for (int i = 0; i < itemList.length; i++) {
       if (itemList[i].selected) {
         result += '${itemList[i].sNo}_';
-
         standaloneSelection.add({
           'id': itemList[i].id,
           'sNo': itemList[i].sNo,
@@ -635,22 +627,22 @@ class _DashboardByManualState extends State<DashboardByManual> {
           'location': itemList[i].location,
           'selected': itemList[i].selected,
         });
-
       }
     }
     return result.isNotEmpty ? result.substring(0, result.length - 1) : '';
   }
 
   void functionSendPayloadToMqtt(sgmType, val, relayList) {
-    String payload = '${1},${1},${1},${0},$relayList,${0},$sgmType,$val';
+    String payload = '${relayList.isEmpty ? 0:1},${1},${1},${0},${relayList.isNotEmpty ? relayList:0},${0},$sgmType,$val';
     String payLoadFinal = jsonEncode({
       "800": [{"801": payload}]
     });
+    print(payLoadFinal);
     MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
+    GlobalSnackBar.show(context, 'Command Sent Successfully to the Controller', 200);
   }
 
 }
-
 
 class DisplayLineOrSequence extends StatefulWidget {
   const DisplayLineOrSequence({super.key, required this.lineOrSequence, required this.programList, required this.programSelectionCallback, required this.ddSelectedVal, required this.duration, required this.flow, required this.callbackFunctionForPayload});
@@ -666,7 +658,7 @@ class DisplayLineOrSequence extends StatefulWidget {
 }
 
 class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
-  Segment segmentView = Segment.manual;
+  Segment segmentView = Segment.duration;
   final TextEditingController _textController = TextEditingController();
   String durationValue = '', flowValue = '';
   final double _progressValue = 0.45;
@@ -699,28 +691,29 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                   ),
                   segments: const <ButtonSegment<Segment>>[
                     ButtonSegment<Segment>(
-                        value: Segment.manual,
-                        label: Text('Manual base'),
-                        icon: Icon(Icons.edit_note)),
-                    ButtonSegment<Segment>(
                         value: Segment.duration,
                         label: Text('Duration base'),
                         icon: Icon(Icons.timer_outlined)),
                     ButtonSegment<Segment>(
                         value: Segment.flow,
                         label: Text('Flow base'),
-                        icon: Icon(Icons.gas_meter_outlined)),
+                        icon: Icon(Icons.water_drop_outlined)),
+                    ButtonSegment<Segment>(
+                        value: Segment.manual,
+                        label: Text('Manual base'),
+                        icon: Icon(Icons.pan_tool_alt_outlined)),
                   ],
                   selected: <Segment>{segmentView},
                   onSelectionChanged: (Set<Segment> newSelection) {
                     setState(() {
                       segmentView = newSelection.first;
                       if(segmentView.index==0){
-                        widget.callbackFunctionForPayload(segmentView.index, '0');
-                      }else if(segmentView.index==1){
                         widget.callbackFunctionForPayload(segmentView.index, durationValue);
-                      }else{
+                      }else if(segmentView.index==1){
                         widget.callbackFunctionForPayload(segmentView.index, _textController.text);
+                      }else{
+                        widget.callbackFunctionForPayload(segmentView.index, '0');
+
                       }
                     });
                   },
@@ -756,12 +749,12 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
             ],
           ),
         ),
-        segmentView.index == 0? Container():
+        segmentView.index == 2? Container():
         SizedBox(
           width: MediaQuery.of(context).size.width - 370,
           height: 50,
           child: ListTile(
-            leading: segmentView.index == 1?
+            leading: segmentView.index == 0?
             SizedBox(
               width: 200,
               child: Center(

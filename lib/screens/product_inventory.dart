@@ -205,26 +205,145 @@ class ProductInventoryState extends State<ProductInventory> {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    return visibleLoading? Visibility(
-      visible: visibleLoading,
-      child: Container(
-        color: Colors.white,
-        padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 100, 0, mediaQuery.size.width/2 - 100, 0),
-        child: const LoadingIndicator(
-          indicatorType: Indicator.ballPulse,
-        ),
+    return Scaffold(
+      backgroundColor: myTheme.primaryColor.withOpacity(0.1),
+      appBar: AppBar(
+        title: const Text('Product Inventory'),
+        actions: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              totalProduct > 50 ?Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  PopupMenuButton<dynamic>(
+                    icon: const Icon(Icons.filter_alt_outlined),
+                    tooltip: 'filter by category or model',
+                    itemBuilder: (BuildContext context) {
+                      List<PopupMenuEntry<dynamic>> menuItems = [];
+                      menuItems.add(
+                        const PopupMenuItem<dynamic>(
+                          enabled: false,
+                          child: Text("Category"),
+                        ),
+                      );
+
+                      List<dynamic> categoryItems = jsonDataMap['data']['category'];
+                      menuItems.addAll(
+                        categoryItems.map((dynamic item) {
+                          return PopupMenuItem<dynamic>(
+                            value: item,
+                            child: Text(item['categoryName']),
+                          );
+                        }),
+                      );
+                      menuItems.add(
+                        const PopupMenuItem<dynamic>(
+                          enabled: false,
+                          child: Text("Model"),
+                        ),
+                      );
+                      List<dynamic> modelItems = jsonDataMap['data']['model'];
+                      menuItems.addAll(
+                        modelItems.map((dynamic item) {
+                          return PopupMenuItem<dynamic>(
+                            value: item,
+                            child: Text('${item['categoryName']} - ${item['modelName']}'),
+                          );
+                        }),
+                      );
+
+                      return menuItems;
+                    },
+                    onSelected: (dynamic selectedItem) {
+                      if (selectedItem is Map<String, dynamic>) {
+                        filterActive = true;
+                        if (selectedItem.containsKey('categoryName') && selectedItem.containsKey('modelName')) {
+                          setState(() {
+                            searchedChipName = '${selectedItem['categoryName']} - ${selectedItem['modelName']}';
+                            fetchFilterData(null, selectedItem['modelId'], null);
+                          });
+                        } else {
+                          setState(() {
+                            searchedChipName = '${selectedItem['categoryName']}';
+                            fetchFilterData(selectedItem['categoryId'], null, null);
+                          });
+                        }
+                      }
+                    },
+                  ),
+                  const SizedBox(width: 10,),
+                  IconButton(
+                    icon: const Icon(Icons.search),
+                    tooltip: 'search by imei number',
+                    onPressed: () {
+                      setState(() {
+                        showSearch(
+                          context: context,
+                          delegate: SearchPage<String>(
+                            items: jsonDataByImeiNo,
+                            searchLabel: 'Search items',
+                            searchStyle: const TextStyle(color: Colors.white),
+                            itemEndsWith: true,
+                            suggestion: const Center(
+                              child: Text('Filter items by typing'),
+                            ),
+                            failure: const Center(
+                              child: Text('No items found'),
+                            ),
+                            filter: (String term) {
+                              return jsonDataByImeiNo.where((item) => item.toLowerCase().contains(term.toLowerCase())).toList();
+                            },
+                            builder: (String item) {
+                              return ListTile(
+                                title: Text(item),
+                                onTap: () {
+                                  Navigator.of(context).pop(item);
+                                  setState(() {
+                                    filterActive = true;
+                                    searchedChipName = item;
+                                    fetchFilterData(null, null, item);
+                                  });
+                                },
+                              );
+                            },
+                          ),
+                        );
+                      });
+                    },
+                  )
+                ],
+              ) :
+              Container(),
+            ],),
+          const SizedBox(width: 10)
+        ],
+        //scrolledUnderElevation: 5.0,
+        //shadowColor: Theme.of(context).colorScheme.shadow,
       ),
-    ) : userType == 3? buildCustomerDataTable():
-    Container(
-      color: Colors.blueGrey.shade50,
-      child: Padding(
+      body: visibleLoading? Visibility(
+        visible: visibleLoading,
+        child: Container(
+          height: mediaQuery.size.height,
+          color: Colors.transparent,
+          padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 75, 0, mediaQuery.size.width/2 - 75, 0),
+          child: const LoadingIndicator(
+            indicatorType: Indicator.ballPulse,
+          ),
+        ),
+      ):
+      userType == 3? buildCustomerDataTable():
+      Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
             buildAdminOrDealerHeader(),
             Expanded(
               child: Container(
-                color: Colors.white,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.only(right: 5, left: 5, top: 5),
                   child: buildAdminOrDealerDataTable(),
@@ -240,151 +359,32 @@ class ProductInventoryState extends State<ProductInventory> {
 
   Widget buildAdminOrDealerHeader()
   {
-    return Column(
-      children: [
-        Container(
-          decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(10.0),
-                topRight: Radius.circular(10.0),
-              )
-          ),
-          height: 50,
-          child: ListTile(
-            title: RichText(
-              text: const TextSpan(
-                children: <TextSpan>[
-                  TextSpan(text: 'Product ', style: TextStyle(fontSize: 20, color: Colors.black)),
-                  TextSpan(text: 'Inventory', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 21)),
-                ],
+    return Container(
+      color: Colors.white,
+      child: Column(
+        children: [
+          searchedChipName != ''? Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 5, left: 5),
+                child: Chip(
+                    backgroundColor: Colors.yellow,
+                    label: Text('filtered By $searchedChipName'),
+                    onDeleted: (){
+                      setState(() {
+                        searchedChipName = '';
+                        filterActive = false;
+                        searched = false;
+                        filterProductInventoryList.clear();
+                      });
+                    }),
               ),
-            ),
-            trailing: totalProduct > 50 ? Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                PopupMenuButton<dynamic>(
-                  icon: const Icon(Icons.filter_alt_outlined),
-                  tooltip: 'filter by category or model',
-                  itemBuilder: (BuildContext context) {
-                    List<PopupMenuEntry<dynamic>> menuItems = [];
-                    menuItems.add(
-                      const PopupMenuItem<dynamic>(
-                        enabled: false,
-                        child: Text("Category"),
-                      ),
-                    );
-
-                    List<dynamic> categoryItems = jsonDataMap['data']['category'];
-                    menuItems.addAll(
-                      categoryItems.map((dynamic item) {
-                        return PopupMenuItem<dynamic>(
-                          value: item,
-                          child: Text(item['categoryName']),
-                        );
-                      }),
-                    );
-                    menuItems.add(
-                      const PopupMenuItem<dynamic>(
-                        enabled: false,
-                        child: Text("Model"),
-                      ),
-                    );
-                    List<dynamic> modelItems = jsonDataMap['data']['model'];
-                    menuItems.addAll(
-                      modelItems.map((dynamic item) {
-                        return PopupMenuItem<dynamic>(
-                          value: item,
-                          child: Text('${item['categoryName']} - ${item['modelName']}'),
-                        );
-                      }),
-                    );
-
-                    return menuItems;
-                  },
-                  onSelected: (dynamic selectedItem) {
-                    if (selectedItem is Map<String, dynamic>) {
-                      filterActive = true;
-                      if (selectedItem.containsKey('categoryName') && selectedItem.containsKey('modelName')) {
-                        setState(() {
-                          searchedChipName = '${selectedItem['categoryName']} - ${selectedItem['modelName']}';
-                          fetchFilterData(null, selectedItem['modelId'], null);
-                        });
-                      } else {
-                        setState(() {
-                          searchedChipName = '${selectedItem['categoryName']}';
-                          fetchFilterData(selectedItem['categoryId'], null, null);
-                        });
-                      }
-                    }
-                  },
-                ),
-                const SizedBox(width: 10,),
-                IconButton(
-                  icon: const Icon(Icons.search),
-                  tooltip: 'search by imei number',
-                  onPressed: () {
-                    setState(() {
-                      showSearch(
-                        context: context,
-                        delegate: SearchPage<String>(
-                          items: jsonDataByImeiNo,
-                          searchLabel: 'Search items',
-                          searchStyle: const TextStyle(color: Colors.white),
-                          itemEndsWith: true,
-                          suggestion: const Center(
-                            child: Text('Filter items by typing'),
-                          ),
-                          failure: const Center(
-                            child: Text('No items found'),
-                          ),
-                          filter: (String term) {
-                            return jsonDataByImeiNo.where((item) => item.toLowerCase().contains(term.toLowerCase())).toList();
-                          },
-                          builder: (String item) {
-                            return ListTile(
-                              title: Text(item),
-                              onTap: () {
-                                Navigator.of(context).pop(item);
-                                setState(() {
-                                  filterActive = true;
-                                  searchedChipName = item;
-                                  fetchFilterData(null, null, item);
-                                });
-                              },
-                            );
-                          },
-                        ),
-                      );
-                    });
-                  },
-                )
-              ],
-            ) : null,
-          ),
-        ),
-        SizedBox(height: 2, child: Container(color: Colors.grey.shade200,)),
-        searchedChipName != ''? Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 5, left: 5),
-              child: Chip(
-                  backgroundColor: Colors.yellow,
-                  label: Text('filtered By $searchedChipName'),
-                  onDeleted: (){
-                    setState(() {
-                      searchedChipName = '';
-                      filterActive = false;
-                      searched = false;
-                      filterProductInventoryList.clear();
-                    });
-                  }),
-            ),
-          ],
-        ) :
-        const SizedBox(),
-      ],
+            ],
+          ) :
+          const SizedBox(),
+        ],
+      ),
     );
   }
 

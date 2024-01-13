@@ -6,6 +6,7 @@ import '../../../state_management/irrigation_program_main_provider.dart';
 import '../../../state_management/overall_use.dart';
 import '../../../widgets/my_number_picker.dart';
 
+
 class WaterAndFertScreen extends StatefulWidget {
   final int userId;
   final int controllerId;
@@ -18,8 +19,6 @@ class WaterAndFertScreen extends StatefulWidget {
 
 class _WaterAndFertScreenState extends State<WaterAndFertScreen> with SingleTickerProviderStateMixin{
 
-  dynamic apiData = {};
-
   @override
   void initState() {
     // TODO: implement initState
@@ -30,25 +29,11 @@ class _WaterAndFertScreenState extends State<WaterAndFertScreen> with SingleTick
         // programPvd.updateSequenceForFert(programPvd.irrigationLine?.sequence ?? []);
         programPvd.waterAndFert();
         programPvd.editSegmentedControlGroupValue(1);
-        if(programPvd.segmentedControlGroupValue == 0){
-        }
+        programPvd.selectingTheSite();
+        programPvd.editGroupSiteInjector(programPvd.segmentedControlCentralLocal == 0 ? 'selectedCentralSite' : 'selectedLocalSite', programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite :programPvd.selectedLocalSite);
       });
     }
   }
-
-  // void moveGroup(int index,[double? length]){
-  //   setState(() {
-  //     double screenWidth = MediaQuery.of(context).size.width;
-  //     double itemWidth = length ?? 100.0;
-  //     double offset = (index * itemWidth) - (screenWidth / 2) + (itemWidth / 2);
-  //
-  //     scrollControllerGroup.animateTo(
-  //       offset < 0 ? 0 : offset,
-  //       duration: const Duration(milliseconds: 500),
-  //       curve: Curves.ease,
-  //     );
-  //   });
-  // }
   @override
   Widget build(BuildContext context) {
     final programPvd = Provider.of<IrrigationProgramMainProvider>(context);
@@ -121,8 +106,35 @@ class _WaterAndFertScreenState extends State<WaterAndFertScreen> with SingleTick
                                                 return InkWell(
                                                   onTap: (){
                                                     programPvd.editGroupSiteInjector('selectedGroup', index);
-                                                    programPvd.editGroupSiteInjector('selectedCentralSite', 0);
-                                                    programPvd.editGroupSiteInjector('selectedLocalSite', 0);
+                                                    if(programPvd.segmentedControlCentralLocal == 0){
+                                                      if(!programPvd.selectionModel.data!.centralFertilizerSite!.any((element) => element.selected == true)){
+                                                        programPvd.editGroupSiteInjector('selectedCentralSite', 0);
+                                                      }else{
+                                                        for(var i = 0;i < programPvd.selectionModel.data!.centralFertilizerSite!.length;i++){
+                                                          if(programPvd.selectionModel.data!.centralFertilizerSite![i].selected == true){
+                                                            for(var j = 0;j < programPvd.sequenceData[programPvd.selectedGroup]['centralDosing'].length;j++){
+                                                              if(programPvd.sequenceData[programPvd.selectedGroup]['centralDosing'][j]['sNo'] == programPvd.selectionModel.data!.centralFertilizerSite![i].sNo){
+                                                                programPvd.editGroupSiteInjector('selectedCentralSite', j);
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }else{
+                                                      if(!programPvd.selectionModel.data!.localFertilizerSite!.any((element) => element.selected == true)){
+                                                        programPvd.editGroupSiteInjector('selectedLocalSite', 0);
+                                                      }else{
+                                                        for(var i = 0;i < programPvd.selectionModel.data!.localFertilizerSite!.length;i++){
+                                                          if(programPvd.selectionModel.data!.localFertilizerSite![i].selected == true){
+                                                            for(var j = 0;j < programPvd.sequenceData[programPvd.selectedGroup]['localDosing'].length;j++){
+                                                              if(programPvd.sequenceData[programPvd.selectedGroup]['localDosing'][j]['sNo'] == programPvd.selectionModel.data!.localFertilizerSite![i].sNo){
+                                                                programPvd.editGroupSiteInjector('selectedLocalSite', j);
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
                                                   },
                                                   child: Container(
                                                     margin: EdgeInsets.only(left: 20),
@@ -168,11 +180,13 @@ class _WaterAndFertScreenState extends State<WaterAndFertScreen> with SingleTick
                                               children: programPvd.cOrL,
                                               onValueChanged: (i) {
                                                 programPvd.editSegmentedCentralLocal(i!);
+                                                programPvd.selectingTheSite();
                                               }),
                                         ),
 
                                       ],
                                     ),
+
                                 ],
                               ),
                             ),
@@ -210,7 +224,7 @@ class _WaterAndFertScreenState extends State<WaterAndFertScreen> with SingleTick
                                                         child: Container(
                                                           color: Colors.blueGrey,
                                                           height: 30,
-                                                          child: const Center(child: Text('Value',style: TextStyle(color: Colors.white))),
+                                                          child: const Center(child: Text('Value',style: TextStyle(color: Colors.white,fontSize: 12))),
                                                         )
                                                     ),
                                                   ],
@@ -272,7 +286,7 @@ class _WaterAndFertScreenState extends State<WaterAndFertScreen> with SingleTick
                                                                     width: 80,
                                                                     height: 40,
                                                                     child: Center(
-                                                                      child: Text('${programPvd.sequenceData[programPvd.selectedGroup]['timeValue']}'),
+                                                                      child: Text('${programPvd.sequenceData[programPvd.selectedGroup]['timeValue']}',style: wf,),
                                                                     ),
                                                                   ),
                                                                 ),
@@ -328,7 +342,7 @@ class _WaterAndFertScreenState extends State<WaterAndFertScreen> with SingleTick
                                 children: [
                                   const SizedBox(
                                     width: 30,
-                                    height: 60,
+                                    height: 65,
                                     child: Center(
                                       child: Divider(
                                         color: Colors.black,
@@ -354,736 +368,681 @@ class _WaterAndFertScreenState extends State<WaterAndFertScreen> with SingleTick
                                   )
                                 ],
                               ),
-                            if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'].length != 0)
-                              if(programPvd.segmentedControlGroupValue == 1)
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
+                            if(programPvd.isSiteVisible(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'],programPvd.segmentedControlCentralLocal == 0 ? 'central' : 'local') == true)
+                              if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'].length != 0)
+                                if(programPvd.segmentedControlGroupValue == 1)
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 40,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
                                       children: [
-                                        const SizedBox(
-                                          width: 30,
-                                          height: 90,
-                                          child: Center(
-                                            child: Divider(
-                                              color: Colors.black,
-                                              thickness: 2,
-                                            ),
-                                          ),
+                                        Checkbox(
+                                            value: programPvd.sequenceData[programPvd.selectedGroup]['applyFertilizer'],
+                                            onChanged: (value){
+                                              programPvd.editGroupSiteInjector('applyFertilizer', value);
+                                            }
                                         ),
-                                        Expanded(
-                                          child: Container(
-                                            width: double.infinity,
-                                            height: 93,
-                                            child: LayoutBuilder(
-                                                builder: (context,constraints){
-                                                  return  Column(
-                                                    children: [
-                                                      Row(
-                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                        children: [
-                                                          Text('preValue'),
-                                                          Text('method'),
-                                                          Text('postValue'),
-                                                        ],
-                                                      ),
-                                                      Row(
-                                                        children: [
-                                                          Container(
-                                                            // width: returnWidth(programPvd.sequenceData[programPvd.selectedGroup]['timeValue'],programPvd.sequenceData[programPvd.selectedGroup]['preValue'],constraints.maxWidth),
-                                                            width: returnWidth(programPvd,'pre',constraints.maxWidth),
-                                                            color: Colors.red.shade200,
-                                                            height: 40,
-                                                          ),
-                                                          Expanded(
-                                                            child: Container(
-                                                              color: Colors.blue.shade200,
-                                                              width: double.infinity,
-                                                              height: 40,
-                                                            ),
-                                                          ),
-                                                          Container(
-                                                            // width: returnWidth(programPvd.sequenceData[programPvd.selectedGroup]['timeValue'],programPvd.sequenceData[programPvd.selectedGroup]['postValue'],constraints.maxWidth),
-                                                            width: returnWidth(programPvd,'post',constraints.maxWidth),
-                                                            color: Colors.orange.shade200,
-                                                            height: 40,
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      Row(
-                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                        children: [
-                                                          Container(
-                                                            width: 100,
-                                                            color: Colors.white,
-                                                            height: 30,
-                                                            child: Center(
-                                                                child: SizedBox(
-                                                                  width: 80,
-                                                                  height: 28,
-                                                                  child: programPvd.sequenceData[programPvd.selectedGroup]['prePostMethod'] == 'Quantity' ? TextFormField(
-                                                                    controller: programPvd.preValue,
-                                                                    maxLength: 6,
-                                                                    textAlign: TextAlign.center,
-                                                                    style: const TextStyle(fontSize: 13),
-                                                                    decoration: const InputDecoration(
-                                                                        counterText: '',
-                                                                        contentPadding: EdgeInsets.only(bottom: 5),
-                                                                        enabledBorder: OutlineInputBorder(
-                                                                        ),
-                                                                        border: OutlineInputBorder(
-                                                                            borderSide: BorderSide(width: 1)
-                                                                        )
-                                                                    ),
-                                                                    onChanged: (value){
-                                                                      programPvd.editPrePostMethod('preValue',programPvd.selectedGroup,value);
-                                                                    },
-                                                                  ) :  InkWell(
-                                                                    onTap: (){
-                                                                      _showTimePicker(programPvd,overAllPvd,programPvd.selectedGroup,'pre');
-                                                                    },
-                                                                    child: SizedBox(
-                                                                      width: 80,
-                                                                      height: 40,
-                                                                      child: Center(
-                                                                        child: Text('${programPvd.sequenceData[programPvd.selectedGroup]['preValue']}'),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                )
-                                                            ),
-                                                          ),
-
-                                                          Container(
-                                                            width: 100,
-                                                            color: Colors.white,
-                                                            height: 30,
-                                                            child: Center(
-                                                                child: DropdownButton(
-                                                                  dropdownColor: Colors.white,
-                                                                  value: programPvd.sequenceData[programPvd.selectedGroup]['prePostMethod'],
-                                                                  underline: Container(),
-                                                                  items: ['Time','Quantity'].map((String items) {
-                                                                    return DropdownMenuItem(
-                                                                      value: items,
-                                                                      child: Text(items,style: const TextStyle(fontSize: 14,color: Colors.black),),
-                                                                    );
-                                                                  }).toList(),
-                                                                  onChanged: (value) {
-                                                                    programPvd.editPrePostMethod('prePostMethod',programPvd.selectedGroup,value.toString());
-                                                                  },
-                                                                )
-                                                            ),
-                                                          ),
-                                                          Container(
-                                                            width: 100,
-                                                            color: Colors.white,
-                                                            height: 30,
-                                                            child: Center(
-                                                                child: SizedBox(
-                                                                  width: 60,
-                                                                  height: 28,
-                                                                  child: programPvd.sequenceData[programPvd.selectedGroup]['prePostMethod'] == 'Quantity' ? TextFormField(
-                                                                    controller: programPvd.postValue,
-                                                                    maxLength: 6,
-                                                                    textAlign: TextAlign.center,
-                                                                    style: const TextStyle(fontSize: 13),
-                                                                    decoration: const InputDecoration(
-                                                                        counterText: '',
-                                                                        contentPadding: EdgeInsets.only(bottom: 5),
-                                                                        enabledBorder: OutlineInputBorder(
-                                                                        ),
-                                                                        border: OutlineInputBorder(
-
-                                                                            borderSide: BorderSide(width: 1)
-                                                                        )
-                                                                    ),
-                                                                    onChanged: (value){
-                                                                      programPvd.editPrePostMethod('postValue',programPvd.selectedGroup,value);
-                                                                    },
-                                                                  ) :  InkWell(
-                                                                    onTap: (){
-                                                                      _showTimePicker(programPvd,overAllPvd,programPvd.selectedGroup,'post');
-                                                                    },
-                                                                    child: SizedBox(
-                                                                      width: 80,
-                                                                      height: 40,
-                                                                      child: Center(
-                                                                        child: Text('${programPvd.sequenceData[programPvd.selectedGroup]['postValue']}'),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                )
-                                                            ),
-                                                          ),
-
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  );
-                                                }),
-                                          ),
-                                        )
-
-                                        // Expanded(
-                                        //     child: Container(
-                                        //       padding: const EdgeInsets.only(left: 10,right: 10),
-                                        //       child: Column(
-                                        //         children: [
-                                        //           Row(
-                                        //             children: [
-                                        //               Expanded(
-                                        //                   child: Container(
-                                        //                     color: Colors.blueGrey,
-                                        //                     height: 30,
-                                        //                     child: const Center(child: Text('Method',style: TextStyle(color: Colors.white),)),
-                                        //                   )
-                                        //               ),
-                                        //               Expanded(
-                                        //                   child: Container(
-                                        //                     color: Colors.blueGrey,
-                                        //                     height: 30,
-                                        //                     child: const Center(child: Text('Pre',style: TextStyle(color: Colors.white))),
-                                        //                   )
-                                        //               ),
-                                        //               Expanded(
-                                        //                   child: Container(
-                                        //                     color: Colors.blueGrey,
-                                        //                     height: 30,
-                                        //                     child: const Center(child: Text('Post',style: TextStyle(color: Colors.white))),
-                                        //                   )
-                                        //               ),
-                                        //             ],
-                                        //           ),
-                                        //           Row(
-                                        //             children: [
-                                        //               Expanded(
-                                        //                   child: Container(
-                                        //                     color: Colors.white,
-                                        //                     height: 30,
-                                        //                     child: Center(
-                                        //                         child: DropdownButton(
-                                        //                           dropdownColor: Colors.white,
-                                        //                           value: programPvd.sequenceData[programPvd.selectedGroup]['prePostMethod'],
-                                        //                           underline: Container(),
-                                        //                           items: ['Time','Quantity'].map((String items) {
-                                        //                             return DropdownMenuItem(
-                                        //                               value: items,
-                                        //                               child: Text(items,style: const TextStyle(fontSize: 14,color: Colors.black),),
-                                        //                             );
-                                        //                           }).toList(),
-                                        //                           onChanged: (value) {
-                                        //                             programPvd.editPrePostMethod('prePostMethod',programPvd.selectedGroup,value.toString());
-                                        //                           },
-                                        //                         )
-                                        //                     ),
-                                        //                   )
-                                        //               ),
-                                        //               Expanded(
-                                        //                   child: Container(
-                                        //                     color: Colors.white,
-                                        //                     height: 30,
-                                        //                     child: Center(
-                                        //                         child: SizedBox(
-                                        //                           width: 80,
-                                        //                           height: 28,
-                                        //                           child: programPvd.sequenceData[programPvd.selectedGroup]['prePostMethod'] == 'Quantity' ? TextFormField(
-                                        //                             controller: programPvd.preValue,
-                                        //                             maxLength: 6,
-                                        //                             textAlign: TextAlign.center,
-                                        //                             style: const TextStyle(fontSize: 13),
-                                        //                             decoration: const InputDecoration(
-                                        //                                 counterText: '',
-                                        //                                 contentPadding: EdgeInsets.only(bottom: 5),
-                                        //                                 enabledBorder: OutlineInputBorder(
-                                        //                                 ),
-                                        //                                 border: OutlineInputBorder(
-                                        //                                     borderSide: BorderSide(width: 1)
-                                        //                                 )
-                                        //                             ),
-                                        //                             onChanged: (value){
-                                        //                               programPvd.editPrePostMethod('preValue',programPvd.selectedGroup,value);
-                                        //                             },
-                                        //                           ) :  InkWell(
-                                        //                             onTap: (){
-                                        //                               _showTimePicker(programPvd,overAllPvd,programPvd.selectedGroup,'preValue');
-                                        //                             },
-                                        //                             child: SizedBox(
-                                        //                               width: 80,
-                                        //                               height: 40,
-                                        //                               child: Center(
-                                        //                                 child: Text('${programPvd.sequenceData[programPvd.selectedGroup]['preValue']}'),
-                                        //                               ),
-                                        //                             ),
-                                        //                           ),
-                                        //                         )
-                                        //                     ),
-                                        //                   )
-                                        //               ),
-                                        //               Expanded(
-                                        //                   child: Container(
-                                        //                     color: Colors.white,
-                                        //                     height: 30,
-                                        //                     child: Center(
-                                        //                         child: SizedBox(
-                                        //                           width: 60,
-                                        //                           height: 28,
-                                        //                           child: programPvd.sequenceData[programPvd.selectedGroup]['prePostMethod'] == 'Quantity' ? TextFormField(
-                                        //                             controller: programPvd.postValue,
-                                        //                             maxLength: 6,
-                                        //                             textAlign: TextAlign.center,
-                                        //                             style: const TextStyle(fontSize: 13),
-                                        //                             decoration: const InputDecoration(
-                                        //                                 counterText: '',
-                                        //                                 contentPadding: EdgeInsets.only(bottom: 5),
-                                        //                                 enabledBorder: OutlineInputBorder(
-                                        //                                 ),
-                                        //                                 border: OutlineInputBorder(
-                                        //
-                                        //                                     borderSide: BorderSide(width: 1)
-                                        //                                 )
-                                        //                             ),
-                                        //                             onChanged: (value){
-                                        //                               programPvd.editPrePostMethod('postValue',programPvd.selectedGroup,value);
-                                        //                             },
-                                        //                           ) :  InkWell(
-                                        //                             onTap: (){
-                                        //                               _showTimePicker(programPvd,overAllPvd,programPvd.selectedGroup,'postValue');
-                                        //                             },
-                                        //                             child: SizedBox(
-                                        //                               width: 80,
-                                        //                               height: 40,
-                                        //                               child: Center(
-                                        //                                 child: Text('${programPvd.sequenceData[programPvd.selectedGroup]['postValue']}'),
-                                        //                               ),
-                                        //                             ),
-                                        //                           ),
-                                        //                         )
-                                        //                     ),
-                                        //                   )
-                                        //               ),
-                                        //             ],
-                                        //           )
-                                        //         ],
-                                        //       ),
-                                        //     )
-                                        // )
-
+                                        Text('Apply Fertilizer',style: wf,)
                                       ],
                                     ),
-                                  ],
-                                ),
-                            if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'].length != 0)
-                              if(programPvd.segmentedControlGroupValue == 1)
-                                Container(
-                                  height: 90,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          const SizedBox(
-                                            width: 30,
-                                            height: 2,
-                                            child: Center(
-                                              child: Divider(
-                                                color: Colors.black,
-                                                thickness: 2,
-                                              ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: Container(
-                                              width: double.infinity,
-                                              height: 90,
-                                              child: ListView.builder(
-                                                  scrollDirection: Axis.horizontal,
-                                                  itemCount: programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'].length,
-                                                  itemBuilder: (context,index){
-                                                    return InkWell(
-                                                      onTap: (){
-                                                        programPvd.editGroupSiteInjector(programPvd.segmentedControlCentralLocal == 0 ? 'selectedCentralSite' : 'selectedLocalSite', index);
-                                                        programPvd.editGroupSiteInjector('selectedInjector', 0);
-                                                      },
-                                                      child: Container(
-                                                        margin: EdgeInsets.only(left: 20),
-                                                        padding: const EdgeInsets.only(left: 10,top: 5,bottom: 5,right: 10),
-                                                        decoration: BoxDecoration(
-                                                            color: (programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite) == index ? Theme.of(context).primaryColor : Colors.white,
-                                                            borderRadius: BorderRadius.circular(10)
-                                                        ),
-                                                        child: Column(
-                                                          children: [
-                                                            Row(
-                                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                              children: [
-                                                                if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'selectedCentralSite' : 'selectedLocalSite'] != index)
-                                                                  InkWell(
-                                                                      onTap: (){
-                                                                        programPvd.editSelectedSite(programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing',index);
-                                                                      },
-                                                                      child: Icon(Icons.radio_button_off,color: (programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite) == index ? Colors.white : Colors.black,)
-                                                                  )
-                                                                else
-                                                                  InkWell(
-                                                                      onTap: (){
-                                                                        programPvd.editSelectedSite(programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing',index);
-                                                                      },
-                                                                      child: Icon(Icons.radio_button_checked,color: Colors.yellow,)
-                                                                  ),
-                                                                SizedBox(width: 5,),
-                                                                Text(
-                                                                  programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][index]['name'],
-                                                                  style: TextStyle(color: (programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite) == index ? Colors.white : Colors.black),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            // Row(
-                                                            //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                            //   children: [
-                                                            //     Text('Fertilizer set : ',style: TextStyle(color: Colors.white),),
-                                                            //     SizedBox(width: 10,),
-                                                            //     DropdownButton(
-                                                            //       icon: Icon(Icons.arrow_drop_down,color: (programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite) == index ? Colors.white : Colors.black,),
-                                                            //       focusColor: Colors.white,
-                                                            //       dropdownColor: (programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite) == index ? Colors.black : Colors.white,
-                                                            //       value: programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['recipe'],
-                                                            //       underline: Container(),
-                                                            //       items: ['-'].map((String items) {
-                                                            //         return DropdownMenuItem(
-                                                            //           value: items,
-                                                            //           child: Text(items,style: TextStyle(fontSize: 14,color: (programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite) == index ? Colors.white : Colors.black),),
-                                                            //         );
-                                                            //       }).toList(),
-                                                            //       onChanged: (value) {
-                                                            //         programPvd.editParticularChannelDetails('method', programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing', value);
-                                                            //       },
-                                                            //     )
-                                                            //   ],
-                                                            // )
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
                                   ),
-                                ),
-                            ////
-                            if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'].length != 0)
-                              if(programPvd.segmentedControlGroupValue == 1)
-                                if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.selectedCentralSite]['ecValue'] != null || programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.selectedCentralSite]['phValue'] != null)
-                                  Row(
-                                    children: [
-                                      const SizedBox(
-                                        width: 30,
-                                        height: 2,
-                                        child: Center(
-                                          child: Divider(
-                                            color: Colors.black,
-                                            thickness: 2,
-                                          ),
-                                        ),
-                                      ),
-                                      if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.selectedCentralSite]['ecValue'] != null)
-                                        Container(
-                                          width: 120,
-                                          height: 40,
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                            children: [
-                                              if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['needEcValue'] == false)
-                                                InkWell(
-                                                    onTap: (){
-                                                      programPvd.editEcPhNeedOrNot('ec');
-                                                    },
-                                                    child: Icon(Icons.radio_button_off,color: Colors.black,)
-                                                )
-                                              else
-                                                InkWell(
-                                                    onTap: (){
-                                                      programPvd.editEcPhNeedOrNot('ec');
-                                                    },
-                                                    child: Icon(Icons.radio_button_checked,color: Colors.green)
-                                                ),
-                                              Text("EC"),
-                                              if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['needEcValue'] == true)
-                                                SizedBox(
-                                                  width: 60,
-                                                  height: 40,
-                                                  child: TextFormField(
-                                                    controller: programPvd.ec,
-                                                    maxLength: 6,
-                                                    textAlign: TextAlign.center,
-                                                    style: const TextStyle(fontSize: 13),
-                                                    decoration: const InputDecoration(
-                                                        counterText: '',
-                                                        contentPadding: EdgeInsets.only(bottom: 5),
-                                                        enabledBorder: OutlineInputBorder(
-                                                        ),
-                                                        border: OutlineInputBorder(
-                                                            borderSide: BorderSide(width: 1)
-                                                        )
-                                                    ),
-                                                    onChanged: (value){
-                                                      programPvd.editEcPh(programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing', 'ecValue', value);
-                                                    },
-                                                  ),
-                                                )
-                                              else
-                                                SizedBox(width: 60,)
-                                            ],
-                                          ),
-                                        ),
-                                      if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.selectedCentralSite]['phValue'] != null)
-                                        Container(
-                                          width: 120,
-                                          height: 40,
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                            children: [
-                                              if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['needPhValue'] == false)
-                                                InkWell(
-                                                    onTap: (){
-                                                      programPvd.editEcPhNeedOrNot('ph');
-                                                    },
-                                                    child: Icon(Icons.radio_button_off,color: Colors.black,)
-                                                )
-                                              else
-                                                InkWell(
-                                                    onTap: (){
-                                                      programPvd.editEcPhNeedOrNot('ph');
-                                                    },
-                                                    child: Icon(Icons.radio_button_checked,color: Colors.green)
-                                                ),
-                                              Text("PH"),
-                                              if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['needPhValue'] == true)
-                                                SizedBox(
-                                                  width: 60,
-                                                  height: 40,
-                                                  child: TextFormField(
-                                                    controller: programPvd.ph,
-                                                    maxLength: 6,
-                                                    textAlign: TextAlign.center,
-                                                    style: const TextStyle(fontSize: 13),
-                                                    decoration: const InputDecoration(
-                                                        counterText: '',
-                                                        contentPadding: EdgeInsets.only(bottom: 5),
-                                                        enabledBorder: OutlineInputBorder(
-                                                        ),
-                                                        border: OutlineInputBorder(
-                                                            borderSide: BorderSide(width: 1)
-                                                        )
-                                                    ),
-                                                    onChanged: (value){
-                                                      programPvd.editEcPh(programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing', 'phValue', value);
-                                                    },
-                                                  ),
-                                                )
-                                              else
-                                                SizedBox(width: 60,)
-                                            ],
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-
-                            if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'].length != 0)
-                              if(programPvd.segmentedControlGroupValue == 1)
-                                Container(
-                                  height: 40,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          const SizedBox(
-                                            width: 30,
-                                            height: 2,
-                                            child: Center(
-                                              child: Divider(
-                                                color: Colors.black,
-                                                thickness: 2,
-                                              ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: Container(
-                                              width: double.infinity,
-                                              height: 40,
-                                              child: ListView.builder(
-                                                  scrollDirection: Axis.horizontal,
-                                                  itemCount: programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['fertilizer'].length,
-                                                  itemBuilder: (context,index){
-                                                    return InkWell(
-                                                      onTap: (){
-                                                        programPvd.editGroupSiteInjector('selectedInjector', index);
-                                                      },
-                                                      child: Container(
-                                                        margin: EdgeInsets.only(left: 20),
-                                                        padding: const EdgeInsets.only(left: 10,right: 10),
-                                                        decoration: BoxDecoration(
-                                                            color: programPvd.selectedInjector == index ? Theme.of(context).primaryColor : Colors.white,
-                                                            borderRadius: BorderRadius.circular(10)
-                                                        ),
-                                                        child: Column(
-                                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                          children: [
-                                                            Row(
-                                                              children: [
-                                                                Text(
-                                                                  programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['fertilizer'][index]['name'],
-                                                                  style: TextStyle(color: programPvd.selectedInjector == index ? Colors.white : Colors.black),
-                                                                ),
-                                                                SizedBox(
-                                                                  width: 10,
-                                                                ),
-                                                                Switch(
-                                                                    activeTrackColor: Colors.green,
-                                                                    activeColor: Colors.yellow.shade50,
-                                                                    value: programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['fertilizer'][index]['onOff'],
-                                                                    onChanged: (value){
-                                                                      programPvd.editOnOffInInjector(programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing',index,value);
-                                                                    }
-                                                                )
-                                                              ],
-                                                            ),
-
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                            if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'].length != 0)
-                              if(programPvd.segmentedControlGroupValue == 1)
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
+                            if(programPvd.isSiteVisible(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'],programPvd.segmentedControlCentralLocal == 0 ? 'central' : 'local') == true)
+                              if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'].length != 0)
+                                if(programPvd.segmentedControlGroupValue == 1)
+                                  if(programPvd.sequenceData[programPvd.selectedGroup]['applyFertilizer'])
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const SizedBox(
-                                          width: 30,
-                                          height: 60,
-                                          child: Center(
-                                            child: Divider(
-                                              color: Colors.black,
-                                              thickness: 2,
+                                        Row(
+                                          children: [
+                                            const SizedBox(
+                                              width: 30,
+                                              height: 60,
+                                              child: Center(
+                                                child: Divider(
+                                                  color: Colors.black,
+                                                  thickness: 2,
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                            child: Container(
-                                              padding: const EdgeInsets.only(left: 10,right: 10),
-                                              child: Column(
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      Expanded(
-                                                          child: Container(
-                                                            color: Colors.blueGrey,
-                                                            height: 30,
-                                                            child: const Center(child: Text('Method',style: TextStyle(color: Colors.white),)),
-                                                          )
-                                                      ),
-                                                      Expanded(
-                                                          child: Container(
-                                                            color: Colors.blueGrey,
-                                                            height: 30,
-                                                            child: const Center(child: Text('Value',style: TextStyle(color: Colors.white))),
-                                                          )
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  Row(
-                                                    children: [
-                                                      Expanded(
-                                                          child: Container(
-                                                            color: Colors.white,
-                                                            height: 30,
-                                                            child: Center(
-                                                                child: DropdownButton(
-                                                                  dropdownColor: Colors.white,
-                                                                  value: programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['fertilizer'][programPvd.selectedInjector]['method'],
-                                                                  underline: Container(),
-                                                                  items: ['Time','Pro.time','Quantity','Pro.quantity'].map((String items) {
-                                                                    return DropdownMenuItem(
-                                                                      value: items,
-                                                                      child: Text(items,style: const TextStyle(fontSize: 14,color: Colors.black),),
-                                                                    );
-                                                                  }).toList(),
-                                                                  onChanged: (value) {
-                                                                    programPvd.editParticularChannelDetails('method', programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing', value);
-                                                                  },
-                                                                )
-                                                            ),
-                                                          )
-                                                      ),
-                                                      Expanded(
-                                                          child: Container(
-                                                            color: Colors.white,
-                                                            height: 30,
-                                                            child: Center(
-                                                                child: SizedBox(
-                                                                  width: 60,
-                                                                  height: 28,
-                                                                  child: (programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['fertilizer'][programPvd.selectedInjector]['method'] == 'Quantity' ||  programPvd.sequenceData[programPvd.selectedGroup]['centralDosing'][programPvd.selectedCentralSite]['fertilizer'][programPvd.selectedInjector]['method'] == 'Pro.quantity') ? TextFormField(
-                                                                    controller: programPvd.injectorValue,
-                                                                    maxLength: 6,
-                                                                    textAlign: TextAlign.center,
-                                                                    style: const TextStyle(fontSize: 13),
-                                                                    decoration: const InputDecoration(
-                                                                        counterText: '',
-                                                                        contentPadding: EdgeInsets.only(bottom: 5),
-                                                                        enabledBorder: OutlineInputBorder(
-                                                                        ),
-                                                                        border: OutlineInputBorder(
-                                                                            borderSide: BorderSide(width: 1)
-                                                                        )
-                                                                    ),
-                                                                    onChanged: (value){
-                                                                      programPvd.editParticularChannelDetails('quantityValue', programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing', value);
-                                                                    },
-                                                                  ) :  InkWell(
-                                                                    onTap: (){
-                                                                      _showTimePicker(programPvd,overAllPvd,programPvd.selectedGroup,'timeValue');
-                                                                    },
+                                            Expanded(
+                                              child: Container(
+                                                width: double.infinity,
+                                                height: 65,
+                                                child: LayoutBuilder(
+                                                    builder: (context,constraints){
+                                                      return  Column(
+                                                        children: [
+                                                          Row(
+                                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                            children: [
+                                                              Text('preValue',style: wf,),
+                                                              Text('method',style: wf,),
+                                                              Text('postValue',style: wf,),
+                                                            ],
+                                                          ),
+                                                          Row(
+                                                            children: [
+                                                              Container(
+                                                                // width: returnWidth(programPvd.sequenceData[programPvd.selectedGroup]['timeValue'],programPvd.sequenceData[programPvd.selectedGroup]['preValue'],constraints.maxWidth),
+                                                                width: returnWidth(programPvd,'pre',constraints.maxWidth),
+                                                                color: Colors.red.shade200,
+                                                                height: 15,
+                                                              ),
+                                                              Expanded(
+                                                                child: Container(
+                                                                  color: Colors.blue.shade200,
+                                                                  width: double.infinity,
+                                                                  height: 15,
+                                                                ),
+                                                              ),
+                                                              Container(
+                                                                // width: returnWidth(programPvd.sequenceData[programPvd.selectedGroup]['timeValue'],programPvd.sequenceData[programPvd.selectedGroup]['postValue'],constraints.maxWidth),
+                                                                width: returnWidth(programPvd,'post',constraints.maxWidth),
+                                                                color: Colors.orange.shade200,
+                                                                height: 15,
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          Row(
+                                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                            children: [
+                                                              Container(
+                                                                width: 100,
+                                                                color: Colors.white,
+                                                                height: 30,
+                                                                child: Center(
                                                                     child: SizedBox(
                                                                       width: 80,
-                                                                      height: 40,
-                                                                      child: Center(
-                                                                        child: Text('${programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['fertilizer'][programPvd.selectedInjector]['timeValue']}'),
+                                                                      height: 28,
+                                                                      child: programPvd.sequenceData[programPvd.selectedGroup]['prePostMethod'] == 'Quantity' ? TextFormField(
+                                                                        controller: programPvd.preValue,
+                                                                        maxLength: 6,
+                                                                        textAlign: TextAlign.center,
+                                                                        style: const TextStyle(fontSize: 13),
+                                                                        decoration: const InputDecoration(
+                                                                            counterText: '',
+                                                                            contentPadding: EdgeInsets.only(bottom: 5),
+                                                                            enabledBorder: OutlineInputBorder(
+                                                                            ),
+                                                                            border: OutlineInputBorder(
+                                                                                borderSide: BorderSide(width: 1)
+                                                                            )
+                                                                        ),
+                                                                        onChanged: (value){
+                                                                          programPvd.editPrePostMethod('preValue',programPvd.selectedGroup,value);
+                                                                        },
+                                                                      ) :  InkWell(
+                                                                        onTap: (){
+                                                                          _showTimePicker(programPvd,overAllPvd,programPvd.selectedGroup,'pre');
+                                                                        },
+                                                                        child: SizedBox(
+                                                                          width: 80,
+                                                                          height: 40,
+                                                                          child: Center(
+                                                                            child: Text('${programPvd.sequenceData[programPvd.selectedGroup]['preValue']}',style: wf,),
+                                                                          ),
+                                                                        ),
                                                                       ),
-                                                                    ),
-                                                                  ),
-                                                                )
-                                                            ),
-                                                          )
-                                                      ),
-                                                    ],
-                                                  )
-                                                ],
+                                                                    )
+                                                                ),
+                                                              ),
+
+                                                              Container(
+                                                                width: 100,
+                                                                color: Colors.white,
+                                                                height: 30,
+                                                                child: Center(
+                                                                    child: DropdownButton(
+                                                                      dropdownColor: Colors.white,
+                                                                      value: programPvd.sequenceData[programPvd.selectedGroup]['prePostMethod'],
+                                                                      underline: Container(),
+                                                                      items: ['Time','Quantity'].map((String items) {
+                                                                        return DropdownMenuItem(
+                                                                          value: items,
+                                                                          child: Text(items,style: const TextStyle(fontSize: 12,color: Colors.black),),
+                                                                        );
+                                                                      }).toList(),
+                                                                      onChanged: (value) {
+                                                                        programPvd.editPrePostMethod('prePostMethod',programPvd.selectedGroup,value.toString());
+                                                                      },
+                                                                    )
+                                                                ),
+                                                              ),
+                                                              Container(
+                                                                width: 100,
+                                                                color: Colors.white,
+                                                                height: 30,
+                                                                child: Center(
+                                                                    child: SizedBox(
+                                                                      width: 60,
+                                                                      height: 28,
+                                                                      child: programPvd.sequenceData[programPvd.selectedGroup]['prePostMethod'] == 'Quantity' ? TextFormField(
+                                                                        controller: programPvd.postValue,
+                                                                        maxLength: 6,
+                                                                        textAlign: TextAlign.center,
+                                                                        style: const TextStyle(fontSize: 13),
+                                                                        decoration: const InputDecoration(
+                                                                            counterText: '',
+                                                                            contentPadding: EdgeInsets.only(bottom: 5),
+                                                                            enabledBorder: OutlineInputBorder(
+                                                                            ),
+                                                                            border: OutlineInputBorder(
+
+                                                                                borderSide: BorderSide(width: 1)
+                                                                            )
+                                                                        ),
+                                                                        onChanged: (value){
+                                                                          programPvd.editPrePostMethod('postValue',programPvd.selectedGroup,value);
+                                                                        },
+                                                                      ) :  InkWell(
+                                                                        onTap: (){
+                                                                          _showTimePicker(programPvd,overAllPvd,programPvd.selectedGroup,'post');
+                                                                        },
+                                                                        child: SizedBox(
+                                                                          width: 80,
+                                                                          height: 40,
+                                                                          child: Center(
+                                                                            child: Text('${programPvd.sequenceData[programPvd.selectedGroup]['postValue']}',style: wf,),
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    )
+                                                                ),
+                                                              ),
+
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      );
+                                                    }),
                                               ),
                                             )
-                                        )
-
+                                          ],
+                                        ),
                                       ],
                                     ),
-                                  ],
-                                ),
-                            if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'].length == 0)
+                            if(programPvd.isSiteVisible(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'],programPvd.segmentedControlCentralLocal == 0 ? 'central' : 'local') == true)
+                              if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'].length != 0)
+                                if(programPvd.segmentedControlGroupValue == 1)
+                                  if(programPvd.sequenceData[programPvd.selectedGroup]['applyFertilizer'])
+                                    Container(
+                                      height: 40,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              const SizedBox(
+                                                width: 30,
+                                                height: 2,
+                                                child: Center(
+                                                  child: Divider(
+                                                    color: Colors.black,
+                                                    thickness: 2,
+                                                  ),
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: Container(
+                                                  width: double.infinity,
+                                                  height: 40,
+                                                  child: ListView.builder(
+                                                      scrollDirection: Axis.horizontal,
+                                                      itemCount: programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'].length,
+                                                      itemBuilder: (context,index){
+                                                        return InkWell(
+                                                          onTap: (){
+                                                            programPvd.editGroupSiteInjector(programPvd.segmentedControlCentralLocal == 0 ? 'selectedCentralSite' : 'selectedLocalSite', index);
+                                                            programPvd.editGroupSiteInjector('selectedInjector', 0);
+                                                            // programPvd.editSelectedSite(programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing',index);
+                                                          },
+                                                          child: Visibility(
+                                                            visible: programPvd.isSiteVisible([programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][index]],programPvd.segmentedControlCentralLocal == 0 ? 'central' : 'local'),
+                                                            child: Container(
+                                                              margin: EdgeInsets.only(left: 20),
+                                                              padding: const EdgeInsets.only(left: 10,top: 5,bottom: 5,right: 10),
+                                                              decoration: BoxDecoration(
+                                                                  color: (programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite) == index ? Theme.of(context).primaryColor : Colors.white,
+                                                                  borderRadius: BorderRadius.circular(10)
+                                                              ),
+                                                              child: Column(
+                                                                children: [
+                                                                  Row(
+                                                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                                    children: [
+                                                                      if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'selectedCentralSite' : 'selectedLocalSite'] != index)
+                                                                        Icon(Icons.radio_button_off,color: (programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite) == index ? Colors.white : Colors.black,)
+                                                                      else
+                                                                        Icon(Icons.radio_button_checked,color: Colors.yellow,),
+                                                                      SizedBox(width: 5,),
+                                                                      Text(
+                                                                        programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][index]['name'],
+                                                                        style: TextStyle(color: (programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite) == index ? Colors.white : Colors.black,fontSize: 12),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                            if(programPvd.recipe != null)
+                              if(programPvd.isSiteVisible(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'],programPvd.segmentedControlCentralLocal == 0 ? 'central' : 'local') == true)
+                                if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'].length != 0)
+                                  if(programPvd.segmentedControlGroupValue == 1)
+                                    if(programPvd.sequenceData[programPvd.selectedGroup]['applyFertilizer'])
+                                      Container(
+                                        height: 40,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: [
+                                                const SizedBox(
+                                                  width: 30,
+                                                  height: 2,
+                                                  child: Center(
+                                                    child: Divider(
+                                                      color: Colors.black,
+                                                      thickness: 2,
+                                                    ),
+                                                  ),
+                                                ),
+                                                if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'selectedCentralSite' : 'selectedLocalSite'] != -1)
+                                                  SizedBox(
+                                                    width: 120,
+                                                    height: 40,
+                                                    child: Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                      children: [
+                                                        Checkbox(
+                                                            value: programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['applyRecipe'],
+                                                            onChanged: (value){
+                                                              programPvd.editGroupSiteInjector('applyRecipe', value);
+                                                            }
+                                                        ),
+                                                        Text('Apply Recipe',style: wf,)
+                                                      ],
+                                                    ),
+                                                  ),
+                                                if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'selectedCentralSite' : 'selectedLocalSite']]['applyRecipe'])
+                                                  Expanded(
+                                                    child: Container(
+                                                      width: double.infinity,
+                                                      height: 40,
+                                                      child: ListView.builder(
+                                                          scrollDirection: Axis.horizontal,
+                                                          //TODO : SEE
+                                                          itemCount: returnSelectedSiteRecipe(programPvd).length,
+                                                          itemBuilder: (context,index){
+                                                            // return Text('yes');
+                                                            return InkWell(
+                                                              onTap: (){
+                                                                // programPvd.editGroupSiteInjector(programPvd.segmentedControlCentralLocal == 0 ? 'selectedCentralSite' : 'selectedLocalSite', index);
+                                                                programPvd.editGroupSiteInjector('selectedRecipe', index);
+                                                              },
+                                                              child: Container(
+                                                                margin: EdgeInsets.only(left: 20),
+                                                                padding: const EdgeInsets.only(left: 10,top: 5,bottom: 5,right: 10),
+                                                                decoration: BoxDecoration(
+                                                                    color: programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'selectedCentralSite' : 'selectedLocalSite']]['recipe'] == index ? Theme.of(context).primaryColor : Colors.white,
+                                                                    borderRadius: BorderRadius.circular(10)
+                                                                ),
+                                                                child: Column(
+                                                                  children: [
+                                                                    Row(
+                                                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                                      children: [
+                                                                        if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['recipe'] != index)
+                                                                          Icon(Icons.radio_button_off,color: programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'selectedCentralSite' : 'selectedLocalSite']]['recipe'] == index ? Colors.white : Colors.black,)
+                                                                        else
+                                                                          Icon(Icons.radio_button_checked,color: Colors.yellow,),
+                                                                        SizedBox(width: 5,),
+                                                                        Text(
+                                                                          '${returnSelectedSiteRecipe(programPvd)[index]['name']}',style: TextStyle(color: programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'selectedCentralSite' : 'selectedLocalSite']]['recipe'] == index ? Colors.white : Colors.black,fontSize: 12),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            );
+                                                          }),
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                            ////
+                            if(programPvd.isSiteVisible(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'],programPvd.segmentedControlCentralLocal == 0 ? 'central' : 'local') == true)
+                              if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'].length != 0)
+                                if(programPvd.segmentedControlGroupValue == 1)
+                                  if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite :  programPvd.selectedLocalSite]['ecValue'] != null || programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite :  programPvd.selectedLocalSite]['phValue'] != null)
+                                    if(programPvd.sequenceData[programPvd.selectedGroup]['applyFertilizer'])
+                                      Row(
+                                        children: [
+                                          const SizedBox(
+                                            width: 30,
+                                            height: 2,
+                                            child: Center(
+                                              child: Divider(
+                                                color: Colors.black,
+                                                thickness: 2,
+                                              ),
+                                            ),
+                                          ),
+                                          if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.selectedCentralSite]['ecValue'] != null)
+                                            Container(
+                                              width: 120,
+                                              height: 40,
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                children: [
+                                                  if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['needEcValue'] == false)
+                                                    InkWell(
+                                                        onTap: (){
+                                                          programPvd.editEcPhNeedOrNot('ec');
+                                                        },
+                                                        child: Icon(Icons.radio_button_off,color: Colors.black,)
+                                                    )
+                                                  else
+                                                    InkWell(
+                                                        onTap: (){
+                                                          programPvd.editEcPhNeedOrNot('ec');
+                                                        },
+                                                        child: Icon(Icons.radio_button_checked,color: Colors.green)
+                                                    ),
+                                                  Text("EC",style: wf,),
+                                                  if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['needEcValue'] == true)
+                                                    SizedBox(
+                                                      width: 60,
+                                                      height: 40,
+                                                      child: TextFormField(
+                                                        controller: programPvd.ec,
+                                                        maxLength: 6,
+                                                        textAlign: TextAlign.center,
+                                                        style: const TextStyle(fontSize: 13),
+                                                        decoration: const InputDecoration(
+                                                            counterText: '',
+                                                            contentPadding: EdgeInsets.only(bottom: 5),
+                                                            enabledBorder: OutlineInputBorder(
+                                                            ),
+                                                            border: OutlineInputBorder(
+                                                                borderSide: BorderSide(width: 1)
+                                                            )
+                                                        ),
+                                                        onChanged: (value){
+                                                          programPvd.editEcPh(programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing', 'ecValue', value);
+                                                        },
+                                                      ),
+                                                    )
+                                                  else
+                                                    SizedBox(width: 60,)
+                                                ],
+                                              ),
+                                            ),
+                                          if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['phValue'] != null)
+                                            Container(
+                                              width: 120,
+                                              height: 40,
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                children: [
+                                                  if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['needPhValue'] == false)
+                                                    InkWell(
+                                                        onTap: (){
+                                                          programPvd.editEcPhNeedOrNot('ph');
+                                                        },
+                                                        child: Icon(Icons.radio_button_off,color: Colors.black,)
+                                                    )
+                                                  else
+                                                    InkWell(
+                                                        onTap: (){
+                                                          programPvd.editEcPhNeedOrNot('ph');
+                                                        },
+                                                        child: Icon(Icons.radio_button_checked,color: Colors.green)
+                                                    ),
+                                                  Text("PH",style: TextStyle(fontSize: 12),),
+                                                  if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['needPhValue'] == true)
+                                                    SizedBox(
+                                                      width: 60,
+                                                      height: 40,
+                                                      child: TextFormField(
+                                                        controller: programPvd.ph,
+                                                        maxLength: 6,
+                                                        textAlign: TextAlign.center,
+                                                        style: const TextStyle(fontSize: 13),
+                                                        decoration: const InputDecoration(
+                                                            counterText: '',
+                                                            contentPadding: EdgeInsets.only(bottom: 5),
+                                                            enabledBorder: OutlineInputBorder(
+                                                            ),
+                                                            border: OutlineInputBorder(
+                                                                borderSide: BorderSide(width: 1)
+                                                            )
+                                                        ),
+                                                        onChanged: (value){
+                                                          programPvd.editEcPh(programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing', 'phValue', value);
+                                                        },
+                                                      ),
+                                                    )
+                                                  else
+                                                    SizedBox(width: 60,)
+                                                ],
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+
+                            if(programPvd.isSiteVisible(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'],programPvd.segmentedControlCentralLocal == 0 ? 'central' : 'local') == true)
+                              if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'].length != 0)
+                                if(programPvd.segmentedControlGroupValue == 1)
+                                  if(programPvd.sequenceData[programPvd.selectedGroup]['applyFertilizer'])
+                                    Container(
+                                      height: 40,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              const SizedBox(
+                                                width: 30,
+                                                height: 2,
+                                                child: Center(
+                                                  child: Divider(
+                                                    color: Colors.black,
+                                                    thickness: 2,
+                                                  ),
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: Container(
+                                                  width: double.infinity,
+                                                  height: 40,
+                                                  child: ListView.builder(
+                                                      scrollDirection: Axis.horizontal,
+                                                      itemCount: programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['fertilizer'].length,
+                                                      itemBuilder: (context,index){
+                                                        return InkWell(
+                                                          onTap: (){
+                                                            programPvd.editGroupSiteInjector('selectedInjector', index);
+                                                          },
+                                                          child: Container(
+                                                            margin: EdgeInsets.only(left: 20),
+                                                            padding: const EdgeInsets.only(left: 10,right: 10),
+                                                            decoration: BoxDecoration(
+                                                                color: programPvd.selectedInjector == index ? Theme.of(context).primaryColor : Colors.white,
+                                                                borderRadius: BorderRadius.circular(10)
+                                                            ),
+                                                            child: Column(
+                                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                              children: [
+                                                                Row(
+                                                                  children: [
+                                                                    Text(
+                                                                      programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['fertilizer'][index]['name'],
+                                                                      style: TextStyle(color: programPvd.selectedInjector == index ? Colors.white : Colors.black,fontSize: 12),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      width: 10,
+                                                                    ),
+                                                                    Switch(
+                                                                        activeTrackColor: Colors.green,
+                                                                        activeColor: Colors.yellow.shade50,
+                                                                        value: programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['fertilizer'][index]['onOff'],
+                                                                        onChanged: (value){
+                                                                          programPvd.editOnOffInInjector(programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing',index,value);
+                                                                        }
+                                                                    )
+                                                                  ],
+                                                                ),
+
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                            if(programPvd.isSiteVisible(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'],programPvd.segmentedControlCentralLocal == 0 ? 'central' : 'local') == true)
+                              if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'].length != 0)
+                                if(programPvd.segmentedControlGroupValue == 1)
+                                  if(programPvd.sequenceData[programPvd.selectedGroup]['applyFertilizer'])
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            const SizedBox(
+                                              width: 30,
+                                              height: 60,
+                                              child: Center(
+                                                child: Divider(
+                                                  color: Colors.black,
+                                                  thickness: 2,
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                                child: Container(
+                                                  padding: const EdgeInsets.only(left: 10,right: 10),
+                                                  child: Column(
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Expanded(
+                                                              child: Container(
+                                                                color: Colors.blueGrey,
+                                                                height: 30,
+                                                                child: const Center(child: Text('Method',style: TextStyle(color: Colors.white,fontSize: 12),)),
+                                                              )
+                                                          ),
+                                                          Expanded(
+                                                              child: Container(
+                                                                color: Colors.blueGrey,
+                                                                height: 30,
+                                                                child: const Center(child: Text('Value',style: TextStyle(color: Colors.white,fontSize: 12))),
+                                                              )
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      Row(
+                                                        children: [
+                                                          Expanded(
+                                                              child: Container(
+                                                                color: Colors.white,
+                                                                height: 30,
+                                                                child: Center(
+                                                                    child: DropdownButton(
+                                                                      dropdownColor: Colors.white,
+                                                                      value: programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['fertilizer'][programPvd.selectedInjector]['method'],
+                                                                      underline: Container(),
+                                                                      items: ['Time','Pro.time','Quantity','Pro.quantity'].map((String items) {
+                                                                        return DropdownMenuItem(
+                                                                          value: items,
+                                                                          child: Text(items,style: const TextStyle(fontSize: 12,color: Colors.black),),
+                                                                        );
+                                                                      }).toList(),
+                                                                      onChanged: (value) {
+                                                                        programPvd.editParticularChannelDetails('method', programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing', value);
+                                                                      },
+                                                                    )
+                                                                ),
+                                                              )
+                                                          ),
+                                                          Expanded(
+                                                              child: Container(
+                                                                color: Colors.white,
+                                                                height: 30,
+                                                                child: Center(
+                                                                    child: SizedBox(
+                                                                      width: 60,
+                                                                      height: 28,
+                                                                      child: ['Pro.quantity','Quantity'].contains(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['fertilizer'][programPvd.selectedInjector]['method']) ? TextFormField(
+                                                                        controller: programPvd.injectorValue,
+                                                                        maxLength: 6,
+                                                                        textAlign: TextAlign.center,
+                                                                        style: const TextStyle(fontSize: 13),
+                                                                        decoration: const InputDecoration(
+                                                                            counterText: '',
+                                                                            contentPadding: EdgeInsets.only(bottom: 5),
+                                                                            enabledBorder: OutlineInputBorder(
+                                                                            ),
+                                                                            border: OutlineInputBorder(
+                                                                                borderSide: BorderSide(width: 1)
+                                                                            )
+                                                                        ),
+                                                                        onChanged: (value){
+                                                                          programPvd.editParticularChannelDetails('quantityValue', programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing', value);
+                                                                        },
+                                                                      ) :  InkWell(
+                                                                        onTap: (){
+                                                                          _showTimePicker(programPvd,overAllPvd,programPvd.selectedGroup,'timeValue');
+                                                                        },
+                                                                        child: SizedBox(
+                                                                          width: 80,
+                                                                          height: 40,
+                                                                          child: Center(
+                                                                            child: Text('${programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][programPvd.segmentedControlCentralLocal == 0 ? programPvd.selectedCentralSite : programPvd.selectedLocalSite]['fertilizer'][programPvd.selectedInjector]['timeValue']}',style: TextStyle(fontSize: 12),),
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    )
+                                                                ),
+                                                              )
+                                                          ),
+                                                        ],
+                                                      )
+                                                    ],
+                                                  ),
+                                                )
+                                            )
+
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                            if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'].length == 0 || programPvd.isSiteVisible(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'],programPvd.segmentedControlCentralLocal == 0 ? 'central' : 'local') == false)
                               if(programPvd.segmentedControlGroupValue == 1)
                                 Row(
                                   children: [
@@ -1113,7 +1072,7 @@ class _WaterAndFertScreenState extends State<WaterAndFertScreen> with SingleTick
                                   Container(
                                       height: 20,
                                       margin: const EdgeInsets.only(left: 30),
-                                      child: const Text('Click next to change channel',style: TextStyle(fontStyle: FontStyle.italic,fontWeight: FontWeight.bold),)),
+                                      child: const Text('Click next to change channel',style: TextStyle(fontStyle: FontStyle.italic,fontWeight: FontWeight.bold,fontSize: 12),)),
                                   SizedBox(
                                     height: 40,
                                     child: Row(
@@ -1180,7 +1139,7 @@ class _WaterAndFertScreenState extends State<WaterAndFertScreen> with SingleTick
     })
         : const Center(child: Padding(
       padding: EdgeInsets.all(8.0),
-      child: Text('Without selecting sequence, water and fertigation can not be configured', textAlign: TextAlign.center,),
+      child: Text('Without selecting sequence, water and fertigation can not be configured', textAlign: TextAlign.center,style: TextStyle(fontSize: 12),),
     ),);
 
   }
@@ -1196,7 +1155,7 @@ class _WaterAndFertScreenState extends State<WaterAndFertScreen> with SingleTick
           title: const Column(
             children: [
               Text(
-                'Select time',style: TextStyle(color: Colors.black),
+                'Select time',style: TextStyle(fontSize: 12),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -1208,7 +1167,7 @@ class _WaterAndFertScreenState extends State<WaterAndFertScreen> with SingleTick
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Cancel',style: TextStyle(color: Colors.red,fontWeight: FontWeight.bold),),
+              child: const Text('Cancel',style: TextStyle(color: Colors.red,fontWeight: FontWeight.bold,fontSize: 12),),
             ),
             TextButton(
               onPressed: () {
@@ -1223,7 +1182,7 @@ class _WaterAndFertScreenState extends State<WaterAndFertScreen> with SingleTick
                 }
                 Navigator.of(context).pop();
               },
-              child: Text('OK',style: TextStyle(color: Theme.of(context).primaryColor,fontWeight: FontWeight.bold)),
+              child: Text('OK',style: TextStyle(color: Theme.of(context).primaryColor,fontWeight: FontWeight.bold,fontSize: 12)),
             ),
           ],
         );
@@ -1234,15 +1193,32 @@ class _WaterAndFertScreenState extends State<WaterAndFertScreen> with SingleTick
 
 int returnHrsLimit(IrrigationProgramMainProvider programPvd,String preOrPostValue){
   var diff = programPvd.waterValueInSec() - (preOrPostValue == 'pre' ? programPvd.postValueInSec() : programPvd.preValueInSec());
-  print('diff : $diff');
+  // print('diff : $diff');
   var limit = (diff/3600 - 1).round();
-  print('limit : ${limit}');
+  // print('limit : ${limit}');
   return limit as int < 1 ? 0 : limit as int;
 }
 
 double returnWidth(IrrigationProgramMainProvider programPvd,String preOrPostValue,double screenWidth){
   var water = programPvd.waterValueInSec();
   var ratio = water / (preOrPostValue == 'pre' ? programPvd.preValueInSec() : programPvd.postValueInSec());
-  print('water : $water || prePost : ${(preOrPostValue == 'pre' ? programPvd.preValueInSec() : programPvd.postValueInSec())} || ratio : $ratio');
+  // print('water : $water || prePost : ${(preOrPostValue == 'pre' ? programPvd.preValueInSec() : programPvd.postValueInSec())} || ratio : $ratio');
   return (ratio == 0 || water == 0 || ratio.isInfinite) ? 0 : screenWidth/ratio;
 }
+
+List<dynamic> returnSelectedSiteRecipe(IrrigationProgramMainProvider programPvd){
+  var list = [];
+  // print('recipe : ${programPvd.recipe}');
+  for(var i in programPvd.recipe){
+    var selectedSite = programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'selectedCentralSite' : 'selectedLocalSite'];
+    if(selectedSite != -1){
+      if(programPvd.sequenceData[programPvd.selectedGroup][programPvd.segmentedControlCentralLocal == 0 ? 'centralDosing' : 'localDosing'][selectedSite]['sNo'] == i['sNo']){
+        list = i['recipe'];
+      }
+    }
+  }
+  // print('selectes recipe : ${list}');
+  return list;
+}
+
+TextStyle wf = const TextStyle(fontSize: 12);

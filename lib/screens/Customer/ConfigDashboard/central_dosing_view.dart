@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oro_irrigation_new/screens/Customer/ConfigDashboard/pumpView.dart';
+import 'package:oro_irrigation_new/screens/Customer/configDashboard/pumpView.dart';
 
 import '../../../constants/theme.dart';
 
@@ -114,48 +114,53 @@ class _CentralDosingViewState extends State<CentralDosingView> {
                                     height: 40,
                                     child: Image.asset('assets/images/central_fertilizer_site.png'),
                                   ),
-                                  Text('   ${widget.centralDosing[index]['name']}',style: TextStyle(fontSize: 13),)
+                                  Text('   ${widget.centralDosing[index]['name']}',style: TextStyle(fontSize: 16,color: Colors.teal.shade800,fontWeight: FontWeight.w900),)
 
                                 ],
                               ),
                             ),
-                            expandAndCollaps(index,'injectorVisible','fert_chanel','channel'),
+                            const SizedBox(height: 5,),
+                            expandAndCollaps(index,'injectorVisible','channel','channel',Colors.indigo),
                             if(widget.centralDosing[index]['visible'])
                               if(widget.centralDosing[index]['injectorVisible'])
                                 for(var i = 0;i < widget.centralDosing[index]['injector'].length;i++)
                                   object('${widget.centralDosing[index]['injector'][i]['name']}',true,widget.centralDosing[index]['injector'][i],index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+                            const SizedBox(height: 5,),
 
                             if(check(widget.centralDosing[index]['injector'],true,'dosingMeter'))
-                              expandAndCollaps(index,'dmVisible','fertilizer_meter','fertilizer meter'),
+                              expandAndCollaps(index,'dmVisible','fertilizer_meter','fertilizer meter',Colors.indigo),
                             for(var i = 0;i < widget.centralDosing[index]['injector'].length;i++)
                               if(widget.centralDosing[index]['injector'][i]['dosingMeter'].isNotEmpty)
                                 if(widget.centralDosing[index]['visible'])
                                   if(widget.centralDosing[index]['dmVisible'])
                                     object('${widget.centralDosing[index]['injector'][i]['dosingMeter']['name']}',false,widget.centralDosing[index]['injector'][i]['dosingMeter'],index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+                            const SizedBox(height: 5,),
 
                             if(check(widget.centralDosing[index]['injector'],true,'levelSensor'))
-                              expandAndCollaps(index,'levelVisible','level_sensor','level sensor'),
+                              expandAndCollaps(index,'levelVisible','level_sensor','level sensor',Colors.indigo),
                             for(var i = 0;i < widget.centralDosing[index]['injector'].length;i++)
                               if(widget.centralDosing[index]['injector'][i]['levelSensor'].isNotEmpty)
                                 if(widget.centralDosing[index]['visible'])
                                   if(widget.centralDosing[index]['levelVisible'])
                                     object('level sensor ${i+1}',false,widget.centralDosing[index]['injector'][i]['levelSensor'],index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+                            const SizedBox(height: 5,),
 
                             if(check(widget.centralDosing[index]['boosterConnection'],false))
-                              expandAndCollaps(index,'boosterVisible','booster_pump','booster'),
+                              expandAndCollaps(index,'boosterVisible','booster_pump','booster',Colors.indigo),
                             for(var i = 0;i < widget.centralDosing[index]['boosterConnection'].length;i++)
                               if(widget.centralDosing[index]['visible'])
                                 if(widget.centralDosing[index]['boosterVisible'])
                                   object('Booster ${i+1}',true,widget.centralDosing[index]['boosterConnection'][i],index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+                            const SizedBox(height: 5,),
 
                             if(check(widget.centralDosing[index]['ecConnection'],false))
-                              expandAndCollaps(index,'ecVisible','ec_sensor','ec'),
+                              expandAndCollaps(index,'ecVisible','ec_sensor','ec',Colors.indigo),
                             for(var i in widget.centralDosing[index]['ecConnection'])
                               if(widget.centralDosing[index]['visible'])
                                 if(widget.centralDosing[index]['ecVisible'])
                                   object('${i['name']}',false,i,index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
                             if(check(widget.centralDosing[index]['phConnection'],false))
-                              expandAndCollaps(index,'phVisible','ph_sensor','ph'),
+                              expandAndCollaps(index,'phVisible','ph_sensor','ph',Colors.indigo),
                             if(widget.centralDosing[index]['visible'])
                               if(widget.centralDosing[index]['phVisible'])
                                 for(var i in widget.centralDosing[index]['phConnection'])
@@ -171,7 +176,7 @@ class _CentralDosingViewState extends State<CentralDosingView> {
       );
     });
   }
-  Widget expandAndCollaps(int index,String title, String image,String name){
+  Widget expandAndCollaps(int index,String title, String image,String name,[Color? color]){
     return Visibility(
       visible: widget.centralDosing[index]['visible'],
       child: SizedBox(
@@ -188,11 +193,12 @@ class _CentralDosingViewState extends State<CentralDosingView> {
                 }, icon: Icon(widget.centralDosing[index][title] == true ? Icons.add_box_rounded : Icons.indeterminate_check_box)
             ),
             SizedBox(
-              width: 35,
-              height: 35,
+              width: 30,
+              height: 30,
               child: Image.asset('assets/images/$image.png'),
             ),
-            Text('$name')
+            SizedBox(width: 5,),
+            Text('$name',style: TextStyle(color: color),)
           ],
         ),
       ),

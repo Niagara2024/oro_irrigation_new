@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
-import 'package:oro_irrigation_new/screens/Customer/ConfigDashboard/pumpView.dart';
-
+import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/screens/Customer/configDashboard/pumpView.dart';
 
 class IrrigationLinesView extends StatefulWidget {
   final dynamic irrigationLine;
@@ -125,6 +129,7 @@ class _IrrigationLinesViewState extends State<IrrigationLinesView> {
                               if(widget.irrigationLine[index]['valveVisible'])
                                 for(var i in widget.irrigationLine[index]['valveConnection'])
                                   object('${i['name']}',true,i,index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+                            const SizedBox(height: 5,),
 
                             if(check(widget.irrigationLine[index]['main_valveConnection'],false))
                               expandAndCollaps(index,'mvVisible','main_valve','main valve'),
@@ -132,18 +137,26 @@ class _IrrigationLinesViewState extends State<IrrigationLinesView> {
                               if(widget.irrigationLine[index]['mvVisible'])
                                 for(var i in widget.irrigationLine[index]['main_valveConnection'])
                                   object('${i['name']}',true,i,index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+                            const SizedBox(height: 5,),
 
-                            expandAndCollaps(index,'fanVisible','fan','fan'),
+                            if(widget.irrigationLine[index]['fanConnection'].isEmpty)
+                              expandAndCollaps(index,'fanVisible','fan','fan'),
                             if(widget.irrigationLine[index]['visible'])
                               if(widget.irrigationLine[index]['fanVisible'])
-                                for(var i in widget.irrigationLine[index]['fanConnection'])
-                                  object('${i['name']}',true,i,index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+                                if(widget.irrigationLine[index]['fanConnection'].isEmpty)
+                                  for(var i in widget.irrigationLine[index]['fanConnection'])
+                                    object('${i['name']}',true,i,index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+                            const SizedBox(height: 5,),
 
-                            expandAndCollaps(index,'foggerVisible','fogger','fogger'),
+                            if(widget.irrigationLine[index]['foggerConnection'].isNotEmpty)
+                              expandAndCollaps(index,'foggerVisible','fogger','fogger'),
                             if(widget.irrigationLine[index]['visible'])
                               if(widget.irrigationLine[index]['foggerVisible'])
-                                for(var i in widget.irrigationLine[index]['foggerConnection'])
-                                  object('${i['name']}',true,i,index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+                                if(widget.irrigationLine[index]['foggerConnection'].isNotEmpty)
+                                  for(var i in widget.irrigationLine[index]['foggerConnection'])
+                                    object('${i['name']}',true,i,index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+
+                            const SizedBox(height: 5,),
                             if(widget.irrigationLine[index]['filterConnection'] != null)
                               expandAndCollaps(index,'filterVisible','filter','filter'),
                             if(widget.irrigationLine[index]['visible'])
@@ -151,24 +164,27 @@ class _IrrigationLinesViewState extends State<IrrigationLinesView> {
                                 if(widget.irrigationLine[index]['filterConnection'] != null)
                                   for(var i in widget.irrigationLine[index]['filterConnection'])
                                     object('${i['name']}',true,i,index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+                            const SizedBox(height: 5,),
 
                             if(widget.irrigationLine[index]['dv'] != null)
                               if(check([widget.irrigationLine[index]['dv']],false))
-                                expandAndCollaps(index,'dvVisible','downstream_valve','downstream valve'),
+                                expandAndCollaps(index,'dvVisible','relief_valve','downstream valve'),
                             if(widget.irrigationLine[index]['visible'])
                               if(widget.irrigationLine[index]['dvVisible'])
                                 if(widget.irrigationLine[index]['dv'] != null)
                                   if(check([widget.irrigationLine[index]['dv']],false))
                                     if(widget.irrigationLine[index]['dv'] != null)
                                       object('dv',true,widget.irrigationLine[index]['dv'],index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+                            const SizedBox(height: 5,),
 
                             if(widget.irrigationLine[index]['injector'] != null)
-                              expandAndCollaps(index,'injectorVisible','fert_chanel','channel'),
+                              expandAndCollaps(index,'injectorVisible','channel','channel'),
                             if(widget.irrigationLine[index]['visible'])
                               if(widget.irrigationLine[index]['injectorVisible'])
                                 if(widget.irrigationLine[index]['injector'] != null)
                                   for(var i in widget.irrigationLine[index]['injector'])
                                     object(i['name'],true,i,index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+                            const SizedBox(height: 5,),
 
                             if(widget.irrigationLine[index]['boosterConnection'] != null)
                               if(check(widget.irrigationLine[index]['boosterConnection'],false))
@@ -179,7 +195,7 @@ class _IrrigationLinesViewState extends State<IrrigationLinesView> {
                                   for(var i in widget.irrigationLine[index]['boosterConnection'])
                                     object('booster',true,i,index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
 
-
+                            const SizedBox(height: 5,),
                             if(widget.irrigationLine[index]['ecConnection'] != null)
                               if(check(widget.irrigationLine[index]['ecConnection'],false))
                                 expandAndCollaps(index,'ecVisible','ec_sensor','ec'),
@@ -188,6 +204,7 @@ class _IrrigationLinesViewState extends State<IrrigationLinesView> {
                                 if(widget.irrigationLine[index]['ecConnection'] != null)
                                   for(var i in widget.irrigationLine[index]['ecConnection'])
                                     object('${i['name']}',false,i,index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+                            const SizedBox(height: 5,),
 
                             if(widget.irrigationLine[index]['phConnection'] != null)
                               if(check(widget.irrigationLine[index]['phConnection'],false))
@@ -197,9 +214,10 @@ class _IrrigationLinesViewState extends State<IrrigationLinesView> {
                                 if(widget.irrigationLine[index]['phConnection'] != null)
                                   for(var i in widget.irrigationLine[index]['phConnection'])
                                     object('${i['name']}',false,i,index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+                            const SizedBox(height: 5,),
 
-                            if(check([widget.irrigationLine[index]['pressureIn']],false))
-                              expandAndCollaps(index,'psVisible','pressure_sensor','pressure sensor'),
+                            // if(check([widget.irrigationLine[index]['pressureIn']],false))
+                            expandAndCollaps(index,'psVisible','pressure_sensor','pressure sensor'),
                             if(widget.irrigationLine[index]['visible'])
                               if(widget.irrigationLine[index]['psVisible'])
                                 if(check([widget.irrigationLine[index]['pressureIn']],false))
@@ -208,18 +226,6 @@ class _IrrigationLinesViewState extends State<IrrigationLinesView> {
                               if(widget.irrigationLine[index]['psVisible'])
                                 if(widget.irrigationLine[index]['lf_pressureIn'] != null)
                                   object('${widget.irrigationLine[index]['lf_pressureIn']['name']}',false,widget.irrigationLine[index]['lf_pressureIn'],index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
-
-                            if(widget.irrigationLine[index]['lf_pressureSwitch'] != null)
-                              if(check([widget.irrigationLine[index]['lf_pressureSwitch']],false))
-                                expandAndCollaps(index,'pSwitchVisible','pressure_switch','pressure switch'),
-                            if(widget.irrigationLine[index]['visible'])
-                              if(widget.irrigationLine[index]['pSwitchVisible'])
-                                if(widget.irrigationLine[index]['lf_pressureSwitch'] != null)
-                                  object('pressure switch',false,widget.irrigationLine[index]['lf_pressureSwitch'],index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
-                            if(widget.irrigationLine[index]['visible'])
-                              if(widget.irrigationLine[index]['pSwitchVisible'])
-                                if(widget.irrigationLine[index]['lf_pressureSwitch'] != null)
-                                  object('pressure switch',false,widget.irrigationLine[index]['lf_pressureSwitch'],index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
 
                             if(widget.irrigationLine[index]['visible'])
                               if(widget.irrigationLine[index]['psVisible'])
@@ -233,7 +239,7 @@ class _IrrigationLinesViewState extends State<IrrigationLinesView> {
                                 if(widget.irrigationLine[index]['diffPressureSensor'] != null)
                                   object('${widget.irrigationLine[index]['diffPressureSensor']['name']}',false,widget.irrigationLine[index]['diffPressureSensor'],index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
 
-
+                            const SizedBox(height: 5,),
                             if(widget.irrigationLine[index]['waterMeter'] != null)
                               if(check([widget.irrigationLine[index]['waterMeter']],false))
                                 expandAndCollaps(index,'wmVisible','water_meter','water meter'),
@@ -241,6 +247,19 @@ class _IrrigationLinesViewState extends State<IrrigationLinesView> {
                               if(widget.irrigationLine[index]['wmVisible'])
                                 if(widget.irrigationLine[index]['waterMeter'] != null)
                                   object(widget.irrigationLine[index]['waterMeter']['name'],false,widget.irrigationLine[index]['waterMeter'],index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+
+                            const SizedBox(height: 5,),
+                            if(widget.irrigationLine[index]['lf_pressureSwitch'] != null)
+                              if(check([widget.irrigationLine[index]['lf_pressureSwitch']],false))
+                                expandAndCollaps(index,'pSwitchVisible','pressure_switch','pressure switch'),
+                            if(widget.irrigationLine[index]['visible'])
+                              if(widget.irrigationLine[index]['pSwitchVisible'])
+                                if(widget.irrigationLine[index]['lf_pressureSwitch'] != null)
+                                  object('pressure switch',false,widget.irrigationLine[index]['lf_pressureSwitch'],index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
+                            if(widget.irrigationLine[index]['visible'])
+                              if(widget.irrigationLine[index]['pSwitchVisible'])
+                                if(widget.irrigationLine[index]['lf_pressureSwitch'] != null)
+                                  object('pressure switch',false,widget.irrigationLine[index]['lf_pressureSwitch'],index % 2 == 0 ? Colors.blueGrey.shade50 : Colors.orange.shade50),
                             SizedBox(height: 30,),
                           ],
                         ),
@@ -270,10 +289,11 @@ class _IrrigationLinesViewState extends State<IrrigationLinesView> {
                 }, icon: Icon(widget.irrigationLine[index][title] == true ? Icons.add_box_rounded : Icons.indeterminate_check_box)
             ),
             SizedBox(
-              width: 35,
-              height: 35,
+              width: 30,
+              height: 30,
               child: Image.asset('assets/images/$image.png'),
             ),
+            SizedBox(width: 5,),
             Text(name)
           ],
         ),

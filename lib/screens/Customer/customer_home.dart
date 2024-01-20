@@ -913,24 +913,24 @@ class _CustomerHomeState extends State<CustomerHome>
                                     padding: const EdgeInsets.only(left: 5),
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color: Colors.grey.shade300,
-                                        borderRadius: BorderRadius.circular(3),
-                                      ),
-                                      height: 30,
-                                      width: 85,
-                                      child: const Center(child: Text('Disabled', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 5),
-                                    child: Container(
-                                      decoration: BoxDecoration(
                                         color: Colors.red.shade100,
                                         borderRadius: BorderRadius.circular(3),
                                       ),
                                       height: 30,
                                       width: 65,
                                       child: const Center(child: Text('Error', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 5),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade300,
+                                        borderRadius: BorderRadius.circular(3),
+                                      ),
+                                      height: 30,
+                                      width: 85,
+                                      child: const Center(child: Text('Disabled', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
                                     ),
                                   ),
                                   Padding(

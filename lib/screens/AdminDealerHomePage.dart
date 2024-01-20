@@ -250,57 +250,30 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                           ),
                         ),
                         Expanded(
-                          child: Row(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(left: 5, bottom: 10),
-                                child: SizedBox(
-                                  width: 270,
-                                  child: DataTable2(
-                                      columnSpacing: 12,
-                                      horizontalMargin: 12,
-                                      minWidth: 270,
-                                      headingRowHeight: 30,
-                                      dataRowHeight: 25,
-                                      headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
-                                      columns: const [
-                                        DataColumn2(
-                                          size: ColumnSize.M,
-                                          label: Text('Product', style: TextStyle(fontWeight: FontWeight.bold)),
-                                        ),
-                                        DataColumn2(
-                                          fixedWidth: 45,
-                                          label: Text('Sales', style: TextStyle(fontWeight: FontWeight.bold)),
-                                        ),
-                                        DataColumn2(
-                                          fixedWidth: 45,
-                                          label: Text('Stock', style: TextStyle(fontWeight: FontWeight.bold)),
-                                        ),
-                                      ],
-                                      rows: List<DataRow>.generate(dataResponse.total!.length, (index) => DataRow(cells: [
-                                        DataCell(Row(
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(top: 7, bottom: 7, right: 5),
-                                              child: CircleAvatar(radius: 10, backgroundColor:
-                                              index==0? Colors.cyan : index==1? Colors.pink: index==2 ? Colors.purple : index==3 ? Colors.orange :
-                                              index==4? Colors.deepPurple : index==5? Colors.red: index==6 ? Colors.yellow : index==7 ? Colors.black54 :
-                                              index==8 ? Colors.purple: index==9 ? Colors.redAccent: index == 10? Colors.blueGrey : index == 11?
-                                              Colors.lightGreen : index == 12?Colors.purpleAccent:Colors.brown),
-                                            ),
-                                            Text(dataResponse.total![index].categoryName, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 11)),
-                                          ],
-                                        )),
-                                        DataCell(Center(child: Text('${dataResponse.total![index].totalProduct}', style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 11)))),
-                                        DataCell(Center(child: Text('${dataResponse.total![index].inStock}', style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 11)))),
-                                      ]))),
-                                ),
+                          child: MySalesChart(),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Wrap(
+                            spacing: 5,
+                            runSpacing: 5,
+                            alignment: WrapAlignment.start,
+                            runAlignment: WrapAlignment.spaceBetween,
+                            children: List.generate(
+                              dataResponse.total!.length, (index) => Chip(
+                              avatar: CircleAvatar(backgroundColor: index==0? Colors.cyan : index==1? Colors.pink: index==2 ? Colors.purple : index==3 ? Colors.orange :
+                              index==4? Colors.deepPurple : index==5? Colors.red: index==6 ? Colors.yellow : index==7 ? Colors.black54 :
+                              index==8 ? Colors.purple: index==9 ? Colors.redAccent: index == 10? Colors.blueGrey : index == 11?
+                              Colors.lightGreen : index == 12?Colors.purpleAccent:Colors.brown),
+                              elevation: 3,
+                              shape: const LinearBorder(),
+                              label: Text('${dataResponse.total![index].categoryName} - ${dataResponse.total![index].totalProduct}',
+                                style: const TextStyle(fontSize: 11),
                               ),
-                              const VerticalDivider(width: 0),
-                              const Expanded(
-                                child: MySalesChart(),
-                              )
-                            ],
+                              visualDensity: VisualDensity.compact,
+                              // Customize Chip properties based on your needs
+                            ),
+                            ),
                           ),
                         ),
                       ],
@@ -442,8 +415,8 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                               Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerHome(customerID: myCustomerList[index].userId, type: 1, customerName: myCustomerList[index].userName, userID: userId, siteList: const [],)),);
                             }
                           }),
-                          title: Text(myCustomerList[index].userName),
-                          subtitle: Text('+${myCustomerList[index].countryCode} ${myCustomerList[index].mobileNumber}'),
+                          title: Text(myCustomerList[index].userName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
+                          subtitle: Text('+${myCustomerList[index].countryCode} ${myCustomerList[index].mobileNumber}', style: const TextStyle(fontSize: 12,fontWeight: FontWeight.normal)),
                           onTap:() {
                             Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: myCustomerList[index].userId, userName: myCustomerList[index].userName, userID: userId, userType: userType, productStockList: productStockList, callback: callbackFunction,)),);
                           },

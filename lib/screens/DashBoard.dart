@@ -386,13 +386,15 @@ class _DashboardWideState extends State<DashboardWide> {
             ],
           ),
           Expanded(
-            child: widget.userType =='1'? _selectedIndex == 0 ? AdminDealerHomePage(userName: widget.userName, countryCode: widget.countryCode, mobileNo: widget.mobileNo) :
+            child: widget.userType == '1'?
+            _selectedIndex == 0 ? AdminDealerHomePage(userName: widget.userName, countryCode: widget.countryCode, mobileNo: widget.mobileNo, fromLogin: true, userId: 0, userType: 0,) :
             _selectedIndex == 1 ? ProductInventory(userName: widget.userName) :
-            _selectedIndex == 2 ? const AllEntry() : _selectedIndex == 3 ? const MyPreference(userID: 1,) : const MyWebView():
+            _selectedIndex == 2 ? const AllEntry():
+            _selectedIndex == 2 ? const MyPreference(userID: 1,) : const MyWebView() :
 
-            _selectedIndex == 0 ? AdminDealerHomePage(userName: widget.userName, countryCode: widget.countryCode, mobileNo: widget.mobileNo) :
+            _selectedIndex == 0 ? AdminDealerHomePage(userName: widget.userName, countryCode: widget.countryCode, mobileNo: widget.mobileNo, fromLogin: true, userId: 0, userType: 0,) :
             _selectedIndex == 1 ? ProductInventory(userName: widget.userName) :
-            _selectedIndex == 2 ? widget.userType =='1'? const AllEntry() : const MyPreference(userID: 1,) : const MyWebView(),
+            _selectedIndex == 2 ? const MyPreference(userID: 1,) : const MyWebView(),
           ),
         ],
       )
@@ -575,7 +577,7 @@ class _DashboardWideState extends State<DashboardWide> {
             ),
           ),
           Expanded(
-            child: _selectedIndex == 0 ? const AdminDealerHomePage(userName: '', countryCode: '', mobileNo: '',) :
+            child: _selectedIndex == 0 ? const AdminDealerHomePage(userName: '', countryCode: '', mobileNo: '', fromLogin: true, userId: 0, userType: 0,) :
             _selectedIndex == 1 ? ProductInventory(userName: widget.userName) :
             _selectedIndex == 2 ? widget.userType =='1'? const AllEntry() : const MyPreference(userID: 1,) : const MyWebView(),
           ),
@@ -593,10 +595,11 @@ class MyDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(MediaQuery.of(context).size.height);
     return SingleChildScrollView(
       child: Container(
         width: 250,
-        height: MediaQuery.of(context).size.height < 750 ? 750 : MediaQuery.of(context).size.height,
+        height: MediaQuery.of(context).size.height < 675 ? 675 : MediaQuery.of(context).size.height,
         color: myTheme.primaryColor.withOpacity(0.9),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -607,19 +610,25 @@ class MyDrawer extends StatelessWidget {
               width: 250,
               child: Padding(
                 padding: const EdgeInsets.all(10.0),
-                child: Column(
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     const CircleAvatar(
-                      radius: 40,
+                      radius: 25,
                       backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
                       backgroundColor: Colors.transparent,
                     ),
-                    const SizedBox(height: 3,),
-                    Text(userName, style: const TextStyle(fontSize: 17, color: Colors.white)),
-                    const SizedBox(height: 3,),
-                    Text('+$countryCode $phoneNo', style: const TextStyle(fontSize: 14, color: Colors.white)),
+                    const SizedBox(width: 5),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(userName, style: const TextStyle(fontSize: 15, color: Colors.white)),
+                        const SizedBox(height: 3,),
+                        Text('+$countryCode $phoneNo', style: const TextStyle(fontSize: 13, color: Colors.white)),
+                      ],
+                    ),
                   ],
                 ),
               ),

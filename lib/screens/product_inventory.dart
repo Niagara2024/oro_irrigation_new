@@ -206,9 +206,9 @@ class ProductInventoryState extends State<ProductInventory> {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     return Scaffold(
-      backgroundColor: myTheme.primaryColor.withOpacity(0.1),
+      backgroundColor: myTheme.primaryColor.withOpacity(0.02),
       appBar: AppBar(
-        title: const Text('Product Inventory'),
+        title: Text(userType == 3 ? 'My Product' : 'Product Inventory'),
         actions: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -569,83 +569,77 @@ class ProductInventoryState extends State<ProductInventory> {
 
   Widget buildCustomerDataTable()
   {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('MY PRODUCT'),
-        backgroundColor: myTheme.primaryColor,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 12, left: 12, top: 5),
-              child: DataTable2(
-                columnSpacing: 12,
-                horizontalMargin: 12,
-                minWidth: 600,
-                dataRowHeight: 35.0,
-                headingRowHeight: 33,
-                headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
-                border: TableBorder.all(color: Colors.grey),
-                columns: const [
-                  DataColumn2(
-                      label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
-                      fixedWidth: 70
-                  ),
-                  DataColumn2(
-                      label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
-                      size: ColumnSize.M
-                  ),
-                  DataColumn2(
-                      label: Text('Model Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
-                      size: ColumnSize.M
-                  ),
-                  DataColumn2(
-                    label: Text('Device ID', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
-                    fixedWidth: 170,
-                  ),
-                  DataColumn2(
-                      label: Center(child: Text('Site Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
-                      size: ColumnSize.M
-                  ),
-                  DataColumn2(
-                    label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
-                    fixedWidth: 90,
-                  ),
-                  DataColumn2(
-                    label: Center(child: Text('Modify Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
-                    fixedWidth: 100,
-                  ),
-                ],
-                rows: searched ? List<DataRow>.generate(filterProductInventoryListCus.length, (index) => DataRow(cells: [
-                  DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}'))),
-                  DataCell(Text(filterProductInventoryListCus[index].categoryName)),
-                  DataCell(Text(filterProductInventoryListCus[index].model)),
-                  DataCell(Text(filterProductInventoryListCus[index].deviceId)),
-                  DataCell(Center(child: Text(filterProductInventoryListCus[index].siteName))),
-                  DataCell(Center(child: filterProductInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free')],):
-                  const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active')],))),
-                  const DataCell(Center(child: Text('25-09-2023'))),
-                ])):
-                List<DataRow>.generate(productInventoryListCus.length, (index) => DataRow(cells: [
-                  DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
-                  DataCell(Text(productInventoryListCus[index].categoryName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-                  DataCell(Text(productInventoryListCus[index].model, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-                  DataCell(Text(productInventoryListCus[index].deviceId, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-                  DataCell(Center(child: Text(productInventoryListCus[index].productStatus==3? '-' : productInventoryListCus[index].siteName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
-                  DataCell(Center(child: productInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))],):
-                  const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))],))),
-                  const DataCell(Center(child: Text('25-09-2023', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
-                ])),
-              ),
+    return Column(
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(right: 12, left: 12, top: 5),
+            child: DataTable2(
+              columnSpacing: 12,
+              horizontalMargin: 12,
+              minWidth: 600,
+              dataRowHeight: 35.0,
+              headingRowHeight: 33,
+              headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
+              border: TableBorder.all(color: Colors.grey),
+              columns: const [
+                DataColumn2(
+                    label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
+                    fixedWidth: 70
+                ),
+                DataColumn2(
+                    label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
+                    size: ColumnSize.M
+                ),
+                DataColumn2(
+                    label: Text('Model Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
+                    size: ColumnSize.M
+                ),
+                DataColumn2(
+                  label: Text('Device ID', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
+                  fixedWidth: 170,
+                ),
+                DataColumn2(
+                    label: Center(child: Text('Site Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
+                    size: ColumnSize.M
+                ),
+                DataColumn2(
+                  label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
+                  fixedWidth: 90,
+                ),
+                DataColumn2(
+                  label: Center(child: Text('Modify Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
+                  fixedWidth: 100,
+                ),
+              ],
+              rows: searched ? List<DataRow>.generate(filterProductInventoryListCus.length, (index) => DataRow(cells: [
+                DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}'))),
+                DataCell(Text(filterProductInventoryListCus[index].categoryName)),
+                DataCell(Text(filterProductInventoryListCus[index].model)),
+                DataCell(Text(filterProductInventoryListCus[index].deviceId)),
+                DataCell(Center(child: Text(filterProductInventoryListCus[index].siteName))),
+                DataCell(Center(child: filterProductInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free')],):
+                const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active')],))),
+                const DataCell(Center(child: Text('25-09-2023'))),
+              ])):
+              List<DataRow>.generate(productInventoryListCus.length, (index) => DataRow(cells: [
+                DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
+                DataCell(Text(productInventoryListCus[index].categoryName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+                DataCell(Text(productInventoryListCus[index].model, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+                DataCell(Text(productInventoryListCus[index].deviceId, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+                DataCell(Center(child: Text(productInventoryListCus[index].productStatus==3? '-' : productInventoryListCus[index].siteName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
+                DataCell(Center(child: productInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))],):
+                const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))],))),
+                const DataCell(Center(child: Text('25-09-2023', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
+              ])),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
-            child: buildFooterView(),
-          ),
-        ],
-      ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+          child: buildFooterView(),
+        ),
+      ],
     );
   }
 

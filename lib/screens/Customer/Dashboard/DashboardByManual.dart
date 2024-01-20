@@ -555,11 +555,11 @@ class _DashboardByManualState extends State<DashboardByManual> {
   void sendCommandToController(List<String> nonEmptyStrings){
     String finalResult = nonEmptyStrings.where((s) => s.isNotEmpty).join('_');
     if(segmentIndex==0){
-      functionSendPayloadToMqtt(segmentIndex, '0', finalResult);
-    }else if(segmentIndex==1){
       functionSendPayloadToMqtt(segmentIndex, strDuration, finalResult);
-    }else{
+    }else if(segmentIndex==1){
       functionSendPayloadToMqtt(segmentIndex, strFlow, finalResult);
+    }else{
+      functionSendPayloadToMqtt(segmentIndex, '0', finalResult);
     }
 
     Map<String, dynamic> manualOperation = {
@@ -633,7 +633,10 @@ class _DashboardByManualState extends State<DashboardByManual> {
   }
 
   void functionSendPayloadToMqtt(sgmType, val, relayList) {
-    String payload = '${relayList.isEmpty ? 0:1},${1},${1},${0},${relayList.isNotEmpty ? relayList:0},${0},$sgmType,$val';
+    String payload = '${relayList.isEmpty ? 0:1},${ddSelection==0?1:2},${1},${0},${relayList.isNotEmpty ? relayList:0},${0},$sgmType,$val';
+    print(payload);
+    print(ddSelection);
+
     String payLoadFinal = jsonEncode({
       "800": [{"801": payload}]
     });
@@ -826,7 +829,6 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
             itemBuilder: (context, index) {
               LineOrSequence line = widget.lineOrSequence[index];
               Map<String, List<DashBoardValve>> groupedValves = groupValvesByLocation(line.valves);
-
               return Padding(
                 padding: const EdgeInsets.only(left: 5, right: 5, bottom: 5),
                 child: Card(

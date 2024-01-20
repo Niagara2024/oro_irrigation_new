@@ -18,7 +18,6 @@ import '../../constants/MQTTManager.dart';
 import '../../constants/http_service.dart';
 import '../Config/product_limit.dart';
 import '../Customer/ConfigDashboard/configMakerView.dart';
-import '../Customer/customer_home.dart';
 
 enum MasterController {gem1, gem2, gem3, gem4, gem5, gem6, gem7, gem8, gem9, gem10,}
 
@@ -47,7 +46,6 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   List<ProductStockModel> nodeStockList = <ProductStockModel>[];
   List<List<NodeModel>> usedNodeList = <List<NodeModel>>[];
 
-  static List<Object> configList = ['Product List','Site Config'];
   late  List<Object> _configTabs = [];
   late final TabController _tabCont;
 
@@ -63,14 +61,16 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    configList[1] = (widget.userType == 1) ? 'Customer' : 'Site Config';
+
+    List<Object> configList = (widget.userType == 1) ? ['Product List'] : ['Product List', 'Site Config'];
     _configTabs = List.generate(configList.length, (index) => configList[index]);
     _tabCont = TabController(length: configList.length, vsync: this);
     _tabCont.addListener(() {
       setState(() {
-        _tabCont.index;
+        int tabIndex = _tabCont.index;
       });
     });
+
     selectedRadioTile = 0;
     getCustomerType();
 
@@ -1092,24 +1092,6 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
         ),
       );
     }
-    else if(widget.label.toString()=='Customer')
-    {
-      return  Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 7, // Number of columns
-            crossAxisSpacing: 8.0,
-            mainAxisSpacing: 8.0,
-          ),
-          itemCount: myCustomerChildList.length,
-          itemBuilder: (BuildContext context, int index) {
-            return UserCard(user: myCustomerChildList, index: index,);
-          },
-          
-        ),
-      );
-    }
 
     return Center(child: Text('Page of ${widget.label}'));
   }
@@ -1295,52 +1277,4 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
     return formattedTime;
   }
 
-}
-
-
-class UserCard extends StatelessWidget
-{
-  final List<CustomerListMDL> user;
-  final int index;
-  const UserCard({Key? key, required this.user, required this.index}) : super(key: key);
-
-  static const SizedBox _sizedBox = SizedBox(height: 10.0);
-  static const TextStyle _boldTextStyle = TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold);
-  static const TextStyle _normalTextStyle = TextStyle(fontSize: 12.0);
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      child: Card(
-        elevation: 3.0,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: 40,
-                backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
-                backgroundColor: Colors.transparent,
-              ),
-              _sizedBox,
-              Text(
-                user[index].userName,
-                style: _boldTextStyle,
-              ),
-              _sizedBox,
-              Text(
-                user[index].mobileNumber,
-                style: _normalTextStyle,
-              ),
-            ],
-          ),
-        ),
-      ),
-      onTap: (){
-        Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerHome(customerID: user[index].userId, type: 1, customerName: user[index].userName, userID: user[index].userId, siteList: const [],)),);
-      },
-    );
-  }
 }

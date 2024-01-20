@@ -13,16 +13,20 @@ import '../Models/product_stock.dart';
 import '../constants/http_service.dart';
 import '../constants/theme.dart';
 import '../state_management/mqtt_message_provider.dart';
+import 'Customer/customer_home.dart';
 import 'Forms/add_product.dart';
 import 'Forms/create_account.dart';
 import 'Forms/device_list.dart';
+import 'my_dealers.dart';
 
 enum Calendar { day, week, month, year }
 typedef CallbackFunction = void Function(String result);
 
 class AdminDealerHomePage extends StatefulWidget {
-  const AdminDealerHomePage({Key? key, required this.userName, required this.countryCode, required this.mobileNo}) : super(key: key);
+  const AdminDealerHomePage({Key? key, required this.userName, required this.countryCode, required this.mobileNo, required this.fromLogin, required this.userId, required this.userType}) : super(key: key);
   final String userName, countryCode, mobileNo;
+  final bool fromLogin;
+  final int userId, userType;
 
   @override
   State<AdminDealerHomePage> createState() => AdminDealerHomePageHomePageState();
@@ -48,6 +52,7 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
   void initState() {
     super.initState();
     dataResponse = DataResponse();
+    indicatorViewShow();
     getUserInfo();
   }
 
@@ -60,10 +65,14 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
 
   Future<void> getUserInfo() async
   {
-    indicatorViewShow();
     final prefs = await SharedPreferences.getInstance();
-    userType = int.parse(prefs.getString('userType') ?? "");
-    userId = int.parse(prefs.getString('userId') ?? "");
+    if(widget.fromLogin){
+      userType = int.parse(prefs.getString('userType') ?? "");
+      userId = int.parse(prefs.getString('userId') ?? "");
+    }else{
+      userType = widget.userType;
+      userId = widget.userId;
+    }
 
     getProductSalesReport();
     getProductStock();
@@ -71,20 +80,18 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
   }
 
   Future<void> getProductSalesReport() async {
-
     Map<String, Object> body = {"userId": userId, "userType": userType, "type": "All"};
     final response = await HttpService().postRequest("getProductSalesReport", body);
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
       if (data is Map<String, dynamic> && data["code"] == 200) {
         try {
-          setState(() {
-            dataResponse = DataResponse.fromJson(data);
-          });
-        } catch (e) {
+          dataResponse = DataResponse.fromJson(data);
+        }catch (e) {
           print('Error parsing data response: $e');
         }
       }
+      indicatorViewHide();
     } else {
       //_showSnackBar(response.body);
     }
@@ -111,12 +118,6 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
           productStockList.add(ProductStockModel.fromJson(cntList[i]));
         }
       }
-
-      if (mounted) {
-        setState(() {
-          productStockList;
-        });
-      }
     }
     else{
       //_showSnackBar(response.body);
@@ -138,17 +139,11 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
           myCustomerList.add(CustomerListMDL.fromJson(cntList[i]));
         }
       }
-
-      if (mounted) {
-        setState(() {
-        });
-      }
-
     }
     else{
       //_showSnackBar(response.body);
     }
-    indicatorViewHide();
+
   }
 
 
@@ -159,7 +154,7 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: myTheme.primaryColor.withOpacity(0.1),
+      backgroundColor: myTheme.primaryColor.withOpacity(0.02),
       appBar: AppBar(
         title: const Text('Dashboard'),
         actions: <Widget>[
@@ -410,7 +405,7 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                 width: 270,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: const BorderRadius.all(Radius.circular(5)),
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
                   border: Border.all(
                     color: CupertinoColors.lightBackgroundGray, // Border color
                     width: 1.0, // Border width
@@ -419,8 +414,8 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                 child: Column(
                   children: [
                     ListTile(
-                      title: const Text('Customer', style: TextStyle(fontSize: 17),),
-                      trailing: IconButton(tooltip: 'Create Dealer account', icon: const Icon(Icons.person_add_outlined), color: myTheme.primaryColor, onPressed: () async
+                      title: Text(userType==1? 'My Dealer':'My Customer', style: const TextStyle(fontSize: 17)),
+                      trailing: IconButton(tooltip: userType==1? 'Add Dealer account' : 'Add Customer account', icon: const Icon(Icons.person_add_outlined), color: myTheme.primaryColor, onPressed: () async
                       {
                         await showDialog<void>(
                             context: context,
@@ -439,6 +434,14 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                             backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
                             backgroundColor: Colors.transparent,
                           ),
+                          trailing: IconButton(tooltip: 'View Dealer Screen', icon: const Icon(Icons.view_quilt_outlined), color: myTheme.primaryColor, onPressed: () async
+                          {
+                            if(userType==1){
+                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyDealers(dealerId: myCustomerList[index].userId, dealerName: myCustomerList[index].userName)),);
+                            }else{
+                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerHome(customerID: myCustomerList[index].userId, type: 1, customerName: myCustomerList[index].userName, userID: userId, siteList: const [],)),);
+                            }
+                          }),
                           title: Text(myCustomerList[index].userName),
                           subtitle: Text('+${myCustomerList[index].countryCode} ${myCustomerList[index].mobileNumber}'),
                           onTap:() {
@@ -458,15 +461,19 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
   }
 
   void indicatorViewShow() {
-    setState(() {
-      visibleLoading = true;
-    });
+    if(mounted){
+      setState(() {
+        visibleLoading = true;
+      });
+    }
   }
 
   void indicatorViewHide() {
-    setState(() {
-      visibleLoading = false;
-    });
+    if(mounted){
+      setState(() {
+        visibleLoading = false;
+      });
+    }
   }
 }
 

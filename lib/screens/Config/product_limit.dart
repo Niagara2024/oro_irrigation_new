@@ -248,7 +248,7 @@ class _ProductLimitsState extends State<ProductLimits> {
         myControllers = [];
         for (int i=0; i < cntList.length; i++) {
           productLimits.add(MdlProductLimit.fromJson(cntList[i]));
-          myControllers.add(TextEditingController());
+          myControllers.add(TextEditingController(text: "0"));
           myControllers[i].text = '${productLimits[i].quantity}';
           filledRelayCount = filledRelayCount + productLimits[i].quantity;
         }
@@ -268,6 +268,9 @@ class _ProductLimitsState extends State<ProductLimits> {
   Future<void> updateProductLimit() async
   {
     for (int i=0; i < productLimits.length; i++) {
+      if(myControllers[i].text==""){
+        myControllers[i].text = "0";
+      }
       productLimits[i].quantity = int.parse(myControllers[i].text);
     }
 
@@ -293,9 +296,8 @@ class _ProductLimitsState extends State<ProductLimits> {
   Future<void> getConfigData()  async {
     await Future.delayed(const Duration(seconds: 2));
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: false);
-    HttpService service = HttpService();
     try{
-      var response = await service.postRequest('getUserConfigMaker', {'userId' : widget.customerID, 'controllerId' : widget.controllerId});
+      var response = await HttpService().postRequest('getUserConfigMaker', {'userId' : widget.customerID, 'controllerId' : widget.controllerId});
       var jsonData = jsonDecode(response.body);
       //print('jsonData : ${jsonData['data']}');
       configPvd.fetchAll(jsonData['data']);
@@ -314,8 +316,8 @@ class _ProductLimitsState extends State<ProductLimits> {
         title: Text(widget.siteName),
       ),
       body: Stepper(
-        type: StepperType.horizontal,
-        physics: const ScrollPhysics(),
+        type: StepperType.vertical,
+        //physics: const ScrollPhysics(),
         currentStep: _currentStep,
         connectorThickness: 2,
         connectorColor: MaterialStateProperty.resolveWith<Color>(

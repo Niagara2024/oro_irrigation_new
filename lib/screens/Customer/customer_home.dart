@@ -8,7 +8,6 @@ import '../../Models/Customer/Dashboard/ProgramList.dart';
 import '../../Models/Customer/Dashboard/ProgramServiceDevices.dart';
 import '../../constants/MQTTManager.dart';
 import '../../constants/http_service.dart';
-import '../../constants/snack_bar.dart';
 import '../../constants/theme.dart';
 import '../../state_management/MqttPayloadProvider.dart';
 import 'Dashboard/DashboardByManual.dart';
@@ -91,6 +90,7 @@ class _CustomerHomeState extends State<CustomerHome>
       final response = await HttpService().postRequest("getUserProgramNameList", body);
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
+        //print(jsonResponse);
         List<dynamic> programsJson = jsonResponse['data'];
         setState(() {
           programList = [
@@ -354,8 +354,8 @@ class _CustomerHomeState extends State<CustomerHome>
                                     ),
                                     child: Row(
                                       children: [
-                                        Expanded(
-                                          flex: 1,
+                                        SizedBox(
+                                          width: 260,
                                           child: Column(
                                             children: [
                                               const ListTile(

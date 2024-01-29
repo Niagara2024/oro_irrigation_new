@@ -1,38 +1,32 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
+import 'package:oro_irrigation_new/state_management/scheule_view_provider.dart';
 
 enum MQTTConnectionState { connected, disconnected, connecting }
 
 class MqttPayloadProvider with ChangeNotifier {
   MQTTConnectionState _appConnectionState = MQTTConnectionState.disconnected;
-  int _wifiStrength = 0;
-  List<dynamic> _list2401 = [];
+  String dashBoardPayload = '', schedulePayload = '';
+  late ScheduleViewProvider mySchedule;
 
-  StreamController<String> _payloadStreamController = StreamController<String>();
-
+  void editMySchedule(ScheduleViewProvider instance){
+    mySchedule = instance;
+    notifyListeners();
+  }
 
   void updateReceivedPayload(String payload) {
     try {
       Map<String, dynamic> data = jsonDecode(payload);
-      print(payload);
-
       if (data.containsKey('2400') && data['2400'] != null && data['2400'].isNotEmpty) {
-        if (data['2400'][0].containsKey('WifiStrength')) {
-          _wifiStrength = data['2400'][0]['WifiStrength'];
-        }
-        if (data['2400'][0].containsKey('2401')) {
-          _list2401 = data['2400'][0]['2401'];
-        }
-      } else {
-        print('Error: Key "2400" not found or its value is null or empty.');
+        dashBoardPayload = payload;
       }
-
-      _payloadStreamController.add(payload); // Emit the updated payload to listeners
+      else if(data.containsKey('2900') && data['2900'] != null && data['2900'].isNotEmpty){
+        schedulePayload = payload;
+      }
     } catch (e) {
       print('Error parsing JSON: $e');
     }
-
     notifyListeners();
   }
 
@@ -42,14 +36,12 @@ class MqttPayloadProvider with ChangeNotifier {
   }
 
 
-  Stream<String> get payloadStream => _payloadStreamController.stream;
-  int get receivedWifiStrength => _wifiStrength;
-  List<dynamic> get receivedNodeList => _list2401;
+  String get receivedDashboardPayload => dashBoardPayload;
+  String get receivedSchedulePayload => schedulePayload;
   MQTTConnectionState get getAppConnectionState => _appConnectionState;
 
   @override
   void dispose() {
-    _payloadStreamController.close();
     super.dispose();
   }
 }

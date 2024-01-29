@@ -555,11 +555,11 @@ class _DashboardByManualState extends State<DashboardByManual> {
   void sendCommandToController(List<String> nonEmptyStrings){
     String finalResult = nonEmptyStrings.where((s) => s.isNotEmpty).join('_');
     if(segmentIndex==0){
-      functionSendPayloadToMqtt(segmentIndex, strDuration, finalResult);
+      functionSendPayloadToMqtt(segmentIndex+1, '$strDuration:00', finalResult);
     }else if(segmentIndex==1){
-      functionSendPayloadToMqtt(segmentIndex, strFlow, finalResult);
+      functionSendPayloadToMqtt(segmentIndex+1, strFlow, finalResult);
     }else{
-      functionSendPayloadToMqtt(segmentIndex, '0', finalResult);
+      functionSendPayloadToMqtt(segmentIndex+1, '0', finalResult);
     }
 
     Map<String, dynamic> manualOperation = {

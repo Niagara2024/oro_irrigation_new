@@ -215,6 +215,7 @@ class _DashboardWideState extends State<DashboardWide> {
   void onOptionSelected(String option) {
     currentTap = option;
     setState(() {
+
       if (option == 'Dashboard') {
         _centerWidget = CustomerHome(customerID: widget.userID, type: 0, customerName: widget.userName, userID: widget.userID, mobileNo: '+${widget.countryCode}-${widget.mobileNo}',);
       } else if (option == 'My Product') {

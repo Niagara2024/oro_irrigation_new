@@ -1,11 +1,14 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/main.dart';
 import 'package:provider/provider.dart';
 
 import '../../../state_management/constant_provider.dart';
 import '../../../state_management/overall_use.dart';
+import '../../../widgets/HoursMinutesSeconds.dart';
 import '../../../widgets/SCustomWidgets/custom_time_picker.dart';
 import '../../../widgets/drop_down_button.dart';
 import '../../../widgets/table_needs.dart';
@@ -27,47 +30,110 @@ class _IrrigationLinesConstantState extends State<IrrigationLinesConstant> {
     var constantPvd = Provider.of<ConstantProvider>(context,listen: true);
     var overAllPvd = Provider.of<OverAllUse>(context,listen: true);
     return LayoutBuilder(builder: (context,constraints){
-      if(constraints.maxWidth < 800){
+      if(constraints.maxWidth < 900){
         return IrrigationLinesConstant_M();
       }
-      return myTable(
-          [expandedTableCell_Text('Name','','first',null),
-            expandedTableCell_Text('ID',''),
-            expandedTableCell_Text('Pump',''),
-            expandedTableCell_Text('Low flow','delay'),
-            expandedTableCell_Text('High flow','delay'),
-            expandedTableCell_Text('Low flow','behavior'),
-            expandedTableCell_Text('High flow','behavior'),
-            expandedTableCell_Text('Leakage','limit')],
-          Expanded(
-            child: ListView.builder(
-                itemCount: constantPvd.irrigationLineUpdated.length,
-                itemBuilder: (BuildContext context,int index){
-                  return Container(
-                    margin: index == constantPvd.irrigationLineUpdated.length - 1 ? EdgeInsets.only(bottom: 60) : null,
-                    decoration: BoxDecoration(
-                      border: Border(bottom: BorderSide(width: 1)),
-                      color: Colors.white70,
-                    ),
-                    child: Row(
-                      children: [
-                        expandedCustomCell(Text('${constantPvd.irrigationLineUpdated[index]['name']}',),'first',null),
-                        expandedCustomCell(Text('${constantPvd.irrigationLineUpdated[index]['id']}'),),
-                        expandedCustomCell(MyDropDown(initialValue: constantPvd.irrigationLineUpdated[index]['pump'], itemList: ['-','IP1','IP2','IP3'], pvdName: 'line/irrigationPump', index: index),),
-                        expandedCustomCell(CustomTimePickerSiva(purpose: 'line/lowFlowDelay', index: index, value: '${constantPvd.irrigationLineUpdated[index]['lowFlowDelay']}', displayHours: true, displayMins: true, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,)),
-                        expandedCustomCell(CustomTimePickerSiva(purpose: 'line/highFlowDelay', index: index, value: '${constantPvd.irrigationLineUpdated[index]['highFlowDelay']}', displayHours: true, displayMins: true, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,)),
-                        expandedCustomCell(MyDropDown(initialValue: constantPvd.irrigationLineUpdated[index]['lowFlowBehavior'], itemList: ['Ignore','Do next','wait'], pvdName: 'line/lowFlowBehavior', index: index),),
-                        expandedCustomCell(MyDropDown(initialValue: constantPvd.irrigationLineUpdated[index]['highFlowBehavior'], itemList: ['Ignore','Do next','wait'], pvdName: 'line/highFlowBehavior', index: index),),
-                        expandedCustomCell(CustomTimePickerSiva(purpose: 'line/leakageLimit', index: index, value: '${constantPvd.irrigationLineUpdated[index]['leakageLimit']}', displayHours: false, displayMins: false, displaySecs: false, displayCustom: true, CustomString: 'pulse', CustomList: [0,10], displayAM_PM: false,)),
-                      ],
-                    ),
-                  );
-                }),
-          )
+      return  Padding(
+        padding: const EdgeInsets.all(16),
+        child: DataTable2(
+            columnSpacing: 12,
+            horizontalMargin: 12,
+            minWidth: 600,
+          dataRowHeight: 40.0,
+          headingRowHeight: 40,
+          headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
+          border: TableBorder.all(color: Colors.grey),
+            columns: [
+              DataColumn2(
+                label: Text('Name'),
+                size: ColumnSize.L,
+              ),
+              DataColumn(
+                label: Text('Id'),
+              ),
+              DataColumn(
+                label: Text('Pump'),
+              ),
+              DataColumn(
+                label: Text('Low flow delay'),
+              ),
+              DataColumn(
+                label: Text('High flow delay'),
+              ),
+              DataColumn(
+                label: Text('Low flow behavior'),
+                numeric: true,
+              ),
+              DataColumn(
+                label: Text('High flow behavior'),
+                numeric: true,
+              ),
+              DataColumn(
+                label: Text('Leakage limit'),
+                numeric: true,
+              ),
+            ],
+            rows: [
+              for(var i = 0;i < constantPvd.irrigationLineUpdated.length;i++)
+                DataRow(cells: [
+                  DataCell(Text('${constantPvd.irrigationLineUpdated[i]['name']}')),
+                  DataCell(Text('${constantPvd.irrigationLineUpdated[i]['id']}')),
+                  DataCell(MyDropDown(initialValue: constantPvd.irrigationLineUpdated[i]['pump'], itemList: ['-','IP1','IP2','IP3'], pvdName: 'line/irrigationPump', index: i)),
+                  DataCell(lowFlowDelay(context,constantPvd,overAllPvd,i)),
+                  DataCell(highFlowDelay(context,constantPvd,overAllPvd,i)),
+                  DataCell(MyDropDown(initialValue: constantPvd.irrigationLineUpdated[i]['lowFlowBehavior'], itemList: ['Ignore','Do next','wait'], pvdName: 'line/lowFlowBehavior', index: i)),
+                  DataCell(MyDropDown(initialValue: constantPvd.irrigationLineUpdated[i]['highFlowBehavior'], itemList: ['Ignore','Do next','wait'], pvdName: 'line/highFlowBehavior', index: i)),
+                  DataCell(MyDropDown(initialValue: constantPvd.irrigationLineUpdated[i]['leakageLimit'], itemList: ['0','1','2','3','4','5','6','7','8','9','10'], pvdName: 'line/leakageLimit', index: i)),
+                ])
+            ],
+        ),
       );
     });
 
   }
+}
+
+Widget lowFlowDelay(BuildContext context,constantPvd,overAllPvd,selectedLine){
+  return TextButton(
+      style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all(Colors.transparent)
+      ),
+      onPressed: ()async{
+        showDialog(context: context, builder: (context){
+          return AlertDialog(
+            content: HoursMinutesSeconds(
+              initialTime: '${constantPvd.irrigationLineUpdated[selectedLine]['lowFlowDelay']}',
+              onPressed: (){
+                constantPvd.irrigationLineFunctionality(['line/lowFlowDelay',selectedLine,'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                Navigator.pop(context);
+              },
+            ),
+          );
+        });
+      },
+      child: Text('${constantPvd.irrigationLineUpdated[selectedLine]['lowFlowDelay']}',style: TextStyle(color: Colors.black87),)
+  );
+}
+Widget highFlowDelay(BuildContext context,constantPvd,overAllPvd,selectedLine){
+  return TextButton(
+    style: ButtonStyle(
+      backgroundColor: MaterialStateProperty.all(Colors.transparent)
+    ),
+      onPressed: ()async{
+        showDialog(context: context, builder: (context){
+          return AlertDialog(
+            content: HoursMinutesSeconds(
+              initialTime: '${constantPvd.irrigationLineUpdated[selectedLine]['highFlowDelay']}',
+              onPressed: (){
+                constantPvd.irrigationLineFunctionality(['line/highFlowDelay',selectedLine,'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                Navigator.pop(context);
+              },
+            ),
+          );
+        });
+      },
+      child: Text('${constantPvd.irrigationLineUpdated[selectedLine]['highFlowDelay']}',style: TextStyle(color: Colors.black87),)
+  );
 }
 
 class IrrigationLinesConstant_M extends StatefulWidget {
@@ -79,119 +145,317 @@ class IrrigationLinesConstant_M extends StatefulWidget {
 
 class _IrrigationLinesConstant_MState extends State<IrrigationLinesConstant_M> {
   int selectedLine = 0;
+  double hrs = 0;
+  double mins = 0;
+  double secs = 0;
+
   @override
   Widget build(BuildContext context) {
     var constantPvd = Provider.of<ConstantProvider>(context,listen: true);
     var overAllPvd = Provider.of<OverAllUse>(context,listen: true);
+
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.all(8.0),
+      padding: EdgeInsets.all(10),
+      color: Color(0xfff3f3f3),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
+          SizedBox(height: 5,),
           Container(
-              margin: EdgeInsets.only(bottom: 8),
-              height: 30,
-              color: myTheme.primaryColor,
-              width : double.infinity,
-              child: Center(child: Text('Select line',style: TextStyle(color: Colors.white),))
-          ),
-          Container(
-            padding: EdgeInsets.only(left: 10),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.white
+            ),
             width: double.infinity,
-            height: 50,
-            child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: constantPvd.irrigationLines.length,
-                itemBuilder: (BuildContext context,int index){
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Container(
-                        width: 60,
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              width: 60,
-                              height: 40,
-                              child: GestureDetector(
-                                onTap: (){
-                                  setState(() {
-                                    selectedLine = index;
-                                  });
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: index == 0 ? BorderRadius.only(topLeft: Radius.circular(20)) : constantPvd.irrigationLines.length -1 == index ? BorderRadius.only(topRight: Radius.circular(20)) : BorderRadius.circular(5),
-                                    color: selectedLine == index ? myTheme.primaryColor : Colors.blue.shade100,
-                                  ),
-                                  child: Center(child: Text('${index + 1}',style: TextStyle(color: selectedLine == index ? Colors.white : null),)),
-                                ),
-                              ),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(width: 3,),
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      color: Colors.black
-                                  ),
-                                ),
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      color: Colors.black
-                                  ),
-                                ),
-                                SizedBox(width: 3,),
-                              ],
-                            )
-                          ],
-                        ),
+            height: 60,
+            child: Center(
+              child: ListTile(
+                title: Text('Irrigation Line'),
+                leading: SizedBox(
+                  width: 30,
+                  height: 30,
+                  child: Image.asset('assets/images/irrigation_line1.png'),
+                ),
+                trailing:  PopupMenuButton<int>(
+                  child: Text('${selectedLine + 1}',style: TextStyle(fontSize: 20),),
+                  itemBuilder: (context) => [
+                    for(var i = 0;i < constantPvd.irrigationLineUpdated.length;i++)
+                      PopupMenuItem(
+                          value: i,
+                          child: Text('${i+1}')
                       ),
-                      if(constantPvd.irrigationLines.length - 1 != index)
-                        Text('-')
-                    ],
-                  );
-                }),
-          ),
-          Container(
-              margin: EdgeInsets.only(bottom: 8),
-              height: 30,
-              color: myTheme.primaryColor,
-              width : double.infinity,
-              child: Center(child: Text('Line ${selectedLine + 1}',style: TextStyle(color: Colors.white),))
-          ),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                // color: Color(0XFFF3F3F3)
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  // mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    returnMyListTile('Name', Text('${constantPvd.irrigationLines[selectedLine][1]}',style: TextStyle(fontSize: 14),)),
-                    returnMyListTile('ID', Text('${selectedLine + 1}',style: TextStyle(fontSize: 14))),
-                    returnMyListTile('Pump', fixedContainer(MyDropDown(initialValue: constantPvd.irrigationLines[selectedLine][2], itemList: ['IP1','IP2','IP3'], pvdName: 'line/irrigationPump', index: selectedLine))),
-                    returnMyListTile('Low flow delay', CustomTimePickerSiva(purpose: 'line/lowFlowDelay', index: selectedLine, value: '${constantPvd.irrigationLines[selectedLine][3]}', displayHours: true, displayMins: true, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,)),
-                    returnMyListTile('High flow delay', CustomTimePickerSiva(purpose: 'line/highFlowDelay', index: selectedLine, value: '${constantPvd.irrigationLines[selectedLine][4]}', displayHours: true, displayMins: true, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,)),
-                    returnMyListTile('Low flow behavior', fixedContainer(MyDropDown(initialValue: constantPvd.irrigationLines[selectedLine][5], itemList: ['Ignore','Do next','wait'], pvdName: 'line/lowFlowBehavior', index: selectedLine))),
-                    returnMyListTile('High flow behavior', fixedContainer(MyDropDown(initialValue: constantPvd.irrigationLines[selectedLine][6], itemList: ['Ignore','Do next','wait'], pvdName: 'line/highFlowBehavior', index: selectedLine))),
-                    returnMyListTile('Leakage limit', CustomTimePickerSiva(purpose: 'line/leakageLimit', index: selectedLine, value: '${constantPvd.irrigationLines[selectedLine][7]}', displayHours: false, displayMins: false, displaySecs: false, displayCustom: true, CustomString: 'pulse', CustomList: [0,10], displayAM_PM: false,)),
                   ],
+                  offset: Offset(0, 50),
+                  color: Colors.white,
+                  elevation: 2,
+                  // on selected we show the dialog box
+                  onSelected: (value) {
+                    print('selected value  : $value');
+                    setState(() {
+                      selectedLine = value;
+                    });
+                  },
                 ),
               ),
             ),
-          )
+          ),
+          SizedBox(height: 5,),
+          Expanded(
+            child: GridView.count(
+              crossAxisCount: 2,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              childAspectRatio: MediaQuery.sizeOf(context).width/210,
+              children: <Widget>[
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          SizedBox(
+                            width: 30,
+                            height: 30,
+                            child: Image.asset('assets/images/irrigation_pump.png'),
+                          ),
+                          Text('Pump'),
+                        ],
+                      ),
+                      DropdownButton(
+                        focusColor: Colors.transparent,
+                        // style: ioText,
+                        value: constantPvd.irrigationLineUpdated[selectedLine]['pump'],
+                        underline: Container(),
+                        items: ['-','IP1','IP2','IP3'].map((dynamic items) {
+                          return DropdownMenuItem(
+                            value: items,
+                            child: Container(
+                                child: Text(items,style: TextStyle(fontSize: 11,color: Colors.black),)
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          constantPvd.irrigationLineFunctionality(['line/irrigationPump',selectedLine,value!]);
+                        },
+                        // After selecting the desired option,it will
+                        // change button value to selected value
+
+                      ),
+
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.ev_station,color: myTheme.primaryColor,),
+                          Text('Low flow delay'),
+                        ],
+                      ),
+                      lowFlowDelay(context,constantPvd,overAllPvd,selectedLine),
+
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.perm_identity,color: myTheme.primaryColor,),
+                          Text('High flow delay'),
+                        ],
+                      ),
+                      highFlowDelay(context,constantPvd,overAllPvd,selectedLine)
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.local_activity_outlined,color: myTheme.primaryColor,),
+                          Text('Low flow behavior'),
+                        ],
+                      ),
+                      DropdownButton(
+                        focusColor: Colors.transparent,
+                        // style: ioText,
+                        value: constantPvd.irrigationLineUpdated[selectedLine]['lowFlowBehavior'],
+                        underline: Container(),
+                        items: ['Ignore','Do next','wait'].map((dynamic items) {
+                          return DropdownMenuItem(
+                            value: items,
+                            child: Container(
+                                child: Text(items,style: TextStyle(fontSize: 11,color: Colors.black),)
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          constantPvd.irrigationLineFunctionality(['line/lowFlowBehavior',selectedLine,value!]);
+                        },
+
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.local_activity_outlined,color: myTheme.primaryColor,),
+                          Text('High flow behavior'),
+                        ],
+                      ),
+                      DropdownButton(
+                        focusColor: Colors.transparent,
+                        // style: ioText,
+                        value: constantPvd.irrigationLineUpdated[selectedLine]['highFlowBehavior'],
+                        underline: Container(),
+                        items: ['Ignore','Do next','wait'].map((dynamic items) {
+                          return DropdownMenuItem(
+                            value: items,
+                            child: Container(
+                                child: Text(items,style: TextStyle(fontSize: 11,color: Colors.black),)
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          constantPvd.irrigationLineFunctionality(['line/highFlowBehavior',selectedLine,value!]);
+                        },
+
+                      ),
+
+
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.local_activity_outlined,color: myTheme.primaryColor,),
+                          Text('Leakage limit'),
+                        ],
+                      ),
+                      DropdownButton(
+                        focusColor: Colors.transparent,
+                        // style: ioText,
+                        value: constantPvd.irrigationLineUpdated[selectedLine]['leakageLimit'],
+                        underline: Container(),
+                        items: ['0','1','2','3','4','5','6','7','8','9','10'].map((dynamic items) {
+                          return DropdownMenuItem(
+                            value: items,
+                            child: Container(
+                                child: Text(items,style: TextStyle(fontSize: 11,color: Colors.black),)
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          constantPvd.irrigationLineFunctionality(['line/leakageLimit',selectedLine,value!]);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.green.shade50,
+                            Colors.white,
+                          ]
+                      )
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.local_activity_outlined,color: myTheme.primaryColor,),
+                          Text('Name'),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.green.shade50,
+                            Colors.white,
+                          ]
+                      )
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.local_activity_outlined,color: myTheme.primaryColor,),
+                          Text('Id'),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 }
+
+
+/// Example without a datasource

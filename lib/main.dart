@@ -15,12 +15,16 @@ import 'package:oro_irrigation_new/state_management/mqtt_message_provider.dart';
 import 'package:oro_irrigation_new/state_management/overall_use.dart';
 import 'package:oro_irrigation_new/state_management/preferences_screen_main_provider.dart';
 import 'package:oro_irrigation_new/state_management/program_queue_provider.dart';
+import 'package:oro_irrigation_new/state_management/scheule_view_provider.dart';
 import 'package:oro_irrigation_new/state_management/system_definition_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'state_management/config_maker_provider.dart';
 
 void main() {
+  ScheduleViewProvider mySchedule = ScheduleViewProvider();
+  MqttPayloadProvider myMqtt = MqttPayloadProvider();
+  //myMqtt.editMySchedule(mySchedule);
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => ConfigMakerProvider()),
@@ -33,9 +37,10 @@ void main() {
       ChangeNotifierProvider(create: (context) => SelectedGroupProvider()),
       ChangeNotifierProvider(create: (context) => FertilizerSetProvider()),
       ChangeNotifierProvider(create: (context) => GlobalFertLimitProvider()),
-      ChangeNotifierProvider(create: (context) => MqttPayloadProvider()),
+      ChangeNotifierProvider(create: (context) => myMqtt),
       ChangeNotifierProvider(create: (context) => SystemDefinitionProvider()),
       ChangeNotifierProvider(create: (context) => ProgramQueueProvider()),
+      ChangeNotifierProvider(create: (context) => mySchedule),
 
     ],
     child: const MyApp(),

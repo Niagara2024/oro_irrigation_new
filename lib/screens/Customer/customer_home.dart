@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../Models/Customer/Dashboard/ProgramList.dart';
 import '../../Models/Customer/Dashboard/ProgramServiceDevices.dart';
@@ -25,7 +27,6 @@ class CustomerHome extends StatefulWidget {
 
 class _CustomerHomeState extends State<CustomerHome>
 {
-  MQTTManager mqttManager = MQTTManager();
   List<DashboardModel> siteListFinal = [];
   int siteIndex = 0;
   List<ProgramList> programList = [];
@@ -41,61 +42,12 @@ class _CustomerHomeState extends State<CustomerHome>
   @override
   void initState() {
     super.initState();
-
     indicatorViewShow();
     getCustomerSite(widget.customerID);
-
-    mqttManager.payloadStream.listen((String payload)
-    {
-      try {
-        Map<String, dynamic> data = jsonDecode(payload);
-        if (data.containsKey('2400') && data['2400'] != null && data['2400'].isNotEmpty)
-        {
-          if (data['2400'][0].containsKey('WifiStrength')) {
-            wifiStrength = data['2400'][0]['WifiStrength'];
-          }
-          if (data['2400'][0].containsKey('2401')) {
-            for (var item in data['2400'][0]['2401']) {
-              if (item is Map<String, dynamic>) {
-                try {
-                  //print(item['SNo'].runtimeType);
-                  int position = getNodePositionInNodeList(siteIndex, item['SNo']);
-                  if (position != -1) {
-                    siteListFinal[siteIndex].nodeList[position].status = item['Status'];
-                    siteListFinal[siteIndex].nodeList[position].batVolt = item['BatVolt'];
-                    siteListFinal[siteIndex].nodeList[position].slrVolt = item['SVolt'];
-                    siteListFinal[siteIndex].nodeList[position].rlyStatus = item['RlyStatus'];
-                    //siteListFinal[siteIndex].nodeList[position].sensor = item['Sensor'];
-                  } else {
-                    print('${item['SNo']} The serial number not found');
-                  }
-                } catch (e) {
-                  print('Error updating node properties: $e');
-                }
-              }
-            }
-          }
-          setState(() {
-          });
-        }
-        else {
-          print('Error: Key "2400" not found or its value is null or empty.');
-        }
-      } catch (e) {
-        print('Error parsing JSON: $e');
-      }
-    },
-      onError: (error) {
-        print('Stream error: $error');
-      },
-      onDone: () {
-        print('Stream closed');
-      },
-    );
-
   }
 
-  void callbackFunction(){
+  void callbackFunction()
+  {
     Future.delayed(const Duration(seconds: 02), () {
       getStandaloneDetails(siteListFinal[siteIndex].controllerId ?? 0);
     });
@@ -162,7 +114,6 @@ class _CustomerHomeState extends State<CustomerHome>
 
   Future<void> getStandaloneDetails(int controllerId) async
   {
-    print('getStandaloneDetails');
     try {
       Map<String, Object> body = {"userId": widget.customerID, "controllerId": controllerId};
       final response = await HttpService().postRequest("getUserManualOperation", body);
@@ -220,7 +171,40 @@ class _CustomerHomeState extends State<CustomerHome>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)
+  {
+    var provider = Provider.of<MqttPayloadProvider>(context, listen: true);
+    try{
+      Map<String, dynamic> data = jsonDecode(provider.receivedDashboardPayload);
+      setState(() {
+        if (data['2400'][0].containsKey('WifiStrength')) {
+          wifiStrength = data['2400'][0]['WifiStrength'];
+        }
+        if (data['2400'][0].containsKey('2401')) {
+          for (var item in data['2400'][0]['2401']) {
+            if (item is Map<String, dynamic>) {
+              try {
+                int position = getNodePositionInNodeList(siteIndex, item['SNo']);
+                if (position != -1) {
+                  siteListFinal[siteIndex].nodeList[position].status = item['Status'];
+                  siteListFinal[siteIndex].nodeList[position].batVolt = item['BatVolt'];
+                  siteListFinal[siteIndex].nodeList[position].slrVolt = item['SVolt'];
+                  siteListFinal[siteIndex].nodeList[position].rlyStatus = item['RlyStatus'];
+                  //siteListFinal[siteIndex].nodeList[position].sensor = item['Sensor'];
+                } else {
+                  print('${item['SNo']} The serial number not found');
+                }
+              } catch (e) {
+                print('Error updating node properties: $e');
+              }
+            }
+          }
+        }
+      });
+    }
+    catch(e){
+      print(e);
+    }
 
     final screenWidth = MediaQuery.of(context).size.width;
     if(widget.type==0){
@@ -243,8 +227,8 @@ class _CustomerHomeState extends State<CustomerHome>
     );
   }
 
-
-  Widget buildLoadingIndicator(bool isVisible, double width) {
+  Widget buildLoadingIndicator(bool isVisible, double width)
+  {
     return Visibility(
       visible: isVisible,
       child: Container(
@@ -257,7 +241,8 @@ class _CustomerHomeState extends State<CustomerHome>
     );
   }
 
-  AppBar buildAppBar(String title, BuildContext context) {
+  AppBar buildAppBar(String title, BuildContext context)
+  {
     return AppBar(
       title: Text(title),
       backgroundColor: myTheme.primaryColor,
@@ -283,7 +268,8 @@ class _CustomerHomeState extends State<CustomerHome>
     );
   }
 
-  Padding buildBodyContent() {
+  Padding buildBodyContent()
+  {
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
       child: Column(
@@ -1061,16 +1047,14 @@ class _CustomerHomeState extends State<CustomerHome>
                                         Text(siteListFinal[siteIndex].nodeList[index].deviceId, style: const TextStyle(fontWeight: FontWeight.normal,fontSize: 11)),
                                       ],
                                     ),),
-                                    DataCell(Center(child: IconButton(
+                                    DataCell(Center(child: IconButton(tooltip: 'View Relay status',
                                       icon: Icon(Icons.format_list_bulleted_outlined, color: myTheme.primaryColor,), // Icon to display
                                       onPressed: () {
-                                        print(siteListFinal[siteIndex].nodeList[index].rlyStatus);
-
                                         showModalBottomSheet(
                                           context: context,
                                           builder: (BuildContext context) {
                                             return SizedBox(
-                                              height: 250,
+                                              height: siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 270 : 230,
                                               child: Column(
                                                 mainAxisAlignment: MainAxisAlignment.start,
                                                 children: <Widget>[
@@ -1094,30 +1078,68 @@ class _CustomerHomeState extends State<CustomerHome>
                                                   const Divider(height: 0),
                                                   SizedBox(
                                                     width : double.infinity,
-                                                    height : 175,
+                                                    height : siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 230 : 160,
                                                     child: Padding(
                                                       padding: const EdgeInsets.all(8.0),
-                                                      child: siteListFinal[siteIndex].nodeList[index].rlyStatus.length >0? GridView.builder(
-                                                        itemCount: siteListFinal[siteIndex].nodeList[index].rlyStatus.length, // Number of items in the grid
-                                                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                                          crossAxisCount: 8,
-                                                          crossAxisSpacing: 10.0,
-                                                          mainAxisSpacing: 10.0,
-                                                        ),
-                                                        itemBuilder: (BuildContext context, int indexGv) {
-                                                          return Column(
-                                                            children: [
-                                                              CircleAvatar(
-                                                                backgroundColor: Colors.blue, // Avatar background color
-                                                                child: Text((siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['RlyNo']).toString(), style: TextStyle(color: Colors.white),
-                                                                ),
+                                                      child: siteListFinal[siteIndex].nodeList[index].rlyStatus.isNotEmpty ? Column(
+                                                        children: [
+                                                          const SizedBox(
+                                                            width: double.infinity,
+                                                            height : 40,
+                                                            child: Row(
+                                                              children: [
+                                                                SizedBox(width: 10),
+                                                                CircleAvatar(radius: 5,backgroundColor: Colors.green,),
+                                                                SizedBox(width: 5),
+                                                                Text('ON'),
+
+                                                                SizedBox(width: 20),
+                                                                CircleAvatar(radius: 5,backgroundColor: Colors.black45),
+                                                                SizedBox(width: 5),
+                                                                Text('OFF'),
+
+                                                                SizedBox(width: 20),
+                                                                CircleAvatar(radius: 5,backgroundColor: Colors.orange),
+                                                                SizedBox(width: 5),
+                                                                Text('ON IN OFF'),
+
+                                                                SizedBox(width: 20),
+                                                                CircleAvatar(radius: 5,backgroundColor: Colors.redAccent),
+                                                                SizedBox(width: 5),
+                                                                Text('OFF IN ON'),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          SizedBox(
+                                                            width: double.infinity,
+                                                            height : 100,
+                                                            child: GridView.builder(
+                                                              itemCount: siteListFinal[siteIndex].nodeList[index].rlyStatus.length, // Number of items in the grid
+                                                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                                                crossAxisCount: 8,
+                                                                crossAxisSpacing: 10.0,
+                                                                mainAxisSpacing: 10.0,
                                                               ),
-                                                              Text((siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Name']).toString(), style: TextStyle(color: Colors.black)),
-                                                            ],
-                                                          );
-                                                        },
-                                                      ):
-                                                      const Center(child: Text('Really Status Not Found')),
+                                                              itemBuilder: (BuildContext context, int indexGv) {
+                                                                return Column(
+                                                                  children: [
+                                                                    CircleAvatar(
+                                                                      backgroundColor: siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Status']==0 ? Colors.grey :
+                                                                      siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Status']==1 ? Colors.green :
+                                                                      siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Status']==2 ? Colors.orange :
+                                                                      siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Status']==3 ? Colors.redAccent : Colors.black12, // Avatar background color
+                                                                      child: Text((siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['RlyNo']).toString(), style: TextStyle(color: Colors.white),
+                                                                      ),
+                                                                    ),
+                                                                    Text((siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Name']).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                                                  ],
+                                                                );
+                                                              },
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ) :
+                                                      const Center(child: Text('Relay Status Not Found')),
                                                     ),
                                                   ),
 
@@ -1135,71 +1157,7 @@ class _CustomerHomeState extends State<CustomerHome>
                                           },
                                         );*/
                                       },
-                                    )
-                                      /*PopupMenuButton(
-                                      icon: Icon(Icons.info_outline, color: myTheme.primaryColor),
-                                      tooltip: 'View details',
-                                      elevation: 10,
-                                      surfaceTintColor: Colors.yellow,
-                                      itemBuilder: (context) {
-                                        return [
-                                          PopupMenuItem(
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              mainAxisAlignment: MainAxisAlignment.start,
-                                              children: [
-                                                Text(siteListFinal[siteIndex].nodeList[index].categoryName, style: const TextStyle(fontWeight: FontWeight.bold),),
-                                                const Divider(),
-                                                Text('Battery voltage : ${siteListFinal[siteIndex].nodeList[index].batVolt}'),
-                                                Text('Solar voltage : ${siteListFinal[siteIndex].nodeList[index].slrVolt}'),
-                                                Text('Sensor : ${siteListFinal[siteIndex].nodeList[index].sensor}'),
-                                                const SizedBox(height: 10),
-                                                const Text('Relay Status', style: TextStyle(fontWeight: FontWeight.bold),),
-                                                //Text('Relay Status : ${siteListFinal[siteIndex].nodeList[index].rlyStatus}'),
-                                                SizedBox(
-                                                  width: 300,
-                                                  height: 200,
-                                                  child: DataTable2(
-                                                    columnSpacing: 12,
-                                                    horizontalMargin: 12,
-                                                    minWidth: 250,
-                                                    dataRowHeight: 30.0,
-                                                    headingRowHeight: 30.0,
-                                                    headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
-                                                    columns: const [
-                                                      DataColumn2(
-                                                          label: Center(child: Text('Rly.No')),
-                                                          fixedWidth: 45
-                                                      ),
-                                                      DataColumn2(
-                                                        label: Center(child: Text('Status')),
-                                                        fixedWidth: 55,
-                                                      ),
-                                                      DataColumn2(
-                                                        label: Text('Name', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
-                                                        size: ColumnSize.M,
-                                                        numeric: true,
-                                                      ),
-                                                    ],
-                                                    rows: List<DataRow>.generate(siteListFinal[siteIndex].nodeList.length, (index) => DataRow(cells: [
-                                                      DataCell(Center(child: Text('${siteListFinal[siteIndex].nodeList[index].serialNumber}', style: const TextStyle(fontWeight: FontWeight.normal),))),
-                                                      DataCell(Center(child: CircleAvatar(radius: 7, backgroundColor:
-                                                      siteListFinal[siteIndex].nodeList[index].status == 1 ? Colors.green.shade400:
-                                                      siteListFinal[siteIndex].nodeList[index].status == 3 ? Colors.red.shade400:
-                                                      siteListFinal[siteIndex].nodeList[index].status == 2 ? Colors.grey :
-                                                      siteListFinal[siteIndex].nodeList[index].status == 4 ? Colors.yellow :
-                                                      Colors.grey,
-                                                      ))),
-                                                      DataCell(Text(siteListFinal[siteIndex].nodeList[index].categoryName, style: const TextStyle(fontWeight: FontWeight.normal)),),
-                                                    ])),
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                          ),
-                                        ];
-                                      },
-                                    )*/)),
+                                    ))),
                                   ])),
                                 ),
                               ),
@@ -1218,7 +1176,8 @@ class _CustomerHomeState extends State<CustomerHome>
     );
   }
 
-  Future<void>removeManualModeInServer() async {
+  Future<void>removeManualModeInServer() async
+  {
     Map<String, dynamic> manualOperation = {
       "method": 1,
       "time": '00:00',
@@ -1251,39 +1210,3 @@ class _CustomerHomeState extends State<CustomerHome>
   }
 
 }
-
-class HorizontalAlertDialog extends StatelessWidget {
-  const HorizontalAlertDialog({super.key, required this.relayStatusList});
-  final List<RelayStatus> relayStatusList;
-
-  @override
-  Widget build(BuildContext context) {
-    print(relayStatusList.length);
-    return AlertDialog(
-      content: SizedBox(
-        width: double.maxFinite,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            CircleAvatar(backgroundColor: Colors.green, child: Text("1")),
-            CircleAvatar(backgroundColor: Colors.redAccent,child: Text("2")),
-            CircleAvatar(backgroundColor: Colors.redAccent,child: Text("3")),
-            CircleAvatar(backgroundColor: Colors.green,child: Text("4")),
-            CircleAvatar(backgroundColor: Colors.green,child: Text("5")),
-            CircleAvatar(backgroundColor: Colors.yellow,child: Text("6")),
-            CircleAvatar(backgroundColor: Colors.green,child: Text("7")),
-            CircleAvatar(backgroundColor: Colors.green,child: Text("8")),
-            for (var relayStatus in relayStatusList)
-              CircleAvatar(
-                backgroundColor: Colors.blue, // Choose your desired background color
-                child: Text(
-                  relayStatus.toString(), // Or any text you want to display
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-

@@ -6606,14 +6606,14 @@ class ConfigMakerProvider extends ChangeNotifier{
           'name' : isNew == true ? '$spName ${i+1}' : names['${sourcePumpUpdated[i]['sNo']}'] ?? '$spName ${i+1}',
           'location' : '',
         });
-      }
-      if(sourcePumpUpdated[i]['waterMeter'].isNotEmpty){
-        name['WM'].add({
-          'sNo' : sourcePumpUpdated[i]['waterMeter']['sNo'],
-          'id' : '$spwmId${i+1}',
-          'name' : isNew == true ? '$spwmName${i+1}' : names['${sourcePumpUpdated[i]['waterMeter']['sNo']}'] ?? '$spwmName${i+1}',
-          'location' : '${spId}${i+1}',
-        });
+        if(sourcePumpUpdated[i]['waterMeter'].isNotEmpty){
+          name['WM'].add({
+            'sNo' : sourcePumpUpdated[i]['waterMeter']['sNo'],
+            'id' : '$spwmId${i+1}',
+            'name' : isNew == true ? '$spwmName${i+1}' : names['${sourcePumpUpdated[i]['waterMeter']['sNo']}'] ?? '$spwmName${i+1}',
+            'location' : '${spId}${i+1}',
+          });
+        }
       }
     }
     for(var i = 0 ;i < irrigationPumpUpdated.length;i++){
@@ -6621,23 +6621,25 @@ class ConfigMakerProvider extends ChangeNotifier{
       for(var irr = 0;irr < irrigationLines.length;irr++){
         if(irrigationLines[irr]['irrigationPump'] == '${i+1}'){
           location += '${location.length != 0 ? '&' : ''}IL${irr+1}';
-
         }
       }
-      name['IP'].add({
-        'sNo' : irrigationPumpUpdated[i]['sNo'],
-        'id' : '$ipId${i+1}',
-        'name' : isNew == true ? '$ipName ${i+1}' : names['${irrigationPumpUpdated[i]['sNo']}'] ?? '$ipName ${i+1}',
-        'location' : location,
-      });
-      if(irrigationPumpUpdated[i]['waterMeter'].isNotEmpty){
-        name['WM'].add({
-          'sNo' : irrigationPumpUpdated[i]['waterMeter']['sNo'],
-          'id' : '$ipwmId${i+1}',
-          'name' : isNew == true ? '$ipwmName${i+1}' : names['${irrigationPumpUpdated[i]['waterMeter']['sNo']}'] ?? '$ipwmName${i+1}',
-          'location' : '$ipId${i+1}',
+      if(!irrigationPumpUpdated[i]['deleted']){
+        name['IP'].add({
+          'sNo' : irrigationPumpUpdated[i]['sNo'],
+          'id' : '$ipId${i+1}',
+          'name' : isNew == true ? '$ipName ${i+1}' : names['${irrigationPumpUpdated[i]['sNo']}'] ?? '$ipName ${i+1}',
+          'location' : location,
         });
+        if(irrigationPumpUpdated[i]['waterMeter'].isNotEmpty){
+          name['WM'].add({
+            'sNo' : irrigationPumpUpdated[i]['waterMeter']['sNo'],
+            'id' : '$ipwmId${i+1}',
+            'name' : isNew == true ? '$ipwmName${i+1}' : names['${irrigationPumpUpdated[i]['waterMeter']['sNo']}'] ?? '$ipwmName${i+1}',
+            'location' : '$ipId${i+1}',
+          });
+        }
       }
+
     }
     for(var i = 0; i < centralDosingUpdated.length;i++){
       var location = '';
@@ -6646,268 +6648,276 @@ class ConfigMakerProvider extends ChangeNotifier{
           location += '${location.isNotEmpty ? '&' : ''}IL${irr+1}';
         }
       }
-      name['CFESI'].add({
-        'sNo' : centralDosingUpdated[i]['sNo'],
-        'id' : '${cdId}${i+1}',
-        'name' : isNew == true ? '$cdName ${i+1}' : names['${centralDosingUpdated[i]['sNo']}'] ?? '$cdName ${i+1}',
-        'location' : location,
-      });
-      for(var j = 0;j < centralDosingUpdated[i]['injector'].length;j++){
-        name['CFEI'].add({
-          'sNo' : centralDosingUpdated[i]['injector'][j]['sNo'],
-          'id' : '$cdInjId${i+1}.${j+1}',
-          'name' : isNew == true ? '$cdInjName ${i+1}.${j+1}' : names['${centralDosingUpdated[i]['injector'][j]['sNo']}'] ?? '$cdInjName ${i+1}.${j+1}',
-          'location' : '$cdId${i+1}',
+      if(!centralDosingUpdated[i]['deleted']){
+        name['CFESI'].add({
+          'sNo' : centralDosingUpdated[i]['sNo'],
+          'id' : '${cdId}${i+1}',
+          'name' : isNew == true ? '$cdName ${i+1}' : names['${centralDosingUpdated[i]['sNo']}'] ?? '$cdName ${i+1}',
+          'location' : location,
         });
-        if(centralDosingUpdated[i]['injector'][j]['dosingMeter'].isNotEmpty){
-          name['CFEM'].add({
-            'sNo' : centralDosingUpdated[i]['injector'][j]['dosingMeter']['sNo'],
-            'id' : '$cdDmId${i+1}.${j+1}',
-            'name' : isNew == true ? '$cdDmName ${i+1}.${j+1}' : names['${centralDosingUpdated[i]['injector'][j]['dosingMeter']['sNo']}'] ?? '$cdDmName ${i+1}.${j+1}',
-            'location' : '$cdInjId${i+1}.${j+1}',
-          });
-        }
-      }
-      for(var j = 0;j < centralDosingUpdated[i]['ecConnection'].length;j++){
-        if(centralDosingUpdated[i]['ecConnection'][j].isNotEmpty){
-          name['ECS'].add({
-            'sNo' : centralDosingUpdated[i]['ecConnection'][j]['sNo'],
-            'id' : '$cdEcId${i+1}.${j+1}',
-            'name' : isNew == true ? '$cdEcName ${i+1}.${j+1}' : names['${centralDosingUpdated[i]['ecConnection'][j]['sNo']}'] ?? '$cdEcName ${i+1}.${j+1}',
+        for(var j = 0;j < centralDosingUpdated[i]['injector'].length;j++){
+          name['CFEI'].add({
+            'sNo' : centralDosingUpdated[i]['injector'][j]['sNo'],
+            'id' : '$cdInjId${i+1}.${j+1}',
+            'name' : isNew == true ? '$cdInjName ${i+1}.${j+1}' : names['${centralDosingUpdated[i]['injector'][j]['sNo']}'] ?? '$cdInjName ${i+1}.${j+1}',
             'location' : '$cdId${i+1}',
           });
+          if(centralDosingUpdated[i]['injector'][j]['dosingMeter'].isNotEmpty){
+            name['CFEM'].add({
+              'sNo' : centralDosingUpdated[i]['injector'][j]['dosingMeter']['sNo'],
+              'id' : '$cdDmId${i+1}.${j+1}',
+              'name' : isNew == true ? '$cdDmName ${i+1}.${j+1}' : names['${centralDosingUpdated[i]['injector'][j]['dosingMeter']['sNo']}'] ?? '$cdDmName ${i+1}.${j+1}',
+              'location' : '$cdInjId${i+1}.${j+1}',
+            });
+          }
         }
-      }
-      for(var j = 0;j < centralDosingUpdated[i]['phConnection'].length;j++){
-        if(centralDosingUpdated[i]['phConnection'][j].isNotEmpty){
-          name['PHS'].add({
-            'sNo' : centralDosingUpdated[i]['phConnection'][j]['sNo'],
-            'id' : '$cdPhId${i+1}.${j+1}',
-            'name' : isNew == true ? '$cdPhName ${i+1}.${j+1}' : names['${centralDosingUpdated[i]['phConnection'][j]['sNo']}'] ?? '$cdPhName ${i+1}.${j+1}',
-            'location' : '$cdId${i+1}',
-          });
+        for(var j = 0;j < centralDosingUpdated[i]['ecConnection'].length;j++){
+          if(centralDosingUpdated[i]['ecConnection'][j].isNotEmpty){
+            name['ECS'].add({
+              'sNo' : centralDosingUpdated[i]['ecConnection'][j]['sNo'],
+              'id' : '$cdEcId${i+1}.${j+1}',
+              'name' : isNew == true ? '$cdEcName ${i+1}.${j+1}' : names['${centralDosingUpdated[i]['ecConnection'][j]['sNo']}'] ?? '$cdEcName ${i+1}.${j+1}',
+              'location' : '$cdId${i+1}',
+            });
+          }
+        }
+        for(var j = 0;j < centralDosingUpdated[i]['phConnection'].length;j++){
+          if(centralDosingUpdated[i]['phConnection'][j].isNotEmpty){
+            name['PHS'].add({
+              'sNo' : centralDosingUpdated[i]['phConnection'][j]['sNo'],
+              'id' : '$cdPhId${i+1}.${j+1}',
+              'name' : isNew == true ? '$cdPhName ${i+1}.${j+1}' : names['${centralDosingUpdated[i]['phConnection'][j]['sNo']}'] ?? '$cdPhName ${i+1}.${j+1}',
+              'location' : '$cdId${i+1}',
+            });
 
+          }
         }
       }
+
     }
     for(var i = 0; i < centralFiltrationUpdated.length;i++){
       centralFiltrationUpdated[i]['id'] = '${cfId}${i+1}';
       centralFiltrationUpdated[i]['name'] = '${cfName}${i+1}';
       var location = '';
-      for(var irr = 0;irr < irrigationLines.length;irr++){
-        if(irrigationLines[irr]['Central_filtration_site'] == '${i+1}'){
-          location += '${location.length != 0 ? '&' : ''}IL${irr + 1}';
+      if(!centralDosingUpdated[i]['deleted']){
+        for(var irr = 0;irr < irrigationLines.length;irr++){
+          if(irrigationLines[irr]['Central_filtration_site'] == '${i+1}'){
+            location += '${location.length != 0 ? '&' : ''}IL${irr + 1}';
+          }
         }
-      }
-      name['CFISI'].add({
-        'sNo' : centralFiltrationUpdated[i]['sNo'],
-        'id' : '$cfId${i+1}',
-        'name' : isNew == true ? '$cfName ${i+1}' : names['${centralFiltrationUpdated[i]['sNo']}'] ?? '$cfName ${i+1}',
-        'location' : location,
-      });
-      for(var j = 0;j < centralFiltrationUpdated[i]['filterConnection'].length;j++){
-        name['CFI'].add({
-          'sNo' : centralFiltrationUpdated[i]['filterConnection'][j]['sNo'],
-          'id' : '$cflId${i+1}.${j+1}',
-          'name' : isNew == true ? '$cflName ${i+1}.${j+1}' : names['${centralFiltrationUpdated[i]['filterConnection'][j]['sNo']}'] ?? '$cflName ${i+1}.${j+1}',
-          'location' : '$cfId${i+1}',
+        name['CFISI'].add({
+          'sNo' : centralFiltrationUpdated[i]['sNo'],
+          'id' : '$cfId${i+1}',
+          'name' : isNew == true ? '$cfName ${i+1}' : names['${centralFiltrationUpdated[i]['sNo']}'] ?? '$cfName ${i+1}',
+          'location' : location,
         });
-      }
-      if(centralFiltrationUpdated[i]['pressureIn'].isNotEmpty){
-        name['PS'].add({
-          'sNo' : centralFiltrationUpdated[i]['pressureIn']['sNo'],
-          'id' : '${cfPiId}${i+1}.1',
-          'name' : isNew == true ? '$cfPiName ${i+1}.1' : names['${centralFiltrationUpdated[i]['pressureIn']['sNo']}'] ?? '$cfPiName ${i+1}.1',
-          'location' : '$cfId${i+1}',
-        });
-      }
-      if(centralFiltrationUpdated[i]['pressureOut'].isNotEmpty){
-        name['PS'].add({
-          'sNo' : centralFiltrationUpdated[i]['pressureOut']['sNo'],
-          'id' : '${cfPoId}${i+1}.1',
-          'name' : isNew == true ? '$cfPoName ${i+1}.1' : names['${centralFiltrationUpdated[i]['pressureOut']['sNo']}'] ?? '$cfPoName ${i+1}.1',
-          'location' : '$cfId${i+1}',
-        });
+        for(var j = 0;j < centralFiltrationUpdated[i]['filterConnection'].length;j++){
+          name['CFI'].add({
+            'sNo' : centralFiltrationUpdated[i]['filterConnection'][j]['sNo'],
+            'id' : '$cflId${i+1}.${j+1}',
+            'name' : isNew == true ? '$cflName ${i+1}.${j+1}' : names['${centralFiltrationUpdated[i]['filterConnection'][j]['sNo']}'] ?? '$cflName ${i+1}.${j+1}',
+            'location' : '$cfId${i+1}',
+          });
+        }
+        if(centralFiltrationUpdated[i]['pressureIn'].isNotEmpty){
+          name['PS'].add({
+            'sNo' : centralFiltrationUpdated[i]['pressureIn']['sNo'],
+            'id' : '${cfPiId}${i+1}.1',
+            'name' : isNew == true ? '$cfPiName ${i+1}.1' : names['${centralFiltrationUpdated[i]['pressureIn']['sNo']}'] ?? '$cfPiName ${i+1}.1',
+            'location' : '$cfId${i+1}',
+          });
+        }
+        if(centralFiltrationUpdated[i]['pressureOut'].isNotEmpty){
+          name['PS'].add({
+            'sNo' : centralFiltrationUpdated[i]['pressureOut']['sNo'],
+            'id' : '${cfPoId}${i+1}.1',
+            'name' : isNew == true ? '$cfPoName ${i+1}.1' : names['${centralFiltrationUpdated[i]['pressureOut']['sNo']}'] ?? '$cfPoName ${i+1}.1',
+            'location' : '$cfId${i+1}',
+          });
+        }
       }
     }
     for(var i = 0;i < irrigationLines.length;i++){
-      name['IL'].add({
-        'sNo' : irrigationLines[i]['sNo'],
-        'id' : '$ilId${i+1}',
-        'name' : isNew == true ? '$ilName ${i+1}' : names['${irrigationLines[i]['sNo']}'] ?? '$ilName ${i+1}',
-        'location' : '',
-      });
-      for(var j = 0;j < irrigationLines[i]['valveConnection'].length;j++){
-        name['VL'].add({
-          'sNo' : irrigationLines[i]['valveConnection'][j]['sNo'],
-          'id' : '$ilvId${i+1}.${j+1}',
-          'name' : isNew == true ? '$ilvName ${i+1}.${j+1}' : names['${irrigationLines[i]['valveConnection'][j]['sNo']}'] ?? '$ilvName ${i+1}.${j+1}',
-          'location' : '${ilId}${i+1}',
+      if(!irrigationLines[i]['deleted']){
+        name['IL'].add({
+          'sNo' : irrigationLines[i]['sNo'],
+          'id' : '$ilId${i+1}',
+          'name' : isNew == true ? '$ilName ${i+1}' : names['${irrigationLines[i]['sNo']}'] ?? '$ilName ${i+1}',
+          'location' : '',
         });
-      }
-      for(var j = 0;j < irrigationLines[i]['main_valveConnection'].length;j++){
-        name['MVL'].add({
-          'sNo' : irrigationLines[i]['main_valveConnection'][j]['sNo'],
-          'id' : '$ilMvId${i+1}.${j+1}',
-          'name' : isNew == true ? '$ilMvName ${i+1}.${j+1}' : names['${irrigationLines[i]['main_valveConnection'][j]['sNo']}'] ?? '$ilMvName ${i+1}.${j+1}',
-          'location' : '$ilId${i+1}',
-        });
-      }
-      for(var j = 0;j < irrigationLines[i]['moistureSensorConnection'].length;j++){
-        name['MS'].add({
-          'sNo' : irrigationLines[i]['moistureSensorConnection'][j]['sNo'],
-          'id' : '$ilMsId${i+1}.${j+1}',
-          'name' : isNew == true ? '$ilMsName ${i+1}.${j+1}' : names['${irrigationLines[i]['moistureSensorConnection'][j]['sNo']}'] ?? '$ilMsName ${i+1}.${j+1}',
-          'location' : '$ilId${i+1}',
-        });
-      }
-      for(var j = 0;j < irrigationLines[i]['levelSensorConnection'].length;j++){
-        name['LS'].add({
-          'sNo' : irrigationLines[i]['levelSensorConnection'][j]['sNo'],
-          'id' : '$ilLsId${i+1}.${j+1}',
-          'name' : isNew == true ? '$ilLsName ${i+1}.${j+1}' : names['${irrigationLines[i]['levelSensorConnection'][j]['sNo']}'] ?? '$ilLsName ${i+1}.${j+1}',
-          'location' : '$ilId${i+1}',
-        });
-      }
-      for(var j = 0;j < irrigationLines[i]['foggerConnection'].length;j++){
-        name['FOG'].add({
-          'sNo' : irrigationLines[i]['foggerConnection'][j]['sNo'],
-          'id' : '$ilFgId${i+1}.${j+1}',
-          'name' : isNew == true ? '$ilFgName ${i+1}.${j+1}' : names['${irrigationLines[i]['foggerConnection'][j]['sNo']}'] ?? '$ilFgName ${i+1}.${j+1}',
-          'location' : '$ilId${i+1}',
-        });
-      }
-      for(var j = 0;j < irrigationLines[i]['fanConnection'].length;j++){
-        name['FAN'].add({
-          'sNo' : irrigationLines[i]['fanConnection'][j]['sNo'],
-          'id' : '$ilFnId${i+1}.${j+1}',
-          'name' : isNew == true ? '$ilFnName ${i+1}.${j+1}' : names['${irrigationLines[i]['fanConnection'][j]['sNo']}'] ?? '$ilFnName ${i+1}.${j+1}',
-          'location' : '${ilId}${i+1}',
-        });
-      }
-      for(var j = 0;j < irrigationLines[i]['myOROsense'].length;j++){
-        var sNo = returnI_O_AutoIncrement();
-        name['OROSEN'].add({
-          'sNo' : sNo,
-          'id' : 'MSIL${i+1}.${j+1}',
-          'name' : isNew == true ? 'Moisture ${i+1}.${j+1}' : names['${sNo}'] ?? 'Moisture ${i+1}.${j+1}',
-          'location' : '$ilId${i+1}',
-        });
-      }
-      for(var j = 0;j < irrigationLines[i]['myOROlevel'].length;j++){
-        var sNo = returnI_O_AutoIncrement();
-        name['OROLVL'].add({
-          'sNo' : sNo,
-          'id' : 'LSIL${i+1}.${j+1}',
-          'name' : isNew == true ? 'Level ${i+1}.${j+1}' : names['$sNo'] ?? 'Level ${i+1}.${j+1}',
-          'location' : '$ilId${i+1}',
-        });
-      }
-      if(irrigationLines[i]['pressureIn'].isNotEmpty){
-        name['PS'].add({
-          'sNo' : irrigationLines[i]['pressureIn']['sNo'],
-          'id' : '$ilPiId${i+1}.1',
-          'name' : isNew == true ? '$ilPiName ${i+1}.1' : names['${irrigationLines[i]['pressureIn']['sNo']}'] ?? '$ilPiName ${i+1}.1',
-          'location' : '$ilId${i+1}',
-        });
-      }
-      if(irrigationLines[i]['pressureOut'].isNotEmpty){
-        name['PS'].add({
-          'sNo' : irrigationLines[i]['pressureOut']['sNo'],
-          'id' : '$ilPoId${i+1}.1',
-          'name' : isNew == true ? '$ilPoName ${i+1}.1' : names['${irrigationLines[i]['pressureOut']['sNo']}'] ?? '$ilPoName ${i+1}.1',
-          'location' : '$ilId${i+1}',
-        });
-      }
-      if(irrigationLines[i]['water_meter'].isNotEmpty){
-        name['WM'].add({
-          'sNo' : irrigationLines[i]['water_meter']['sNo'],
-          'id' : '$ilwmId${i+1}.1',
-          'name' : isNew == true ? '$ilwmName ${i+1}.1' : names['${irrigationLines[i]['water_meter']['sNo']}'] ?? '$ilwmName ${i+1}.1',
-          'location' : '$ilId${i+1}',
-        });
-      }
-      if(irrigationLines[i]['Local_dosing_site'] == true){
-        for(var ld in localDosingUpdated){
-          if(ld['sNo'] == irrigationLines[i]['sNo']){
-            for(var j = 0;j < ld['injector'].length;j++){
-              name['LFEI'].add({
-                'sNo' : ld['injector'][j]['sNo'],
-                'id' : '$ldInjId${i+1}.${j+1}',
-                'name' : isNew == true ? '$ldInjName ${i+1}.${j+1}' : names['${ld['injector'][j]['sNo']}'] ?? '$ldInjName ${i+1}.${j+1}',
-                'location' : '$ilId${i+1}',
-              });
-              if(ld['injector'][j]['dosingMeter'].isNotEmpty){
-                name['LFEM'].add({
-                  'sNo' : ld['injector'][j]['dosingMeter']['sNo'],
-                  'id' : '$ldDmId${i+1}.${j+1}',
-                  'name' : isNew == true ? '$ldDmName ${i+1}.${j+1}' : names['${ld['injector'][j]['dosingMeter']['sNo']}'] ?? '$ldDmName ${i+1}.${j+1}',
-                  'location' : '$ldInjId${i+1}.${j+1}',
-                });
-              }
-            }
-            for(var j = 0;j < ld['ecConnection'].length;j++){
-              if(ld['ecConnection'][j].isNotEmpty){
-                name['ECS'].add({
-                  'sNo' : ld['ecConnection'][j]['sNo'],
-                  'id' : '$ldEcId${i+1}.${j+1}',
-                  'name' : isNew == true ? '$ldEcName ${i+1}.${j+1}' : names['${ld['ecConnection'][j]['sNo']}'] ?? '$ldEcName ${i+1}.${j+1}',
+        for(var j = 0;j < irrigationLines[i]['valveConnection'].length;j++){
+          name['VL'].add({
+            'sNo' : irrigationLines[i]['valveConnection'][j]['sNo'],
+            'id' : '$ilvId${i+1}.${j+1}',
+            'name' : isNew == true ? '$ilvName ${i+1}.${j+1}' : names['${irrigationLines[i]['valveConnection'][j]['sNo']}'] ?? '$ilvName ${i+1}.${j+1}',
+            'location' : '${ilId}${i+1}',
+          });
+        }
+        for(var j = 0;j < irrigationLines[i]['main_valveConnection'].length;j++){
+          name['MVL'].add({
+            'sNo' : irrigationLines[i]['main_valveConnection'][j]['sNo'],
+            'id' : '$ilMvId${i+1}.${j+1}',
+            'name' : isNew == true ? '$ilMvName ${i+1}.${j+1}' : names['${irrigationLines[i]['main_valveConnection'][j]['sNo']}'] ?? '$ilMvName ${i+1}.${j+1}',
+            'location' : '$ilId${i+1}',
+          });
+        }
+        for(var j = 0;j < irrigationLines[i]['moistureSensorConnection'].length;j++){
+          name['MS'].add({
+            'sNo' : irrigationLines[i]['moistureSensorConnection'][j]['sNo'],
+            'id' : '$ilMsId${i+1}.${j+1}',
+            'name' : isNew == true ? '$ilMsName ${i+1}.${j+1}' : names['${irrigationLines[i]['moistureSensorConnection'][j]['sNo']}'] ?? '$ilMsName ${i+1}.${j+1}',
+            'location' : '$ilId${i+1}',
+          });
+        }
+        for(var j = 0;j < irrigationLines[i]['levelSensorConnection'].length;j++){
+          name['LS'].add({
+            'sNo' : irrigationLines[i]['levelSensorConnection'][j]['sNo'],
+            'id' : '$ilLsId${i+1}.${j+1}',
+            'name' : isNew == true ? '$ilLsName ${i+1}.${j+1}' : names['${irrigationLines[i]['levelSensorConnection'][j]['sNo']}'] ?? '$ilLsName ${i+1}.${j+1}',
+            'location' : '$ilId${i+1}',
+          });
+        }
+        for(var j = 0;j < irrigationLines[i]['foggerConnection'].length;j++){
+          name['FOG'].add({
+            'sNo' : irrigationLines[i]['foggerConnection'][j]['sNo'],
+            'id' : '$ilFgId${i+1}.${j+1}',
+            'name' : isNew == true ? '$ilFgName ${i+1}.${j+1}' : names['${irrigationLines[i]['foggerConnection'][j]['sNo']}'] ?? '$ilFgName ${i+1}.${j+1}',
+            'location' : '$ilId${i+1}',
+          });
+        }
+        for(var j = 0;j < irrigationLines[i]['fanConnection'].length;j++){
+          name['FAN'].add({
+            'sNo' : irrigationLines[i]['fanConnection'][j]['sNo'],
+            'id' : '$ilFnId${i+1}.${j+1}',
+            'name' : isNew == true ? '$ilFnName ${i+1}.${j+1}' : names['${irrigationLines[i]['fanConnection'][j]['sNo']}'] ?? '$ilFnName ${i+1}.${j+1}',
+            'location' : '${ilId}${i+1}',
+          });
+        }
+        for(var j = 0;j < irrigationLines[i]['myOROsense'].length;j++){
+          var sNo = returnI_O_AutoIncrement();
+          name['OROSEN'].add({
+            'sNo' : sNo,
+            'id' : 'MSIL${i+1}.${j+1}',
+            'name' : isNew == true ? 'Moisture ${i+1}.${j+1}' : names['${sNo}'] ?? 'Moisture ${i+1}.${j+1}',
+            'location' : '$ilId${i+1}',
+          });
+        }
+        for(var j = 0;j < irrigationLines[i]['myOROlevel'].length;j++){
+          var sNo = returnI_O_AutoIncrement();
+          name['OROLVL'].add({
+            'sNo' : sNo,
+            'id' : 'LSIL${i+1}.${j+1}',
+            'name' : isNew == true ? 'Level ${i+1}.${j+1}' : names['$sNo'] ?? 'Level ${i+1}.${j+1}',
+            'location' : '$ilId${i+1}',
+          });
+        }
+        if(irrigationLines[i]['pressureIn'].isNotEmpty){
+          name['PS'].add({
+            'sNo' : irrigationLines[i]['pressureIn']['sNo'],
+            'id' : '$ilPiId${i+1}.1',
+            'name' : isNew == true ? '$ilPiName ${i+1}.1' : names['${irrigationLines[i]['pressureIn']['sNo']}'] ?? '$ilPiName ${i+1}.1',
+            'location' : '$ilId${i+1}',
+          });
+        }
+        if(irrigationLines[i]['pressureOut'].isNotEmpty){
+          name['PS'].add({
+            'sNo' : irrigationLines[i]['pressureOut']['sNo'],
+            'id' : '$ilPoId${i+1}.1',
+            'name' : isNew == true ? '$ilPoName ${i+1}.1' : names['${irrigationLines[i]['pressureOut']['sNo']}'] ?? '$ilPoName ${i+1}.1',
+            'location' : '$ilId${i+1}',
+          });
+        }
+        if(irrigationLines[i]['water_meter'].isNotEmpty){
+          name['WM'].add({
+            'sNo' : irrigationLines[i]['water_meter']['sNo'],
+            'id' : '$ilwmId${i+1}.1',
+            'name' : isNew == true ? '$ilwmName ${i+1}.1' : names['${irrigationLines[i]['water_meter']['sNo']}'] ?? '$ilwmName ${i+1}.1',
+            'location' : '$ilId${i+1}',
+          });
+        }
+        if(irrigationLines[i]['Local_dosing_site'] == true){
+          for(var ld in localDosingUpdated){
+            if(ld['sNo'] == irrigationLines[i]['sNo']){
+              for(var j = 0;j < ld['injector'].length;j++){
+                name['LFEI'].add({
+                  'sNo' : ld['injector'][j]['sNo'],
+                  'id' : '$ldInjId${i+1}.${j+1}',
+                  'name' : isNew == true ? '$ldInjName ${i+1}.${j+1}' : names['${ld['injector'][j]['sNo']}'] ?? '$ldInjName ${i+1}.${j+1}',
                   'location' : '$ilId${i+1}',
                 });
+                if(ld['injector'][j]['dosingMeter'].isNotEmpty){
+                  name['LFEM'].add({
+                    'sNo' : ld['injector'][j]['dosingMeter']['sNo'],
+                    'id' : '$ldDmId${i+1}.${j+1}',
+                    'name' : isNew == true ? '$ldDmName ${i+1}.${j+1}' : names['${ld['injector'][j]['dosingMeter']['sNo']}'] ?? '$ldDmName ${i+1}.${j+1}',
+                    'location' : '$ldInjId${i+1}.${j+1}',
+                  });
+                }
               }
-            }
-            for(var j = 0;j < ld['phConnection'].length;j++){
-              if(ld['phConnection'][j].isNotEmpty){
-                name['PHS'].add({
-                  'sNo' : ld['phConnection'][j]['sNo'],
-                  'id' : '$ldPhId${i+1}.${j+1}',
-                  'name' : isNew == true ? '$ldPhName ${i+1}.${j+1}' : names['${ld['phConnection'][j]['sNo']}'] ?? '$ldPhName ${i+1}.${j+1}',
-                  'location' : '$ilId${i+1}',
-                });
+              for(var j = 0;j < ld['ecConnection'].length;j++){
+                if(ld['ecConnection'][j].isNotEmpty){
+                  name['ECS'].add({
+                    'sNo' : ld['ecConnection'][j]['sNo'],
+                    'id' : '$ldEcId${i+1}.${j+1}',
+                    'name' : isNew == true ? '$ldEcName ${i+1}.${j+1}' : names['${ld['ecConnection'][j]['sNo']}'] ?? '$ldEcName ${i+1}.${j+1}',
+                    'location' : '$ilId${i+1}',
+                  });
+                }
+              }
+              for(var j = 0;j < ld['phConnection'].length;j++){
+                if(ld['phConnection'][j].isNotEmpty){
+                  name['PHS'].add({
+                    'sNo' : ld['phConnection'][j]['sNo'],
+                    'id' : '$ldPhId${i+1}.${j+1}',
+                    'name' : isNew == true ? '$ldPhName ${i+1}.${j+1}' : names['${ld['phConnection'][j]['sNo']}'] ?? '$ldPhName ${i+1}.${j+1}',
+                    'location' : '$ilId${i+1}',
+                  });
 
+                }
+              }
+            }
+          }
+        }
+        if(irrigationLines[i]['local_filtration_site'] == true){
+          for(var lf in localFiltrationUpdated){
+            if(lf['sNo'] == irrigationLines[i]['sNo']){
+              for(var j = 0;j < lf['filterConnection'].length;j++){
+                name['LFI'].add({
+                  'sNo' : lf['filterConnection'][j]['sNo'],
+                  'id' : '$lflId${i+1}.${j+1}',
+                  'name' : isNew == true ? '$lflName ${i+1}.${j+1}' : names['${lf['filterConnection'][j]['sNo']}'] ?? '$lflName ${i+1}.${j+1}',
+                  'location' : '$ilId${i+1}',
+                });
+              }
+              if(lf['pressureIn'].isNotEmpty){
+                name['PS'].add({
+                  'sNo' : lf['pressureIn']['sNo'],
+                  'id' : '$lfPiId${i+1}.1',
+                  'name' : isNew == true ? '$lfPiName ${i+1}.1' : names['${lf['pressureIn']['sNo']}'] ?? '$lfPiName ${i+1}.1',
+                  'location' : '$ilId${i+1}',
+                });
+              }
+              if(lf['pressureOut'].isNotEmpty){
+                name['PS'].add({
+                  'sNo' : lf['pressureOut']['sNo'],
+                  'id' : '$lfPoId${i+1}.1',
+                  'name' : isNew == true ? '$lfPoName ${i+1}.1' : names['${lf['pressureOut']['sNo']}'] ?? '$lfPoName ${i+1}.1',
+                  'location' : '$ilId${i+1}',
+                });
+              }
+              if(lf['diffPressureSensor'].isNotEmpty){
+                name['PS'].add({
+                  'sNo' : lf['diffPressureSensor']['sNo'],
+                  'id' : '$lfDpId${i+1}.1',
+                  'name' : isNew == true ? '$lfDpName ${i+1}.1' : names['${lf['diffPressureSensor']['sNo']}'] ?? '$lfDpName ${i+1}.1',
+                  'location' : '$ilId${i+1}',
+                });
               }
             }
           }
         }
       }
-      if(irrigationLines[i]['local_filtration_site'] == true){
-        for(var lf in localFiltrationUpdated){
-          if(lf['sNo'] == irrigationLines[i]['sNo']){
-            for(var j = 0;j < lf['filterConnection'].length;j++){
-              name['LFI'].add({
-                'sNo' : lf['filterConnection'][j]['sNo'],
-                'id' : '$lflId${i+1}.${j+1}',
-                'name' : isNew == true ? '$lflName ${i+1}.${j+1}' : names['${lf['filterConnection'][j]['sNo']}'] ?? '$lflName ${i+1}.${j+1}',
-                'location' : '$ilId${i+1}',
-              });
-            }
-            if(lf['pressureIn'].isNotEmpty){
-              name['PS'].add({
-                'sNo' : lf['pressureIn']['sNo'],
-                'id' : '$lfPiId${i+1}.1',
-                'name' : isNew == true ? '$lfPiName ${i+1}.1' : names['${lf['pressureIn']['sNo']}'] ?? '$lfPiName ${i+1}.1',
-                'location' : '$ilId${i+1}',
-              });
-            }
-            if(lf['pressureOut'].isNotEmpty){
-              name['PS'].add({
-                'sNo' : lf['pressureOut']['sNo'],
-                'id' : '$lfPoId${i+1}.1',
-                'name' : isNew == true ? '$lfPoName ${i+1}.1' : names['${lf['pressureOut']['sNo']}'] ?? '$lfPoName ${i+1}.1',
-                'location' : '$ilId${i+1}',
-              });
-            }
-            if(lf['diffPressureSensor'].isNotEmpty){
-              name['PS'].add({
-                'sNo' : lf['diffPressureSensor']['sNo'],
-                'id' : '$lfDpId${i+1}.1',
-                'name' : isNew == true ? '$lfDpName ${i+1}.1' : names['${lf['diffPressureSensor']['sNo']}'] ?? '$lfDpName ${i+1}.1',
-                'location' : '$ilId${i+1}',
-              });
-            }
-          }
-        }
-      }
+
     }
     notifyListeners();
 

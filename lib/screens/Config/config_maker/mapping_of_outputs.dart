@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:oro_irrigation_new/screens/Config/config_maker/source_pump.dart';
 import 'package:provider/provider.dart';
 
+import '../../../constants/theme.dart';
 import '../../../state_management/config_maker_provider.dart';
 import '../../../widgets/drop_down_button.dart';
 
@@ -178,6 +179,30 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
 
   }
 
+  void myDialog(title){
+    showDialog(context: context, builder: (context){
+      return AlertDialog(
+        title: Text(title,style: TextStyle(color: Colors.red,fontSize: 15,fontWeight: FontWeight.w900),),
+        actions: [
+          InkWell(
+            onTap: (){
+              Navigator.pop(context);
+            },
+            child: Container(
+              child: Center(
+                child: Text('Ok',style: TextStyle(color: Colors.white,fontSize: 16),
+                ),
+              ),
+              width: 80,
+              height: 30,
+              color: myTheme.primaryColor,
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
   List<Widget> getIrrigationLine(List<Map<String,dynamic>> myList,ConfigMakerProvider configPvd){
     List<Widget> widgetList = [];
     for(var i = 0;i < myList.length;i++){
@@ -257,7 +282,25 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                         ),
                         child: IconButton(
                             onPressed: (){
-                              configPvd.irrigationLinesFunctionality(['deleteFromMapio',i,myList[i]['map'][j]['connection'],myList[i]['map'][j]['sNo']]);
+                              for(var ld in configPvd.localDosingUpdated){
+                                if(ld['sNo'] == configPvd.irrigationLines[i]['sNo']){
+                                  if(ld['injector'].length == 1){
+                                    myDialog('Irrigation Line contains atleast single injector');
+                                  }
+                                }
+                              }
+                              for(var lf in configPvd.localFiltrationUpdated){
+                                if(lf['sNo'] == configPvd.irrigationLines[i]['sNo']){
+                                  if(lf['filterConnection'].length == 1){
+                                    myDialog('Irrigation Line contains atleast single filter');
+                                  }
+                                }
+                              }
+                              if(configPvd.irrigationLines[i]['valveConnection'].length == 1){
+                                myDialog('Irrigation Line contains atleast single valve');
+                              }else{
+                                configPvd.irrigationLinesFunctionality(['deleteFromMapio',i,myList[i]['map'][j]['connection'],myList[i]['map'][j]['sNo']]);
+                              }
                             },
                             icon: Icon(Icons.delete)
                         ),
@@ -363,7 +406,11 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                         ),
                         child: IconButton(
                             onPressed: (){
-                              configPvd.centralDosingFunctionality(['deleteFromMapio',i,myList[i]['map'][j]['connection'],myList[i]['map'][j]['sNo']]);
+                              if(configPvd.centralDosingUpdated[i]['injector'].length == 1){
+                                myDialog('Central dosing site contains atleast single injector');
+                              }else{
+                                configPvd.centralDosingFunctionality(['deleteFromMapio',i,myList[i]['map'][j]['connection'],myList[i]['map'][j]['sNo']]);
+                              }
                             },
                             icon: Icon(Icons.delete)
                         ),
@@ -470,6 +517,9 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                         ),
                         child: IconButton(
                             onPressed: (){
+                              if(configPvd.centralFiltrationUpdated[i]['filterConnection'].length == 1){
+                                myDialog('Central Filtration site contains atleast single filter');
+                              }
                               configPvd.centralFiltrationFunctionality(['deleteFromMapio',i,myList[i]['map'][j]['connection'],myList[i]['map'][j]['sNo']]);
                             },
                             icon: Icon(Icons.delete)

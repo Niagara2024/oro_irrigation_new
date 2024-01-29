@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ConstantProvider extends ChangeNotifier{
-  List<String> myTabs = ['General','Lines','Main valve','Valve','Water meter','Fertilizers','EC/PH','Filters','Analog sensor','Moisture sensor','Level sensor','Normal Alarm','Critical Alarm','Finish'];
+  List<String> myTabs = ['General','Pump','Lines','Main valve','Valve','Water meter','Fertilizers','EC/PH','Analog sensor','Moisture sensor','Level sensor','Normal Alarm','Critical Alarm','Finish'];
   List<List<dynamic>> general = [['Reset time','00:00',Icon(Icons.restart_alt),'time'],['Fertilizer leakage limit','20',Icon(Icons.production_quantity_limits),'numbers'],['Run list limit','10',Icon(Icons.list)],['Current irrigation day','1',Icon(Icons.today),'numbers'],['No pressure delay','00:00',Icon(Icons.timelapse_outlined),'time'],['Water pulse before dosing','Yes',Icon(Icons.navigate_before),'yes/no'],['Common dosing coefficient','100%',Icon(Icons.percent),'percentage']];
   int selected = -1;
   dynamic APIdata = {};
@@ -24,6 +24,7 @@ class ConstantProvider extends ChangeNotifier{
     ['Line 12','12','IP3','00:00:00','00:00:00','IGNORE','IGNORE','10'],
   ];
   List<Map<String,dynamic>> irrigationLineUpdated = [];
+  List<Map<String,dynamic>> pumpUpdated = [];
   List<Map<String,dynamic>> mainValveUpdated = [];
   List<Map<String,dynamic>> valveUpdated = [];
   List<Map<String,dynamic>> fertilizerUpdated = [];
@@ -271,6 +272,10 @@ class ConstantProvider extends ChangeNotifier{
     for(var il in data['analogSensor']){
       setting['analogSensor']['${il['sNo']}'] = il;
     }
+    setting['pump'] = {};
+    for(var il in data['pump']){
+      setting['pump']['${il['sNo']}'] = il;
+    }
     setting['moistureSensor'] = {};
     for(var il in data['moistureSensor']){
       setting['moistureSensor']['${il['sNo']}'] = il;
@@ -308,6 +313,7 @@ class ConstantProvider extends ChangeNotifier{
   }
   void fetchAll(dynamic data){
     irrigationLineUpdated = [];
+    pumpUpdated = [];
     mainValveUpdated = [];
     valveUpdated = [];
     waterMeterUpdated = [];
@@ -369,20 +375,21 @@ class ConstantProvider extends ChangeNotifier{
               print('seee : ${setting['normalAlarm']?['${line['sNo']}']}');
               alarmUpdated.add({
                 'sNo' : line['sNo'],
-                'name' : line['name'],
                 'id' : line['id'],
+                'name' : line['name'],
                 'alarm' : type,
               });
               criticalAlarmUpdated.add({
                 'sNo' : line['sNo'],
-                'name' : line['name'],
                 'id' : line['id'],
+                'name' : line['name'],
                 'alarm' : criticalType,
               });
               irrigationLineUpdated.add({
                 'sNo' : line['sNo'],
-                'name' : line['name'],
                 'id' : line['id'],
+                'name' : line['name'],
+                'location' : line['location'],
                 'pump' : line['irrigationPump'].length != 0 ? line['irrigationPump'][0]['id'] : '-',
                 'lowFlowDelay' : setting['line']?['${line['sNo']}']?['lowFlowDelay'] ?? '00:00:00',
                 'highFlowDelay' : setting['line']?['${line['sNo']}']?['highFlowDelay'] ?? '00:00:00',
@@ -401,7 +408,7 @@ class ConstantProvider extends ChangeNotifier{
                   'sNo' : mv['sNo'],
                   'name' : mv['name'],
                   'id' : mv['id'],
-                  'location' : line['name'],
+                  'location' : line['id'],
                   'mode' : setting['mainValve']?['${mv['sNo']}']?['mode'] ?? 'No delay',
                   'delay' : setting['mainValve']?['${mv['sNo']}']?['delay'] ?? '00:00:00',
                 });
@@ -424,8 +431,8 @@ class ConstantProvider extends ChangeNotifier{
               for(var ls in line['levelSensor']){
                 levelSensorUpdated.add({
                   'sNo' : ls['sNo'],
-                  'name' : ls['name'],
                   'id' : ls['id'],
+                  'name' : ls['name'],
                   'location' : line['id'],
                   'high/low' : setting['levelSensor']?['${ls['sNo']}']?['high/low'] ?? '-',
                   'units' : setting['levelSensor']?['${ls['sNo']}']?['units'] ?? 'bar',
@@ -453,7 +460,9 @@ class ConstantProvider extends ChangeNotifier{
               }
               valveUpdated.add({
                 'sNo' : line['sNo'],
+                'id' : line['id'],
                 'name' : line['name'],
+                'location' : line['location'],
                 'valve' : valve,
               });
 
@@ -468,6 +477,7 @@ class ConstantProvider extends ChangeNotifier{
                   'sNo' : inj['sNo'],
                   'id' : inj['id'],
                   'name' : inj['name'],
+                  'location' : inj['location'],
                   'fertilizerMeter' : inj['fertilizerMeter'].length != 0 ? 'yes' : 'no',
                   'ratio' : setting['inj']?['${inj['sNo']}']?['ratio'] ?? '100',
                   'shortestPulse' : setting['inj']?['${inj['sNo']}']?['shortestPulse'] ?? '1',
@@ -593,11 +603,25 @@ class ConstantProvider extends ChangeNotifier{
                 'sNo' : as['sNo'],
                 'id' : as['id'],
                 'name' : as['name'],
+                'location' : as['location'],
                 'type' : setting['analogSensor']?['${as['sNo']}']?['type'] ?? 'Soil Temperature',
                 'units' : setting['analogSensor']?['${as['sNo']}']?['units'] ?? 'bar',
                 'base' : setting['analogSensor']?['${as['sNo']}']?['base'] ?? 'Current',
                 'minimum' : setting['analogSensor']?['${as['sNo']}']?['minimum'] ?? '0.00',
                 'maximum' : setting['analogSensor']?['${as['sNo']}']?['maximum'] ?? '0.00',
+              });
+            }
+          }
+          //TODO: generating pump
+          else if(j.key == 'pump'){
+            for(var p in j.value){
+              pumpUpdated.add({
+                'sNo' : p['sNo'],
+                'id' : p['id'],
+                'name' : p['name'],
+                'location' : p['location'],
+                'range' : setting['pump']?['${p['sNo']}']?['range'] ?? '0',
+                'pumpStation' : setting['pump']?['${p['sNo']}']?['pumpStation'] ?? false,
               });
             }
           }
@@ -696,6 +720,20 @@ class ConstantProvider extends ChangeNotifier{
     }
     notifyListeners();
   }
+  void pumpFunctionality(dynamic list){
+    print(list);
+    switch (list[0]){
+      case ('pumpRange'):{
+        pumpUpdated[list[1]]['range'] = list[2];
+        break;
+      }
+      case ('pumpStation'):{
+        pumpUpdated[list[1]]['pumpStation'] = list[2];
+        break;
+      }
+    }
+    notifyListeners();
+  }
 
   void waterMeterFunctionality(dynamic list){
     switch (list[0]){
@@ -784,7 +822,8 @@ class ConstantProvider extends ChangeNotifier{
         break;
       }
       case ('ecPhAvgFiltSpeed'):{
-        ecPhUpdated[list[1]][list[2]][list[3]]['senseOrAvg'] = list[4];
+        print(list);
+        ecPhUpdated[list[1]][list[2]][list[3]]['avgFilterSpeed'] = list[4];
         break;
       }
       case ('ecPhSenseOrAvg'):{

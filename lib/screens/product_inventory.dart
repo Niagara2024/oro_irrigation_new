@@ -58,7 +58,6 @@ class ProductInventoryState extends State<ProductInventory> {
   PrdModel? initialSelectedModel;
   int indexOfInitialSelection = 0;
 
-
   late List<DropdownMenuEntry<ProductStockModel>> ddCategoryList;
   List<ProductStockModel> productStockList = <ProductStockModel>[];
   String rplMdl = '-', rplImeiNo = '-';
@@ -76,7 +75,7 @@ class ProductInventoryState extends State<ProductInventory> {
         //loadMoreData();
         print('scroll position end');
         if(currentSet * batchSize <= totalProduct){
-          getProductList(currentSet = currentSet+1, batchSize);
+          loadData(currentSet = currentSet+1, batchSize);
         }else{
           //loadMoreData completed
         }
@@ -95,12 +94,12 @@ class ProductInventoryState extends State<ProductInventory> {
       userID = prefs.getString('userId') ?? "";
       userType = int.parse(prefs.getString('userType') ?? "");
     });
-    getProductList(currentSet, batchSize);
+    loadData(currentSet, batchSize);
     fetchCatModAndImeiData();
     getProductStock();
   }
 
-  Future<void> getProductList(int set, int limit) async {
+  Future<void> loadData(int set, int limit) async {
     final body = userType == 1 ? {"fromUserId": null, "toUserId": null, "set":set, "limit":limit} :
     {"fromUserId": null, "toUserId": userID, "set":set, "limit":limit};
     //print(body);
@@ -345,7 +344,6 @@ class ProductInventoryState extends State<ProductInventory> {
         child: Column(
           children: [
             buildAdminOrDealerHeader(),
-           // ListTile(title:  Text('Total Product - $totalProduct')),
             Expanded(
               child: Container(
                 decoration: const BoxDecoration(
@@ -872,7 +870,7 @@ class ProductInventoryState extends State<ProductInventory> {
                         if(searched){
                           fetchFilterData(catId, null, null);
                         }else{
-                          getProductList(currentSet, batchSize);
+                          loadData(currentSet, batchSize);
                           _showSnackBar(jsonDecode(response.body)["message"]);
                         }
                       }else{
@@ -985,7 +983,7 @@ class ProductInventoryState extends State<ProductInventory> {
                     if(jsonDecode(response.body)["code"]==200)
                     {
                       getProductStock();
-                      getProductList(currentSet, batchSize);
+                      loadData(currentSet, batchSize);
                       _showSnackBar(jsonDecode(response.body)["message"]);
 
                     }else{
@@ -1053,13 +1051,6 @@ class ProductInventoryState extends State<ProductInventory> {
     );
   }
 
-  void _onNextButtonPressed() {
-    getProductList(currentSet = currentSet+1, batchSize);
-  }
-
-  void _onPreviousButtonPressed() {
-    getProductList(currentSet = currentSet-1, batchSize);
-  }
 
   void indicatorViewShow() {
     setState(() {

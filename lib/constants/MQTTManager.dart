@@ -7,7 +7,7 @@ import '../state_management/MqttPayloadProvider.dart';
 
 class MQTTManager {
   static MQTTManager? _instance;
-  //MqttPayloadProvider? providerState;
+  MqttPayloadProvider? providerState;
   MqttBrowserClient? _client;
 
   factory MQTTManager() {
@@ -18,8 +18,6 @@ class MQTTManager {
   MQTTManager._internal();
 
   bool get isConnected => _client?.connectionStatus?.state == MqttConnectionState.connected;
-  StreamController<String> payloadStreamController = StreamController<String>();
-  Stream<String> get payloadStream => payloadStreamController.stream;
 
   void initializeMQTTClient({MqttPayloadProvider? state}) {
 
@@ -27,7 +25,7 @@ class MQTTManager {
     print('Unique ID: $uniqueId');
 
     if (_client == null) {
-      //providerState = state;
+       providerState = state;
       _client = MqttBrowserClient('ws://192.168.1.141', uniqueId);
       _client!.port = 9001;
       _client!.keepAlivePeriod = 60;
@@ -53,7 +51,7 @@ class MQTTManager {
     if (!isConnected) {
       try {
         print('Mosquitto start client connecting....');
-        //providerState?.setAppConnectionState(MQTTConnectionState.connecting);
+        providerState?.setAppConnectionState(MQTTConnectionState.connecting);
         await _client!.connect();
       } on Exception catch (e, stackTrace) {
         print('Client exception - $e');
@@ -66,7 +64,6 @@ class MQTTManager {
   void disconnect() {
     print('Disconnected');
     _client!.disconnect();
-    payloadStreamController.close();
   }
 
   void subscribeToTopic(String topic) {
@@ -77,11 +74,7 @@ class MQTTManager {
       final MqttPublishMessage recMess = c![0].payload as MqttPublishMessage;
 
       final String pt = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-      //providerState?.updateReceivedPayload(pt);
-      payloadStreamController.add(pt);
-
-     // print('Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
-      //print('');
+      providerState?.updateReceivedPayload(pt);
 
     });
 
@@ -105,7 +98,7 @@ class MQTTManager {
     if (_client!.connectionStatus!.returnCode == MqttConnectReturnCode.noneSpecified) {
       print('OnDisconnected callback is solicited, this is correct');
     }
-    //providerState?.setAppConnectionState(MQTTConnectionState.disconnected);
+    providerState?.setAppConnectionState(MQTTConnectionState.disconnected);
 
     // Attempt reconnection after a delay
     Future.delayed(const Duration(seconds: 03), () {
@@ -116,7 +109,7 @@ class MQTTManager {
 
   void onConnected() {
     assert(isConnected);
-    //providerState?.setAppConnectionState(MQTTConnectionState.connected);
+    providerState?.setAppConnectionState(MQTTConnectionState.connected);
     print('Mosquitto client connected....');
   }
 }

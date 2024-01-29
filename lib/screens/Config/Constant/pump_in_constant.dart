@@ -1,37 +1,28 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
-import 'package:oro_irrigation_new/constants/theme.dart';
-import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:flutter/services.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
 
-import '../../../main.dart';
 import '../../../state_management/constant_provider.dart';
-import '../../../state_management/overall_use.dart';
-import '../../../widgets/HoursMinutesSeconds.dart';
-import '../../../widgets/SCustomWidgets/custom_time_picker.dart';
-import '../../../widgets/drop_down_button.dart';
 import '../../../widgets/table_needs.dart';
-import '../../../widgets/time_picker.dart';
+import '../../../widgets/text_form_field_constant.dart';
+import 'analog_sensor_in_constant.dart';
 
-
-
-class MainValveConstant extends StatefulWidget {
-  const MainValveConstant({super.key});
+class PumpInConstant extends StatefulWidget {
+  const PumpInConstant({super.key});
 
   @override
-  State<MainValveConstant> createState() => _MainValveConstantState();
+  State<PumpInConstant> createState() => _PumpInConstantState();
 }
 
-class _MainValveConstantState extends State<MainValveConstant> {
-  ScrollController scrollController = ScrollController();
+class _PumpInConstantState extends State<PumpInConstant> {
   @override
   Widget build(BuildContext context) {
     var constantPvd = Provider.of<ConstantProvider>(context,listen: true);
-    var overAllPvd = Provider.of<OverAllUse>(context,listen: true);
-    return LayoutBuilder(builder: (BuildContext context,BoxConstraints constraints){
-      if(constraints.maxWidth < 800){
-        return MainValveConstant_M();
+    return LayoutBuilder(builder: (context,constraints){
+      if(constraints.maxWidth < 900){
+        return PumpInConstant_M();
       }
       return  Padding(
         padding: const EdgeInsets.all(16),
@@ -52,69 +43,52 @@ class _MainValveConstantState extends State<MainValveConstant> {
               label: Text('Id'),
             ),
             DataColumn(
-              label: Text('Line'),
+              label: Text('Range'),
             ),
             DataColumn(
-              label: Text('Mode'),
-            ),
-            DataColumn(
-              label: Text('Delay'),
+              label: Text('Pump Station'),
             ),
           ],
           rows: [
-            for(var i = 0;i < constantPvd.mainValveUpdated.length;i++)
+            for(var i = 0;i < constantPvd.pumpUpdated.length;i++)
               DataRow(cells: [
-                DataCell(Text('${constantPvd.mainValveUpdated[i]['name']}')),
-                DataCell(Text('${constantPvd.mainValveUpdated[i]['id']}')),
-                DataCell(Text('${constantPvd.mainValveUpdated[i]['location']}')),
-                DataCell(MyDropDown(initialValue: constantPvd.mainValveUpdated[i]['mode'], itemList: ['No delay','Open before','Open after'], pvdName: 'mainvalve/mode', index: i)),
-                DataCell(mainValveDelay(context,constantPvd,overAllPvd,i)),
+                DataCell(Text('${constantPvd.pumpUpdated[i]['name']}')),
+                DataCell(Text('${constantPvd.pumpUpdated[i]['id']}')),
+                DataCell(TextFieldForConstant(index: -1, initialValue: constantPvd.pumpUpdated[i]['range'], constantPvd: constantPvd, purpose: 'pumpRange/$i', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
+                DataCell(Checkbox(value: constantPvd.pumpUpdated[i]['pumpStation'],
+                    onChanged: (value){
+                      constantPvd.pumpFunctionality(['pumpStation',i,value]);
+                    })),
               ])
           ],
         ),
       );
     });
-
   }
 }
 
-Widget mainValveDelay(BuildContext context,constantPvd,overAllPvd,index){
-  return TextButton(
-      style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all(Colors.transparent)
-      ),
-      onPressed: ()async{
-        showDialog(context: context, builder: (context){
-          return AlertDialog(
-            content: HoursMinutesSeconds(
-              initialTime: '${constantPvd.mainValveUpdated[index]['delay']}',
-              onPressed: (){
-                constantPvd.mainValveFunctionality(['mainvalve/delay',index,'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
-                Navigator.pop(context);
-              },
-            ),
-          );
-        });
-      },
-      child: Text('${constantPvd.mainValveUpdated[index]['delay']}',style: TextStyle(color: Colors.black87),)
-  );
-}
-
-
-class MainValveConstant_M extends StatefulWidget {
-  const MainValveConstant_M({super.key});
+class PumpInConstant_M extends StatefulWidget {
+  const PumpInConstant_M({super.key});
 
   @override
-  State<MainValveConstant_M> createState() => _MainValveConstant_MState();
+  State<PumpInConstant_M> createState() => _PumpInConstant_MState();
 }
 
-class _MainValveConstant_MState extends State<MainValveConstant_M> {
-  int selected_M_Valve = 0;
+class _PumpInConstant_MState extends State<PumpInConstant_M> {
+  int selectedPump = 0;
+  TextEditingController range = TextEditingController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    var constantPvd = Provider.of<ConstantProvider>(context,listen: false);
+    range.text = constantPvd.pumpUpdated[selectedPump]['range'];
+  }
+
   @override
   Widget build(BuildContext context) {
     var constantPvd = Provider.of<ConstantProvider>(context,listen: true);
-    var overAllPvd = Provider.of<OverAllUse>(context,listen: true);
-
     return Container(
       padding: EdgeInsets.all(10),
       color: Color(0xfff3f3f3),
@@ -124,26 +98,26 @@ class _MainValveConstant_MState extends State<MainValveConstant_M> {
           SizedBox(height: 5,),
           Container(
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.white
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.white
             ),
             width: double.infinity,
             height: 60,
             child: Center(
               child: ListTile(
-                title: Text('Main Valve'),
+                title: Text('Pump'),
                 leading: SizedBox(
                   width: 30,
                   height: 30,
-                  child: Image.asset('assets/images/main_valve1.png'),
+                  child: Image.asset('assets/images/irrigation_pump.png'),
                 ),
                 trailing:  PopupMenuButton<int>(
-                  child: Text('${selected_M_Valve + 1}',style: TextStyle(fontSize: 20),),
+                  child: Text('${selectedPump + 1}',style: TextStyle(fontSize: 20),),
                   itemBuilder: (context) => [
-                    for(var i = 0;i < constantPvd.mainValveUpdated.length;i++)
+                    for(var i = 0;i < constantPvd.pumpUpdated.length;i++)
                       PopupMenuItem(
-                          value: i,
-                          child: Text('${i+1}')
+                        value: i,
+                        child: Text('${i+1}')
                       ),
                   ],
                   offset: Offset(0, 50),
@@ -153,7 +127,8 @@ class _MainValveConstant_MState extends State<MainValveConstant_M> {
                   onSelected: (value) {
                     print('selected value  : $value');
                     setState(() {
-                      selected_M_Valve = value;
+                      selectedPump = value;
+                      range.text = constantPvd.pumpUpdated[selectedPump]['range'];
                     });
                   },
                 ),
@@ -163,10 +138,9 @@ class _MainValveConstant_MState extends State<MainValveConstant_M> {
           SizedBox(height: 5,),
           Expanded(
             child: GridView.count(
-              crossAxisCount: 2,
+              crossAxisCount: 3,
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
-              childAspectRatio: MediaQuery.sizeOf(context).width/210,
               children: <Widget>[
                 Container(
                   decoration: BoxDecoration(
@@ -176,34 +150,26 @@ class _MainValveConstant_MState extends State<MainValveConstant_M> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Column(
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Icon(Icons.mode,color: myTheme.primaryColor,),
-                          Text('MOde'),
+                          Icon(Icons.production_quantity_limits,color: myTheme.primaryColor,),
+                          Text('Range',style: TextStyle(color: myTheme.primaryColor),),
                         ],
                       ),
-                      DropdownButton(
-                        focusColor: Colors.transparent,
-                        // style: ioText,
-                        value: constantPvd.mainValveUpdated[selected_M_Valve]['mode'],
-                        underline: Container(),
-                        items: ['No delay','Open before','Open after'].map((dynamic items) {
-                          return DropdownMenuItem(
-                            value: items,
-                            child: Container(
-                                child: Text(items,style: TextStyle(fontSize: 11,color: Colors.black),)
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          constantPvd.mainValveFunctionality(['mainvalve/mode',selected_M_Valve,value!]);
-                        },
-                        // After selecting the desired option,it will
-                        // change button value to selected value
-
-                      ),
-
+                      SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: TextFormField(
+                          controller: range,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder()
+                          ),
+                          onChanged: (value){
+                            constantPvd.pumpFunctionality(['pumpRange',selectedPump,value]);
+                          },
+                        ),
+                      )
                     ],
                   ),
                 ),
@@ -215,15 +181,21 @@ class _MainValveConstant_MState extends State<MainValveConstant_M> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Column(
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Icon(Icons.mode,color: myTheme.primaryColor,),
-                          Text('MOde'),
+                          Icon(Icons.ev_station,color: myTheme.primaryColor,),
+                          Text('Pump Station',style: TextStyle(color: myTheme.primaryColor),),
                         ],
                       ),
-                      mainValveDelay(context, constantPvd, overAllPvd, selected_M_Valve)
-
+                      SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: Checkbox(value: constantPvd.pumpUpdated[selectedPump]['pumpStation'],
+                            onChanged: (value){
+                              constantPvd.pumpFunctionality(['pumpStation',selectedPump,value]);
+                            }),
+                      )
                     ],
                   ),
                 ),
@@ -242,15 +214,18 @@ class _MainValveConstant_MState extends State<MainValveConstant_M> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Column(
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Icon(Icons.local_activity_outlined,color: myTheme.primaryColor,),
-                          Text('Name'),
+                          Icon(Icons.perm_identity,color: myTheme.primaryColor,),
+                          Text('Name',style: TextStyle(color: myTheme.primaryColor),),
                         ],
                       ),
-                      Text('${constantPvd.mainValveUpdated[selected_M_Valve]['name']}')
-
+                      SizedBox(
+                        width: double.infinity,
+                        height: 60,
+                        child: Center(child: Text('${constantPvd.pumpUpdated[selectedPump]['name']}'))
+                      )
                     ],
                   ),
                 ),
@@ -269,14 +244,18 @@ class _MainValveConstant_MState extends State<MainValveConstant_M> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Column(
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           Icon(Icons.local_activity_outlined,color: myTheme.primaryColor,),
-                          Text('Id'),
+                          Text('Id',style: TextStyle(color: myTheme.primaryColor),),
                         ],
                       ),
-                      Text('${constantPvd.mainValveUpdated[selected_M_Valve]['id']}')
+                      SizedBox(
+                        width: double.infinity,
+                        height: 60,
+                        child: Center(child: Text('${constantPvd.pumpUpdated[selectedPump]['id']}')),
+                      )
                     ],
                   ),
                 ),
@@ -288,3 +267,4 @@ class _MainValveConstant_MState extends State<MainValveConstant_M> {
     );
   }
 }
+

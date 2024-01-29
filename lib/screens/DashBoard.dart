@@ -183,13 +183,11 @@ class _DashboardWideState extends State<DashboardWide> {
   Calendar calendarView = Calendar.day;
   late Widget _centerWidget;
   String currentTap = 'Dashboard';
-  List<DashboardModel> siteList = [];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
     getCustomerSite();
   }
 
@@ -197,33 +195,14 @@ class _DashboardWideState extends State<DashboardWide> {
   {
     _centerWidget = Center(child: Container(
       color: Colors.white,
-      padding: EdgeInsets.symmetric(horizontal: widget.screenWidth/2 - 160),
+      padding: EdgeInsets.symmetric(horizontal: widget.screenWidth/2 - 150),
       child: const LoadingIndicator(
         indicatorType: Indicator.ballPulse,
       ),
     ));
 
-    final prefs = await SharedPreferences.getInstance();
-    Map<String, Object> body = {"userId" : int.parse(prefs.getString('userId') ?? "")};
-    final response = await HttpService().postRequest("getUserDeviceListForCustomer", body);
-    if (response.statusCode == 200)
-    {
-      siteList.clear();
-      var data = jsonDecode(response.body);
-      if(data["code"]==200)
-      {
-        final cntList = data["data"] as List;
-        try {
-          siteList = cntList.map((json) => DashboardModel.fromJson(json)).toList();
-        } catch (e) {
-          print('Error: $e');
-        }
-      }
-      callCustomerDashboard();
-    }
-    else{
-      //_showSnackBar(response.body);
-    }
+    callCustomerDashboard();
+
   }
 
   Future<void> callCustomerDashboard()  async {
@@ -237,16 +216,15 @@ class _DashboardWideState extends State<DashboardWide> {
     currentTap = option;
     setState(() {
       if (option == 'Dashboard') {
-        _centerWidget = CustomerHome(customerID: widget.userID, type: 0, customerName: '', userID: widget.userID, siteList: siteList,);
+        _centerWidget = CustomerHome(customerID: widget.userID, type: 0, customerName: widget.userName, userID: widget.userID, mobileNo: '+${widget.countryCode}-${widget.mobileNo}',);
       } else if (option == 'My Product') {
         _centerWidget = ProductInventory(userName: widget.userName);
       } else if (option == 'Device Settings') {
-        _centerWidget = FarmSettings(customerID: widget.userID, siteList: siteList,);
+        _centerWidget = FarmSettings(customerID: widget.userID, siteList: [],);
       }
       else if (option == 'Sent And Received') {
-        _centerWidget = SentAndReceived(customerID: widget.userID, siteList: siteList,);
+        _centerWidget = SentAndReceived(customerID: widget.userID, siteList: [],);
       }
-      // Add more conditions for additional options
     });
   }
 
@@ -255,15 +233,39 @@ class _DashboardWideState extends State<DashboardWide> {
     //var appState = Provider.of<MqttPayloadProvider>(context,listen: true);
     return Scaffold(
       backgroundColor: myTheme.primaryColor.withOpacity(0.1),
+      appBar: widget.userType =='3'? AppBar(
+        leading: const Image(image: AssetImage("assets/images/niagara_logo.png")),
+        leadingWidth: 200,
+        actions: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(widget.userName, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                  Text('+${widget.countryCode} ${widget.mobileNo}', style: const TextStyle(fontWeight: FontWeight.normal,color: Colors.white)),
+                ],
+              ),
+              const SizedBox(width: 05),
+              const CircleAvatar(
+                radius: 23,
+                backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
+              ),
+            ],),
+          const SizedBox(width: 10)
+        ],
+      ) : null,
       body: widget.userType =='3'? Stack(
         children: [
           MyDrawer(
             userName: widget.userName, countryCode: widget.countryCode, phoneNo: widget.mobileNo, onOptionSelected: onOptionSelected, currentTap: currentTap,
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 250),
+            padding: const EdgeInsets.only(left: 241.0),
             child: Container(
-                color:Colors.white,
+                color: Colors.white,
                 child: _centerWidget
             ),
           ),
@@ -276,18 +278,14 @@ class _DashboardWideState extends State<DashboardWide> {
             selectedIndex: _selectedIndex,
             backgroundColor: Colors.white,
             labelType: NavigationRailLabelType.all,
-            indicatorColor: Colors.black,
-            indicatorShape: const CircleBorder(side: BorderSide(color: Colors.black12)),
+            indicatorColor: myTheme.primaryColor,
+            indicatorShape: const CircleBorder(eccentricity: 0.3),
             //unselectedIconTheme: const IconThemeData(color: Colors.grey),
             elevation: 5,
-            leading: Column(
+            leading: const Column(
               children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage("assets/images/company_logo.png"),
-                  backgroundColor: Colors.white,
-                ),
-                Divider()
+                Image(image: AssetImage("assets/images/company_logo.png"), height: 60,),
+                SizedBox(height: 20),
               ],
             ),
             trailing: Expanded(
@@ -327,32 +325,32 @@ class _DashboardWideState extends State<DashboardWide> {
               const NavigationRailDestination(
                 padding: EdgeInsets.only(top: 5),
                 icon: Icon(Icons.dashboard_outlined),
-                selectedIcon: Icon(Icons.dashboard_outlined, color: Color(0xFF0D5D9A),),
+                selectedIcon: Icon(Icons.dashboard_outlined, color: Colors.white,),
                 label: Text(''),
               ),
               const NavigationRailDestination(
-                icon: Icon(Icons.add_chart),
-                selectedIcon: Icon(Icons.add_chart, color: Color(0xFF0D5D9A),),
+                icon: Icon(Icons.list),
+                selectedIcon: Icon(Icons.list, color: Colors.white,),
                 label: Text(''),
               ),
               const NavigationRailDestination(
                 icon: Icon(Icons.topic_outlined),
-                selectedIcon: Icon(Icons.topic_outlined, color: Color(0xFF0D5D9A),),
+                selectedIcon: Icon(Icons.topic_outlined, color: Colors.white,),
                 label: Text(''),
               ),
               const NavigationRailDestination(
                 icon: Icon(Icons.settings_outlined),
-                selectedIcon: Icon(Icons.settings_outlined, color: Color(0xFF0D5D9A),),
+                selectedIcon: Icon(Icons.settings_outlined, color: Colors.white,),
                 label: Text(''),
               ),
               const NavigationRailDestination(
                 icon: Icon(Icons.info_outline),
-                selectedIcon: Icon(Icons.info_outline, color: Color(0xFF0D5D9A),),
+                selectedIcon: Icon(Icons.info_outline, color: Colors.white,),
                 label: Text(''),
               ),
               const NavigationRailDestination(
                 icon: Icon(Icons.help_outline),
-                selectedIcon: Icon(Icons.help_outline, color: Color(0xFF0D5D9A),),
+                selectedIcon: Icon(Icons.help_outline, color: Colors.white,),
                 label: Text(''),
               ),
             ]:
@@ -360,27 +358,27 @@ class _DashboardWideState extends State<DashboardWide> {
               const NavigationRailDestination(
                 padding: EdgeInsets.only(top: 5),
                 icon: Icon(Icons.dashboard_outlined),
-                selectedIcon: Icon(Icons.dashboard_outlined, color: Color(0xFF0D5D9A),),
+                selectedIcon: Icon(Icons.dashboard_outlined, color: Colors.white,),
                 label: Text(''),
               ),
               const NavigationRailDestination(
-                icon: Icon(Icons.add_chart),
-                selectedIcon: Icon(Icons.add_chart, color: Color(0xFF0D5D9A),),
+                icon: Icon(Icons.list),
+                selectedIcon: Icon(Icons.list, color: Colors.white),
                 label: Text(''),
               ),
               const NavigationRailDestination(
                 icon: Icon(Icons.settings_outlined),
-                selectedIcon: Icon(Icons.settings_outlined, color: Color(0xFF0D5D9A),),
+                selectedIcon: Icon(Icons.settings_outlined, color: Colors.white,),
                 label: Text(''),
               ),
               const NavigationRailDestination(
                 icon: Icon(Icons.info_outline),
-                selectedIcon: Icon(Icons.info_outline, color: Color(0xFF0D5D9A),),
+                selectedIcon: Icon(Icons.info_outline, color: Colors.white,),
                 label: Text(''),
               ),
               const NavigationRailDestination(
                 icon: Icon(Icons.help_outline),
-                selectedIcon: Icon(Icons.help_outline, color: Color(0xFF0D5D9A),),
+                selectedIcon: Icon(Icons.help_outline, color: Colors.white,),
                 label: Text(''),
               ),
             ],
@@ -399,193 +397,7 @@ class _DashboardWideState extends State<DashboardWide> {
         ],
       )
     );
-
-    return widget.userType =='3'? Scaffold(
-      body: Stack(
-        children: [
-          MyDrawer(
-            userName: widget.userName, countryCode: widget.countryCode, phoneNo: widget.mobileNo, onOptionSelected: onOptionSelected, currentTap: currentTap,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 250),
-            child: Container(
-                color:Colors.white,
-                child: _centerWidget
-            ),
-          ),
-        ],
-      ),
-    ):
-    Scaffold(
-      appBar: widget.userType =='1'?  AppBar(
-        title: Text (appBarTitle),
-        actions: _selectedIndex==0?[
-          IconButton(tooltip: 'Create Dealer account', icon: const Icon(Icons.person_add_outlined), color: Colors.white, onPressed: () async
-          {
-            await showDialog<void>(
-                context: context,
-                builder: (context) => const AlertDialog(
-                  content: CreateAccount(),
-                ));
-
-          }),
-          const SizedBox(width: 20,),
-          const Icon(Icons.notifications_none, color: Colors.white,),
-          const SizedBox(width: 30,),
-        ] : [],
-      ) :
-      AppBar(
-        title: const Text ('Dashboard'),
-        actions: _selectedIndex==0?[
-          IconButton(tooltip: 'Create customer account', icon: const Icon(Icons.person_add_outlined), color: Colors.white, onPressed: () async
-          {
-            await showDialog<void>(
-                context: context,
-                builder: (context) => const AlertDialog(
-                  content: CreateAccount(),
-                ));
-
-          }),
-          const SizedBox(width: 20,),
-          const Icon(Icons.notifications_none, color: Colors.white,),
-          const SizedBox(width: 30,),
-        ] : [
-          const SizedBox(width: 20,),
-        ],
-      ),
-      body: Row(
-        children: <Widget>[
-          SizedBox(
-            width: 150,
-            child: NavigationRail(
-              indicatorColor: myTheme.primaryColor.withOpacity(0.1),
-              minWidth: 145.0,
-              selectedIndex: _selectedIndex,
-              groupAlignment: groupAlignment,
-              labelType: NavigationRailLabelType.all,
-              leading: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const CircleAvatar(
-                      radius: 35,
-                      backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
-                      backgroundColor: Colors.transparent,
-                    ),
-                    const SizedBox(height: 3,),
-                    Text(widget.userName, style: myTheme.textTheme.titleSmall,),
-                    const SizedBox(height: 3,),
-                    Text('+${widget.countryCode} ${widget.mobileNo}', style: myTheme.textTheme.titleSmall,),
-                  ],
-                ),
-              ),
-              trailing: Expanded(
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: IconButton(tooltip: 'Logout', icon: const Icon(Icons.logout, color: Colors.redAccent,),
-                      onPressed: () async {
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.remove('userId');
-                        await prefs.remove('userName');
-                        await prefs.remove('countryCode');
-                        await prefs.remove('mobileNumber');
-                        await prefs.remove('subscribeTopic');
-
-                        if (mounted){
-                          Navigator.pushNamedAndRemoveUntil(context, '/login', ModalRoute.withName('/login'));
-                        }
-                      },
-                    ),
-                  ),
-                ),
-              ),
-              onDestinationSelected: (int index) {
-                setState(() {
-                  _selectedIndex = index;
-                  if(_selectedIndex==0){
-                    appBarTitle = 'Home';
-                  }else if(_selectedIndex==1){
-                    appBarTitle = 'Product';
-                  }else{
-                    appBarTitle = 'My Preference';
-                  }
-                });
-              },
-              destinations: widget.userType == '1'? <NavigationRailDestination>[
-                const NavigationRailDestination(
-                  padding: EdgeInsets.only(top: 5),
-                  icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home_outlined, color: Color(0xFF0D5D9A),),
-                  label: Text('Home'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.add_chart),
-                  selectedIcon: Icon(Icons.add_chart, color: Color(0xFF0D5D9A),),
-                  label: Text('Product'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.topic_outlined),
-                  selectedIcon: Icon(Icons.topic_outlined, color: Color(0xFF0D5D9A),),
-                  label: Text('Master'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.settings_outlined),
-                  selectedIcon: Icon(Icons.settings_outlined, color: Color(0xFF0D5D9A),),
-                  label: Text('My Preference'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.info_outline),
-                  selectedIcon: Icon(Icons.info_outline, color: Color(0xFF0D5D9A),),
-                  label: Text('App Info'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.help_outline),
-                  selectedIcon: Icon(Icons.help_outline, color: Color(0xFF0D5D9A),),
-                  label: Text('Help & Support'),
-                ),
-              ]:
-              <NavigationRailDestination>[
-                const NavigationRailDestination(
-                  padding: EdgeInsets.only(top: 5),
-                  icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home_outlined, color: Color(0xFF0D5D9A),),
-                  label: Text('Home'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.add_chart),
-                  selectedIcon: Icon(Icons.add_chart, color: Color(0xFF0D5D9A),),
-                  label: Text('Product'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.settings_outlined),
-                  selectedIcon: Icon(Icons.settings_outlined, color: Color(0xFF0D5D9A),),
-                  label: Text('My Preference'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.info_outline),
-                  selectedIcon: Icon(Icons.info_outline, color: Color(0xFF0D5D9A),),
-                  label: Text('App Info'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.help_outline),
-                  selectedIcon: Icon(Icons.help_outline, color: Color(0xFF0D5D9A),),
-                  label: Text('Help & Support'),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: _selectedIndex == 0 ? const AdminDealerHomePage(userName: '', countryCode: '', mobileNo: '', fromLogin: true, userId: 0, userType: 0,) :
-            _selectedIndex == 1 ? ProductInventory(userName: widget.userName) :
-            _selectedIndex == 2 ? widget.userType =='1'? const AllEntry() : const MyPreference(userID: 1,) : const MyWebView(),
-          ),
-        ],
-      ),
-    );
   }
-
 }
 
 class MyDrawer extends StatelessWidget {
@@ -595,105 +407,97 @@ class MyDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(MediaQuery.of(context).size.height);
+    print(MediaQuery.sizeOf(context).height);
     return SingleChildScrollView(
-      child: Container(
-        width: 250,
-        height: MediaQuery.of(context).size.height < 675 ? 675 : MediaQuery.of(context).size.height,
-        color: myTheme.primaryColor.withOpacity(0.9),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              color: myTheme.primaryColor,
-              width: 250,
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              border: Border(
+                right: BorderSide(
+                  color: Colors.black.withOpacity(0.3), // Adjust color as needed
+                  width: 0.5, // Adjust thickness as needed
+                ),
+              ),
+            ),
+            child: SizedBox(
+              width: 240.0,
+              height: MediaQuery.sizeOf(context).height > 660 ? MediaQuery.sizeOf(context).height - 60 : 660,
               child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                padding: const EdgeInsets.only(left: 8),
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    const CircleAvatar(
-                      radius: 25,
-                      backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
-                      backgroundColor: Colors.transparent,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    const Padding(
+                      padding: EdgeInsets.only(left: 10, bottom: 5, top: 10),
+                      child: Text('HOME', style: TextStyle(color: Colors.black, fontSize: 14)),
                     ),
-                    const SizedBox(width: 5),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(userName, style: const TextStyle(fontSize: 15, color: Colors.white)),
-                        const SizedBox(height: 3,),
-                        Text('+$countryCode $phoneNo', style: const TextStyle(fontSize: 13, color: Colors.white)),
-                      ],
+                    buildCustomListTile('Dashboard', Icons.dashboard_outlined, 'Dashboard'),
+                    buildCustomListTile('My Product', Icons.topic_outlined, 'My Product'),
+                    buildCustomListTile('Report Overview', Icons.my_library_books_outlined, 'Report Overview'),
+                    buildCustomListTile('Sent And Received', Icons.question_answer_outlined, 'Sent And Received'),
+                    buildCustomListTile('Controller Logs', Icons.message_outlined, 'Controller Logs'),
+                    buildCustomListTile('Device Settings', Icons.settings_outlined, 'Device Settings'),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 10, top: 10, bottom: 5),
+                      child: Text('ORGANIZATION', style: TextStyle(color: Colors.black, fontSize: 14)),
+                    ),
+                    buildCustomListTile('App Info', Icons.info_outline, 'App Info'),
+                    buildCustomListTile('Help & Support', Icons.help_outline, 'Help & Support'),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 10, top: 10, bottom: 5),
+                      child: Text('ACCOUNT', style: TextStyle(color: Colors.black, fontSize: 14)),
+                    ),
+                    buildCustomListTile('My Preference', Icons.settings_outlined, 'My Preference'),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: ListTile(
+                        leading: const Icon(Icons.logout, color: Colors.red,),
+                        title: const Text('Logout', style: TextStyle(fontSize: 14, color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                        onTap: () async {
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.remove('userId');
+                          await prefs.remove('userName');
+                          await prefs.remove('countryCode');
+                          await prefs.remove('mobileNumber');
+                          await prefs.remove('subscribeTopic');
+                          if (context.mounted){
+                            Navigator.pushNamedAndRemoveUntil(context, '/login', ModalRoute.withName('/login'));
+                          }
+                        },
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.only(left: 10, bottom: 5, top: 10),
-              child: Text('HOME', style: TextStyle(color: Colors.white)),
-            ),
-            buildCustomListTile('Dashboard', Icons.dashboard_outlined, 'Dashboard'),
-            buildCustomListTile('My Product', Icons.topic_outlined, 'My Product'),
-            buildCustomListTile('Report Overview', Icons.my_library_books_outlined, 'Report Overview'),
-            buildCustomListTile('Sent And Received', Icons.question_answer_outlined, 'Sent And Received'),
-            buildCustomListTile('Controller Logs', Icons.message_outlined, 'Controller Logs'),
-            buildCustomListTile('Device Settings', Icons.settings_outlined, 'Device Settings'),
-            const Padding(
-              padding: EdgeInsets.only(left: 10, top: 10, bottom: 5),
-              child: Text('ORGANIZATION', style: TextStyle(color: Colors.white)),
-            ),
-            buildCustomListTile('App Info', Icons.info_outline, 'App Info'),
-            buildCustomListTile('Help & Support', Icons.help_outline, 'Help & Support'),
-            const Padding(
-              padding: EdgeInsets.only(left: 10, top: 10, bottom: 5),
-              child: Text('ACCOUNT', style: TextStyle(color: Colors.white)),
-            ),
-            buildCustomListTile('My Preference', Icons.settings_outlined, 'My Preference'),
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red,),
-              title: const Text('Logout', style: TextStyle(fontSize: 14, color: Colors.white)),
-              onTap: () async {
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.remove('userId');
-                await prefs.remove('userName');
-                await prefs.remove('countryCode');
-                await prefs.remove('mobileNumber');
-                await prefs.remove('subscribeTopic');
-                if (context.mounted){
-                  Navigator.pushNamedAndRemoveUntil(context, '/login', ModalRoute.withName('/login'));
-                }
-              },
-            ),
-            // Add more ListTile widgets for additional options
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget buildCustomListTile(String title, IconData icon, String tapOption) {
     return Padding(
-      padding: const EdgeInsets.only(left: 8),
+      padding: const EdgeInsets.only(left: 8, right: 8),
       child: Container(
         decoration: BoxDecoration(
-          color: currentTap == tapOption ? Colors.white : Colors.transparent,
-          borderRadius: const BorderRadius.only(topLeft: Radius.circular(30), bottomLeft: Radius.circular(30)), // Adjust the radius as needed
+          color: currentTap == tapOption ? myTheme.primaryColor.withOpacity(0.1) : Colors.transparent,
+          borderRadius: const BorderRadius.all(Radius.circular(5)), // Adjust the radius as needed
         ),
         child: ListTile(
           leading: Icon(
             icon,
-            color: currentTap == tapOption ? myTheme.primaryColor : Colors.white,
+            color: currentTap == tapOption ? myTheme.primaryColor : Colors.black.withOpacity(0.6),
           ),
           title: Text(
             title,
             style: TextStyle(
               fontSize: 14,
-              color: currentTap == tapOption ? myTheme.primaryColor : Colors.white,
+              fontWeight: FontWeight.bold,
+              color: currentTap == tapOption ? myTheme.primaryColor : Colors.black.withOpacity(0.8),
             ),
           ),
           onTap: () {
@@ -702,5 +506,32 @@ class MyDrawer extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class CustomShapeBorder extends ShapeBorder {
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+    return Path();
+  }
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    return Path()
+      ..addRRect(RRect.fromRectAndCorners(
+        rect,// Adjust bottom-right corner radius as needed
+      ));
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {}
+
+  @override
+  ShapeBorder scale(double t) {
+    // TODO: implement scale
+    throw UnimplementedError();
   }
 }

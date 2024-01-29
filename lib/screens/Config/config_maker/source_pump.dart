@@ -17,8 +17,33 @@ class SourcePumpTable extends StatefulWidget {
 class _SourcePumpTableState extends State<SourcePumpTable> {
   ScrollController scrollController = ScrollController();
   bool selectButton = false;
+  final GlobalKey widgetKey = GlobalKey();
+
   var val = '1';
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        var configPvd = Provider.of<ConfigMakerProvider>(context,listen: false);
+        configPvd.sourcePumpFunctionality(['editsourcePumpSelection',false]);
+        configPvd.irrigationPumpFunctionality(['editIrrigationPumpSelection',false]);
+        configPvd.centralDosingFunctionality(['c_dosingSelectAll',false]);
+        configPvd.centralDosingFunctionality(['c_dosingSelection',false]);
+        configPvd.centralFiltrationFunctionality(['centralFiltrationSelection',false]);
+        configPvd.centralFiltrationFunctionality(['centralFiltrationSelectAll',false]);
+        configPvd.irrigationLinesFunctionality(['editIrrigationSelection',false]);
+        configPvd.irrigationLinesFunctionality(['editIrrigationSelectAll',false]);
+        configPvd.localDosingFunctionality(['edit_l_DosingSelectAll',false]);
+        configPvd.localDosingFunctionality(['edit_l_DosingSelection',false]);
+        configPvd.localFiltrationFunctionality(['edit_l_filtrationSelection',false]);
+        configPvd.localFiltrationFunctionality(['edit_l_filtrationSelectALL',false]);
+        configPvd.cancelSelection();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -185,7 +210,8 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                   topBtmRgt('ORO','pump'),
                   topBtmRgt('ORO Pump','Plus'),
                   topBtmRgt('Relay','count'),
-                  topBtmRgt('Level','Type'),
+                  topBtmRgt('Level','Type(${configPvd.totalLevelSensor})'),
+                  topBtmRgt('Pressure','Sensor(${configPvd.total_p_sensor})'),
                   topBtmRgt('Top','tank(high)'),
                   topBtmRgt('Top','tank(low)'),
                   topBtmRgt('Sump','tank(high)'),
@@ -305,7 +331,7 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                                   ),
                                   width: double.infinity,
                                   height: 50,
-                                  child: configPvd.sourcePumpUpdated[index]['oro_pump_plus'] == true ? MyDropDown(initialValue: configPvd.sourcePumpUpdated[index]['levelType'], itemList: ['-','ADC level','RS485 level','float level'], pvdName: 'editLevelType_sp', index: index) : notAvailable
+                                  child: configPvd.sourcePumpUpdated[index]['oro_pump_plus'] == true ? MyDropDown(initialValue: configPvd.sourcePumpUpdated[index]['levelType'], itemList: (configPvd.totalLevelSensor == 0 && ['ADC level','both'].contains(configPvd.sourcePumpUpdated[index]['levelType'])) ? ['-','ADC level','float level','both'] : configPvd.totalLevelSensor == 0 ? ['-','float level'] : ['-','ADC level','float level','both'] , pvdName: 'editLevelType_sp', index: index) : notAvailable
                               ),
                             ),
                             Expanded(
@@ -315,10 +341,26 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                                 ),
                                 width: double.infinity,
                                 height: 50,
-                                child: (configPvd.sourcePumpUpdated[index]['levelType'] != 'float level') ?
+                                child: (!configPvd.sourcePumpUpdated[index]['oro_pump_plus'] || (configPvd.total_p_sensor == 0 && !configPvd.sourcePumpUpdated[index]['oro_pump_plus']) || (configPvd.total_p_sensor == 0 && configPvd.sourcePumpUpdated[index]['pressureSensor'].isEmpty)) ?
                                 notAvailable :
                                 Checkbox(
-                                    value: configPvd.sourcePumpUpdated[index]['TopTankHigh'].isEmpty ? false : true,
+                                    value: configPvd.sourcePumpUpdated[index]['pressureSensor'].isEmpty ? false : true,
+                                    onChanged: (value){
+                                      configPvd.sourcePumpFunctionality(['editPressureSensor',index,value]);
+                                    }),
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    border: Border(right: BorderSide(width: 1))
+                                ),
+                                width: double.infinity,
+                                height: 50,
+                                child: (!['float level','both'].contains(configPvd.sourcePumpUpdated[index]['levelType']) || !configPvd.sourcePumpUpdated[index]['oro_pump_plus']) ?
+                                notAvailable :
+                                Checkbox(
+                                    value: (configPvd.sourcePumpUpdated[index]['TopTankHigh'] == null || configPvd.sourcePumpUpdated[index]['TopTankHigh'].isEmpty) ? false : true,
                                     onChanged: (value){
                                       configPvd.sourcePumpFunctionality(['editTopTankHigh',index,value]);
                                     }),
@@ -331,10 +373,10 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                                 ),
                                 width: double.infinity,
                                 height: 50,
-                                child: (configPvd.sourcePumpUpdated[index]['levelType'] != 'float level') ?
+                                child: (!['float level','both'].contains(configPvd.sourcePumpUpdated[index]['levelType']) || !configPvd.sourcePumpUpdated[index]['oro_pump_plus']) ?
                                 notAvailable :
                                 Checkbox(
-                                    value: configPvd.sourcePumpUpdated[index]['TopTankLow'].isEmpty ? false : true,
+                                    value: (configPvd.sourcePumpUpdated[index]['TopTankLow'] == null || configPvd.sourcePumpUpdated[index]['TopTankLow'].isEmpty) ? false : true,
                                     onChanged: (value){
                                       configPvd.sourcePumpFunctionality(['editTopTankLow',index,value]);
                                     }),
@@ -347,10 +389,10 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                                 ),
                                 width: double.infinity,
                                 height: 50,
-                                child: (configPvd.sourcePumpUpdated[index]['levelType'] != 'float level') ?
+                                child: (!['float level','both'].contains(configPvd.sourcePumpUpdated[index]['levelType']) || !configPvd.sourcePumpUpdated[index]['oro_pump_plus']) ?
                                 notAvailable :
                                 Checkbox(
-                                    value: configPvd.sourcePumpUpdated[index]['SumpTankHigh'].isEmpty ? false : true,
+                                    value: (configPvd.sourcePumpUpdated[index]['SumpTankHigh'] == null || configPvd.sourcePumpUpdated[index]['SumpTankHigh'].isEmpty) ? false : true,
                                     onChanged: (value){
                                       configPvd.sourcePumpFunctionality(['editSumpTankHigh',index,value]);
                                     }),
@@ -363,10 +405,10 @@ class _SourcePumpTableState extends State<SourcePumpTable> {
                                 ),
                                 width: double.infinity,
                                 height: 50,
-                                child: (configPvd.sourcePumpUpdated[index]['levelType'] != 'float level') ?
+                                child: (!['float level','both'].contains(configPvd.sourcePumpUpdated[index]['levelType']) || !configPvd.sourcePumpUpdated[index]['oro_pump_plus']) ?
                                 notAvailable :
                                 Checkbox(
-                                    value: configPvd.sourcePumpUpdated[index]['SumpTankLow'].isEmpty ? false : true,
+                                    value: (configPvd.sourcePumpUpdated[index]['SumpTankLow'] == null ||configPvd.sourcePumpUpdated[index]['SumpTankLow'].isEmpty) ? false : true,
                                     onChanged: (value){
                                       configPvd.sourcePumpFunctionality(['editSumpTankLow',index,value]);
                                     }),

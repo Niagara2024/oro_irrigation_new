@@ -209,8 +209,10 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs> {
                     DataCell(Text(nameList[index]['id'])),
                     DataCell(
                       TextFormField(
-                        maxLength: 40,
-                        initialValue: nameList[index]['name'],
+                          inputFormatters: [
+                            LengthLimitingTextInputFormatter(40), // Limit input to 50 characters
+                          ],
+                          initialValue: nameList[index]['name'],
                         onChanged: (val) {
                           setState(() {
                             for (var element in nameList) {
@@ -280,9 +282,9 @@ class _MyContainerWithTabsState extends State<MyContainerWithTabs> {
 
                     TextFormField(
                       inputFormatters: [
-                        LengthLimitingTextInputFormatter(50), // Limit input to 50 characters
+                        LengthLimitingTextInputFormatter(40), // Limit input to 50 characters
                       ],
-                      maxLength: 40,
+                      // maxLength: 40,
                       initialValue: nameList[index]['name'],
                       onChanged: (val) {
                         setState(() {

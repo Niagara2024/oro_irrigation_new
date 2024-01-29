@@ -316,7 +316,7 @@ class _ProductLimitsState extends State<ProductLimits> {
         title: Text(widget.siteName),
       ),
       body: Stepper(
-        type: StepperType.vertical,
+        type: StepperType.horizontal,
         //physics: const ScrollPhysics(),
         currentStep: _currentStep,
         connectorThickness: 2,

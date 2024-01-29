@@ -1,6 +1,6 @@
 class NodeModel
 {
-  int userDeviceListId,productId, categoryId, modelId, productStatus, communicationMode, warrantyMonths, referenceNumber, interfaceTypeId, relayCount;
+  int userDeviceListId,productId, categoryId, modelId, productStatus, communicationMode, warrantyMonths, referenceNumber,serialNumber, interfaceTypeId, relayCount;
   String categoryName, modelName, productDescription, dateOfManufacturing, interface, interfaceInterval, deviceId, active;
 
   NodeModel({
@@ -17,6 +17,7 @@ class NodeModel
     this.productStatus = 0,
     this.communicationMode = 0,
     this.referenceNumber = 0,
+    this.serialNumber = 0,
     this.interface = '',
     this.interfaceInterval = '',
     this.interfaceTypeId = 0,
@@ -38,6 +39,7 @@ class NodeModel
     productStatus: json['productStatus'],
     communicationMode: json['communicationMode'],
     referenceNumber: json['referenceNumber'],
+    serialNumber: json['serialNumber'],
     interface: json['interface'],
     interfaceInterval: json['interfaceInterval'],
     interfaceTypeId: json['interfaceTypeId'],

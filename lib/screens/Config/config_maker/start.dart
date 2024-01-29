@@ -18,6 +18,7 @@ class _StartPageConfigMakerState extends State<StartPageConfigMaker> {
   @override
   Widget build(BuildContext context) {
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
+
     return Container(
       width: double.infinity,
       height: double.infinity,
@@ -25,6 +26,20 @@ class _StartPageConfigMakerState extends State<StartPageConfigMaker> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // ElevatedButton(
+          //     onPressed: (){
+          //       MqttWebClient myMqtt = MqttWebClient();
+          //       print(myMqtt.init());
+          //     },
+          //     child: Text('connect')
+          // ),
+          // ElevatedButton(
+          //     onPressed: (){
+          //       print(mqttPvd.isConnect);
+          //     },
+          //     child: Text('check')
+          // ),
+          // Icon(Icons.circle,color: mqttPvd.isConnect == true ? Colors.green : Colors.red,),
           MouseRegion(
             onEnter: (_) {
               setState(() {
@@ -38,6 +53,7 @@ class _StartPageConfigMakerState extends State<StartPageConfigMaker> {
             },
             child: InkWell(
               onTap: (){
+                print(configPvd.totalAnalogSensor);
                 configPvd.clearConfig();
                 configPvd.fetchAll(configPvd.serverData,true);
                 configPvd.editSelectedTab(1);

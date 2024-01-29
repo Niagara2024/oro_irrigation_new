@@ -4,9 +4,9 @@ import 'dart:math';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Models/ProductListWithNode.dart';
 import '../../Models/customer_list.dart';
@@ -57,6 +57,12 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   final List<InterfaceModel> interfaceType = <InterfaceModel>[];
   List<int> selectedProduct = [];
 
+  bool checkboxValueNode = false;
+  final List<String> _interfaceInterval = ['0 sec', '5 sec', '10 sec', '20 sec', '30 sec', '45 sec','1 min','5 min','10 min','30 min','1 hr']; // Option 2
+  List<CustomerListMDL> myCustomerChildList = <CustomerListMDL>[];
+  List<int> nodeStockSelection = [];
+  int currentSite = 0;
+
 
   @override
   void initState() {
@@ -91,9 +97,9 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   }
 
   void removeProductStockById(int productId) {
-    print(productId);
     widget.productStockList.removeWhere((productStock) => productStock.productId == productId);
   }
+
 
   Future<void> getCustomerType() async
   {
@@ -108,13 +114,11 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   Future<void> getMyAllProduct() async
   {
     final body = widget.userType == 1 ? {"fromUserId": widget.userID, "toUserId": widget.customerID ,"set":1, "limit":100} : {"fromUserId": widget.userID, "toUserId": widget.customerID, "set":1, "limit":100};
-    print(body);
     final response = await HttpService().postRequest("getCustomerProduct", body);
     if (response.statusCode == 200)
     {
       customerProductList.clear();
       var data = jsonDecode(response.body);
-      //print(data);
       if(data["code"]==200)
       {
         final cntList = data["data"]['product'] as List;
@@ -135,7 +139,6 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   {
     Map<String, Object> body = {"userId" : widget.customerID};
     final response = await HttpService().postRequest("getMasterControllerStock", body);
-    print(body);
     if (response.statusCode == 200)
     {
       myMasterControllerList.clear();
@@ -185,7 +188,6 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
             usedNodeList[i].add(NodeModel.fromJson(nodeList[j]));
           }
         }
-
       }
       setState(() {
         customerSiteList;
@@ -446,21 +448,26 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
       body: TabBarView(
         controller: _tabCont,
         children: [
+          displayProductList(),
+          displaySiteConfigPage(),
+        ],
+      ),
+      /*body: TabBarView(
+        controller: _tabCont,
+        children: [
           ..._configTabs.map((label) =>
               CustomerSalesPage(
               label: label.toString(), customerID: widget.customerID, customerProductList: customerProductList, customerSiteList: customerSiteList, nodeStockList: nodeStockList,
-                usedNodeList: usedNodeList, interfaceType: interfaceType, userID : widget.userID, getNodeStockList: getNodeStockList, getCustomerSite : getCustomerSite, userType: widget.userType, userName: widget.userName,
+                usedNodeList: usedNodeList, interfaceType: interfaceType, userID : widget.userID, callBackFunction: callBackFunction, getCustomerSite : getCustomerSite, userType: widget.userType, userName: widget.userName,
             ),
           ),
         ],
-      ),
+      ),*/
     );
   }
 
   Future<void> _displayCustomerSiteDialog(BuildContext context, String ctrlName, String ctrlModel, String ctrlIemi) async {
-    return showDialog(
-        context: context,
-        builder: (context) {
+    return showDialog(context: context,  builder: (context) {
           return AlertDialog(
             title: const Text('Create Customer Site'),
             content: SizedBox(
@@ -514,6 +521,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                 textColor: Colors.white,
                 child: const Text('CREATE'),
                 onPressed: () async {
+
                   if (_formKey.currentState!.validate()) {
                     Map<String, dynamic> body = {
                       "userId": widget.customerID,
@@ -528,13 +536,17 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                     print(response.body);
                     if(response.statusCode == 200)
                     {
+
                       var data = jsonDecode(response.body);
                       if(data["code"]==200)
                       {
                         getCustomerSite();
                         getMasterProduct();
                         getNodeStockList();
-                        Navigator.pop(context);
+                        if(mounted){
+                          Navigator.pop(context);
+                        }
+
                       }
                       else{
                         //_showSnackBar(data["message"]);
@@ -548,566 +560,466 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
           );
         });
   }
-}
 
-class CustomerSalesPage extends StatefulWidget
-{
-  const CustomerSalesPage({Key? key, required this.label, required this.customerID, required this.userType, required this.userName, required this.customerProductList, required this.customerSiteList, required this.nodeStockList, required this.usedNodeList,
-    required this.interfaceType, required this.userID, required this.getNodeStockList, required this.getCustomerSite}) : super(key: key);
-  final String label, userName;
-  final int customerID;
-  final int userID;
-  final int userType;
-  final List<CustomerProductModel> customerProductList;
-  final List<ProductListWithNode> customerSiteList;
-  final List<ProductStockModel> nodeStockList;
-  final List<List<NodeModel>> usedNodeList;
-  final List<InterfaceModel> interfaceType;
-  final Function getNodeStockList;
-  final Function getCustomerSite;
-
-
-  @override
-  State<CustomerSalesPage> createState() => _CustomerSalesPageState();
-}
-
-class _CustomerSalesPageState extends State<CustomerSalesPage> {
-
-  bool checkboxValueNode = false;
-  final List<String> _interfaceInterval = ['0 sec', '5 sec', '10 sec', '20 sec', '30 sec', '45 sec','1 min','5 min','10 min','30 min','1 hr']; // Option 2
-  List<CustomerListMDL> myCustomerChildList = <CustomerListMDL>[];
-  List<int> nodeStockSelection = [];
-  int currentSite = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    if(widget.label.toString()=='Customer'){
-      getCustomerChildList();
-    }
-
-  }
-
-  Future<void> getCustomerChildList() async
-  {
-    Map<String, Object> body = {"userType" : widget.userType+1, "userId" : widget.customerID};
-    final response = await HttpService().postRequest("getUserList", body);
-    if (response.statusCode == 200)
-    {
-      myCustomerChildList.clear();
-      var data = jsonDecode(response.body);
-      if(data["code"]==200)
-      {
-        final cntList = data["data"] as List;
-        for (int i=0; i < cntList.length; i++) {
-          myCustomerChildList.add(CustomerListMDL.fromJson(cntList[i]));
-        }
-      }
-
-
-      setState(() {
-      });
-    }
-    else{
-      //_showSnackBar(response.body);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context)
-  {
-    if(widget.label.toString()=='Product List')
-    {
-      return  Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(10),
-            bottomRight: Radius.circular(10),
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: DataTable2(
-              columnSpacing: 12,
-              horizontalMargin: 12,
-              minWidth: 580,
-              columns: [
-                const DataColumn2(
-                    label: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold),),
-                    fixedWidth: 100
-                ),
-                const DataColumn2(
-                  label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold),),
-                  size: ColumnSize.M,
-                ),
-                const DataColumn2(
-                  label: Text('Model', style: TextStyle(fontWeight: FontWeight.bold),),
-                  size: ColumnSize.M,
-                ),
-                const DataColumn2(
-                  label: Text('IMEI', style: TextStyle(fontWeight: FontWeight.bold),),
-                  size: ColumnSize.M,
-                ),
-                const DataColumn2(
-                  label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold),),
-                ),
-                const DataColumn2(
-                  label: Text('Modify Date', style: TextStyle(fontWeight: FontWeight.bold),),
-                  fixedWidth: 100,
-                ),
-                DataColumn2(
-                  label: const Text('Action', style: TextStyle(fontWeight: FontWeight.bold),),
-                  fixedWidth: widget.userType==2 ? 70 : 0,
-                ),
-              ],
-              rows: List<DataRow>.generate(widget.customerProductList.length, (index) => DataRow(cells: [
-                DataCell(Text('${index+1}')),
-                DataCell(Row(children: [ CircleAvatar(
-                  radius: 17,
-                    backgroundColor: Colors.transparent,
-                    backgroundImage: widget.customerProductList[index].categoryName == 'ORO SWITCH'
-                        || widget.customerProductList[index].categoryName == 'OROSENSE'?
-                    AssetImage('assets/images/oro_switch.png'):
-                    widget.customerProductList[index].categoryName == 'ORO LEVEL'?
-                    AssetImage('assets/images/oro_sense.png'):
-                    widget.customerProductList[index].categoryName == 'OROGEM'?
-                    AssetImage('assets/images/oro_gem.png'): AssetImage('assets/images/oro_rtu.png'),
-                ), const SizedBox(width: 10,), Text(widget.customerProductList[index].categoryName)],)),
-                DataCell(Text(widget.customerProductList[index].model)),
-                DataCell(Text(widget.customerProductList[index].deviceId)),
-                //DataCell(widget.userType==2 ? Text(widget.customerProductList[index].siteName) : widget.customerProductList[index].buyer == widget.userName? const Text('-') : Text(widget.customerProductList[index].buyer)),
-                DataCell(
-                    Center(
-                      child: widget.userType == 1? Row(
-                        children: [
-                          CircleAvatar(radius: 5,
-                            backgroundColor:
-                            widget.customerProductList[index].productStatus==1? Colors.pink:
-                            widget.customerProductList[index].productStatus==2? Colors.blue:
-                            widget.customerProductList[index].productStatus==3? Colors.purple:
-                            widget.customerProductList[index].productStatus==4? Colors.yellow:
-                            widget.customerProductList[index].productStatus==5? Colors.deepOrangeAccent:
-                            Colors.green,
-                          ),
-                          const SizedBox(width: 5,),
-                          widget.customerProductList[index].productStatus==1? const Text('In-Stock'):
-                          widget.customerProductList[index].productStatus==2? const Text('Stock'):
-                          widget.customerProductList[index].productStatus==3? const Text('Sold-Out'):
-                          widget.customerProductList[index].productStatus==4? const Text('Pending'):
-                          widget.customerProductList[index].productStatus==5? const Text('Installed'):
-                          const Text('Active'),
-                        ],
-                      ):
-                      widget.userType == 2? Row(
-                        children: [
-                          CircleAvatar(radius: 5,
-                            backgroundColor:
-                            widget.customerProductList[index].productStatus==2? Colors.pink:
-                            widget.customerProductList[index].productStatus==3? Colors.blue:
-                            widget.customerProductList[index].productStatus==4? Colors.yellow:
-                            widget.customerProductList[index].productStatus==5? Colors.deepOrangeAccent:
-                            Colors.green,
-                          ),
-                          const SizedBox(width: 5,),
-                          widget.customerProductList[index].productStatus==2? const Text('In-Stock'):
-                          widget.customerProductList[index].productStatus==3? const Text('Stock'):
-                          widget.customerProductList[index].productStatus==4? const Text('Pending'):
-                          widget.customerProductList[index].productStatus==5? const Text('Installed'):
-                          const Text('Active'),
-                        ],
-                      ):
-                      Row(
-                        children: [
-                          CircleAvatar(radius: 5,
-                            backgroundColor:
-                            widget.customerProductList[index].productStatus==3? Colors.pink:
-                            widget.customerProductList[index].productStatus==4? Colors.yellow:
-                            widget.customerProductList[index].productStatus==5? Colors.deepOrangeAccent:
-                            Colors.green,
-                          ),
-                          const SizedBox(width: 5,),
-                          widget.customerProductList[index].productStatus==3? const Text('In-Stock'):
-                          widget.customerProductList[index].productStatus==4? const Text('Pending'):
-                          widget.customerProductList[index].productStatus==5? const Text('Installed'):
-                          const Text('Active'),
-                        ],
-                      ),
-                    )
-                ),
-                DataCell(Text(DateFormat('dd-MM-yyyy').format(DateTime.parse(widget.customerProductList[index].modifyDate)))),
-                widget.userType==2 ? DataCell(Center(child: IconButton(tooltip:'Delete product',onPressed: () {
-                 print('IconButton click');
-                }, icon: const Icon(Icons.delete_outline, color:  Colors.red,),))) : DataCell.empty,
-              ]))),
-        ),
-      );
-    }
-    else if(widget.label.toString()=='Site Config')
-    {
-      nodeStockSelection.clear();
-      for(int i=0; i<widget.nodeStockList.length; i++){
-        nodeStockSelection.add(0);
-      }
-
-      return DefaultTabController(
-        length: widget.customerSiteList.length, // Number of tabs
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TabBar(
-                    indicatorColor: const Color.fromARGB(255, 175, 73, 73),
-                    isScrollable: true,
-                    tabs: [
-                      for (var i = 0; i < widget.customerSiteList.length; i++)
-                        Tab(text: widget.customerSiteList[i].groupName,),
-                    ],
-                    onTap: (index) {
-                      currentSite = index;
-                    },
-                  ),
-                ),
-                PopupMenuButton(
-                  elevation: 10,
-                  tooltip: 'Add node list',
-                  child: Center(child: Icon(Icons.add, color: myTheme.primaryColor,)),
-                  onCanceled: () {
-                    checkboxValueNode = false;
-                  },
-                  itemBuilder: (context) {
-                    return List.generate(widget.nodeStockList.length+1 ,(nodeIndex) {
-                      if(widget.nodeStockList.isEmpty){
-                        return const PopupMenuItem(
-                          child: Text('No node available to add in this site'),
-                        );
-                      }
-                      else if(widget.nodeStockList.length == nodeIndex){
-                        return PopupMenuItem(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              MaterialButton(
-                                color: Colors.red,
-                                textColor: Colors.white,
-                                child: const Text('CANCEL'),
-                                onPressed: () {
-                                  setState(() {
-                                    checkboxValueNode = false;
-                                    Navigator.pop(context);
-                                  });
-                                },
-                              ),
-                              MaterialButton(
-                                color: Colors.green,
-                                textColor: Colors.white,
-                                child: const Text('ADD'),
-                                onPressed: () async
-                                {
-                                  generateRFNumber();
-                                },
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                      return PopupMenuItem(
-                        child: StatefulBuilder(
-                          builder: (BuildContext context, void Function(void Function()) setState) {
-                            return CheckboxListTile(
-                              title: Text(widget.nodeStockList[nodeIndex].categoryName),
-                              subtitle: Text(widget.nodeStockList[nodeIndex].imeiNo),
-                              value: checkboxValueNode,
-                              onChanged:(bool? value) { setState(() {
-                                checkboxValueNode = value!;
-                                if(value){
-                                  nodeStockSelection[nodeIndex] = 1;
-                                }else{
-                                  nodeStockSelection[nodeIndex] = 0;
-                                }
-
-                              });},
-                            );
-                          },
-                        ),
-                      );
-                    });
-                  },
-                ),
-                const SizedBox(width: 10,),
-              ],
+  Widget displayProductList() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, right: 8),
+      child: DataTable2(
+          columnSpacing: 12,
+          horizontalMargin: 12,
+          minWidth: 580,
+          columns: [
+            const DataColumn2(
+                label: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold),),
+                fixedWidth: 100
             ),
-            const SizedBox(height: 5.0),
-            SizedBox(
-              height: MediaQuery.sizeOf(context).height-160,
-              child: TabBarView(
-                children: [
-                  for (int siteIndex = 0; siteIndex < widget.customerSiteList.length; siteIndex++)
-                    Column(
-                      children: [
-                        Expanded(
-                          child: Row(
-                            children: [
-                              SizedBox(
-                                width: 260,
-                                child: Column(
-                                  children: [
-                                    const SizedBox(height: 10,),
-                                    const CircleAvatar(radius: 42,
-                                      backgroundImage: AssetImage('assets/images/oro_gem.png'),
-                                      backgroundColor: Colors.transparent,
-                                    ),
-                                    const SizedBox(height: 5,),
-                                    Text(widget.customerSiteList[siteIndex].categoryName,style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                                    Text('Device Id : ${widget.customerSiteList[siteIndex].deviceId.toString()}', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                    Text('Model Name  : ${widget.customerSiteList[siteIndex].modelName}', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                  ],
-                                ),
-                              ),
-                              const VerticalDivider(),
-                              Expanded(
-                                flex: 1,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: DataTable2(
-                                    columnSpacing: 12,
-                                    horizontalMargin: 12,
-                                    minWidth: 600,
-                                    dataRowHeight: 40.0,
-                                    headingRowHeight: 35,
-                                    headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
-                                    columns: const [
-                                      DataColumn2(
-                                          label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
-                                          fixedWidth: 50
-                                      ),
-                                      DataColumn2(
-                                          label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
-                                          size: ColumnSize.M
-                                      ),
-                                      DataColumn2(
-                                          label: Text('Model Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
-                                          size: ColumnSize.M
-                                      ),
-                                      DataColumn2(
-                                        label: Text('Device Id', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
-                                        fixedWidth: 170,
-                                      ),
-                                      DataColumn2(
-                                        label: Center(child: Text('Interface', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
-                                        fixedWidth: 100,
-                                      ),
-                                      DataColumn2(
-                                        label: Center(child: Text('Interval', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
-                                        fixedWidth: 100,
-                                      ),
-                                      DataColumn2(
-                                        label: Center(child: Text('Action', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
-                                        fixedWidth: 50,
-                                      ),
-                                    ],
-                                    rows: List<DataRow>.generate(widget.usedNodeList[siteIndex].length, (index) => DataRow(cells: [
-                                      DataCell(Center(child: Text('${index + 1}'))),
-                                      DataCell(Text(widget.usedNodeList[siteIndex][index].categoryName)),
-                                      DataCell(Text(widget.usedNodeList[siteIndex][index].modelName)),
-                                      DataCell(Text(widget.usedNodeList[siteIndex][index].deviceId)),
-                                      DataCell(Center(
-                                          child: DropdownButton(
-                                            value: widget.usedNodeList[siteIndex][index].interface,
-                                            style: const TextStyle(fontSize: 12),
-                                            onChanged: (newValue) {
-                                              setState(() {
-                                                widget.usedNodeList[siteIndex][index].interface = newValue!;
-                                                int infIndex = widget.interfaceType.indexWhere((model) => model.interface == newValue);
-                                                widget.usedNodeList[siteIndex][index].interfaceTypeId = widget.interfaceType[infIndex].interfaceTypeId;
-                                              });
-                                            },
-                                            items: widget.interfaceType.map((interface) {
-                                              return DropdownMenuItem(
-                                                value: interface.interface,
-                                                child: Text(interface.interface, style: const TextStyle(fontWeight: FontWeight.normal),),
-                                              );
-                                            }).toList(),
-                                          )
-                                      )),
-                                      DataCell(Center(
-                                          child: DropdownButton(
-                                            value: widget.usedNodeList[siteIndex][index].interfaceInterval ?? '0 sec',
-                                            style: const TextStyle(fontSize: 12),
-                                            onChanged: (newValue) {
-                                              setState(() {
-                                                widget.usedNodeList[siteIndex][index].interfaceInterval = newValue!;
-                                              });
-                                            },
-                                            items: _interfaceInterval.map((interface) {
-                                              return DropdownMenuItem(
-                                                value: interface,
-                                                child: Text(interface, style: const TextStyle(fontWeight: FontWeight.normal),),
-                                              );
-                                            }).toList(),
-                                          ),
-                                      )),
-                                      DataCell(Center(
-                                          child: IconButton(onPressed: () async {
-                                            Map<String, dynamic> body = {
-                                              "userId": widget.customerID,
-                                              "controllerId": widget.usedNodeList[siteIndex][index].userDeviceListId,
-                                              "modifyUser": widget.userID,
-                                              "productId": widget.usedNodeList[siteIndex][index].productId,
-                                            };
-
-                                            final response = await HttpService().putRequest("removeNodeInMaster", body);
-                                            if(response.statusCode == 200)
-                                            {
-                                              var data = jsonDecode(response.body);
-                                              if(data["code"]==200)
-                                              {
-                                                widget.usedNodeList[siteIndex].removeWhere((node) => node.userDeviceListId == widget.usedNodeList[siteIndex][index].userDeviceListId);
-                                                _showSnackBar(data["message"]);
-                                                setState(() {
-                                                  checkboxValueNode = false;
-                                                });
-                                                widget.getNodeStockList();
-                                              }
-                                              else{
-                                                _showSnackBar(data["message"]);
-                                              }
-
-                                              //generateRFNumber();
-                                            }
-
-                                          }, icon: const Icon(Icons.delete_outline, color: Colors.red,)),
-                                      )),
-                                    ])),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          height: 50,
-                          decoration: const BoxDecoration(
-                            borderRadius: BorderRadius.only(bottomRight: Radius.circular(5), bottomLeft: Radius.circular(5)),
-                            color: Colors.white,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              IconButton(
-                                  tooltip : 'view config overview',
-                                  onPressed: () async {
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  ConfigMakerView(userID: widget.userID, siteID: widget.customerSiteList[siteIndex].controllerId, customerID: widget.customerID)),);
-                                  },
-                                  icon: const Icon(Icons.view_list_outlined)),
-                              const SizedBox(width: 10,),
-                              IconButton(
-                                  tooltip : 'Send to target',
-                                  onPressed: () async {
-                                    List<dynamic> updatedInterface = [];
-                                    for(int i=0; i<widget.usedNodeList[siteIndex].length; i++){
-                                      Map<String, dynamic> myMap = {"serialNumber": i+1, "productId": widget.usedNodeList[siteIndex][i].productId,
-                                        'interfaceTypeId': widget.usedNodeList[siteIndex][i].interfaceTypeId, 'interfaceInterval': widget.usedNodeList[siteIndex][i].interfaceInterval};
-                                      updatedInterface.add(myMap);
-                                    }
-                                    Map<String, dynamic> body = {
-                                      "userId": widget.customerID,
-                                      "products": updatedInterface,
-                                      "modifyUser": widget.userID,
-                                    };
-
-                                    List<dynamic> payLoad = [];
-                                    payLoad.add('${1},${widget.customerSiteList[siteIndex].categoryName},${'1'}, ${'1'}, ${widget.customerSiteList[siteIndex].deviceId.toString()},'
-                                        '${'0'},${"00:00:30"};');
-
-                                    for(int i=0; i<widget.usedNodeList[siteIndex].length; i++){
-
-                                      //String paddedNumber = widget.usedNodeList[siteIndex][i].deviceId.toString().padLeft(20, '0');
-                                      String formattedTime = convertToHHmmss(widget.usedNodeList[siteIndex][i].interfaceInterval);
-
-                                      payLoad.add('${i+2},${widget.usedNodeList[siteIndex][i].categoryName},${widget.usedNodeList[siteIndex][i].categoryId},'
-                                          '${widget.usedNodeList[siteIndex][i].referenceNumber},${widget.usedNodeList[siteIndex][i].deviceId},'
-                                          '${widget.usedNodeList[siteIndex][i].interfaceTypeId},$formattedTime;');
-                                    }
-
-                                    String inputString = payLoad.toString();
-                                    List<String> parts = inputString.split(';');
-                                    String resultString = parts.map((part) {return part.replaceFirst(',', '');
-                                    }).join(';');
-
-                                    String resultStringFinal = resultString.replaceAll('[', '').replaceAll(']', '');
-                                    String modifiedString = resultStringFinal.replaceAll(', ', ',');
-                                    String modifiedStringFinal = '${modifiedString.substring(0, 1)},${modifiedString.substring(1)}';
-                                    String stringWithoutSpace = modifiedStringFinal.replaceAll('; ', ';');
-                                    //print(stringWithoutSpace);
-
-                                    String payLoadFinal = jsonEncode({
-                                      "100": [
-                                        {"101": stringWithoutSpace},
-                                      ]
-                                    });
-
-                                    //publish payload to mqtt
-                                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.customerSiteList[siteIndex].deviceId}');
-
-                                    final response = await HttpService().putRequest("updateUserDeviceNodeList", body);
-                                    //print(body);
-                                    if(response.statusCode == 200)
-                                    {
-                                      var data = jsonDecode(response.body);
-                                      if(data["code"]==200)
-                                      {
-                                        updatedInterface.clear();
-                                        _showSnackBar(data["message"]);
-                                      }
-                                      else{
-                                        _showSnackBar(data["message"]);
-                                      }
-                                    }
-                                  },
-                                  icon: const Icon(Icons.send)),
-                              const SizedBox(width: 10,),
-                              IconButton(
-                                  tooltip : 'Product Limit',
-                                  onPressed: () async {
-                                    int relayCnt = 0;
-                                    for(int i=0; i<widget.usedNodeList[siteIndex].length; i++){
-                                      relayCnt = relayCnt + widget.usedNodeList[siteIndex][i].relayCount;
-                                    }
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  ProductLimits(userID: widget.userID, customerID: widget.customerID, userType: 2, nodeCount: relayCnt, siteName: widget.customerSiteList[siteIndex].groupName, controllerId: widget.customerSiteList[siteIndex].controllerId, deviceId: widget.customerSiteList[siteIndex].deviceId,)),);
-                                  },
-                                  icon: const Icon(Icons.list_alt)),
-                              const SizedBox(width: 20,),
-
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                ],
-              ),
+            const DataColumn2(
+              label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold),),
+              size: ColumnSize.M,
+            ),
+            const DataColumn2(
+              label: Text('Model', style: TextStyle(fontWeight: FontWeight.bold),),
+              size: ColumnSize.M,
+            ),
+            const DataColumn2(
+              label: Text('IMEI', style: TextStyle(fontWeight: FontWeight.bold),),
+              size: ColumnSize.M,
+            ),
+            const DataColumn2(
+              label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold),),
+            ),
+            const DataColumn2(
+              label: Text('Modify Date', style: TextStyle(fontWeight: FontWeight.bold),),
+              fixedWidth: 100,
+            ),
+            DataColumn2(
+              label: const Text('Action', style: TextStyle(fontWeight: FontWeight.bold),),
+              fixedWidth: widget.userType==2 ? 70 : 0,
             ),
           ],
-        ),
-      );
-    }
-
-    return Center(child: Text('Page of ${widget.label}'));
+          rows: List<DataRow>.generate(customerProductList.length, (index) => DataRow(cells: [
+            DataCell(Text('${index+1}')),
+            DataCell(Row(children: [ CircleAvatar(
+              radius: 17,
+              backgroundColor: Colors.transparent,
+              backgroundImage: customerProductList[index].categoryName == 'ORO SWITCH'
+                  || customerProductList[index].categoryName == 'OROSENSE'?
+              AssetImage('assets/images/oro_switch.png'):
+              customerProductList[index].categoryName == 'ORO LEVEL'?
+              AssetImage('assets/images/oro_sense.png'):
+              customerProductList[index].categoryName == 'OROGEM'?
+              AssetImage('assets/images/oro_gem.png'): AssetImage('assets/images/oro_rtu.png'),
+            ), const SizedBox(width: 10,), Text(customerProductList[index].categoryName)],)),
+            DataCell(Text(customerProductList[index].model)),
+            DataCell(Text(customerProductList[index].deviceId)),
+            //DataCell(widget.userType==2 ? Text(widget.customerProductList[index].siteName) : widget.customerProductList[index].buyer == widget.userName? const Text('-') : Text(widget.customerProductList[index].buyer)),
+            DataCell(
+                Center(
+                  child: widget.userType == 1? Row(
+                    children: [
+                      CircleAvatar(radius: 5,
+                        backgroundColor:
+                        customerProductList[index].productStatus==1? Colors.pink:
+                        customerProductList[index].productStatus==2? Colors.blue:
+                        customerProductList[index].productStatus==3? Colors.purple:
+                        customerProductList[index].productStatus==4? Colors.yellow:
+                        customerProductList[index].productStatus==5? Colors.deepOrangeAccent:
+                        Colors.green,
+                      ),
+                      const SizedBox(width: 5,),
+                      customerProductList[index].productStatus==1? const Text('In-Stock'):
+                      customerProductList[index].productStatus==2? const Text('Stock'):
+                      customerProductList[index].productStatus==3? const Text('Sold-Out'):
+                      customerProductList[index].productStatus==4? const Text('Pending'):
+                      customerProductList[index].productStatus==5? const Text('Installed'):
+                      const Text('Active'),
+                    ],
+                  ) :
+                  widget.userType == 2? Row(
+                    children: [
+                      CircleAvatar(radius: 5,
+                        backgroundColor:
+                        customerProductList[index].productStatus==2? Colors.pink:
+                        customerProductList[index].productStatus==3? Colors.blue:
+                        customerProductList[index].productStatus==4? Colors.yellow:
+                        customerProductList[index].productStatus==5? Colors.deepOrangeAccent:
+                        Colors.green,
+                      ),
+                      const SizedBox(width: 5,),
+                      customerProductList[index].productStatus==2? const Text('In-Stock'):
+                      customerProductList[index].productStatus==3? const Text('Stock'):
+                      customerProductList[index].productStatus==4? const Text('Pending'):
+                      customerProductList[index].productStatus==5? const Text('Installed'):
+                      const Text('Active'),
+                    ],
+                  ) :
+                  Row(
+                    children: [
+                      CircleAvatar(radius: 5,
+                        backgroundColor:
+                        customerProductList[index].productStatus==3? Colors.pink:
+                        customerProductList[index].productStatus==4? Colors.yellow:
+                        customerProductList[index].productStatus==5? Colors.deepOrangeAccent:
+                        Colors.green,
+                      ),
+                      const SizedBox(width: 5,),
+                      customerProductList[index].productStatus==3? const Text('In-Stock'):
+                      customerProductList[index].productStatus==4? const Text('Pending'):
+                      customerProductList[index].productStatus==5? const Text('Installed'):
+                      const Text('Active'),
+                    ],
+                  ),
+                )
+            ),
+            DataCell(Text(DateFormat('dd-MM-yyyy').format(DateTime.parse(customerProductList[index].modifyDate)))),
+            widget.userType==2 ? DataCell(Center(child: IconButton(tooltip:'Delete product',onPressed: () {
+              print('IconButton click');
+            }, icon: const Icon(Icons.delete_outline, color:  Colors.red,),))) : DataCell.empty,
+          ]))),
+    );
   }
+
+  DefaultTabController displaySiteConfigPage() {
+    return DefaultTabController(
+      length: customerSiteList.length, // Number of tabs
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: TabBar(
+                  indicatorColor: myTheme.primaryColor,
+                  isScrollable: true,
+                  tabs: [
+                    for (var i = 0; i < customerSiteList.length; i++)
+                      Tab(text: customerSiteList[i].groupName,),
+                  ],
+                  onTap: (index) {
+                    currentSite = index;
+                  },
+                ),
+              ),
+              PopupMenuButton(
+                elevation: 10,
+                tooltip: 'Add node list',
+                child: Center(child: Icon(Icons.add, color: myTheme.primaryColor,)),
+                onOpened: (){
+                  nodeStockSelection.clear();
+                  for(int i=0; i< nodeStockList.length; i++){
+                    nodeStockSelection.add(0);
+                  }
+                },
+                onCanceled: () {
+                  checkboxValueNode = false;
+                },
+                itemBuilder: (context) {
+                  return List.generate(nodeStockList.length+1 ,(nodeIndex) {
+                    if(nodeStockList.isEmpty){
+                      return const PopupMenuItem(
+                        child: Text('No node available to add in this site'),
+                      );
+                    }
+                    else if(nodeStockList.length == nodeIndex){
+                      return PopupMenuItem(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            MaterialButton(
+                              color: Colors.red,
+                              textColor: Colors.white,
+                              child: const Text('CANCEL'),
+                              onPressed: () {
+                                setState(() {
+                                  checkboxValueNode = false;
+                                  Navigator.pop(context);
+                                });
+                              },
+                            ),
+                            MaterialButton(
+                              color: Colors.green,
+                              textColor: Colors.white,
+                              child: const Text('ADD'),
+                              onPressed: () async
+                              {
+                                generateRFNumber();
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    return PopupMenuItem(
+                      child: StatefulBuilder(
+                        builder: (BuildContext context, void Function(void Function()) setState) {
+                          return CheckboxListTile(
+                            title: Text(nodeStockList[nodeIndex].categoryName),
+                            subtitle: Text(nodeStockList[nodeIndex].imeiNo),
+                            value: checkboxValueNode,
+                            onChanged:(bool? value) { setState(() {
+                              checkboxValueNode = value!;
+                              if(value){
+                                nodeStockSelection[nodeIndex] = 1;
+                              }else{
+                                nodeStockSelection[nodeIndex] = 0;
+                              }
+                            });},
+                          );
+                        },
+                      ),
+                    );
+                  });
+                },
+              ),
+              const SizedBox(width: 10,),
+            ],
+          ),
+          const SizedBox(height: 5.0),
+          SizedBox(
+            height: MediaQuery.sizeOf(context).height-160,
+            child: TabBarView(
+              children: [
+                for (int siteIndex = 0; siteIndex < customerSiteList.length; siteIndex++)
+                  Column(
+                    children: [
+                      ListTile(
+                        leading: Image.asset('assets/images/oro_gem.png'),
+                        title: Text(customerSiteList[siteIndex].categoryName,style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                        subtitle: Text(customerSiteList[siteIndex].deviceId.toString(), style: const TextStyle(fontWeight: FontWeight.normal),),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                                tooltip : 'view config overview',
+                                onPressed: () async {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  ConfigMakerView(userID: widget.userID, siteID: customerSiteList[siteIndex].controllerId, customerID: widget.customerID)),);
+                                },
+                                icon: const Icon(Icons.view_list_outlined)),// Replace icon1 with your first icon
+                            const SizedBox(width: 8), // Adjust the spacing between icons if needed
+                            IconButton(
+                                tooltip : 'Product Limit',
+                                onPressed: () async {
+                                  int relayCnt = 0;
+                                  for(int i=0; i<usedNodeList[siteIndex].length; i++){
+                                    relayCnt = relayCnt + usedNodeList[siteIndex][i].relayCount;
+                                  }
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  ProductLimits(userID: widget.userID, customerID: widget.customerID, userType: 2, nodeCount: relayCnt, siteName: customerSiteList[siteIndex].groupName, controllerId: customerSiteList[siteIndex].controllerId, deviceId: customerSiteList[siteIndex].deviceId,)),);
+                                },
+                                icon: const Icon(Icons.list_alt)),
+                            const SizedBox(width: 8),
+                            IconButton(
+                                tooltip : 'Send to target',
+                                onPressed: () async {
+                                  List<dynamic> updatedInterface = [];
+                                  for(int i=0; i<usedNodeList[siteIndex].length; i++){
+                                    Map<String, dynamic> myMap = {"serialNumber": usedNodeList[siteIndex][i].serialNumber, "productId": usedNodeList[siteIndex][i].productId,
+                                      'interfaceTypeId': usedNodeList[siteIndex][i].interfaceTypeId, 'interfaceInterval': usedNodeList[siteIndex][i].interfaceInterval};
+                                    updatedInterface.add(myMap);
+                                  }
+                                  Map<String, dynamic> body = {
+                                    "userId": widget.customerID,
+                                    "products": updatedInterface,
+                                    "modifyUser": widget.userID,
+                                  };
+
+                                  List<dynamic> payLoad = [];
+                                  payLoad.add('${0},${customerSiteList[siteIndex].categoryName},${'1'}, ${'1'}, ${customerSiteList[siteIndex].deviceId.toString()},'
+                                      '${'0'},${"00:00:30"};');
+
+                                  for(int i=0; i<usedNodeList[siteIndex].length; i++){
+                                    //String paddedNumber = widget.usedNodeList[siteIndex][i].deviceId.toString().padLeft(20, '0');
+                                    String formattedTime = convertToHHmmss(usedNodeList[siteIndex][i].interfaceInterval);
+                                    payLoad.add('${usedNodeList[siteIndex][i].serialNumber},${usedNodeList[siteIndex][i].categoryName},${usedNodeList[siteIndex][i].categoryId},'
+                                        '${usedNodeList[siteIndex][i].referenceNumber},${usedNodeList[siteIndex][i].deviceId},'
+                                        '${usedNodeList[siteIndex][i].interfaceTypeId},$formattedTime;');
+                                  }
+
+                                  String inputString = payLoad.toString();
+                                  List<String> parts = inputString.split(';');
+                                  String resultString = parts.map((part) {return part.replaceFirst(',', '');
+                                  }).join(';');
+
+                                  String resultStringFinal = resultString.replaceAll('[', '').replaceAll(']', '');
+                                  String modifiedString = resultStringFinal.replaceAll(', ', ',');
+                                  String modifiedStringFinal = '${modifiedString.substring(0, 1)},${modifiedString.substring(1)}';
+                                  String stringWithoutSpace = modifiedStringFinal.replaceAll('; ', ';');
+                                  //print(stringWithoutSpace);
+
+                                  String payLoadFinal = jsonEncode({
+                                    "100": [
+                                      {"101": stringWithoutSpace},
+                                    ]
+                                  });
+
+                                  //print(payLoadFinal);
+
+                                  //publish payload to mqtt
+                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${customerSiteList[siteIndex].deviceId}');
+
+                                  final response = await HttpService().putRequest("updateUserDeviceNodeList", body);
+                                  //print(body);
+                                  if(response.statusCode == 200)
+                                  {
+                                    var data = jsonDecode(response.body);
+                                    if(data["code"]==200)
+                                    {
+                                      updatedInterface.clear();
+                                      _showSnackBar(data["message"]);
+                                    }
+                                    else{
+                                      _showSnackBar(data["message"]);
+                                    }
+                                  }
+                                },
+                                icon: const Icon(Icons.send)),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: DataTable2(
+                            columnSpacing: 12,
+                            horizontalMargin: 12,
+                            minWidth: 1000,
+                            dataRowHeight: 40.0,
+                            headingRowHeight: 35,
+                            headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
+                            columns: const [
+                              DataColumn2(
+                                  label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+                                  fixedWidth: 70
+                              ),
+                              DataColumn2(
+                                  label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+                                  size: ColumnSize.M
+                              ),
+                              DataColumn2(
+                                  label: Text('Model Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+                                  size: ColumnSize.M
+                              ),
+                              DataColumn2(
+                                label: Text('Device Id', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+                                size: ColumnSize.M
+                              ),
+                              DataColumn2(
+                                label: Center(child: Text('Interface', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+                                fixedWidth: 120,
+                              ),
+                              DataColumn2(
+                                label: Center(child: Text('Interval', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+                                fixedWidth: 120,
+                              ),
+                              DataColumn2(
+                                label: Center(child: Text('Action', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+                                fixedWidth: 70,
+                              ),
+                            ],
+                            rows: usedNodeList[siteIndex].map((data) {
+                              return DataRow(cells: [
+                                DataCell(Center(child: Text('${data.serialNumber}'))),
+                                DataCell(Text(data.categoryName)),
+                                DataCell(Text(data.modelName)),
+                                DataCell(Text(data.deviceId)),
+                                DataCell(Center(child: DropdownButton(
+                                  value: data.interface,
+                                  style: const TextStyle(fontSize: 12),
+                                  onChanged: (newValue) {
+                                    setState(() {
+                                      data.interface = newValue!;
+                                      int infIndex = interfaceType.indexWhere((model) =>  model.interface == newValue);
+                                      data.interfaceTypeId = interfaceType[infIndex].interfaceTypeId;
+                                    });
+                                  },
+                                  items: interfaceType.map((interface) {
+                                    return DropdownMenuItem(
+                                      value: interface.interface,
+                                      child: Text(interface.interface, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                    );
+                                  }).toList(),
+                                )
+                                )),
+                                DataCell(Center(
+                                  child: DropdownButton(
+                                    value: data.interfaceInterval ?? '0 sec',
+                                    style: const TextStyle(fontSize: 12), onChanged: (newValue) {
+                                    setState(() {
+                                      data.interfaceInterval = newValue!;
+                                    });
+                                  },
+                                    items: _interfaceInterval.map((interface) {
+                                      return DropdownMenuItem(value: interface,
+                                        child: Text(interface, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                      );
+                                    }).toList(),
+                                  ),
+                                )),
+                                DataCell(Center(
+                                  child: IconButton(
+                                      onPressed: () async {
+                                        Map<String, dynamic> body = {
+                                          "userId": widget.customerID,
+                                          "controllerId": data.userDeviceListId,
+                                          "modifyUser": widget.userID,
+                                          "productId": data.productId,
+                                        };
+
+
+                                        print(body);
+
+                                        final response = await HttpService().putRequest("removeNodeInMaster", body);
+                                        if (response.statusCode == 200) {
+                                          var data = jsonDecode(response.body);
+                                          if (data["code"] == 200) {
+                                            _showSnackBar(data["message"]);
+                                            getCustomerSite();
+                                            getNodeStockList();
+                                          }
+                                          else {
+                                            _showSnackBar(data["message"]);
+                                          }
+                                        }
+                                      },
+                                      icon: const Icon(Icons.delete_outline, color: Colors.red,)),
+                                )),
+                              ]);
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   Future<void> generateRFNumber() async
   {
-    print('generateRFNumber');
     List<int> oldNodeListRfNo = [];
     int refNo = 0;
     String refNoUpdatingNode = '';
-
     List<dynamic> selectedNodeList = [];
+
+    List<int> oldNodeListSrlNo = [];
+    for(int i=0; i<usedNodeList[currentSite].length; i++){
+      oldNodeListSrlNo.add(usedNodeList[currentSite][i].serialNumber);
+    }
+    List missingSrlNumber = missingArray(oldNodeListSrlNo);
+    //print(missingSrlNumber);
     for(int i=0; i<nodeStockSelection.length; i++)
     {
-      if(nodeStockSelection[i]==1){
-        Map<String, dynamic> myMap = {"productId": widget.nodeStockList[i].productId.toString(), 'categoryName': widget.nodeStockList[i].categoryName, 'referenceNumber': 0, 'serialNumber': i+1};
+      if(nodeStockSelection[i]==1) {
+        Map<String, dynamic> myMap = {};
+        if(missingSrlNumber.isNotEmpty){
+          myMap = {"productId": nodeStockList[i].productId.toString(), 'categoryName': nodeStockList[i].categoryName, 'referenceNumber': 0, 'serialNumber': missingSrlNumber[0]};
+          missingSrlNumber.removeAt(0);
+        }else{
+          myMap = {"productId": nodeStockList[i].productId.toString(), 'categoryName': nodeStockList[i].categoryName, 'referenceNumber': 0, 'serialNumber': usedNodeList[currentSite].length+1};
+        }
         selectedNodeList.add(myMap);
       }
     }
@@ -1116,44 +1028,58 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
     {
       for(int i = 0; i < selectedNodeList.length; i++)
       {
-        if(refNoUpdatingNode != selectedNodeList[i]['categoryName'])
-        {
-          refNoUpdatingNode = selectedNodeList[i]['categoryName'];
-          var contain = widget.usedNodeList[currentSite].where((element) => element.categoryName == refNoUpdatingNode);
-          if (contain.isNotEmpty)
+        if(selectedNodeList[i]['referenceNumber'] == 0){
+          if(refNoUpdatingNode != selectedNodeList[i]['categoryName'])
           {
-            for(int j = 0; j < widget.usedNodeList[currentSite].length; j++)
+            refNoUpdatingNode = selectedNodeList[i]['categoryName'];
+            var contain = usedNodeList[currentSite].where((element) => element.categoryName == refNoUpdatingNode);
+            if (contain.isNotEmpty)
             {
-              if(widget.usedNodeList[currentSite][j].categoryName == refNoUpdatingNode)
+              for(int j = 0; j < usedNodeList[currentSite].length; j++)
               {
-                oldNodeListRfNo.add(widget.usedNodeList[currentSite][j].referenceNumber);
+                if(usedNodeList[currentSite][j].categoryName == refNoUpdatingNode)
+                {
+                  oldNodeListRfNo.add(usedNodeList[currentSite][j].referenceNumber);
+                }
               }
-            }
-            List missingRN = missingArray(oldNodeListRfNo);
-            if(missingRN.isNotEmpty)
-            {
-              refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
-              for(int k = 0; k < selectedNodeList.length; k++)
+              List missingRN = missingArray(oldNodeListRfNo);
+              if(missingRN.isNotEmpty)
               {
-                if(missingRN.isNotEmpty)
+                refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
+                for(int k = 0; k < selectedNodeList.length; k++)
+                {
+                  if(missingRN.isNotEmpty)
+                  {
+                    if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
+                    {
+                      selectedNodeList[k]['referenceNumber'] = missingRN[0];
+                      missingRN.removeAt(0);
+                    }
+                  }else{
+                    refNo = refNo+1;
+                    selectedNodeList[k]['referenceNumber'] = refNo;
+                  }
+                }
+              }
+              else
+              {
+                refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
+                for(int k = 0; k < selectedNodeList.length; k++)
                 {
                   if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
                   {
-                    selectedNodeList[k]['referenceNumber'] = missingRN[0];
-                    missingRN.removeAt(0);
+                    refNo = refNo+1;
+                    selectedNodeList[k]['referenceNumber'] = refNo;
                   }
-                }else{
-                  refNo = refNo+1;
-                  selectedNodeList[k]['referenceNumber'] = refNo;
                 }
               }
             }
             else
             {
-              refNo = oldNodeListRfNo.reduce((value, element) => value > element ? value : element);
+              refNo = 0;
               for(int k = 0; k < selectedNodeList.length; k++)
               {
-                if(selectedNodeList[k]['categoryName'] == refNoUpdatingNode)
+                if(refNoUpdatingNode == selectedNodeList[k]['categoryName'])
                 {
                   refNo = refNo+1;
                   selectedNodeList[k]['referenceNumber'] = refNo;
@@ -1161,32 +1087,22 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
               }
             }
           }
-          else
-          {
-            refNo = 0;
-            for(int k = 0; k < selectedNodeList.length; k++)
-            {
-              if(refNoUpdatingNode == selectedNodeList[k]['categoryName'])
-              {
-                refNo = refNo+1;
-                selectedNodeList[k]['referenceNumber'] = refNo;
-              }
-            }
+          else{
           }
-        }
-        else{
+        }else{
+          //refNo already created
         }
       }
 
-      print(selectedNodeList);
+      Navigator.pop(context);
 
       if(selectedNodeList.isNotEmpty)
       {
         Map<String, dynamic> body = {
           "userId": widget.customerID,
           "dealerId": widget.userID,
-          "masterId": widget.customerSiteList[currentSite].controllerId,
-          "groupId": widget.customerSiteList[currentSite].groupId,
+          "masterId": customerSiteList[currentSite].controllerId,
+          "groupId": customerSiteList[currentSite].groupId,
           "products": selectedNodeList,
           "createUser": widget.userID,
         };
@@ -1204,9 +1120,9 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
               checkboxValueNode = false;
             });
 
-            widget.getCustomerSite();
-            widget.getNodeStockList();
-            Navigator.pop(context);
+            getCustomerSite();
+            getNodeStockList();
+
           }
           else{
             //_showSnackBar(data["message"]);
@@ -1226,12 +1142,12 @@ class _CustomerSalesPageState extends State<CustomerSalesPage> {
     );
   }
 
-  List<int> missingArray(List<int> referenceArr) {
+  List<int> missingArray(List<int> no) {
     List<int> missingValues = [];
-    int n = referenceArr.reduce(max);
+    int n = no.reduce(max);
     List<int> intArray = List.generate(n, (index) => index + 1);
     for (var value in intArray) {
-      if (!referenceArr.contains(value)) {
+      if (!no.contains(value)) {
         missingValues.add(value);
       }
     }

@@ -32,7 +32,8 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
   @override
 
   Widget configTables(ConfigMakerProvider configPvd){
-    switch(configPvd.selectedTab){
+
+    switch(configPvd.tabs[configPvd.selectedTab][3]){
       case (0):{
         return StartPageConfigMaker();
       }
@@ -67,6 +68,7 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
         return  MappingOfInputsTable(configPvd: configPvd,);
       }
       case (11):{
+        print('check : ${widget.imeiNo}');
         return  FinishPageConfigMaker(userId: widget.userID, customerID: widget.customerID, controllerId: widget.siteId,imeiNo: widget.imeiNo,);
       }
       default : {
@@ -102,12 +104,11 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
               FloatingActionButton.small(
                 heroTag: 'btn 2',
                 tooltip: 'Next',
-                // backgroundColor: configPvd.selectedTab == 11 ? Colors.white54 : myTheme1.colorScheme.primary,
-                backgroundColor: configPvd.selectedTab == 11 ? Colors.white54 : Colors.white,
-                onPressed: configPvd.selectedTab == 11
+                backgroundColor: configPvd.selectedTab == configPvd.tabs.length - 1 ? Colors.white54 : Colors.white,
+                onPressed: configPvd.selectedTab == configPvd.tabs.length - 1
                     ? null
                     : () {
-                  if (configPvd.selectedTab != 11) {
+                  if (configPvd.selectedTab != configPvd.tabs.length - 1) {
                     configPvd.editSelectedTab(configPvd.selectedTab + 1);
                   }
                 },
@@ -143,43 +144,43 @@ class _ConfigMakerForWebState extends State<ConfigMakerForWeb> {
                           Column(
                             children: [
                               InkWell(
-                                onTap: (){
-                                  setState(() {
-                                    configPvd.selectedTab = i;
-                                  });
-                                  configPvd.editSelectedTab(configPvd.selectedTab);
-                                  if(configPvd.selectedTab != 5){
-                                    // configPvd.editLoadIL(false);
-                                  }
-                                },
-                                onHover: (value){
-                                  if(value == true){
+                                  onTap: (){
                                     setState(() {
-                                      hoverTab = i;
+                                      configPvd.selectedTab = i;
                                     });
-                                  }else{
-                                    setState(() {
-                                      hoverTab = -1;
-                                    });
-                                  }
-                                },
-                                child: Container(
-                                  height: 45,
-                                  decoration: BoxDecoration(
-                                    color: hoverTab == i ||configPvd.selectedTab == i ? myTheme.primaryColor : null,
-                                  ),
-                                  // padding: EdgeInsets.all(10),
-                                  margin: EdgeInsets.symmetric(vertical: 2),
-                                  width: double.infinity,
-                                  child: Row(
-                                      children: [
-                                        SizedBox(width: 20,),
-                                        Icon(configPvd.tabs[i][2],color: hoverTab == i ? Colors.white : configPvd.selectedTab == i ? Colors.white : Colors.black87,),
-                                        SizedBox(width: 20,),
-                                        Text('${configPvd.tabs[i][0]} ${configPvd.tabs[i][1]}',style: TextStyle(color: hoverTab == i ? Colors.white : configPvd.selectedTab == i ? Colors.white : Colors.black87,fontWeight: FontWeight.bold),)
-                                      ]
-                                  ),
-                                )
+                                    configPvd.editSelectedTab(configPvd.selectedTab);
+                                    if(configPvd.selectedTab != 5){
+                                      // configPvd.editLoadIL(false);
+                                    }
+                                  },
+                                  onHover: (value){
+                                    if(value == true){
+                                      setState(() {
+                                        hoverTab = i;
+                                      });
+                                    }else{
+                                      setState(() {
+                                        hoverTab = -1;
+                                      });
+                                    }
+                                  },
+                                  child: Container(
+                                    height: 45,
+                                    decoration: BoxDecoration(
+                                      color: hoverTab == i ||configPvd.selectedTab == i ? myTheme.primaryColor : null,
+                                    ),
+                                    // padding: EdgeInsets.all(10),
+                                    margin: EdgeInsets.symmetric(vertical: 2),
+                                    width: double.infinity,
+                                    child: Row(
+                                        children: [
+                                          SizedBox(width: 20,),
+                                          Icon(configPvd.tabs[i][2],color: hoverTab == i ? Colors.white : configPvd.selectedTab == i ? Colors.white : Colors.black87,),
+                                          SizedBox(width: 20,),
+                                          Text('${configPvd.tabs[i][0]} ${configPvd.tabs[i][1]}',style: TextStyle(color: hoverTab == i ? Colors.white : configPvd.selectedTab == i ? Colors.white : Colors.black87,fontWeight: FontWeight.bold),)
+                                        ]
+                                    ),
+                                  )
                               ),
                             ],
                           ),

@@ -42,15 +42,9 @@ class ProductInventoryState extends State<ProductInventory> {
   bool searched = false;
 
   int totalProduct = 0;
-  int totalCategory = 0;
-  int totalModel = 0;
-  int outOfStockModel = 0;
-
   int batchSize = 30;
   int currentSet = 1;
 
-  bool isNextButtonEnabled = true;
-  bool isPreviousButtonEnabled = false;
 
   String jsonOptions = '';
   late Map<String, dynamic> jsonDataMap;
@@ -69,10 +63,26 @@ class ProductInventoryState extends State<ProductInventory> {
   List<ProductStockModel> productStockList = <ProductStockModel>[];
   String rplMdl = '-', rplImeiNo = '-';
 
+  final ScrollController _scrollController = ScrollController();
+  bool isLoading = false;
+
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+        // Reached the end of the scroll
+        //loadMoreData();
+        print('scroll position end');
+        if(currentSet * batchSize <= totalProduct){
+          getProductList(currentSet = currentSet+1, batchSize);
+        }else{
+          //loadMoreData completed
+        }
+      }
+    });
+
     ddCategoryList =  <DropdownMenuEntry<ProductStockModel>>[];
     selectedModel =  <DropdownMenuEntry<PrdModel>>[];
     getUserInfo();
@@ -93,7 +103,7 @@ class ProductInventoryState extends State<ProductInventory> {
   Future<void> getProductList(int set, int limit) async {
     final body = userType == 1 ? {"fromUserId": null, "toUserId": null, "set":set, "limit":limit} :
     {"fromUserId": null, "toUserId": userID, "set":set, "limit":limit};
-    print(body);
+    //print(body);
     Response response;
     if(userType == 3){
       response = await HttpService().postRequest("getCustomerProduct", body);
@@ -105,23 +115,22 @@ class ProductInventoryState extends State<ProductInventory> {
     {
       if(jsonDecode(response.body)["code"]==200)
       {
+        //print(jsonDecode(response.body)["data"]);
+
         setState(()
         {
           totalProduct = jsonDecode(response.body)["data"]["totalProduct"];
 
           if(userType != 3){
-            totalCategory = jsonDecode(response.body)["data"]["totalCategory"];
-            totalModel = jsonDecode(response.body)["data"]["totalModel"];
-            outOfStockModel = jsonDecode(response.body)["data"]["outOfStockModel"];
-            productInventoryList = (jsonDecode(response.body)["data"]["product"] as List).map((data) => ProductListModel.fromJson(data)).toList();
-            isNextButtonEnabled = productInventoryList.length >= limit;
+            List<dynamic> productList = jsonDecode(response.body)["data"]["product"];
+            for (int i = 0; i < productList.length; i++) {
+              productInventoryList.add(ProductListModel.fromJson(productList[i]));
+            }
           }
           else{
             productInventoryListCus = (jsonDecode(response.body)["data"]["product"] as List).map((data) => CustomerProductModel.fromJson(data)).toList();
-            isNextButtonEnabled = productInventoryListCus.length >= limit;
           }
 
-          isPreviousButtonEnabled = currentSet > 1;
           indicatorViewHide();
         });
 
@@ -207,8 +216,8 @@ class ProductInventoryState extends State<ProductInventory> {
     final mediaQuery = MediaQuery.of(context);
     return Scaffold(
       backgroundColor: myTheme.primaryColor.withOpacity(0.02),
-      appBar: AppBar(
-        title: Text(userType == 3 ? 'My Product' : 'Product Inventory'),
+      appBar: userType != 3 ? AppBar(
+        title: const Text('Product Inventory'),
         actions: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -318,9 +327,7 @@ class ProductInventoryState extends State<ProductInventory> {
             ],),
           const SizedBox(width: 10)
         ],
-        //scrolledUnderElevation: 5.0,
-        //shadowColor: Theme.of(context).colorScheme.shadow,
-      ),
+      ) : null,
       body: visibleLoading? Visibility(
         visible: visibleLoading,
         child: Container(
@@ -338,6 +345,7 @@ class ProductInventoryState extends State<ProductInventory> {
         child: Column(
           children: [
             buildAdminOrDealerHeader(),
+           // ListTile(title:  Text('Total Product - $totalProduct')),
             Expanded(
               child: Container(
                 decoration: const BoxDecoration(
@@ -350,7 +358,6 @@ class ProductInventoryState extends State<ProductInventory> {
                 ),
               ),
             ),
-            buildFooterView(),
           ],
         ),
       ),
@@ -391,57 +398,58 @@ class ProductInventoryState extends State<ProductInventory> {
   Widget buildAdminOrDealerDataTable()
   {
     return DataTable2(
+      scrollController: _scrollController,
       columnSpacing: 12,
       horizontalMargin: 12,
-      minWidth: 600,
+      minWidth: 1200,
       dataRowHeight: 40.0,
-      headingRowHeight: 40,
-      headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
-      border: TableBorder.all(color: Colors.grey),
+      headingRowHeight: 35,
+      headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
+      bottomMargin: 30.0,
       columns: const [
         DataColumn2(
-            label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+            label: Center(child: Text('S.No')),
             fixedWidth: 70
         ),
         DataColumn2(
-            label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+            label: Text('Category'),
             size: ColumnSize.M
         ),
         DataColumn2(
-            label: Text('Model Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+            label: Text('Model Name'),
             size: ColumnSize.M
         ),
         DataColumn2(
-          label: Text('Device Id', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+          label: Text('Device Id'),
           fixedWidth: 170,
         ),
         DataColumn2(
-          label: Center(child: Text('M.Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+          label: Center(child: Text('M.Date')),
           fixedWidth: 95,
         ),
         DataColumn2(
-          label: Center(child: Text('Warranty', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+          label: Center(child: Text('Warranty')),
           fixedWidth: 80,
         ),
         DataColumn2(
-          label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
-          fixedWidth: 90,
+          label: Center(child: Text('Status')),
+          fixedWidth: 110,
         ),
         DataColumn2(
-          label: Center(child: Text('Sales Person', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+          label: Center(child: Text('Sales Person')),
           fixedWidth: 150,
         ),
         DataColumn2(
-          label: Center(child: Text('Modify Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+          label: Center(child: Text('Modify Date')),
           fixedWidth: 100,
         ),
         DataColumn2(
-          label: Center(child: Text('Action', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+          label: Center(child: Text('Action')),
           fixedWidth: 50,
         ),
       ],
       rows: searched ? List<DataRow>.generate(filterProductInventoryList.length, (index) => DataRow(cells: [
-        DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}'))),
+        DataCell(Center(child: Text('${index + 1}'))),
         DataCell(Text(filterProductInventoryList[index].categoryName)),
         DataCell(Text(filterProductInventoryList[index].modelName)),
         DataCell(Text(filterProductInventoryList[index].deviceId)),
@@ -503,12 +511,12 @@ class ProductInventoryState extends State<ProductInventory> {
         }, icon: const Icon(Icons.repeat),)))
       ])):
       List<DataRow>.generate(productInventoryList.length, (index) => DataRow(cells: [
-        DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}'))),
-        DataCell(Text(productInventoryList[index].categoryName)),
-        DataCell(Text(productInventoryList[index].modelName)),
-        DataCell(Text(productInventoryList[index].deviceId)),
-        DataCell(Center(child: Text(productInventoryList[index].dateOfManufacturing))),
-        DataCell(Center(child: Text('${productInventoryList[index].warrantyMonths}'))),
+        DataCell(Center(child: Text('${index + 1}', style: const TextStyle(fontSize: 12),))),
+        DataCell(Text(productInventoryList[index].categoryName, style: const TextStyle(fontSize: 12))),
+        DataCell(Text(productInventoryList[index].modelName, style: const TextStyle(fontSize: 12))),
+        DataCell(Text(productInventoryList[index].deviceId, style: const TextStyle(fontSize: 12))),
+        DataCell(Center(child: Text(productInventoryList[index].dateOfManufacturing, style: const TextStyle(fontSize: 12)))),
+        DataCell(Center(child: Text('${productInventoryList[index].warrantyMonths}', style: const TextStyle(fontSize: 12)))),
         DataCell(
             Center(
               child: userType == 1? Row(
@@ -523,12 +531,12 @@ class ProductInventoryState extends State<ProductInventory> {
                     Colors.green,
                   ),
                   const SizedBox(width: 5,),
-                  productInventoryList[index].productStatus==1? const Text('In-Stock'):
-                  productInventoryList[index].productStatus==2? const Text('Stock'):
-                  productInventoryList[index].productStatus==3? const Text('Sold-Out'):
-                  productInventoryList[index].productStatus==4? const Text('Pending'):
-                  productInventoryList[index].productStatus==5? const Text('Installed'):
-                  const Text('Active'),
+                  productInventoryList[index].productStatus==1? const Text('In-Stock', style: const TextStyle(fontSize: 12)):
+                  productInventoryList[index].productStatus==2? const Text('Stock', style: const TextStyle(fontSize: 12)):
+                  productInventoryList[index].productStatus==3? const Text('Sold-Out', style: const TextStyle(fontSize: 12)):
+                  productInventoryList[index].productStatus==4? const Text('Pending', style: const TextStyle(fontSize: 12)):
+                  productInventoryList[index].productStatus==5? const Text('Installed', style: const TextStyle(fontSize: 12)):
+                  const Text('Active', style: const TextStyle(fontSize: 12)),
                 ],
               ):
               Row(
@@ -542,17 +550,17 @@ class ProductInventoryState extends State<ProductInventory> {
                     Colors.green,
                   ),
                   const SizedBox(width: 5,),
-                  productInventoryList[index].productStatus==2? const Text('In-Stock'):
-                  productInventoryList[index].productStatus==3? const Text('Sold-Out'):
-                  productInventoryList[index].productStatus==4? const Text('Pending'):
-                  productInventoryList[index].productStatus==5? const Text('Installed'):
-                  const Text('Active'),
+                  productInventoryList[index].productStatus==2? const Text('In-Stock', style: const TextStyle(fontSize: 12)):
+                  productInventoryList[index].productStatus==3? const Text('Sold-Out', style: const TextStyle(fontSize: 12)):
+                  productInventoryList[index].productStatus==4? const Text('Pending', style: const TextStyle(fontSize: 12)):
+                  productInventoryList[index].productStatus==5? const Text('Installed', style: const TextStyle(fontSize: 12)):
+                  const Text('Active', style: const TextStyle(fontSize: 12)),
                 ],
               ),
             )
         ),
-        DataCell(Center(child: widget.userName==productInventoryList[index].latestBuyer? Text('-'):Text(productInventoryList[index].latestBuyer))),
-        const DataCell(Center(child: Text('25-09-2023'))),
+        DataCell(Center(child: widget.userName==productInventoryList[index].latestBuyer? Text('-'):Text(productInventoryList[index].latestBuyer, style: const TextStyle(fontSize: 12)))),
+        const DataCell(Center(child: Text('25-09-2023', style: const TextStyle(fontSize: 12)))),
         userType == 1 ? DataCell(Center(child: IconButton(tooltip:'Edit product', onPressed: () {
           getModelByActiveList(context, productInventoryList[index].categoryId, productInventoryList[index].categoryName,
               productInventoryList[index].modelName, productInventoryList[index].modelId, productInventoryList[index].deviceId,
@@ -571,147 +579,174 @@ class ProductInventoryState extends State<ProductInventory> {
   {
     return Column(
       children: [
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(right: 12, left: 12, top: 5),
-            child: DataTable2(
-              columnSpacing: 12,
-              horizontalMargin: 12,
-              minWidth: 600,
-              dataRowHeight: 35.0,
-              headingRowHeight: 33,
-              headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
-              border: TableBorder.all(color: Colors.grey),
-              columns: const [
-                DataColumn2(
-                    label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
-                    fixedWidth: 70
+        ListTile(trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            totalProduct > 50 ?Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                PopupMenuButton<dynamic>(
+                  icon: const Icon(Icons.filter_alt_outlined),
+                  tooltip: 'filter by category or model',
+                  itemBuilder: (BuildContext context) {
+                    List<PopupMenuEntry<dynamic>> menuItems = [];
+                    menuItems.add(
+                      const PopupMenuItem<dynamic>(
+                        enabled: false,
+                        child: Text("Category"),
+                      ),
+                    );
+
+                    List<dynamic> categoryItems = jsonDataMap['data']['category'];
+                    menuItems.addAll(
+                      categoryItems.map((dynamic item) {
+                        return PopupMenuItem<dynamic>(
+                          value: item,
+                          child: Text(item['categoryName']),
+                        );
+                      }),
+                    );
+                    menuItems.add(
+                      const PopupMenuItem<dynamic>(
+                        enabled: false,
+                        child: Text("Model"),
+                      ),
+                    );
+                    List<dynamic> modelItems = jsonDataMap['data']['model'];
+                    menuItems.addAll(
+                      modelItems.map((dynamic item) {
+                        return PopupMenuItem<dynamic>(
+                          value: item,
+                          child: Text('${item['categoryName']} - ${item['modelName']}'),
+                        );
+                      }),
+                    );
+
+                    return menuItems;
+                  },
+                  onSelected: (dynamic selectedItem) {
+                    if (selectedItem is Map<String, dynamic>) {
+                      filterActive = true;
+                      if (selectedItem.containsKey('categoryName') && selectedItem.containsKey('modelName')) {
+                        setState(() {
+                          searchedChipName = '${selectedItem['categoryName']} - ${selectedItem['modelName']}';
+                          fetchFilterData(null, selectedItem['modelId'], null);
+                        });
+                      } else {
+                        setState(() {
+                          searchedChipName = '${selectedItem['categoryName']}';
+                          fetchFilterData(selectedItem['categoryId'], null, null);
+                        });
+                      }
+                    }
+                  },
                 ),
-                DataColumn2(
-                    label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
-                    size: ColumnSize.M
-                ),
-                DataColumn2(
-                    label: Text('Model Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
-                    size: ColumnSize.M
-                ),
-                DataColumn2(
-                  label: Text('Device ID', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
-                  fixedWidth: 170,
-                ),
-                DataColumn2(
-                    label: Center(child: Text('Site Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
-                    size: ColumnSize.M
-                ),
-                DataColumn2(
-                  label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
-                  fixedWidth: 90,
-                ),
-                DataColumn2(
-                  label: Center(child: Text('Modify Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),)),
-                  fixedWidth: 100,
-                ),
+                const SizedBox(width: 10,),
+                IconButton(
+                  icon: const Icon(Icons.search),
+                  tooltip: 'search by imei number',
+                  onPressed: () {
+                    setState(() {
+                      showSearch(
+                        context: context,
+                        delegate: SearchPage<String>(
+                          items: jsonDataByImeiNo,
+                          searchLabel: 'Search items',
+                          searchStyle: const TextStyle(color: Colors.white),
+                          itemEndsWith: true,
+                          suggestion: const Center(
+                            child: Text('Filter items by typing'),
+                          ),
+                          failure: const Center(
+                            child: Text('No items found'),
+                          ),
+                          filter: (String term) {
+                            return jsonDataByImeiNo.where((item) => item.toLowerCase().contains(term.toLowerCase())).toList();
+                          },
+                          builder: (String item) {
+                            return ListTile(
+                              title: Text(item),
+                              onTap: () {
+                                Navigator.of(context).pop(item);
+                                setState(() {
+                                  filterActive = true;
+                                  searchedChipName = item;
+                                  fetchFilterData(null, null, item);
+                                });
+                              },
+                            );
+                          },
+                        ),
+                      );
+                    });
+                  },
+                )
               ],
-              rows: searched ? List<DataRow>.generate(filterProductInventoryListCus.length, (index) => DataRow(cells: [
-                DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}'))),
-                DataCell(Text(filterProductInventoryListCus[index].categoryName)),
-                DataCell(Text(filterProductInventoryListCus[index].model)),
-                DataCell(Text(filterProductInventoryListCus[index].deviceId)),
-                DataCell(Center(child: Text(filterProductInventoryListCus[index].siteName))),
-                DataCell(Center(child: filterProductInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free')],):
-                const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active')],))),
-                const DataCell(Center(child: Text('25-09-2023'))),
-              ])):
-              List<DataRow>.generate(productInventoryListCus.length, (index) => DataRow(cells: [
-                DataCell(Center(child: Text('${(currentSet - 1) * batchSize + index + 1}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
-                DataCell(Text(productInventoryListCus[index].categoryName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-                DataCell(Text(productInventoryListCus[index].model, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-                DataCell(Text(productInventoryListCus[index].deviceId, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-                DataCell(Center(child: Text(productInventoryListCus[index].productStatus==3? '-' : productInventoryListCus[index].siteName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
-                DataCell(Center(child: productInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))],):
-                const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))],))),
-                const DataCell(Center(child: Text('25-09-2023', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
-              ])),
-            ),
+            ) :
+            Container(),
+          ],),),
+        Expanded(
+          child: DataTable2(
+            columnSpacing: 12,
+            horizontalMargin: 12,
+            minWidth: 1000,
+            dataRowHeight: 35.0,
+            headingRowHeight: 35,
+            headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
+            //border: TableBorder.all(color: Colors.grey),
+            columns: const [
+              DataColumn2(
+                  label: Center(child: Text('S.No')),
+                  fixedWidth: 70
+              ),
+              DataColumn2(
+                  label: Text('Category'),
+                  size: ColumnSize.M
+              ),
+              DataColumn2(
+                  label: Text('Model Name'),
+                  size: ColumnSize.M
+              ),
+              DataColumn2(
+                label: Text('Device ID'),
+                fixedWidth: 170,
+              ),
+              DataColumn2(
+                  label: Center(child: Text('Site Name')),
+                  size: ColumnSize.M
+              ),
+              DataColumn2(
+                label: Center(child: Text('Status')),
+                fixedWidth: 90,
+              ),
+              DataColumn2(
+                label: Center(child: Text('Modify Date')),
+                fixedWidth: 100,
+              ),
+            ],
+            rows: searched ? List<DataRow>.generate(filterProductInventoryListCus.length, (index) => DataRow(cells: [
+              DataCell(Center(child: Text('${index + 1}'))),
+              DataCell(Text(filterProductInventoryListCus[index].categoryName)),
+              DataCell(Text(filterProductInventoryListCus[index].model)),
+              DataCell(Text(filterProductInventoryListCus[index].deviceId)),
+              DataCell(Center(child: Text(filterProductInventoryListCus[index].siteName))),
+              DataCell(Center(child: filterProductInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free')],):
+              const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active')],))),
+              const DataCell(Center(child: Text('25-09-2023'))),
+            ])):
+            List<DataRow>.generate(productInventoryListCus.length, (index) => DataRow(cells: [
+              DataCell(Center(child: Text('${index + 1}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
+              DataCell(Text(productInventoryListCus[index].categoryName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+              DataCell(Text(productInventoryListCus[index].model, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+              DataCell(Text(productInventoryListCus[index].deviceId, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+              DataCell(Center(child: Text(productInventoryListCus[index].productStatus==3? '-' : productInventoryListCus[index].siteName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
+              DataCell(Center(child: productInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))],):
+              const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))],))),
+              const DataCell(Center(child: Text('25-09-2023', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
+            ])),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
-          child: buildFooterView(),
         ),
       ],
-    );
-  }
-
-  Widget buildFooterView()
-  {
-    return filterActive ? Container() : Container(
-      padding: const EdgeInsets.only(right: 20, left: 20, top: 5),
-      decoration: BoxDecoration(
-        color: myTheme.primaryColor.withOpacity(0.2),
-        borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
-      ),
-      height: 60,
-      child: userType == 3? Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          SizedBox(
-            width: 350,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text('${(currentSet - 1) * batchSize + 1} to ${currentSet * batchSize > totalProduct ? totalProduct : currentSet * batchSize}  of  $totalProduct'),
-                const SizedBox(width: 5,),
-                IconButton(tooltip:'Previous page', onPressed: isPreviousButtonEnabled ? () => _onPreviousButtonPressed() : null , icon: const Icon(Icons.arrow_left)),
-                const SizedBox(width: 5,),
-                IconButton(tooltip:'Next page', onPressed: isNextButtonEnabled ? () => _onNextButtonPressed() : null , icon: const Icon(Icons.arrow_right)),
-                const SizedBox(width: 10,),
-                IconButton(tooltip:'Settings',onPressed:() {}, icon: const Icon(Icons.settings_outlined))
-              ],
-            ),
-          ),
-        ],
-      ):
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Column(children: [
-            const SizedBox(height: 5,),
-            const Text('Total Category', style: TextStyle(fontSize: 13)),
-            Text('$totalCategory',style: TextStyle(fontSize: 17)),
-          ],),
-          Column(children: [
-            const SizedBox(height: 5,),
-            const Text("Total Products", style: TextStyle(fontSize: 13)),
-            Text('$totalModel', style: TextStyle(fontSize: 17)),
-          ],),
-          Column(children: [
-            const SizedBox(height: 5,),
-            const Text("Out of stock", style: TextStyle(fontSize: 13)),
-            Text('$outOfStockModel',style: TextStyle(fontSize: 17)),
-          ],),
-          Column(children: [
-            const SizedBox(height: 5,),
-            const Text("Total Items", style: TextStyle(fontSize: 13)),
-            Text('$totalProduct', style: const TextStyle(fontSize: 17)),
-          ],),
-          SizedBox(
-            width: 350,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text('${(currentSet - 1) * batchSize + 1} to ${currentSet * batchSize > totalProduct ? totalProduct : currentSet * batchSize}  of  $totalProduct'),
-                const SizedBox(width: 5,),
-                IconButton(tooltip:'Previous page', onPressed: isPreviousButtonEnabled ? () => _onPreviousButtonPressed() : null , icon: const Icon(Icons.arrow_left)),
-                const SizedBox(width: 5,),
-                IconButton(tooltip:'Next page', onPressed: isNextButtonEnabled ? () => _onNextButtonPressed() : null , icon: const Icon(Icons.arrow_right)),
-                const SizedBox(width: 10,),
-                IconButton(tooltip:'Settings',onPressed:() {}, icon: const Icon(Icons.settings_outlined))
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 

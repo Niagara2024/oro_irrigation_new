@@ -86,6 +86,7 @@ class MyDealersState extends State<MyDealers> {
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      backgroundColor: myTheme.primaryColor.withOpacity(0.1),
       appBar: AppBar(title: Text(widget.dealerName)),
       body: visibleLoading? Visibility(
         visible: visibleLoading,
@@ -103,140 +104,134 @@ class MyDealersState extends State<MyDealers> {
         child: Row(
           children: [
             Expanded(
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 44,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(10),
-                              topLeft: Radius.circular(10),
-                            ),
-                          ),
-                          child: ListTile(
-                            title: Text('Product Stock(${productStockList.length})', style: const TextStyle(fontSize: 20, color: Colors.black),),
-                          ),
+              child: Card(
+                elevation: 5,
+                surfaceTintColor: Colors.white,
+                child: Column(
+                  children: [
+                    Container(
+                      height: 44,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(10),
+                          topLeft: Radius.circular(10),
                         ),
-                        Expanded(
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(10),
-                                bottomRight: Radius.circular(10),
-                              ),
-                            ),
-                            child: productStockList.isNotEmpty ? Padding(
-                              padding: const EdgeInsets.all(5.0),
-                              child: DataTable2(
-                                  columnSpacing: 12,
-                                  horizontalMargin: 12,
-                                  minWidth: 600,
-                                  headingRowHeight: 40,
-                                  dataRowHeight: 40,
-                                  headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
-                                  columns: const [
-                                    DataColumn2(
-                                        label: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold),),
-                                        fixedWidth: 50
-                                    ),
-                                    DataColumn(
-                                      label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold),),
-                                    ),
-                                    DataColumn(
-                                      label: Text('Model', style: TextStyle(fontWeight: FontWeight.bold),),
-                                    ),
-                                    DataColumn2(
-                                      label: Text('IMEI', style: TextStyle(fontWeight: FontWeight.bold),),
-                                      size: ColumnSize.L,
-                                    ),
-                                    DataColumn2(
-                                      label: Text('M.Date', style: TextStyle(fontWeight: FontWeight.bold),),
-                                      fixedWidth: 90,
-                                    ),
-                                    DataColumn2(
-                                      label: Center(child: Text('Warranty', style: TextStyle(fontWeight: FontWeight.bold),)),
-                                      fixedWidth: 100,
-                                    ),
-                                  ],
-                                  rows: List<DataRow>.generate(productStockList.length, (index) => DataRow(cells: [
-                                    DataCell(Text('${index+1}')),
-                                    DataCell(Row(children: [CircleAvatar(radius: 17,
-                                      backgroundImage: productStockList[index].categoryName == 'ORO SWITCH'
-                                          || productStockList[index].categoryName == 'ORO SENSE'?
-                                      AssetImage('assets/images/oro_switch.png'):
-                                      productStockList[index].categoryName == 'ORO LEVEL'?
-                                      AssetImage('assets/images/oro_sense.png'):
-                                      productStockList[index].categoryName == 'OROGEM'?
-                                      AssetImage('assets/images/oro_gem.png'):AssetImage('assets/images/oro_rtu.png'),
-                                      backgroundColor: Colors.transparent,
-                                    ), SizedBox(width: 10,), Text(productStockList[index].categoryName)],)),
-                                    DataCell(Text(productStockList[index].model)),
-                                    DataCell(Text('${productStockList[index].imeiNo}')),
-                                    DataCell(Text(productStockList[index].dtOfMnf)),
-                                    DataCell(Center(child: Text('${productStockList[index].warranty}'))),
-                                  ]))),
-                            ) :
-                            const Center(child: Text('SOLD OUT', style: TextStyle(fontSize: 20),)),
-                          ),
-                        ),
-                      ],
+                      ),
+                      child: ListTile(
+                        title: Text('Product Stock(${productStockList.length})', style: const TextStyle(fontSize: 20, color: Colors.black),),
+                      ),
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(10),
+                            bottomRight: Radius.circular(10),
+                          ),
+                        ),
+                        child: productStockList.isNotEmpty ? Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: DataTable2(
+                              columnSpacing: 12,
+                              horizontalMargin: 12,
+                              minWidth: 600,
+                              headingRowHeight: 40,
+                              dataRowHeight: 40,
+                              headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
+                              columns: const [
+                                DataColumn2(
+                                    label: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold),),
+                                    fixedWidth: 50
+                                ),
+                                DataColumn(
+                                  label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold),),
+                                ),
+                                DataColumn(
+                                  label: Text('Model', style: TextStyle(fontWeight: FontWeight.bold),),
+                                ),
+                                DataColumn2(
+                                  label: Text('IMEI', style: TextStyle(fontWeight: FontWeight.bold),),
+                                  size: ColumnSize.L,
+                                ),
+                                DataColumn2(
+                                  label: Text('M.Date', style: TextStyle(fontWeight: FontWeight.bold),),
+                                  fixedWidth: 90,
+                                ),
+                                DataColumn2(
+                                  label: Center(child: Text('Warranty', style: TextStyle(fontWeight: FontWeight.bold),)),
+                                  fixedWidth: 100,
+                                ),
+                              ],
+                              rows: List<DataRow>.generate(productStockList.length, (index) => DataRow(cells: [
+                                DataCell(Text('${index+1}')),
+                                DataCell(Row(children: [CircleAvatar(radius: 17,
+                                  backgroundImage: productStockList[index].categoryName == 'ORO SWITCH'
+                                      || productStockList[index].categoryName == 'ORO SENSE'?
+                                  AssetImage('assets/images/oro_switch.png'):
+                                  productStockList[index].categoryName == 'ORO LEVEL'?
+                                  AssetImage('assets/images/oro_sense.png'):
+                                  productStockList[index].categoryName == 'OROGEM'?
+                                  AssetImage('assets/images/oro_gem.png'):AssetImage('assets/images/oro_rtu.png'),
+                                  backgroundColor: Colors.transparent,
+                                ), SizedBox(width: 10,), Text(productStockList[index].categoryName)],)),
+                                DataCell(Text(productStockList[index].model)),
+                                DataCell(Text(productStockList[index].imeiNo)),
+                                DataCell(Text(productStockList[index].dtOfMnf)),
+                                DataCell(Center(child: Text('${productStockList[index].warranty}'))),
+                              ]))),
+                        ) :
+                        const Center(child: Text('SOLD OUT', style: TextStyle(fontSize: 20),)),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(width: 05),
-            Container(
+            SizedBox(
                 width: 300,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.all(Radius.circular(10)),
-                  border: Border.all(
-                    color: CupertinoColors.lightBackgroundGray, // Border color
-                    width: 1.0, // Border width
+                child: Card(
+                  elevation: 5,
+                  surfaceTintColor: Colors.white,
+                  child: Column(
+                    children: [
+                      ListTile(
+                        title: const Text('Customer', style: TextStyle(fontSize: 17)),
+                        trailing: IconButton(tooltip: 'Add New Customer', icon: const Icon(Icons.person_add_outlined), color: myTheme.primaryColor, onPressed: () async
+                        {
+                          await showDialog<void>(
+                              context: context,
+                              builder: (context) => const AlertDialog(
+                                content: CreateAccount(),
+                              ));
+                  
+                        }), // Customize the leading icon
+                      ),
+                      const Divider(height: 0), // Optional: Add a divider between sections
+                      Expanded(child : ListView.builder(
+                        itemCount: customerOfDealer.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return ListTile(
+                            leading: const CircleAvatar(
+                              backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
+                              backgroundColor: Colors.transparent,
+                            ),
+                            trailing: IconButton(tooltip: 'View Customer Dashboard', icon: const Icon(Icons.view_quilt_outlined), color: myTheme.primaryColor, onPressed: () async
+                            {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerHome(customerID: customerOfDealer[index].userId, type: 1, customerName: customerOfDealer[index].userName, userID: widget.dealerId, mobileNo: '+${customerOfDealer[index].countryCode}-${customerOfDealer[index].mobileNumber}',)),);
+                            }),
+                            title: Text(customerOfDealer[index].userName),
+                            subtitle: Text('+${customerOfDealer[index].countryCode} ${customerOfDealer[index].mobileNumber}'),
+                            onTap:() {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: customerOfDealer[index].userId, userName: customerOfDealer[index].userName, userID: widget.dealerId, userType: 2, productStockList: productStockList, callback: (String ) {},)),);
+                            },
+                          );
+                        },
+                      )),
+                    ],
                   ),
-                ),
-                child: Column(
-                  children: [
-                    ListTile(
-                      title: const Text('Customer', style: TextStyle(fontSize: 17)),
-                      trailing: IconButton(tooltip: 'Add New Customer', icon: const Icon(Icons.person_add_outlined), color: myTheme.primaryColor, onPressed: () async
-                      {
-                        await showDialog<void>(
-                            context: context,
-                            builder: (context) => const AlertDialog(
-                              content: CreateAccount(),
-                            ));
-
-                      }), // Customize the leading icon
-                    ),
-                    const Divider(height: 0), // Optional: Add a divider between sections
-                    Expanded(child : ListView.builder(
-                      itemCount: customerOfDealer.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return ListTile(
-                          leading: const CircleAvatar(
-                            backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
-                            backgroundColor: Colors.transparent,
-                          ),
-                          trailing: IconButton(tooltip: 'View Customer Dashboard', icon: const Icon(Icons.view_quilt_outlined), color: myTheme.primaryColor, onPressed: () async
-                          {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerHome(customerID: customerOfDealer[index].userId, type: 1, customerName: customerOfDealer[index].userName, userID: widget.dealerId, siteList: const [],)),);
-                          }),
-                          title: Text(customerOfDealer[index].userName),
-                          subtitle: Text('+${customerOfDealer[index].countryCode} ${customerOfDealer[index].mobileNumber}'),
-                          onTap:() {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: customerOfDealer[index].userId, userName: customerOfDealer[index].userName, userID: widget.dealerId, userType: 2, productStockList: productStockList, callback: (String ) {},)),);
-                          },
-                        );
-                      },
-                    )),
-                  ],
                 )
             ),
           ],

@@ -2,12 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:oro_irrigation_new/constants/MQTTManager.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 
 import '../../Models/condition_model.dart';
 import '../../constants/http_service.dart';
- import '../../constants/snack_bar.dart';
+import '../../constants/snack_bar.dart';
 import '../Config/dealer_definition_config.dart';
 import 'conditionwebui.dart';
 enum Calendar { Program, Moisture, Level }
@@ -341,22 +342,7 @@ class _ConditionUIState extends State<ConditionUI>
           const SizedBox(
             height: 16,
           ),
-          // CupertinoSegmentedControl<int>(
-          //   children: _segmenttab,
-          //   onValueChanged: (value) {
-          //     setState(() {
-          //       _currentSelection = value!;
-          //       if (value == 0) {
-          //         conditionLibrary = _conditionModel.data!.conditionProgram!;
-          //       } else if (value == 1) {
-          //         conditionLibrary = _conditionModel.data!.conditionMoisture!;
-          //       } else {
-          //         conditionLibrary = _conditionModel.data!.conditionLevel!;
-          //       }
-          //     });
-          //   },
-          //   groupValue: _currentSelection,
-          // ),
+
           SegmentedButton<Calendar>(
             style: ButtonStyle(
               backgroundColor: MaterialStatePropertyAll(
@@ -428,7 +414,7 @@ class _ConditionUIState extends State<ConditionUI>
                   ),
                   const SizedBox(height: 10.0),
                   SizedBox(
-                    height: MediaQuery.sizeOf(context).height - 200,
+                    height: MediaQuery.sizeOf(context).height - 255,
                     child: TabBarView(controller: _tabController, children: [
                       for (var i = 0; i < conditionLibrary!.length; i++)
                         ConditionTab(i, conditionLibrary),
@@ -550,17 +536,24 @@ class _ConditionUIState extends State<ConditionUI>
                     ),
                   ),
                 )),
-            Card(
-                child: ListTile(
-                  title: Text(conditionhdrlist[6]),
-                  trailing: Container(
-                      width: 200,
-                      child: Text(
-                        conditionLibrary![i].conditionIsTrueWhen.toString(),
-                        softWrap: true,
-                        overflow: TextOverflow.fade,
-                      )),
-                )),
+            InkWell(
+              onTap: () async {
+                setState(() {
+                  _showFormulaBottomSheet(conditionLibrary![i].id!,i) ;
+                });
+              },
+              child: Card(
+                  child: ListTile(
+                    title: Text(conditionhdrlist[6]),
+                    trailing: Container(
+                        width: 200,
+                        child: Text(
+                          conditionLibrary![i].conditionIsTrueWhen.toString(),
+                          softWrap: true,
+                          overflow: TextOverflow.fade,
+                        )),
+                  )),
+            ),
             Card(
                 child: ListTile(
                   title: Text(conditionhdrlist[10]),
@@ -618,138 +611,7 @@ class _ConditionUIState extends State<ConditionUI>
                   ),
                 )),
             //  Card(child: ListTile(title: Text(conditionhdrlist[9]),trailing: Text(_conditionModel.data!.conditionLibrary![i].usedByProgram.toString(),softWrap: true,),)),
-            Card(
-                child: ListTile(
-                  title: Text('When Program'),
-                  //First DropDown list
-                  trailing: DropdownButton(
-                    items: _conditionModel.data!.dropdown?.map((String? items) {
-                      return DropdownMenuItem(
-                        value: items,
-                        child: Container(
-                            padding: const EdgeInsets.only(left: 10),
-                            child: Text(items!)),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        usedprogramdropdownstr = value.toString();
-                        conditionLibrary![i].dropdown1 = value.toString();
-                        checklistdropdown();
-                      });
-                    },
-                    value: usedprogramdropdownstr == ''
-                        ? conditionLibrary![i].dropdown1!.isEmpty
-                        ? (_conditionModel.data!.dropdown![0])
-                        : conditionLibrary![i].dropdown1!.toString()
-                        : usedprogramdropdownstr,
-                  ),
-                )),
-            if (usedprogramdropdownlist?.length != 0 &&
-                usedprogramdropdownstr != 'Combined')
-            //Second DropDown list
-              Card(
-                  child: ListTile(
-                    title: Text(dropdowntitle),
-                    trailing: DropdownButton(
-                      items: usedprogramdropdownlist?.map((UserNames items) {
-                        return DropdownMenuItem(
-                          value: '${items.name}',
-                          child: Container(
-                              padding: const EdgeInsets.only(left: 10),
-                              child: Text('${items.name}')),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          usedprogramdropdownstr2 = value.toString();
-                          conditionLibrary![i].dropdown2 = value;
-                        });
-                      },
-                      value: usedprogramdropdownstr2,
-                    ),
-                  )),
-            //Values
-            if (usedprogramdropdownstr.contains('Analog') ||
-                usedprogramdropdownstr.contains('Moisture') ||
-                usedprogramdropdownstr.contains('Level') ||
-                usedprogramdropdownstr.contains('Contact') ||
-                usedprogramdropdownstr.contains('Water'))
-              Card(
-                  child: ListTile(
-                    title: Text('Values'),
-                    trailing: Container(
-                      height: 40,
-                      width: 200,
-                      child: TextFormField(
-                        keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                        initialValue: conditionLibrary![i].dropdownValue,
-                        showCursor: true,
-                        decoration: InputDecoration(hintText: hint),
-                        onChanged: (value) {
-                          valueforwhentrue = value;
-                          validator:
-                              (value) {
-                            if (value == null || value.isEmpty) {
-                              valueforwhentrue = '0';
-                            } else {
-                              valueforwhentrue = value;
-                              conditionLibrary![i].dropdownValue = value;
-                            }
-                            return null;
-                          };
-                        },
-                      ),
-                    ),
-                  )),
-            if (usedprogramdropdownstr.contains('Combined'))
-            //Select operator
-              Card(
-                  child: ListTile(
-                    title: Text('Select Operator'),
-                    trailing: DropdownButton<String>(
-                      value: containsOnlyOperators ? dropdownvalues : null,
-                      hint: Text('Select Operator'),
-                      onChanged: (value) {
-                        setState(() {
-                          dropdownvalues = value!;
-                          conditionLibrary![Selectindexrow].dropdownValue = value!;
-                        });
-                      },
-                      items: operatorList.map((operator) {
-                        return DropdownMenuItem(
-                          value: operator,
-                          child: Text(operator),
-                        );
-                      }).toList(),
-                    ),
-                  )),
-            if (usedprogramdropdownstr.contains('Combined'))
-              Card(
-                  child: ListTile(
-                    title: Text('Select Conditions'),
-                    trailing: DropdownButton<String>(
-                      value: usedprogramdropdownstr2.isEmpty
-                          ? null
-                          : usedprogramdropdownstr2,
-                      hint: Text('$usedprogramdropdownstr2'),
-                      onChanged: (value) {
-                        setState(() {
-                          usedprogramdropdownstr2 = value!;
-                          conditionLibrary![Selectindexrow].dropdown2 = value!;
-                        });
-                      },
-                      items:
-                      filterlist(conditionList, conditionList[Selectindexrow])
-                          .map((condition) {
-                        return DropdownMenuItem(
-                          value: condition,
-                          child: Text(condition),
-                        );
-                      }).toList(),
-                    ),
-                  )),
+
             const SizedBox(
               height: 20,
             ),
@@ -931,6 +793,723 @@ class _ConditionUIState extends State<ConditionUI>
     } else
       return Center();
   }
+  void _showFormulaBottomSheet(String title,int index) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return buildconditionselection(title,index);
+      },
+    );
+  }
+  Widget buildconditionselection(String? title, int index) {
+    changeval(index);
+    String conditiontrue = conditionLibrary![index].conditionIsTrueWhen!;
+    bool containsOnlyNumbers = RegExp(r'^[0-9]+$').hasMatch(dropdownvalues);
+    bool containsOnlyOperators = RegExp(r'^[&|^]+$').hasMatch(dropdownvalues);
+    List<String>? Moiturelist = [
+      "",
+      "Moisture Sensor reading is higher than",
+      "Moisture Sensor reading is lower than",
+    ];
+    List<String> levelList = [
+      "",
+      "Level Sensor reading is higher than",
+      "Level Sensor reading is lower than",
+    ];
+    List<String>? dropdownflist = _conditionModel.data!.dropdown!;
+
+    if (selectedSegment == Calendar.Program) {
+      dropdownflist = _conditionModel.data!.dropdown!
+          .where(
+              (item) => !item.contains("Moisture") && !item.contains("Level"))
+          .toList();
+    } else if (selectedSegment == Calendar.Moisture) {
+      dropdownflist = Moiturelist;
+    } else {
+      dropdownflist = levelList;
+    }
+    print("dropdownflist$dropdownflist");
+
+    if ((usedprogramdropdownstr.contains('Combined') == true)) {
+      if (conditionList.contains(usedprogramdropdownstr2)) {
+        usedprogramdropdownstr2 = conditionLibrary![index].dropdown2!;
+      } else {
+        usedprogramdropdownstr2 = "";
+      }
+    } else {
+      List<String> names = usedprogramdropdownlist!
+          .map((contact) => contact.name as String)
+          .toList();
+      if (names.contains(usedprogramdropdownstr2)) {
+        usedprogramdropdownstr2 = usedprogramdropdownstr2;
+      } else {
+        if (usedprogramdropdownlist!.length > 0) {
+          usedprogramdropdownstr2 = '${usedprogramdropdownlist![0].name}';
+        }
+      }
+    }
+    if (usedprogramdropdownstr2.isEmpty &&
+        usedprogramdropdownlist!.isNotEmpty) {
+      usedprogramdropdownstr2 = '${usedprogramdropdownlist![0].name}';
+    }
+
+    if (conditiontrue.contains("&&")) {
+      selectedOperator = "&&";
+    } else if (conditiontrue.contains("||")) {
+      selectedOperator = "||";
+    } else if (conditiontrue.contains("^")) {
+      selectedOperator = "^";
+    } else {
+      selectedOperator = "";
+    }
+    if (selectedSegment == Calendar.Program) {
+      return Padding(
+        padding: const EdgeInsets.only(left: 10),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                spreadRadius: 5,
+                blurRadius: 7,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Container(
+                height: 40,
+                width: double.infinity,
+                color: primaryColorDark,
+                child: Center(
+                    child: Text(
+                      '$title',
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    )),
+              ),
+              // const Text('When in Used'),
+              if (Selectindexrow != null)
+              //First Dropdown values
+                DropdownButton(
+                  items: dropdownflist?.map((String? items) {
+                    return DropdownMenuItem(
+                      value: items,
+                      child: Container(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: Text(
+                            items!,
+                            style: TextStyle(fontSize: 12.5),
+                          )),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      usedprogramdropdownstr = value.toString();
+                      conditionLibrary![Selectindexrow].dropdown1 = value!;
+                      checklistdropdown();
+                    });
+                  },
+                  value: usedprogramdropdownstr == ''
+                      ? conditionLibrary![Selectindexrow].dropdown1!.isEmpty
+                      ? (_conditionModel.data!.dropdown![0])
+                      : conditionLibrary![Selectindexrow]
+                      .dropdown1!
+                      .toString()
+                      : usedprogramdropdownstr,
+                ),
+              if (usedprogramdropdownlist?.length != 0) Text(dropdowntitle),
+              if (usedprogramdropdownstr.contains('Combined') == false &&
+                  usedprogramdropdownlist?.length != 0)
+                DropdownButton(
+                  hint: Text(''),
+                  items: usedprogramdropdownlist?.map((UserNames items) {
+                    return DropdownMenuItem(
+                      value: '${items.name}',
+                      child: Container(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: Text('${items.name}')),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      usedprogramdropdownstr2 = value.toString();
+                      conditionLibrary![Selectindexrow].dropdown2 =
+                          value.toString();
+                    });
+                  },
+                  value: usedprogramdropdownstr2,
+                ),
+              if (usedprogramdropdownstr.contains('Sensor') ||
+                  usedprogramdropdownstr.contains('Contact') ||
+                  usedprogramdropdownstr.contains('Water'))
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Center(
+                    child: TextFormField(
+                      keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                      initialValue: containsOnlyNumbers ? dropdownvalues : null,
+                      showCursor: true,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}'))
+                      ],
+                      decoration: InputDecoration(
+                          hintText: hint, border: OutlineInputBorder()),
+                      onChanged: (value) {
+                        setState(() {
+                          dropdownvalues = value;
+                          conditionLibrary![Selectindexrow].dropdownValue =
+                              dropdownvalues;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              if (usedprogramdropdownstr.contains('Combined'))
+                Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    //Dropdown for operator  values
+                    child: Column(
+                      children: [
+                        DropdownButton<String>(
+                          value: containsOnlyOperators ? dropdownvalues : null,
+                          hint: Text('Select Operator'),
+                          onChanged: (value) {
+                            setState(() {
+                              dropdownvalues = value!;
+                              conditionLibrary![Selectindexrow].dropdownValue =
+                              value!;
+                              print('dropdownValue $value');
+                            });
+                          },
+                          items: operatorList.map((operator) {
+                            return DropdownMenuItem(
+                              value: operator,
+                              child: Text(operator),
+                            );
+                          }).toList(),
+                        ),
+                        SizedBox(width: 16),
+                        //Dropdown for Condition 2 values
+                        DropdownButton<String>(
+                          value: usedprogramdropdownstr2.isEmpty
+                              ? null
+                              : usedprogramdropdownstr2,
+                          hint: Text('$usedprogramdropdownstr2'),
+                          onChanged: (value) {
+                            setState(() {
+                              usedprogramdropdownstr2 = value!;
+                              conditionLibrary![Selectindexrow].dropdown2 =
+                              value!;
+                              print('dropdown2 $value');
+                            });
+                          },
+                          items: filterlist(
+                              conditionList, conditionList[Selectindexrow])
+                              .map((condition) {
+                            return DropdownMenuItem(
+                              value: condition,
+                              child: Text(condition),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    )),
+              const SizedBox(
+                height: 20,
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      if (usedprogramdropdownstr.contains('Program')) {
+                        conditionLibrary![Selectindexrow].conditionIsTrueWhen =
+                            conditionselection(usedprogramdropdownstr,
+                                usedprogramdropdownstr2, '');
+                        conditionLibrary![Selectindexrow].dropdown1 =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown2 =
+                            usedprogramdropdownstr2;
+                        // conditionLibrary![Selectindexrow]
+                        //     .dropdownValue = '';
+                        conditionLibrary![Selectindexrow].usedByProgram =
+                            programstr;
+
+                        List<UserNames>? program = _conditionModel.data!
+                            .program!;
+                        if (program != null) {
+                          String? sNo =
+                          getSNoByName(program, usedprogramdropdownstr2);
+                          if (sNo != null) {
+                            conditionLibrary![Selectindexrow].program = '$sNo';
+                          } else {
+                            conditionLibrary![Selectindexrow].program = '0';
+                          }
+                        }
+                      } else if (usedprogramdropdownstr.contains('Contact')) {
+                        conditionLibrary![Selectindexrow].conditionIsTrueWhen =
+                            conditionselection(
+                                usedprogramdropdownstr, '', dropdownvalues);
+                        conditionLibrary![Selectindexrow].dropdown1 =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown2 =
+                            usedprogramdropdownstr2;
+                        conditionLibrary![Selectindexrow].usedByProgram = '';
+                        // conditionLibrary![Selectindexrow]
+                        //     .dropdownValue = dropdownvalues;
+                        List<UserNames>? program = _conditionModel.data!
+                            .contact!;
+                        if (program != null) {
+                          String? sNo =
+                          getSNoByName(program, usedprogramdropdownstr2);
+                          if (sNo != null) {
+                            conditionLibrary![Selectindexrow].program = '$sNo';
+                          } else {
+                            conditionLibrary![Selectindexrow].program = '0';
+                          }
+                        }
+                      } else if (usedprogramdropdownstr.contains('Analog')) {
+                        conditionLibrary![Selectindexrow].conditionIsTrueWhen =
+                            conditionselection(usedprogramdropdownstr,
+                                usedprogramdropdownstr2, dropdownvalues);
+                        conditionLibrary![Selectindexrow].dropdown1 =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown2 =
+                            usedprogramdropdownstr2;
+                        conditionLibrary![Selectindexrow].usedByProgram = '';
+                        // conditionLibrary![Selectindexrow]
+                        //     .dropdownValue = dropdownvalues;
+                        List<UserNames>? program =
+                        _conditionModel.data!.analogSensor!;
+                        if (program != null) {
+                          String? sNo =
+                          getSNoByName(program, usedprogramdropdownstr2);
+                          if (sNo != null) {
+                            conditionLibrary![Selectindexrow].program = '$sNo';
+                          } else {
+                            conditionLibrary![Selectindexrow].program = '0';
+                          }
+                        }
+                      }
+                      else if (usedprogramdropdownstr.contains('Moisture')) {
+                        conditionLibrary![Selectindexrow].conditionIsTrueWhen =
+                            conditionselection(usedprogramdropdownstr,
+                                usedprogramdropdownstr2, dropdownvalues);
+                        conditionLibrary![Selectindexrow].dropdown1 =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown2 =
+                            usedprogramdropdownstr2;
+                        conditionLibrary![Selectindexrow].usedByProgram = '';
+                        // conditionLibrary![Selectindexrow]
+                        //     .dropdownValue = dropdownvalues;
+                        List<UserNames>? program =
+                        _conditionModel.data!.analogSensor!;
+                        if (program != null) {
+                          String? sNo =
+                          getSNoByName(program, usedprogramdropdownstr2);
+                          if (sNo != null) {
+                            conditionLibrary![Selectindexrow].program = '$sNo';
+                          } else {
+                            conditionLibrary![Selectindexrow].program = '0';
+                          }
+                        }
+                      }
+                      else if (usedprogramdropdownstr.contains('Level')) {
+                        conditionLibrary![Selectindexrow].conditionIsTrueWhen =
+                            conditionselection(usedprogramdropdownstr,
+                                usedprogramdropdownstr2, dropdownvalues);
+                        conditionLibrary![Selectindexrow].dropdown1 =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown2 =
+                            usedprogramdropdownstr2;
+                        conditionLibrary![Selectindexrow].usedByProgram = '';
+                        // conditionLibrary![Selectindexrow]
+                        //     .dropdownValue = dropdownvalues;
+                        List<UserNames>? program =
+                        _conditionModel.data!.analogSensor!;
+                        if (program != null) {
+                          String? sNo =
+                          getSNoByName(program, usedprogramdropdownstr2);
+                          if (sNo != null) {
+                            conditionLibrary![Selectindexrow].program = '$sNo';
+                          } else {
+                            conditionLibrary![Selectindexrow].program = '0';
+                          }
+                        }
+                      } else if (usedprogramdropdownstr.contains('Water')) {
+                        conditionLibrary![Selectindexrow].conditionIsTrueWhen =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown1 =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown2 =
+                            usedprogramdropdownstr2;
+                        conditionLibrary![Selectindexrow].usedByProgram = '';
+                        // conditionLibrary![Selectindexrow]
+                        //     .dropdownValue = dropdownvalues;
+                        List<UserNames>? program =
+                        _conditionModel.data!.waterMeter!;
+                        if (program != null) {
+                          String? sNo =
+                          getSNoByName(program, usedprogramdropdownstr2);
+                          if (sNo != null) {
+                            conditionLibrary![Selectindexrow].program = '$sNo';
+                          } else {
+                            conditionLibrary![Selectindexrow].program = '0';
+                          }
+                        }
+                      } else if (usedprogramdropdownstr.contains('condition')) {
+                        conditionLibrary![Selectindexrow].conditionIsTrueWhen =
+                        '$usedprogramdropdownstr ${conditionList[Selectindexrow]} $dropdownvalues $usedprogramdropdownstr2';
+                        conditionLibrary![Selectindexrow].dropdown1 =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown2 =
+                            usedprogramdropdownstr2;
+                        conditionLibrary![Selectindexrow].usedByProgram = '';
+                        // conditionLibrary![Selectindexrow]
+                        //     .dropdownValue = dropdownvalues;
+                        // conditionLibrary![Selectindexrow].program = dropdownvalues;
+
+                        List<ConditionLibrary>? program = conditionLibrary;
+                        if (program != null) {
+                          String? sNo = getSNoByNamecondition(
+                              program, usedprogramdropdownstr2);
+                          if (sNo != null) {
+                            conditionLibrary![Selectindexrow].program = '$sNo';
+                          } else {
+                            conditionLibrary![Selectindexrow].program = '0';
+                          }
+                        }
+                      } else if (usedprogramdropdownstr.contains('Zone')) {
+                        conditionLibrary![Selectindexrow].conditionIsTrueWhen =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown1 =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown2 = '';
+                        conditionLibrary![Selectindexrow].usedByProgram = '';
+                        // conditionLibrary![Selectindexrow]
+                        //     .dropdownValue = '';
+                        conditionLibrary![Selectindexrow].program = '0';
+                      } else {
+                        conditionLibrary![Selectindexrow].conditionIsTrueWhen =
+                        '';
+                        conditionLibrary![Selectindexrow].dropdown1 = '';
+                        conditionLibrary![Selectindexrow].dropdown2 = '';
+                        // conditionLibrary![Selectindexrow]
+                        //     .dropdownValue = '';
+                        conditionLibrary![Selectindexrow].program = '0';
+                        conditionLibrary![Selectindexrow].usedByProgram = '';
+                      }
+                    });
+                  },
+                  child: const Text('Apply Changes'))
+            ],
+          ),
+        ),
+      );
+    }
+    else
+    {
+      return Padding(
+        padding: const EdgeInsets.only(left: 10),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                spreadRadius: 5,
+                blurRadius: 7,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Container(
+                height: 40,
+                width: double.infinity,
+                color: primaryColorDark,
+                child: Center(
+                    child: Text(
+                      '$title',
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    )),
+              ),
+              // const Text('When in Used'),
+              //First Dropdown values
+              DropdownButton(
+                items: dropdownflist?.map((String? items) {
+                  return DropdownMenuItem(
+                    value: items,
+                    child: Container(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: Text(
+                          items!,
+                          style: TextStyle(fontSize: 12.5),
+                        )),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    usedprogramdropdownstr = value.toString();
+                    conditionLibrary![Selectindexrow].dropdown1 = value!;
+                    checklistdropdown();
+                  });
+                },
+                value: usedprogramdropdownstr == ''
+                    ? conditionLibrary![Selectindexrow].dropdown1!.isEmpty
+                    ? (_conditionModel.data!.dropdown![0])
+                    : conditionLibrary![Selectindexrow]
+                    .dropdown1!
+                    .toString()
+                    : usedprogramdropdownstr,
+              ),
+              if (usedprogramdropdownlist?.length != 0) Text(dropdowntitle),
+              DropdownButton(
+                hint: Text(''),
+                items: usedprogramdropdownlist?.map((UserNames items) {
+                  return DropdownMenuItem(
+                    value: '${items.name}',
+                    child: Container(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: Text('${items.name}')),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    usedprogramdropdownstr2 = value.toString();
+                    conditionLibrary![Selectindexrow].dropdown2 =
+                        value.toString();
+                  });
+                },
+                value: usedprogramdropdownstr2,
+              ),
+
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Center(
+                  child: TextFormField(
+                    keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                    initialValue: containsOnlyNumbers ? dropdownvalues : null,
+                    showCursor: true,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d+\.?\d{0,2}'))
+                    ],
+                    decoration: InputDecoration(
+                        hintText: hint, border: OutlineInputBorder()),
+                    onChanged: (value) {
+                      setState(() {
+                        dropdownvalues = value;
+                        conditionLibrary![Selectindexrow].dropdownValue =
+                            dropdownvalues;
+                      });
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      if (usedprogramdropdownstr.contains('Program')) {
+                        conditionLibrary![Selectindexrow].conditionIsTrueWhen =
+                            conditionselection(usedprogramdropdownstr,
+                                usedprogramdropdownstr2, '');
+                        conditionLibrary![Selectindexrow].dropdown1 =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown2 =
+                            usedprogramdropdownstr2;
+                        // conditionLibrary![Selectindexrow]
+                        //     .dropdownValue = '';
+                        conditionLibrary![Selectindexrow].usedByProgram =
+                            programstr;
+
+                        List<UserNames>? program = _conditionModel.data!
+                            .program!;
+                        if (program != null) {
+                          String? sNo =
+                          getSNoByName(program, usedprogramdropdownstr2);
+                          if (sNo != null) {
+                            conditionLibrary![Selectindexrow].program = '$sNo';
+                          } else {
+                            conditionLibrary![Selectindexrow].program = '0';
+                          }
+                        }
+                      } else if (usedprogramdropdownstr.contains('Contact')) {
+                        conditionLibrary![Selectindexrow].conditionIsTrueWhen =
+                            conditionselection(
+                                usedprogramdropdownstr, '', dropdownvalues);
+                        conditionLibrary![Selectindexrow].dropdown1 =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown2 =
+                            usedprogramdropdownstr2;
+                        conditionLibrary![Selectindexrow].usedByProgram = '';
+                        // conditionLibrary![Selectindexrow]
+                        //     .dropdownValue = dropdownvalues;
+                        List<UserNames>? program = _conditionModel.data!
+                            .contact!;
+                        if (program != null) {
+                          String? sNo =
+                          getSNoByName(program, usedprogramdropdownstr2);
+                          if (sNo != null) {
+                            conditionLibrary![Selectindexrow].program = '$sNo';
+                          } else {
+                            conditionLibrary![Selectindexrow].program = '0';
+                          }
+                        }
+                      } else if (usedprogramdropdownstr.contains('Analog')) {
+                        conditionLibrary![Selectindexrow].conditionIsTrueWhen =
+                            conditionselection(usedprogramdropdownstr,
+                                usedprogramdropdownstr2, dropdownvalues);
+                        conditionLibrary![Selectindexrow].dropdown1 =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown2 =
+                            usedprogramdropdownstr2;
+                        conditionLibrary![Selectindexrow].usedByProgram = '';
+                        // conditionLibrary![Selectindexrow]
+                        //     .dropdownValue = dropdownvalues;
+                        List<UserNames>? program =
+                        _conditionModel.data!.analogSensor!;
+                        if (program != null) {
+                          String? sNo =
+                          getSNoByName(program, usedprogramdropdownstr2);
+                          if (sNo != null) {
+                            conditionLibrary![Selectindexrow].program = '$sNo';
+                          } else {
+                            conditionLibrary![Selectindexrow].program = '0';
+                          }
+                        }
+                      }
+                      else if (usedprogramdropdownstr.contains('Moisture')) {
+                        conditionLibrary![Selectindexrow].conditionIsTrueWhen =
+                            conditionselection(usedprogramdropdownstr,
+                                usedprogramdropdownstr2, dropdownvalues);
+                        conditionLibrary![Selectindexrow].dropdown1 =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown2 =
+                            usedprogramdropdownstr2;
+                        conditionLibrary![Selectindexrow].usedByProgram = '';
+                        // conditionLibrary![Selectindexrow]
+                        //     .dropdownValue = dropdownvalues;
+                        List<UserNames>? program =
+                        _conditionModel.data!.analogSensor!;
+                        if (program != null) {
+                          String? sNo =
+                          getSNoByName(program, usedprogramdropdownstr2);
+                          if (sNo != null) {
+                            conditionLibrary![Selectindexrow].program = '$sNo';
+                          } else {
+                            conditionLibrary![Selectindexrow].program = '0';
+                          }
+                        }
+                      }
+                      else if (usedprogramdropdownstr.contains('Level')) {
+                        conditionLibrary![Selectindexrow].conditionIsTrueWhen =
+                            conditionselection(usedprogramdropdownstr,
+                                usedprogramdropdownstr2, dropdownvalues);
+                        conditionLibrary![Selectindexrow].dropdown1 =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown2 =
+                            usedprogramdropdownstr2;
+                        conditionLibrary![Selectindexrow].usedByProgram = '';
+                        // conditionLibrary![Selectindexrow]
+                        //     .dropdownValue = dropdownvalues;
+                        List<UserNames>? program =
+                        _conditionModel.data!.analogSensor!;
+                        if (program != null) {
+                          String? sNo =
+                          getSNoByName(program, usedprogramdropdownstr2);
+                          if (sNo != null) {
+                            conditionLibrary![Selectindexrow].program = '$sNo';
+                          } else {
+                            conditionLibrary![Selectindexrow].program = '0';
+                          }
+                        }
+                      } else if (usedprogramdropdownstr.contains('Water')) {
+                        conditionLibrary![Selectindexrow].conditionIsTrueWhen =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown1 =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown2 =
+                            usedprogramdropdownstr2;
+                        conditionLibrary![Selectindexrow].usedByProgram = '';
+                        // conditionLibrary![Selectindexrow]
+                        //     .dropdownValue = dropdownvalues;
+                        List<UserNames>? program =
+                        _conditionModel.data!.waterMeter!;
+                        if (program != null) {
+                          String? sNo =
+                          getSNoByName(program, usedprogramdropdownstr2);
+                          if (sNo != null) {
+                            conditionLibrary![Selectindexrow].program = '$sNo';
+                          } else {
+                            conditionLibrary![Selectindexrow].program = '0';
+                          }
+                        }
+                      } else if (usedprogramdropdownstr.contains('condition')) {
+                        conditionLibrary![Selectindexrow].conditionIsTrueWhen =
+                        '$usedprogramdropdownstr ${conditionList[Selectindexrow]} $dropdownvalues $usedprogramdropdownstr2';
+                        conditionLibrary![Selectindexrow].dropdown1 =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown2 =
+                            usedprogramdropdownstr2;
+                        conditionLibrary![Selectindexrow].usedByProgram = '';
+                        // conditionLibrary![Selectindexrow]
+                        //     .dropdownValue = dropdownvalues;
+                        // conditionLibrary![Selectindexrow].program = dropdownvalues;
+
+                        List<ConditionLibrary>? program = conditionLibrary;
+                        if (program != null) {
+                          String? sNo = getSNoByNamecondition(
+                              program, usedprogramdropdownstr2);
+                          if (sNo != null) {
+                            conditionLibrary![Selectindexrow].program = '$sNo';
+                          } else {
+                            conditionLibrary![Selectindexrow].program = '0';
+                          }
+                        }
+                      } else if (usedprogramdropdownstr.contains('Zone')) {
+                        conditionLibrary![Selectindexrow].conditionIsTrueWhen =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown1 =
+                            usedprogramdropdownstr;
+                        conditionLibrary![Selectindexrow].dropdown2 = '';
+                        conditionLibrary![Selectindexrow].usedByProgram = '';
+                        // conditionLibrary![Selectindexrow]
+                        //     .dropdownValue = '';
+                        conditionLibrary![Selectindexrow].program = '0';
+                      } else {
+                        conditionLibrary![Selectindexrow].conditionIsTrueWhen =
+                        '';
+                        conditionLibrary![Selectindexrow].dropdown1 = '';
+                        conditionLibrary![Selectindexrow].dropdown2 = '';
+                        // conditionLibrary![Selectindexrow]
+                        //     .dropdownValue = '';
+                        conditionLibrary![Selectindexrow].program = '0';
+                        conditionLibrary![Selectindexrow].usedByProgram = '';
+                      }
+                    });
+                  },
+                  child: const Text('Apply Changes'))
+            ],
+          ),
+        ),
+      );
+    }
+  }
+
 
   updateconditions() async {
     List<Map<String, dynamic>> programJson = _conditionModel

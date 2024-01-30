@@ -99,6 +99,7 @@ class _DashboardByManualState extends State<DashboardByManual> {
   Future<List<DashboardDataProvider>>fetchControllerData(id) async
   {
     Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.controllerID, "programId": id};
+    //print(body);
     final response = await HttpService().postRequest("getCustomerDashboardByManual", body);
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
@@ -426,7 +427,7 @@ class _DashboardByManualState extends State<DashboardByManual> {
                   flex: 6,
                   child: Padding(
                     padding: const EdgeInsets.only(right: 8),
-                    child: DisplayLineOrSequence(lineOrSequence: dashBoardData.isNotEmpty ? dashBoardData[0].lineOrSequence : [], programList: widget.programList, programSelectionCallback: getControllerDashboardDetails, ddSelectedVal: ddSelection, duration: dashBoardData[0].time, flow: dashBoardData[0].flow, callbackFunctionForPayload: payloadCallbackFunction,),
+                    child: DisplayLineOrSequence(lineOrSequence: dashBoardData.isNotEmpty ? dashBoardData[0].lineOrSequence : [], programList: widget.programList, programSelectionCallback: getControllerDashboardDetails, ddSelectedVal: ddSelection, duration: dashBoardData[0].time, flow: dashBoardData[0].flow, callbackFunctionForPayload: payloadCallbackFunction, method: dashBoardData[0].method,),
                   ),
                 ),
               ],
@@ -648,11 +649,11 @@ class _DashboardByManualState extends State<DashboardByManual> {
 }
 
 class DisplayLineOrSequence extends StatefulWidget {
-  const DisplayLineOrSequence({super.key, required this.lineOrSequence, required this.programList, required this.programSelectionCallback, required this.ddSelectedVal, required this.duration, required this.flow, required this.callbackFunctionForPayload});
+  const DisplayLineOrSequence({super.key, required this.lineOrSequence, required this.programList, required this.programSelectionCallback, required this.ddSelectedVal, required this.duration, required this.flow, required this.callbackFunctionForPayload, required this.method});
   final List<LineOrSequence> lineOrSequence;
   final List<ProgramList> programList;
   final void Function(int, int) programSelectionCallback;
-  final int ddSelectedVal;
+  final int ddSelectedVal, method;
   final String duration, flow;
   final void Function(int, String) callbackFunctionForPayload;
 
@@ -670,6 +671,15 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
   void initState() {
     // TODO: implement initState
     super.initState();
+
+    if(widget.method==1){
+      segmentView = Segment.duration;
+    }else if(widget.method==2){
+      segmentView = Segment.flow;
+    }else{
+      segmentView = Segment.manual;
+    }
+
     durationValue = widget.duration;
     _textController.text = widget.flow;
   }
@@ -716,7 +726,6 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                         widget.callbackFunctionForPayload(segmentView.index, _textController.text);
                       }else{
                         widget.callbackFunctionForPayload(segmentView.index, '0');
-
                       }
                     });
                   },

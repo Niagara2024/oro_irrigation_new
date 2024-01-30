@@ -1046,7 +1046,7 @@ class _CustomerHomeState extends State<CustomerHome>
                                         Text(siteListFinal[siteIndex].nodeList[index].categoryName, style: const TextStyle(fontWeight: FontWeight.normal)),
                                         Text(siteListFinal[siteIndex].nodeList[index].deviceId, style: const TextStyle(fontWeight: FontWeight.normal,fontSize: 11)),
                                       ],
-                                    ),),
+                                    )),
                                     DataCell(Center(child: IconButton(tooltip: 'View Relay status',
                                       icon: Icon(Icons.format_list_bulleted_outlined, color: myTheme.primaryColor,), // Icon to display
                                       onPressed: () {
@@ -1067,11 +1067,13 @@ class _CustomerHomeState extends State<CustomerHome>
                                                       children: [
                                                         const Icon(Icons.solar_power_outlined),
                                                         const SizedBox(width: 5,),
-                                                        Text('${siteListFinal[siteIndex].nodeList[index].slrVolt}%', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                        Text('${siteListFinal[siteIndex].nodeList[index].slrVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
                                                         const SizedBox(width: 5,),
                                                         const Icon(Icons.battery_3_bar_rounded),
                                                         const SizedBox(width: 5,),
-                                                        Text('${siteListFinal[siteIndex].nodeList[index].batVolt} %', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                        Text('${siteListFinal[siteIndex].nodeList[index].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                        const SizedBox(width: 5,),
+                                                        IconButton(tooltip : 'Serial set for all Relay', onPressed: (){}, icon: Icon(Icons.fact_check_outlined))
                                                       ],
                                                     ),
                                                   ),
@@ -1092,17 +1094,14 @@ class _CustomerHomeState extends State<CustomerHome>
                                                                 CircleAvatar(radius: 5,backgroundColor: Colors.green,),
                                                                 SizedBox(width: 5),
                                                                 Text('ON'),
-
                                                                 SizedBox(width: 20),
                                                                 CircleAvatar(radius: 5,backgroundColor: Colors.black45),
                                                                 SizedBox(width: 5),
                                                                 Text('OFF'),
-
                                                                 SizedBox(width: 20),
                                                                 CircleAvatar(radius: 5,backgroundColor: Colors.orange),
                                                                 SizedBox(width: 5),
                                                                 Text('ON IN OFF'),
-
                                                                 SizedBox(width: 20),
                                                                 CircleAvatar(radius: 5,backgroundColor: Colors.redAccent),
                                                                 SizedBox(width: 5),
@@ -1128,8 +1127,7 @@ class _CustomerHomeState extends State<CustomerHome>
                                                                       siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Status']==1 ? Colors.green :
                                                                       siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Status']==2 ? Colors.orange :
                                                                       siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Status']==3 ? Colors.redAccent : Colors.black12, // Avatar background color
-                                                                      child: Text((siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['RlyNo']).toString(), style: TextStyle(color: Colors.white),
-                                                                      ),
+                                                                      child: Text((siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['RlyNo']).toString(), style: const TextStyle(color: Colors.white)),
                                                                     ),
                                                                     Text((siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Name']).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
                                                                   ],
@@ -1142,20 +1140,11 @@ class _CustomerHomeState extends State<CustomerHome>
                                                       const Center(child: Text('Relay Status Not Found')),
                                                     ),
                                                   ),
-
                                                 ],
                                               ),
                                             );
                                           },
                                         );
-                                        /*showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return HorizontalAlertDialog(
-                                              relayStatusList: siteListFinal[siteIndex].nodeList[index].rlyStatus,
-                                            );
-                                          },
-                                        );*/
                                       },
                                     ))),
                                   ])),

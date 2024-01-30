@@ -336,15 +336,14 @@ class _Reset_AccumalationState extends State<Reset_Accumalation>
     });
     MQTTManager().publish( payLoadFinal, 'AppToFirmware/${widget.deviceID}');
   }
-  Request()   {
+  Request(){
     String payLoadFinal = jsonEncode({
       "3000": [
-        {"3001": ""},
+        {"3001": "#GETAACCUMALATION"},
       ]
     });
     MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceID}');
   }
-
 
   Reset(int Srno)   {
     String payLoadFinal = jsonEncode({
@@ -357,7 +356,7 @@ class _Reset_AccumalationState extends State<Reset_Accumalation>
   ResetAll()   {
     String payLoadFinal = jsonEncode({
       "3100": [
-        {"3101": ""},
+        {"3101": "RESETALL"},
       ]
     });
     MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceID}');

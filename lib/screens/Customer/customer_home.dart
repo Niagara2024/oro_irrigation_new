@@ -31,7 +31,7 @@ class _CustomerHomeState extends State<CustomerHome>
   List<ProgramList> programList = [];
   bool visibleLoading = false;
   int wifiStrength = 0;
-  final double _progressValue = 0.35;
+  final double _progressValue = 0.35;//ss
   ProgramServiceDevices programServiceDevices = ProgramServiceDevices(irrigationPump: [], mainValve: [], centralFertilizerSite: [], centralFertilizer: [], localFertilizer: [], centralFilterSite: [], localFilter: []);
 
   String standaloneTime = '', standaloneFlow = '';

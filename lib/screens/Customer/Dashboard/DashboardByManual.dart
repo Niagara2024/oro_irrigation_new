@@ -14,7 +14,7 @@ import '../../../constants/snack_bar.dart';
 import '../../../constants/theme.dart';
 
 
-enum Segment {duration, flow, manual}
+enum ManualBaseSegment {duration, manual}
 
 class DashboardByManual extends StatefulWidget {
   const DashboardByManual({Key? key, required this.customerID, required this.siteID, required this.controllerID, required this.siteName, required this.imeiNo, required this.programList, required this.callbackFunction}) : super(key: key);
@@ -556,11 +556,9 @@ class _DashboardByManualState extends State<DashboardByManual> {
   void sendCommandToController(List<String> nonEmptyStrings){
     String finalResult = nonEmptyStrings.where((s) => s.isNotEmpty).join('_');
     if(segmentIndex==0){
-      functionSendPayloadToMqtt(segmentIndex+1, '$strDuration:00', finalResult);
-    }else if(segmentIndex==1){
-      functionSendPayloadToMqtt(segmentIndex+1, strFlow, finalResult);
+      functionSendPayloadToMqtt(1, '$strDuration:00', finalResult);
     }else{
-      functionSendPayloadToMqtt(segmentIndex+1, '0', finalResult);
+      functionSendPayloadToMqtt(3, '0', finalResult);
     }
 
     Map<String, dynamic> manualOperation = {
@@ -662,7 +660,8 @@ class DisplayLineOrSequence extends StatefulWidget {
 }
 
 class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
-  Segment segmentView = Segment.duration;
+
+  ManualBaseSegment segmentViewManual = ManualBaseSegment.duration;
   final TextEditingController _textController = TextEditingController();
   String durationValue = '', flowValue = '';
   final double _progressValue = 0.45;
@@ -673,11 +672,9 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
     super.initState();
 
     if(widget.method==1){
-      segmentView = Segment.duration;
-    }else if(widget.method==2){
-      segmentView = Segment.flow;
+      segmentViewManual = ManualBaseSegment.duration;
     }else{
-      segmentView = Segment.manual;
+      segmentViewManual = ManualBaseSegment.manual;
     }
 
     durationValue = widget.duration;
@@ -697,35 +694,29 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
             children: [
               Expanded(
                 flex: 1,
-                child: SegmentedButton<Segment>(
+                child: SegmentedButton<ManualBaseSegment>(
                   style: ButtonStyle(
                     backgroundColor: MaterialStatePropertyAll(myTheme.primaryColor.withOpacity(0.05)),
                     iconColor: MaterialStateProperty.all(myTheme.primaryColor),
                   ),
-                  segments: const <ButtonSegment<Segment>>[
-                    ButtonSegment<Segment>(
-                        value: Segment.duration,
+                  segments: const <ButtonSegment<ManualBaseSegment>>[
+                    ButtonSegment<ManualBaseSegment>(
+                        value: ManualBaseSegment.duration,
                         label: Text('Duration base'),
                         icon: Icon(Icons.timer_outlined)),
-                    ButtonSegment<Segment>(
-                        value: Segment.flow,
-                        label: Text('Flow base'),
-                        icon: Icon(Icons.water_drop_outlined)),
-                    ButtonSegment<Segment>(
-                        value: Segment.manual,
+                    ButtonSegment<ManualBaseSegment>(
+                        value: ManualBaseSegment.manual,
                         label: Text('Manual base'),
                         icon: Icon(Icons.pan_tool_alt_outlined)),
                   ],
-                  selected: <Segment>{segmentView},
-                  onSelectionChanged: (Set<Segment> newSelection) {
+                  selected: <ManualBaseSegment>{segmentViewManual},
+                  onSelectionChanged: (Set<ManualBaseSegment> newSelection) {
                     setState(() {
-                      segmentView = newSelection.first;
-                      if(segmentView.index==0){
-                        widget.callbackFunctionForPayload(segmentView.index, durationValue);
-                      }else if(segmentView.index==1){
-                        widget.callbackFunctionForPayload(segmentView.index, _textController.text);
+                      segmentViewManual = newSelection.first;
+                      if(segmentViewManual.index==0){
+                        widget.callbackFunctionForPayload(segmentViewManual.index, durationValue);
                       }else{
-                        widget.callbackFunctionForPayload(segmentView.index, '0');
+                        widget.callbackFunctionForPayload(segmentViewManual.index, '0');
                       }
                     });
                   },
@@ -761,12 +752,12 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
             ],
           ),
         ),
-        segmentView.index == 2? Container():
+        segmentViewManual.index == 1? Container():
         SizedBox(
           width: MediaQuery.of(context).size.width - 370,
           height: 50,
           child: ListTile(
-            leading: segmentView.index == 0?
+            leading: segmentViewManual.index == 0?
             SizedBox(
               width: 200,
               child: Center(
@@ -801,7 +792,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                         fillColor: Colors.greenAccent
                       ),
                       onChanged: (String value) {
-                        widget.callbackFunctionForPayload(segmentView.index, value);
+                        widget.callbackFunctionForPayload(segmentViewManual.index, value);
                       },
                     ),),
                   ],
@@ -1036,7 +1027,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
       String minute = selectedTime.minute.toString().padLeft(2, '0');
       setState(() {
         durationValue = '$hour:$minute';
-        widget.callbackFunctionForPayload(segmentView.index, durationValue);
+        widget.callbackFunctionForPayload(segmentViewManual.index, durationValue);
       });
 
     }

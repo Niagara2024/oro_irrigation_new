@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:provider/provider.dart';
 
-import '../../Models/product_limit.dart';
+import '../../Models/product_limit_model.dart';
 import '../../constants/http_service.dart';
 import '../../constants/theme.dart';
 import '../../state_management/config_maker_provider.dart';
@@ -15,9 +15,10 @@ import 'config_screen.dart';
 import 'dealer_definition_config.dart';
 
 class ProductLimits extends StatefulWidget {
-  const ProductLimits({Key? key, required this.userID,  required this.customerID, required this.userType, required this.nodeCount, required this.siteName, required this.controllerId, required this.deviceId}) : super(key: key);
-  final int userID, customerID, userType, nodeCount, controllerId;
+  const ProductLimits({Key? key, required this.userID,  required this.customerID, required this.userType, required this.inputCount, required this.siteName, required this.controllerId, required this.deviceId, required this.outputCount, required this.myCatIds}) : super(key: key);
+  final int userID, customerID, userType, inputCount,outputCount, controllerId;
   final String siteName, deviceId;
+  final List<int> myCatIds;
 
 
   @override
@@ -28,7 +29,8 @@ class _ProductLimitsState extends State<ProductLimits> {
 
   String userID = '0';
   String userType = '0';
-  int filledRelayCount = 0;
+  int filledOutputCount = 0;
+  int filledInputCount = 0;
   int currentTxtFldVal = 0;
   List<MdlProductLimit> productLimits = <MdlProductLimit>[];
 
@@ -61,200 +63,42 @@ class _ProductLimitsState extends State<ProductLimits> {
     super.dispose();
   }
 
-  Widget buildStepContent(BuildContext context, int stepNumber)
-  {
-    final mediaQuery = MediaQuery.of(context);
-    var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
-    configPvd.clearConfig();
-
-    switch (stepNumber) {
-      case 1:
-        return visibleLoading? Center(
-          child: Visibility(
-            visible: visibleLoading,
-            child: Container(
-              padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 30, 0, mediaQuery.size.width/2 - 30, 0),
-              child: const LoadingIndicator(
-                indicatorType: Indicator.ballPulse,
-              ),
-            ),
-          ),
-        ) : Container(
-          color:  Colors.blueGrey.shade50,
-          child: Column(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      Expanded(
-                          child: GridView.builder(
-                            itemCount: productLimits.length,
-                            itemBuilder: (context, index) {
-                              return Container(
-                                margin: const EdgeInsetsDirectional.all(5.0),
-                                decoration:  BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: myTheme.primaryColor.withOpacity(0.5),
-                                      blurRadius: 2,
-                                      offset: const Offset(2, 2), // Shadow position
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  children: <Widget>[
-                                    Expanded (
-                                      flex:1,
-                                      child : Container(
-                                        constraints: const BoxConstraints.expand(),
-                                        decoration: BoxDecoration(
-                                          color: myTheme.primaryColor.withOpacity(0.2),
-                                          borderRadius: const BorderRadius.only(topLeft: Radius.circular(5.0), bottomLeft: Radius.circular(5.0)),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: CircleAvatar(
-                                            backgroundColor: myTheme.primaryColor.withOpacity(0.5),
-                                            child: Icon(Icons.reset_tv, color: Colors.white,),
-                                          ),
-                                        ),
-                                      ),),
-                                    Expanded(
-                                      flex :2,
-                                      child: Column(
-                                        children: <Widget>[
-                                          Padding(
-                                            padding: const EdgeInsets.only(left: 10, right: 10),
-                                            child: TextField(
-                                              controller: myControllers[index],
-                                              keyboardType: TextInputType.number,
-                                              inputFormatters: <TextInputFormatter>[
-                                                FilteringTextInputFormatter.digitsOnly
-                                              ],
-                                              decoration: InputDecoration(
-                                                labelText: productLimits[index].product,
-                                              ),
-                                              onTap: () {
-                                                currentTxtFldVal = int.parse(myControllers[index].text);
-                                                print(currentTxtFldVal);
-                                              },
-                                              onChanged: (input) async {
-                                                await Future.delayed(const Duration(milliseconds: 50));
-                                                setState(() {
-                                                  String crTvVal = myControllers[index].text;
-                                                  if (widget.nodeCount < filledRelayCount + int.parse(myControllers[index].text.isEmpty ? '0' : myControllers[index].text) - currentTxtFldVal) {
-                                                    if (crTvVal.isNotEmpty) {
-                                                      myControllers[index].text = crTvVal.substring(0, crTvVal.length - 1);
-                                                    }
-                                                    _showSnackBar('Limit reached');
-                                                  } else {
-                                                    filledRelayCount = myControllers.fold<int>(0,(sum, controller) => sum + (int.tryParse(controller.text) ?? 0),);
-                                                  }
-
-                                                });
-                                              },
-                                            ),
-                                          ),
-                                        ],
-                                      ),)
-                                  ],
-                                ),
-                              );
-                            },
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: mediaQuery.size.width > 1200 ? 6 : 4,
-                              childAspectRatio: mediaQuery.size.width / 460,
-                            ),
-                          )
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Container(
-                height: 60,
-                color: Colors.white,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    const Text('Total Relay :'),
-                    const SizedBox(width: 10,),
-                    Text('${widget.nodeCount}', style: const TextStyle(fontSize: 17),),
-                    const SizedBox(width: 20,),
-                    const Text('Remaining :'),
-                    const SizedBox(width: 10,),
-                    Text('${widget.nodeCount - filledRelayCount}', style: const TextStyle(fontSize: 17),),
-                    const SizedBox(width: 20,),
-                    IconButton(
-                        tooltip : 'Save changes',
-                        onPressed: () async {
-                          updateProductLimit();
-                        },
-                        icon: const Icon(Icons.save_as_outlined)),
-                    const SizedBox(width: 10,),
-                    IconButton(
-                        tooltip : 'Config',
-                        onPressed: () async {
-                          if(filledRelayCount==0){
-                            _showSnackBar('Product Limit empty');
-                          }else{
-                            configPvd.clearConfig();
-                            Navigator.push(context, MaterialPageRoute(builder: (context) =>  ConfigScreen(userID: widget.userID, customerID: widget.customerID, siteName: widget.siteName, controllerId: widget.controllerId, imeiNumber: widget.deviceId,)),);
-                          }
-                        },
-                        icon: const Icon(Icons.account_tree_rounded)),
-                    const SizedBox(width: 20,)
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      case 2:
-        return Column(
-          children: [
-            Text('This is the content of Step 2'),
-            SizedBox(height: 10),
-            FlutterLogo(size: 100),
-          ],
-        );
-      case 3:
-        return Text('This is the content of Step 3');
-      default:
-        return SizedBox.shrink();
-    }
-  }
-
   Future<void> getProductLimits() async
   {
     indicatorViewShow();
     await Future.delayed(const Duration(milliseconds: 500));
     Map<String, dynamic> body = {"userId" : widget.customerID, "controllerId" : widget.controllerId};
-    //print(body);
+    print(body);
     final response = await HttpService().postRequest("getUserProductLimit", body);
     if (response.statusCode == 200)
     {
       productLimits.clear();
       var data = jsonDecode(response.body);
-
       if(data["code"]==200)
       {
         final cntList = data["data"] as List;
-        //print(cntList);
+        //print(widget.myCatIds);
         myControllers = [];
-        for (int i=0; i < cntList.length; i++) {
-          productLimits.add(MdlProductLimit.fromJson(cntList[i]));
-          myControllers.add(TextEditingController(text: "0"));
-          myControllers[i].text = '${productLimits[i].quantity}';
-          filledRelayCount = filledRelayCount + productLimits[i].quantity;
+        for (int i = 0; i < cntList.length; i++) {
+          bool existsInCategory = widget.myCatIds.any((value) => cntList[i]['category'].contains(value.toString()));
+          if (existsInCategory) {
+            productLimits.add(MdlProductLimit.fromJson(cntList[i]));
+            myControllers.add(TextEditingController(text: "${cntList[i]['quantity']}"));
+            int quantity = cntList[i]['quantity']!;
+            if(cntList[i]['connectionType'] == 'Output'){
+              filledOutputCount += quantity;
+            }else if(cntList[i]['connectionType']=='Input'){
+              filledInputCount += quantity;
+            }else{
+              //other common count...
+            }
+          } else {
+            print("None of the values");
+          }
         }
       }
       setState(() {
-        //print('${filledRelayCount}');
+        //print('${filledOutputCount}');
         productLimits;
         indicatorViewHide();
       });
@@ -331,12 +175,18 @@ class _ProductLimitsState extends State<ProductLimits> {
         },
         onStepContinue: () {
           if(_currentStep==0){
-            Future.delayed(const Duration(seconds: 2), () {
-              getConfigData();
-            });
-            updateProductLimit();
+
+            if((widget.inputCount - filledInputCount) >= 0 &&
+                (widget.outputCount - filledOutputCount) >= 0){
+              Future.delayed(const Duration(seconds: 2), () {
+                getConfigData();
+              });
+              updateProductLimit();
+              _currentStep < 2 ? setState(() => _currentStep += 1) : null;
+            }else{
+              _showSnackBar('Your entered value is too long');
+            }
           }
-          _currentStep < 2 ? setState(() => _currentStep += 1) : null;
         },
         onStepCancel: () {
           _currentStep > 0 ? setState(() => _currentStep -= 1) : null;
@@ -363,14 +213,28 @@ class _ProductLimitsState extends State<ProductLimits> {
                 child: _currentStep==0? Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    const Text('Total Relay :'),
+                    const Text('Total Output :'),
                     const SizedBox(width: 10,),
-                    Text('${widget.nodeCount}', style: const TextStyle(fontSize: 17),),
+                    Text('${widget.outputCount}', style: const TextStyle(fontSize: 17),),
                     const SizedBox(width: 20,),
                     const Text('Remaining :'),
                     const SizedBox(width: 10,),
-                    Text('${widget.nodeCount - filledRelayCount}', style: const TextStyle(fontSize: 17),),
-                    const SizedBox(width: 20,)
+                    Text('${widget.outputCount - filledOutputCount}', style: TextStyle(fontSize: 17, color:
+                    (widget.outputCount - filledOutputCount) >= 0 ? Colors.black: Colors.red)),
+                    const SizedBox(width: 20,),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 8.0, bottom: 8),
+                      child: VerticalDivider(),
+                    ),
+                    const Text('Total Input :'),
+                    const SizedBox(width: 10,),
+                    Text('${widget.inputCount}', style: const TextStyle(fontSize: 17),),
+                    const SizedBox(width: 20,),
+                    const Text('Remaining :'),
+                    const SizedBox(width: 10,),
+                    Text('${widget.inputCount - filledInputCount}', style: TextStyle(fontSize: 17, color:
+                    (widget.inputCount - filledInputCount) >= 0 ? Colors.black : Colors.red)),
+                    const SizedBox(width: 20,),
                   ],
                 ) : null,
               ),
@@ -560,15 +424,22 @@ class _ProductLimitsState extends State<ProductLimits> {
                                                 onChanged: (input) async {
                                                   await Future.delayed(const Duration(milliseconds: 50));
                                                   setState(() {
-                                                    String crTvVal = myControllers[index].text;
-                                                    if (widget.nodeCount < filledRelayCount + int.parse(myControllers[index].text.isEmpty ? '0' : myControllers[index].text) - currentTxtFldVal) {
+                                                    //String crTvVal = myControllers[index].text;
+                                                    if(productLimits[index].connectionType=='Output'){
+                                                      filledOutputCount = myControllers.fold<int>(0,(sum, controller) => sum + (int.tryParse(controller.text) ?? 0),);
+                                                    }else if(productLimits[index].connectionType=='Input'){
+                                                      filledInputCount= myControllers.fold<int>(0,(sum, controller) => sum + (int.tryParse(controller.text) ?? 0),);
+                                                    }else{
+                                                      //other feild
+                                                    }
+                                                    /*if (widget.outputCount < filledOutputCount + int.parse(myControllers[index].text.isEmpty ? '0' : myControllers[index].text) - currentTxtFldVal) {
                                                       if (crTvVal.isNotEmpty) {
                                                         myControllers[index].text = crTvVal.substring(0, crTvVal.length - 1);
                                                       }
                                                       _showSnackBar('Limit reached');
                                                     } else {
-                                                      filledRelayCount = myControllers.fold<int>(0,(sum, controller) => sum + (int.tryParse(controller.text) ?? 0),);
-                                                    }
+                                                      filledOutputCount = myControllers.fold<int>(0,(sum, controller) => sum + (int.tryParse(controller.text) ?? 0),);
+                                                    }*/
                                                   });
                                                 },
                                               ),
@@ -592,7 +463,7 @@ class _ProductLimitsState extends State<ProductLimits> {
               ),
             ),
             isActive: _currentStep >= 0,
-            state: filledRelayCount == 0? _currentStep == 0 ? StepState.editing : _currentStep >= 1 ? StepState.complete : StepState.disabled:
+            state: filledOutputCount == 0? _currentStep == 0 ? StepState.editing : _currentStep >= 1 ? StepState.complete : StepState.disabled:
             _currentStep == 0 ? StepState.editing : _currentStep >= 1 ? StepState.complete : StepState.indexed,
           ),
           Step(
@@ -603,7 +474,7 @@ class _ProductLimitsState extends State<ProductLimits> {
               child: ConfigMakerScreen(userID: widget.userID, customerID: widget.customerID, siteID: widget.controllerId, imeiNumber: widget.deviceId,),
             ),
             isActive: _currentStep >= 0,
-            state:  filledRelayCount == 0? _currentStep == 1 ? StepState.editing : _currentStep >= 2 ? StepState.complete : StepState.disabled:
+            state:  filledOutputCount == 0? _currentStep == 1 ? StepState.editing : _currentStep >= 2 ? StepState.complete : StepState.disabled:
             _currentStep == 1 ? StepState.editing : _currentStep >= 2 ? StepState.complete : StepState.indexed,
           ),
           Step(
@@ -614,383 +485,13 @@ class _ProductLimitsState extends State<ProductLimits> {
               child: ConfigScreen(userID: widget.userID, customerID: widget.customerID, siteName: widget.siteName, controllerId: widget.controllerId, imeiNumber: widget.deviceId,),
             ),
             isActive: _currentStep >= 0,
-            state: filledRelayCount == 0? _currentStep >= 2? StepState.editing : StepState.disabled:
+            state: filledOutputCount == 0? _currentStep >= 2? StepState.editing : StepState.disabled:
             _currentStep >= 2? StepState.editing : StepState.indexed,
           ),
         ],
       ),
     );
   }
-
- /* @override
-  Widget build(BuildContext context)
-  {
-    final mediaQuery = MediaQuery.of(context);
-    var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.siteName),
-      ),
-      body : LayoutBuilder(
-        builder: (context, constraints) {
-          return Stepper(
-            type: StepperType.horizontal,
-            physics: const ScrollPhysics(),
-            currentStep: _currentStep,
-            connectorThickness: 3,
-            steps: [
-              Step(
-                title: const Text('Product Limit'),
-                content: visibleLoading? Center(
-                  child: Visibility(
-                    visible: visibleLoading,
-                    child: Container(
-                      height: mediaQuery.size.height,
-                      padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 50, 0, mediaQuery.size.width/2 - 50, 0),
-                      child: const LoadingIndicator(
-                        indicatorType: Indicator.ballPulse,
-                      ),
-                    ),
-                  ),
-                ) : Container(
-                  height: mediaQuery.size.height-240,
-                  color:  Colors.white,
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          children: [
-                            Expanded(
-                                child: GridView.builder(
-                                  itemCount: productLimits.length,
-                                  itemBuilder: (context, index) {
-                                    return Container(
-                                      margin: const EdgeInsetsDirectional.all(5.0),
-                                      decoration:  BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: myTheme.primaryColor.withOpacity(0.5),
-                                            blurRadius: 2,
-                                            offset: const Offset(2, 2), // Shadow position
-                                          ),
-                                        ],
-                                      ),
-                                      child: Row(
-                                        children: <Widget>[
-                                          Expanded (
-                                            flex:1,
-                                            child : Container(
-                                              constraints: const BoxConstraints.expand(),
-                                              decoration: BoxDecoration(
-                                                color: myTheme.primaryColor.withOpacity(0.2),
-                                                borderRadius: const BorderRadius.only(topLeft: Radius.circular(5.0), bottomLeft: Radius.circular(5.0)),
-                                              ),
-                                              child: Padding(
-                                                padding: const EdgeInsets.all(8.0),
-                                                child: CircleAvatar(
-                                                  backgroundColor: myTheme.primaryColor.withOpacity(0.5),
-                                                  child: Icon(Icons.reset_tv, color: Colors.white,),
-                                                ),
-                                              ),
-                                            ),),
-                                          Expanded(
-                                            flex :2,
-                                            child: Column(
-                                              children: <Widget>[
-                                                Padding(
-                                                  padding: const EdgeInsets.only(left: 10, right: 10),
-                                                  child: TextField(
-                                                    controller: myControllers[index],
-                                                    keyboardType: TextInputType.number,
-                                                    inputFormatters: <TextInputFormatter>[
-                                                      FilteringTextInputFormatter.digitsOnly
-                                                    ],
-                                                    decoration: InputDecoration(
-                                                      labelText: productLimits[index].product,
-                                                    ),
-                                                    onTap: () {
-                                                      currentTxtFldVal = int.parse(myControllers[index].text);
-                                                      print(currentTxtFldVal);
-                                                    },
-                                                    onChanged: (input) async {
-                                                      await Future.delayed(const Duration(milliseconds: 50));
-                                                      setState(() {
-                                                        String crTvVal = myControllers[index].text;
-                                                        if (widget.nodeCount < filledRelayCount + int.parse(myControllers[index].text.isEmpty ? '0' : myControllers[index].text) - currentTxtFldVal) {
-                                                          if (crTvVal.isNotEmpty) {
-                                                            myControllers[index].text = crTvVal.substring(0, crTvVal.length - 1);
-                                                          }
-                                                          _showSnackBar('Limit reached');
-                                                        } else {
-                                                          filledRelayCount = myControllers.fold<int>(0,(sum, controller) => sum + (int.tryParse(controller.text) ?? 0),);
-                                                        }
-
-                                                      });
-                                                    },
-                                                  ),
-                                                ),
-                                              ],
-                                            ),)
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: mediaQuery.size.width > 1200 ? 6 : 4,
-                                    childAspectRatio: mediaQuery.size.width / 460,
-                                  ),
-                                )
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        height: 60,
-                        color: Colors.white,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            const Text('Relay Total :'),
-                            const SizedBox(width: 10,),
-                            Text('${widget.nodeCount}', style: const TextStyle(fontSize: 17),),
-                            const SizedBox(width: 20,),
-                            const Text('Remaining :'),
-                            const SizedBox(width: 10,),
-                            Text('${widget.nodeCount - filledRelayCount}', style: const TextStyle(fontSize: 17),),
-                            const SizedBox(width: 20,),
-                            IconButton(
-                                tooltip : 'Save changes',
-                                onPressed: () async {
-                                  updateProductLimit();
-                                },
-                                icon: const Icon(Icons.save_as_outlined)),
-                            const SizedBox(width: 10,),
-                            IconButton(
-                                tooltip : 'Config',
-                                onPressed: () async {
-                                  if(filledRelayCount==0){
-                                    _showSnackBar('Product Limit empty');
-                                  }else{
-                                    configPvd.clearConfig();
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) =>  ConfigScreen(userID: widget.userID, customerID: widget.customerID, siteName: widget.siteName, siteID: widget.siteID, controllerId: widget.userDeviceListId, imeiNumber: widget.deviceId,)),);
-                                  }
-                                },
-                                icon: const Icon(Icons.account_tree_rounded)),
-                            const SizedBox(width: 20,)
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                isActive: _currentStep >= 0,
-                state: _currentStep >= 0 ? StepState.complete : StepState.disabled,
-              ),
-              Step(
-                title: const Text('Config maker'),
-                content: Column(
-                  children: [
-                    TextFormField(
-                      decoration: const InputDecoration(
-                          labelText: 'You mobile number'),
-                    ),
-                  ],
-                ),
-                isActive: _currentStep >= 0,
-                state: _currentStep >= 1 ? StepState.complete : StepState.disabled,
-              ),
-              Step(
-                title: const Text('Others'),
-                content: Column(
-                  children: <Widget>[
-                    TextFormField(
-                      decoration: const InputDecoration(
-                          labelText: 'Verification code'),
-                    ),
-                  ],
-                ),
-                isActive: _currentStep >= 0,
-                state: _currentStep >= 2? StepState.complete : StepState.disabled,
-              ),
-            ],
-            onStepTapped: (step) {
-              setState(() => _currentStep = step);
-            },
-            onStepContinue: () {
-              _currentStep < 2 ? setState(() => _currentStep += 1) : null;
-            },
-            onStepCancel: () {
-              _currentStep > 0 ? setState(() => _currentStep -= 1) : null;
-            },
-
-          );
-        },
-      )
-
-    );
-  }*/
-
-
-/*
-  @override
-  Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('${widget.siteName} - Product Limit'),
-      ),
-      body: visibleLoading? Center(
-        child: Visibility(
-          visible: visibleLoading,
-          child: Container(
-            padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 30, 0, mediaQuery.size.width/2 - 30, 0),
-            child: const LoadingIndicator(
-              indicatorType: Indicator.ballPulse,
-            ),
-          ),
-        ),
-      ) : Container(
-        color:  Colors.blueGrey.shade50,
-        child: Column(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Expanded(
-                        child: GridView.builder(
-                          itemCount: productLimits.length,
-                          itemBuilder: (context, index) {
-                            return Container(
-                              margin: const EdgeInsetsDirectional.all(5.0),
-                              decoration:  BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: myTheme.primaryColor.withOpacity(0.5),
-                                    blurRadius: 2,
-                                    offset: const Offset(2, 2), // Shadow position
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                children: <Widget>[
-                                  Expanded (
-                                    flex:1,
-                                    child : Container(
-                                      constraints: const BoxConstraints.expand(),
-                                      decoration: BoxDecoration(
-                                        color: myTheme.primaryColor.withOpacity(0.2),
-                                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(5.0), bottomLeft: Radius.circular(5.0)),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),z
-                                        child: CircleAvatar(
-                                          backgroundColor: myTheme.primaryColor.withOpacity(0.5),
-                                          child: Icon(Icons.reset_tv, color: Colors.white,),
-                                        ),
-                                      ),
-                                    ),),
-                                  Expanded(
-                                    flex :2,
-                                    child: Column(
-                                      children: <Widget>[
-                                        Padding(
-                                          padding: const EdgeInsets.only(left: 10, right: 10),
-                                          child: TextField(
-                                            controller: myControllers[index],
-                                            keyboardType: TextInputType.number,
-                                            inputFormatters: <TextInputFormatter>[
-                                              FilteringTextInputFormatter.digitsOnly
-                                            ],
-                                            decoration: InputDecoration(
-                                              labelText: productLimits[index].product,
-                                            ),
-                                            onTap: () {
-                                              currentTxtFldVal = int.parse(myControllers[index].text);
-                                              print(currentTxtFldVal);
-                                            },
-                                            onChanged: (input) async {
-                                              await Future.delayed(const Duration(milliseconds: 50));
-                                              setState(() {
-                                                String crTvVal = myControllers[index].text;
-                                                if (widget.nodeCount < filledRelayCount + int.parse(myControllers[index].text.isEmpty ? '0' : myControllers[index].text) - currentTxtFldVal) {
-                                                  if (crTvVal.isNotEmpty) {
-                                                    myControllers[index].text = crTvVal.substring(0, crTvVal.length - 1);
-                                                  }
-                                                  _showSnackBar('Limit reached');
-                                                } else {
-                                                  filledRelayCount = myControllers.fold<int>(0,(sum, controller) => sum + (int.tryParse(controller.text) ?? 0),);
-                                                }
-
-                                              });
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),)
-                                ],
-                              ),
-                            );
-                          },
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: mediaQuery.size.width > 1200 ? 6 : 4,
-                            childAspectRatio: mediaQuery.size.width / 460,
-                          ),
-                        )
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Container(
-              height: 60,
-              color: Colors.white,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  const Text('Relay Total :'),
-                  const SizedBox(width: 10,),
-                  Text('${widget.nodeCount}', style: const TextStyle(fontSize: 17),),
-                  const SizedBox(width: 20,),
-                  const Text('Remaining :'),
-                  const SizedBox(width: 10,),
-                  Text('${widget.nodeCount - filledRelayCount}', style: const TextStyle(fontSize: 17),),
-                  const SizedBox(width: 20,),
-                  IconButton(
-                      tooltip : 'Save changes',
-                      onPressed: () async {
-                        updateProductLimit();
-                      },
-                      icon: const Icon(Icons.save_as_outlined)),
-                  const SizedBox(width: 10,),
-                  IconButton(
-                      tooltip : 'Config',
-                      onPressed: () async {
-                        if(filledRelayCount==0){
-                          _showSnackBar('Product Limit empty');
-                        }else{
-                          configPvd.clearConfig();
-                          Navigator.push(context, MaterialPageRoute(builder: (context) =>  ConfigScreen(userID: widget.userID, customerID: widget.customerID, siteName: widget.siteName, siteID: widget.siteID, controllerId: widget.userDeviceListId, imeiNumber: widget.deviceId,)),);
-                        }
-                      },
-                      icon: const Icon(Icons.account_tree_rounded)),
-                  const SizedBox(width: 20,)
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-
-  }*/
 
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(

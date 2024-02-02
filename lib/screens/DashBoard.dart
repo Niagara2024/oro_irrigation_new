@@ -200,13 +200,11 @@ class _DashboardWideState extends State<DashboardWide> {
         indicatorType: Indicator.ballPulse,
       ),
     ));
-
     callCustomerDashboard();
-
   }
 
   Future<void> callCustomerDashboard()  async {
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 3));
     if(widget.userType =='3'){
       onOptionSelected('Dashboard');
     }
@@ -215,7 +213,6 @@ class _DashboardWideState extends State<DashboardWide> {
   void onOptionSelected(String option) {
     currentTap = option;
     setState(() {
-
       if (option == 'Dashboard') {
         _centerWidget = CustomerHome(customerID: widget.userID, type: 0, customerName: widget.userName, userID: widget.userID, mobileNo: '+${widget.countryCode}-${widget.mobileNo}',);
       } else if (option == 'My Product') {
@@ -414,10 +411,10 @@ class MyDrawer extends StatelessWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: Colors.transparent,
+              color: Colors.white,
               border: Border(
                 right: BorderSide(
-                  color: Colors.black.withOpacity(0.3), // Adjust color as needed
+                  color: Colors.black.withOpacity(0.2), // Adjust color as needed
                   width: 0.5, // Adjust thickness as needed
                 ),
               ),

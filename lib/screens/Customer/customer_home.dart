@@ -1053,7 +1053,7 @@ class _CustomerHomeState extends State<CustomerHome>
                                           context: context,
                                           builder: (BuildContext context) {
                                             return SizedBox(
-                                              height: siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 270 : 230,
+                                              height: siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 275 : 200,
                                               child: Column(
                                                 mainAxisAlignment: MainAxisAlignment.start,
                                                 children: <Widget>[
@@ -1079,7 +1079,7 @@ class _CustomerHomeState extends State<CustomerHome>
                                                   const Divider(height: 0),
                                                   SizedBox(
                                                     width : double.infinity,
-                                                    height : siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 230 : 160,
+                                                    height : siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 206 : 130,
                                                     child: Padding(
                                                       padding: const EdgeInsets.all(8.0),
                                                       child: siteListFinal[siteIndex].nodeList[index].rlyStatus.isNotEmpty ? Column(
@@ -1109,7 +1109,7 @@ class _CustomerHomeState extends State<CustomerHome>
                                                             ),
                                                           ),
                                                           SizedBox(
-                                                            width: 100,
+                                                            width: double.infinity,
                                                             height : siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 150 : 70,
                                                             child: GridView.builder(
                                                               itemCount: siteListFinal[siteIndex].nodeList[index].rlyStatus.length, // Number of items in the grid

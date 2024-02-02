@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 
 import '../../Models/ProductListWithNode.dart';
@@ -62,6 +63,8 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   List<CustomerListMDL> myCustomerChildList = <CustomerListMDL>[];
   List<int> nodeStockSelection = [];
   int currentSite = 0;
+  bool visibleLoading = false;
+  int apiCompletedCount = 0;
 
 
   @override
@@ -100,7 +103,6 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
     widget.productStockList.removeWhere((productStock) => productStock.productId == productId);
   }
 
-
   Future<void> getCustomerType() async
   {
     getMyAllProduct();
@@ -108,11 +110,11 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
     getNodeStockList();
     getCustomerSite();
     getNodeInterfaceTypes();
-
   }
 
   Future<void> getMyAllProduct() async
   {
+    indicatorViewShow();
     final body = widget.userType == 1 ? {"fromUserId": widget.userID, "toUserId": widget.customerID ,"set":1, "limit":100} : {"fromUserId": widget.userID, "toUserId": widget.customerID, "set":1, "limit":100};
     final response = await HttpService().postRequest("getCustomerProduct", body);
     if (response.statusCode == 200)
@@ -125,13 +127,17 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
         for (int i=0; i < cntList.length; i++) {
           customerProductList.add(CustomerProductModel.fromJson(cntList[i]));
         }
+        apiCompletedCount = apiCompletedCount + 1;
+        if(apiCompletedCount==5){
+          indicatorViewHide();
+        }
       }
-      setState(() {
-        customerProductList;
-      });
     }
     else{
-      //_showSnackBar(response.body);
+      apiCompletedCount = apiCompletedCount + 1;
+      if(apiCompletedCount==5){
+        indicatorViewHide();
+      }
     }
   }
 
@@ -151,13 +157,17 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
         }
       }
 
-      setState(() {
-        myMasterControllerList;
-      });
+      apiCompletedCount = apiCompletedCount + 1;
+      if(apiCompletedCount==5){
+        indicatorViewHide();
+      };
 
     }
     else{
-      //_showSnackBar(response.body);
+      apiCompletedCount = apiCompletedCount + 1;
+      if(apiCompletedCount==5){
+        indicatorViewHide();
+      }
     }
   }
 
@@ -189,12 +199,17 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
           }
         }
       }
-      setState(() {
-        customerSiteList;
-      });
+
+      apiCompletedCount = apiCompletedCount + 1;
+      if(apiCompletedCount==5){
+        indicatorViewHide();
+      }
     }
     else{
-      //_showSnackBar(response.body);
+      apiCompletedCount = apiCompletedCount + 1;
+      if(apiCompletedCount==5){
+        indicatorViewHide();
+      }
     }
   }
 
@@ -213,13 +228,17 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
           nodeStockList.add(ProductStockModel.fromJson(cntList[i]));
         }
       }
-      setState(() {
-        nodeStockList;
-      });
+      apiCompletedCount = apiCompletedCount + 1;
+      if(apiCompletedCount==5){
+        indicatorViewHide();
+      }
 
     }
     else{
-      //_showSnackBar(response.body);
+      apiCompletedCount = apiCompletedCount + 1;
+      if(apiCompletedCount==5){
+        indicatorViewHide();
+      }
     }
   }
 
@@ -238,16 +257,37 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
           interfaceType.add(InterfaceModel.fromJson(cntList[i]));
         }
       }
-      setState(() {
-        interfaceType;
-      });
+      apiCompletedCount = apiCompletedCount + 1;
+      if(apiCompletedCount==5){
+        indicatorViewHide();
+      }
 
     }
     else{
-      //_showSnackBar(response.body);
+      apiCompletedCount = apiCompletedCount + 1;
+      if(apiCompletedCount==5){
+        indicatorViewHide();
+      }
     }
   }
 
+  void indicatorViewShow() {
+    if(mounted){
+      setState(() {
+        visibleLoading = true;
+      });
+    }
+  }
+
+  void indicatorViewHide() {
+    if(mounted){
+      Future.delayed(const Duration(milliseconds: 500), () {
+        setState(() {
+          visibleLoading = false;
+        });
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context)
@@ -445,7 +485,18 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
           ],
         ),
       ),
-      body: TabBarView(
+      body: visibleLoading? Visibility(
+        visible: visibleLoading,
+        child: Container(
+          height: double.infinity,
+          color: Colors.transparent,
+          padding: EdgeInsets.fromLTRB(MediaQuery.sizeOf(context).width/2 - 25, 0, MediaQuery.sizeOf(context).width/2 - 25, 0),
+          child: const LoadingIndicator(
+            indicatorType: Indicator.ballPulse,
+          ),
+        ),
+      ):
+      TabBarView(
         controller: _tabCont,
         children: [
           displayProductList(),
@@ -783,9 +834,9 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                     children: [
                       ListTile(
                         leading: Image.asset('assets/images/oro_gem.png'),
-                        title: Text(customerSiteList[siteIndex].categoryName,style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                        subtitle: Text(customerSiteList[siteIndex].deviceId.toString(), style: const TextStyle(fontWeight: FontWeight.normal),),
-                        trailing: Row(
+                        title: Text(customerSiteList[siteIndex].categoryName),
+                        subtitle: Text(customerSiteList[siteIndex].deviceId.toString()),
+                        trailing: usedNodeList[siteIndex].isNotEmpty? Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
@@ -798,11 +849,15 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                             IconButton(
                                 tooltip : 'Product Limit',
                                 onPressed: () async {
-                                  int relayCnt = 0;
+                                  int outputCnt = 0;
+                                  int inputCnt = 0;
+                                  List<int> catId = [];
                                   for(int i=0; i<usedNodeList[siteIndex].length; i++){
-                                    relayCnt = relayCnt + usedNodeList[siteIndex][i].relayCount;
+                                    outputCnt = outputCnt + usedNodeList[siteIndex][i].outputCount;
+                                    inputCnt = outputCnt + usedNodeList[siteIndex][i].inputCount;
+                                    catId.add(usedNodeList[siteIndex][i].categoryId);
                                   }
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  ProductLimits(userID: widget.userID, customerID: widget.customerID, userType: 2, nodeCount: relayCnt, siteName: customerSiteList[siteIndex].groupName, controllerId: customerSiteList[siteIndex].controllerId, deviceId: customerSiteList[siteIndex].deviceId,)),);
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  ProductLimits(userID: widget.userID, customerID: widget.customerID, userType: 2, outputCount: outputCnt, siteName: customerSiteList[siteIndex].groupName, controllerId: customerSiteList[siteIndex].controllerId, deviceId: customerSiteList[siteIndex].deviceId, inputCount: inputCnt, myCatIds: catId)),);
                                 },
                                 icon: const Icon(Icons.list_alt)),
                             const SizedBox(width: 8),
@@ -872,7 +927,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                 },
                                 icon: const Icon(Icons.send)),
                           ],
-                        ),
+                        ) : null,
                       ),
                       Expanded(
                         child: Padding(
@@ -1008,6 +1063,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
     for(int i=0; i<usedNodeList[currentSite].length; i++){
       oldNodeListSrlNo.add(usedNodeList[currentSite][i].serialNumber);
     }
+
     List missingSrlNumber = missingArray(oldNodeListSrlNo);
     //print(missingSrlNumber);
     for(int i=0; i<nodeStockSelection.length; i++)
@@ -1144,11 +1200,13 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
 
   List<int> missingArray(List<int> no) {
     List<int> missingValues = [];
-    int n = no.reduce(max);
-    List<int> intArray = List.generate(n, (index) => index + 1);
-    for (var value in intArray) {
-      if (!no.contains(value)) {
-        missingValues.add(value);
+    if(no.isNotEmpty){
+      int n = no.reduce(max);
+      List<int> intArray = List.generate(n, (index) => index + 1);
+      for (var value in intArray) {
+        if (!no.contains(value)) {
+          missingValues.add(value);
+        }
       }
     }
     return missingValues;

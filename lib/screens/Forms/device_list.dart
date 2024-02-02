@@ -64,7 +64,6 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   List<int> nodeStockSelection = [];
   int currentSite = 0;
   bool visibleLoading = false;
-  int apiCompletedCount = 0;
 
 
   @override
@@ -127,17 +126,11 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
         for (int i=0; i < cntList.length; i++) {
           customerProductList.add(CustomerProductModel.fromJson(cntList[i]));
         }
-        apiCompletedCount = apiCompletedCount + 1;
-        if(apiCompletedCount==5){
-          indicatorViewHide();
-        }
+        indicatorViewHide();
       }
     }
     else{
-      apiCompletedCount = apiCompletedCount + 1;
-      if(apiCompletedCount==5){
-        indicatorViewHide();
-      }
+      indicatorViewHide();
     }
   }
 
@@ -157,17 +150,11 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
         }
       }
 
-      apiCompletedCount = apiCompletedCount + 1;
-      if(apiCompletedCount==5){
-        indicatorViewHide();
-      };
+      indicatorViewHide();
 
     }
     else{
-      apiCompletedCount = apiCompletedCount + 1;
-      if(apiCompletedCount==5){
-        indicatorViewHide();
-      }
+      indicatorViewHide();
     }
   }
 
@@ -200,16 +187,10 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
         }
       }
 
-      apiCompletedCount = apiCompletedCount + 1;
-      if(apiCompletedCount==5){
-        indicatorViewHide();
-      }
+      indicatorViewHide();
     }
     else{
-      apiCompletedCount = apiCompletedCount + 1;
-      if(apiCompletedCount==5){
-        indicatorViewHide();
-      }
+      indicatorViewHide();
     }
   }
 
@@ -228,17 +209,10 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
           nodeStockList.add(ProductStockModel.fromJson(cntList[i]));
         }
       }
-      apiCompletedCount = apiCompletedCount + 1;
-      if(apiCompletedCount==5){
-        indicatorViewHide();
-      }
-
+      indicatorViewHide();
     }
     else{
-      apiCompletedCount = apiCompletedCount + 1;
-      if(apiCompletedCount==5){
-        indicatorViewHide();
-      }
+      indicatorViewHide();
     }
   }
 
@@ -257,17 +231,11 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
           interfaceType.add(InterfaceModel.fromJson(cntList[i]));
         }
       }
-      apiCompletedCount = apiCompletedCount + 1;
-      if(apiCompletedCount==5){
-        indicatorViewHide();
-      }
+      indicatorViewHide();
 
     }
     else{
-      apiCompletedCount = apiCompletedCount + 1;
-      if(apiCompletedCount==5){
-        indicatorViewHide();
-      }
+      indicatorViewHide();
     }
   }
 
@@ -587,7 +555,6 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                     print(response.body);
                     if(response.statusCode == 200)
                     {
-
                       var data = jsonDecode(response.body);
                       if(data["code"]==200)
                       {
@@ -1017,10 +984,6 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                           "modifyUser": widget.userID,
                                           "productId": data.productId,
                                         };
-
-
-                                        print(body);
-
                                         final response = await HttpService().putRequest("removeNodeInMaster", body);
                                         if (response.statusCode == 200) {
                                           var data = jsonDecode(response.body);
@@ -1175,10 +1138,8 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
               nodeStockSelection.clear();
               checkboxValueNode = false;
             });
-
             getCustomerSite();
             getNodeStockList();
-
           }
           else{
             //_showSnackBar(data["message"]);

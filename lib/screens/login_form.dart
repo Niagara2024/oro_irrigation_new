@@ -142,7 +142,6 @@ class _NarrowOtpViewState extends State<NarrowOtpView> {
                                 autoValidateMode: AutovalidateMode.disabled,
                                 selectorTextStyle: const TextStyle(color: Colors.black),
                                 initialValue: PhoneNumber(isoCode: 'IN'),
-
                                 textFieldController: _mobileNoController,
                                 formatInput: false,
                                 keyboardType:

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:provider/provider.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
@@ -24,8 +25,11 @@ class CustomerHome extends StatefulWidget {
   _CustomerHomeState createState() => _CustomerHomeState();
 }
 
-class _CustomerHomeState extends State<CustomerHome>
+class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderStateMixin
 {
+   late AnimationController animationController;
+  late Animation<double> rotationAnimation;
+
   List<DashboardModel> siteListFinal = [];
   int siteIndex = 0;
   List<ProgramList> programList = [];
@@ -36,13 +40,46 @@ class _CustomerHomeState extends State<CustomerHome>
 
   String standaloneTime = '', standaloneFlow = '';
   int standaloneMethod = 0;
+  String lastSyncData = '';
 
 
   @override
   void initState() {
     super.initState();
+    initRotationAnimation();
     indicatorViewShow();
     getCustomerSite(widget.customerID);
+  }
+
+  @override
+  void dispose() {
+    animationController.dispose();
+    super.dispose();
+  }
+
+  void initRotationAnimation(){
+    animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    rotationAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: animationController,
+        curve: Curves.linear,
+      ),
+    );
+  }
+
+  void onRefreshClicked() {
+    animationController.repeat();
+    Future.delayed(const Duration(seconds: 2), () {
+      animationController.stop();
+      String payLoadFinal = jsonEncode({"3000": [{"3001": ""}]});
+      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteListFinal[siteIndex].deviceId}');
+    });
   }
 
   void callbackFunction()
@@ -178,6 +215,7 @@ class _CustomerHomeState extends State<CustomerHome>
       setState(() {
         if (data['2400'][0].containsKey('WifiStrength')) {
           wifiStrength = data['2400'][0]['WifiStrength'];
+          lastSyncData = '${getCurrentDate()}-${getCurrentTime()}';
         }
         if (data['2400'][0].containsKey('2401')) {
           for (var item in data['2400'][0]['2401']) {
@@ -189,7 +227,6 @@ class _CustomerHomeState extends State<CustomerHome>
                   siteListFinal[siteIndex].nodeList[position].batVolt = item['BatVolt'];
                   siteListFinal[siteIndex].nodeList[position].slrVolt = item['SVolt'];
                   siteListFinal[siteIndex].nodeList[position].rlyStatus = item['RlyStatus'];
-                  //siteListFinal[siteIndex].nodeList[position].sensor = item['Sensor'];
                 } else {
                   print('${item['SNo']} The serial number not found');
                 }
@@ -267,10 +304,20 @@ class _CustomerHomeState extends State<CustomerHome>
     );
   }
 
+   String getCurrentDate() {
+     var now = DateTime.now();
+     return DateFormat('MMMM dd, yyyy').format(now);
+   }
+
+   String getCurrentTime() {
+     var now = DateTime.now();
+     return DateFormat('hh:mm:ss').format(now);
+   }
+
   Padding buildBodyContent()
   {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 2),
+      padding: const EdgeInsets.only(bottom: 5),
       child: Column(
         children: [
           siteListFinal.length >1 ? TabBar(
@@ -288,93 +335,99 @@ class _CustomerHomeState extends State<CustomerHome>
             },
           ) :
           const SizedBox(),
-          ListTile(
-            leading: const CircleAvatar(
-              backgroundImage: AssetImage('assets/images/oro_gem.png'),
-              backgroundColor: Colors.transparent,
-            ),
-            title: Text(siteListFinal[siteIndex].deviceName),
-            subtitle: Text(siteListFinal[siteIndex].categoryName, style: const TextStyle(fontWeight: FontWeight.normal),),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(wifiStrength == 0? Icons.wifi_off:
-                wifiStrength >= 1 && wifiStrength <= 20 ? Icons.network_wifi_1_bar_outlined:
-                wifiStrength >= 21 && wifiStrength <= 40 ? Icons.network_wifi_2_bar_outlined:
-                wifiStrength >= 41 && wifiStrength <= 60 ? Icons.network_wifi_3_bar_outlined:
-                wifiStrength >= 61 && wifiStrength <= 80 ? Icons.network_wifi_outlined:
-                Icons.wifi),
-                const SizedBox(width: 5,),
-                Text('$wifiStrength %', style: const TextStyle(fontWeight: FontWeight.normal),),
-                const SizedBox(width: 5,),
-                IconButton(
-                  tooltip: 'Set serial for all Nodes',
-                  icon: const Icon(Icons.format_list_numbered),
-                  onPressed: () async {
-                    String payLoadFinal = jsonEncode({
-                      "2300": [
-                        {"2301": ""},
-                      ]
-                    });
-                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteListFinal[siteIndex].deviceId}');
-                  },
-                ),
-                const SizedBox(width: 5,),
-                IconButton(
-                  tooltip: 'Refresh',
-                  icon: const Icon(Icons.refresh),
-                  onPressed: () async {
-                    String payLoadFinal = jsonEncode({"3000": [{"3001": ""}]});
-                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteListFinal[siteIndex].deviceId}');
-                  },
-                ),
-                const SizedBox(width: 5,),
-                IconButton(
-                  tooltip: 'Manual Mode',
-                  icon: const Icon(Icons.touch_app_outlined),
-                  onPressed: () async {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DashboardByManual(
-                          siteID: siteListFinal[siteIndex].siteId,
-                          siteName: siteListFinal[siteIndex].siteName,
-                          controllerID: siteListFinal[siteIndex].controllerId,
-                          customerID: widget.customerID,
-                          imeiNo: siteListFinal[siteIndex].deviceId,
-                          programList: programList, callbackFunction: callbackFunction,
+          Card(
+            elevation: 5,
+            shape: const RoundedRectangleBorder(),
+            surfaceTintColor: Colors.white,
+            margin: EdgeInsets.zero,
+            child: ListTile(
+              leading: const CircleAvatar(
+                backgroundImage: AssetImage('assets/images/oro_gem.png'),
+                backgroundColor: Colors.transparent,
+              ),
+              title: Text(siteListFinal[siteIndex].deviceName),
+              subtitle: Text('${siteListFinal[siteIndex].categoryName} - Last sync : $lastSyncData', style: const TextStyle(fontWeight: FontWeight.normal),),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(wifiStrength == 0? Icons.wifi_off:
+                  wifiStrength >= 1 && wifiStrength <= 20 ? Icons.network_wifi_1_bar_outlined:
+                  wifiStrength >= 21 && wifiStrength <= 40 ? Icons.network_wifi_2_bar_outlined:
+                  wifiStrength >= 41 && wifiStrength <= 60 ? Icons.network_wifi_3_bar_outlined:
+                  wifiStrength >= 61 && wifiStrength <= 80 ? Icons.network_wifi_outlined:
+                  Icons.wifi),
+                  const SizedBox(width: 5,),
+                  Text('$wifiStrength %', style: const TextStyle(fontWeight: FontWeight.normal),),
+                  const SizedBox(width: 5,),
+                  IconButton(
+                    tooltip: 'Set serial for all Nodes',
+                    icon: const Icon(Icons.format_list_numbered),
+                    onPressed: () async {
+                      String payLoadFinal = jsonEncode({
+                        "2300": [
+                          {"2301": ""},
+                        ]
+                      });
+                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteListFinal[siteIndex].deviceId}');
+                    },
+                  ),
+                  const SizedBox(width: 5,),
+                  RotationTransition(
+                    turns: rotationAnimation,
+                    child: IconButton(
+                      tooltip: 'refresh',
+                      icon: const Icon(Icons.refresh),
+                      onPressed: onRefreshClicked,
+                    ),
+                  ),
+                  const SizedBox(width: 5,),
+                  IconButton(
+                    tooltip: 'Manual Mode',
+                    icon: const Icon(Icons.touch_app_outlined),
+                    onPressed: () async {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DashboardByManual(
+                            siteID: siteListFinal[siteIndex].siteId,
+                            siteName: siteListFinal[siteIndex].siteName,
+                            controllerID: siteListFinal[siteIndex].controllerId,
+                            customerID: widget.customerID,
+                            imeiNo: siteListFinal[siteIndex].deviceId,
+                            programList: programList, callbackFunction: callbackFunction,
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(width: 5,),
-                IconButton(
-                  tooltip: 'Planning',
-                  icon: const Icon(Icons.list_alt),
-                  onPressed: () async {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ProgramSchedule(
-                          customerID: widget.customerID,
-                          controllerID: siteListFinal[siteIndex].controllerId,
-                          siteName: siteListFinal[siteIndex].siteName,
-                          imeiNumber: siteListFinal[siteIndex].deviceId,
-                          userId: widget.customerID,
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 5,),
+                  IconButton(
+                    tooltip: 'Planning',
+                    icon: const Icon(Icons.list_alt),
+                    onPressed: () async {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProgramSchedule(
+                            customerID: widget.customerID,
+                            controllerID: siteListFinal[siteIndex].controllerId,
+                            siteName: siteListFinal[siteIndex].siteName,
+                            imeiNumber: siteListFinal[siteIndex].deviceId,
+                            userId: widget.customerID,
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
-              ],
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
           Expanded(
             child: Container(
               color: myTheme.primaryColor.withOpacity(0.07),
               child: Padding(
-                padding: const EdgeInsets.only(left: 5, right: 7, top: 5),
+                padding: const EdgeInsets.only(left: 2, right: 7, top: 5),
                 child: Row(
                   children: [
                     Expanded(
@@ -388,7 +441,7 @@ class _CustomerHomeState extends State<CustomerHome>
                                     SizedBox(
                                       height: 220,
                                       child: Card(
-                                        elevation: 5,
+                                        elevation: 2,
                                         surfaceTintColor: Colors.white,
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(5.0),
@@ -739,7 +792,7 @@ class _CustomerHomeState extends State<CustomerHome>
                                     SizedBox(
                                       height: 150,
                                       child: Card(
-                                        elevation: 5,
+                                        elevation: 2,
                                         surfaceTintColor: Colors.white,
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(5.0), // Adjust the radius as needed
@@ -836,7 +889,7 @@ class _CustomerHomeState extends State<CustomerHome>
                                     SizedBox(
                                       height: (programList.length * 35) + 110,
                                       child: Card(
-                                        elevation: 5,
+                                        elevation: 2,
                                         surfaceTintColor: Colors.white,
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(5.0), // Adjust the radius as needed
@@ -852,10 +905,7 @@ class _CustomerHomeState extends State<CustomerHome>
                                                     tooltip: 'Up Coming Program',
                                                     onPressed: () {
                                                     },
-                                                    icon: Icon(
-                                                      Icons.view_list_outlined,
-                                                      color: myTheme.primaryColor.withOpacity(0.6),
-                                                    )),
+                                                    icon: const Icon(Icons.view_list_outlined)),
                                               ),
                                               Container(
                                                 color: Colors.white,
@@ -919,7 +969,7 @@ class _CustomerHomeState extends State<CustomerHome>
                               ):
                               Column(
                                 children: [
-                                  SizedBox(height: MediaQuery.sizeOf(context).height/2),
+                                  SizedBox(height: MediaQuery.sizeOf(context).height/3),
                                   const Text('No Schedule Available')
                                 ]
                               ),
@@ -938,14 +988,14 @@ class _CustomerHomeState extends State<CustomerHome>
                         ),
                         child: Column(
                           children: [
-                            const SizedBox(
+                            SizedBox(
                               height: 50,
                               child: Row(
                                 children: [
                                   Expanded(
                                     child: Row(
                                       children: [
-                                        Column(
+                                        const Column(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
@@ -954,7 +1004,7 @@ class _CustomerHomeState extends State<CustomerHome>
                                                 SizedBox(width: 10),
                                                 CircleAvatar(radius: 5, backgroundColor: Colors.green,),
                                                 SizedBox(width: 5),
-                                                Text('Connected', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))
+                                                Text('Connected', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12))
                                               ],
                                             ),
                                             Row(
@@ -962,12 +1012,12 @@ class _CustomerHomeState extends State<CustomerHome>
                                                 SizedBox(width: 10),
                                                 CircleAvatar(radius: 5, backgroundColor: Colors.grey),
                                                 SizedBox(width: 5),
-                                                Text('No Communication', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))
+                                                Text('No Communication', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12))
                                               ],
                                             ),
                                           ],
                                         ),
-                                        Column(
+                                        const Column(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
@@ -976,7 +1026,7 @@ class _CustomerHomeState extends State<CustomerHome>
                                                 SizedBox(width: 20),
                                                 CircleAvatar(radius: 5, backgroundColor: Colors.redAccent,),
                                                 SizedBox(width: 5),
-                                                Text('Set Serial Error', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))
+                                                Text('Set Serial Error', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12))
                                               ],
                                             ),
                                             Row(
@@ -984,10 +1034,17 @@ class _CustomerHomeState extends State<CustomerHome>
                                                 SizedBox(width: 20),
                                                 CircleAvatar(radius: 5, backgroundColor: Colors.yellow),
                                                 SizedBox(width: 5),
-                                                Text('Low Battery', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13))
+                                                Text('Low Battery', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12))
                                               ],
                                             ),
                                           ],
+                                        ),
+                                        const SizedBox(width: 15),
+                                        SizedBox(
+                                          width: 40,
+                                          child: IconButton(tooltip:'View all Node details', onPressed: (){
+                                            showNodeDetailsBottomSheet(context);
+                                          }, icon: Icon(Icons.grid_on)),
                                         ),
                                       ],
                                     ),
@@ -1047,103 +1104,9 @@ class _CustomerHomeState extends State<CustomerHome>
                                       ],
                                     )),
                                     DataCell(Center(child: IconButton(tooltip: 'View Relay status',
-                                      icon: Icon(Icons.format_list_bulleted_outlined, color: myTheme.primaryColor,), // Icon to display
+                                      icon: const Icon(Icons.dataset_outlined), // Icon to display
                                       onPressed: () {
-                                        showModalBottomSheet(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return SizedBox(
-                                              height: siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 275 : 200,
-                                              child: Column(
-                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                children: <Widget>[
-                                                  ListTile(
-                                                    leading: const Icon(Icons.developer_board_rounded),
-                                                    title: Text(siteListFinal[siteIndex].nodeList[index].categoryName),
-                                                    subtitle: Text(siteListFinal[siteIndex].nodeList[index].deviceId),
-                                                    trailing: Row(
-                                                      mainAxisSize: MainAxisSize.min,
-                                                      children: [
-                                                        const Icon(Icons.solar_power_outlined),
-                                                        const SizedBox(width: 5,),
-                                                        Text('${siteListFinal[siteIndex].nodeList[index].slrVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                        const SizedBox(width: 5,),
-                                                        const Icon(Icons.battery_3_bar_rounded),
-                                                        const SizedBox(width: 5,),
-                                                        Text('${siteListFinal[siteIndex].nodeList[index].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                        const SizedBox(width: 5,),
-                                                        IconButton(tooltip : 'Serial set for all Relay', onPressed: (){}, icon: Icon(Icons.fact_check_outlined))
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  const Divider(height: 0),
-                                                  SizedBox(
-                                                    width : double.infinity,
-                                                    height : siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 206 : 130,
-                                                    child: Padding(
-                                                      padding: const EdgeInsets.all(8.0),
-                                                      child: siteListFinal[siteIndex].nodeList[index].rlyStatus.isNotEmpty ? Column(
-                                                        children: [
-                                                          const SizedBox(
-                                                            width: double.infinity,
-                                                            height : 40,
-                                                            child: Row(
-                                                              children: [
-                                                                SizedBox(width: 10),
-                                                                CircleAvatar(radius: 5,backgroundColor: Colors.green,),
-                                                                SizedBox(width: 5),
-                                                                Text('ON'),
-                                                                SizedBox(width: 20),
-                                                                CircleAvatar(radius: 5,backgroundColor: Colors.black45),
-                                                                SizedBox(width: 5),
-                                                                Text('OFF'),
-                                                                SizedBox(width: 20),
-                                                                CircleAvatar(radius: 5,backgroundColor: Colors.orange),
-                                                                SizedBox(width: 5),
-                                                                Text('ON IN OFF'),
-                                                                SizedBox(width: 20),
-                                                                CircleAvatar(radius: 5,backgroundColor: Colors.redAccent),
-                                                                SizedBox(width: 5),
-                                                                Text('OFF IN ON'),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                          SizedBox(
-                                                            width: double.infinity,
-                                                            height : siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 150 : 70,
-                                                            child: GridView.builder(
-                                                              itemCount: siteListFinal[siteIndex].nodeList[index].rlyStatus.length, // Number of items in the grid
-                                                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                                                crossAxisCount: 8,
-                                                                crossAxisSpacing: 10.0,
-                                                                mainAxisSpacing: 10.0,
-                                                              ),
-                                                              itemBuilder: (BuildContext context, int indexGv) {
-                                                                return Column(
-                                                                  children: [
-                                                                    CircleAvatar(
-                                                                      backgroundColor: siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Status']==0 ? Colors.grey :
-                                                                      siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Status']==1 ? Colors.green :
-                                                                      siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Status']==2 ? Colors.orange :
-                                                                      siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Status']==3 ? Colors.redAccent : Colors.black12, // Avatar background color
-                                                                      child: Text((siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['RlyNo']).toString(), style: const TextStyle(color: Colors.white)),
-                                                                    ),
-                                                                    Text((siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Name']).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
-                                                                  ],
-                                                                );
-                                                              },
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ) :
-                                                      const Center(child: Text('Relay Status Not Found')),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          },
-                                        );
+                                        showRelayBottomSheet(context, index);
                                       },
                                     ))),
                                   ])),
@@ -1161,6 +1124,133 @@ class _CustomerHomeState extends State<CustomerHome>
           ),
         ],
       ),
+    );
+  }
+
+  Future<void>showNodeDetailsBottomSheet(BuildContext context) async{
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return  SizedBox(
+          height: 600,
+          child: Column(
+            children: [
+              ListTile(
+                tileColor: myTheme.primaryColor,
+                textColor: Colors.white,
+                title: Text('Node Details'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void>showRelayBottomSheet(BuildContext context, int index) async{
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SizedBox(
+          height: siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 275 : 200,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              ListTile(
+                tileColor: myTheme.primaryColor,
+                textColor: Colors.white,
+                leading: const Icon(Icons.developer_board_rounded, color: Colors.white),
+                title: Text(siteListFinal[siteIndex].nodeList[index].categoryName),
+                subtitle: Text(siteListFinal[siteIndex].nodeList[index].deviceId),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.solar_power_outlined, color: Colors.white),
+                    const SizedBox(width: 5,),
+                    Text('${siteListFinal[siteIndex].nodeList[index].slrVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                    const SizedBox(width: 5,),
+                    const Icon(Icons.battery_3_bar_rounded, color: Colors.white),
+                    const SizedBox(width: 5,),
+                    Text('${siteListFinal[siteIndex].nodeList[index].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                    const SizedBox(width: 5,),
+                    IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
+                      String payLoadFinal = jsonEncode({
+                        "2300": [
+                          {"2301": "${siteListFinal[siteIndex].nodeList[index].serialNumber}"},
+                        ]
+                      });
+                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteListFinal[siteIndex].deviceId}');
+                    }, icon: Icon(Icons.fact_check_outlined, color: Colors.white))
+                  ],
+                ),
+              ),
+              const Divider(height: 0),
+              SizedBox(
+                width : double.infinity,
+                height : siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 206 : 130,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: siteListFinal[siteIndex].nodeList[index].rlyStatus.isNotEmpty ? Column(
+                    children: [
+                      const SizedBox(
+                        width: double.infinity,
+                        height : 40,
+                        child: Row(
+                          children: [
+                            SizedBox(width: 10),
+                            CircleAvatar(radius: 5,backgroundColor: Colors.green,),
+                            SizedBox(width: 5),
+                            Text('ON'),
+                            SizedBox(width: 20),
+                            CircleAvatar(radius: 5,backgroundColor: Colors.black45),
+                            SizedBox(width: 5),
+                            Text('OFF'),
+                            SizedBox(width: 20),
+                            CircleAvatar(radius: 5,backgroundColor: Colors.orange),
+                            SizedBox(width: 5),
+                            Text('ON IN OFF'),
+                            SizedBox(width: 20),
+                            CircleAvatar(radius: 5,backgroundColor: Colors.redAccent),
+                            SizedBox(width: 5),
+                            Text('OFF IN ON'),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        height : siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 150 : 70,
+                        child: GridView.builder(
+                          itemCount: siteListFinal[siteIndex].nodeList[index].rlyStatus.length, // Number of items in the grid
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 8,
+                            crossAxisSpacing: 10.0,
+                            mainAxisSpacing: 10.0,
+                          ),
+                          itemBuilder: (BuildContext context, int indexGv) {
+                            return Column(
+                              children: [
+                                CircleAvatar(
+                                  backgroundColor: siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Status']==0 ? Colors.grey :
+                                  siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Status']==1 ? Colors.green :
+                                  siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Status']==2 ? Colors.orange :
+                                  siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Status']==3 ? Colors.redAccent : Colors.black12, // Avatar background color
+                                  child: Text((siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['RlyNo']).toString(), style: const TextStyle(color: Colors.white)),
+                                ),
+                                Text((siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv]['Name']).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ) :
+                  const Center(child: Text('Relay Status Not Found')),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

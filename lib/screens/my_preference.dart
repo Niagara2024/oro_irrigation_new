@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,10 +29,12 @@ class _MyPreferenceState extends State<MyPreference>
   XFile? image;
 
   String countryCode = '', mobileNo = '', userName = '', emailId = '', password = '';
-  TextEditingController _controllerMblNo = TextEditingController();
-  TextEditingController _controllerUsrName = TextEditingController();
-  TextEditingController _controllerEmail = TextEditingController();
-  TextEditingController _controllerPwd = TextEditingController();
+  final TextEditingController _controllerMblNo = TextEditingController();
+  final TextEditingController _controllerUsrName = TextEditingController();
+  final TextEditingController _controllerEmail = TextEditingController();
+  final TextEditingController _controllerPwd = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -48,7 +51,7 @@ class _MyPreferenceState extends State<MyPreference>
     emailId = prefs.getString('email')!;
     password = prefs.getString('password')!;
 
-    _controllerMblNo.text = '+$countryCode $mobileNo';
+    _controllerMblNo.text = mobileNo;
     _controllerUsrName.text = userName;
     _controllerEmail.text = emailId;
     _controllerPwd.text = password;
@@ -178,87 +181,145 @@ class _MyPreferenceState extends State<MyPreference>
                                         ),
                                         Flexible(
                                           flex :2,
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(15.0),
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                const Text('Mobile Number'),
-                                                SizedBox(height: 5,),
-                                                SizedBox(
-                                                  height: 44,
-                                                  child: TextField(
-                                                    controller: _controllerMblNo,
-                                                    decoration: InputDecoration(
-                                                      border: OutlineInputBorder(),
-                                                      hintText: 'Enter Mobile Number',
-                                                    ),
+                                          child: Column(
+                                            children: [
+                                              const SizedBox(height: 20),
+                                              InternationalPhoneNumberInput(
+                                                onInputChanged: (PhoneNumber number) {
+                                                  //print(number.phoneNumber);
+                                                },
+                                                selectorConfig: const SelectorConfig(
+                                                  selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+                                                  setSelectorButtonAsPrefixIcon: true,
+                                                  leadingPadding: 10,
+                                                  useEmoji: false,
+                                                ),
+                                                ignoreBlank: false,
+                                                inputDecoration: InputDecoration(
+                                                  labelText: 'Mobile Number',
+                                                  border: OutlineInputBorder(
+                                                    borderRadius: BorderRadius.circular(10.0), // Border radius
                                                   ),
                                                 ),
-                                                SizedBox(height: 10,),
-                                                Text('Username'),
-                                                SizedBox(height: 5,),
-                                                SizedBox(
-                                                  height: 44,
-                                                  child: TextField(
-                                                    controller: _controllerUsrName,
-                                                    decoration: InputDecoration(
-                                                      border: OutlineInputBorder(),
-                                                      hintText: 'Enter Username',
-                                                    ),
-                                                  ),
-                                                ),
-                                                SizedBox(height: 10,),
-                                                Text('Password'),
-                                                SizedBox(height: 5,),
-                                                SizedBox(
-                                                  height: 44,
-                                                  child: TextField(
-                                                    controller: _controllerPwd,
-                                                    decoration: InputDecoration(
-                                                      border: OutlineInputBorder(),
-                                                      hintText: 'Enter Password',
-                                                    ),
-                                                  ),
-                                                ),
-                                                SizedBox(height: 10,),
-                                                Text('Email'),
-                                                SizedBox(height: 5,),
-                                                SizedBox(
-                                                  height: 44,
-                                                  child: TextField(
-                                                    controller: _controllerEmail,
-                                                    decoration: InputDecoration(
-                                                      border: OutlineInputBorder(),
-                                                      hintText: 'Enter Your Email',
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 20,),
-                                                Row(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    MaterialButton(
-                                                      color: Colors.grey,
-                                                      textColor: Colors.white,
-                                                      child: const Text('CANCEL'),
-                                                      onPressed: () {
-
+                                                autoValidateMode: AutovalidateMode.disabled,
+                                                selectorTextStyle: const TextStyle(color: Colors.black),
+                                                initialValue: PhoneNumber(isoCode: 'IN'),
+                                                textFieldController: _controllerMblNo,
+                                                formatInput: false,
+                                                keyboardType: const TextInputType.numberWithOptions(signed: true, decimal: true),
+                                                onSaved: (PhoneNumber number) {
+                                                  //print('On Saved: $number');
+                                                },
+                                              ),
+                                              Form(
+                                                key: _formKey,
+                                                child: Column(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: <Widget>[
+                                                    const SizedBox(height: 20),
+                                                    TextFormField(
+                                                      controller: _controllerUsrName,
+                                                      decoration: InputDecoration(
+                                                        labelText: 'Name',
+                                                        border: OutlineInputBorder(
+                                                          borderRadius: BorderRadius.circular(10.0), // Border radius
+                                                        ),
+                                                      ),
+                                                      validator: (value) {
+                                                        if (value!.isEmpty) {
+                                                          return 'Please enter your name';
+                                                        }
+                                                        return null;
+                                                      },
+                                                      onChanged: (value) {
+                                                        setState(() {
+                                                          //_name = value;
+                                                        });
                                                       },
                                                     ),
-                                                    const SizedBox(width: 20,),
-                                                    MaterialButton(
-                                                      color: Colors.blue,
-                                                      textColor: Colors.white,
-                                                      child: const Text('SAVE CHANGES'),
-                                                      onPressed: () async {
-
+                                                    const SizedBox(height: 20),
+                                                    TextFormField(
+                                                      controller: _controllerPwd,
+                                                      decoration: InputDecoration(
+                                                        labelText: 'Password',
+                                                        border: OutlineInputBorder(
+                                                          borderRadius: BorderRadius.circular(10.0), // Border radius
+                                                        ),
+                                                      ),
+                                                      validator: (value) {
+                                                        if (value!.isEmpty) {
+                                                          return 'Please enter your password';
+                                                        }
+                                                        return null;
                                                       },
+                                                      onChanged: (value) {
+                                                        setState(() {
+                                                          //_name = value;
+                                                        });
+                                                      },
+                                                    ),
+                                                    const SizedBox(height: 20),
+                                                    TextFormField(
+                                                      controller: _controllerEmail,
+                                                      decoration: InputDecoration(
+                                                        labelText: 'Email Id',
+                                                        border: OutlineInputBorder(
+                                                          borderRadius: BorderRadius.circular(10.0), // Border radius
+                                                        ),
+                                                      ),
+                                                      validator: (value) {
+                                                        if (value!.isEmpty) {
+                                                          return 'Please enter your email id';
+                                                        }
+                                                        return null;
+                                                      },
+                                                      onChanged: (value) {
+                                                        setState(() {
+                                                          //_name = value;
+                                                        });
+                                                      },
+                                                    ),
+                                                    const SizedBox(height: 20),
+                                                    Row(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        MaterialButton(
+                                                          color: Colors.grey,
+                                                          textColor: Colors.white,
+                                                          child: const Text('CANCEL'),
+                                                          onPressed: () {
+
+                                                          },
+                                                        ),
+                                                        const SizedBox(width: 20,),
+                                                        MaterialButton(
+                                                          color: Colors.blue,
+                                                          textColor: Colors.white,
+                                                          child: const Text('SAVE CHANGES'),
+                                                          onPressed: () async {
+                                                            try {
+                                                              if (_formKey.currentState!.validate()) {
+                                                                final body = {"userId": widget.userID, "userName": _controllerUsrName.text, "countryCode": countryCode, "mobileNumber": _controllerMblNo.text,
+                                                                  "emailAddress": _controllerEmail.text,"password": _controllerPwd.text,"modifyUser": widget.userID,};
+                                                                print(body);
+                                                                final response = await HttpService().putRequest("updateUserDetails", body);
+                                                                if (response.statusCode == 200) {
+                                                                  final jsonResponse = json.decode(response.body);
+                                                                  _showSnackBar(jsonResponse['message']);
+                                                                }
+                                                              }
+
+                                                            } catch (e) {
+                                                              print('Error: $e');
+                                                            }
+                                                          },
+                                                        ),
+                                                      ],
                                                     ),
                                                   ],
-                                                )
-                                              ],
-                                            ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                         Flexible(
@@ -458,6 +519,15 @@ class _MyPreferenceState extends State<MyPreference>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 3),
       ),
     );
   }

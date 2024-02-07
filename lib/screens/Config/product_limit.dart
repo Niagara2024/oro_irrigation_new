@@ -98,7 +98,6 @@ class _ProductLimitsState extends State<ProductLimits> {
         }
       }
       setState(() {
-        //print('${filledOutputCount}');
         productLimits;
         indicatorViewHide();
       });
@@ -176,8 +175,7 @@ class _ProductLimitsState extends State<ProductLimits> {
         onStepContinue: () {
           if(_currentStep==0){
 
-            if((widget.inputCount - filledInputCount) >= 0 &&
-                (widget.outputCount - filledOutputCount) >= 0){
+            if((widget.inputCount - filledInputCount) >= 0 && (widget.outputCount - filledOutputCount) >= 0) {
               Future.delayed(const Duration(seconds: 2), () {
                 getConfigData();
               });
@@ -423,23 +421,19 @@ class _ProductLimitsState extends State<ProductLimits> {
                                                 },
                                                 onChanged: (input) async {
                                                   await Future.delayed(const Duration(milliseconds: 50));
-                                                  setState(() {
-                                                    //String crTvVal = myControllers[index].text;
-                                                    if(productLimits[index].connectionType=='Output'){
-                                                      filledOutputCount = myControllers.fold<int>(0,(sum, controller) => sum + (int.tryParse(controller.text) ?? 0),);
-                                                    }else if(productLimits[index].connectionType=='Input'){
-                                                      filledInputCount= myControllers.fold<int>(0,(sum, controller) => sum + (int.tryParse(controller.text) ?? 0),);
-                                                    }else{
-                                                      //other feild
-                                                    }
-                                                    /*if (widget.outputCount < filledOutputCount + int.parse(myControllers[index].text.isEmpty ? '0' : myControllers[index].text) - currentTxtFldVal) {
-                                                      if (crTvVal.isNotEmpty) {
-                                                        myControllers[index].text = crTvVal.substring(0, crTvVal.length - 1);
-                                                      }
-                                                      _showSnackBar('Limit reached');
+                                                  filledOutputCount = 0;
+                                                  filledInputCount = 0;
+                                                  for (int i = 0; i < productLimits.length; i++) {
+                                                    var controller = myControllers[i];
+                                                    if (productLimits[i].connectionType == 'Output') {
+                                                      filledOutputCount += int.tryParse(controller.text) ?? 0; // Accumulate value for 'Output'
+                                                    } else if (productLimits[i].connectionType == 'Input') {
+                                                      filledInputCount += int.tryParse(controller.text) ?? 0; // Accumulate value for 'Input'
                                                     } else {
-                                                      filledOutputCount = myControllers.fold<int>(0,(sum, controller) => sum + (int.tryParse(controller.text) ?? 0),);
-                                                    }*/
+                                                      // Handle other cases if needed
+                                                    }
+                                                  }
+                                                  setState(() {
                                                   });
                                                 },
                                               ),

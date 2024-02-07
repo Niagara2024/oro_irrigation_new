@@ -812,7 +812,6 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                   Navigator.push(context, MaterialPageRoute(builder: (context) =>  ConfigMakerView(userID: widget.userID, siteID: customerSiteList[siteIndex].controllerId, customerID: widget.customerID)),);
                                 },
                                 icon: const Icon(Icons.view_list_outlined)),// Replace icon1 with your first icon
-                            const SizedBox(width: 8), // Adjust the spacing between icons if needed
                             IconButton(
                                 tooltip : 'Product Limit',
                                 onPressed: () async {
@@ -827,7 +826,6 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                   Navigator.push(context, MaterialPageRoute(builder: (context) =>  ProductLimits(userID: widget.userID, customerID: widget.customerID, userType: 2, outputCount: outputCnt, siteName: customerSiteList[siteIndex].groupName, controllerId: customerSiteList[siteIndex].controllerId, deviceId: customerSiteList[siteIndex].deviceId, inputCount: inputCnt, myCatIds: catId)),);
                                 },
                                 icon: const Icon(Icons.list_alt)),
-                            const SizedBox(width: 8),
                             IconButton(
                                 tooltip : 'Send to target',
                                 onPressed: () async {
@@ -893,6 +891,15 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                   }
                                 },
                                 icon: const Icon(Icons.send)),
+                            IconButton(
+                                tooltip : 'Clear serial',
+                                onPressed: () async {
+                                  String payLoadFinal = jsonEncode({
+                                    "2400": [{"2401": ''},]
+                                  });
+                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${customerSiteList[siteIndex].deviceId}');
+                                },
+                                icon: const Icon(Icons.cleaning_services_rounded)),
                           ],
                         ) : null,
                       ),

@@ -599,7 +599,7 @@ class ProductInventoryState extends State<ProductInventory> {
   {
     return Column(
       children: [
-        totalProduct > 30 ? ListTile(trailing: Row(
+        /*totalProduct > 30 ? ListTile(trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             PopupMenuButton<dynamic>(
@@ -699,7 +699,7 @@ class ProductInventoryState extends State<ProductInventory> {
               },
             )
           ],)) :
-        Container(),
+        Container(),*/
         Expanded(
           child: DataTable2(
             columnSpacing: 12,

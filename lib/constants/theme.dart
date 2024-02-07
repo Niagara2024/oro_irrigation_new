@@ -41,8 +41,6 @@ final ThemeData myTheme = ThemeData(
       foregroundColor: textColorWhite, backgroundColor: primaryColorDark
     ),
   ),
-
-
 );
 
 

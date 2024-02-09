@@ -6,8 +6,9 @@ class DashboardModel {
   final String siteName;
   final String categoryName;
   final String modelName;
-  final List<String> categoryList;
   List<NodeModel> nodeList;
+  List<CurrentProgram> currentProgram;
+
 
   DashboardModel({
     required this.controllerId,
@@ -17,15 +18,17 @@ class DashboardModel {
     required this.siteName,
     required this.categoryName,
     required this.modelName,
-    required this.categoryList,
     required this.nodeList,
+    required this.currentProgram,
   });
 
   factory DashboardModel.fromJson(Map<String, dynamic> json) {
-    var categoryListJson = json['categoryList'] as List?;
-    List<String> categoryList = categoryListJson != null ? List<String>.from(categoryListJson) : [];
+
     var nodeList = json['nodeList'] as List;
     List<NodeModel> nodes = nodeList.isNotEmpty? nodeList.map((node) => NodeModel.fromJson(node)).toList() : [];
+
+    var currentProgram = json['currentProgram'] as List;
+    List<CurrentProgram> cProgram = nodeList.isNotEmpty? currentProgram.map((crProgram) => CurrentProgram.fromJson(crProgram)).toList() : [];
 
     return DashboardModel(
       controllerId: json['controllerId'],
@@ -35,8 +38,8 @@ class DashboardModel {
       siteName: json['siteName'],
       categoryName: json['categoryName'],
       modelName: json['modelName'],
-      categoryList: categoryList,
       nodeList: nodes,
+      currentProgram: cProgram,
     );
   }
 }
@@ -88,21 +91,58 @@ class NodeModel {
   }
 }
 
+
+class CurrentProgram {
+  final String programName, programCategory,zoneName,startTime;
+  final int programType, totalRtc,currentRtc,totalCycle,currentCycle,totalZone,currentZone;
+
+  CurrentProgram({
+    required this.programName,
+    required this.programCategory,
+    required this.zoneName,
+    required this.programType,
+    required this.totalRtc,
+    required this.currentRtc,
+    required this.totalCycle,
+    required this.currentCycle,
+    required this.totalZone,
+    required this.currentZone,
+    required this.startTime,
+  });
+
+  factory CurrentProgram.fromJson(Map<String, dynamic> json) {
+    return CurrentProgram(
+      programName: json['ProgName'] ?? "",
+      programCategory: json['ProgCategory'] ?? "",
+      zoneName: json['ZoneName'] ?? "",
+      programType: json['ProgType'] ?? 0,
+      totalRtc: json['TotalRtc'] ?? 0,
+      currentRtc: json['CurrentRtc'] ?? 0,
+      totalCycle: json['TotalCycle'] ?? 0,
+      currentCycle: json['CurrentCycle'] ?? 0,
+      totalZone: json['TotalZone'] ?? 0,
+      currentZone: json['CurrentZone'] ?? 0,
+      startTime: json['StartTime'] ?? "",
+    );
+  }
+
+}
+
 class RelayStatus {
-  String name;
-  int outputInputNumber;
-  int status;
+  final String? name;
+  final int? rlyNo;
+  final int? status;
 
   RelayStatus({
     required this.name,
-    required this.outputInputNumber,
+    required this.rlyNo,
     required this.status,
   });
 
   factory RelayStatus.fromJson(Map<String, dynamic> json) {
     return RelayStatus(
       name: json['Name'],
-      outputInputNumber: json['Output_InputNumber'],
+      rlyNo: json['RlyNo'],
       status: json['Status'],
     );
   }

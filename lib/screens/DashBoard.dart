@@ -10,6 +10,7 @@ import 'package:oro_irrigation_new/screens/web_view.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Models/Customer/Dashboard/DashboardNode.dart';
+import '../Models/language.dart';
 import '../constants/MQTTManager.dart';
 import '../constants/http_service.dart';
 import '../state_management/MqttPayloadProvider.dart';
@@ -22,11 +23,6 @@ import 'product_entry.dart';
 import 'AdminDealerHomePage.dart';
 import 'login_form.dart';
 
-
-String appBarTitle = 'Home';
-get formKey => null;
-TextEditingController dateCtl = TextEditingController();
-String selectedCategory = '';
 
 enum Calendar { day, week, month, year }
 
@@ -59,18 +55,6 @@ class DashBoardMain extends StatefulWidget
 
 class DashBoardMainState extends State<DashBoardMain> with TickerProviderStateMixin
 {
-  NavigationRailLabelType labelType = NavigationRailLabelType.all;
-  bool showLeading = false;
-  bool showTrailing = false;
-  double groupAlignment = -1.0;
-
-  get formKey => null;
-  String selectedCategory = '';
-  String appBarTitle = 'Home';
-  int userID = 0;
-  String userName = '', userType = '', userCountryCode = '', userMobileNo = '', userEmailId = '';
-  final List<Map> myProducts =  List.generate(5, (index) => {"id": index, "name": "Product $index"}).toList();
-
   late MqttPayloadProvider payloadProvider;
   late MQTTManager manager;
 
@@ -78,23 +62,8 @@ class DashBoardMainState extends State<DashBoardMain> with TickerProviderStateMi
   void initState() {
     super.initState();
     manager = MQTTManager();
-    _executeSharedPreferences();
     Future.delayed(const Duration(milliseconds: 1500), () async {
       mqttConfigureAndConnect();
-    });
-  }
-
-
-  Future _executeSharedPreferences() async
-  {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userName = (prefs.getString('userName') ?? "");
-      userType = (prefs.getString('userType') ?? "");
-      userCountryCode = (prefs.getString('countryCode') ?? "");
-      userMobileNo = (prefs.getString('mobileNumber') ?? "");
-      userID = int.parse(prefs.getString('userId') ?? "");
-      userEmailId = (prefs.getString('email') ?? "");
     });
   }
 
@@ -116,7 +85,7 @@ class DashBoardMainState extends State<DashBoardMain> with TickerProviderStateMi
           } else if (constraints.maxWidth > 600 && constraints.maxWidth < 900) {
             return const DashboardMiddle();//pad or tap
           } else {
-            return DashboardWide(userName: userName, userType: userType, countryCode: userCountryCode, mobileNo: userMobileNo, userID: userID, screenWidth: MediaQuery.sizeOf(context).width, userEmailId: userEmailId,);//desktop or web
+            return const DashboardWide();
           }
         },
       ),
@@ -169,10 +138,7 @@ class _DashboardMiddleState extends State<DashboardMiddle> {
 
 class DashboardWide extends StatefulWidget
 {
-  const DashboardWide({Key? key, required this.userName, required this.userType, required this.countryCode,  required this.mobileNo, required this.userID, required this.screenWidth, required this.userEmailId}) : super(key: key);
-  final String userType, userName, countryCode, mobileNo, userEmailId;
-  final int userID;
-  final double screenWidth;
+  const DashboardWide({Key? key}) : super(key: key);
 
   @override
   State<DashboardWide> createState() => _DashboardWideState();
@@ -180,17 +146,21 @@ class DashboardWide extends StatefulWidget
 
 class _DashboardWideState extends State<DashboardWide> {
 
-  int _selectedIndex = 0;
+  String appBarTitle = 'Home';
   NavigationRailLabelType labelType = NavigationRailLabelType.all;
-  double groupAlignment = -1.0;
-  Calendar calendarView = Calendar.day;
-  late Widget _centerWidget;
-  String currentTap = 'Dashboard';
+  int _selectedIndex = 0;
+  int userId = 0;
+  String userName = '', userType = '0', countryCode = '', mobileNo = '', userEmailId = '';
+  bool visibleLoading = false;
+
+  final List<LanguageList> languageList = <LanguageList>[];
+  String _mySelection = 'English';
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    indicatorViewShow();
     getCustomerSite();
   }
 
@@ -202,71 +172,144 @@ class _DashboardWideState extends State<DashboardWide> {
 
   Future<void> getCustomerSite() async
   {
-    _centerWidget = Center(child: Container(
-      color: Colors.transparent,
-      padding: EdgeInsets.symmetric(horizontal: widget.screenWidth/2 - 150),
-      child: const LoadingIndicator(
-        indicatorType: Indicator.ballPulse,
-      ),
-    ));
-    callCustomerDashboard();
-  }
+    final prefs = await SharedPreferences.getInstance();
+    userName = (prefs.getString('userName') ?? "");
+    userType = (prefs.getString('userType') ?? "");
+    countryCode = (prefs.getString('countryCode') ?? "");
+    mobileNo = (prefs.getString('mobileNumber') ?? "");
+    userId = int.parse(prefs.getString('userId') ?? "");
+    userEmailId = (prefs.getString('email') ?? "");
 
-  Future<void> callCustomerDashboard()  async {
-    await Future.delayed(const Duration(seconds: 3));
-    if(widget.userType =='3'){
-      onOptionSelected('Dashboard');
-    }
-  }
-
-  void onOptionSelected(String option) {
-    currentTap = option;
-    setState(() {
-      if (option == 'Dashboard') {
-        _centerWidget = CustomerHome(customerID: widget.userID, type: 0, customerName: widget.userName, userID: widget.userID, mobileNo: '+${widget.countryCode}-${widget.mobileNo}',);
-      } else if (option == 'My Product') {
-        _centerWidget = ProductInventory(userName: widget.userName);
-      } else if (option == 'Device Settings') {
-        _centerWidget = FarmSettings(customerID: widget.userID, siteList: [],);
-      }
-      else if (option == 'Sent And Received') {
-        _centerWidget = SentAndReceived(customerID: widget.userID, siteList: [],);
-      }
+    Future.delayed(const Duration(seconds: 3), () async {
+      indicatorViewHide();
+      getLanguage();
     });
+
+  }
+
+  Future<void> getLanguage() async
+  {
+    final response = await HttpService().postRequest("getLanguageByActive", {"active": '1'});
+    if (response.statusCode == 200)
+    {
+      languageList.clear();
+      var data = jsonDecode(response.body);
+      if(data["code"]==200)
+      {
+        final cntList = data["data"] as List;
+        for (int i=0; i < cntList.length; i++) {
+          languageList.add(LanguageList.fromJson(cntList[i]));
+        }
+      }
+      setState(() {
+        languageList;
+      });
+    }
+    else{
+      //_showSnackBar(response.body);
+    }
   }
 
   @override
   Widget build(BuildContext context)  {
-    //var appState = Provider.of<MqttPayloadProvider>(context,listen: true);
+    final mediaQuery = MediaQuery.of(context);
     return Scaffold(
-      backgroundColor: myTheme.primaryColor.withOpacity(0.1),
-      appBar: widget.userType =='3'? AppBar(
+      appBar: userType =='3'? AppBar(
         leading: const Image(image: AssetImage("assets/images/niagara_logo.png")),
         leadingWidth: 100,
         actions: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              IconButton(onPressed: (){
+              IconButton(tooltip : 'Help & Support', onPressed: (){
                 showMenu(
                   context: context,
-                  position: RelativeRect.fromLTRB(100, 0, 70, 0),
+                  color: Colors.white,
+                  position: const RelativeRect.fromLTRB(100, 0, 95, 0),
                   items: <PopupMenuEntry>[
                     PopupMenuItem(
-                      child: ListTile(
-                        leading: Icon(Icons.settings),
-                        title: Text('Settings'),
-                        onTap: () {
-                          // Handle settings tap
-                          Navigator.pop(context); // Close popup after selection
-                        },
+                      child: Column(
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.help_outline),
+                            title: const Text('Help'),
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.model_training),
+                            title: const Text('Training'),
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.update),
+                            title: const Text('Updates'),
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          const Divider(height: 0),
+                          ListTile(
+                            leading: const Icon(Icons.feedback_outlined),
+                            title: const Text('Send feedback'),
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ],
                       ),
                     ),
-                    // Add more menu items as needed
                   ],
                 );
-              }, icon: const Icon(Icons.settings_outlined)),
-              IconButton(tooltip : 'Niagara Account\n${widget.userName}\n+${widget.countryCode} ${widget.mobileNo}', onPressed: (){
+              }, icon: const CircleAvatar(
+                radius: 17,
+                backgroundColor: Colors.white,
+                child: Icon(Icons.live_help_outlined),
+              )),
+              IconButton(tooltip : 'App Settings', onPressed: (){
+                showMenu(
+                  context: context,
+                  position: const RelativeRect.fromLTRB(100, 0, 70, 0),
+                  items: <PopupMenuEntry>[
+                    PopupMenuItem(
+                      child: Column(
+                        children: [
+                          ListTile(
+                            title: const Text('Language'),
+                            leading: Icon(Icons.language, color: myTheme.primaryColor,),
+                            trailing: DropdownButton(
+                              items: languageList.map((item) {
+                                return DropdownMenuItem(
+                                  value: item.languageName,
+                                  child: Text(item.languageName),
+                                );
+                              }).toList(),
+                              onChanged: (newVal) {
+                                setState(() {
+                                  _mySelection = newVal!;
+                                });
+                              },
+                              value: _mySelection,
+                            ),
+                          ),
+                          ListTile(
+                            title: const Text('Theme(Light/Dark)'),
+                            leading: Icon(Icons.color_lens_outlined,  color: myTheme.primaryColor,),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              }, icon: const CircleAvatar(
+                radius: 17,
+                backgroundColor: Colors.white,
+                child: Icon(Icons.settings_outlined),
+              )),
+              IconButton(tooltip : 'Niagara Account\n$userName\n+$countryCode $mobileNo', onPressed: (){
                 showMenu(
                   context: context,
                   position: const RelativeRect.fromLTRB(100, 0, 10, 0),
@@ -280,13 +323,13 @@ class _DashboardWideState extends State<DashboardWide> {
                           Stack(
                             children: [
                               Center(
-                                child: CircleAvatar(radius: 35, backgroundColor: Colors.greenAccent, child: Text(widget.userName.substring(0, 1).toUpperCase(), style: const TextStyle(fontSize: 25)),),
+                                child: CircleAvatar(radius: 35, backgroundColor: Colors.greenAccent, child: Text(userName.substring(0, 1).toUpperCase(), style: const TextStyle(fontSize: 25)),),
                               ),
                               Positioned(
                                 bottom: 0.0,
                                 right: 70.0,
                                 child: Container(
-                                  decoration: BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     shape: BoxShape.circle, // Optional: Makes the container circular
                                     color: Colors.green, // Set the background color here
                                   ),
@@ -299,16 +342,16 @@ class _DashboardWideState extends State<DashboardWide> {
                               ),
                             ],
                           ),
-                          Text('Hi, ${widget.userName}!',style: const TextStyle(fontSize: 20)),
-                          Text(widget.userEmailId, style: const TextStyle(fontSize: 13)),
-                          Text('+${widget.countryCode} ${widget.mobileNo}', style: const TextStyle(fontSize: 13)),
+                          Text('Hi, $userName!',style: const TextStyle(fontSize: 20)),
+                          Text(userEmailId, style: const TextStyle(fontSize: 13)),
+                          Text('+$countryCode $mobileNo', style: const TextStyle(fontSize: 13)),
                           const SizedBox(height: 15),
                           TextButton(onPressed: (){
                             Navigator.pop(context);
                             showModalBottomSheet(
                               context: context,
                               builder: (BuildContext context) {
-                                return AccountManagement(userID: widget.userID, callback: callbackFunction);
+                                return AccountManagement(userID: userId, callback: callbackFunction);
                               },
                             );
                           }, child: const Text('Manage Your Niagara Account')),
@@ -342,18 +385,30 @@ class _DashboardWideState extends State<DashboardWide> {
                 );
               }, icon: CircleAvatar(
                 radius: 17,
-                child: Text(widget.userName.substring(0, 1).toUpperCase()),
+                backgroundColor: Colors.white,
+                child: Text(userName.substring(0, 1).toUpperCase()),
               )),
             ],),
-          const SizedBox(width: 10)
+          const SizedBox(width: 10),
         ],
       ) : null,
-      body: widget.userType =='3'? Stack(
-        children: [
-          buildCustomerScreen(),
-        ],
-      ):
-      Row(
+      body: visibleLoading? Center(
+        child: Visibility(
+          visible: visibleLoading,
+          child: Container(
+            padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 25, 0, mediaQuery.size.width/2 - 25, 0),
+            child: const LoadingIndicator(
+              indicatorType: Indicator.ballPulse,
+            ),
+          ),
+        ),
+      ) :
+      userType =='3'? Container(
+        color: Colors.transparent,
+        width: double.infinity,
+        height: double.infinity,
+        child: CustomerHome(customerID: userId, type: 0, customerName: userName, userID: userId, mobileNo: '+$countryCode-$mobileNo',),
+      ): Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           NavigationRail(
@@ -403,7 +458,7 @@ class _DashboardWideState extends State<DashboardWide> {
                 }
               });
             },
-            destinations: widget.userType == '1'? <NavigationRailDestination>[
+            destinations: userType == '1'? <NavigationRailDestination>[
               const NavigationRailDestination(
                 padding: EdgeInsets.only(top: 5),
                 icon: Icon(Icons.dashboard_outlined),
@@ -466,108 +521,34 @@ class _DashboardWideState extends State<DashboardWide> {
             ],
           ),
           Expanded(
-            child: widget.userType == '1'?
-            _selectedIndex == 0 ? AdminDealerHomePage(userName: widget.userName, countryCode: widget.countryCode, mobileNo: widget.mobileNo, fromLogin: true, userId: 0, userType: 0,) :
-            _selectedIndex == 1 ? ProductInventory(userName: widget.userName) :
+            child: userType == '1'?
+            _selectedIndex == 0 ? AdminDealerHomePage(userName: userName, countryCode: countryCode, mobileNo: mobileNo, fromLogin: true, userId: 0, userType: 0,) :
+            _selectedIndex == 1 ? ProductInventory(userName: userName) :
             _selectedIndex == 2 ? const AllEntry():
-            _selectedIndex == 3 ?  MyPreference(userID: widget.userID,) : const MyWebView() :
+            _selectedIndex == 3 ?  MyPreference(userID: userId,) : const MyWebView() :
 
-            _selectedIndex == 0 ? AdminDealerHomePage(userName: widget.userName, countryCode: widget.countryCode, mobileNo: widget.mobileNo, fromLogin: true, userId: 0, userType: 0,) :
-            _selectedIndex == 1 ? ProductInventory(userName: widget.userName) :
-            _selectedIndex == 2 ? MyPreference(userID: widget.userID,) : const MyWebView(),
+            _selectedIndex == 0 ? AdminDealerHomePage(userName: userName, countryCode: countryCode, mobileNo: mobileNo, fromLogin: true, userId: 0, userType: 0,) :
+            _selectedIndex == 1 ? ProductInventory(userName: userName) :
+            _selectedIndex == 2 ? MyPreference(userID: userId,) : const MyWebView(),
           ),
-        ],
-      )
-    );
-  }
-
-  Widget buildCustomerScreen() {
-    return Container(
-     color: Colors.white,
-      child: Row(
-        children: [
-          Container(
-            width: 250,
-            height: double.infinity,
-            decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 5,
-                    blurRadius: 5,
-                    offset: const Offset(0, 0),
-                  ),
-                ],
-              ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                const Padding(
-                  padding: EdgeInsets.only(left: 10, bottom: 5, top: 10),
-                  child: Text('HOME', style: TextStyle(color: Colors.black, fontSize: 14)),
-                ),
-                buildCustomListTile('Dashboard', Icons.dashboard_outlined, 'Dashboard'),
-                buildCustomListTile('My Product', Icons.topic_outlined, 'My Product'),
-                buildCustomListTile('Report Overview', Icons.my_library_books_outlined, 'Report Overview'),
-                buildCustomListTile('Sent And Received', Icons.question_answer_outlined, 'Sent And Received'),
-                buildCustomListTile('Controller Logs', Icons.message_outlined, 'Controller Logs'),
-                buildCustomListTile('Device Settings', Icons.settings_outlined, 'Device Settings'),
-                const Padding(
-                  padding: EdgeInsets.only(left: 10, top: 10, bottom: 5),
-                  child: Text('ORGANIZATION', style: TextStyle(color: Colors.black, fontSize: 14)),
-                ),
-                buildCustomListTile('App Info', Icons.info_outline, 'App Info'),
-                buildCustomListTile('Help & Support', Icons.help_outline, 'Help & Support'),
-
-              ],
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 12),
-              child: Container(
-                color: Colors.transparent,
-                width: double.infinity,
-                height: double.infinity,
-                child: _centerWidget,
-              ),
-            ),
-          )
         ],
       ),
     );
+
   }
 
-  Widget buildCustomListTile(String title, IconData icon, String tapOption) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8, right: 8),
-      child: Container(
-        decoration: BoxDecoration(
-          color: currentTap == tapOption ? myTheme.primaryColor.withOpacity(0.1) : Colors.transparent,
-          borderRadius: const BorderRadius.all(Radius.circular(5)), // Adjust the radius as needed
-        ),
-        child: ListTile(
-          leading: Icon(
-            icon,
-            color: currentTap == tapOption ? myTheme.primaryColor : Colors.black.withOpacity(0.6),
-          ),
-          title: Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: currentTap == tapOption ? myTheme.primaryColor : Colors.black.withOpacity(0.8),
-            ),
-          ),
-          onTap: () {
-            onOptionSelected(tapOption);
-          },
-        ),
-      ),
-    );
+  void indicatorViewShow() {
+    setState(() {
+      visibleLoading = true;
+    });
   }
+
+  void indicatorViewHide() {
+    setState(() {
+      visibleLoading = false;
+    });
+  }
+
 
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(

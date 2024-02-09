@@ -355,11 +355,11 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                     segments: const <ButtonSegment<ManualBaseSegment>>[
                       ButtonSegment<ManualBaseSegment>(
                           value: ManualBaseSegment.manual,
-                          label: Text('Manual base'),
+                          label: Text('Manual'),
                           icon: Icon(Icons.pan_tool_alt_outlined)),
                       ButtonSegment<ManualBaseSegment>(
                           value: ManualBaseSegment.duration,
-                          label: Text('Duration base'),
+                          label: Text('Duration'),
                           icon: Icon(Icons.timer_outlined)),
                     ],
                     selected: <ManualBaseSegment>{segmentViewManual},

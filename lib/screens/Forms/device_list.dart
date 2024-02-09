@@ -820,7 +820,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                   List<int> catId = [];
                                   for(int i=0; i<usedNodeList[siteIndex].length; i++){
                                     outputCnt = outputCnt + usedNodeList[siteIndex][i].outputCount;
-                                    inputCnt = outputCnt + usedNodeList[siteIndex][i].inputCount;
+                                    inputCnt = inputCnt + usedNodeList[siteIndex][i].inputCount;
                                     catId.add(usedNodeList[siteIndex][i].categoryId);
                                   }
                                   Navigator.push(context, MaterialPageRoute(builder: (context) =>  ProductLimits(userID: widget.userID, customerID: widget.customerID, userType: 2, outputCount: outputCnt, siteName: customerSiteList[siteIndex].groupName, controllerId: customerSiteList[siteIndex].controllerId, deviceId: customerSiteList[siteIndex].deviceId, inputCount: inputCnt, myCatIds: catId)),);

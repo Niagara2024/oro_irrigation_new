@@ -4,7 +4,10 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:provider/provider.dart';
+<<<<<<< HEAD
 import 'package:shared_preferences/shared_preferences.dart';
+=======
+>>>>>>> f6881ec (Save changes 310124)
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../Models/Customer/Dashboard/ProgramList.dart';
 import '../../Models/Customer/Dashboard/ProgramServiceDevices.dart';
@@ -1054,7 +1057,11 @@ class _CustomerHomeState extends State<CustomerHome>
                                           context: context,
                                           builder: (BuildContext context) {
                                             return SizedBox(
+<<<<<<< HEAD
                                               height: siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 270 : 230,
+=======
+                                              height: siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 275 : 200,
+>>>>>>> f6881ec (Save changes 310124)
                                               child: Column(
                                                 mainAxisAlignment: MainAxisAlignment.start,
                                                 children: <Widget>[
@@ -1080,7 +1087,11 @@ class _CustomerHomeState extends State<CustomerHome>
                                                   const Divider(height: 0),
                                                   SizedBox(
                                                     width : double.infinity,
+<<<<<<< HEAD
                                                     height : siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 230 : 160,
+=======
+                                                    height : siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 206 : 130,
+>>>>>>> f6881ec (Save changes 310124)
                                                     child: Padding(
                                                       padding: const EdgeInsets.all(8.0),
                                                       child: siteListFinal[siteIndex].nodeList[index].rlyStatus.isNotEmpty ? Column(
@@ -1111,7 +1122,11 @@ class _CustomerHomeState extends State<CustomerHome>
                                                           ),
                                                           SizedBox(
                                                             width: double.infinity,
+<<<<<<< HEAD
                                                             height : 100,
+=======
+                                                            height : siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 150 : 70,
+>>>>>>> f6881ec (Save changes 310124)
                                                             child: GridView.builder(
                                                               itemCount: siteListFinal[siteIndex].nodeList[index].rlyStatus.length, // Number of items in the grid
                                                               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

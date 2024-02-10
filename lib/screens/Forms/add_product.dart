@@ -39,12 +39,11 @@ class _AddProductState extends State<AddProduct> {
 
   late List<DropdownMenuEntry<PrdCateModel>> selectedCategory;
   List<PrdCateModel> activeCategoryList = <PrdCateModel>[];
-  int sldCatID = 0;
+  int sldCatID = 0, sldModID = 0;
 
 
   late List<DropdownMenuEntry<PrdModel>> selectedModel;
   List<PrdModel> activeModelList = <PrdModel>[];
-  int sldModID = 0;
   String mdlDis = 'Product Description';
 
   bool vldErrorCTL = false;
@@ -75,13 +74,13 @@ class _AddProductState extends State<AddProduct> {
       "active" : "1",
     };
     final response = await HttpService().postRequest("getCategoryByActive", body);
-    print(response);
+    //print(response);
     if (response.statusCode == 200)
     {
       activeCategoryList.clear();
       var data = jsonDecode(response.body);
       final cntList = data["data"] as List;
-
+      print(response.body);
       for (int i=0; i < cntList.length; i++) {
         activeCategoryList.add(PrdCateModel.fromJson(cntList[i]));
       }
@@ -128,8 +127,6 @@ class _AddProductState extends State<AddProduct> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context)
   {
@@ -162,6 +159,7 @@ class _AddProductState extends State<AddProduct> {
                     sldCatID = ptdCat!.categoryId;
                     vldErrorCTL = false;
                     ddModelList.clear();
+                    sldModID = 0;
                     getModelByActiveList(sldCatID);
                   });
                 },
@@ -182,8 +180,8 @@ class _AddProductState extends State<AddProduct> {
                 onSelected: (PrdModel? mdl) {
                   setState(() {
                     sldModID = mdl!.modelId;
-                    ctrlPrdDis.text = mdl.modelDescription;
-                    vldErrorMDL = false;
+                    ddModelList.clear();
+                    ddModelList.text = mdl.modelName;
                   });
                 },
               ),
@@ -224,6 +222,7 @@ class _AddProductState extends State<AddProduct> {
                     if(value==null || value.isEmpty){
                       return 'Please fill out this field';
                     }
+                    return null;
                   },
                   maxLength: 2,
                   inputFormatters: <TextInputFormatter>[
@@ -248,6 +247,7 @@ class _AddProductState extends State<AddProduct> {
                     if(value==null || value.isEmpty){
                       return 'Please fill out this field';
                     }
+                    return null;
                   },
                   controller: ctrlDofM,
                   decoration: InputDecoration(
@@ -282,26 +282,30 @@ class _AddProductState extends State<AddProduct> {
           textColor: Colors.white,
           child: const Text('ADD'),
           onPressed: () async {
-            if (sldCatID!=0) {
-              String newIMEI = ctrlIMI.text;
-              if (!isIMEIAlreadyExists(newIMEI, addedProductList)) {
-                Map<String, dynamic> productMap = {
-                  "categoryName": ddCatList.text,
-                  "categoryId": sldCatID.toString(),
-                  "modelName": ddModelList.text,
-                  "modelId": sldModID.toString(),
-                  "deviceId": newIMEI,
-                  "productDescription": ctrlPrdDis.text,
-                  'dateOfManufacturing': ctrlDofM.text,
-                  'warrantyMonths': ctrlWrM.text,
-                };
+            if (sldCatID!=0 && sldModID!=0) {
 
-                setState(() {
-                  addedProductList.add(productMap);
-                  //ctrlIMI.clear();
-                });
-              } else {
-                _showSnackBar('IMEI already exists!');
+              if (isNotEmpty(ctrlIMI.text) && isNotEmpty(ctrlDofM.text) && isNotEmpty(ctrlWrM.text)) {
+                if (!isIMEIAlreadyExists(ctrlIMI.text, addedProductList)) {
+                  Map<String, dynamic> productMap = {
+                    "categoryName": ddCatList.text,
+                    "categoryId": sldCatID.toString(),
+                    "modelName": ddModelList.text,
+                    "modelId": sldModID.toString(),
+                    "deviceId": ctrlIMI.text,
+                    "productDescription": ctrlPrdDis.text,
+                    'dateOfManufacturing': ctrlDofM.text,
+                    'warrantyMonths': ctrlWrM.text,
+                  };
+
+                  setState(() {
+                    addedProductList.add(productMap);
+                    //ctrlIMI.clear();
+                  });
+                } else {
+                  _showAlertDialog('Error!', 'IMEI already exists!');
+                }
+              }else{
+                _showAlertDialog('Error!', 'Empty filed not allowed!');
               }
 
             }
@@ -309,6 +313,10 @@ class _AddProductState extends State<AddProduct> {
               if(sldCatID==0){
                 setState(() {
                   vldErrorCTL = true;
+                });
+              }else if(sldModID==0){
+                setState(() {
+                  vldErrorMDL = true;
                 });
               }
             }
@@ -349,7 +357,7 @@ class _AddProductState extends State<AddProduct> {
                               ),
                               DataColumn2(
                                 label: Center(child: Text('M.Date')),
-                                fixedWidth: 70,
+                                fixedWidth: 75,
                               ),
                               DataColumn2(
                                 label: Center(child: Text('Warranty')),
@@ -392,7 +400,7 @@ class _AddProductState extends State<AddProduct> {
                               builder: (BuildContext context) {
                                 return AlertDialog(
                                   title: const Text('Confirmation'),
-                                  content: const Text('Are you sure you want to save the product stock?'),
+                                  content: const Text('Are you sure! You want to save the product to Stock list?'),
                                   actions: [
                                     TextButton(
                                       onPressed: () {
@@ -410,7 +418,7 @@ class _AddProductState extends State<AddProduct> {
                                           'createUser': userID,
                                         };
 
-                                        final Response response = await HttpService().postRequest("createProduct", body);;
+                                        final Response response = await HttpService().postRequest("createProduct", body);
                                         if(response.statusCode == 200)
                                         {
                                           var data = jsonDecode(response.body);
@@ -435,7 +443,7 @@ class _AddProductState extends State<AddProduct> {
                             );
 
                           }else{
-                            _showSnackBar('Product Empty');
+                            _showAlertDialog('Alert Message', 'Product Empty!');
                           }
                         },
                       )),
@@ -450,6 +458,10 @@ class _AddProductState extends State<AddProduct> {
     );
   }
 
+  bool isNotEmpty(String text) {
+    return text.isNotEmpty;
+  }
+
   bool isIMEIAlreadyExists(String newIMEI, List<Map<String, dynamic>> productList) {
     for (var product in productList) {
       if (product['deviceId'] == newIMEI) {
@@ -459,14 +471,7 @@ class _AddProductState extends State<AddProduct> {
     return false; // IMEI does not exist
   }
 
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
+
 
   void _showAlertDialog(String title , String message)
   {

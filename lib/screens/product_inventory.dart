@@ -342,7 +342,7 @@ class ProductInventoryState extends State<ProductInventory> {
         child: Container(
           height: mediaQuery.size.height,
           color: Colors.transparent,
-          padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 75, 0, mediaQuery.size.width/2 - 75, 0),
+          padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 60, 0, mediaQuery.size.width/2 - 60, 0),
           child: const LoadingIndicator(
             indicatorType: Indicator.ballPulse,
           ),

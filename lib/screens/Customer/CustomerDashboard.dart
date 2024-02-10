@@ -15,10 +15,10 @@ import 'Dashboard/RunByManual.dart';
 import 'ProgramSchedule.dart';
 
 class CustomerDashboard extends StatefulWidget {
-  const CustomerDashboard({Key? key, required this.userID, required this.customerID, required this.type, required this.customerName, required this.mobileNo, required this.siteListFinal}) : super(key: key);
-  final int userID, customerID, type;
+  const CustomerDashboard({Key? key, required this.userID, required this.customerID, required this.type, required this.customerName, required this.mobileNo, required this.siteData, required this.siteLength}) : super(key: key);
+  final int userID, customerID, type, siteLength;
   final String customerName, mobileNo;
-  final List<DashboardModel> siteListFinal;
+  final DashboardModel siteData;
 
   @override
   State<CustomerDashboard> createState() => _CustomerDashboardState();
@@ -37,6 +37,9 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
   @override
   void initState() {
     super.initState();
+    //call live
+    String payLoadFinal = jsonEncode({"3000": [{"3001": ""}]});
+    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
     initRotationAnimation();
     getProgramList();
   }
@@ -52,7 +55,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
     Future.delayed(const Duration(milliseconds: 500), () {
       animationController.stop();
       String payLoadFinal = jsonEncode({"3000": [{"3001": ""}]});
-      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteListFinal[siteIndex].deviceId}');
+      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
     });
   }
 
@@ -60,7 +63,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
   {
     programList.clear();
     try {
-      Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.siteListFinal[0].controllerId};
+      Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.siteData.controllerId};
       final response = await HttpService().postRequest("getUserProgramNameList", body);
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
@@ -104,15 +107,15 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
               try {
                 int position = getNodePositionInNodeList(0, item['SNo']);
                 if (position != -1) {
-                  widget.siteListFinal[0].nodeList[position].status = item['Status'];
-                  widget.siteListFinal[0].nodeList[position].batVolt = item['BatVolt'];
-                  widget.siteListFinal[0].nodeList[position].slrVolt = item['SVolt'];
+                  widget.siteData.nodeList[position].status = item['Status'];
+                  widget.siteData.nodeList[position].batVolt = item['BatVolt'];
+                  widget.siteData.nodeList[position].slrVolt = item['SVolt'];
 
-                  widget.siteListFinal[0].nodeList[position].rlyStatus = [];
+                  widget.siteData.nodeList[position].rlyStatus = [];
                   if (item['RlyStatus'] != null) {
                     List<dynamic> rlyStatusJsonList = item['RlyStatus'];
                     List<RelayStatus> rlyStatusList = rlyStatusJsonList.map((rs) => RelayStatus.fromJson(rs)).toList();
-                    widget.siteListFinal[0].nodeList[position].rlyStatus = rlyStatusList;
+                    widget.siteData.nodeList[position].rlyStatus = rlyStatusList;
                   }
 
                 } else {
@@ -131,7 +134,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
               try {
                 print(item);
                 var currentProgram = CurrentProgram.fromJson(item);
-                widget.siteListFinal[0].currentProgram.add(currentProgram);
+                widget.siteData.currentProgram.add(currentProgram);
               } catch (e) {
                 print('Error updating node properties: $e');
               }
@@ -159,8 +162,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
               child: ListTile(
                 tileColor: Colors.transparent,
                 leading: Image.asset('assets/images/oro_gem.png'),
-                title: Text(widget.siteListFinal[siteIndex].deviceName),
-                subtitle: Text('${widget.siteListFinal[siteIndex].categoryName} - Last sync : $lastSyncData', style: const TextStyle(fontWeight: FontWeight.normal),),
+                title: Text(widget.siteData.deviceName),
+                subtitle: Text('${widget.siteData.categoryName} - Last sync : $lastSyncData', style: const TextStyle(fontWeight: FontWeight.normal),),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -190,11 +193,11 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                         showModalBottomSheet(
                           context: context,
                           builder: (BuildContext context) {
-                            return RunByManual(siteID: widget.siteListFinal[siteIndex].siteId,
-                                siteName: widget.siteListFinal[siteIndex].siteName,
-                                controllerID: widget.siteListFinal[siteIndex].controllerId,
+                            return RunByManual(siteID: widget.siteData.siteId,
+                                siteName: widget.siteData.siteName,
+                                controllerID: widget.siteData.controllerId,
                                 customerID: widget.customerID,
-                                imeiNo: widget.siteListFinal[siteIndex].deviceId,
+                                imeiNo: widget.siteData.deviceId,
                                 programList: programList, callbackFunction: callbackFunction);
                           },
                         );
@@ -210,9 +213,9 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                           MaterialPageRoute(
                             builder: (context) => ProgramSchedule(
                               customerID: widget.customerID,
-                              controllerID: widget.siteListFinal[siteIndex].controllerId,
-                              siteName: widget.siteListFinal[siteIndex].siteName,
-                              imeiNumber: widget.siteListFinal[siteIndex].deviceId,
+                              controllerID: widget.siteData.controllerId,
+                              siteName: widget.siteData.siteName,
+                              imeiNumber: widget.siteData.deviceId,
                               userId: widget.customerID,
                             ),
                           ),
@@ -612,11 +615,11 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                     Container(
                                       color: Colors.white,
                                       height: 85,
-                                      child: widget.siteListFinal[0].currentProgram.isNotEmpty? ListView.builder(
+                                      child: widget.siteData.currentProgram.isNotEmpty? ListView.builder(
                                           scrollDirection: Axis.vertical,
-                                          itemCount: widget.siteListFinal[0].currentProgram.length,
+                                          itemCount: widget.siteData.currentProgram.length,
                                           itemBuilder: (context, cpInx) {
-                                            if(widget.siteListFinal[0].currentProgram[cpInx].programCategory=='Manual'){
+                                            if(widget.siteData.currentProgram[cpInx].programCategory=='Manual'){
                                               return SizedBox(
                                                 height: 85,
                                                 child: DataTable2(
@@ -629,7 +632,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                   //border: TableBorder.all(),
                                                   columns: [
                                                     DataColumn2(
-                                                        label: Text(widget.siteListFinal[0].currentProgram[cpInx].programName, style: TextStyle(fontSize: 13),),
+                                                        label: Text(widget.siteData.currentProgram[cpInx].programName, style: TextStyle(fontSize: 13),),
                                                         fixedWidth: 100
                                                     ),
                                                     const DataColumn2(
@@ -647,7 +650,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                   ],
                                                   rows: List<DataRow>.generate(1, (index) => DataRow(cells: [
                                                     DataCell(Text('Manual')),
-                                                    DataCell(Center(child: Text(_convertTime(widget.siteListFinal[0].currentProgram[cpInx].startTime)))),
+                                                    DataCell(Center(child: Text(_convertTime(widget.siteData.currentProgram[cpInx].startTime)))),
                                                     DataCell(Center(child: Text('---'))),
                                                     DataCell(Center(child: Row(
                                                       children: [
@@ -657,7 +660,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                           String payLoadFinal = jsonEncode({
                                                             "2900": [{"2901": payload}]
                                                           });
-                                                          MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteListFinal[0].deviceId}');
+                                                          MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
                                                         }, icon: Icon(Icons.stop_circle_outlined, color: Colors.red,)),
                                                         PopupMenuButton<String>(
                                                           tooltip: 'Show more option',
@@ -755,7 +758,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                         String payLoadFinal = jsonEncode({
                                                           "2900": [{"2901": payload}]
                                                         });
-                                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteListFinal[0].deviceId}');
+                                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
                                                       }, icon: Icon(Icons.stop_circle_outlined, color: Colors.red,)),
                                                       PopupMenuButton<String>(
                                                         tooltip: 'Show more option',
@@ -826,7 +829,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                     ListTile(
                                       tileColor: Colors.white,
                                       title: const Text('NEXT PROGRAM', style: TextStyle(fontSize: 14)),
-                                      //subtitle: Text(programList.isNotEmpty ? programList[0].programName:'No program Available'),
+                                      //subtitle: Text(programList.isNotEmpty ? programList.programName:'No program Available'),
                                       trailing: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
@@ -902,7 +905,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                           ),
                                         ),
                                         onTap: (){
-                                          //Navigator.push(context, MaterialPageRoute(builder: (context) =>  DashboardByProgram(siteID: siteListFinal[i].siteId, siteName: siteListFinal[i].siteName, controllerID: siteListFinal[i].controllerId, customerID: widget.customerID, imeiNo: siteListFinal[i].deviceId, programId: programList[index].programId,)),);
+                                          //Navigator.push(context, MaterialPageRoute(builder: (context) =>  DashboardByProgram(siteID: siteData[i].siteId, siteName: siteData[i].siteName, controllerID: siteData[i].controllerId, customerID: widget.customerID, imeiNo: siteData[i].deviceId, programId: programList[index].programId,)),);
                                         },
                                       ) :
                                       Container(),
@@ -927,7 +930,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                     padding: const EdgeInsets.all(3.0),
                     child: Container(
                       width: 345,
-                      height: MediaQuery.sizeOf(context).height-153,
+                      height: widget.siteLength > 0? MediaQuery.sizeOf(context).height-197 : MediaQuery.sizeOf(context).height-153,
                       color: Colors.white,
                       child: Column(
                         children: [
@@ -999,7 +1002,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                               {"2301": ""},
                                             ]
                                           });
-                                          MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteListFinal[siteIndex].deviceId}');
+                                          MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
                                         },
                                       ),
                                     ),
@@ -1040,22 +1043,22 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                   fixedWidth: 40,
                                 ),
                               ],
-                              rows: List<DataRow>.generate(widget.siteListFinal[0].nodeList.length, (index) => DataRow(cells: [
-                                DataCell(Center(child: Text('${widget.siteListFinal[0].nodeList[index].serialNumber}', style: const TextStyle(fontWeight: FontWeight.normal),))),
+                              rows: List<DataRow>.generate(widget.siteData.nodeList.length, (index) => DataRow(cells: [
+                                DataCell(Center(child: Text('${widget.siteData.nodeList[index].serialNumber}', style: const TextStyle(fontWeight: FontWeight.normal),))),
                                 DataCell(Center(child: CircleAvatar(radius: 7, backgroundColor:
-                                widget.siteListFinal[0].nodeList[index].status == 1 ? Colors.green.shade400:
-                                widget.siteListFinal[0].nodeList[index].status == 3 ? Colors.red.shade400:
-                                widget.siteListFinal[0].nodeList[index].status == 2 ? Colors.grey :
-                                widget.siteListFinal[0].nodeList[index].status == 4 ? Colors.yellow :
+                                widget.siteData.nodeList[index].status == 1 ? Colors.green.shade400:
+                                widget.siteData.nodeList[index].status == 3 ? Colors.red.shade400:
+                                widget.siteData.nodeList[index].status == 2 ? Colors.grey :
+                                widget.siteData.nodeList[index].status == 4 ? Colors.yellow :
                                 Colors.grey,
                                 ))),
-                                DataCell(Center(child: Text('${widget.siteListFinal[0].nodeList[index].referenceNumber}', style: TextStyle(fontWeight: FontWeight.normal)))),
+                                DataCell(Center(child: Text('${widget.siteData.nodeList[index].referenceNumber}', style: TextStyle(fontWeight: FontWeight.normal)))),
                                 DataCell(Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(widget.siteListFinal[0].nodeList[index].categoryName, style: const TextStyle(fontWeight: FontWeight.normal)),
-                                    Text(widget.siteListFinal[0].nodeList[index].deviceId, style: const TextStyle(fontWeight: FontWeight.normal,fontSize: 11)),
+                                    Text(widget.siteData.nodeList[index].categoryName, style: const TextStyle(fontWeight: FontWeight.normal)),
+                                    Text(widget.siteData.nodeList[index].deviceId, style: const TextStyle(fontWeight: FontWeight.normal,fontSize: 11)),
                                   ],
                                 )),
                                 DataCell(Center(child: IconButton(tooltip: 'View Relay status',
@@ -1065,7 +1068,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                       context: context,
                                       builder: (BuildContext context) {
                                         return SizedBox(
-                                          height: widget.siteListFinal[0].nodeList[index].rlyStatus.length > 8? 275 : 200,
+                                          height: widget.siteData.nodeList[index].rlyStatus.length > 8? 275 : 200,
                                           child: Column(
                                             mainAxisAlignment: MainAxisAlignment.start,
                                             children: <Widget>[
@@ -1073,25 +1076,25 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                 tileColor: myTheme.primaryColor,
                                                 textColor: Colors.white,
                                                 leading: const Icon(Icons.developer_board_rounded, color: Colors.white),
-                                                title: Text('${widget.siteListFinal[0].nodeList[index].categoryName} - ${widget.siteListFinal[0].nodeList[index].deviceId}'),
+                                                title: Text('${widget.siteData.nodeList[index].categoryName} - ${widget.siteData.nodeList[index].deviceId}'),
                                                 trailing: Row(
                                                   mainAxisSize: MainAxisSize.min,
                                                   children: [
                                                     const Icon(Icons.solar_power_outlined, color: Colors.white),
                                                     const SizedBox(width: 5,),
-                                                    Text('${widget.siteListFinal[0].nodeList[index].slrVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                    Text('${widget.siteData.nodeList[index].slrVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
                                                     const SizedBox(width: 5,),
                                                     const Icon(Icons.battery_3_bar_rounded, color: Colors.white),
                                                     const SizedBox(width: 5,),
-                                                    Text('${widget.siteListFinal[0].nodeList[index].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                    Text('${widget.siteData.nodeList[index].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
                                                     const SizedBox(width: 5,),
                                                     IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
                                                       String payLoadFinal = jsonEncode({
                                                         "2300": [
-                                                          {"2301": "${widget.siteListFinal[0].nodeList[index].serialNumber}"},
+                                                          {"2301": "${widget.siteData.nodeList[index].serialNumber}"},
                                                         ]
                                                       });
-                                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteListFinal[0].deviceId}');
+                                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
                                                     }, icon: Icon(Icons.fact_check_outlined, color: Colors.white))
                                                   ],
                                                 ),
@@ -1099,10 +1102,10 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                               const Divider(height: 0),
                                               SizedBox(
                                                 width : double.infinity,
-                                                height : widget.siteListFinal[0].nodeList[index].rlyStatus.length > 8? 206 : 130,
+                                                height : widget.siteData.nodeList[index].rlyStatus.length > 8? 206 : 130,
                                                 child: Padding(
                                                   padding: const EdgeInsets.all(8.0),
-                                                  child: widget.siteListFinal[0].nodeList[index].rlyStatus.isNotEmpty ? Column(
+                                                  child: widget.siteData.nodeList[index].rlyStatus.isNotEmpty ? Column(
                                                     children: [
                                                       const SizedBox(
                                                         width: double.infinity,
@@ -1130,9 +1133,9 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                       ),
                                                       SizedBox(
                                                         width: double.infinity,
-                                                        height : widget.siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 150 : 70,
+                                                        height : widget.siteData.nodeList[index].rlyStatus.length > 8? 150 : 70,
                                                         child: GridView.builder(
-                                                          itemCount: widget.siteListFinal[siteIndex].nodeList[index].rlyStatus.length, // Number of items in the grid
+                                                          itemCount: widget.siteData.nodeList[index].rlyStatus.length, // Number of items in the grid
                                                           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                                             crossAxisCount: 8,
                                                             crossAxisSpacing: 10.0,
@@ -1142,13 +1145,13 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                             return Column(
                                                               children: [
                                                                 CircleAvatar(
-                                                                  backgroundColor: widget.siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv].status==0 ? Colors.grey :
-                                                                  widget.siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv].status==1 ? Colors.green :
-                                                                  widget.siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv].status==2 ? Colors.orange :
-                                                                  widget.siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv].status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
-                                                                  child: Text((widget.siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv].rlyNo).toString(), style: const TextStyle(color: Colors.white)),
+                                                                  backgroundColor: widget.siteData.nodeList[index].rlyStatus[indexGv].status==0 ? Colors.grey :
+                                                                  widget.siteData.nodeList[index].rlyStatus[indexGv].status==1 ? Colors.green :
+                                                                  widget.siteData.nodeList[index].rlyStatus[indexGv].status==2 ? Colors.orange :
+                                                                  widget.siteData.nodeList[index].rlyStatus[indexGv].status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
+                                                                  child: Text((widget.siteData.nodeList[index].rlyStatus[indexGv].rlyNo).toString(), style: const TextStyle(color: Colors.white)),
                                                                 ),
-                                                                Text((widget.siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv].name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                                                Text((widget.siteData.nodeList[index].rlyStatus[indexGv].name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
                                                               ],
                                                             );
                                                           },
@@ -1219,17 +1222,13 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
 
   int getNodePositionInNodeList(int siteIndex, int srlNo)
   {
-    if (siteIndex >= 0 && siteIndex < widget.siteListFinal.length) {
-      List<NodeModel> nodeList = widget.siteListFinal[siteIndex].nodeList;
-      for (int i = 0; i < nodeList.length; i++) {
-        if (nodeList[i].serialNumber == srlNo) {
-          return i;
-        }
+    List<NodeModel> nodeList = widget.siteData.nodeList;
+    for (int i = 0; i < nodeList.length; i++) {
+      if (nodeList[i].serialNumber == srlNo) {
+        return i;
       }
-      return -1; // Return -1 as a signal of not found
-    } else {
-      return -1; // Return -1 if siteIndex is invalid
     }
+    return -1;
   }
 
   Future<void>removeManualModeInServer() async
@@ -1241,11 +1240,11 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
       "selected": [],
     };
     try {
-      final body = {"userId": widget.customerID, "controllerId": widget.siteListFinal[0].controllerId, "manualOperation": manualOperation, "createUser": widget.customerID};
+      final body = {"userId": widget.customerID, "controllerId": widget.siteData.controllerId, "manualOperation": manualOperation, "createUser": widget.customerID};
       final response = await HttpService().postRequest("createUserManualOperation", body);
       if (response.statusCode == 200) {
         Future.delayed(const Duration(seconds: 01), () {
-          getStandaloneDetails(widget.siteListFinal[0].controllerId ?? 0);
+          getStandaloneDetails(widget.siteData.controllerId ?? 0);
         });
       }
     } catch (e) {
@@ -1334,7 +1333,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                 flex: 1,
                 child: ListView(
                   children: [
-                    for (int i = 0; i < widget.siteListFinal[siteIndex].nodeList.length; i++)
+                    for (int i = 0; i < widget.siteData.nodeList.length; i++)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1345,24 +1344,24 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                             margin: EdgeInsets.zero,
                             child: ListTile(
                               tileColor: myTheme.primaryColor.withOpacity(0.1),
-                              title: Text('${widget.siteListFinal[siteIndex].nodeList[i].categoryName} - ${widget.siteListFinal[siteIndex].nodeList[i].deviceId}'),
+                              title: Text('${widget.siteData.nodeList[i].categoryName} - ${widget.siteData.nodeList[i].deviceId}'),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   const Icon(Icons.solar_power_outlined),
                                   const SizedBox(width: 5,),
-                                  Text('${widget.siteListFinal[siteIndex].nodeList[i].slrVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                  Text('${widget.siteData.nodeList[i].slrVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
                                   const SizedBox(width: 5,),
                                   const Icon(Icons.battery_3_bar_rounded),
-                                  Text('${widget.siteListFinal[siteIndex].nodeList[i].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                  Text('${widget.siteData.nodeList[i].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
                                   const SizedBox(width: 5,),
                                   IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
                                     String payLoadFinal = jsonEncode({
                                       "2300": [
-                                        {"2301": "${widget.siteListFinal[siteIndex].nodeList[i].serialNumber}"},
+                                        {"2301": "${widget.siteData.nodeList[i].serialNumber}"},
                                       ]
                                     });
-                                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteListFinal[siteIndex].deviceId}');
+                                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
                                   }, icon: Icon(Icons.fact_check_outlined))
                                 ],
                               ),
@@ -1373,7 +1372,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                             child: GridView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              itemCount: widget.siteListFinal[siteIndex].nodeList[i].rlyStatus.length,
+                              itemCount: widget.siteData.nodeList[i].rlyStatus.length,
                               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 8,
                               ),
@@ -1389,13 +1388,13 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                       children: [
                                         CircleAvatar(
                                           radius: 5,
-                                          backgroundColor: widget.siteListFinal[siteIndex].nodeList[i].rlyStatus[index].status==0 ? Colors.grey :
-                                          widget.siteListFinal[siteIndex].nodeList[i].rlyStatus[index].status==1 ? Colors.green :
-                                          widget.siteListFinal[siteIndex].nodeList[i].rlyStatus[index].status==2 ? Colors.orange :
-                                          widget.siteListFinal[siteIndex].nodeList[i].rlyStatus[index].status==3 ? Colors.redAccent : Colors.black12,
+                                          backgroundColor: widget.siteData.nodeList[i].rlyStatus[index].status==0 ? Colors.grey :
+                                          widget.siteData.nodeList[i].rlyStatus[index].status==1 ? Colors.green :
+                                          widget.siteData.nodeList[i].rlyStatus[index].status==2 ? Colors.orange :
+                                          widget.siteData.nodeList[i].rlyStatus[index].status==3 ? Colors.redAccent : Colors.black12,
                                         ),
                                         const SizedBox(width: 3),
-                                        Text('${widget.siteListFinal[siteIndex].nodeList[i].rlyStatus[index].name}(${widget.siteListFinal[siteIndex].nodeList[i].rlyStatus[index].rlyNo})', style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                        Text('${widget.siteData.nodeList[i].rlyStatus[index].name}(${widget.siteData.nodeList[i].rlyStatus[index].rlyNo})', style: const TextStyle(color: Colors.black, fontSize: 10)),
                                       ],
                                     ),
                                   ],
@@ -1476,7 +1475,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                     rows: List<DataRow>.generate(programList.length, (index) => DataRow(cells: [
                       DataCell(Text(programList[index].programName)),
                       DataCell(Text(programList[index].programName == 'Default'? '----' : programList[index].scheduleType)),
-                      DataCell(Center(child: Text(programList[index].programName == 'Default'? '----':'${programList[index].sequenceCount}'))),
+                      DataCell(Center(child: Text('${programList[index].sequenceCount}'))),
                       DataCell(Center(child: Text(programList[index].programName == 'Default'? '----':programList[index].startDate.split(' ').first))),
                       DataCell(Center(child: Text(programList[index].programName == 'Default'? '----':programList[index].startTime))),
                       DataCell(Center(child: Row(
@@ -1486,7 +1485,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                             String payLoadFinal = jsonEncode({
                               "2900": [{"2901": payload}]
                             });
-                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteListFinal[0].deviceId}');
+                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
                             Navigator.pop(context);
                           }, icon: const Icon(Icons.start, color: Colors.green,)),
                           IconButton(tooltip:'Remove',onPressed: (){
@@ -1494,7 +1493,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                             String payLoadFinal = jsonEncode({
                               "2900": [{"2901": payload}]
                             });
-                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteListFinal[0].deviceId}');*/
+                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');*/
                           }, icon: const Icon(Icons.remove_circle_outline, color: Colors.red)),
                         ],
                       ))),

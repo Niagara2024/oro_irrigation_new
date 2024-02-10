@@ -407,7 +407,7 @@ class _DashboardWideState extends State<DashboardWide> {
         color: Colors.transparent,
         width: double.infinity,
         height: double.infinity,
-        child: CustomerHome(customerID: userId, type: 0, customerName: userName, userID: userId, mobileNo: '+$countryCode-$mobileNo',),
+        child: CustomerHome(customerID: userId, customerName: userName, mobileNo: '+$countryCode-$mobileNo', comingFrom: 'Customer',),
       ): Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

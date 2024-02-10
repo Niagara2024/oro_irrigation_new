@@ -205,9 +205,12 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
       if(data["code"]==200)
       {
         final cntList = data["data"] as List;
-        for (int i=0; i < cntList.length; i++) {
-          nodeStockList.add(ProductStockModel.fromJson(cntList[i]));
-        }
+        setState(() {
+          for (int i=0; i < cntList.length; i++) {
+            nodeStockList.add(ProductStockModel.fromJson(cntList[i]));
+          }
+        });
+
       }
       indicatorViewHide();
     }
@@ -335,10 +338,6 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                   getNodeStockList();
                                   widget.callback('reloadStock');
                                 });
-
-                                if(mounted){
-                                  Navigator.pop(context);
-                                }
 
                                 getMyAllProduct();
                                 getMasterProduct();

@@ -59,8 +59,9 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
   void callbackFunction(String message)
   {
     if(message=='reloadStock'){
+      print('reloadStock');
       Navigator.pop(context);
-      Future.delayed(const Duration(milliseconds: 2000), () {
+      Future.delayed(const Duration(milliseconds: 500), () {
         getProductStock();
       });
     }
@@ -108,7 +109,6 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
     }else{
       body = {"fromUserId" : null, "toUserId" : userId};
     }
-    //print(body);
 
     final response = await HttpService().postRequest("getProductStock", body);
     if (response.statusCode == 200)
@@ -118,10 +118,11 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
       if(data["code"]==200)
       {
         final cntList = data["data"] as List;
-       // print(cntList);
-        for (int i=0; i < cntList.length; i++) {
-          productStockList.add(ProductStockModel.fromJson(cntList[i]));
-        }
+        setState(() {
+          for (int i=0; i < cntList.length; i++) {
+            productStockList.add(ProductStockModel.fromJson(cntList[i]));
+          }
+        });
       }
     }
     else{
@@ -189,7 +190,7 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
         child: Container(
           height: height,
           color: Colors.transparent,
-          padding: EdgeInsets.fromLTRB(width/2 - 75, 0, width/2 - 75, 0),
+          padding: EdgeInsets.fromLTRB(width/2 - 60, 0, width/2 - 60, 0),
           child: const LoadingIndicator(
             indicatorType: Indicator.ballPulse,
           ),
@@ -414,8 +415,7 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                             builder: (context) => const AlertDialog(
                               content: CreateAccount(),
                             ));
-
-                      }), // Customize the leading icon
+                      }),
                     ),
                     const Divider(height: 0), // Optional: Add a divider between sections
                     Expanded(child : ListView.builder(
@@ -431,11 +431,11 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                             if(userType==1){
                               Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyDealers(dealerId: myCustomerList[index].userId, dealerName: myCustomerList[index].userName)),);
                             }else{
-                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerHome(customerID: myCustomerList[index].userId, type: 1, customerName: myCustomerList[index].userName, userID: userId, mobileNo: '+${myCustomerList[index].countryCode}-${myCustomerList[index].mobileNumber}',)));
+                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerHome(customerID: myCustomerList[index].userId, comingFrom: 'AdminORDealer', customerName: myCustomerList[index].userName, mobileNo: '+${myCustomerList[index].countryCode}-${myCustomerList[index].mobileNumber}',)));
                             }
                           }),
                           title: Text(myCustomerList[index].userName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
-                          subtitle: Text('+${myCustomerList[index].countryCode} ${myCustomerList[index].mobileNumber}', style: const TextStyle(fontSize: 12,fontWeight: FontWeight.normal)),
+                          subtitle: Text('+${myCustomerList[index].countryCode} ${myCustomerList[index].mobileNumber}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal)),
                           onTap:() {
                             Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: myCustomerList[index].userId, userName: myCustomerList[index].userName, userID: userId, userType: userType, productStockList: productStockList, callback: callbackFunction,)),);
                           },

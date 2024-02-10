@@ -220,7 +220,7 @@ class MyDealersState extends State<MyDealers> {
                             ),
                             trailing: IconButton(tooltip: 'View Customer Dashboard', icon: const Icon(Icons.view_quilt_outlined), color: myTheme.primaryColor, onPressed: () async
                             {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerHome(customerID: customerOfDealer[index].userId, type: 1, customerName: customerOfDealer[index].userName, userID: widget.dealerId, mobileNo: '+${customerOfDealer[index].countryCode}-${customerOfDealer[index].mobileNumber}',)),);
+                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerHome(customerID: customerOfDealer[index].userId, comingFrom: 'AdminORDealer', customerName: customerOfDealer[index].userName, mobileNo: '+${customerOfDealer[index].countryCode}-${customerOfDealer[index].mobileNumber}',)),);
                             }),
                             title: Text(customerOfDealer[index].userName),
                             subtitle: Text('+${customerOfDealer[index].countryCode} ${customerOfDealer[index].mobileNumber}'),

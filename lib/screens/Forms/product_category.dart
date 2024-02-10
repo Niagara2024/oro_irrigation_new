@@ -132,7 +132,7 @@ class _ProductCategoryState extends State<ProductCategory> {
                                   async {
                                     catName.text = categoryList[index].categoryName;
                                     catSMSFormat.text = categoryList[index].smsFormat;
-                                    relayCountCtrl.text = '${categoryList[index].relayCount}';
+                                    relayCountCtrl.text = '${categoryList[index].outputCount}';
                                     sldCatID = categoryList[index].categoryId;
 
                                     setState(() {

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
-import '../../Models/Customer/Dashboard/ProgramList.dart';
 import '../../Models/Customer/Dashboard/ProgramServiceDevices.dart';
 import '../../constants/MQTTManager.dart';
 import '../../constants/http_service.dart';
@@ -13,9 +12,9 @@ import 'CustomerDashboard.dart';
 
 
 class CustomerHome extends StatefulWidget {
-  const CustomerHome({Key? key, required this.customerID, required this.type, required this.customerName, required this.userID, required this.mobileNo}) : super(key: key);
-  final int userID, customerID, type;
-  final String customerName, mobileNo;
+  const CustomerHome({Key? key, required this.customerID, required this.customerName, required this.mobileNo, required this.comingFrom}) : super(key: key);
+  final customerID;
+  final String customerName, mobileNo, comingFrom;
 
   @override
   _CustomerHomeState createState() => _CustomerHomeState();
@@ -26,7 +25,6 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
 
   List<DashboardModel> siteListFinal = [];
   int siteIndex = 0;
-  List<ProgramList> programList = [];
   bool visibleLoading = false;
   int wifiStrength = 0;
   ProgramServiceDevices programServiceDevices = ProgramServiceDevices(irrigationPump: [], mainValve: [], centralFertilizerSite: [], centralFertilizer: [], localFertilizer: [], centralFilterSite: [], localFilter: []);
@@ -47,10 +45,10 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
   Future<void> getCustomerSite(userId) async
   {
     Map<String, Object> body = {"userId" : userId ?? 0};
-    //print(body);
     final response = await HttpService().postRequest("getUserDeviceListForCustomer", body);
     if (response.statusCode == 200)
     {
+      indicatorViewHide();
       siteListFinal.clear();
       var data = jsonDecode(response.body);
       if(data["code"]==200)
@@ -59,10 +57,7 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
         //print(response.body);
         try {
           siteListFinal = cntList.map((json) => DashboardModel.fromJson(json)).toList();
-          //live call
-          String payLoadFinal = jsonEncode({"3000": [{"3001": ""}]});
-          MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteListFinal[siteIndex].deviceId}');
-          fetchDashboardData();
+          subscribeAndUpdateSite();
         } catch (e) {
           print('Error: $e');
         }
@@ -73,84 +68,106 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
     }
   }
 
-  void fetchDashboardData()
-  {
-    _centerWidget = CustomerDashboard(customerID: widget.userID, type: 0, customerName: widget.customerName, userID: widget.userID, mobileNo: '+${91}-${widget.mobileNo}', siteListFinal: siteListFinal,);
-    getStandaloneDetails(siteListFinal[siteIndex].controllerId ?? 0);
-    getProgramList(siteListFinal[siteIndex].controllerId ?? 0);
+  void subscribeAndUpdateSite() {
     MQTTManager().subscribeToTopic('FirmwareToApp/${siteListFinal[siteIndex].deviceId}');
+    setState(() {
+      _centerWidget = CustomerDashboard(customerID: widget.customerID, type: 0, customerName: widget.customerName, mobileNo: '+${91}-${widget.mobileNo}', siteData: siteListFinal[siteIndex], siteLength: siteListFinal.length, userID: widget.customerID,);
+    });
   }
 
-  Future<void> getProgramList(int controllerId) async
-  {
-    programList.clear();
-    try {
-      Map<String, Object> body = {"userId": widget.customerID, "controllerId": controllerId};
-      final response = await HttpService().postRequest("getUserProgramNameList", body);
-      if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
-        //print(jsonResponse);
-        List<dynamic> programsJson = jsonResponse['data'];
-        setState(() {
-          programList = [
-            ...programsJson.map((programJson) => ProgramList.fromJson(programJson)).toList(),
-          ];
-        });
-        indicatorViewHide();
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
-  Future<void> getStandaloneDetails(int controllerId) async
-  {
-    try {
-      Map<String, Object> body = {"userId": widget.customerID, "controllerId": controllerId};
-      final response = await HttpService().postRequest("getUserManualOperation", body);
-      if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
-        if(jsonResponse['code']==200){
-          standaloneMethod = jsonResponse['data']['method'];
-          standaloneTime = jsonResponse['data']['time'];
-          standaloneFlow = jsonResponse['data']['flow'];
-        }else{
-          standaloneMethod = 0;
-        }
-        setState(() {});
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
 
   @override
   Widget build(BuildContext context)
   {
-
     final screenWidth = MediaQuery.of(context).size.width;
-    if(widget.type==0){
-      return visibleLoading? buildLoadingIndicator(visibleLoading, screenWidth):
-      DefaultTabController(
-        length: siteListFinal.length,
-        animationDuration: Duration.zero,
-        child: Scaffold(
-          backgroundColor: myTheme.primaryColor.withOpacity(0.1),
-          body: buildBodyContent(),
+    return visibleLoading? buildLoadingIndicator(visibleLoading, screenWidth):
+    DefaultTabController(
+      length: siteListFinal.length,
+      animationDuration: Duration.zero,
+      child: Scaffold(
+        appBar: widget.comingFrom == 'AdminORDealer'? AppBar(title: Text('${widget.customerName} - DASHBOARD')) : null,
+        backgroundColor: myTheme.primaryColor.withOpacity(0.1),
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          color: Colors.white,
+          child: Column(
+            children: [
+              siteListFinal.length >1 ? TabBar(
+                indicatorColor: myTheme.primaryColor,
+                isScrollable: true,
+                labelColor: myTheme.primaryColor,
+                unselectedLabelColor: Colors.black,
+                tabs: [
+                  for (var i = 0; i < siteListFinal.length; i++)
+                    Tab(text: siteListFinal[i].siteName ?? '',),
+                ],
+                onTap: (index) {
+                  print('ontapcall');
+                  siteIndex = index;
+                  subscribeAndUpdateSite();
+                },
+              ) :
+              const SizedBox(),
+              widget.comingFrom == 'Customer' ? Stack(
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 250,
+                        height: siteListFinal.length >1? MediaQuery.sizeOf(context).height-104 : MediaQuery.sizeOf(context).height-56,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 3,
+                              blurRadius: 3,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            const Padding(
+                              padding: EdgeInsets.only(top: 10),
+                            ),
+                            buildCustomListTile('Dashboard', Icons.dashboard_outlined, 'Dashboard'),
+                            buildCustomListTile('Product List', Icons.topic_outlined, 'Product List'),
+                            buildCustomListTile('Report Overview', Icons.my_library_books_outlined, 'Report Overview'),
+                            buildCustomListTile('Sent And Received', Icons.question_answer_outlined, 'Sent And Received'),
+                            buildCustomListTile('Controller Logs', Icons.message_outlined, 'Controller Logs'),
+                            buildCustomListTile('Device Settings', Icons.settings_outlined, 'Device Settings'),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          width: double.infinity,
+                          height: siteListFinal.length >1? MediaQuery.sizeOf(context).height-104 : MediaQuery.sizeOf(context).height-56,
+                          color: myTheme.primaryColor.withOpacity(0.1),
+                          child: _centerWidget,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ) :
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  height: siteListFinal.length >1? MediaQuery.sizeOf(context).height-104 : MediaQuery.sizeOf(context).height-56,
+                  color: myTheme.primaryColor.withOpacity(0.1),
+                  child: _centerWidget,
+                ),
+              ),
+            ],
+          ),
         ),
-      );
-    }else{
-      return visibleLoading? buildLoadingIndicator(visibleLoading, screenWidth):
-      DefaultTabController(
-        length: siteListFinal.length, // Set the number of tabs
-        child: Scaffold(
-          backgroundColor: myTheme.primaryColor.withOpacity(0.1),
-          appBar: buildAppBar('${widget.customerName} - DASHBOARD', context),
-          body: buildBodyContent(),
-        ),
-      );
-    }
-
+      ),
+    );
   }
 
   Widget buildLoadingIndicator(bool isVisible, double width)
@@ -167,127 +184,25 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
     );
   }
 
-  AppBar buildAppBar(String title, BuildContext context)
-  {
-    return AppBar(
-      title: Text(title),
-      backgroundColor: myTheme.primaryColor,
-      actions: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(widget.customerName, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                Text(widget.mobileNo, style: const TextStyle(fontWeight: FontWeight.normal,color: Colors.white)),
-              ],
-            ),
-            const SizedBox(width: 05),
-            const CircleAvatar(
-              radius: 23,
-              backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
-            ),
-          ],),
-        const SizedBox(width: 10)
-      ],
-    );
-  }
-
-  Container buildBodyContent()
-  {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      color: Colors.white,
-      child: Column(
-        children: [
-          siteListFinal.length >1 ? TabBar(
-            indicatorColor: myTheme.primaryColor,
-            isScrollable: true,
-            labelColor: myTheme.primaryColor,
-            unselectedLabelColor: Colors.black,
-            tabs: [
-              for (var i = 0; i < siteListFinal.length; i++)
-                Tab(text: siteListFinal[i].siteName ?? '',),
-            ],
-            onTap: (index) {
-              getProgramList(siteListFinal[index].controllerId ?? 0 );
-              siteIndex = index;
-            },
-          ) :
-          const SizedBox(),
-          Stack(
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 250,
-                    height: siteListFinal.length >1? MediaQuery.sizeOf(context).height-104 : MediaQuery.sizeOf(context).height-56,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 3,
-                          blurRadius: 3,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        const Padding(
-                          padding: EdgeInsets.only(top: 10),
-                        ),
-                        buildCustomListTile('Dashboard', Icons.dashboard_outlined, 'Dashboard'),
-                        buildCustomListTile('Product List', Icons.topic_outlined, 'Product List'),
-                        buildCustomListTile('Report Overview', Icons.my_library_books_outlined, 'Report Overview'),
-                        buildCustomListTile('Sent And Received', Icons.question_answer_outlined, 'Sent And Received'),
-                        buildCustomListTile('Controller Logs', Icons.message_outlined, 'Controller Logs'),
-                        buildCustomListTile('Device Settings', Icons.settings_outlined, 'Device Settings'),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: siteListFinal.length >1? MediaQuery.sizeOf(context).height-104 : MediaQuery.sizeOf(context).height-56,
-                      color: myTheme.primaryColor.withOpacity(0.1),
-                      child: _centerWidget,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-
-  }
-
    Widget buildCustomListTile(String title, IconData icon, String tapOption) {
      return Padding(
        padding: const EdgeInsets.only(left: 8, right: 8),
        child: Container(
          decoration: BoxDecoration(
-           color: currentTap == tapOption ? myTheme.primaryColor.withOpacity(0.1) : Colors.transparent,
-           borderRadius: const BorderRadius.all(Radius.circular(5)), // Adjust the radius as needed
+           color: currentTap == tapOption ? myTheme.primaryColor : Colors.transparent,
+           borderRadius: const BorderRadius.all(Radius.circular(10)), // Adjust the radius as needed
          ),
          child: ListTile(
            leading: Icon(
              icon,
-             color: currentTap == tapOption ? myTheme.primaryColor : Colors.black.withOpacity(0.6),
+             color: currentTap == tapOption ? Colors.white : Colors.black.withOpacity(0.6),
            ),
            title: Text(
              title,
              style: TextStyle(
                fontSize: 14,
                fontWeight: FontWeight.bold,
-               color: currentTap == tapOption ? myTheme.primaryColor : Colors.black.withOpacity(0.8),
+               color: currentTap == tapOption ? Colors.white : Colors.black.withOpacity(0.8),
              ),
            ),
            onTap: () {
@@ -302,7 +217,7 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
      currentTap = option;
      setState(() {
        if (option == 'Dashboard') {
-         _centerWidget = CustomerDashboard(customerID: widget.userID, type: 0, customerName: widget.customerName, userID: widget.userID, mobileNo: '+${91}-${widget.mobileNo}', siteListFinal: siteListFinal,);
+         _centerWidget = CustomerDashboard(customerID: widget.customerID, type: 0, customerName: widget.customerName, userID: widget.customerID, mobileNo: '+${widget.mobileNo}', siteData: siteListFinal[siteIndex], siteLength: siteListFinal.length,);
        } else if (option == 'Product List') {
          _centerWidget = ProductInventory(userName: widget.customerName);
        } else if (option == 'Device Settings') {
@@ -326,6 +241,5 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
       visibleLoading = false;
     });
   }
-
 
 }

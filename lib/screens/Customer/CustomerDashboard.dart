@@ -4,7 +4,6 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../Models/Customer/Dashboard/ProgramList.dart';
 import '../../constants/MQTTManager.dart';
@@ -227,369 +226,370 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: SingleChildScrollView(
-                    child: SizedBox(
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
                       child: Column(
                         children: [
-                          /*SizedBox(
-                                    height: 220,
-                                    child: Card(
-                                      elevation: 2,
-                                      surfaceTintColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(5.0),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          SizedBox(
-                                            width: 260,
-                                            child: Column(
-                                              children: [
-                                                const ListTile(
-                                                  title: Text('Main Line'),
+                          SizedBox(
+                            height: 220,
+                            child: Card(
+                              elevation: 2,
+                              surfaceTintColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5.0),
+                              ),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 260,
+                                    child: Column(
+                                      children: [
+                                        const ListTile(
+                                          title: Text('Main Line'),
+                                        ),
+                                        widget.siteData.irrigationPump.isNotEmpty
+                                            ||widget.siteData.centralFilterSite.isNotEmpty
+                                            ||widget.siteData.mainValve.isNotEmpty?
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 5),
+                                          child: Row(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              SizedBox(
+                                                width: 49.5,
+                                                height: 145,
+                                                child: ListView.builder(
+                                                  itemCount: widget.siteData.irrigationPump.length,
+                                                  itemBuilder: (BuildContext context, int index) {
+                                                    if (index < widget.siteData.irrigationPump.length) {
+                                                      return Column(
+                                                        children: [
+                                                          PopupMenuButton(
+                                                            tooltip: 'Details',
+                                                            itemBuilder: (context) {
+                                                              return [
+                                                                PopupMenuItem(
+                                                                  child: Column(
+                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                                    children: [
+                                                                      Text(widget.siteData.irrigationPump[index].name, style: const TextStyle(fontWeight: FontWeight.bold),),
+                                                                      const Divider(),
+                                                                      Text('ID : ${widget.siteData.irrigationPump[index].id}'),
+                                                                      Text('Location : ${widget.siteData.irrigationPump[index].location}'),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ];
+                                                            },
+                                                            child: widget.siteData.irrigationPump.length ==1?
+                                                            Image.asset('assets/images/dp_irr_pump.png'):
+                                                            widget.siteData.irrigationPump.length==2 && index==0?
+                                                            Image.asset('assets/images/dp_irr_pump_1.png'):
+                                                            widget.siteData.irrigationPump.length==2 && index==1?
+                                                            Image.asset('assets/images/dp_irr_pump_3.png'):
+                                                            widget.siteData.irrigationPump.length==3 && index==0?
+                                                            Image.asset('assets/images/dp_irr_pump_1.png'):
+                                                            widget.siteData.irrigationPump.length==3 && index==1?
+                                                            Image.asset('assets/images/dp_irr_pump_2.png'):
+                                                            Image.asset('assets/images/dp_irr_pump_3.png'),
+                                                          ),
+                                                        ],
+                                                      ); // Replace 'yourKey' with the key from your API response
+                                                    } else {
+                                                      return Text('Out of range'); // or any placeholder/error message
+                                                    }
+                                                  },
                                                 ),
-                                                programServiceDevices.irrigationPump.isNotEmpty
-                                                    ||programServiceDevices.centralFilterSite.isNotEmpty
-                                                    ||programServiceDevices.mainValve.isNotEmpty?
-                                                Padding(
-                                                  padding: const EdgeInsets.only(left: 5),
-                                                  child: Row(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      SizedBox(
-                                                        width: 49.5,
-                                                        height: 145,
-                                                        child: ListView.builder(
-                                                          itemCount: programServiceDevices.irrigationPump.length,
-                                                          itemBuilder: (BuildContext context, int index) {
-                                                            if (index < programServiceDevices.irrigationPump.length) {
-                                                              return Column(
-                                                                children: [
-                                                                  PopupMenuButton(
-                                                                    tooltip: 'Details',
-                                                                    itemBuilder: (context) {
-                                                                      return [
-                                                                        PopupMenuItem(
-                                                                          child: Column(
-                                                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                                                            mainAxisAlignment: MainAxisAlignment.start,
-                                                                            children: [
-                                                                              Text(programServiceDevices.irrigationPump[index].name, style: const TextStyle(fontWeight: FontWeight.bold),),
-                                                                              const Divider(),
-                                                                              Text('ID : ${programServiceDevices.irrigationPump[index].id}'),
-                                                                              Text('Location : ${programServiceDevices.irrigationPump[index].location}'),
-                                                                            ],
-                                                                          ),
-                                                                        ),
-                                                                      ];
-                                                                    },
-                                                                    child: programServiceDevices.irrigationPump.length ==1?
-                                                                    Image.asset('assets/images/dp_irr_pump.png'):
-                                                                    programServiceDevices.irrigationPump.length==2 && index==0?
-                                                                    Image.asset('assets/images/dp_irr_pump_1.png'):
-                                                                    programServiceDevices.irrigationPump.length==2 && index==1?
-                                                                    Image.asset('assets/images/dp_irr_pump_3.png'):
-                                                                    programServiceDevices.irrigationPump.length==3 && index==0?
-                                                                    Image.asset('assets/images/dp_irr_pump_1.png'):
-                                                                    programServiceDevices.irrigationPump.length==3 && index==1?
-                                                                    Image.asset('assets/images/dp_irr_pump_2.png'):
-                                                                    Image.asset('assets/images/dp_irr_pump_3.png'),
-                                                                  ),
-                                                                ],
-                                                              ); // Replace 'yourKey' with the key from your API response
-                                                            } else {
-                                                              return Text('Out of range'); // or any placeholder/error message
-                                                            }
-                                                          },
-                                                        ),
-                                                      ),
-                                                      SizedBox(
-                                                        width: 49.5,
-                                                        height: 145,
-                                                        child: ListView.builder(
-                                                          itemCount: 1,
-                                                          itemBuilder: (BuildContext context, int index) {
-                                                            return Column(
-                                                              children: [
-                                                                PopupMenuButton(
-                                                                  tooltip: 'Details',
-                                                                  itemBuilder: (context) {
-                                                                    return [
-                                                                      const PopupMenuItem(
-                                                                        child: Column(
-                                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                                          mainAxisAlignment: MainAxisAlignment.start,
-                                                                          children: [
-                                                                            Text('Pressure Sensor', style: TextStyle(fontWeight: FontWeight.bold),),
-                                                                            Divider(),
-                                                                          ],
-                                                                        ),
-                                                                      ),
-                                                                    ];
-                                                                  },
-                                                                  child: Image.asset('assets/images/dp_prs_sensor.png',),
+                                              ),
+                                              SizedBox(
+                                                width: 49.5,
+                                                height: 145,
+                                                child: ListView.builder(
+                                                  itemCount: 1,
+                                                  itemBuilder: (BuildContext context, int index) {
+                                                    return Column(
+                                                      children: [
+                                                        PopupMenuButton(
+                                                          tooltip: 'Details',
+                                                          itemBuilder: (context) {
+                                                            return [
+                                                              const PopupMenuItem(
+                                                                child: Column(
+                                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                                  children: [
+                                                                    Text('Pressure Sensor', style: TextStyle(fontWeight: FontWeight.bold),),
+                                                                    Divider(),
+                                                                  ],
                                                                 ),
-                                                                const Text('Prs In',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
-                                                                const Text('7.0 bar',style: TextStyle(fontSize: 10),),
-                                                              ],
-                                                            );
+                                                              ),
+                                                            ];
                                                           },
+                                                          child: Image.asset('assets/images/dp_prs_sensor.png',),
                                                         ),
-                                                      ),
-                                                      SizedBox(
-                                                        width: 49.5,
-                                                        height: 145,
-                                                        child: ListView.builder(
-                                                          itemCount: 1,
-                                                          itemBuilder: (BuildContext context, int index) {
-                                                            if (index < programServiceDevices.centralFilterSite.length) {
-                                                              return Column(
-                                                                children: [
-                                                                  PopupMenuButton(
-                                                                    tooltip: 'Details',
-                                                                    itemBuilder: (context) {
-                                                                      return [
-                                                                        PopupMenuItem(
-                                                                          child: Column(
-                                                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                                                            mainAxisAlignment: MainAxisAlignment.start,
-                                                                            children: [
-                                                                              Text(programServiceDevices.centralFilterSite[index].name, style: const TextStyle(fontWeight: FontWeight.bold),),
-                                                                              const Divider(),
-                                                                              Text('ID : ${programServiceDevices.centralFilterSite[index].id}'),
-                                                                              Text('Location : ${programServiceDevices.centralFilterSite[index].location}'),
-                                                                            ],
-                                                                          ),
-                                                                        ),
-                                                                      ];
-                                                                    },
-                                                                    child: Image.asset('assets/images/dp_filter.png',),
+                                                        const Text('Prs In',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
+                                                        const Text('7.0 bar',style: TextStyle(fontSize: 10),),
+                                                      ],
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 49.5,
+                                                height: 145,
+                                                child: ListView.builder(
+                                                  itemCount: 1,
+                                                  itemBuilder: (BuildContext context, int index) {
+                                                    if (index < widget.siteData.centralFilterSite.length) {
+                                                      return Column(
+                                                        children: [
+                                                          PopupMenuButton(
+                                                            tooltip: 'Details',
+                                                            itemBuilder: (context) {
+                                                              return [
+                                                                PopupMenuItem(
+                                                                  child: Column(
+                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                                    children: [
+                                                                      Text(widget.siteData.centralFilterSite[index].name, style: const TextStyle(fontWeight: FontWeight.bold),),
+                                                                      const Divider(),
+                                                                      Text('ID : ${widget.siteData.centralFilterSite[index].id}'),
+                                                                      Text('Location : ${widget.siteData.centralFilterSite[index].location}'),
+                                                                    ],
                                                                   ),
-                                                                ],
-                                                              ); // Replace 'yourKey' with the key from your API response
-                                                            } else {
-                                                              return const Text('Out of range'); // or any placeholder/error message
-                                                            }
-                                                          },
-                                                        ),
-                                                      ),
-                                                      SizedBox(
-                                                        width: 49.5,
-                                                        height: 145,
-                                                        child: ListView.builder(
-                                                          itemCount: 1,
-                                                          itemBuilder: (BuildContext context, int index) {
-                                                            return Column(
-                                                              children: [
-                                                                PopupMenuButton(
-                                                                  tooltip: 'Details',
-                                                                  itemBuilder: (context) {
-                                                                    return [
-                                                                      const PopupMenuItem(
-                                                                        child: Column(
-                                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                                          mainAxisAlignment: MainAxisAlignment.start,
-                                                                          children: [
-                                                                            Text('Pressure Sensor', style: TextStyle(fontWeight: FontWeight.bold),),
-                                                                            Divider(),
-                                                                          ],
-                                                                        ),
-                                                                      ),
-                                                                    ];
-                                                                  },
-                                                                  child: Image.asset('assets/images/dp_prs_sensor.png',),
                                                                 ),
-                                                                const Text('Prs Out',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
-                                                                const Text('6.2 bar',style: TextStyle(fontSize: 10),),
-                                                              ],
-                                                            );
+                                                              ];
+                                                            },
+                                                            child: Image.asset('assets/images/dp_filter.png',),
+                                                          ),
+                                                        ],
+                                                      ); // Replace 'yourKey' with the key from your API response
+                                                    } else {
+                                                      return const Text('Out of range'); // or any placeholder/error message
+                                                    }
+                                                  },
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 49.5,
+                                                height: 145,
+                                                child: ListView.builder(
+                                                  itemCount: 1,
+                                                  itemBuilder: (BuildContext context, int index) {
+                                                    return Column(
+                                                      children: [
+                                                        PopupMenuButton(
+                                                          tooltip: 'Details',
+                                                          itemBuilder: (context) {
+                                                            return [
+                                                              const PopupMenuItem(
+                                                                child: Column(
+                                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                                  children: [
+                                                                    Text('Pressure Sensor', style: TextStyle(fontWeight: FontWeight.bold),),
+                                                                    Divider(),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ];
                                                           },
+                                                          child: Image.asset('assets/images/dp_prs_sensor.png',),
                                                         ),
-                                                      ),
-                                                      SizedBox(
-                                                        width: 49.5,
-                                                        height: 145,
-                                                        child: ListView.builder(
-                                                          itemCount: programServiceDevices.mainValve.length,
-                                                          itemBuilder: (BuildContext context, int index) {
-                                                            if (index < programServiceDevices.mainValve.length) {
-                                                              return Column(
-                                                                children: [
-                                                                  PopupMenuButton(
-                                                                    tooltip: 'Details',
-                                                                    itemBuilder: (context) {
-                                                                      return [
-                                                                        PopupMenuItem(
-                                                                          child: Column(
-                                                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                                                            mainAxisAlignment: MainAxisAlignment.start,
-                                                                            children: [
-                                                                              Text(programServiceDevices.mainValve[index].name, style: const TextStyle(fontWeight: FontWeight.bold),),
-                                                                              const Divider(),
-                                                                              Text('ID : ${programServiceDevices.mainValve[index].id}'),
-                                                                              Text('Location : ${programServiceDevices.mainValve[index].location}'),
-                                                                            ],
-                                                                          ),
-                                                                        ),
-                                                                      ];
-                                                                    },
-                                                                    child: Image.asset('assets/images/db_valve.png',),
+                                                        const Text('Prs Out',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
+                                                        const Text('6.2 bar',style: TextStyle(fontSize: 10),),
+                                                      ],
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 49.5,
+                                                height: 145,
+                                                child: ListView.builder(
+                                                  itemCount: widget.siteData.mainValve.length,
+                                                  itemBuilder: (BuildContext context, int index) {
+                                                    if (index < widget.siteData.mainValve.length) {
+                                                      return Column(
+                                                        children: [
+                                                          PopupMenuButton(
+                                                            tooltip: 'Details',
+                                                            itemBuilder: (context) {
+                                                              return [
+                                                                PopupMenuItem(
+                                                                  child: Column(
+                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                                    children: [
+                                                                      Text(widget.siteData.mainValve[index].name, style: const TextStyle(fontWeight: FontWeight.bold),),
+                                                                      const Divider(),
+                                                                      Text('ID : ${widget.siteData.mainValve[index].id}'),
+                                                                      Text('Location : ${widget.siteData.mainValve[index].location}'),
+                                                                    ],
                                                                   ),
-                                                                ],
-                                                              ); // Replace 'yourKey' with the key from your API response
-                                                            } else {
-                                                              return Text('Out of range'); // or any placeholder/error message
-                                                            }
-                                                          },
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ):
-                                                const Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                                                ),
+                                                              ];
+                                                            },
+                                                            child: Image.asset('assets/images/db_valve.png',),
+                                                          ),
+                                                        ],
+                                                      ); // Replace 'yourKey' with the key from your API response
+                                                    } else {
+                                                      return Text('Out of range'); // or any placeholder/error message
+                                                    }
+                                                  },
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ):
+                                        const Column(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            SizedBox(height: 50,),
+                                            Text('No Device Available'),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const VerticalDivider(width: 0),
+                                  Expanded(
+                                    flex :1,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const ListTile(
+                                          title: Text('Dosing Recipes - NPK1'),
+                                        ),
+                                        SizedBox(
+                                          height: 40,
+                                          child: Row(
+                                            children: [
+                                              const SizedBox(width : 40, child: Icon(Icons.account_tree_rounded)),
+                                              const SizedBox(width: 10,),
+                                              const Expanded(
+                                                flex: 3,
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  mainAxisAlignment: MainAxisAlignment.center,
                                                   children: [
-                                                    SizedBox(height: 50,),
-                                                    Text('No Device Available'),
+                                                    Text('EC',style: TextStyle(fontSize: 10)),
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.start,
+                                                      children: [
+                                                        Text('Actual:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
+                                                        Text('00.0',style: TextStyle(fontSize: 10)),
+                                                        SizedBox(width: 5,),
+                                                        Text('Target:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
+                                                        Text('00.0',style: TextStyle(fontSize: 10)),
+                                                      ],
+                                                    ),
                                                   ],
                                                 ),
-                                              ],
-                                            ),
-                                          ),
-                                          const VerticalDivider(width: 0),
-                                          Expanded(
-                                            flex :1,
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                const ListTile(
-                                                  title: Text('Dosing Recipes - NPK1'),
-                                                ),
-                                                SizedBox(
-                                                  height: 40,
-                                                  child: Row(
-                                                    children: [
-                                                      const SizedBox(width : 40, child: Icon(Icons.account_tree_rounded)),
-                                                      const SizedBox(width: 10,),
-                                                      const Expanded(
-                                                        flex: 3,
-                                                        child: Column(
-                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                          mainAxisAlignment: MainAxisAlignment.center,
-                                                          children: [
-                                                            Text('EC',style: TextStyle(fontSize: 10)),
-                                                            Row(
-                                                              mainAxisAlignment: MainAxisAlignment.start,
-                                                              children: [
-                                                                Text('Actual:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
-                                                                Text('00.0',style: TextStyle(fontSize: 10)),
-                                                                SizedBox(width: 5,),
-                                                                Text('Target:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
-                                                                Text('00.0',style: TextStyle(fontSize: 10)),
-                                                              ],
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      const Expanded(
-                                                        flex: 3,
-                                                        child: Column(
-                                                          mainAxisAlignment: MainAxisAlignment.center,
-                                                          crossAxisAlignment: CrossAxisAlignment.end,
-                                                          children: [
-                                                            Text('PH',style: TextStyle(fontSize: 10)),
-                                                            Row(
-                                                              mainAxisAlignment: MainAxisAlignment.end,
-                                                              children: [
-                                                                Text('Actual:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
-                                                                Text('00.0',style: TextStyle(fontSize: 10)),
-                                                                SizedBox(width: 5,),
-                                                                Text('Target:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
-                                                                Text('00.0',style: TextStyle(fontSize: 10)),
-                                                              ],
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      SizedBox(width : 40, child: Image.asset('assets/images/injector.png',)),
-                                                    ],),
-                                                ),
-                                                Flexible(
-                                                    flex: 2,
-                                                    child: DataTable2(
-                                                      columnSpacing: 12,
-                                                      horizontalMargin: 12,
-                                                      minWidth: 400,
-                                                      dataRowHeight: 20.0,
-                                                      headingRowHeight: 20,
-                                                      headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
-                                                      columns: const [
-                                                        DataColumn2(
-                                                            label: Center(child: Text('Channel', style: TextStyle(fontSize: 10),)),
-                                                            size: ColumnSize.M
-                                                        ),
-                                                        DataColumn2(
-                                                            label: Center(child: Text('1', style: TextStyle(fontSize: 10),)),
-                                                            fixedWidth: 37
-                                                        ),
-                                                        DataColumn2(
-                                                            label: Center(child: Text('2', style: TextStyle(fontSize: 10),)),
-                                                            fixedWidth: 37
-                                                        ),
-                                                        DataColumn2(
-                                                            label: Center(child: Text('3', style: TextStyle(fontSize: 10),)),
-                                                            fixedWidth: 37
-                                                        ),
-                                                        DataColumn2(
-                                                            label: Center(child: Text('4', style: TextStyle(fontSize: 10),)),
-                                                            fixedWidth: 37
-                                                        ),
-                                                        DataColumn2(
-                                                            label: Center(child: Text('5', style: TextStyle(fontSize: 10),)),
-                                                            fixedWidth: 37
-                                                        ),
-                                                        DataColumn2(
-                                                            label: Center(child: Text('6', style: TextStyle(fontSize: 10),)),
-                                                            fixedWidth: 37
-                                                        ),
-                                                        DataColumn2(
-                                                            label: Center(child: Text('7', style: TextStyle(fontSize: 10),)),
-                                                            fixedWidth: 37
-                                                        ),
-                                                        DataColumn2(
-                                                            label: Center(child: Text('8', style: TextStyle(fontSize: 10),)),
-                                                            fixedWidth: 30
-                                                        ),
+                                              ),
+                                              const Expanded(
+                                                flex: 3,
+                                                child: Column(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                                  children: [
+                                                    Text('PH',style: TextStyle(fontSize: 10)),
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.end,
+                                                      children: [
+                                                        Text('Actual:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
+                                                        Text('00.0',style: TextStyle(fontSize: 10)),
+                                                        SizedBox(width: 5,),
+                                                        Text('Target:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
+                                                        Text('00.0',style: TextStyle(fontSize: 10)),
                                                       ],
-                                                      rows: List<DataRow>.generate(5, (index) => DataRow(cells: [
-                                                        DataCell(Center(child: Text(index==0? 'Open(%)':index==1?'Flow(l/h)':index==2?'Qty Delivered': index==3?'Time Delivered':'Set Point',
-                                                            style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                                                        DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                                                        DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                                                        DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                                                        DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                                                        DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                                                        DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                                                        DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                                                        DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                                                      ])),
-                                                    )
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(width : 40, child: Image.asset('assets/images/injector.png',)),
+                                            ],),
+                                        ),
+                                        Flexible(
+                                            flex: 2,
+                                            child: DataTable2(
+                                              columnSpacing: 12,
+                                              horizontalMargin: 12,
+                                              minWidth: 400,
+                                              dataRowHeight: 20.0,
+                                              headingRowHeight: 20,
+                                              headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
+                                              columns: const [
+                                                DataColumn2(
+                                                    label: Center(child: Text('Channel', style: TextStyle(fontSize: 10),)),
+                                                    size: ColumnSize.M
+                                                ),
+                                                DataColumn2(
+                                                    label: Center(child: Text('1', style: TextStyle(fontSize: 10),)),
+                                                    fixedWidth: 37
+                                                ),
+                                                DataColumn2(
+                                                    label: Center(child: Text('2', style: TextStyle(fontSize: 10),)),
+                                                    fixedWidth: 37
+                                                ),
+                                                DataColumn2(
+                                                    label: Center(child: Text('3', style: TextStyle(fontSize: 10),)),
+                                                    fixedWidth: 37
+                                                ),
+                                                DataColumn2(
+                                                    label: Center(child: Text('4', style: TextStyle(fontSize: 10),)),
+                                                    fixedWidth: 37
+                                                ),
+                                                DataColumn2(
+                                                    label: Center(child: Text('5', style: TextStyle(fontSize: 10),)),
+                                                    fixedWidth: 37
+                                                ),
+                                                DataColumn2(
+                                                    label: Center(child: Text('6', style: TextStyle(fontSize: 10),)),
+                                                    fixedWidth: 37
+                                                ),
+                                                DataColumn2(
+                                                    label: Center(child: Text('7', style: TextStyle(fontSize: 10),)),
+                                                    fixedWidth: 37
+                                                ),
+                                                DataColumn2(
+                                                    label: Center(child: Text('8', style: TextStyle(fontSize: 10),)),
+                                                    fixedWidth: 30
                                                 ),
                                               ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                              rows: List<DataRow>.generate(5, (index) => DataRow(cells: [
+                                                DataCell(Center(child: Text(index==0? 'Open(%)':index==1?'Flow(l/h)':index==2?'Qty Delivered': index==3?'Time Delivered':'Set Point',
+                                                    style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
+                                                DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
+                                                DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
+                                                DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
+                                                DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
+                                                DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
+                                                DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
+                                                DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
+                                                DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
+                                              ])),
+                                            )
+                                        ),
+                                      ],
                                     ),
-                                  ),*/
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 3),
                           SizedBox(
                             child: Card(
                               elevation: 2,
@@ -604,17 +604,19 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                     ListTile(
                                       tileColor: Colors.white,
                                       title: const Text('CURRENT PROGRAM', style: TextStyle(fontSize: 14)),
-                                      trailing: Row(
+                                      trailing: widget.siteData.currentProgram.isNotEmpty && widget.siteData.currentProgram.length > 1? Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Image.asset('assets/GiffFile/water_drop_animation.gif'),
+                                          IconButton(tooltip:'Pause all program', onPressed: (){}, icon: Icon(Icons.pause_circle_outline_sharp,)),
+                                          IconButton(tooltip:'Remove all program', onPressed: (){}, icon: Icon(Icons.remove_circle_outline, color: Colors.red,)),
                                         ],
-                                      ),
+                                      ) : null,
                                     ),
                                     const Divider(height: 0),
                                     Container(
                                       color: Colors.white,
-                                      height: 85,
+                                      height: widget.siteData.currentProgram.isNotEmpty? (widget.siteData.currentProgram.length * 50)+35 : 50,
                                       child: widget.siteData.currentProgram.isNotEmpty? ListView.builder(
                                           scrollDirection: Axis.vertical,
                                           itemCount: widget.siteData.currentProgram.length,
@@ -645,69 +647,154 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                     ),
                                                     const DataColumn2(
                                                         label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
-                                                        fixedWidth: 110
+                                                        fixedWidth: 126
                                                     ),
                                                   ],
                                                   rows: List<DataRow>.generate(1, (index) => DataRow(cells: [
                                                     DataCell(Text('Manual')),
                                                     DataCell(Center(child: Text(_convertTime(widget.siteData.currentProgram[cpInx].startTime)))),
-                                                    DataCell(Center(child: Text('---'))),
+                                                    const DataCell(Center(child: Text('---'))),
                                                     DataCell(Center(child: Row(
                                                       children: [
-                                                        IconButton(tooltip:'Pause',onPressed: (){}, icon: Icon(Icons.pause_circle_outline_sharp)),
-                                                        IconButton(tooltip:'Stop',onPressed: (){
+                                                        IconButton(tooltip:'Pause',onPressed: (){
+                                                          String payload = '${programList[index].serialNumber}, 3';
+                                                          String payLoadFinal = jsonEncode({
+                                                            "2900": [{"2901": payload}]
+                                                          });
+                                                          MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                                        }, icon: Icon(Icons.pause_circle_outline_sharp)),
+                                                        IconButton(tooltip:'Skip next',onPressed: (){
+                                                          String payload = '${programList[index].serialNumber}, 2';
+                                                          String payLoadFinal = jsonEncode({
+                                                            "2900": [{"2901": payload}]
+                                                          });
+                                                          MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                                        }, icon: Icon(Icons.skip_next_outlined, color: myTheme.primaryColor,)),
+                                                        IconButton(tooltip:'Remove',onPressed: (){
                                                           String payload = '${programList[index].serialNumber}, 0';
                                                           String payLoadFinal = jsonEncode({
                                                             "2900": [{"2901": payload}]
                                                           });
                                                           MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                                        }, icon: Icon(Icons.stop_circle_outlined, color: Colors.red,)),
-                                                        PopupMenuButton<String>(
-                                                          tooltip: 'Show more option',
-                                                          itemBuilder: (context) => [
-                                                            PopupMenuItem(
-                                                              value: 'Replay 30 sec',
-                                                              child: Row(
-                                                                children: [
-                                                                  Icon(Icons.replay_30), // Leading icon
-                                                                  SizedBox(width: 8), // Padding between icon and text
-                                                                  Text('Replay 30 sec'), // Menu item text
-                                                                ],
-                                                              ),
-                                                            ),
-                                                            PopupMenuItem(
-                                                              value: 'Forward 30 sec',
-                                                              child: Row(
-                                                                children: [
-                                                                  Icon(Icons.forward_30), // Leading icon
-                                                                  SizedBox(width: 8), // Padding between icon and text
-                                                                  Text('Forward 30 sec'), // Menu item text
-                                                                ],
-                                                              ),
-                                                            ),
-                                                            PopupMenuItem(
-                                                              value: 'Skip',
-                                                              child: Row(
-                                                                children: [
-                                                                  Icon(Icons.skip_next_outlined), // Leading icon
-                                                                  SizedBox(width: 8), // Padding between icon and text
-                                                                  Text('Skip'), // Menu item text
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          ],
-                                                          onSelected: (value) {
-                                                            // Handle the selection here
-                                                            print('Selected: $value');
-                                                          },
-                                                          child: Icon(Icons.more_vert),
-                                                        ),
+                                                        }, icon: Icon(Icons.remove_circle_outline, color: Colors.red,)),
                                                       ],
                                                     ))),
                                                   ])),
                                                 ),
                                               );
                                             }
+                                            return SizedBox(
+                                              height: 100,
+                                              child: DataTable2(
+                                                columnSpacing: 12,
+                                                horizontalMargin: 12,
+                                                minWidth: 550,
+                                                dataRowHeight: 50.0,
+                                                headingRowHeight: 35.0,
+                                                headingRowColor: MaterialStateProperty.all<Color>(Colors.green.withOpacity(0.1)),
+                                                //border: TableBorder.all(),
+                                                columns: const [
+                                                  DataColumn2(
+                                                      label: Text('Name', style: TextStyle(fontSize: 13),),
+                                                      size: ColumnSize.M
+                                                  ),
+                                                  DataColumn2(
+                                                      label: Center(child: Text('Shift', style: TextStyle(fontSize: 13),)),
+                                                      fixedWidth: 100
+                                                  ),
+                                                  DataColumn2(
+                                                      label: Center(child: Text('Cycle', style: TextStyle(fontSize: 13),)),
+                                                      fixedWidth: 100
+                                                  ),
+                                                  DataColumn2(
+                                                      label: Center(child: Text('Duration', style: TextStyle(fontSize: 13),)),
+                                                      fixedWidth: 100
+                                                  ),
+                                                  DataColumn2(
+                                                      label: Center(child: Text('Valve', style: TextStyle(fontSize: 13),)),
+                                                      fixedWidth: 100
+                                                  ),
+                                                  DataColumn2(
+                                                      label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
+                                                      fixedWidth: 126
+                                                  ),
+                                                ],
+                                                rows: List<DataRow>.generate(1, (index) => DataRow(cells: [
+                                                  DataCell(Text('Manual')),
+                                                  DataCell(Center(child: Text('---'))),
+                                                  DataCell(Center(child: Text('---'))),
+                                                  DataCell(Center(child: Text('---'))),
+                                                  DataCell(Center(child: Text('----'))),
+                                                  DataCell(Center(child: Row(
+                                                    children: [
+                                                      IconButton(tooltip:'Pause',onPressed: (){
+                                                        String payload = '${programList[index].serialNumber}, 3';
+                                                        String payLoadFinal = jsonEncode({
+                                                          "2900": [{"2901": payload}]
+                                                        });
+                                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                                      }, icon: Icon(Icons.pause_circle_outline_sharp)),
+                                                      IconButton(tooltip:'Skip next',onPressed: (){
+                                                        String payload = '${programList[index].serialNumber}, 2';
+                                                        String payLoadFinal = jsonEncode({
+                                                          "2900": [{"2901": payload}]
+                                                        });
+                                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                                      }, icon: Icon(Icons.skip_next_outlined, color: myTheme.primaryColor,)),
+                                                      IconButton(tooltip:'Remove',onPressed: (){
+                                                        String payload = '${programList[index].serialNumber}, 0';
+                                                        String payLoadFinal = jsonEncode({
+                                                          "2900": [{"2901": payload}]
+                                                        });
+                                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                                      }, icon: Icon(Icons.remove_circle_outline, color: Colors.red,)),
+                                                    ],
+                                                  ))),
+                                                ])),
+                                              ),
+                                            );
+                                          }) :
+                                      const Center(child: Text('Current Program not Available')),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          SizedBox(
+                            child: Card(
+                              elevation: 2,
+                              surfaceTintColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5), // make it circular
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(5.0),
+                                child: Column(
+                                  children: [
+                                    ListTile(
+                                      tileColor: Colors.white,
+                                      title: const Text('NEXT PROGRAM', style: TextStyle(fontSize: 14)),
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                              tooltip: 'Program library',
+                                              onPressed: () {
+                                              },
+                                              icon: const Icon(Icons.view_list_outlined)),
+                                        ],
+                                      ),
+                                    ),
+                                    const Divider(height: 0),
+                                    Container(
+                                      color: Colors.white,
+                                      height: widget.siteData.nextProgram.isNotEmpty? (widget.siteData.nextProgram.length * 50) +35 : 50,
+                                      child: widget.siteData.nextProgram.isNotEmpty? ListView.builder(
+                                          scrollDirection: Axis.vertical,
+                                          itemCount: widget.siteData.nextProgram.length,
+                                          itemBuilder: (context, cpInx) {
                                             return SizedBox(
                                               height: 100,
                                               child: DataTable2(
@@ -806,16 +893,15 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                               ),
                                             );
                                           }) :
-                                      Container(),
+                                      const Center(child: Text('Next Program not Available')),
                                     ),
                                   ],
                                 ),
                               ),
                             ),
                           ),
-                          const SizedBox(height: 5),
+                          const SizedBox(height: 3),
                           SizedBox(
-                            height: (programList.length * 35) + 110,
                             child: Card(
                               elevation: 2,
                               surfaceTintColor: Colors.white,
@@ -826,89 +912,73 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                 padding: const EdgeInsets.all(5.0),
                                 child: Column(
                                   children: [
-                                    ListTile(
+                                    const ListTile(
                                       tileColor: Colors.white,
-                                      title: const Text('NEXT PROGRAM', style: TextStyle(fontSize: 14)),
-                                      //subtitle: Text(programList.isNotEmpty ? programList.programName:'No program Available'),
-                                      trailing: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          IconButton(
-                                              tooltip: 'Program Library',
-                                              onPressed: () {
-                                                showProgramLibraryBottomSheet(context);
-                                              },
-                                              icon: const Icon(Icons.list)),
-                                          IconButton(
-                                              tooltip: 'Up Coming Program',
-                                              onPressed: () {
-                                              },
-                                              icon: const Icon(Icons.view_list_outlined)),
-                                        ],
-                                      ),
+                                      title: Text('UPCOMING PROGRAM', style: TextStyle(fontSize: 14)),
                                     ),
                                     const Divider(height: 0),
-                                    Container(
-                                      color: Colors.white,
-                                      height: (programList.length * 35) + 35,
-                                      child: programList.isNotEmpty? InkWell(
-                                        child: SizedBox(
-                                          height: (programList.length * 35) + 35,
-                                          child: DataTable2(
-                                            columnSpacing: 12,
-                                            horizontalMargin: 12,
-                                            minWidth: 550,
-                                            dataRowHeight: 35.0,
-                                            headingRowHeight: 35.0,
-                                            headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
-                                            //border: TableBorder.all(),
-                                            columns: const [
-                                              DataColumn2(
-                                                  label: Text('Name', style: TextStyle(fontSize: 13),),
-                                                  size: ColumnSize.M
-                                              ),
-                                              DataColumn2(
-                                                  label: Center(child: Text('Total Rtc', style: TextStyle(fontSize: 13),)),
-                                                  fixedWidth: 100
-                                              ),
-                                              DataColumn2(
-                                                  label: Center(child: Text('Current Rtc', style: TextStyle(fontSize: 13),)),
-                                                  fixedWidth: 100
-                                              ),
-                                              DataColumn2(
-                                                  label: Center(child: Text('Total Cycle', style: TextStyle(fontSize: 13),)),
-                                                  fixedWidth: 100
-                                              ),
-                                              DataColumn2(
-                                                  label: Center(child: Text('Start Date', style: TextStyle(fontSize: 13),)),
-                                                  fixedWidth: 100
-                                              ),
-                                              DataColumn2(
-                                                  label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
-                                                  fixedWidth: 100
-                                              ),
-                                              DataColumn2(
-                                                  label: Center(child: Text('Duration', style: TextStyle(fontSize: 13),)),
-                                                  fixedWidth: 100
-                                              ),
-                                            ],
-                                            rows: List<DataRow>.generate(programList.length, (index) => DataRow(cells: [
-                                              DataCell(Text(programList[index].firstSequence)),
-                                              DataCell(Center(child: Text('1/${programList[index].sequenceCount}'))),
-                                              DataCell(Center(child: programList[index].scheduleType == 'NO SCHEDULE' ? const Text('---') :
-                                              Text(programList[index].startDate.split(' ').first))),
-                                              DataCell(Center(child: Text(programList[index].startTime))),
-                                              DataCell(Center(child: Text(programList[index].duration))),
-                                              DataCell(Center(child: Text(programList[index].duration))),
-                                              DataCell(Center(child: Text(programList[index].duration))),
-                                            ])),
+                                    SizedBox(
+                                      height: programList.isNotEmpty? (programList.length * 50) + 35 : 50,
+                                      child: programList.isNotEmpty? DataTable2(
+                                        columnSpacing: 12,
+                                        horizontalMargin: 12,
+                                        minWidth: 600,
+                                        dataRowHeight: 45.0,
+                                        headingRowHeight: 35.0,
+                                        headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
+                                        columns: const [
+                                          DataColumn2(
+                                              label: Text('Name', style: TextStyle(fontSize: 13),),
+                                              fixedWidth: 110
                                           ),
-                                        ),
-                                        onTap: (){
-                                          //Navigator.push(context, MaterialPageRoute(builder: (context) =>  DashboardByProgram(siteID: siteData[i].siteId, siteName: siteData[i].siteName, controllerID: siteData[i].controllerId, customerID: widget.customerID, imeiNo: siteData[i].deviceId, programId: programList[index].programId,)),);
-                                        },
+                                          DataColumn2(
+                                              label: Text('Category', style: TextStyle(fontSize: 13),),
+                                              size: ColumnSize.M
+                                          ),
+                                          DataColumn2(
+                                              label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
+                                              fixedWidth: 50
+                                          ),
+                                          DataColumn2(
+                                              label: Center(child: Text('Start Date', style: TextStyle(fontSize: 13),)),
+                                              fixedWidth: 100
+                                          ),
+                                          DataColumn2(
+                                              label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
+                                              fixedWidth: 80
+                                          ),
+                                          DataColumn2(
+                                              label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
+                                              fixedWidth: 87
+                                          ),
+                                        ],
+                                        rows: List<DataRow>.generate(programList.length, (index) => DataRow(cells: [
+                                          DataCell(Text(programList[index].programName)),
+                                          DataCell(Text(programList[index].programName == 'Default'? '----' : programList[index].scheduleType)),
+                                          DataCell(Center(child: Text('${programList[index].sequenceCount}'))),
+                                          DataCell(Center(child: Text(programList[index].programName == 'Default'? '----':programList[index].startDate.split(' ').first))),
+                                          DataCell(Center(child: Text(programList[index].programName == 'Default'? '----':programList[index].startTime))),
+                                          DataCell(Center(child: Row(
+                                            children: [
+                                              IconButton(tooltip:'Start',onPressed: (){
+                                                String payload = '${programList[index].serialNumber},1';
+                                                String payLoadFinal = jsonEncode({
+                                                  "2900": [{"2901": payload}]
+                                                });
+                                                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                              }, icon: const Icon(Icons.start, color: Colors.green,)),
+                                              IconButton(tooltip:'Remove',onPressed: (){
+                                                String payload = '${programList[index].serialNumber}, 0';
+                                                String payLoadFinal = jsonEncode({
+                                                  "2900": [{"2901": payload}]
+                                                });
+                                                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                              }, icon: const Icon(Icons.remove_circle_outline, color: Colors.red)),
+                                            ],
+                                          ))),
+                                        ])),
                                       ) :
-                                      Container(),
+                                      const Center(child: Text('Upcoming Program not Available')),
                                     ),
                                   ],
                                 ),
@@ -919,265 +989,265 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                       ),
                     ),
                   ),
-                ),
-                Card(
-                  elevation: 5,
-                  surfaceTintColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5), // make it circular
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(3.0),
-                    child: Container(
-                      width: 345,
-                      height: widget.siteLength > 0? MediaQuery.sizeOf(context).height-197 : MediaQuery.sizeOf(context).height-153,
-                      color: Colors.white,
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            height: 50,
-                            child: Row(
-                              children: [
-                                Row(
-                                  children: [
-                                    const Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            SizedBox(width: 5),
-                                            CircleAvatar(radius: 5, backgroundColor: Colors.green,),
-                                            SizedBox(width: 5),
-                                            Text('Connected', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12))
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            SizedBox(width: 5),
-                                            CircleAvatar(radius: 5, backgroundColor: Colors.grey),
-                                            SizedBox(width: 5),
-                                            Text('No Communication', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12))
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    const Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            SizedBox(width: 10),
-                                            CircleAvatar(radius: 5, backgroundColor: Colors.redAccent,),
-                                            SizedBox(width: 5),
-                                            Text('Set Serial Error', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12))
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            SizedBox(width: 10),
-                                            CircleAvatar(radius: 5, backgroundColor: Colors.yellow),
-                                            SizedBox(width: 5),
-                                            Text('Low Battery', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12))
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(width: 5),
-                                    SizedBox(
-                                      width: 40,
-                                      child: IconButton(tooltip:'View all Node details', onPressed: (){
-                                        showNodeDetailsBottomSheet(context);
-                                      }, icon: const Icon(Icons.backup_table_rounded)),
-                                    ),
-                                    SizedBox(
-                                      width: 40,
-                                      child: IconButton(
-                                        tooltip: 'Set serial for all Nodes',
-                                        icon: const Icon(Icons.format_list_numbered),
-                                        onPressed: () async {
-                                          String payLoadFinal = jsonEncode({
-                                            "2300": [
-                                              {"2301": ""},
-                                            ]
-                                          });
-                                          MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: DataTable2(
-                              columnSpacing: 12,
-                              horizontalMargin: 12,
-                              minWidth: 325,
-                              dataRowHeight: 40.0,
-                              headingRowHeight: 35.0,
-                              headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
-                              columns: const [
-                                DataColumn2(
-                                    label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13),)),
-                                    fixedWidth: 35
-                                ),
-                                DataColumn2(
-                                  label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13),)),
-                                  fixedWidth: 55,
-                                ),
-                                DataColumn2(
-                                  label: Center(child: Text('Rf.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13),)),
-                                  fixedWidth: 45,
-                                ),
-                                DataColumn2(
-                                  label: Text('Category', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
-                                  size: ColumnSize.M,
-                                  numeric: true,
-                                ),
-                                DataColumn2(
-                                  label: Text('Info', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
-                                  fixedWidth: 40,
-                                ),
-                              ],
-                              rows: List<DataRow>.generate(widget.siteData.nodeList.length, (index) => DataRow(cells: [
-                                DataCell(Center(child: Text('${widget.siteData.nodeList[index].serialNumber}', style: const TextStyle(fontWeight: FontWeight.normal),))),
-                                DataCell(Center(child: CircleAvatar(radius: 7, backgroundColor:
-                                widget.siteData.nodeList[index].status == 1 ? Colors.green.shade400:
-                                widget.siteData.nodeList[index].status == 3 ? Colors.red.shade400:
-                                widget.siteData.nodeList[index].status == 2 ? Colors.grey :
-                                widget.siteData.nodeList[index].status == 4 ? Colors.yellow :
-                                Colors.grey,
-                                ))),
-                                DataCell(Center(child: Text('${widget.siteData.nodeList[index].referenceNumber}', style: TextStyle(fontWeight: FontWeight.normal)))),
-                                DataCell(Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(widget.siteData.nodeList[index].categoryName, style: const TextStyle(fontWeight: FontWeight.normal)),
-                                    Text(widget.siteData.nodeList[index].deviceId, style: const TextStyle(fontWeight: FontWeight.normal,fontSize: 11)),
-                                  ],
-                                )),
-                                DataCell(Center(child: IconButton(tooltip: 'View Relay status',
-                                  icon: const Icon(Icons.receipt_long), // Icon to display
-                                  onPressed: () {
-                                    showModalBottomSheet(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return SizedBox(
-                                          height: widget.siteData.nodeList[index].rlyStatus.length > 8? 275 : 200,
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: <Widget>[
-                                              ListTile(
-                                                tileColor: myTheme.primaryColor,
-                                                textColor: Colors.white,
-                                                leading: const Icon(Icons.developer_board_rounded, color: Colors.white),
-                                                title: Text('${widget.siteData.nodeList[index].categoryName} - ${widget.siteData.nodeList[index].deviceId}'),
-                                                trailing: Row(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    const Icon(Icons.solar_power_outlined, color: Colors.white),
-                                                    const SizedBox(width: 5,),
-                                                    Text('${widget.siteData.nodeList[index].slrVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                    const SizedBox(width: 5,),
-                                                    const Icon(Icons.battery_3_bar_rounded, color: Colors.white),
-                                                    const SizedBox(width: 5,),
-                                                    Text('${widget.siteData.nodeList[index].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                    const SizedBox(width: 5,),
-                                                    IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
-                                                      String payLoadFinal = jsonEncode({
-                                                        "2300": [
-                                                          {"2301": "${widget.siteData.nodeList[index].serialNumber}"},
-                                                        ]
-                                                      });
-                                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                                    }, icon: Icon(Icons.fact_check_outlined, color: Colors.white))
-                                                  ],
-                                                ),
-                                              ),
-                                              const Divider(height: 0),
-                                              SizedBox(
-                                                width : double.infinity,
-                                                height : widget.siteData.nodeList[index].rlyStatus.length > 8? 206 : 130,
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(8.0),
-                                                  child: widget.siteData.nodeList[index].rlyStatus.isNotEmpty ? Column(
-                                                    children: [
-                                                      const SizedBox(
-                                                        width: double.infinity,
-                                                        height : 40,
-                                                        child: Row(
-                                                          children: [
-                                                            SizedBox(width: 10),
-                                                            CircleAvatar(radius: 5,backgroundColor: Colors.green,),
-                                                            SizedBox(width: 5),
-                                                            Text('ON'),
-                                                            SizedBox(width: 20),
-                                                            CircleAvatar(radius: 5,backgroundColor: Colors.black45),
-                                                            SizedBox(width: 5),
-                                                            Text('OFF'),
-                                                            SizedBox(width: 20),
-                                                            CircleAvatar(radius: 5,backgroundColor: Colors.orange),
-                                                            SizedBox(width: 5),
-                                                            Text('ON IN OFF'),
-                                                            SizedBox(width: 20),
-                                                            CircleAvatar(radius: 5,backgroundColor: Colors.redAccent),
-                                                            SizedBox(width: 5),
-                                                            Text('OFF IN ON'),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      SizedBox(
-                                                        width: double.infinity,
-                                                        height : widget.siteData.nodeList[index].rlyStatus.length > 8? 150 : 70,
-                                                        child: GridView.builder(
-                                                          itemCount: widget.siteData.nodeList[index].rlyStatus.length, // Number of items in the grid
-                                                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                                            crossAxisCount: 8,
-                                                            crossAxisSpacing: 10.0,
-                                                            mainAxisSpacing: 10.0,
-                                                          ),
-                                                          itemBuilder: (BuildContext context, int indexGv) {
-                                                            return Column(
-                                                              children: [
-                                                                CircleAvatar(
-                                                                  backgroundColor: widget.siteData.nodeList[index].rlyStatus[indexGv].status==0 ? Colors.grey :
-                                                                  widget.siteData.nodeList[index].rlyStatus[indexGv].status==1 ? Colors.green :
-                                                                  widget.siteData.nodeList[index].rlyStatus[indexGv].status==2 ? Colors.orange :
-                                                                  widget.siteData.nodeList[index].rlyStatus[indexGv].status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
-                                                                  child: Text((widget.siteData.nodeList[index].rlyStatus[indexGv].rlyNo).toString(), style: const TextStyle(color: Colors.white)),
-                                                                ),
-                                                                Text((widget.siteData.nodeList[index].rlyStatus[indexGv].name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
-                                                              ],
-                                                            );
-                                                          },
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ) :
-                                                  const Center(child: Text('Relay Status Not Found')),
-                                                ),
-                                              ),
+                  Card(
+                    elevation: 5,
+                    surfaceTintColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5), // make it circular
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(3.0),
+                      child: Container(
+                        width: 345,
+                        height: widget.siteLength > 1? MediaQuery.sizeOf(context).height-197 : MediaQuery.sizeOf(context).height-153,
+                        color: Colors.white,
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 50,
+                              child: Row(
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              SizedBox(width: 5),
+                                              CircleAvatar(radius: 5, backgroundColor: Colors.green,),
+                                              SizedBox(width: 5),
+                                              Text('Connected', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12))
                                             ],
                                           ),
-                                        );
-                                      },
-                                    );
-                                  },
-                                ))),
-                              ])),
+                                          Row(
+                                            children: [
+                                              SizedBox(width: 5),
+                                              CircleAvatar(radius: 5, backgroundColor: Colors.grey),
+                                              SizedBox(width: 5),
+                                              Text('No Communication', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12))
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      const Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              SizedBox(width: 10),
+                                              CircleAvatar(radius: 5, backgroundColor: Colors.redAccent,),
+                                              SizedBox(width: 5),
+                                              Text('Set Serial Error', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12))
+                                            ],
+                                          ),
+                                          Row(
+                                            children: [
+                                              SizedBox(width: 10),
+                                              CircleAvatar(radius: 5, backgroundColor: Colors.yellow),
+                                              SizedBox(width: 5),
+                                              Text('Low Battery', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12))
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(width: 5),
+                                      SizedBox(
+                                        width: 40,
+                                        child: IconButton(tooltip:'View all Node details', onPressed: (){
+                                          showNodeDetailsBottomSheet(context);
+                                        }, icon: const Icon(Icons.backup_table_rounded)),
+                                      ),
+                                      SizedBox(
+                                        width: 40,
+                                        child: IconButton(
+                                          tooltip: 'Set serial for all Nodes',
+                                          icon: const Icon(Icons.format_list_numbered),
+                                          onPressed: () async {
+                                            String payLoadFinal = jsonEncode({
+                                              "2300": [
+                                                {"2301": ""},
+                                              ]
+                                            });
+                                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          )
-                        ],
+                            Expanded(
+                              flex: 1,
+                              child: DataTable2(
+                                columnSpacing: 12,
+                                horizontalMargin: 12,
+                                minWidth: 325,
+                                dataRowHeight: 40.0,
+                                headingRowHeight: 35.0,
+                                headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
+                                columns: const [
+                                  DataColumn2(
+                                      label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13),)),
+                                      fixedWidth: 35
+                                  ),
+                                  DataColumn2(
+                                    label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13),)),
+                                    fixedWidth: 55,
+                                  ),
+                                  DataColumn2(
+                                    label: Center(child: Text('Rf.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13),)),
+                                    fixedWidth: 45,
+                                  ),
+                                  DataColumn2(
+                                    label: Text('Category', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
+                                    size: ColumnSize.M,
+                                    numeric: true,
+                                  ),
+                                  DataColumn2(
+                                    label: Text('Info', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
+                                    fixedWidth: 40,
+                                  ),
+                                ],
+                                rows: List<DataRow>.generate(widget.siteData.nodeList.length, (index) => DataRow(cells: [
+                                  DataCell(Center(child: Text('${widget.siteData.nodeList[index].serialNumber}', style: const TextStyle(fontWeight: FontWeight.normal),))),
+                                  DataCell(Center(child: CircleAvatar(radius: 7, backgroundColor:
+                                  widget.siteData.nodeList[index].status == 1 ? Colors.green.shade400:
+                                  widget.siteData.nodeList[index].status == 3 ? Colors.red.shade400:
+                                  widget.siteData.nodeList[index].status == 2 ? Colors.grey :
+                                  widget.siteData.nodeList[index].status == 4 ? Colors.yellow :
+                                  Colors.grey,
+                                  ))),
+                                  DataCell(Center(child: Text('${widget.siteData.nodeList[index].referenceNumber}', style: TextStyle(fontWeight: FontWeight.normal)))),
+                                  DataCell(Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(widget.siteData.nodeList[index].categoryName, style: const TextStyle(fontWeight: FontWeight.normal)),
+                                      Text(widget.siteData.nodeList[index].deviceId, style: const TextStyle(fontWeight: FontWeight.normal,fontSize: 11)),
+                                    ],
+                                  )),
+                                  DataCell(Center(child: IconButton(tooltip: 'View Relay status',
+                                    icon: const Icon(Icons.receipt_long), // Icon to display
+                                    onPressed: () {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return SizedBox(
+                                            height: widget.siteData.nodeList[index].rlyStatus.length > 8? 275 : 200,
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              children: <Widget>[
+                                                ListTile(
+                                                  tileColor: myTheme.primaryColor,
+                                                  textColor: Colors.white,
+                                                  leading: const Icon(Icons.developer_board_rounded, color: Colors.white),
+                                                  title: Text('${widget.siteData.nodeList[index].categoryName} - ${widget.siteData.nodeList[index].deviceId}'),
+                                                  trailing: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      const Icon(Icons.solar_power_outlined, color: Colors.white),
+                                                      const SizedBox(width: 5,),
+                                                      Text('${widget.siteData.nodeList[index].slrVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                      const SizedBox(width: 5,),
+                                                      const Icon(Icons.battery_3_bar_rounded, color: Colors.white),
+                                                      const SizedBox(width: 5,),
+                                                      Text('${widget.siteData.nodeList[index].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                      const SizedBox(width: 5,),
+                                                      IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
+                                                        String payLoadFinal = jsonEncode({
+                                                          "2300": [
+                                                            {"2301": "${widget.siteData.nodeList[index].serialNumber}"},
+                                                          ]
+                                                        });
+                                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                                      }, icon: Icon(Icons.fact_check_outlined, color: Colors.white))
+                                                    ],
+                                                  ),
+                                                ),
+                                                const Divider(height: 0),
+                                                SizedBox(
+                                                  width : double.infinity,
+                                                  height : widget.siteData.nodeList[index].rlyStatus.length > 8? 206 : 130,
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(8.0),
+                                                    child: widget.siteData.nodeList[index].rlyStatus.isNotEmpty ? Column(
+                                                      children: [
+                                                        const SizedBox(
+                                                          width: double.infinity,
+                                                          height : 40,
+                                                          child: Row(
+                                                            children: [
+                                                              SizedBox(width: 10),
+                                                              CircleAvatar(radius: 5,backgroundColor: Colors.green,),
+                                                              SizedBox(width: 5),
+                                                              Text('ON'),
+                                                              SizedBox(width: 20),
+                                                              CircleAvatar(radius: 5,backgroundColor: Colors.black45),
+                                                              SizedBox(width: 5),
+                                                              Text('OFF'),
+                                                              SizedBox(width: 20),
+                                                              CircleAvatar(radius: 5,backgroundColor: Colors.orange),
+                                                              SizedBox(width: 5),
+                                                              Text('ON IN OFF'),
+                                                              SizedBox(width: 20),
+                                                              CircleAvatar(radius: 5,backgroundColor: Colors.redAccent),
+                                                              SizedBox(width: 5),
+                                                              Text('OFF IN ON'),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        SizedBox(
+                                                          width: double.infinity,
+                                                          height : widget.siteData.nodeList[index].rlyStatus.length > 8? 150 : 70,
+                                                          child: GridView.builder(
+                                                            itemCount: widget.siteData.nodeList[index].rlyStatus.length, // Number of items in the grid
+                                                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                                              crossAxisCount: 8,
+                                                              crossAxisSpacing: 10.0,
+                                                              mainAxisSpacing: 10.0,
+                                                            ),
+                                                            itemBuilder: (BuildContext context, int indexGv) {
+                                                              return Column(
+                                                                children: [
+                                                                  CircleAvatar(
+                                                                    backgroundColor: widget.siteData.nodeList[index].rlyStatus[indexGv].status==0 ? Colors.grey :
+                                                                    widget.siteData.nodeList[index].rlyStatus[indexGv].status==1 ? Colors.green :
+                                                                    widget.siteData.nodeList[index].rlyStatus[indexGv].status==2 ? Colors.orange :
+                                                                    widget.siteData.nodeList[index].rlyStatus[indexGv].status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
+                                                                    child: Text((widget.siteData.nodeList[index].rlyStatus[indexGv].rlyNo).toString(), style: const TextStyle(color: Colors.white)),
+                                                                  ),
+                                                                  Text((widget.siteData.nodeList[index].rlyStatus[indexGv].name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                                                ],
+                                                              );
+                                                            },
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ) :
+                                                    const Center(child: Text('Relay Status Not Found')),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ))),
+                                ])),
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             ),
           ),
         ],
@@ -1229,48 +1299,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
       }
     }
     return -1;
-  }
-
-  Future<void>removeManualModeInServer() async
-  {
-    Map<String, dynamic> manualOperation = {
-      "method": 1,
-      "time": '00:00',
-      "flow": '00.0',
-      "selected": [],
-    };
-    try {
-      final body = {"userId": widget.customerID, "controllerId": widget.siteData.controllerId, "manualOperation": manualOperation, "createUser": widget.customerID};
-      final response = await HttpService().postRequest("createUserManualOperation", body);
-      if (response.statusCode == 200) {
-        Future.delayed(const Duration(seconds: 01), () {
-          getStandaloneDetails(widget.siteData.controllerId ?? 0);
-        });
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
-  Future<void> getStandaloneDetails(int controllerId) async
-  {
-    try {
-      Map<String, Object> body = {"userId": widget.customerID, "controllerId": controllerId};
-      final response = await HttpService().postRequest("getUserManualOperation", body);
-      if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
-        if(jsonResponse['code']==200){
-          //standaloneMethod = jsonResponse['data']['method'];
-          //standaloneTime = jsonResponse['data']['time'];
-          //standaloneFlow = jsonResponse['data']['flow'];
-        }else{
-          //standaloneMethod = 0;
-        }
-        setState(() {});
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
   }
 
   String _convertTime(String timeString) {
@@ -1412,122 +1440,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
         );
       },
     );
-  }
-
-  Future<void>showProgramLibraryBottomSheet(BuildContext context) async{
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return SizedBox(
-          height: 600,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                height: 50,
-                decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(10.0),
-                      topRight: Radius.circular(10.0),
-                    )
-                ),
-                child: const ListTile(
-                  title: Text("Program Library", style: TextStyle(fontSize: 20, color: Colors.black),),
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  color: Colors.blueGrey.shade50,
-                  child: DataTable2(
-                    columnSpacing: 12,
-                    horizontalMargin: 12,
-                    minWidth: 600,
-                    dataRowHeight: 45.0,
-                    headingRowHeight: 35.0,
-                    headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
-                    columns: const [
-                      DataColumn2(
-                          label: Text('Name', style: TextStyle(fontSize: 13),),
-                          fixedWidth: 110
-                      ),
-                      DataColumn2(
-                          label: Text('Category', style: TextStyle(fontSize: 13),),
-                          size: ColumnSize.M
-                      ),
-                      DataColumn2(
-                          label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
-                          fixedWidth: 50
-                      ),
-                      DataColumn2(
-                          label: Center(child: Text('Start Date', style: TextStyle(fontSize: 13),)),
-                          fixedWidth: 100
-                      ),
-                      DataColumn2(
-                          label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
-                          fixedWidth: 80
-                      ),
-                      DataColumn2(
-                          label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
-                          fixedWidth: 87
-                      ),
-                    ],
-                    rows: List<DataRow>.generate(programList.length, (index) => DataRow(cells: [
-                      DataCell(Text(programList[index].programName)),
-                      DataCell(Text(programList[index].programName == 'Default'? '----' : programList[index].scheduleType)),
-                      DataCell(Center(child: Text('${programList[index].sequenceCount}'))),
-                      DataCell(Center(child: Text(programList[index].programName == 'Default'? '----':programList[index].startDate.split(' ').first))),
-                      DataCell(Center(child: Text(programList[index].programName == 'Default'? '----':programList[index].startTime))),
-                      DataCell(Center(child: Row(
-                        children: [
-                          IconButton(tooltip:'Start',onPressed: (){
-                            String payload = '${programList[index].serialNumber},1';
-                            String payLoadFinal = jsonEncode({
-                              "2900": [{"2901": payload}]
-                            });
-                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                            Navigator.pop(context);
-                          }, icon: const Icon(Icons.start, color: Colors.green,)),
-                          IconButton(tooltip:'Remove',onPressed: (){
-                            /*String payload = '${programList[index].serialNumber}, 0';
-                            String payLoadFinal = jsonEncode({
-                              "2900": [{"2901": payload}]
-                            });
-                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');*/
-                          }, icon: const Icon(Icons.remove_circle_outline, color: Colors.red)),
-                        ],
-                      ))),
-                    ])),
-                  ),
-                ),
-              )
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> getProgramServiceDevices(int controllerId) async
-  {
-    try {
-      Map<String, Object> body = {"userId": widget.customerID, "controllerId": controllerId};
-      final response = await HttpService().postRequest("getProgramServiceDevices", body);
-      if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
-        //print(jsonResponse);
-        if(jsonResponse['code']==200){
-          Map<String, dynamic> jsonDataMap = jsonResponse['data'];
-          setState((){
-            //programServiceDevices = ProgramServiceDevices.fromJson(jsonDataMap);
-          });
-        }else{
-
-        }
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
   }
 
 }

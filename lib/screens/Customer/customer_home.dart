@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
-import '../../Models/Customer/Dashboard/ProgramServiceDevices.dart';
 import '../../constants/MQTTManager.dart';
 import '../../constants/http_service.dart';
 import '../../constants/theme.dart';
@@ -27,7 +26,6 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
   int siteIndex = 0;
   bool visibleLoading = false;
   int wifiStrength = 0;
-  ProgramServiceDevices programServiceDevices = ProgramServiceDevices(irrigationPump: [], mainValve: [], centralFertilizerSite: [], centralFertilizer: [], localFertilizer: [], centralFilterSite: [], localFilter: []);
 
   String standaloneTime = '', standaloneFlow = '';
   int standaloneMethod = 0;
@@ -147,7 +145,7 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                         child: Container(
                           width: double.infinity,
                           height: siteListFinal.length >1? MediaQuery.sizeOf(context).height-104 : MediaQuery.sizeOf(context).height-56,
-                          color: myTheme.primaryColor.withOpacity(0.1),
+                          color: myTheme.primaryColor.withOpacity(0.2),
                           child: _centerWidget,
                         ),
                       ),
@@ -159,7 +157,7 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                 child: Container(
                   width: double.infinity,
                   height: siteListFinal.length >1? MediaQuery.sizeOf(context).height-104 : MediaQuery.sizeOf(context).height-56,
-                  color: myTheme.primaryColor.withOpacity(0.1),
+                  color: myTheme.primaryColor.withOpacity(0.2),
                   child: _centerWidget,
                 ),
               ),
@@ -189,7 +187,7 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
        padding: const EdgeInsets.only(left: 8, right: 8),
        child: Container(
          decoration: BoxDecoration(
-           color: currentTap == tapOption ? myTheme.primaryColor : Colors.transparent,
+           color: currentTap == tapOption ? myTheme.primaryColor.withOpacity(0.7) : Colors.transparent,
            borderRadius: const BorderRadius.all(Radius.circular(10)), // Adjust the radius as needed
          ),
          child: ListTile(

@@ -28,6 +28,7 @@ class ProgramList {
   });
 
   factory ProgramList.fromJson(Map<String, dynamic> json) {
+    //print('Program list :$json');
     return ProgramList(
       programId: json['programId'],
       serialNumber: json['serialNumber'],

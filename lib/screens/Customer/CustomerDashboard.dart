@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:data_table_2/data_table_2.dart';
@@ -32,6 +33,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
   late Animation<double> rotationAnimation;
 
   List<ProgramList> programList = [];
+  Timer? timer;
+  final StreamController<String> _controller = StreamController<String>();
 
   @override
   void initState() {
@@ -46,7 +49,45 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
   @override
   void dispose() {
     animationController.dispose();
+    timer?.cancel();
+    _controller.close();
     super.dispose();
+  }
+
+
+  String durationUpdatingFunction(leftDuration) {
+    timer?.cancel();
+    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+      List<String> parts = leftDuration.split(':');
+      int hours = int.parse(parts[0]);
+      int minutes = int.parse(parts[1]);
+      int seconds = int.parse(parts[2]);
+
+      if (seconds > 0) {
+        seconds--;
+      } else {
+        if (minutes > 0) {
+          minutes--;
+          seconds = 59;
+        } else {
+          if (hours > 0) {
+            hours--;
+            minutes = 59;
+            seconds = 59;
+          }
+        }
+      }
+
+      String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+      leftDuration = updatedDurationQtyLeft;
+      _controller.sink.add(updatedDurationQtyLeft);
+      if (updatedDurationQtyLeft == '00:00:00') {
+        timer?.cancel();
+      }
+
+    });
+
+    return leftDuration;
   }
 
   void onRefreshClicked() {
@@ -133,7 +174,14 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
               try {
                 print(item);
                 var currentProgram = CurrentProgram.fromJson(item);
-                widget.siteData.currentProgram.add(currentProgram);
+                int existingIndex = widget.siteData.currentProgram.indexWhere((cp) => cp.programId == currentProgram.programId);
+                if (existingIndex != -1) {
+                  widget.siteData.currentProgram[existingIndex] = currentProgram;
+                } else {
+                  widget.siteData.currentProgram.add(currentProgram);
+                }
+                print('currentProgram updated');
+
               } catch (e) {
                 print('Error updating node properties: $e');
               }
@@ -604,24 +652,41 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                     ListTile(
                                       tileColor: Colors.white,
                                       title: const Text('CURRENT PROGRAM', style: TextStyle(fontSize: 14)),
-                                      trailing: widget.siteData.currentProgram.isNotEmpty && widget.siteData.currentProgram.length > 1? Row(
+                                      subtitle: widget.siteData.currentProgram.isNotEmpty? Text(widget.siteData.currentProgram[0].programName): Text('data'),
+                                      trailing: Row(
                                         mainAxisSize: MainAxisSize.min,
-                                        children: [
+                                        children: widget.siteData.currentProgram.length > 1 ? [
                                           Image.asset('assets/GiffFile/water_drop_animation.gif'),
                                           IconButton(tooltip:'Pause all program', onPressed: (){}, icon: Icon(Icons.pause_circle_outline_sharp,)),
-                                          IconButton(tooltip:'Remove all program', onPressed: (){}, icon: Icon(Icons.remove_circle_outline, color: Colors.red,)),
+                                          IconButton(tooltip:'Remove all program', onPressed: (){
+                                            String payload = '0, 0';
+                                            String payLoadFinal = jsonEncode({
+                                              "2900": [{"2901": payload}]
+                                            });
+                                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                          }, icon: Icon(Icons.remove_circle_outline, color: Colors.red,)),
+                                        ]:
+                                        [
+                                          Image.asset('assets/GiffFile/water_drop_animation.gif'),
+                                          IconButton(tooltip:'Emergency Stop', onPressed: (){
+                                            String payload = '0, 0';
+                                            String payLoadFinal = jsonEncode({
+                                              "2900": [{"2901": payload}]
+                                            });
+                                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                          }, icon: const Icon(Icons.emergency_outlined, color: Colors.red,)),
                                         ],
-                                      ) : null,
+                                      ),
                                     ),
                                     const Divider(height: 0),
                                     Container(
                                       color: Colors.white,
-                                      height: widget.siteData.currentProgram.isNotEmpty? (widget.siteData.currentProgram.length * 50)+35 : 50,
+                                      height: widget.siteData.currentProgram.isNotEmpty? (widget.siteData.currentProgram.length * 50) + 35 : 50,
                                       child: widget.siteData.currentProgram.isNotEmpty? ListView.builder(
                                           scrollDirection: Axis.vertical,
                                           itemCount: widget.siteData.currentProgram.length,
                                           itemBuilder: (context, cpInx) {
-                                            if(widget.siteData.currentProgram[cpInx].programCategory=='Manual'){
+                                            if(widget.siteData.currentProgram[cpInx].programCategory == "Manual"){
                                               return SizedBox(
                                                 height: 85,
                                                 child: DataTable2(
@@ -692,18 +757,17 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                 dataRowHeight: 50.0,
                                                 headingRowHeight: 35.0,
                                                 headingRowColor: MaterialStateProperty.all<Color>(Colors.green.withOpacity(0.1)),
-                                                //border: TableBorder.all(),
                                                 columns: const [
                                                   DataColumn2(
                                                       label: Text('Name', style: TextStyle(fontSize: 13),),
                                                       size: ColumnSize.M
                                                   ),
                                                   DataColumn2(
-                                                      label: Center(child: Text('Shift', style: TextStyle(fontSize: 13),)),
-                                                      fixedWidth: 100
+                                                      label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
+                                                      fixedWidth: 50
                                                   ),
                                                   DataColumn2(
-                                                      label: Center(child: Text('Cycle', style: TextStyle(fontSize: 13),)),
+                                                      label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
                                                       fixedWidth: 100
                                                   ),
                                                   DataColumn2(
@@ -711,20 +775,29 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                       fixedWidth: 100
                                                   ),
                                                   DataColumn2(
-                                                      label: Center(child: Text('Valve', style: TextStyle(fontSize: 13),)),
+                                                      label: Center(child: Text('Left', style: TextStyle(fontSize: 13),)),
                                                       fixedWidth: 100
                                                   ),
                                                   DataColumn2(
-                                                      label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
+                                                      label: Center(child: Text('Action', style: TextStyle(fontSize: 13),)),
                                                       fixedWidth: 126
                                                   ),
                                                 ],
                                                 rows: List<DataRow>.generate(1, (index) => DataRow(cells: [
-                                                  DataCell(Text('Manual')),
-                                                  DataCell(Center(child: Text('---'))),
-                                                  DataCell(Center(child: Text('---'))),
-                                                  DataCell(Center(child: Text('---'))),
-                                                  DataCell(Center(child: Text('----'))),
+                                                  DataCell(Text(widget.siteData.currentProgram[cpInx].zoneName)),
+                                                  DataCell(Center(child: Text(widget.siteData.currentProgram[cpInx].programCategory))),
+                                                  DataCell(Center(child: Text(widget.siteData.currentProgram[cpInx].startTime))),
+                                                  DataCell(Center(child: Text(widget.siteData.currentProgram[cpInx].duration_Qty))),
+                                                  DataCell(Center(child: StreamBuilder<String>(
+                                                    stream: _controller.stream,
+                                                    builder: (context, snapshot) {
+                                                      if (snapshot.hasData) {
+                                                        return Text(snapshot.data!);
+                                                      } else {
+                                                        return Text(durationUpdatingFunction(widget.siteData.currentProgram[cpInx].duration_QtyLeft));
+                                                      }
+                                                    },
+                                                  ))),
                                                   DataCell(Center(child: Row(
                                                     children: [
                                                       IconButton(tooltip:'Pause',onPressed: (){
@@ -961,7 +1034,9 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                           DataCell(Center(child: Row(
                                             children: [
                                               IconButton(tooltip:'Start',onPressed: (){
-                                                String payload = '${programList[index].serialNumber},1';
+                                                //print(index);
+                                                //print(programList[index].serialNumber);
+                                                String payload = '${programList[index].serialNumber}, 1';
                                                 String payLoadFinal = jsonEncode({
                                                   "2900": [{"2901": payload}]
                                                 });

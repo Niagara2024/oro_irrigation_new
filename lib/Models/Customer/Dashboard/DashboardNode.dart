@@ -127,10 +127,12 @@ class NodeModel {
 
 
 class CurrentProgram {
-  final String programName, programCategory,zoneName,startTime;
-  final int programType, totalRtc,currentRtc,totalCycle,currentCycle,totalZone,currentZone;
+  final String programName, programCategory,zoneName,startTime, duration_Qty, duration_QtyCompleted;
+  String duration_QtyLeft;
+  final int programId, programType, totalRtc,currentRtc,totalCycle,currentCycle,totalZone,currentZone;
 
   CurrentProgram({
+    required this.programId,
     required this.programName,
     required this.programCategory,
     required this.zoneName,
@@ -142,10 +144,14 @@ class CurrentProgram {
     required this.totalZone,
     required this.currentZone,
     required this.startTime,
+    required this.duration_Qty,
+    required this.duration_QtyCompleted,
+    required this.duration_QtyLeft,
   });
 
   factory CurrentProgram.fromJson(Map<String, dynamic> json) {
     return CurrentProgram(
+      programId: 1,
       programName: json['ProgName'] ?? "",
       programCategory: json['ProgCategory'] ?? "",
       zoneName: json['ZoneName'] ?? "",
@@ -157,6 +163,9 @@ class CurrentProgram {
       totalZone: json['TotalZone'] ?? 0,
       currentZone: json['CurrentZone'] ?? 0,
       startTime: json['StartTime'] ?? "",
+      duration_Qty: json['Duration_Qty'] ?? "",
+      duration_QtyCompleted: json['Duration_QtyCompleted'] ?? "",
+      duration_QtyLeft: json['Duration_QtyLeft'] ?? "",
     );
   }
 

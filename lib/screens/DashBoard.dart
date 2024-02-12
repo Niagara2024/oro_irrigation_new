@@ -313,7 +313,7 @@ class _DashboardWideState extends State<DashboardWide> {
                 showMenu(
                   context: context,
                   position: const RelativeRect.fromLTRB(100, 0, 10, 0),
-                  surfaceTintColor: Colors.green,
+                  surfaceTintColor: myTheme.primaryColor,
                   items: <PopupMenuEntry>[
                     PopupMenuItem(
                       child: Column(
@@ -323,15 +323,15 @@ class _DashboardWideState extends State<DashboardWide> {
                           Stack(
                             children: [
                               Center(
-                                child: CircleAvatar(radius: 35, backgroundColor: Colors.greenAccent, child: Text(userName.substring(0, 1).toUpperCase(), style: const TextStyle(fontSize: 25)),),
+                                child: CircleAvatar(radius: 35, backgroundColor: myTheme.primaryColor.withOpacity(0.1), child: Text(userName.substring(0, 1).toUpperCase(), style: const TextStyle(fontSize: 25)),),
                               ),
                               Positioned(
                                 bottom: 0.0,
                                 right: 70.0,
                                 child: Container(
-                                  decoration: const BoxDecoration(
+                                  decoration: BoxDecoration(
                                     shape: BoxShape.circle, // Optional: Makes the container circular
-                                    color: Colors.green, // Set the background color here
+                                    color: myTheme.primaryColor, // Set the background color here
                                   ),
                                   child: IconButton(
                                     tooltip:'Edit',
@@ -346,15 +346,20 @@ class _DashboardWideState extends State<DashboardWide> {
                           Text(userEmailId, style: const TextStyle(fontSize: 13)),
                           Text('+$countryCode $mobileNo', style: const TextStyle(fontSize: 13)),
                           const SizedBox(height: 15),
-                          TextButton(onPressed: (){
-                            Navigator.pop(context);
-                            showModalBottomSheet(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AccountManagement(userID: userId, callback: callbackFunction);
-                              },
-                            );
-                          }, child: const Text('Manage Your Niagara Account')),
+                          MaterialButton(
+                            color: myTheme.primaryColor,
+                            textColor: Colors.white,
+                            child: const Text('Manage Your Niagara Account'),
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AccountManagement(userID: userId, callback: callbackFunction);
+                                },
+                              );
+                            },
+                          ),
                           const SizedBox(height: 10),
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.end,

@@ -827,6 +827,10 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                       fixedWidth: 100
                                                   ),
                                                   DataColumn2(
+                                                      label: Center(child: Text('Valve', style: TextStyle(fontSize: 13),)),
+                                                      fixedWidth: 50
+                                                  ),
+                                                  DataColumn2(
                                                       label: Center(child: Text('Action', style: TextStyle(fontSize: 13),)),
                                                       fixedWidth: 126
                                                   ),
@@ -847,6 +851,56 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                       }
                                                     },
                                                   ))),
+                                                  DataCell(Center(child: PopupMenuButton(
+                                                    tooltip: 'Details',
+                                                    itemBuilder: (context) {
+                                                      return [
+                                                        PopupMenuItem(
+                                                          child: Center(
+                                                            child: SizedBox(
+                                                              width: 130,
+                                                              height: ((widget.siteData.currentProgram[cpInx].valve.length + 1) ~/ 2) * 75.0,
+                                                              child: GridView.builder(
+                                                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                                                  crossAxisCount: 2,
+                                                                  crossAxisSpacing: 10.0,
+                                                                  mainAxisSpacing: 10.0,
+                                                                ),
+                                                                itemCount: widget.siteData.currentProgram[cpInx].valve.length, // Number of items
+                                                                itemBuilder: (context, index) {
+                                                                  return GridTile(
+                                                                    child: Column(
+                                                                      children: [
+                                                                        const CircleAvatar(
+                                                                          backgroundColor: Colors.transparent,
+                                                                          backgroundImage: AssetImage('assets/images/valve.png'),
+                                                                        ),
+                                                                        Row(
+                                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                                          children: [
+                                                                            CircleAvatar(
+                                                                              radius: 5,
+                                                                              backgroundColor: widget.siteData.currentProgram[cpInx].valve[index]['Status']==0 ? Colors.grey :
+                                                                              widget.siteData.currentProgram[cpInx].valve[index]['Status']==1 ? Colors.green :
+                                                                              widget.siteData.currentProgram[cpInx].valve[index]['Status']==2 ? Colors.orange :
+                                                                              widget.siteData.currentProgram[cpInx].valve[index]['Status']==3 ? Colors.redAccent : Colors.black12,
+                                                                            ),
+                                                                            const SizedBox(width: 3),
+                                                                            Text('${widget.siteData.currentProgram[cpInx].valve[index]['Name']}(${widget.siteData.currentProgram[cpInx].valve[index]['SNo']})', style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                                                          ],
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  );
+                                                                },
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ];
+                                                    },
+                                                    child: const Icon(Icons.info_outline),
+                                                  ))),
                                                   DataCell(Center(child: Row(
                                                     children: [
                                                       IconButton(tooltip:'Pause',onPressed: (){
@@ -862,7 +916,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                           "2900": [{"2901": payload}]
                                                         });
                                                         MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                                      }, icon: Icon(Icons.skip_next_outlined)),
+                                                      }, icon: const Icon(Icons.skip_next_outlined)),
                                                       IconButton(tooltip:'Remove',onPressed: (){
                                                         String payload = '${programList[index].serialNumber}, 0';
                                                         String payLoadFinal = jsonEncode({

@@ -88,7 +88,6 @@ class NodeModel {
   double slrVolt;
   double batVolt;
   List<dynamic> rlyStatus;
-  //List<dynamic> sensor;
   int status;
 
   NodeModel({
@@ -102,7 +101,6 @@ class NodeModel {
     required this.slrVolt,
     required this.batVolt,
     required this.rlyStatus,
-    //required this.sensor,
     required this.status,
   });
 
@@ -119,7 +117,6 @@ class NodeModel {
       slrVolt: json['SVolt'] ?? 0.0,
       batVolt: json['BatVolt'] ?? 0.0,
       rlyStatus: json['RlyStatus'] ?? [],
-      //sensor: sensor,
       status: json['Status'] ?? 0,
     );
   }
@@ -130,6 +127,7 @@ class CurrentProgram {
   final String programName, programCategory,zoneName,startTime, duration_Qty, duration_QtyCompleted;
   String duration_QtyLeft;
   final int programId, programType, totalRtc,currentRtc,totalCycle,currentCycle,totalZone,currentZone;
+  List<dynamic> valve;
 
   CurrentProgram({
     required this.programId,
@@ -147,6 +145,7 @@ class CurrentProgram {
     required this.duration_Qty,
     required this.duration_QtyCompleted,
     required this.duration_QtyLeft,
+    required this.valve,
   });
 
   factory CurrentProgram.fromJson(Map<String, dynamic> json) {
@@ -166,6 +165,7 @@ class CurrentProgram {
       duration_Qty: json['Duration_Qty'] ?? "",
       duration_QtyCompleted: json['Duration_QtyCompleted'] ?? "",
       duration_QtyLeft: json['Duration_QtyLeft'] ?? "",
+      valve: json['Valve'] ?? [],
     );
   }
 

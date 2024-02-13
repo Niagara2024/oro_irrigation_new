@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:oro_irrigation_new/screens/Customer/ScheduleView.dart';
 import 'package:provider/provider.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../Models/Customer/Dashboard/ProgramList.dart';
@@ -57,6 +58,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
 
   String durationUpdatingFunction(leftDuration) {
     timer?.cancel();
+    _controller.onCancel;
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       List<String> parts = leftDuration.split(':');
       int hours = int.parse(parts[0]);
@@ -136,6 +138,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
     try{
       print(provider.receivedDashboardPayload);
       Map<String, dynamic> data = jsonDecode(provider.receivedDashboardPayload);
+      //_controller.onCancel;
       setState(() {
         if (data['2400'][0].containsKey('WifiStrength')) {
           wifiStrength = data['2400'][0]['WifiStrength'];
@@ -169,6 +172,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
         }
 
         if (data['2400'][0].containsKey('2402')) {
+          widget.siteData.currentProgram.clear();
           for (var item in data['2400'][0]['2402']) {
             if (item is Map<String, dynamic>) {
               try {
@@ -236,7 +240,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                       tooltip: 'Manual Mode',
                       icon: const Icon(Icons.touch_app_outlined),
                       onPressed: () async {
-
                         showModalBottomSheet(
                           context: context,
                           builder: (BuildContext context) {
@@ -651,8 +654,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                   children: [
                                     ListTile(
                                       tileColor: Colors.white,
-                                      title: const Text('CURRENT PROGRAM', style: TextStyle(fontSize: 14)),
-                                      subtitle: widget.siteData.currentProgram.isNotEmpty? Text(widget.siteData.currentProgram[0].programName): Text('data'),
+                                      title: const Text('CURRENT SCHEDULE', style: TextStyle(fontSize: 14)),
                                       trailing: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: widget.siteData.currentProgram.length > 1 ? [
@@ -665,7 +667,18 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                             });
                                             MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
                                           }, icon: Icon(Icons.remove_circle_outline, color: Colors.red,)),
-                                        ]:
+                                          IconButton(
+                                              tooltip: 'Schedule details',
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => ScheduleViewScreen(deviceId: widget.siteData.deviceId, userId: widget.userID, controllerId: widget.siteData.controllerId, customerId: widget.customerID,),
+                                                  ),
+                                                );
+                                              },
+                                              icon: const Icon(Icons.view_list_outlined)),
+                                        ]: widget.siteData.currentProgram.isNotEmpty?
                                         [
                                           Image.asset('assets/GiffFile/water_drop_animation.gif'),
                                           IconButton(tooltip:'Emergency Stop', onPressed: (){
@@ -675,6 +688,37 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                             });
                                             MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
                                           }, icon: const Icon(Icons.emergency_outlined, color: Colors.red,)),
+                                          IconButton(
+                                              tooltip: 'Schedule details',
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => ScheduleViewScreen(deviceId: widget.siteData.deviceId, userId: widget.userID, controllerId: widget.siteData.controllerId, customerId: widget.customerID,),
+                                                  ),
+                                                );
+                                              },
+                                              icon: const Icon(Icons.view_list_outlined)),
+                                        ]:
+                                        [
+                                          IconButton(tooltip:'Emergency Stop', onPressed: (){
+                                            String payload = '0, 0';
+                                            String payLoadFinal = jsonEncode({
+                                              "2900": [{"2901": payload}]
+                                            });
+                                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                          }, icon: const Icon(Icons.emergency_outlined, color: Colors.red,)),
+                                          IconButton(
+                                              tooltip: 'Schedule details',
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => ScheduleViewScreen(deviceId: widget.siteData.deviceId, userId: widget.userID, controllerId: widget.siteData.controllerId, customerId: widget.customerID,),
+                                                  ),
+                                                );
+                                              },
+                                              icon: const Icon(Icons.view_list_outlined)),
                                         ],
                                       ),
                                     ),
@@ -749,7 +793,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                               );
                                             }
                                             return SizedBox(
-                                              height: 100,
+                                              height: (widget.siteData.currentProgram.length * 50) + 35,
                                               child: DataTable2(
                                                 columnSpacing: 12,
                                                 horizontalMargin: 12,
@@ -759,12 +803,16 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                 headingRowColor: MaterialStateProperty.all<Color>(Colors.green.withOpacity(0.1)),
                                                 columns: const [
                                                   DataColumn2(
-                                                      label: Text('Name', style: TextStyle(fontSize: 13),),
+                                                      label: Text('Program', style: TextStyle(fontSize: 13),),
                                                       size: ColumnSize.M
                                                   ),
                                                   DataColumn2(
+                                                      label: Text('Line', style: TextStyle(fontSize: 13),),
+                                                      fixedWidth: 60
+                                                  ),
+                                                  DataColumn2(
                                                       label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
-                                                      fixedWidth: 50
+                                                      size: ColumnSize.M
                                                   ),
                                                   DataColumn2(
                                                       label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
@@ -784,9 +832,10 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                   ),
                                                 ],
                                                 rows: List<DataRow>.generate(1, (index) => DataRow(cells: [
-                                                  DataCell(Text(widget.siteData.currentProgram[cpInx].zoneName)),
-                                                  DataCell(Center(child: Text(widget.siteData.currentProgram[cpInx].programCategory))),
-                                                  DataCell(Center(child: Text(widget.siteData.currentProgram[cpInx].startTime))),
+                                                  DataCell(Text(widget.siteData.currentProgram[cpInx].programName)),
+                                                  DataCell(Text(widget.siteData.currentProgram[cpInx].programCategory)),
+                                                  DataCell(Center(child: Text(widget.siteData.currentProgram[cpInx].zoneName))),
+                                                  DataCell(Center(child: Text(_convertTime(widget.siteData.currentProgram[cpInx].startTime)))),
                                                   DataCell(Center(child: Text(widget.siteData.currentProgram[cpInx].duration_Qty))),
                                                   DataCell(Center(child: StreamBuilder<String>(
                                                     stream: _controller.stream,
@@ -813,7 +862,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                           "2900": [{"2901": payload}]
                                                         });
                                                         MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                                      }, icon: Icon(Icons.skip_next_outlined, color: myTheme.primaryColor,)),
+                                                      }, icon: Icon(Icons.skip_next_outlined)),
                                                       IconButton(tooltip:'Remove',onPressed: (){
                                                         String payload = '${programList[index].serialNumber}, 0';
                                                         String payLoadFinal = jsonEncode({
@@ -827,7 +876,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                               ),
                                             );
                                           }) :
-                                      const Center(child: Text('Current Program not Available')),
+                                      const Center(child: Text('Current Schedule not Available')),
                                     ),
                                   ],
                                 ),
@@ -846,19 +895,9 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                 padding: const EdgeInsets.all(5.0),
                                 child: Column(
                                   children: [
-                                    ListTile(
+                                    const ListTile(
                                       tileColor: Colors.white,
-                                      title: const Text('NEXT PROGRAM', style: TextStyle(fontSize: 14)),
-                                      trailing: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          IconButton(
-                                              tooltip: 'Program library',
-                                              onPressed: () {
-                                              },
-                                              icon: const Icon(Icons.view_list_outlined)),
-                                        ],
-                                      ),
+                                      title: Text('NEXT SCHEDULE', style: TextStyle(fontSize: 14)),
                                     ),
                                     const Divider(height: 0),
                                     Container(
@@ -966,7 +1005,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                               ),
                                             );
                                           }) :
-                                      const Center(child: Text('Next Program not Available')),
+                                      const Center(child: Text('Next Schedule not Available')),
                                     ),
                                   ],
                                 ),
@@ -987,7 +1026,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                   children: [
                                     const ListTile(
                                       tileColor: Colors.white,
-                                      title: Text('UPCOMING PROGRAM', style: TextStyle(fontSize: 14)),
+                                      title: Text('UPCOMING SCHEDULE', style: TextStyle(fontSize: 14)),
                                     ),
                                     const Divider(height: 0),
                                     SizedBox(
@@ -1030,13 +1069,11 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                           DataCell(Text(programList[index].programName == 'Default'? '----' : programList[index].scheduleType)),
                                           DataCell(Center(child: Text('${programList[index].sequenceCount}'))),
                                           DataCell(Center(child: Text(programList[index].programName == 'Default'? '----':programList[index].startDate.split(' ').first))),
-                                          DataCell(Center(child: Text(programList[index].programName == 'Default'? '----':programList[index].startTime))),
+                                          DataCell(Center(child: Text(programList[index].programName == 'Default'? '----': programList[index].startTime))),
                                           DataCell(Center(child: Row(
                                             children: [
                                               IconButton(tooltip:'Start',onPressed: (){
-                                                //print(index);
-                                                //print(programList[index].serialNumber);
-                                                String payload = '${programList[index].serialNumber}, 1';
+                                                String payload = '${programList[index].serialNumber},1';
                                                 String payLoadFinal = jsonEncode({
                                                   "2900": [{"2901": payload}]
                                                 });
@@ -1053,7 +1090,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                           ))),
                                         ])),
                                       ) :
-                                      const Center(child: Text('Upcoming Program not Available')),
+                                      const Center(child: Text('Upcoming Schedule not Available')),
                                     ),
                                   ],
                                 ),

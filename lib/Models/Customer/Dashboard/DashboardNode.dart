@@ -43,10 +43,10 @@ class DashboardModel {
     var nodeList = json['nodeList'] as List;
     List<NodeModel> nodes = nodeList.isNotEmpty? nodeList.map((node) => NodeModel.fromJson(node)).toList() : [];
 
-    var currentProgram = json['currentProgram'] as List;
+    var currentProgram = json['currentSchedule'] as List;
     List<CurrentProgram> cProgram = nodeList.isNotEmpty? currentProgram.map((crProgram) => CurrentProgram.fromJson(crProgram)).toList() : [];
 
-    var nextProgram = json['nextProgram'] as List;
+    var nextProgram = json['nextSchedule'] as List;
     List<NextProgram> nxtProgram = nodeList.isNotEmpty? nextProgram.map((nxtProgram) => NextProgram.fromJson(nxtProgram)).toList() : [];
 
     return DashboardModel(

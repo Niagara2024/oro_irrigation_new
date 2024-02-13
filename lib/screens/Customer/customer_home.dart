@@ -31,7 +31,7 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
   int standaloneMethod = 0;
   String currentTap = 'Dashboard';
 
-  late Widget _centerWidget;
+  late Widget _centerWidget = Container();
 
   @override
   void initState() {

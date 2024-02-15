@@ -12,7 +12,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Models/Customer/Dashboard/DashboardNode.dart';
 import '../Models/language.dart';
 import '../constants/MQTTManager.dart';
+import '../constants/UserData.dart';
 import '../constants/http_service.dart';
+import '../main.dart';
 import '../state_management/MqttPayloadProvider.dart';
 import 'Customer/AccountManagement.dart';
 import 'Customer/Dashboard/SentAndReceived.dart';
@@ -26,79 +28,85 @@ import 'login_form.dart';
 
 enum Calendar { day, week, month, year }
 
-class MainDashBoard extends StatelessWidget
+class MainDashBoard extends StatefulWidget
 {
   const MainDashBoard({super.key});
 
   @override
-  Widget build(BuildContext context)
-  {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: myTheme,
-      routes: {
-        '/': (context) => const DashBoardMain(),
-        '/login': (context) => const LoginForm(),
-      },
-    );
-  }
+  State<MainDashBoard> createState() => _MainDashBoardState();
 }
 
+class _MainDashBoardState extends State<MainDashBoard> {
 
-class DashBoardMain extends StatefulWidget
-{
-  const DashBoardMain({super.key});
-
-  @override
-  DashBoardMainState createState() => DashBoardMainState();
-}
-
-class DashBoardMainState extends State<DashBoardMain> with TickerProviderStateMixin
-{
-  late MqttPayloadProvider payloadProvider;
-  late MQTTManager manager;
+  late MQTTManager manager = MQTTManager();
 
   @override
   void initState() {
     super.initState();
-    manager = MQTTManager();
-    Future.delayed(const Duration(milliseconds: 1500), () async {
+    Future.delayed(const Duration(milliseconds: 500), () async {
       mqttConfigureAndConnect();
     });
   }
 
   void mqttConfigureAndConnect() {
+    MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context,listen: false);
     manager.initializeMQTTClient(state: payloadProvider);
     manager.connect();
   }
 
+
   @override
   Widget build(BuildContext context)
   {
-    payloadProvider = Provider.of<MqttPayloadProvider>(context,listen: false);
-    return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints)
-        {
-          if (constraints.maxWidth < 600) {
-            return const DashboardNarrow();//mobile
-          } else if (constraints.maxWidth > 600 && constraints.maxWidth < 900) {
-            return const DashboardMiddle();//pad or tap
-          } else {
-            return const DashboardWide();
-          }
-        },
-      ),
+    return FutureBuilder<SharedPreferences>(
+      future: SharedPreferences.getInstance(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return Container();
+        }
+
+        final sharedPreferences = snapshot.data!;
+        final userId = sharedPreferences.getString('userId') ?? '';
+        final userName = sharedPreferences.getString('userName') ?? '';
+        final userType = sharedPreferences.getString('userType') ?? '';
+        final countryCode = sharedPreferences.getString('countryCode') ?? '';
+        final mobileNo = sharedPreferences.getString('mobileNumber') ?? '';
+        final userEmailId = sharedPreferences.getString('email') ?? '';
+        final password = sharedPreferences.getString('password') ?? '';
+
+
+        if (userId.isNotEmpty) {
+          return UserData(
+            userId: int.parse(userId),
+            userName: userName,
+            userType: userType,
+            countryCode: countryCode,
+            mobileNo: mobileNo,
+            userEmailId: userEmailId,
+            password: password,
+            child: Scaffold(
+              body: LayoutBuilder(
+                builder: (context, constraints)
+                {
+                  if (constraints.maxWidth < 600) {
+                    return const DashboardNarrow();//mobile
+                  } else if (constraints.maxWidth > 600 && constraints.maxWidth < 900) {
+                    return const DashboardMiddle();//pad or tap
+                  } else {
+                    return const DashboardWide();
+                  }
+                },
+              ),
+            ),
+          );
+        } else {
+          return const LoginForm();
+        }
+      },
     );
-  }
 
-  @override
-  void dispose() {
-    super.dispose();
   }
-
 }
-
 
 
 //Narrow-------------------------------------------------------------------------------------------------
@@ -149,8 +157,6 @@ class _DashboardWideState extends State<DashboardWide> {
   String appBarTitle = 'Home';
   NavigationRailLabelType labelType = NavigationRailLabelType.all;
   int _selectedIndex = 0;
-  int userId = 0;
-  String userName = '', userType = '0', countryCode = '', mobileNo = '', userEmailId = '';
   bool visibleLoading = false;
 
   final List<LanguageList> languageList = <LanguageList>[];
@@ -160,31 +166,13 @@ class _DashboardWideState extends State<DashboardWide> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    indicatorViewShow();
-    getCustomerSite();
+    getLanguage();
   }
 
   void callbackFunction(message)
   {
     Navigator.pop(context);
     _showSnackBar(message);
-  }
-
-  Future<void> getCustomerSite() async
-  {
-    final prefs = await SharedPreferences.getInstance();
-    userName = (prefs.getString('userName') ?? "");
-    userType = (prefs.getString('userType') ?? "");
-    countryCode = (prefs.getString('countryCode') ?? "");
-    mobileNo = (prefs.getString('mobileNumber') ?? "");
-    userId = int.parse(prefs.getString('userId') ?? "");
-    userEmailId = (prefs.getString('email') ?? "");
-
-    Future.delayed(const Duration(seconds: 3), () async {
-      indicatorViewHide();
-      getLanguage();
-    });
-
   }
 
   Future<void> getLanguage() async
@@ -213,8 +201,9 @@ class _DashboardWideState extends State<DashboardWide> {
   @override
   Widget build(BuildContext context)  {
     final mediaQuery = MediaQuery.of(context);
+    final userData = UserData.of(context)!;
     return Scaffold(
-      appBar: userType =='3'? AppBar(
+      appBar: userData.userType =='3'? AppBar(
         leading: const Image(image: AssetImage("assets/images/niagara_logo.png")),
         leadingWidth: 100,
         actions: <Widget>[
@@ -309,7 +298,7 @@ class _DashboardWideState extends State<DashboardWide> {
                 backgroundColor: Colors.white,
                 child: Icon(Icons.settings_outlined),
               )),
-              IconButton(tooltip : 'Niagara Account\n$userName\n+$countryCode $mobileNo', onPressed: (){
+              IconButton(tooltip : 'Niagara Account\n${userData.userName}\n+${userData.countryCode} $userData.mobileNo', onPressed: (){
                 showMenu(
                   context: context,
                   position: const RelativeRect.fromLTRB(100, 0, 10, 0),
@@ -323,7 +312,7 @@ class _DashboardWideState extends State<DashboardWide> {
                           Stack(
                             children: [
                               Center(
-                                child: CircleAvatar(radius: 35, backgroundColor: myTheme.primaryColor.withOpacity(0.1), child: Text(userName.substring(0, 1).toUpperCase(), style: const TextStyle(fontSize: 25)),),
+                                child: CircleAvatar(radius: 35, backgroundColor: myTheme.primaryColor.withOpacity(0.1), child: Text(userData.userName.substring(0, 1).toUpperCase(), style: const TextStyle(fontSize: 25)),),
                               ),
                               Positioned(
                                 bottom: 0.0,
@@ -342,9 +331,9 @@ class _DashboardWideState extends State<DashboardWide> {
                               ),
                             ],
                           ),
-                          Text('Hi, $userName!',style: const TextStyle(fontSize: 20)),
-                          Text(userEmailId, style: const TextStyle(fontSize: 13)),
-                          Text('+$countryCode $mobileNo', style: const TextStyle(fontSize: 13)),
+                          Text('Hi, ${userData.userName}!',style: const TextStyle(fontSize: 20)),
+                          Text(userData.userEmailId, style: const TextStyle(fontSize: 13)),
+                          Text('+${userData.countryCode} ${userData.mobileNo}', style: const TextStyle(fontSize: 13)),
                           const SizedBox(height: 15),
                           MaterialButton(
                             color: myTheme.primaryColor,
@@ -355,7 +344,7 @@ class _DashboardWideState extends State<DashboardWide> {
                               showModalBottomSheet(
                                 context: context,
                                 builder: (BuildContext context) {
-                                  return AccountManagement(userID: userId, callback: callbackFunction);
+                                  return AccountManagement(userID: userData.userId, callback: callbackFunction);
                                 },
                               );
                             },
@@ -372,11 +361,12 @@ class _DashboardWideState extends State<DashboardWide> {
                                   final prefs = await SharedPreferences.getInstance();
                                   await prefs.remove('userId');
                                   await prefs.remove('userName');
+                                  await prefs.remove('userType');
                                   await prefs.remove('countryCode');
                                   await prefs.remove('mobileNumber');
                                   await prefs.remove('subscribeTopic');
                                   if (context.mounted){
-                                    Navigator.pushNamedAndRemoveUntil(context, '/login', ModalRoute.withName('/login'));
+                                    Navigator.pushReplacementNamed(context, '/login');
                                   }
                                 },
                               ),
@@ -391,7 +381,7 @@ class _DashboardWideState extends State<DashboardWide> {
               }, icon: CircleAvatar(
                 radius: 17,
                 backgroundColor: Colors.white,
-                child: Text(userName.substring(0, 1).toUpperCase()),
+                child: Text(userData.userName.substring(0, 1).toUpperCase()),
               )),
             ],),
           const SizedBox(width: 10),
@@ -408,11 +398,11 @@ class _DashboardWideState extends State<DashboardWide> {
           ),
         ),
       ) :
-      userType =='3'? Container(
+      userData.userType =='3'? Container(
         color: Colors.transparent,
         width: double.infinity,
         height: double.infinity,
-        child: CustomerHome(customerID: userId, customerName: userName, mobileNo: '+$countryCode-$mobileNo', comingFrom: 'Customer',),
+        child: CustomerHome(customerID: userData.userId, customerName: userData.userName, mobileNo: '+${userData.countryCode}-${userData.mobileNo}', comingFrom: 'Customer',),
       ): Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -440,11 +430,12 @@ class _DashboardWideState extends State<DashboardWide> {
                       final prefs = await SharedPreferences.getInstance();
                       await prefs.remove('userId');
                       await prefs.remove('userName');
+                      await prefs.remove('userType');
                       await prefs.remove('countryCode');
                       await prefs.remove('mobileNumber');
                       await prefs.remove('subscribeTopic');
                       if (mounted){
-                        Navigator.pushNamedAndRemoveUntil(context, '/login', ModalRoute.withName('/login'));
+                        Navigator.pushReplacementNamed(context, '/login');
                       }
                     },
                   ),
@@ -463,7 +454,7 @@ class _DashboardWideState extends State<DashboardWide> {
                 }
               });
             },
-            destinations: userType == '1'? <NavigationRailDestination>[
+            destinations: userData.userType == '1'? <NavigationRailDestination>[
               const NavigationRailDestination(
                 padding: EdgeInsets.only(top: 5),
                 icon: Icon(Icons.dashboard_outlined),
@@ -526,15 +517,15 @@ class _DashboardWideState extends State<DashboardWide> {
             ],
           ),
           Expanded(
-            child: userType == '1'?
-            _selectedIndex == 0 ? AdminDealerHomePage(userName: userName, countryCode: countryCode, mobileNo: mobileNo, fromLogin: true, userId: 0, userType: 0,) :
-            _selectedIndex == 1 ? ProductInventory(userName: userName) :
+            child: userData.userType == '1'?
+            _selectedIndex == 0 ? AdminDealerHomePage(userName: userData.userName, countryCode: userData.countryCode, mobileNo: userData.mobileNo, fromLogin: true, userId: 0, userType: 0,) :
+            _selectedIndex == 1 ? ProductInventory(userName: userData.userName) :
             _selectedIndex == 2 ? const AllEntry():
-            _selectedIndex == 3 ?  MyPreference(userID: userId,) : const MyWebView() :
+            _selectedIndex == 3 ?  MyPreference(userID: userData.userId,) : const MyWebView() :
 
-            _selectedIndex == 0 ? AdminDealerHomePage(userName: userName, countryCode: countryCode, mobileNo: mobileNo, fromLogin: true, userId: 0, userType: 0,) :
-            _selectedIndex == 1 ? ProductInventory(userName: userName) :
-            _selectedIndex == 2 ? MyPreference(userID: userId,) : const MyWebView(),
+            _selectedIndex == 0 ? AdminDealerHomePage(userName: userData.userName, countryCode: userData.countryCode, mobileNo: userData.mobileNo, fromLogin: true, userId: 0, userType: 0,) :
+            _selectedIndex == 1 ? ProductInventory(userName: userData.userName) :
+            _selectedIndex == 2 ? MyPreference(userID: userData.userId,) : const MyWebView(),
           ),
         ],
       ),

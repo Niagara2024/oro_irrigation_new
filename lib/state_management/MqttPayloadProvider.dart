@@ -35,13 +35,8 @@ class MqttPayloadProvider with ChangeNotifier {
     notifyListeners();
   }
 
-
   String get receivedDashboardPayload => dashBoardPayload;
   String get receivedSchedulePayload => schedulePayload;
   MQTTConnectionState get getAppConnectionState => _appConnectionState;
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

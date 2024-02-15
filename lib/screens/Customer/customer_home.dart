@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../constants/MQTTManager.dart';
+import '../../constants/UserData.dart';
 import '../../constants/http_service.dart';
 import '../../constants/theme.dart';
 import '../product_inventory.dart';
@@ -68,11 +69,12 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
 
   void subscribeAndUpdateSite() {
     MQTTManager().subscribeToTopic('FirmwareToApp/${siteListFinal[siteIndex].deviceId}');
-    setState(() {
-      _centerWidget = CustomerDashboard(customerID: widget.customerID, type: 0, customerName: widget.customerName, mobileNo: '+${91}-${widget.mobileNo}', siteData: siteListFinal[siteIndex], siteLength: siteListFinal.length, userID: widget.customerID,);
+    indicatorViewHide();
+    Future.delayed(const Duration(milliseconds: 500), () {
+      onOptionSelected('Dashboard');
     });
-  }
 
+  }
 
   @override
   Widget build(BuildContext context)
@@ -101,7 +103,6 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                     Tab(text: siteListFinal[i].siteName ?? '',),
                 ],
                 onTap: (index) {
-                  print('ontapcall');
                   siteIndex = index;
                   subscribeAndUpdateSite();
                 },

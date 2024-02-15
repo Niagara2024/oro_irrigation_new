@@ -109,7 +109,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
       final response = await HttpService().postRequest("getUserProgramNameList", body);
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
-        //print(jsonResponse);
         List<dynamic> programsJson = jsonResponse['data'];
         setState(() {
           programList = [
@@ -660,13 +659,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                         children: widget.siteData.currentProgram.length > 1 ? [
                                           Image.asset('assets/GiffFile/water_drop_animation.gif'),
                                           IconButton(tooltip:'Pause all program', onPressed: (){}, icon: Icon(Icons.pause_circle_outline_sharp,)),
-                                          IconButton(tooltip:'Remove all program', onPressed: (){
-                                            String payload = '0, 0';
-                                            String payLoadFinal = jsonEncode({
-                                              "2900": [{"2901": payload}]
-                                            });
-                                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                          }, icon: Icon(Icons.remove_circle_outline, color: Colors.red,)),
                                           IconButton(
                                               tooltip: 'Schedule details',
                                               onPressed: () {
@@ -681,13 +673,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                         ]: widget.siteData.currentProgram.isNotEmpty?
                                         [
                                           Image.asset('assets/GiffFile/water_drop_animation.gif'),
-                                          IconButton(tooltip:'Emergency Stop', onPressed: (){
-                                            String payload = '0, 0';
-                                            String payLoadFinal = jsonEncode({
-                                              "2900": [{"2901": payload}]
-                                            });
-                                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                          }, icon: const Icon(Icons.emergency_outlined, color: Colors.red,)),
+                                          IconButton(tooltip:'Pause all program', onPressed: (){}, icon: Icon(Icons.pause_circle_outline_sharp,)),
                                           IconButton(
                                               tooltip: 'Schedule details',
                                               onPressed: () {
@@ -701,13 +687,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                               icon: const Icon(Icons.view_list_outlined)),
                                         ]:
                                         [
-                                          IconButton(tooltip:'Emergency Stop', onPressed: (){
-                                            String payload = '0, 0';
-                                            String payLoadFinal = jsonEncode({
-                                              "2900": [{"2901": payload}]
-                                            });
-                                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                          }, icon: const Icon(Icons.emergency_outlined, color: Colors.red,)),
+                                          IconButton(tooltip:'Pause all program', onPressed: (){}, icon: Icon(Icons.pause_circle_outline_sharp,)),
                                           IconButton(
                                               tooltip: 'Schedule details',
                                               onPressed: () {
@@ -832,7 +812,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                   ),
                                                   DataColumn2(
                                                       label: Center(child: Text('Action', style: TextStyle(fontSize: 13),)),
-                                                      fixedWidth: 126
+                                                      fixedWidth: 90
                                                   ),
                                                 ],
                                                 rows: List<DataRow>.generate(1, (index) => DataRow(cells: [
@@ -917,13 +897,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                         });
                                                         MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
                                                       }, icon: const Icon(Icons.skip_next_outlined)),
-                                                      IconButton(tooltip:'Remove',onPressed: (){
-                                                        String payload = '${programList[index].serialNumber}, 0';
-                                                        String payLoadFinal = jsonEncode({
-                                                          "2900": [{"2901": payload}]
-                                                        });
-                                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                                      }, icon: Icon(Icons.remove_circle_outline, color: Colors.red,)),
                                                     ],
                                                   ))),
                                                 ])),
@@ -1080,7 +1053,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                   children: [
                                     const ListTile(
                                       tileColor: Colors.white,
-                                      title: Text('UPCOMING SCHEDULE', style: TextStyle(fontSize: 14)),
+                                      title: Text('UPCOMING PROGRAM', style: TextStyle(fontSize: 14)),
                                     ),
                                     const Divider(height: 0),
                                     SizedBox(
@@ -1133,18 +1106,18 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                 });
                                                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
                                               }, icon: const Icon(Icons.start, color: Colors.green,)),
-                                              IconButton(tooltip:'Remove',onPressed: (){
+                                              IconButton(tooltip:'Stop',onPressed: (){
                                                 String payload = '${programList[index].serialNumber}, 0';
                                                 String payLoadFinal = jsonEncode({
                                                   "2900": [{"2901": payload}]
                                                 });
                                                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                              }, icon: const Icon(Icons.remove_circle_outline, color: Colors.red)),
+                                              }, icon: const Icon(Icons.stop_circle_outlined, color: Colors.red)),
                                             ],
                                           ))),
                                         ])),
                                       ) :
-                                      const Center(child: Text('Upcoming Schedule not Available')),
+                                      const Center(child: Text('Upcoming Program not Available')),
                                     ),
                                   ],
                                 ),

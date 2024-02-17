@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:oro_irrigation_new/screens/Customer/ScheduleView.dart';
 import 'package:provider/provider.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../Models/Customer/Dashboard/ProgramList.dart';
@@ -12,6 +11,7 @@ import '../../constants/MQTTManager.dart';
 import '../../constants/http_service.dart';
 import '../../constants/theme.dart';
 import '../../state_management/MqttPayloadProvider.dart';
+import 'Dashboard/CurrentSchedule.dart';
 import 'Dashboard/RunByManual.dart';
 import 'ProgramSchedule.dart';
 
@@ -32,10 +32,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
 
   late AnimationController animationController;
   late Animation<double> rotationAnimation;
-
   List<ProgramList> programList = [];
-  Timer? timer;
-  final StreamController<String> _controller = StreamController<String>();
 
   @override
   void initState() {
@@ -50,46 +47,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
   @override
   void dispose() {
     animationController.dispose();
-    timer?.cancel();
-    _controller.close();
     super.dispose();
-  }
-
-
-  String durationUpdatingFunction(leftDuration) {
-    timer?.cancel();
-    _controller.onCancel;
-    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-      List<String> parts = leftDuration.split(':');
-      int hours = int.parse(parts[0]);
-      int minutes = int.parse(parts[1]);
-      int seconds = int.parse(parts[2]);
-
-      if (seconds > 0) {
-        seconds--;
-      } else {
-        if (minutes > 0) {
-          minutes--;
-          seconds = 59;
-        } else {
-          if (hours > 0) {
-            hours--;
-            minutes = 59;
-            seconds = 59;
-          }
-        }
-      }
-
-      String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-      leftDuration = updatedDurationQtyLeft;
-      _controller.sink.add(updatedDurationQtyLeft);
-      if (updatedDurationQtyLeft == '00:00:00') {
-        timer?.cancel();
-      }
-
-    });
-
-    return leftDuration;
   }
 
   void onRefreshClicked() {
@@ -137,7 +95,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
     try{
       print(provider.receivedDashboardPayload);
       Map<String, dynamic> data = jsonDecode(provider.receivedDashboardPayload);
-      //_controller.onCancel;
       setState(() {
         if (data['2400'][0].containsKey('WifiStrength')) {
           wifiStrength = data['2400'][0]['WifiStrength'];
@@ -152,7 +109,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                   widget.siteData.nodeList[position].status = item['Status'];
                   widget.siteData.nodeList[position].batVolt = item['BatVolt'];
                   widget.siteData.nodeList[position].slrVolt = item['SVolt'];
-
                   widget.siteData.nodeList[position].rlyStatus = [];
                   if (item['RlyStatus'] != null) {
                     List<dynamic> rlyStatusJsonList = item['RlyStatus'];
@@ -170,28 +126,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
           }
         }
 
-        if (data['2400'][0].containsKey('2402')) {
-          widget.siteData.currentProgram.clear();
-          for (var item in data['2400'][0]['2402']) {
-            if (item is Map<String, dynamic>) {
-              try {
-                print(item);
-                var currentProgram = CurrentProgram.fromJson(item);
-                int existingIndex = widget.siteData.currentProgram.indexWhere((cp) => cp.programId == currentProgram.programId);
-                if (existingIndex != -1) {
-                  widget.siteData.currentProgram[existingIndex] = currentProgram;
-                } else {
-                  widget.siteData.currentProgram.add(currentProgram);
-                }
-                print('currentProgram updated');
-
-              } catch (e) {
-                print('Error updating node properties: $e');
-              }
-            }
-          }
-        }
-
       });
     }
     catch(e){
@@ -199,80 +133,77 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
     }
 
     return Container(
-      color: Colors.transparent,
+      color: Colors.grey.shade100,
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 8, right: 8, top: 5),
-            child: Card(
-              elevation: 5,
-              surfaceTintColor: Colors.white,
-              shape: const RoundedRectangleBorder(),
-              margin: EdgeInsets.zero,
-              child: ListTile(
-                tileColor: Colors.transparent,
-                leading: Image.asset('assets/images/oro_gem.png'),
-                title: Text(widget.siteData.deviceName),
-                subtitle: Text('${widget.siteData.categoryName} - Last sync : $lastSyncData', style: const TextStyle(fontWeight: FontWeight.normal),),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(wifiStrength == 0? Icons.wifi_off:
-                    wifiStrength >= 1 && wifiStrength <= 20 ? Icons.network_wifi_1_bar_outlined:
-                    wifiStrength >= 21 && wifiStrength <= 40 ? Icons.network_wifi_2_bar_outlined:
-                    wifiStrength >= 41 && wifiStrength <= 60 ? Icons.network_wifi_3_bar_outlined:
-                    wifiStrength >= 61 && wifiStrength <= 80 ? Icons.network_wifi_outlined:
-                    Icons.wifi),
-                    const SizedBox(width: 5,),
-                    Text('$wifiStrength %', style: const TextStyle(fontWeight: FontWeight.normal),),
-                    const SizedBox(width: 5,),
-                    RotationTransition(
-                      turns: rotationAnimation,
-                      child: IconButton(
-                        tooltip: 'refresh',
-                        icon: const Icon(Icons.refresh),
-                        onPressed: onRefreshClicked,
-                      ),
+          Card(
+            elevation: 2,
+            surfaceTintColor: Colors.white,
+            shape: const RoundedRectangleBorder(),
+            margin: EdgeInsets.zero,
+            child: ListTile(
+              tileColor: Colors.transparent,
+              leading: Image.asset('assets/images/oro_gem.png'),
+              title: Text(widget.siteData.deviceName),
+              subtitle: Text('${widget.siteData.categoryName} - Last sync : $lastSyncData', style: const TextStyle(fontWeight: FontWeight.normal),),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(wifiStrength == 0? Icons.wifi_off:
+                  wifiStrength >= 1 && wifiStrength <= 20 ? Icons.network_wifi_1_bar_outlined:
+                  wifiStrength >= 21 && wifiStrength <= 40 ? Icons.network_wifi_2_bar_outlined:
+                  wifiStrength >= 41 && wifiStrength <= 60 ? Icons.network_wifi_3_bar_outlined:
+                  wifiStrength >= 61 && wifiStrength <= 80 ? Icons.network_wifi_outlined:
+                  Icons.wifi),
+                  const SizedBox(width: 5,),
+                  Text('$wifiStrength %', style: const TextStyle(fontWeight: FontWeight.normal),),
+                  const SizedBox(width: 5,),
+                  RotationTransition(
+                    turns: rotationAnimation,
+                    child: IconButton(
+                      tooltip: 'refresh',
+                      icon: const Icon(Icons.refresh),
+                      onPressed: onRefreshClicked,
                     ),
-                    const SizedBox(width: 5,),
-                    IconButton(
-                      tooltip: 'Manual Mode',
-                      icon: const Icon(Icons.touch_app_outlined),
-                      onPressed: () async {
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return RunByManual(siteID: widget.siteData.siteId,
-                                siteName: widget.siteData.siteName,
-                                controllerID: widget.siteData.controllerId,
-                                customerID: widget.customerID,
-                                imeiNo: widget.siteData.deviceId,
-                                programList: programList, callbackFunction: callbackFunction);
-                          },
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 5,),
-                    IconButton(
-                      tooltip: 'Planning',
-                      icon: const Icon(Icons.list_alt),
-                      onPressed: () async {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ProgramSchedule(
-                              customerID: widget.customerID,
-                              controllerID: widget.siteData.controllerId,
+                  ),
+                  const SizedBox(width: 5,),
+                  IconButton(
+                    tooltip: 'Manual Mode',
+                    icon: const Icon(Icons.touch_app_outlined),
+                    onPressed: () async {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return RunByManual(siteID: widget.siteData.siteId,
                               siteName: widget.siteData.siteName,
-                              imeiNumber: widget.siteData.deviceId,
-                              userId: widget.customerID,
-                            ),
+                              controllerID: widget.siteData.controllerId,
+                              customerID: widget.customerID,
+                              imeiNo: widget.siteData.deviceId,
+                              programList: programList, callbackFunction: callbackFunction);
+                        },
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 5,),
+                  IconButton(
+                    tooltip: 'Planning',
+                    icon: const Icon(Icons.list_alt),
+                    onPressed: () async {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProgramSchedule(
+                            customerID: widget.customerID,
+                            controllerID: widget.siteData.controllerId,
+                            siteName: widget.siteData.siteName,
+                            imeiNumber: widget.siteData.deviceId,
+                            userId: widget.customerID,
                           ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
           ),
@@ -284,435 +215,386 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            height: 220,
-                            child: Card(
-                              elevation: 2,
-                              surfaceTintColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5.0),
-                              ),
-                              child: Row(
-                                children: [
-                                  SizedBox(
-                                    width: 260,
-                                    child: Column(
-                                      children: [
-                                        const ListTile(
-                                          title: Text('Main Line'),
-                                        ),
-                                        widget.siteData.irrigationPump.isNotEmpty
-                                            ||widget.siteData.centralFilterSite.isNotEmpty
-                                            ||widget.siteData.mainValve.isNotEmpty?
-                                        Padding(
-                                          padding: const EdgeInsets.only(left: 5),
-                                          child: Row(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              SizedBox(
-                                                width: 49.5,
-                                                height: 145,
-                                                child: ListView.builder(
-                                                  itemCount: widget.siteData.irrigationPump.length,
-                                                  itemBuilder: (BuildContext context, int index) {
-                                                    if (index < widget.siteData.irrigationPump.length) {
-                                                      return Column(
-                                                        children: [
-                                                          PopupMenuButton(
-                                                            tooltip: 'Details',
-                                                            itemBuilder: (context) {
-                                                              return [
-                                                                PopupMenuItem(
-                                                                  child: Column(
-                                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                                    mainAxisAlignment: MainAxisAlignment.start,
-                                                                    children: [
-                                                                      Text(widget.siteData.irrigationPump[index].name, style: const TextStyle(fontWeight: FontWeight.bold),),
-                                                                      const Divider(),
-                                                                      Text('ID : ${widget.siteData.irrigationPump[index].id}'),
-                                                                      Text('Location : ${widget.siteData.irrigationPump[index].location}'),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ];
-                                                            },
-                                                            child: widget.siteData.irrigationPump.length ==1?
-                                                            Image.asset('assets/images/dp_irr_pump.png'):
-                                                            widget.siteData.irrigationPump.length==2 && index==0?
-                                                            Image.asset('assets/images/dp_irr_pump_1.png'):
-                                                            widget.siteData.irrigationPump.length==2 && index==1?
-                                                            Image.asset('assets/images/dp_irr_pump_3.png'):
-                                                            widget.siteData.irrigationPump.length==3 && index==0?
-                                                            Image.asset('assets/images/dp_irr_pump_1.png'):
-                                                            widget.siteData.irrigationPump.length==3 && index==1?
-                                                            Image.asset('assets/images/dp_irr_pump_2.png'):
-                                                            Image.asset('assets/images/dp_irr_pump_3.png'),
-                                                          ),
-                                                        ],
-                                                      ); // Replace 'yourKey' with the key from your API response
-                                                    } else {
-                                                      return Text('Out of range'); // or any placeholder/error message
-                                                    }
-                                                  },
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 49.5,
-                                                height: 145,
-                                                child: ListView.builder(
-                                                  itemCount: 1,
-                                                  itemBuilder: (BuildContext context, int index) {
-                                                    return Column(
-                                                      children: [
-                                                        PopupMenuButton(
-                                                          tooltip: 'Details',
-                                                          itemBuilder: (context) {
-                                                            return [
-                                                              const PopupMenuItem(
-                                                                child: Column(
-                                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                                  mainAxisAlignment: MainAxisAlignment.start,
-                                                                  children: [
-                                                                    Text('Pressure Sensor', style: TextStyle(fontWeight: FontWeight.bold),),
-                                                                    Divider(),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ];
-                                                          },
-                                                          child: Image.asset('assets/images/dp_prs_sensor.png',),
-                                                        ),
-                                                        const Text('Prs In',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
-                                                        const Text('7.0 bar',style: TextStyle(fontSize: 10),),
-                                                      ],
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 49.5,
-                                                height: 145,
-                                                child: ListView.builder(
-                                                  itemCount: 1,
-                                                  itemBuilder: (BuildContext context, int index) {
-                                                    if (index < widget.siteData.centralFilterSite.length) {
-                                                      return Column(
-                                                        children: [
-                                                          PopupMenuButton(
-                                                            tooltip: 'Details',
-                                                            itemBuilder: (context) {
-                                                              return [
-                                                                PopupMenuItem(
-                                                                  child: Column(
-                                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                                    mainAxisAlignment: MainAxisAlignment.start,
-                                                                    children: [
-                                                                      Text(widget.siteData.centralFilterSite[index].name, style: const TextStyle(fontWeight: FontWeight.bold),),
-                                                                      const Divider(),
-                                                                      Text('ID : ${widget.siteData.centralFilterSite[index].id}'),
-                                                                      Text('Location : ${widget.siteData.centralFilterSite[index].location}'),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ];
-                                                            },
-                                                            child: Image.asset('assets/images/dp_filter.png',),
-                                                          ),
-                                                        ],
-                                                      ); // Replace 'yourKey' with the key from your API response
-                                                    } else {
-                                                      return const Text('Out of range'); // or any placeholder/error message
-                                                    }
-                                                  },
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 49.5,
-                                                height: 145,
-                                                child: ListView.builder(
-                                                  itemCount: 1,
-                                                  itemBuilder: (BuildContext context, int index) {
-                                                    return Column(
-                                                      children: [
-                                                        PopupMenuButton(
-                                                          tooltip: 'Details',
-                                                          itemBuilder: (context) {
-                                                            return [
-                                                              const PopupMenuItem(
-                                                                child: Column(
-                                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                                  mainAxisAlignment: MainAxisAlignment.start,
-                                                                  children: [
-                                                                    Text('Pressure Sensor', style: TextStyle(fontWeight: FontWeight.bold),),
-                                                                    Divider(),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ];
-                                                          },
-                                                          child: Image.asset('assets/images/dp_prs_sensor.png',),
-                                                        ),
-                                                        const Text('Prs Out',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
-                                                        const Text('6.2 bar',style: TextStyle(fontSize: 10),),
-                                                      ],
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 49.5,
-                                                height: 145,
-                                                child: ListView.builder(
-                                                  itemCount: widget.siteData.mainValve.length,
-                                                  itemBuilder: (BuildContext context, int index) {
-                                                    if (index < widget.siteData.mainValve.length) {
-                                                      return Column(
-                                                        children: [
-                                                          PopupMenuButton(
-                                                            tooltip: 'Details',
-                                                            itemBuilder: (context) {
-                                                              return [
-                                                                PopupMenuItem(
-                                                                  child: Column(
-                                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                                    mainAxisAlignment: MainAxisAlignment.start,
-                                                                    children: [
-                                                                      Text(widget.siteData.mainValve[index].name, style: const TextStyle(fontWeight: FontWeight.bold),),
-                                                                      const Divider(),
-                                                                      Text('ID : ${widget.siteData.mainValve[index].id}'),
-                                                                      Text('Location : ${widget.siteData.mainValve[index].location}'),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ];
-                                                            },
-                                                            child: Image.asset('assets/images/db_valve.png',),
-                                                          ),
-                                                        ],
-                                                      ); // Replace 'yourKey' with the key from your API response
-                                                    } else {
-                                                      return Text('Out of range'); // or any placeholder/error message
-                                                    }
-                                                  },
-                                                ),
-                                              ),
-                                            ],
+                    child: Card(
+                      elevation: 5,
+                      surfaceTintColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5), // make it circular
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(3.0),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height: 220,
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 400,
+                                      child: Column(
+                                        children: [
+                                          const ListTile(
+                                            title: Text('Main Line'),
                                           ),
-                                        ):
-                                        const Column(
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            SizedBox(height: 50,),
-                                            Text('No Device Available'),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const VerticalDivider(width: 0),
-                                  Expanded(
-                                    flex :1,
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const ListTile(
-                                          title: Text('Dosing Recipes - NPK1'),
-                                        ),
-                                        SizedBox(
-                                          height: 40,
-                                          child: Row(
-                                            children: [
-                                              const SizedBox(width : 40, child: Icon(Icons.account_tree_rounded)),
-                                              const SizedBox(width: 10,),
-                                              const Expanded(
-                                                flex: 3,
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Text('EC',style: TextStyle(fontSize: 10)),
-                                                    Row(
-                                                      mainAxisAlignment: MainAxisAlignment.start,
-                                                      children: [
-                                                        Text('Actual:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
-                                                        Text('00.0',style: TextStyle(fontSize: 10)),
-                                                        SizedBox(width: 5,),
-                                                        Text('Target:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
-                                                        Text('00.0',style: TextStyle(fontSize: 10)),
-                                                      ],
-                                                    ),
-                                                  ],
+                                          widget.siteData.irrigationPump.isNotEmpty
+                                              ||widget.siteData.centralFilterSite.isNotEmpty
+                                              ||widget.siteData.mainValve.isNotEmpty?
+                                          Padding(
+                                            padding: const EdgeInsets.only(left: 5),
+                                            child: Row(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                SizedBox(
+                                                  width: 49.5,
+                                                  height: 145,
+                                                  child: ListView.builder(
+                                                    itemCount: widget.siteData.irrigationPump.length,
+                                                    itemBuilder: (BuildContext context, int index) {
+                                                      if (index < widget.siteData.irrigationPump.length) {
+                                                        return Column(
+                                                          children: [
+                                                            PopupMenuButton(
+                                                              tooltip: 'Details',
+                                                              itemBuilder: (context) {
+                                                                return [
+                                                                  PopupMenuItem(
+                                                                    child: Column(
+                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                      mainAxisAlignment: MainAxisAlignment.start,
+                                                                      children: [
+                                                                        Text(widget.siteData.irrigationPump[index].name, style: const TextStyle(fontWeight: FontWeight.bold),),
+                                                                        const Divider(),
+                                                                        Text('ID : ${widget.siteData.irrigationPump[index].id}'),
+                                                                        Text('Location : ${widget.siteData.irrigationPump[index].location}'),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ];
+                                                              },
+                                                              child: widget.siteData.irrigationPump.length ==1?
+                                                              Image.asset('assets/images/dp_irr_pump.png'):
+                                                              widget.siteData.irrigationPump.length==2 && index==0?
+                                                              Image.asset('assets/images/dp_irr_pump_1.png'):
+                                                              widget.siteData.irrigationPump.length==2 && index==1?
+                                                              Image.asset('assets/images/dp_irr_pump_3.png'):
+                                                              widget.siteData.irrigationPump.length==3 && index==0?
+                                                              Image.asset('assets/images/dp_irr_pump_1.png'):
+                                                              widget.siteData.irrigationPump.length==3 && index==1?
+                                                              Image.asset('assets/images/dp_irr_pump_2.png'):
+                                                              Image.asset('assets/images/dp_irr_pump_3.png'),
+                                                            ),
+                                                          ],
+                                                        ); // Replace 'yourKey' with the key from your API response
+                                                      } else {
+                                                        return Text('Out of range'); // or any placeholder/error message
+                                                      }
+                                                    },
+                                                  ),
                                                 ),
-                                              ),
-                                              const Expanded(
-                                                flex: 3,
-                                                child: Column(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                                  children: [
-                                                    Text('PH',style: TextStyle(fontSize: 10)),
-                                                    Row(
-                                                      mainAxisAlignment: MainAxisAlignment.end,
-                                                      children: [
-                                                        Text('Actual:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
-                                                        Text('00.0',style: TextStyle(fontSize: 10)),
-                                                        SizedBox(width: 5,),
-                                                        Text('Target:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
-                                                        Text('00.0',style: TextStyle(fontSize: 10)),
-                                                      ],
-                                                    ),
-                                                  ],
+                                                SizedBox(
+                                                  width: 49.5,
+                                                  height: 145,
+                                                  child: ListView.builder(
+                                                    itemCount: 1,
+                                                    itemBuilder: (BuildContext context, int index) {
+                                                      return Column(
+                                                        children: [
+                                                          PopupMenuButton(
+                                                            tooltip: 'Details',
+                                                            itemBuilder: (context) {
+                                                              return [
+                                                                const PopupMenuItem(
+                                                                  child: Column(
+                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                                    children: [
+                                                                      Text('Pressure Sensor', style: TextStyle(fontWeight: FontWeight.bold),),
+                                                                      Divider(),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ];
+                                                            },
+                                                            child: Image.asset('assets/images/dp_prs_sensor.png',),
+                                                          ),
+                                                          const Text('Prs In',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
+                                                          const Text('7.0 bar',style: TextStyle(fontSize: 10),),
+                                                        ],
+                                                      );
+                                                    },
+                                                  ),
                                                 ),
-                                              ),
-                                              SizedBox(width : 40, child: Image.asset('assets/images/injector.png',)),
-                                            ],),
-                                        ),
-                                        Flexible(
-                                            flex: 2,
-                                            child: DataTable2(
-                                              columnSpacing: 12,
-                                              horizontalMargin: 12,
-                                              minWidth: 400,
-                                              dataRowHeight: 20.0,
-                                              headingRowHeight: 20,
-                                              headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
-                                              columns: const [
-                                                DataColumn2(
-                                                    label: Center(child: Text('Channel', style: TextStyle(fontSize: 10),)),
-                                                    size: ColumnSize.M
+                                                SizedBox(
+                                                  width: 49.5,
+                                                  height: 145,
+                                                  child: ListView.builder(
+                                                    itemCount: 1,
+                                                    itemBuilder: (BuildContext context, int index) {
+                                                      if (index < widget.siteData.centralFilterSite.length) {
+                                                        return Column(
+                                                          children: [
+                                                            PopupMenuButton(
+                                                              tooltip: 'Details',
+                                                              itemBuilder: (context) {
+                                                                return [
+                                                                  PopupMenuItem(
+                                                                    child: Column(
+                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                      mainAxisAlignment: MainAxisAlignment.start,
+                                                                      children: [
+                                                                        Text(widget.siteData.centralFilterSite[index].name, style: const TextStyle(fontWeight: FontWeight.bold),),
+                                                                        const Divider(),
+                                                                        Text('ID : ${widget.siteData.centralFilterSite[index].id}'),
+                                                                        Text('Location : ${widget.siteData.centralFilterSite[index].location}'),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ];
+                                                              },
+                                                              child: Image.asset('assets/images/dp_filter.png',),
+                                                            ),
+                                                          ],
+                                                        ); // Replace 'yourKey' with the key from your API response
+                                                      } else {
+                                                        return const Text('Out of range'); // or any placeholder/error message
+                                                      }
+                                                    },
+                                                  ),
                                                 ),
-                                                DataColumn2(
-                                                    label: Center(child: Text('1', style: TextStyle(fontSize: 10),)),
-                                                    fixedWidth: 37
+                                                SizedBox(
+                                                  width: 49.5,
+                                                  height: 145,
+                                                  child: ListView.builder(
+                                                    itemCount: 1,
+                                                    itemBuilder: (BuildContext context, int index) {
+                                                      return Column(
+                                                        children: [
+                                                          PopupMenuButton(
+                                                            tooltip: 'Details',
+                                                            itemBuilder: (context) {
+                                                              return [
+                                                                const PopupMenuItem(
+                                                                  child: Column(
+                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                                    children: [
+                                                                      Text('Pressure Sensor', style: TextStyle(fontWeight: FontWeight.bold),),
+                                                                      Divider(),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ];
+                                                            },
+                                                            child: Image.asset('assets/images/dp_prs_sensor.png',),
+                                                          ),
+                                                          const Text('Prs Out',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
+                                                          const Text('6.2 bar',style: TextStyle(fontSize: 10),),
+                                                        ],
+                                                      );
+                                                    },
+                                                  ),
                                                 ),
-                                                DataColumn2(
-                                                    label: Center(child: Text('2', style: TextStyle(fontSize: 10),)),
-                                                    fixedWidth: 37
-                                                ),
-                                                DataColumn2(
-                                                    label: Center(child: Text('3', style: TextStyle(fontSize: 10),)),
-                                                    fixedWidth: 37
-                                                ),
-                                                DataColumn2(
-                                                    label: Center(child: Text('4', style: TextStyle(fontSize: 10),)),
-                                                    fixedWidth: 37
-                                                ),
-                                                DataColumn2(
-                                                    label: Center(child: Text('5', style: TextStyle(fontSize: 10),)),
-                                                    fixedWidth: 37
-                                                ),
-                                                DataColumn2(
-                                                    label: Center(child: Text('6', style: TextStyle(fontSize: 10),)),
-                                                    fixedWidth: 37
-                                                ),
-                                                DataColumn2(
-                                                    label: Center(child: Text('7', style: TextStyle(fontSize: 10),)),
-                                                    fixedWidth: 37
-                                                ),
-                                                DataColumn2(
-                                                    label: Center(child: Text('8', style: TextStyle(fontSize: 10),)),
-                                                    fixedWidth: 30
+                                                SizedBox(
+                                                  width: 49.5,
+                                                  height: 145,
+                                                  child: ListView.builder(
+                                                    itemCount: widget.siteData.mainValve.length,
+                                                    itemBuilder: (BuildContext context, int index) {
+                                                      if (index < widget.siteData.mainValve.length) {
+                                                        return Column(
+                                                          children: [
+                                                            PopupMenuButton(
+                                                              tooltip: 'Details',
+                                                              itemBuilder: (context) {
+                                                                return [
+                                                                  PopupMenuItem(
+                                                                    child: Column(
+                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                      mainAxisAlignment: MainAxisAlignment.start,
+                                                                      children: [
+                                                                        Text(widget.siteData.mainValve[index].name, style: const TextStyle(fontWeight: FontWeight.bold),),
+                                                                        const Divider(),
+                                                                        Text('ID : ${widget.siteData.mainValve[index].id}'),
+                                                                        Text('Location : ${widget.siteData.mainValve[index].location}'),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ];
+                                                              },
+                                                              child: Image.asset('assets/images/db_valve.png',),
+                                                            ),
+                                                          ],
+                                                        ); // Replace 'yourKey' with the key from your API response
+                                                      } else {
+                                                        return Text('Out of range'); // or any placeholder/error message
+                                                      }
+                                                    },
+                                                  ),
                                                 ),
                                               ],
-                                              rows: List<DataRow>.generate(5, (index) => DataRow(cells: [
-                                                DataCell(Center(child: Text(index==0? 'Open(%)':index==1?'Flow(l/h)':index==2?'Qty Delivered': index==3?'Time Delivered':'Set Point',
-                                                    style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                                                DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                                                DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                                                DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                                                DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                                                DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                                                DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                                                DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                                                DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                                              ])),
-                                            )
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          SizedBox(
-                            child: Card(
-                              elevation: 2,
-                              surfaceTintColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5), // make it circular
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(5.0),
-                                child: Column(
-                                  children: [
-                                    ListTile(
-                                      tileColor: Colors.white,
-                                      title: const Text('CURRENT SCHEDULE', style: TextStyle(fontSize: 14)),
-                                      trailing: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: widget.siteData.currentProgram.length > 1 ? [
-                                          Image.asset('assets/GiffFile/water_drop_animation.gif'),
-                                          IconButton(tooltip:'Pause all program', onPressed: (){}, icon: Icon(Icons.pause_circle_outline_sharp,)),
-                                          IconButton(
-                                              tooltip: 'Schedule details',
-                                              onPressed: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) => ScheduleViewScreen(deviceId: widget.siteData.deviceId, userId: widget.userID, controllerId: widget.siteData.controllerId, customerId: widget.customerID,),
-                                                  ),
-                                                );
-                                              },
-                                              icon: const Icon(Icons.view_list_outlined)),
-                                        ]: widget.siteData.currentProgram.isNotEmpty?
-                                        [
-                                          Image.asset('assets/GiffFile/water_drop_animation.gif'),
-                                          IconButton(tooltip:'Pause all program', onPressed: (){}, icon: Icon(Icons.pause_circle_outline_sharp,)),
-                                          IconButton(
-                                              tooltip: 'Schedule details',
-                                              onPressed: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) => ScheduleViewScreen(deviceId: widget.siteData.deviceId, userId: widget.userID, controllerId: widget.siteData.controllerId, customerId: widget.customerID,),
-                                                  ),
-                                                );
-                                              },
-                                              icon: const Icon(Icons.view_list_outlined)),
-                                        ]:
-                                        [
-                                          IconButton(tooltip:'Pause all program', onPressed: (){}, icon: Icon(Icons.pause_circle_outline_sharp,)),
-                                          IconButton(
-                                              tooltip: 'Schedule details',
-                                              onPressed: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) => ScheduleViewScreen(deviceId: widget.siteData.deviceId, userId: widget.userID, controllerId: widget.siteData.controllerId, customerId: widget.customerID,),
-                                                  ),
-                                                );
-                                              },
-                                              icon: const Icon(Icons.view_list_outlined)),
+                                            ),
+                                          ):
+                                          const Column(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              SizedBox(height: 50,),
+                                              Text('No Device Available'),
+                                            ],
+                                          ),
                                         ],
                                       ),
                                     ),
-                                    const Divider(height: 0),
-                                    Container(
-                                      color: Colors.white,
-                                      height: widget.siteData.currentProgram.isNotEmpty? (widget.siteData.currentProgram.length * 50) + 35 : 50,
-                                      child: widget.siteData.currentProgram.isNotEmpty? ListView.builder(
-                                          scrollDirection: Axis.vertical,
-                                          itemCount: widget.siteData.currentProgram.length,
-                                          itemBuilder: (context, cpInx) {
-                                            if(widget.siteData.currentProgram[cpInx].programCategory == "Manual"){
+                                    const VerticalDivider(width: 0),
+                                    Expanded(
+                                      flex :1,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const ListTile(
+                                            title: Text('Dosing Recipes - NPK1'),
+                                          ),
+                                          SizedBox(
+                                            height: 40,
+                                            child: Row(
+                                              children: [
+                                                const SizedBox(width : 40, child: Icon(Icons.account_tree_rounded)),
+                                                const SizedBox(width: 10,),
+                                                const Expanded(
+                                                  flex: 3,
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    children: [
+                                                      Text('EC',style: TextStyle(fontSize: 10)),
+                                                      Row(
+                                                        mainAxisAlignment: MainAxisAlignment.start,
+                                                        children: [
+                                                          Text('Actual:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
+                                                          Text('00.0',style: TextStyle(fontSize: 10)),
+                                                          SizedBox(width: 5,),
+                                                          Text('Target:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
+                                                          Text('00.0',style: TextStyle(fontSize: 10)),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                const Expanded(
+                                                  flex: 3,
+                                                  child: Column(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                                    children: [
+                                                      Text('PH',style: TextStyle(fontSize: 10)),
+                                                      Row(
+                                                        mainAxisAlignment: MainAxisAlignment.end,
+                                                        children: [
+                                                          Text('Actual:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
+                                                          Text('00.0',style: TextStyle(fontSize: 10)),
+                                                          SizedBox(width: 5,),
+                                                          Text('Target:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
+                                                          Text('00.0',style: TextStyle(fontSize: 10)),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                SizedBox(width : 40, child: Image.asset('assets/images/injector.png',)),
+                                              ],),
+                                          ),
+                                          Flexible(
+                                              flex: 2,
+                                              child: DataTable2(
+                                                columnSpacing: 12,
+                                                horizontalMargin: 12,
+                                                minWidth: 400,
+                                                dataRowHeight: 20.0,
+                                                headingRowHeight: 20,
+                                                headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
+                                                columns: const [
+                                                  DataColumn2(
+                                                      label: Center(child: Text('Channel', style: TextStyle(fontSize: 10),)),
+                                                      size: ColumnSize.M
+                                                  ),
+                                                  DataColumn2(
+                                                      label: Center(child: Text('1', style: TextStyle(fontSize: 10),)),
+                                                      fixedWidth: 37
+                                                  ),
+                                                  DataColumn2(
+                                                      label: Center(child: Text('2', style: TextStyle(fontSize: 10),)),
+                                                      fixedWidth: 37
+                                                  ),
+                                                  DataColumn2(
+                                                      label: Center(child: Text('3', style: TextStyle(fontSize: 10),)),
+                                                      fixedWidth: 37
+                                                  ),
+                                                  DataColumn2(
+                                                      label: Center(child: Text('4', style: TextStyle(fontSize: 10),)),
+                                                      fixedWidth: 37
+                                                  ),
+                                                  DataColumn2(
+                                                      label: Center(child: Text('5', style: TextStyle(fontSize: 10),)),
+                                                      fixedWidth: 37
+                                                  ),
+                                                  DataColumn2(
+                                                      label: Center(child: Text('6', style: TextStyle(fontSize: 10),)),
+                                                      fixedWidth: 37
+                                                  ),
+                                                  DataColumn2(
+                                                      label: Center(child: Text('7', style: TextStyle(fontSize: 10),)),
+                                                      fixedWidth: 37
+                                                  ),
+                                                  DataColumn2(
+                                                      label: Center(child: Text('8', style: TextStyle(fontSize: 10),)),
+                                                      fixedWidth: 30
+                                                  ),
+                                                ],
+                                                rows: List<DataRow>.generate(5, (index) => DataRow(cells: [
+                                                  DataCell(Center(child: Text(index==0? 'Open(%)':index==1?'Flow(l/h)':index==2?'Qty Delivered': index==3?'Time Delivered':'Set Point',
+                                                      style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
+                                                  DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
+                                                  DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
+                                                  DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
+                                                  DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
+                                                  DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
+                                                  DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
+                                                  DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
+                                                  DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
+                                                ])),
+                                              )
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Divider(height: 0),
+                              SizedBox(
+                                child: CurrentSchedule(userID: widget.userID, customerID: widget.customerID, siteData: widget.siteData),
+                              ),
+                              const Divider(height: 0),
+                              SizedBox(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: Column(
+                                    children: [
+                                      const ListTile(
+                                        tileColor: Colors.white,
+                                        title: Text('NEXT SCHEDULE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                      ),
+                                      const Divider(height: 0),
+                                      Container(
+                                        color: Colors.white,
+                                        height: widget.siteData.nextProgram.isNotEmpty? (widget.siteData.nextProgram.length * 50) +35 : 50,
+                                        child: widget.siteData.nextProgram.isNotEmpty? ListView.builder(
+                                            scrollDirection: Axis.vertical,
+                                            itemCount: widget.siteData.nextProgram.length,
+                                            itemBuilder: (context, cpInx) {
                                               return SizedBox(
-                                                height: 85,
+                                                height: 100,
                                                 child: DataTable2(
                                                   columnSpacing: 12,
                                                   horizontalMargin: 12,
@@ -721,410 +603,181 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                   headingRowHeight: 35.0,
                                                   headingRowColor: MaterialStateProperty.all<Color>(Colors.green.withOpacity(0.1)),
                                                   //border: TableBorder.all(),
-                                                  columns: [
+                                                  columns: const [
                                                     DataColumn2(
-                                                        label: Text(widget.siteData.currentProgram[cpInx].programName, style: TextStyle(fontSize: 13),),
-                                                        fixedWidth: 100
-                                                    ),
-                                                    const DataColumn2(
-                                                        label: Center(child: Text('StartTime', style: TextStyle(fontSize: 13),)),
-                                                        fixedWidth: 100
-                                                    ),
-                                                    const DataColumn2(
-                                                        label: Center(child: Text('Valve', style: TextStyle(fontSize: 13),)),
+                                                        label: Text('Name', style: TextStyle(fontSize: 13),),
                                                         size: ColumnSize.M
                                                     ),
-                                                    const DataColumn2(
+                                                    DataColumn2(
+                                                        label: Center(child: Text('Shift', style: TextStyle(fontSize: 13),)),
+                                                        fixedWidth: 100
+                                                    ),
+                                                    DataColumn2(
+                                                        label: Center(child: Text('Cycle', style: TextStyle(fontSize: 13),)),
+                                                        fixedWidth: 100
+                                                    ),
+                                                    DataColumn2(
+                                                        label: Center(child: Text('Duration', style: TextStyle(fontSize: 13),)),
+                                                        fixedWidth: 100
+                                                    ),
+                                                    DataColumn2(
+                                                        label: Center(child: Text('Valve', style: TextStyle(fontSize: 13),)),
+                                                        fixedWidth: 100
+                                                    ),
+                                                    DataColumn2(
                                                         label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
-                                                        fixedWidth: 126
+                                                        fixedWidth: 110
                                                     ),
                                                   ],
                                                   rows: List<DataRow>.generate(1, (index) => DataRow(cells: [
                                                     DataCell(Text('Manual')),
-                                                    DataCell(Center(child: Text(_convertTime(widget.siteData.currentProgram[cpInx].startTime)))),
-                                                    const DataCell(Center(child: Text('---'))),
+                                                    DataCell(Center(child: Text('---'))),
+                                                    DataCell(Center(child: Text('---'))),
+                                                    DataCell(Center(child: Text('---'))),
+                                                    DataCell(Center(child: Text('----'))),
                                                     DataCell(Center(child: Row(
                                                       children: [
-                                                        IconButton(tooltip:'Pause',onPressed: (){
-                                                          String payload = '${programList[index].serialNumber}, 3';
-                                                          String payLoadFinal = jsonEncode({
-                                                            "2900": [{"2901": payload}]
-                                                          });
-                                                          MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                                        }, icon: Icon(Icons.pause_circle_outline_sharp)),
-                                                        IconButton(tooltip:'Skip next',onPressed: (){
-                                                          String payload = '${programList[index].serialNumber}, 2';
-                                                          String payLoadFinal = jsonEncode({
-                                                            "2900": [{"2901": payload}]
-                                                          });
-                                                          MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                                        }, icon: Icon(Icons.skip_next_outlined, color: myTheme.primaryColor,)),
-                                                        IconButton(tooltip:'Remove',onPressed: (){
+                                                        IconButton(tooltip:'Pause',onPressed: (){}, icon: Icon(Icons.pause_circle_outline_sharp)),
+                                                        IconButton(tooltip:'Stop',onPressed: (){
                                                           String payload = '${programList[index].serialNumber}, 0';
                                                           String payLoadFinal = jsonEncode({
                                                             "2900": [{"2901": payload}]
                                                           });
                                                           MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                                        }, icon: Icon(Icons.remove_circle_outline, color: Colors.red,)),
+                                                        }, icon: Icon(Icons.stop_circle_outlined, color: Colors.red,)),
+                                                        PopupMenuButton<String>(
+                                                          tooltip: 'Show more option',
+                                                          itemBuilder: (context) => [
+                                                            PopupMenuItem(
+                                                              value: 'Replay 30 sec',
+                                                              child: Row(
+                                                                children: [
+                                                                  Icon(Icons.replay_30), // Leading icon
+                                                                  SizedBox(width: 8), // Padding between icon and text
+                                                                  Text('Replay 30 sec'), // Menu item text
+                                                                ],
+                                                              ),
+                                                            ),
+                                                            PopupMenuItem(
+                                                              value: 'Forward 30 sec',
+                                                              child: Row(
+                                                                children: [
+                                                                  Icon(Icons.forward_30), // Leading icon
+                                                                  SizedBox(width: 8), // Padding between icon and text
+                                                                  Text('Forward 30 sec'), // Menu item text
+                                                                ],
+                                                              ),
+                                                            ),
+                                                            PopupMenuItem(
+                                                              value: 'Skip',
+                                                              child: Row(
+                                                                children: [
+                                                                  Icon(Icons.skip_next_outlined), // Leading icon
+                                                                  SizedBox(width: 8), // Padding between icon and text
+                                                                  Text('Skip'), // Menu item text
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ],
+                                                          onSelected: (value) {
+                                                            // Handle the selection here
+                                                            print('Selected: $value');
+                                                          },
+                                                          child: Icon(Icons.more_vert),
+                                                        ),
                                                       ],
                                                     ))),
                                                   ])),
                                                 ),
                                               );
-                                            }
-                                            return SizedBox(
-                                              height: (widget.siteData.currentProgram.length * 50) + 35,
-                                              child: DataTable2(
-                                                columnSpacing: 12,
-                                                horizontalMargin: 12,
-                                                minWidth: 550,
-                                                dataRowHeight: 50.0,
-                                                headingRowHeight: 35.0,
-                                                headingRowColor: MaterialStateProperty.all<Color>(Colors.green.withOpacity(0.1)),
-                                                columns: const [
-                                                  DataColumn2(
-                                                      label: Text('Program', style: TextStyle(fontSize: 13),),
-                                                      size: ColumnSize.M
-                                                  ),
-                                                  DataColumn2(
-                                                      label: Text('Line', style: TextStyle(fontSize: 13),),
-                                                      fixedWidth: 60
-                                                  ),
-                                                  DataColumn2(
-                                                      label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
-                                                      size: ColumnSize.M
-                                                  ),
-                                                  DataColumn2(
-                                                      label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
-                                                      fixedWidth: 100
-                                                  ),
-                                                  DataColumn2(
-                                                      label: Center(child: Text('Duration', style: TextStyle(fontSize: 13),)),
-                                                      fixedWidth: 100
-                                                  ),
-                                                  DataColumn2(
-                                                      label: Center(child: Text('Left', style: TextStyle(fontSize: 13),)),
-                                                      fixedWidth: 100
-                                                  ),
-                                                  DataColumn2(
-                                                      label: Center(child: Text('Valve', style: TextStyle(fontSize: 13),)),
-                                                      fixedWidth: 50
-                                                  ),
-                                                  DataColumn2(
-                                                      label: Center(child: Text('Action', style: TextStyle(fontSize: 13),)),
-                                                      fixedWidth: 90
-                                                  ),
-                                                ],
-                                                rows: List<DataRow>.generate(1, (index) => DataRow(cells: [
-                                                  DataCell(Text(widget.siteData.currentProgram[cpInx].programName)),
-                                                  DataCell(Text(widget.siteData.currentProgram[cpInx].programCategory)),
-                                                  DataCell(Center(child: Text(widget.siteData.currentProgram[cpInx].zoneName))),
-                                                  DataCell(Center(child: Text(_convertTime(widget.siteData.currentProgram[cpInx].startTime)))),
-                                                  DataCell(Center(child: Text(widget.siteData.currentProgram[cpInx].duration_Qty))),
-                                                  DataCell(Center(child: StreamBuilder<String>(
-                                                    stream: _controller.stream,
-                                                    builder: (context, snapshot) {
-                                                      if (snapshot.hasData) {
-                                                        return Text(snapshot.data!);
-                                                      } else {
-                                                        return Text(durationUpdatingFunction(widget.siteData.currentProgram[cpInx].duration_QtyLeft));
-                                                      }
-                                                    },
-                                                  ))),
-                                                  DataCell(Center(child: PopupMenuButton(
-                                                    tooltip: 'Details',
-                                                    itemBuilder: (context) {
-                                                      return [
-                                                        PopupMenuItem(
-                                                          child: Center(
-                                                            child: SizedBox(
-                                                              width: 130,
-                                                              height: ((widget.siteData.currentProgram[cpInx].valve.length + 1) ~/ 2) * 75.0,
-                                                              child: GridView.builder(
-                                                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                                                  crossAxisCount: 2,
-                                                                  crossAxisSpacing: 10.0,
-                                                                  mainAxisSpacing: 10.0,
-                                                                ),
-                                                                itemCount: widget.siteData.currentProgram[cpInx].valve.length, // Number of items
-                                                                itemBuilder: (context, index) {
-                                                                  return GridTile(
-                                                                    child: Column(
-                                                                      children: [
-                                                                        const CircleAvatar(
-                                                                          backgroundColor: Colors.transparent,
-                                                                          backgroundImage: AssetImage('assets/images/valve.png'),
-                                                                        ),
-                                                                        Row(
-                                                                          mainAxisAlignment: MainAxisAlignment.center,
-                                                                          children: [
-                                                                            CircleAvatar(
-                                                                              radius: 5,
-                                                                              backgroundColor: widget.siteData.currentProgram[cpInx].valve[index]['Status']==0 ? Colors.grey :
-                                                                              widget.siteData.currentProgram[cpInx].valve[index]['Status']==1 ? Colors.green :
-                                                                              widget.siteData.currentProgram[cpInx].valve[index]['Status']==2 ? Colors.orange :
-                                                                              widget.siteData.currentProgram[cpInx].valve[index]['Status']==3 ? Colors.redAccent : Colors.black12,
-                                                                            ),
-                                                                            const SizedBox(width: 3),
-                                                                            Text('${widget.siteData.currentProgram[cpInx].valve[index]['Name']}(${widget.siteData.currentProgram[cpInx].valve[index]['SNo']})', style: const TextStyle(color: Colors.black, fontSize: 10)),
-                                                                          ],
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  );
-                                                                },
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ];
-                                                    },
-                                                    child: const Icon(Icons.info_outline),
-                                                  ))),
-                                                  DataCell(Center(child: Row(
-                                                    children: [
-                                                      IconButton(tooltip:'Pause',onPressed: (){
-                                                        String payload = '${programList[index].serialNumber}, 3';
-                                                        String payLoadFinal = jsonEncode({
-                                                          "2900": [{"2901": payload}]
-                                                        });
-                                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                                      }, icon: Icon(Icons.pause_circle_outline_sharp)),
-                                                      IconButton(tooltip:'Skip next',onPressed: (){
-                                                        String payload = '${programList[index].serialNumber}, 2';
-                                                        String payLoadFinal = jsonEncode({
-                                                          "2900": [{"2901": payload}]
-                                                        });
-                                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                                      }, icon: const Icon(Icons.skip_next_outlined)),
-                                                    ],
-                                                  ))),
-                                                ])),
-                                              ),
-                                            );
-                                          }) :
-                                      const Center(child: Text('Current Schedule not Available')),
-                                    ),
-                                  ],
+                                            }) :
+                                        const Center(child: Text('Next Schedule not Available')),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          SizedBox(
-                            child: Card(
-                              elevation: 2,
-                              surfaceTintColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5), // make it circular
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(5.0),
-                                child: Column(
-                                  children: [
-                                    const ListTile(
-                                      tileColor: Colors.white,
-                                      title: Text('NEXT SCHEDULE', style: TextStyle(fontSize: 14)),
-                                    ),
-                                    const Divider(height: 0),
-                                    Container(
-                                      color: Colors.white,
-                                      height: widget.siteData.nextProgram.isNotEmpty? (widget.siteData.nextProgram.length * 50) +35 : 50,
-                                      child: widget.siteData.nextProgram.isNotEmpty? ListView.builder(
-                                          scrollDirection: Axis.vertical,
-                                          itemCount: widget.siteData.nextProgram.length,
-                                          itemBuilder: (context, cpInx) {
-                                            return SizedBox(
-                                              height: 100,
-                                              child: DataTable2(
-                                                columnSpacing: 12,
-                                                horizontalMargin: 12,
-                                                minWidth: 550,
-                                                dataRowHeight: 50.0,
-                                                headingRowHeight: 35.0,
-                                                headingRowColor: MaterialStateProperty.all<Color>(Colors.green.withOpacity(0.1)),
-                                                //border: TableBorder.all(),
-                                                columns: const [
-                                                  DataColumn2(
-                                                      label: Text('Name', style: TextStyle(fontSize: 13),),
-                                                      size: ColumnSize.M
-                                                  ),
-                                                  DataColumn2(
-                                                      label: Center(child: Text('Shift', style: TextStyle(fontSize: 13),)),
-                                                      fixedWidth: 100
-                                                  ),
-                                                  DataColumn2(
-                                                      label: Center(child: Text('Cycle', style: TextStyle(fontSize: 13),)),
-                                                      fixedWidth: 100
-                                                  ),
-                                                  DataColumn2(
-                                                      label: Center(child: Text('Duration', style: TextStyle(fontSize: 13),)),
-                                                      fixedWidth: 100
-                                                  ),
-                                                  DataColumn2(
-                                                      label: Center(child: Text('Valve', style: TextStyle(fontSize: 13),)),
-                                                      fixedWidth: 100
-                                                  ),
-                                                  DataColumn2(
-                                                      label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
-                                                      fixedWidth: 110
-                                                  ),
-                                                ],
-                                                rows: List<DataRow>.generate(1, (index) => DataRow(cells: [
-                                                  DataCell(Text('Manual')),
-                                                  DataCell(Center(child: Text('---'))),
-                                                  DataCell(Center(child: Text('---'))),
-                                                  DataCell(Center(child: Text('---'))),
-                                                  DataCell(Center(child: Text('----'))),
-                                                  DataCell(Center(child: Row(
-                                                    children: [
-                                                      IconButton(tooltip:'Pause',onPressed: (){}, icon: Icon(Icons.pause_circle_outline_sharp)),
-                                                      IconButton(tooltip:'Stop',onPressed: (){
-                                                        String payload = '${programList[index].serialNumber}, 0';
-                                                        String payLoadFinal = jsonEncode({
-                                                          "2900": [{"2901": payload}]
-                                                        });
-                                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                                      }, icon: Icon(Icons.stop_circle_outlined, color: Colors.red,)),
-                                                      PopupMenuButton<String>(
-                                                        tooltip: 'Show more option',
-                                                        itemBuilder: (context) => [
-                                                          PopupMenuItem(
-                                                            value: 'Replay 30 sec',
-                                                            child: Row(
-                                                              children: [
-                                                                Icon(Icons.replay_30), // Leading icon
-                                                                SizedBox(width: 8), // Padding between icon and text
-                                                                Text('Replay 30 sec'), // Menu item text
-                                                              ],
-                                                            ),
-                                                          ),
-                                                          PopupMenuItem(
-                                                            value: 'Forward 30 sec',
-                                                            child: Row(
-                                                              children: [
-                                                                Icon(Icons.forward_30), // Leading icon
-                                                                SizedBox(width: 8), // Padding between icon and text
-                                                                Text('Forward 30 sec'), // Menu item text
-                                                              ],
-                                                            ),
-                                                          ),
-                                                          PopupMenuItem(
-                                                            value: 'Skip',
-                                                            child: Row(
-                                                              children: [
-                                                                Icon(Icons.skip_next_outlined), // Leading icon
-                                                                SizedBox(width: 8), // Padding between icon and text
-                                                                Text('Skip'), // Menu item text
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ],
-                                                        onSelected: (value) {
-                                                          // Handle the selection here
-                                                          print('Selected: $value');
-                                                        },
-                                                        child: Icon(Icons.more_vert),
-                                                      ),
-                                                    ],
-                                                  ))),
-                                                ])),
-                                              ),
-                                            );
-                                          }) :
-                                      const Center(child: Text('Next Schedule not Available')),
-                                    ),
-                                  ],
+                              const Divider(height: 0),
+                              SizedBox(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: Column(
+                                    children: [
+                                      const ListTile(
+                                        tileColor: Colors.white,
+                                        title: Text('UPCOMING PROGRAM', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                      ),
+                                      const Divider(height: 0),
+                                      SizedBox(
+                                        height: programList.isNotEmpty? (programList.length * 50) + 35 : 50,
+                                        child: programList.isNotEmpty? DataTable2(
+                                          columnSpacing: 12,
+                                          horizontalMargin: 12,
+                                          minWidth: 600,
+                                          dataRowHeight: 45.0,
+                                          headingRowHeight: 35.0,
+                                          headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
+                                          columns: const [
+                                            DataColumn2(
+                                                label: Text('Name', style: TextStyle(fontSize: 13),),
+                                                fixedWidth: 110
+                                            ),
+                                            DataColumn2(
+                                                label: Text('Category', style: TextStyle(fontSize: 13),),
+                                                size: ColumnSize.M
+                                            ),
+                                            DataColumn2(
+                                                label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
+                                                fixedWidth: 50
+                                            ),
+                                            DataColumn2(
+                                                label: Center(child: Text('Start Date', style: TextStyle(fontSize: 13),)),
+                                                fixedWidth: 100
+                                            ),
+                                            DataColumn2(
+                                                label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
+                                                fixedWidth: 80
+                                            ),
+                                            DataColumn2(
+                                                label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
+                                                fixedWidth: 87
+                                            ),
+                                          ],
+                                          rows: List<DataRow>.generate(programList.length, (index) => DataRow(cells: [
+                                            DataCell(Text(programList[index].programName)),
+                                            DataCell(Text(programList[index].programName == 'Default'? '----' : programList[index].scheduleType)),
+                                            DataCell(Center(child: Text('${programList[index].sequenceCount}'))),
+                                            DataCell(Center(child: Text(programList[index].programName == 'Default'? '----':programList[index].startDate.split(' ').first))),
+                                            DataCell(Center(child: Text(programList[index].programName == 'Default'? '----': programList[index].startTime))),
+                                            DataCell(Center(child: Row(
+                                              children: [
+                                                IconButton(tooltip:'Start',onPressed: (){
+                                                  String payload = '${programList[index].serialNumber},1';
+                                                  String payLoadFinal = jsonEncode({
+                                                    "2900": [{"2901": payload}]
+                                                  });
+                                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                                }, icon: const Icon(Icons.start, color: Colors.green,)),
+                                                IconButton(tooltip:'Stop',onPressed: (){
+                                                  String payload = '${programList[index].serialNumber}, 0';
+                                                  String payLoadFinal = jsonEncode({
+                                                    "2900": [{"2901": payload}]
+                                                  });
+                                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                                }, icon: const Icon(Icons.stop_circle_outlined, color: Colors.red)),
+                                              ],
+                                            ))),
+                                          ])),
+                                        ) :
+                                        const Center(child: Text('Upcoming Program not Available')),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
-                          const SizedBox(height: 3),
-                          SizedBox(
-                            child: Card(
-                              elevation: 2,
-                              surfaceTintColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5), // make it circular
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(5.0),
-                                child: Column(
-                                  children: [
-                                    const ListTile(
-                                      tileColor: Colors.white,
-                                      title: Text('UPCOMING PROGRAM', style: TextStyle(fontSize: 14)),
-                                    ),
-                                    const Divider(height: 0),
-                                    SizedBox(
-                                      height: programList.isNotEmpty? (programList.length * 50) + 35 : 50,
-                                      child: programList.isNotEmpty? DataTable2(
-                                        columnSpacing: 12,
-                                        horizontalMargin: 12,
-                                        minWidth: 600,
-                                        dataRowHeight: 45.0,
-                                        headingRowHeight: 35.0,
-                                        headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
-                                        columns: const [
-                                          DataColumn2(
-                                              label: Text('Name', style: TextStyle(fontSize: 13),),
-                                              fixedWidth: 110
-                                          ),
-                                          DataColumn2(
-                                              label: Text('Category', style: TextStyle(fontSize: 13),),
-                                              size: ColumnSize.M
-                                          ),
-                                          DataColumn2(
-                                              label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
-                                              fixedWidth: 50
-                                          ),
-                                          DataColumn2(
-                                              label: Center(child: Text('Start Date', style: TextStyle(fontSize: 13),)),
-                                              fixedWidth: 100
-                                          ),
-                                          DataColumn2(
-                                              label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
-                                              fixedWidth: 80
-                                          ),
-                                          DataColumn2(
-                                              label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
-                                              fixedWidth: 87
-                                          ),
-                                        ],
-                                        rows: List<DataRow>.generate(programList.length, (index) => DataRow(cells: [
-                                          DataCell(Text(programList[index].programName)),
-                                          DataCell(Text(programList[index].programName == 'Default'? '----' : programList[index].scheduleType)),
-                                          DataCell(Center(child: Text('${programList[index].sequenceCount}'))),
-                                          DataCell(Center(child: Text(programList[index].programName == 'Default'? '----':programList[index].startDate.split(' ').first))),
-                                          DataCell(Center(child: Text(programList[index].programName == 'Default'? '----': programList[index].startTime))),
-                                          DataCell(Center(child: Row(
-                                            children: [
-                                              IconButton(tooltip:'Start',onPressed: (){
-                                                String payload = '${programList[index].serialNumber},1';
-                                                String payLoadFinal = jsonEncode({
-                                                  "2900": [{"2901": payload}]
-                                                });
-                                                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                              }, icon: const Icon(Icons.start, color: Colors.green,)),
-                                              IconButton(tooltip:'Stop',onPressed: (){
-                                                String payload = '${programList[index].serialNumber}, 0';
-                                                String payLoadFinal = jsonEncode({
-                                                  "2900": [{"2901": payload}]
-                                                });
-                                                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                              }, icon: const Icon(Icons.stop_circle_outlined, color: Colors.red)),
-                                            ],
-                                          ))),
-                                        ])),
-                                      ) :
-                                      const Center(child: Text('Upcoming Program not Available')),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -1138,7 +791,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                       padding: const EdgeInsets.all(3.0),
                       child: Container(
                         width: 345,
-                        height: widget.siteLength > 1? MediaQuery.sizeOf(context).height-197 : MediaQuery.sizeOf(context).height-153,
+                        height: widget.siteLength > 1? MediaQuery.sizeOf(context).height-197 : MediaQuery.sizeOf(context).height-145,
                         color: Colors.white,
                         child: Column(
                           children: [
@@ -1197,7 +850,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                         width: 40,
                                         child: IconButton(tooltip:'View all Node details', onPressed: (){
                                           showNodeDetailsBottomSheet(context);
-                                        }, icon: const Icon(Icons.backup_table_rounded)),
+                                        }, icon: const Icon(Icons.format_list_bulleted_outlined)),
                                       ),
                                       SizedBox(
                                         width: 40,
@@ -1440,11 +1093,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
     return -1;
   }
 
-  String _convertTime(String timeString) {
-    final parsedTime = DateFormat('HH:mm:ss').parse(timeString);
-    final formattedTime = DateFormat('hh:mm a').format(parsedTime);
-    return formattedTime;
-  }
 
   Future<void>showNodeDetailsBottomSheet(BuildContext context) async{
     showModalBottomSheet(

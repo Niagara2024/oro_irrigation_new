@@ -74,6 +74,9 @@ class _MainDashBoardState extends State<MainDashBoard> {
         final userEmailId = sharedPreferences.getString('email') ?? '';
         final password = sharedPreferences.getString('password') ?? '';
 
+        MqttPayloadProvider provider = MqttPayloadProvider();
+        provider.clearData();
+
 
         if (userId.isNotEmpty) {
           return UserData(
@@ -399,7 +402,7 @@ class _DashboardWideState extends State<DashboardWide> {
         ),
       ) :
       userData.userType =='3'? Container(
-        color: Colors.transparent,
+        color: Colors.yellow,
         width: double.infinity,
         height: double.infinity,
         child: CustomerHome(customerID: userData.userId, customerName: userData.userName, mobileNo: '+${userData.countryCode}-${userData.mobileNo}', comingFrom: 'Customer',),

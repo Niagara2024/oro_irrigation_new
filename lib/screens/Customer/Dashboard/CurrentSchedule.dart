@@ -46,7 +46,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
           ListTile(
             tileColor: Colors.white,
             title: const Text('CURRENT SCHEDULE', style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
-            trailing: provider.currentProgram.isNotEmpty ? Row(
+            trailing: provider.currentSchedule.isNotEmpty ? Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Image.asset('assets/GiffFile/water_drop_animation.gif'),
@@ -83,9 +83,9 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
           const Divider(height: 0),
           Container(
             color: Colors.white,
-            height: provider.currentProgram.isNotEmpty? (provider.currentProgram.length * 55) + 35 : 50,
-            child: provider.currentProgram.isNotEmpty? SizedBox(
-              height: (provider.currentProgram.length * 55) + 35,
+            height: provider.currentSchedule.isNotEmpty? (provider.currentSchedule.length * 55) + 35 : 50,
+            child: provider.currentSchedule.isNotEmpty? SizedBox(
+              height: (provider.currentSchedule.length * 55) + 35,
               child: DataTable2(
                 columnSpacing: 12,
                 horizontalMargin: 12,
@@ -131,24 +131,24 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                       fixedWidth: 50
                   ),
                 ],
-                rows: List<DataRow>.generate(provider.currentProgram.length, (index) => DataRow(cells: [
-                  DataCell(Text(provider.currentProgram[index]['ProgName'])),
-                  DataCell(Text(provider.currentProgram[index]['ProgCategory'])),
-                  DataCell(Center(child: Text('${provider.currentProgram[index]['CurrentZone']}/${provider.currentProgram[index]['TotalZone']}'))),
-                  DataCell(Center(child: Text(provider.currentProgram[index]['ZoneName']))),
-                  DataCell(Center(child: Text(_convertTime(provider.currentProgram[index]['StartTime'])))),
-                  DataCell(Center(child: Text(provider.currentProgram[index]['Duration_Qty']))),
-                  DataCell(Center(child: Text(provider.currentProgram[index]['Duration_QtyLeft']))),
+                rows: List<DataRow>.generate(provider.currentSchedule.length, (index) => DataRow(cells: [
+                  DataCell(Text(provider.currentSchedule[index]['ProgName'])),
+                  DataCell(Text(provider.currentSchedule[index]['ProgCategory'])),
+                  DataCell(Center(child: Text('${provider.currentSchedule[index]['CurrentZone']}/${provider.currentSchedule[index]['TotalZone']}'))),
+                  DataCell(Center(child: Text(provider.currentSchedule[index]['ZoneName']))),
+                  DataCell(Center(child: Text(_convertTime(provider.currentSchedule[index]['StartTime'])))),
+                  DataCell(Center(child: Text(provider.currentSchedule[index]['Duration_Qty']))),
+                  DataCell(Center(child: Text(provider.currentSchedule[index]['Duration_QtyLeft']))),
                   DataCell(Center(child: GridView.count(
                     crossAxisCount: 3,
                     children: List.generate(
-                      provider.currentProgram[index]['Valve'].length,
+                      provider.currentSchedule[index]['Valve'].length,
                           (vIndex) => Center(
-                            child : IconButton(tooltip: '${provider.currentProgram[index]['Valve'][vIndex]['Name']}', onPressed: (){}, icon: CircleAvatar(
-                              backgroundColor: provider.currentProgram[index]['Valve'][vIndex]['Status']==0 ? Colors.grey.shade100 :
-                              provider.currentProgram[index]['Valve'][vIndex]['Status']==1 ? Colors.green.shade100 :
-                              provider.currentProgram[index]['Valve'][vIndex]['Status']==2 ? Colors.orange.shade100 :
-                              provider.currentProgram[index]['Valve'][vIndex]['Status']==3 ? Colors.red.shade100 : Colors.black12,
+                            child : IconButton(tooltip: '${provider.currentSchedule[index]['Valve'][vIndex]['Name']}', onPressed: (){}, icon: CircleAvatar(
+                              backgroundColor: provider.currentSchedule[index]['Valve'][vIndex]['Status']==0 ? Colors.grey.shade100 :
+                              provider.currentSchedule[index]['Valve'][vIndex]['Status']==1 ? Colors.green.shade100 :
+                              provider.currentSchedule[index]['Valve'][vIndex]['Status']==2 ? Colors.orange.shade100 :
+                              provider.currentSchedule[index]['Valve'][vIndex]['Status']==3 ? Colors.red.shade100 : Colors.black12,
                               backgroundImage: const AssetImage('assets/images/valve.png'),
                             )),
 
@@ -162,14 +162,14 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                           child: Center(
                             child: SizedBox(
                               width: 130,
-                              height: ((provider.currentProgram[index]['Valve'].length + 1) ~/ 2) * 75.0,
+                              height: ((provider.currentSchedule[index]['Valve'].length + 1) ~/ 2) * 75.0,
                               child: GridView.builder(
                                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 2,
                                   crossAxisSpacing: 10.0,
                                   mainAxisSpacing: 10.0,
                                 ),
-                                itemCount: provider.currentProgram[index]['Valve'].length, // Number of items
+                                itemCount: provider.currentSchedule[index]['Valve'].length, // Number of items
                                 itemBuilder: (context, vIndex) {
                                   return GridTile(
                                     child: Column(
@@ -183,13 +183,13 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                           children: [
                                             CircleAvatar(
                                               radius: 5,
-                                              backgroundColor: provider.currentProgram[index]['Valve'][vIndex]['Status']==0 ? Colors.grey :
-                                              provider.currentProgram[index]['Valve'][vIndex]['Status']==1 ? Colors.green :
-                                              provider.currentProgram[index]['Valve'][vIndex]['Status']==2 ? Colors.orange :
-                                              provider.currentProgram[index]['Valve'][vIndex]['Status']==3 ? Colors.redAccent : Colors.black12,
+                                              backgroundColor: provider.currentSchedule[index]['Valve'][vIndex]['Status']==0 ? Colors.grey :
+                                              provider.currentSchedule[index]['Valve'][vIndex]['Status']==1 ? Colors.green :
+                                              provider.currentSchedule[index]['Valve'][vIndex]['Status']==2 ? Colors.orange :
+                                              provider.currentSchedule[index]['Valve'][vIndex]['Status']==3 ? Colors.redAccent : Colors.black12,
                                             ),
                                             const SizedBox(width: 3),
-                                            Text('${provider.currentProgram[index]['Valve'][vIndex]['Name']}(${provider.currentProgram[index]['Valve'][vIndex]['SNo']})', style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                            Text('${provider.currentSchedule[index]['Valve'][vIndex]['Name']}(${provider.currentSchedule[index]['Valve'][vIndex]['SNo']})', style: const TextStyle(color: Colors.black, fontSize: 10)),
                                           ],
                                         ),
                                       ],
@@ -206,7 +206,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                   )*/)),
                   DataCell(Center(child: Center(
                     child: IconButton(tooltip:'Skip next',onPressed: (){
-                      String payload = '${provider.currentProgram[index]['ProgType']}, 0';
+                      String payload = '${provider.currentSchedule[index]['ProgType']}, 0';
                       String payLoadFinal = jsonEncode({
                         "3700": [{"3701": payload}]
                       });

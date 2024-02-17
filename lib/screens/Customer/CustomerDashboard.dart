@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:oro_irrigation_new/screens/Customer/Dashboard/UpcomingProgram.dart';
 import 'package:provider/provider.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../Models/Customer/Dashboard/ProgramList.dart';
@@ -699,81 +700,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                               ),
                               const Divider(height: 0),
                               SizedBox(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(5.0),
-                                  child: Column(
-                                    children: [
-                                      const ListTile(
-                                        tileColor: Colors.white,
-                                        title: Text('UPCOMING PROGRAM', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                                      ),
-                                      const Divider(height: 0),
-                                      SizedBox(
-                                        height: programList.isNotEmpty? (programList.length * 50) + 35 : 50,
-                                        child: programList.isNotEmpty? DataTable2(
-                                          columnSpacing: 12,
-                                          horizontalMargin: 12,
-                                          minWidth: 600,
-                                          dataRowHeight: 45.0,
-                                          headingRowHeight: 35.0,
-                                          headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
-                                          columns: const [
-                                            DataColumn2(
-                                                label: Text('Name', style: TextStyle(fontSize: 13),),
-                                                fixedWidth: 110
-                                            ),
-                                            DataColumn2(
-                                                label: Text('Category', style: TextStyle(fontSize: 13),),
-                                                size: ColumnSize.M
-                                            ),
-                                            DataColumn2(
-                                                label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
-                                                fixedWidth: 50
-                                            ),
-                                            DataColumn2(
-                                                label: Center(child: Text('Start Date', style: TextStyle(fontSize: 13),)),
-                                                fixedWidth: 100
-                                            ),
-                                            DataColumn2(
-                                                label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
-                                                fixedWidth: 80
-                                            ),
-                                            DataColumn2(
-                                                label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
-                                                fixedWidth: 87
-                                            ),
-                                          ],
-                                          rows: List<DataRow>.generate(programList.length, (index) => DataRow(cells: [
-                                            DataCell(Text(programList[index].programName)),
-                                            DataCell(Text(programList[index].programName == 'Default'? '----' : programList[index].scheduleType)),
-                                            DataCell(Center(child: Text('${programList[index].sequenceCount}'))),
-                                            DataCell(Center(child: Text(programList[index].programName == 'Default'? '----':programList[index].startDate.split(' ').first))),
-                                            DataCell(Center(child: Text(programList[index].programName == 'Default'? '----': programList[index].startTime))),
-                                            DataCell(Center(child: Row(
-                                              children: [
-                                                IconButton(tooltip:'Start',onPressed: (){
-                                                  String payload = '${programList[index].serialNumber},1';
-                                                  String payLoadFinal = jsonEncode({
-                                                    "2900": [{"2901": payload}]
-                                                  });
-                                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                                }, icon: const Icon(Icons.start, color: Colors.green,)),
-                                                IconButton(tooltip:'Stop',onPressed: (){
-                                                  String payload = '${programList[index].serialNumber}, 0';
-                                                  String payLoadFinal = jsonEncode({
-                                                    "2900": [{"2901": payload}]
-                                                  });
-                                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                                }, icon: const Icon(Icons.stop_circle_outlined, color: Colors.red)),
-                                              ],
-                                            ))),
-                                          ])),
-                                        ) :
-                                        const Center(child: Text('Upcoming Program not Available')),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                child: UpcomingProgram(siteData: widget.siteData),
                               ),
                             ],
                           ),

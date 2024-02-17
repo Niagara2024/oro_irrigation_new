@@ -2,7 +2,7 @@ import 'DashBoardValve.dart';
 import 'Sensor.dart';
 
 class LineOrSequence {
-  int sNo;
+  dynamic sNo;
   String id;
   String name, location, time, flow, type;
   List<DashBoardValve> valves;

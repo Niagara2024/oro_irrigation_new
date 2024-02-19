@@ -11,6 +11,7 @@ class MqttPayloadProvider with ChangeNotifier {
   late ScheduleViewProvider mySchedule;
 
   late List<dynamic> currentSchedule = [];
+  late List<dynamic> nextSchedule = [];
   late List<dynamic> upcomingProgram = [];
 
   void editMySchedule(ScheduleViewProvider instance){
@@ -26,6 +27,9 @@ class MqttPayloadProvider with ChangeNotifier {
 
         if (data['2400'][0].containsKey('2402')) {
           currentSchedule = data['2400'][0]['2402'];
+        }
+        if (data['2400'][0].containsKey('2403')) {
+          nextSchedule = data['2400'][0]['2403'];
         }
         if (data['2400'][0].containsKey('2404')) {
           upcomingProgram = data['2400'][0]['2404'];
@@ -54,6 +58,7 @@ class MqttPayloadProvider with ChangeNotifier {
     dashBoardPayload = '';
     currentSchedule.clear();
     upcomingProgram.clear();
+    nextSchedule.clear();
     notifyListeners();
   }
 

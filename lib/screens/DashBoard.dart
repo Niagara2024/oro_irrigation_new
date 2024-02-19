@@ -301,7 +301,7 @@ class _DashboardWideState extends State<DashboardWide> {
                 backgroundColor: Colors.white,
                 child: Icon(Icons.settings_outlined),
               )),
-              IconButton(tooltip : 'Niagara Account\n${userData.userName}\n+${userData.countryCode} $userData.mobileNo', onPressed: (){
+              IconButton(tooltip : 'Niagara Account\n${userData.userName}\n+${userData.countryCode} ${userData.mobileNo}', onPressed: (){
                 showMenu(
                   context: context,
                   position: const RelativeRect.fromLTRB(100, 0, 10, 0),

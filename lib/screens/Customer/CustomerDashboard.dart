@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:oro_irrigation_new/screens/Customer/Dashboard/NextSchedule.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/UpcomingProgram.dart';
 import 'package:provider/provider.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
@@ -577,126 +578,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                 child: CurrentSchedule(userID: widget.userID, customerID: widget.customerID, siteData: widget.siteData),
                               ),
                               const Divider(height: 0),
-                              SizedBox(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(5.0),
-                                  child: Column(
-                                    children: [
-                                      const ListTile(
-                                        tileColor: Colors.white,
-                                        title: Text('NEXT SCHEDULE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                                      ),
-                                      const Divider(height: 0),
-                                      Container(
-                                        color: Colors.white,
-                                        height: widget.siteData.nextProgram.isNotEmpty? (widget.siteData.nextProgram.length * 50) +35 : 50,
-                                        child: widget.siteData.nextProgram.isNotEmpty? ListView.builder(
-                                            scrollDirection: Axis.vertical,
-                                            itemCount: widget.siteData.nextProgram.length,
-                                            itemBuilder: (context, cpInx) {
-                                              return SizedBox(
-                                                height: 100,
-                                                child: DataTable2(
-                                                  columnSpacing: 12,
-                                                  horizontalMargin: 12,
-                                                  minWidth: 550,
-                                                  dataRowHeight: 50.0,
-                                                  headingRowHeight: 35.0,
-                                                  headingRowColor: MaterialStateProperty.all<Color>(Colors.green.withOpacity(0.1)),
-                                                  //border: TableBorder.all(),
-                                                  columns: const [
-                                                    DataColumn2(
-                                                        label: Text('Name', style: TextStyle(fontSize: 13),),
-                                                        size: ColumnSize.M
-                                                    ),
-                                                    DataColumn2(
-                                                        label: Center(child: Text('Shift', style: TextStyle(fontSize: 13),)),
-                                                        fixedWidth: 100
-                                                    ),
-                                                    DataColumn2(
-                                                        label: Center(child: Text('Cycle', style: TextStyle(fontSize: 13),)),
-                                                        fixedWidth: 100
-                                                    ),
-                                                    DataColumn2(
-                                                        label: Center(child: Text('Duration', style: TextStyle(fontSize: 13),)),
-                                                        fixedWidth: 100
-                                                    ),
-                                                    DataColumn2(
-                                                        label: Center(child: Text('Valve', style: TextStyle(fontSize: 13),)),
-                                                        fixedWidth: 100
-                                                    ),
-                                                    DataColumn2(
-                                                        label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
-                                                        fixedWidth: 110
-                                                    ),
-                                                  ],
-                                                  rows: List<DataRow>.generate(1, (index) => DataRow(cells: [
-                                                    DataCell(Text('Manual')),
-                                                    DataCell(Center(child: Text('---'))),
-                                                    DataCell(Center(child: Text('---'))),
-                                                    DataCell(Center(child: Text('---'))),
-                                                    DataCell(Center(child: Text('----'))),
-                                                    DataCell(Center(child: Row(
-                                                      children: [
-                                                        IconButton(tooltip:'Pause',onPressed: (){}, icon: Icon(Icons.pause_circle_outline_sharp)),
-                                                        IconButton(tooltip:'Stop',onPressed: (){
-                                                          String payload = '${programList[index].serialNumber}, 0';
-                                                          String payLoadFinal = jsonEncode({
-                                                            "2900": [{"2901": payload}]
-                                                          });
-                                                          MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                                        }, icon: Icon(Icons.stop_circle_outlined, color: Colors.red,)),
-                                                        PopupMenuButton<String>(
-                                                          tooltip: 'Show more option',
-                                                          itemBuilder: (context) => [
-                                                            PopupMenuItem(
-                                                              value: 'Replay 30 sec',
-                                                              child: Row(
-                                                                children: [
-                                                                  Icon(Icons.replay_30), // Leading icon
-                                                                  SizedBox(width: 8), // Padding between icon and text
-                                                                  Text('Replay 30 sec'), // Menu item text
-                                                                ],
-                                                              ),
-                                                            ),
-                                                            PopupMenuItem(
-                                                              value: 'Forward 30 sec',
-                                                              child: Row(
-                                                                children: [
-                                                                  Icon(Icons.forward_30), // Leading icon
-                                                                  SizedBox(width: 8), // Padding between icon and text
-                                                                  Text('Forward 30 sec'), // Menu item text
-                                                                ],
-                                                              ),
-                                                            ),
-                                                            PopupMenuItem(
-                                                              value: 'Skip',
-                                                              child: Row(
-                                                                children: [
-                                                                  Icon(Icons.skip_next_outlined), // Leading icon
-                                                                  SizedBox(width: 8), // Padding between icon and text
-                                                                  Text('Skip'), // Menu item text
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          ],
-                                                          onSelected: (value) {
-                                                            // Handle the selection here
-                                                            print('Selected: $value');
-                                                          },
-                                                          child: Icon(Icons.more_vert),
-                                                        ),
-                                                      ],
-                                                    ))),
-                                                  ])),
-                                                ),
-                                              );
-                                            }) :
-                                        const Center(child: Text('Next Schedule not Available')),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                              const SizedBox(
+                                child: NextSchedule(),
                               ),
                               const Divider(height: 0),
                               SizedBox(

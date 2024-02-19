@@ -36,7 +36,7 @@ class UpcomingProgram extends StatelessWidget {
               columns: const [
                 DataColumn2(
                     label: Text('Name', style: TextStyle(fontSize: 13),),
-                    fixedWidth: 110
+                    size: ColumnSize.L
                 ),
                 DataColumn2(
                     label: Text('Line', style: TextStyle(fontSize: 13),),
@@ -52,11 +52,11 @@ class UpcomingProgram extends StatelessWidget {
                 ),
                 DataColumn2(
                     label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
-                    fixedWidth: 80
+                    fixedWidth: 100
                 ),
                 DataColumn2(
                     label: Center(child: Text('ON/OFF', style: TextStyle(fontSize: 13),)),
-                    fixedWidth: 87
+                    fixedWidth: 100
                 ),
               ],
               rows: List<DataRow>.generate(provider.upcomingProgram.length, (index) => DataRow(cells: [

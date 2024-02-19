@@ -100,7 +100,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                   ),
                   DataColumn2(
                       label: Text('Line', style: TextStyle(fontSize: 13),),
-                      fixedWidth: 60
+                      fixedWidth: 70
                   ),
                   DataColumn2(
                       label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),

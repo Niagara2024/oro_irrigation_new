@@ -20,11 +20,10 @@ class UpcomingProgram extends StatelessWidget {
       padding: const EdgeInsets.all(5.0),
       child: Column(
         children: [
-          const ListTile(
-            tileColor: Colors.white,
-            title: Text('UPCOMING PROGRAM', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          ListTile(
+            tileColor: myTheme.primaryColor.withOpacity(0.2),
+            title: const Text('UPCOMING PROGRAM', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
           ),
-          const Divider(height: 0),
           SizedBox(
             height: provider.upcomingProgram.isNotEmpty? (provider.upcomingProgram.length * 45) + 35 : 50,
             child: provider.upcomingProgram.isNotEmpty? DataTable2(
@@ -56,8 +55,8 @@ class UpcomingProgram extends StatelessWidget {
                     fixedWidth: 100
                 ),
                 DataColumn2(
-                    label: Center(child: Text('ON/OFF', style: TextStyle(fontSize: 13),)),
-                    fixedWidth: 100
+                    label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
+                    fixedWidth: 50
                 ),
               ],
               rows: List<DataRow>.generate(provider.upcomingProgram.length, (index) => DataRow(cells: [
@@ -66,27 +65,31 @@ class UpcomingProgram extends StatelessWidget {
                 DataCell(Center(child: Text('${provider.upcomingProgram[index]['TotalZone']}'))),
                 DataCell(Center(child: Text('${provider.upcomingProgram[index]['TotalZone']}'))),
                 DataCell(Center(child: Text('${provider.upcomingProgram[index]['TotalZone']}'))),
-                DataCell(Center(child: Row(
-                  children: [
-                    IconButton(tooltip:'Start',onPressed: (){
-                      String localFilePath = 'assets/audios/button_click_sound.mp3';
-                      audioPlayer.play(UrlSource(localFilePath));
-                      String payload = '${provider.upcomingProgram[index]['SNo']},1';
-                      String payLoadFinal = jsonEncode({
-                        "2900": [{"2901": payload}]
-                      });
-                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
-                    }, icon: const Icon(Icons.start, color: Colors.green,)),
-                    IconButton(tooltip:'Stop',onPressed: (){
-                      String localFilePath = 'assets/audios/audio_off.mp3';
-                      audioPlayer.play(UrlSource(localFilePath));
-                      String payload = '${provider.upcomingProgram[index]['SNo']}, 0';
-                      String payLoadFinal = jsonEncode({
-                        "2900": [{"2901": payload}]
-                      });
-                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
-                    }, icon: const Icon(Icons.stop_circle_outlined, color: Colors.red)),
-                  ],
+                DataCell(Center(child: Transform.scale(
+                  scale: 0.7,
+                  child: Tooltip(
+                    message: provider.upcomingProgram[index]['SwitchOnOff']==1? 'Off' : 'On',
+                    child: Switch(
+                      hoverColor: Colors.pink.shade100,
+                      value: provider.upcomingProgram[index]['SwitchOnOff'] == 1 ? true : false,
+                      onChanged: (value) {
+                        String payload = '';
+                        if(value){
+                          String localFilePath = 'assets/audios/audio_off.mp3';
+                          audioPlayer.play(UrlSource(localFilePath));
+                          payload = '${provider.upcomingProgram[index]['SNo']},1';
+                        }else{
+                          String localFilePath = 'assets/audios/button_click_sound.mp3';
+                          audioPlayer.play(UrlSource(localFilePath));
+                          payload = '${provider.upcomingProgram[index]['SNo']}, 0';
+                        }
+                        String payLoadFinal = jsonEncode({
+                          "2900": [{"2901": payload}]
+                        });
+                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
+                      },
+                    ),
+                  ),
                 ))),
               ])),
             ) :

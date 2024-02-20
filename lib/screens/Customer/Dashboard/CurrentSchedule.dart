@@ -39,13 +39,12 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<MqttPayloadProvider>(context);
-
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: Column(
         children: [
           ListTile(
-            tileColor: Colors.white,
+            tileColor: myTheme.primaryColor.withOpacity(0.2),
             title: const Text('CURRENT SCHEDULE', style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
             trailing: provider.currentSchedule.isNotEmpty ? Row(
                 mainAxisSize: MainAxisSize.min,
@@ -81,7 +80,6 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                 ]
             ),
           ),
-          const Divider(height: 0),
           Container(
             color: Colors.white,
             height: provider.currentSchedule.isNotEmpty? (provider.currentSchedule.length * 55) + 35 : 50,

@@ -93,6 +93,8 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                 isScrollable: true,
                 labelColor: myTheme.primaryColor,
                 unselectedLabelColor: Colors.black,
+                dividerColor: myTheme.primaryColor.withOpacity(0.2),
+                labelStyle: const TextStyle(fontSize: 16),
                 tabs: [
                   for (var i = 0; i < siteListFinal.length; i++)
                     Tab(text: siteListFinal[i].siteName ?? '',),
@@ -109,10 +111,6 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                   children: [
                     NavigationRail(
                       selectedIndex: _selectedIndex,
-                      backgroundColor: myTheme.secondaryHeaderColor,
-                      labelType: NavigationRailLabelType.all,
-                      indicatorColor: myTheme.primaryColor,
-                      elevation: 5,
                       minWidth: 100,
                       onDestinationSelected: (int index) {
                         setState(() {
@@ -148,7 +146,7 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                         ),
                       ],
                     ),
-                    VerticalDivider(width: 2, color: myTheme.primaryColorLight),
+                    VerticalDivider(width: 2, color: myTheme.primaryColor.withOpacity(0.5)),
                     Expanded(
                       child:
                       _selectedIndex == 0 ? CustomerDashboard(customerID: widget.customerID, type: 0, customerName: widget.customerName, userID: widget.customerID, mobileNo: '+${widget.mobileNo}', siteData: siteListFinal[siteIndex], siteLength: siteListFinal.length) :

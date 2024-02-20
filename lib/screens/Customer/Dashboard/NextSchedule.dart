@@ -20,11 +20,10 @@ class _NextScheduleState extends State<NextSchedule> {
       padding: const EdgeInsets.all(5.0),
       child: Column(
         children: [
-          const ListTile(
-            tileColor: Colors.white,
-            title: Text('NEXT SCHEDULE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          ListTile(
+            tileColor: myTheme.primaryColor.withOpacity(0.2),
+            title: const Text('NEXT SCHEDULE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
           ),
-          const Divider(height: 0),
           SizedBox(
             height: provider.nextSchedule.isNotEmpty? (provider.nextSchedule.length * 45) + 35 : 50,
             child: provider.nextSchedule.isNotEmpty? DataTable2(
@@ -41,7 +40,7 @@ class _NextScheduleState extends State<NextSchedule> {
                 ),
                 DataColumn2(
                     label: Text('Line', style: TextStyle(fontSize: 13),),
-                    fixedWidth: 70
+                    fixedWidth: 100
                 ),
                 DataColumn2(
                     label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
@@ -53,11 +52,11 @@ class _NextScheduleState extends State<NextSchedule> {
                 ),
                 DataColumn2(
                     label: Center(child: Text('Start Date', style: TextStyle(fontSize: 13),)),
-                    fixedWidth: 90
+                    fixedWidth: 100
                 ),
                 DataColumn2(
                     label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
-                    fixedWidth: 80
+                    fixedWidth: 100
                 ),
               ],
               rows: List<DataRow>.generate(provider.nextSchedule.length, (index) => DataRow(cells: [

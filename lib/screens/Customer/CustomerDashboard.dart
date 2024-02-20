@@ -290,7 +290,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                           ],
                                                         ); // Replace 'yourKey' with the key from your API response
                                                       } else {
-                                                        return Text('Out of range'); // or any placeholder/error message
+                                                        return Text(''); // or any placeholder/error message
                                                       }
                                                     },
                                                   ),
@@ -360,7 +360,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                           ],
                                                         ); // Replace 'yourKey' with the key from your API response
                                                       } else {
-                                                        return const Text('Out of range'); // or any placeholder/error message
+                                                        return const Text(''); // or any placeholder/error message
                                                       }
                                                     },
                                                   ),
@@ -430,7 +430,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                                           ],
                                                         ); // Replace 'yourKey' with the key from your API response
                                                       } else {
-                                                        return Text('Out of range'); // or any placeholder/error message
+                                                        return Text(''); // or any placeholder/error message
                                                       }
                                                     },
                                                   ),
@@ -573,15 +573,12 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                   ],
                                 ),
                               ),
-                              const Divider(height: 0),
                               SizedBox(
                                 child: CurrentSchedule(userID: widget.userID, customerID: widget.customerID, siteData: widget.siteData),
                               ),
-                              const Divider(height: 0),
                               const SizedBox(
                                 child: NextSchedule(),
                               ),
-                              const Divider(height: 0),
                               SizedBox(
                                 child: UpcomingProgram(siteData: widget.siteData),
                               ),
@@ -716,9 +713,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                 ],
                                 rows: List<DataRow>.generate(widget.siteData.nodeList.length, (index) => DataRow(cells: [
                                   DataCell(Center(child: Text('${widget.siteData.nodeList[index].serialNumber}', style: const TextStyle(fontWeight: FontWeight.normal),))),
-                                  DataCell(Center(child: CircleAvatar(radius: 7, backgroundColor:
+                                  DataCell(Center(child: widget.siteData.nodeList[index].status == 1 ? const LEDLightsAnimationGREEN() : widget.siteData.nodeList[index].status == 3 ? const LEDLightsAnimationRED() : CircleAvatar(radius: 7, backgroundColor:
                                   widget.siteData.nodeList[index].status == 1 ? Colors.green.shade400:
-                                  widget.siteData.nodeList[index].status == 3 ? Colors.red.shade400:
                                   widget.siteData.nodeList[index].status == 2 ? Colors.grey :
                                   widget.siteData.nodeList[index].status == 4 ? Colors.yellow :
                                   Colors.grey,
@@ -1039,4 +1035,92 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
     );
   }
 
+}
+
+class LEDLightsAnimationRED extends StatefulWidget {
+  const LEDLightsAnimationRED({super.key});
+
+  @override
+  _LEDLightsAnimationREDState createState() => _LEDLightsAnimationREDState();
+}
+class _LEDLightsAnimationREDState extends State<LEDLightsAnimationRED> {
+  bool _isOn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startBlinking();
+  }
+
+  void _startBlinking() {
+    Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      setState(() {
+        _isOn = !_isOn;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 15,
+      height: 15,
+      decoration: BoxDecoration(
+        color: _isOn ? Colors.redAccent : Colors.grey.shade300,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: _isOn ? Colors.red.withOpacity(0.5) : Colors.transparent,
+            spreadRadius: 3,
+            blurRadius: 3,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class LEDLightsAnimationGREEN extends StatefulWidget {
+  const LEDLightsAnimationGREEN({super.key});
+
+  @override
+  _LEDLightsAnimationGREENState createState() => _LEDLightsAnimationGREENState();
+}
+class _LEDLightsAnimationGREENState extends State<LEDLightsAnimationGREEN> {
+  bool _isOn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startBlinking();
+  }
+
+  void _startBlinking() {
+    Timer.periodic(const Duration(milliseconds: 5000), (timer) {
+      setState(() {
+        _isOn = !_isOn;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 15,
+      height: 15,
+      decoration: BoxDecoration(
+        color: _isOn ? Colors.green : Colors.greenAccent,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: _isOn ? Colors.green.withOpacity(0.3) : Colors.transparent,
+            spreadRadius: 3,
+            blurRadius: 3,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+    );
+  }
 }

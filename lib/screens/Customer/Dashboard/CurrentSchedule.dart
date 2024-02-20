@@ -22,16 +22,17 @@ class CurrentSchedule extends StatefulWidget {
 }
 
 class _CurrentScheduleState extends State<CurrentSchedule> {
-  final StreamController<String> streamController = StreamController<String>();
   Timer? timer;
 
-
+  @override
+  void initState() {
+    super.initState();
+    durationUpdatingFunction();
+  }
 
   @override
   void dispose() {
     timer?.cancel();
-    streamController.close();
-    //print('streamController');
     super.dispose();
   }
 
@@ -89,7 +90,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
               child: DataTable2(
                 columnSpacing: 12,
                 horizontalMargin: 12,
-                minWidth: 550,
+                minWidth: 650,
                 dataRowHeight: 55.0,
                 headingRowHeight: 35.0,
                 headingRowColor: MaterialStateProperty.all<Color>(myTheme.primaryColor.withOpacity(0.1)),
@@ -123,7 +124,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                       fixedWidth: 100
                   ),
                   DataColumn2(
-                      label: Center(child: Text('Valve', style: TextStyle(fontSize: 13),)),
+                      label: Text('Valve', style: TextStyle(fontSize: 13),),
                       size: ColumnSize.M
                   ),
                   DataColumn2(
@@ -145,65 +146,16 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                       provider.currentSchedule[index]['Valve'].length,
                           (vIndex) => Center(
                             child : IconButton(tooltip: '${provider.currentSchedule[index]['Valve'][vIndex]['Name']}', onPressed: (){}, icon: CircleAvatar(
-                              backgroundColor: provider.currentSchedule[index]['Valve'][vIndex]['Status']==0 ? Colors.grey.shade100 :
+                              backgroundColor: provider.currentSchedule[index]['Valve'][vIndex]['Status']==0 ? Colors.orange.shade100 :
                               provider.currentSchedule[index]['Valve'][vIndex]['Status']==1 ? Colors.green.shade100 :
                               provider.currentSchedule[index]['Valve'][vIndex]['Status']==2 ? Colors.orange.shade100 :
-                              provider.currentSchedule[index]['Valve'][vIndex]['Status']==3 ? Colors.red.shade100 : Colors.black12,
+                              provider.currentSchedule[index]['Valve'][vIndex]['Status']==3 ? Colors.red.shade100 : Colors.blue.shade100,
                               backgroundImage: const AssetImage('assets/images/valve.png'),
                             )),
 
                       ),
                     ),
-                  )/*PopupMenuButton(
-                    tooltip: 'Details',
-                    itemBuilder: (context) {
-                      return [
-                        PopupMenuItem(
-                          child: Center(
-                            child: SizedBox(
-                              width: 130,
-                              height: ((provider.currentSchedule[index]['Valve'].length + 1) ~/ 2) * 75.0,
-                              child: GridView.builder(
-                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: 10.0,
-                                  mainAxisSpacing: 10.0,
-                                ),
-                                itemCount: provider.currentSchedule[index]['Valve'].length, // Number of items
-                                itemBuilder: (context, vIndex) {
-                                  return GridTile(
-                                    child: Column(
-                                      children: [
-                                        const CircleAvatar(
-                                          backgroundColor: Colors.transparent,
-                                          backgroundImage: AssetImage('assets/images/valve.png'),
-                                        ),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            CircleAvatar(
-                                              radius: 5,
-                                              backgroundColor: provider.currentSchedule[index]['Valve'][vIndex]['Status']==0 ? Colors.grey :
-                                              provider.currentSchedule[index]['Valve'][vIndex]['Status']==1 ? Colors.green :
-                                              provider.currentSchedule[index]['Valve'][vIndex]['Status']==2 ? Colors.orange :
-                                              provider.currentSchedule[index]['Valve'][vIndex]['Status']==3 ? Colors.redAccent : Colors.black12,
-                                            ),
-                                            const SizedBox(width: 3),
-                                            Text('${provider.currentSchedule[index]['Valve'][vIndex]['Name']}(${provider.currentSchedule[index]['Valve'][vIndex]['SNo']})', style: const TextStyle(color: Colors.black, fontSize: 10)),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ];
-                    },
-                    child: const Icon(Icons.info_outline),
-                  )*/)),
+                  ))),
                   DataCell(Center(child: Center(
                     child: IconButton(tooltip:'Skip next',onPressed: (){
                       String payload = '${provider.currentSchedule[index]['ProgType']}, 0';
@@ -229,38 +181,41 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
     return formattedTime;
   }
 
-  String durationUpdatingFunction(leftDuration) {
+  void durationUpdatingFunction() {
     timer?.cancel();
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-      List<String> parts = leftDuration.split(':');
-      int hours = int.parse(parts[0]);
-      int minutes = int.parse(parts[1]);
-      int seconds = int.parse(parts[2]);
+      final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
+      for (int i = 0; i < provider.currentSchedule.length; i++) {
 
-      if (seconds > 0) {
-        seconds--;
-      } else {
-        if (minutes > 0) {
-          minutes--;
-          seconds = 59;
+        List<String> parts = provider.currentSchedule[i]['Duration_QtyLeft'].split(':');
+        int hours = int.parse(parts[0]);
+        int minutes = int.parse(parts[1]);
+        int seconds = int.parse(parts[2]);
+
+        if (seconds > 0) {
+          seconds--;
         } else {
-          if (hours > 0) {
-            hours--;
-            minutes = 59;
+          if (minutes > 0) {
+            minutes--;
             seconds = 59;
+          } else {
+            if (hours > 0) {
+              hours--;
+              minutes = 59;
+              seconds = 59;
+            }
           }
         }
-      }
 
-      String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-      leftDuration = updatedDurationQtyLeft;
-      streamController.sink.add(updatedDurationQtyLeft);
-      if (updatedDurationQtyLeft == '00:00:00') {
-        timer?.cancel();
+        String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+        if(provider.currentSchedule[i]['Duration_QtyLeft']!='00:00:00'){
+          setState(() {
+            provider.currentSchedule[i]['Duration_QtyLeft'] = updatedDurationQtyLeft;
+          });
+        }
       }
     });
 
-    return leftDuration;
   }
 
 }

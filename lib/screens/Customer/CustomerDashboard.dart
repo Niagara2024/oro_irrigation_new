@@ -54,7 +54,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
 
   void onRefreshClicked() {
     animationController.repeat();
-    Future.delayed(const Duration(milliseconds: 500), () {
+    Future.delayed(const Duration(milliseconds: 1000), () {
       animationController.stop();
       String payLoadFinal = jsonEncode({"3000": [{"3001": ""}]});
       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');

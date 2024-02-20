@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:audioplayers/audioplayers.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -9,8 +9,9 @@ import '../../../constants/theme.dart';
 import '../../../state_management/MqttPayloadProvider.dart';
 
 class UpcomingProgram extends StatelessWidget {
-  const UpcomingProgram({Key? key, required this.siteData}) : super(key: key);
+  UpcomingProgram({Key? key, required this.siteData}) : super(key: key);
   final DashboardModel siteData;
+  final AudioPlayer audioPlayer = AudioPlayer();
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +69,8 @@ class UpcomingProgram extends StatelessWidget {
                 DataCell(Center(child: Row(
                   children: [
                     IconButton(tooltip:'Start',onPressed: (){
+                      String localFilePath = 'assets/audios/button_click_sound.mp3';
+                      audioPlayer.play(UrlSource(localFilePath));
                       String payload = '${provider.upcomingProgram[index]['SNo']},1';
                       String payLoadFinal = jsonEncode({
                         "2900": [{"2901": payload}]
@@ -75,6 +78,8 @@ class UpcomingProgram extends StatelessWidget {
                       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
                     }, icon: const Icon(Icons.start, color: Colors.green,)),
                     IconButton(tooltip:'Stop',onPressed: (){
+                      String localFilePath = 'assets/audios/audio_off.mp3';
+                      audioPlayer.play(UrlSource(localFilePath));
                       String payload = '${provider.upcomingProgram[index]['SNo']}, 0';
                       String payLoadFinal = jsonEncode({
                         "2900": [{"2901": payload}]

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../constants/MQTTManager.dart';
-import '../../constants/UserData.dart';
 import '../../constants/http_service.dart';
 import '../../constants/theme.dart';
 import '../product_inventory.dart';
@@ -25,21 +24,13 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
 
   List<DashboardModel> siteListFinal = [];
   int siteIndex = 0;
+  bool loadingSite = true;
   bool visibleLoading = false;
-  int wifiStrength = 0;
-
-  String standaloneTime = '', standaloneFlow = '';
-  int standaloneMethod = 0;
-  String currentTap = 'Dashboard';
-
-  late Widget _centerWidget = Container();
   int _selectedIndex = 0;
-  bool waitingFlag = true;
 
   @override
   void initState() {
     super.initState();
-    indicatorViewShow();
     getCustomerSite(widget.customerID);
   }
 
@@ -54,9 +45,11 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
       if(data["code"]==200)
       {
         final cntList = data["data"] as List;
-        //print(response.body);
         try {
           siteListFinal = cntList.map((json) => DashboardModel.fromJson(json)).toList();
+          setState((){
+            loadingSite = false;
+          });
           subscribeAndUpdateSite();
         } catch (e) {
           print('Error: $e');
@@ -70,9 +63,9 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
   }
 
   void subscribeAndUpdateSite() {
-    MQTTManager().subscribeToTopic('FirmwareToApp/${siteListFinal[siteIndex].deviceId}');
-    Future.delayed(const Duration(seconds: 3), () {
-      waitingFlag = false;
+    indicatorViewShow();
+    Future.delayed(const Duration(seconds: 2), () {
+      MQTTManager().subscribeToTopic('FirmwareToApp/${siteListFinal[siteIndex].deviceId}');
       indicatorViewHide();
     });
 
@@ -82,7 +75,7 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
   Widget build(BuildContext context)
   {
     final screenWidth = MediaQuery.of(context).size.width;
-    return visibleLoading? buildLoadingIndicator(visibleLoading, screenWidth):
+    return loadingSite? buildLoadingIndicator(loadingSite, screenWidth):
     DefaultTabController(
       length: siteListFinal.length,
       animationDuration: Duration.zero,
@@ -110,53 +103,8 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                 },
               ) :
               const SizedBox(),
-              widget.comingFrom == 'Customer' ? /*Stack(
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 250,
-                        height: siteListFinal.length >1? MediaQuery.sizeOf(context).height-104 : MediaQuery.sizeOf(context).height-56,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 3,
-                              blurRadius: 3,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            const Padding(
-                              padding: EdgeInsets.only(top: 10),
-                            ),
-                            buildCustomListTile('Dashboard', Icons.dashboard_outlined, 'Dashboard'),
-                            buildCustomListTile('Product List', Icons.topic_outlined, 'Product List'),
-                            buildCustomListTile('Report Overview', Icons.my_library_books_outlined, 'Report Overview'),
-                            buildCustomListTile('Sent And Received', Icons.question_answer_outlined, 'Sent And Received'),
-                            buildCustomListTile('Controller Logs', Icons.message_outlined, 'Controller Logs'),
-                            buildCustomListTile('Device Settings', Icons.settings_outlined, 'Device Settings'),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          width: double.infinity,
-                          height: siteListFinal.length >1? MediaQuery.sizeOf(context).height-104 : MediaQuery.sizeOf(context).height-56,
-                          color: myTheme.primaryColor.withOpacity(0.2),
-                          child: _centerWidget,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              )*/ Expanded(
-                child: waitingFlag ? Container() : Row(
+              widget.comingFrom == 'Customer' ? Expanded(
+                child: visibleLoading ? buildLoadingIndicator(visibleLoading, screenWidth) : Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     NavigationRail(
@@ -186,7 +134,7 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                         NavigationRailDestination(
                           icon: Icon(Icons.message_outlined),
                           selectedIcon: Icon(Icons.message_outlined, color: Colors.white,),
-                          label: Text('Logs'),
+                          label: Text('Irrigation Logs'),
                         ),
                         NavigationRailDestination(
                           icon: Icon(Icons.question_answer_outlined),
@@ -239,52 +187,6 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
       ),
     );
   }
-
-   Widget buildCustomListTile(String title, IconData icon, String tapOption) {
-     return Padding(
-       padding: const EdgeInsets.only(left: 8, right: 8),
-       child: Container(
-         decoration: BoxDecoration(
-           color: currentTap == tapOption ? myTheme.primaryColor.withOpacity(0.7) : Colors.transparent,
-           borderRadius: const BorderRadius.all(Radius.circular(10)), // Adjust the radius as needed
-         ),
-         child: ListTile(
-           leading: Icon(
-             icon,
-             color: currentTap == tapOption ? Colors.white : Colors.black.withOpacity(0.6),
-           ),
-           title: Text(
-             title,
-             style: TextStyle(
-               fontSize: 14,
-               fontWeight: FontWeight.bold,
-               color: currentTap == tapOption ? Colors.white : Colors.black.withOpacity(0.8),
-             ),
-           ),
-           onTap: () {
-             onOptionSelected(tapOption);
-           },
-         ),
-       ),
-     );
-   }
-
-   void onOptionSelected(String option) {
-     currentTap = option;
-     setState(() {
-       if (option == 'Dashboard') {
-         _centerWidget = CustomerDashboard(customerID: widget.customerID, type: 0, customerName: widget.customerName, userID: widget.customerID, mobileNo: '+${widget.mobileNo}', siteData: siteListFinal[siteIndex], siteLength: siteListFinal.length,);
-       } else if (option == 'Product List') {
-         _centerWidget = ProductInventory(userName: widget.customerName);
-       } else if (option == 'Device Settings') {
-         //_centerWidget = FarmSettings(customerID: widget.userID, siteList: [],);
-       }
-       else if (option == 'Sent And Received') {
-        // _centerWidget = SentAndReceived(customerID: widget.userID, siteList: const [],);
-       }
-     });
-   }
-
 
   void indicatorViewShow() {
     setState((){

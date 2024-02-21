@@ -56,7 +56,7 @@ class UpcomingProgram extends StatelessWidget {
                 ),
                 DataColumn2(
                     label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
-                    fixedWidth: 50
+                    fixedWidth: 90
                 ),
               ],
               rows: List<DataRow>.generate(provider.upcomingProgram.length, (index) => DataRow(cells: [
@@ -65,32 +65,27 @@ class UpcomingProgram extends StatelessWidget {
                 DataCell(Center(child: Text('${provider.upcomingProgram[index]['TotalZone']}'))),
                 DataCell(Center(child: Text('${provider.upcomingProgram[index]['TotalZone']}'))),
                 DataCell(Center(child: Text('${provider.upcomingProgram[index]['TotalZone']}'))),
-                DataCell(Center(child: Transform.scale(
-                  scale: 0.7,
-                  child: Tooltip(
-                    message: provider.upcomingProgram[index]['SwitchOnOff']==1? 'Off' : 'On',
-                    child: Switch(
-                      hoverColor: Colors.pink.shade100,
-                      value: provider.upcomingProgram[index]['SwitchOnOff'] == 1 ? true : false,
-                      onChanged: (value) {
-                        String payload = '';
-                        if(value){
-                          String localFilePath = 'assets/audios/audio_off.mp3';
-                          audioPlayer.play(UrlSource(localFilePath));
-                          payload = '${provider.upcomingProgram[index]['SNo']},1';
-                        }else{
-                          String localFilePath = 'assets/audios/button_click_sound.mp3';
-                          audioPlayer.play(UrlSource(localFilePath));
-                          payload = '${provider.upcomingProgram[index]['SNo']},0';
-                        }
-                        String payLoadFinal = jsonEncode({
-                          "2900": [{"2901": payload}]
-                        });
-                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
-                      },
-                    ),
-                  ),
-                ))),
+                DataCell(Row(children: [
+                  IconButton(tooltip:'Start',onPressed: (){
+                    String localFilePath = 'assets/audios/button_click_sound.mp3';
+                    audioPlayer.play(UrlSource(localFilePath));
+                    String payload = '${provider.upcomingProgram[index]['SNo']},1';
+                    String payLoadFinal = jsonEncode({
+                      "2900": [{"2901": payload}]
+                    });
+                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
+
+                  }, icon: const Icon(Icons.start, color: Colors.green,)),
+                  IconButton(tooltip:'Stop',onPressed: (){
+                    String localFilePath = 'assets/audios/audio_off.mp3';
+                    audioPlayer.play(UrlSource(localFilePath));
+                    String payload = '${provider.upcomingProgram[index]['SNo']},0';
+                    String payLoadFinal = jsonEncode({
+                      "2900": [{"2901": payload}]
+                    });
+                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
+                  }, icon: const Icon(Icons.stop_circle_outlined, color: Colors.red,))
+                ],)),
               ])),
             ) :
             const Center(child: Text('Upcoming Program not Available')),

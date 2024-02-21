@@ -983,44 +983,80 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                       ]
                                     });
                                     MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                  }, icon: Icon(Icons.fact_check_outlined))
+                                  }, icon: const Icon(Icons.fact_check_outlined))
                                 ],
                               ),
                             ),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(top: 8),
-                            child: GridView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: widget.siteData.nodeList[i].rlyStatus.length,
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 8,
-                              ),
-                              itemBuilder: (context, index) {
-                                return Column(
-                                  children: [
-                                    const CircleAvatar(
-                                      backgroundColor: Colors.transparent,
-                                      backgroundImage: AssetImage('assets/images/valve.png'),
-                                    ),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                            child: Column(
+                              children: [
+                                GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: widget.siteData.nodeList[i].rlyStatus.length,
+                                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 8,
+                                  ),
+                                  itemBuilder: (context, index) {
+                                    return Column(
                                       children: [
                                         CircleAvatar(
-                                          radius: 5,
-                                          backgroundColor: widget.siteData.nodeList[i].rlyStatus[index].status==0 ? Colors.grey :
-                                          widget.siteData.nodeList[i].rlyStatus[index].status==1 ? Colors.green :
-                                          widget.siteData.nodeList[i].rlyStatus[index].status==2 ? Colors.orange :
-                                          widget.siteData.nodeList[i].rlyStatus[index].status==3 ? Colors.redAccent : Colors.black12,
+                                          backgroundColor: Colors.transparent,
+                                          backgroundImage: widget.siteData.nodeList[i].rlyStatus[index].name.contains("VL") ? const AssetImage('assets/images/valve.png') : const AssetImage('assets/images/irrigation_pump.png'),
                                         ),
-                                        const SizedBox(width: 3),
-                                        Text('${widget.siteData.nodeList[i].rlyStatus[index].name}(${widget.siteData.nodeList[i].rlyStatus[index].rlyNo})', style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            CircleAvatar(
+                                              radius: 5,
+                                              backgroundColor: widget.siteData.nodeList[i].rlyStatus[index].status==0 ? Colors.grey :
+                                              widget.siteData.nodeList[i].rlyStatus[index].status==1 ? Colors.green :
+                                              widget.siteData.nodeList[i].rlyStatus[index].status==2 ? Colors.orange :
+                                              widget.siteData.nodeList[i].rlyStatus[index].status==3 ? Colors.redAccent : Colors.black12,
+                                            ),
+                                            const SizedBox(width: 3),
+                                            Text('${widget.siteData.nodeList[i].rlyStatus[index].name}(${widget.siteData.nodeList[i].rlyStatus[index].rlyNo})', style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                          ],
+                                        ),
                                       ],
-                                    ),
-                                  ],
-                                );
-                              },
+                                    );
+                                  },
+                                ),
+                                GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: widget.siteData.nodeList[i].sensor.length,
+                                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 8,
+                                  ),
+                                  itemBuilder: (context, index) {
+                                    return Column(
+                                      children: [
+                                        const CircleAvatar(
+                                          backgroundColor: Colors.transparent,
+                                          backgroundImage: AssetImage('assets/images/valve.png'),
+                                        ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            CircleAvatar(
+                                              radius: 5,
+                                              backgroundColor: widget.siteData.nodeList[i].sensor[index].status==0 ? Colors.grey :
+                                              widget.siteData.nodeList[i].sensor[index].status==1 ? Colors.green :
+                                              widget.siteData.nodeList[i].sensor[index].status==2 ? Colors.orange :
+                                              widget.siteData.nodeList[i].sensor[index].status==3 ? Colors.redAccent : Colors.black12,
+                                            ),
+                                            const SizedBox(width: 3),
+                                            Text('${widget.siteData.nodeList[i].rlyStatus[index].name}(${widget.siteData.nodeList[i].rlyStatus[index].rlyNo})', style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                          ],
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                )
+                              ],
                             ),
                           ),
                         ],

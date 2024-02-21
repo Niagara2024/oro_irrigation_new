@@ -169,6 +169,7 @@ class _DashboardWideState extends State<DashboardWide> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    indicatorViewShow();
     getLanguage();
   }
 
@@ -192,12 +193,10 @@ class _DashboardWideState extends State<DashboardWide> {
           languageList.add(LanguageList.fromJson(cntList[i]));
         }
       }
-      setState(() {
-        languageList;
-      });
+      indicatorViewHide();
     }
     else{
-      //_showSnackBar(response.body);
+      indicatorViewHide();
     }
   }
 
@@ -205,7 +204,17 @@ class _DashboardWideState extends State<DashboardWide> {
   Widget build(BuildContext context)  {
     final mediaQuery = MediaQuery.of(context);
     final userData = UserData.of(context)!;
-    return Scaffold(
+    return visibleLoading? Center(
+      child: Visibility(
+        visible: visibleLoading,
+        child: Container(
+          padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 25, 0, mediaQuery.size.width/2 - 25, 0),
+          child: const LoadingIndicator(
+            indicatorType: Indicator.ballPulse,
+          ),
+        ),
+      ),
+    ) : Scaffold(
       appBar: userData.userType =='3'? AppBar(
         leading: const Image(image: AssetImage("assets/images/niagara_logo.png")),
         leadingWidth: 100,
@@ -390,18 +399,7 @@ class _DashboardWideState extends State<DashboardWide> {
           const SizedBox(width: 10),
         ],
       ) : null,
-      body: visibleLoading? Center(
-        child: Visibility(
-          visible: visibleLoading,
-          child: Container(
-            padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 25, 0, mediaQuery.size.width/2 - 25, 0),
-            child: const LoadingIndicator(
-              indicatorType: Indicator.ballPulse,
-            ),
-          ),
-        ),
-      ) :
-      userData.userType =='3'? Container(
+      body: userData.userType =='3'? Container(
         color: Colors.yellow,
         width: double.infinity,
         height: double.infinity,

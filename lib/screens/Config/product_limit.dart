@@ -68,10 +68,10 @@ class _ProductLimitsState extends State<ProductLimits> {
     indicatorViewShow();
     await Future.delayed(const Duration(milliseconds: 500));
     Map<String, dynamic> body = {"userId" : widget.customerID, "controllerId" : widget.controllerId};
-    print(body);
     final response = await HttpService().postRequest("getUserProductLimit", body);
     if (response.statusCode == 200)
     {
+      print(response.body);
       productLimits.clear();
       var data = jsonDecode(response.body);
       if(data["code"]==200)

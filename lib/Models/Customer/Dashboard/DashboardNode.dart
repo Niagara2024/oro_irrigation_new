@@ -88,6 +88,7 @@ class NodeModel {
   double slrVolt;
   double batVolt;
   List<dynamic> rlyStatus;
+  List<dynamic> sensor;
   int status;
 
   NodeModel({
@@ -101,6 +102,7 @@ class NodeModel {
     required this.slrVolt,
     required this.batVolt,
     required this.rlyStatus,
+    required this.sensor,
     required this.status,
   });
 
@@ -117,6 +119,7 @@ class NodeModel {
       slrVolt: json['SVolt'] ?? 0.0,
       batVolt: json['BatVolt'] ?? 0.0,
       rlyStatus: json['RlyStatus'] ?? [],
+      sensor: json['Sensor'] ?? [],
       status: json['Status'] ?? 0,
     );
   }

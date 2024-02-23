@@ -36,7 +36,12 @@ class UpcomingProgram extends StatelessWidget {
               columns: const [
                 DataColumn2(
                     label: Text('Name', style: TextStyle(fontSize: 13),),
-                    size: ColumnSize.L
+                    size: ColumnSize.M
+                ),
+                DataColumn2(
+                    label: Text('Method', style: TextStyle(fontSize: 13)),
+                    size: ColumnSize.M
+
                 ),
                 DataColumn2(
                     label: Text('Line', style: TextStyle(fontSize: 13),),
@@ -55,16 +60,22 @@ class UpcomingProgram extends StatelessWidget {
                     fixedWidth: 100
                 ),
                 DataColumn2(
+                    label: Center(child: Text('End Date', style: TextStyle(fontSize: 13),)),
+                    fixedWidth: 100
+                ),
+                DataColumn2(
                     label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
                     fixedWidth: 90
                 ),
               ],
               rows: List<DataRow>.generate(provider.upcomingProgram.length, (index) => DataRow(cells: [
                 DataCell(Text(provider.upcomingProgram[index]['ProgName'])),
+                DataCell(Text(provider.upcomingProgram[index]['SchedulingMethod']==1?'No Schedule':provider.upcomingProgram[index]['SchedulingMethod']==2?'Schedule as run list':'Schedule by days')),
                 DataCell(Text(provider.upcomingProgram[index]['ProgCategory'])),
                 DataCell(Center(child: Text('${provider.upcomingProgram[index]['TotalZone']}'))),
-                DataCell(Center(child: Text('${provider.upcomingProgram[index]['TotalZone']}'))),
-                DataCell(Center(child: Text('${provider.upcomingProgram[index]['TotalZone']}'))),
+                DataCell(Center(child: Text('${provider.upcomingProgram[index]['StartDate']}'))),
+                DataCell(Center(child: Text('${provider.upcomingProgram[index]['StartTime']}'))),
+                DataCell(Center(child: Text('${provider.upcomingProgram[index]['EndDate']}'))),
                 DataCell(Row(children: [
                   IconButton(tooltip:'Start',onPressed: (){
                     String localFilePath = 'assets/audios/button_click_sound.mp3';

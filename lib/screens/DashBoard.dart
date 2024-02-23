@@ -299,6 +299,14 @@ class _DashboardWideState extends State<DashboardWide> {
                           ListTile(
                             title: const Text('Theme(Light/Dark)'),
                             leading: Icon(Icons.color_lens_outlined,  color: myTheme.primaryColor,),
+                            onTap: (){
+                              Navigator.pop(context);
+                              ThemeData initialTheme = Theme.of(context);
+                              showDialog(
+                                context: context,
+                                builder: (context) => ThemeChangeDialog(initialTheme: initialTheme),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -556,4 +564,125 @@ class _DashboardWideState extends State<DashboardWide> {
     );
   }
 
+}
+
+class ThemeChangeDialog extends StatefulWidget {
+  final ThemeData initialTheme;
+  ThemeChangeDialog({super.key, required this.initialTheme});
+
+  @override
+  _ThemeChangeDialogState createState() => _ThemeChangeDialogState();
+}
+
+class _ThemeChangeDialogState extends State<ThemeChangeDialog> {
+  late ThemeData _selectedTheme;
+
+  @override
+  void initState() {
+    _selectedTheme = widget.initialTheme;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Select Theme'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          RadioListTile(
+            title: Container(
+              color: Colors.cyan,
+              width: 150,
+              height: 75,
+              child: const Center(child: Text('Theme cyan')),
+            ),
+            value: ThemeData.light(),
+            groupValue: _selectedTheme,
+            onChanged: (value) {
+              setState(() {
+                _selectedTheme = value!;
+              });
+            },
+          ),
+          RadioListTile(
+            title: Container(
+              color: Colors.yellow,
+              width: 150,
+              height: 75,
+              child: Center(child: const Text('Theme yellow')),
+            ),
+            value: ThemeData.light(),
+            groupValue: _selectedTheme,
+            onChanged: (value) {
+              setState(() {
+                _selectedTheme = value!;
+              });
+            },
+          ),
+          RadioListTile(
+            title: Container(
+              color: Colors.green,
+              width: 150,
+              height: 75,
+              child: Center(child: const Text('Theme green')),
+            ),
+            value: ThemeData.light(),
+            groupValue: _selectedTheme,
+            onChanged: (value) {
+              setState(() {
+                _selectedTheme = value!;
+              });
+            },
+          ),
+          RadioListTile(
+            title: Container(
+              color: Colors.pink,
+              width: 150,
+              height: 75,
+              child: Center(child: const Text('Theme pink')),
+            ),
+            value: ThemeData.light(),
+            groupValue: _selectedTheme,
+            onChanged: (value) {
+              setState(() {
+                _selectedTheme = value!;
+              });
+            },
+          ),
+          RadioListTile(
+            title: Container(
+              color: Colors.purple,
+              width: 150,
+              height: 75,
+              child: Center(child: const Text('Theme purple')),
+            ),
+            value: ThemeData.light(),
+            groupValue: _selectedTheme,
+            onChanged: (value) {
+              setState(() {
+                _selectedTheme = value!;
+              });
+            },
+          ),
+        ],
+      ),
+      actions: <Widget>[
+        MaterialButton(
+          onPressed: () {
+            Navigator.pop(context); // Close the dialog
+          },
+          child: Text('Cancel'),
+        ),
+        MaterialButton(
+          onPressed: () {
+            // Update the theme and close the dialog
+            //ThemeController().updateTheme(_selectedTheme);
+            Navigator.pop(context);
+          },
+          child: Text('OK'),
+        ),
+      ],
+    );
+  }
 }

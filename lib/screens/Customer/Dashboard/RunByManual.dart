@@ -142,7 +142,8 @@ class _RunByManualState extends State<RunByManual> {
                 String strSldMainValve = buildSelectedItemsString(dashBoardData[0].mainValve);
                 String strSldCtrlFilter = buildSelectedItemsString(dashBoardData[0].centralFilterSite);
 
-                String strSldValveOrLine = '';
+                String strSldValveOrLineSno = '';
+                String strSldValveOrLineLocation = '';
                 Map<String, List<DashBoardValve>> groupedValves = {};
                 for (int i = 0; i < dashBoardData[0].lineOrSequence.length; i++) {
                   LineOrSequence line = dashBoardData[0].lineOrSequence[i];
@@ -151,7 +152,8 @@ class _RunByManualState extends State<RunByManual> {
                     groupedValves.forEach((location, valves) {
                       for (int j = 0; j < valves.length; j++) {
                         if (valves[j].isOn) {
-                          strSldValveOrLine += '${valves[j].sNo}_';
+                          strSldValveOrLineSno += '${valves[j].sNo}_';
+                          strSldValveOrLineLocation += '${valves[j].location}_';
 
                           standaloneSelection.add({
                             'id': valves[j].id,
@@ -165,7 +167,8 @@ class _RunByManualState extends State<RunByManual> {
                     });
                   }else{
                     if (line.selected) {
-                      strSldValveOrLine += '${line.id}_';
+                      strSldValveOrLineSno += '${line.id}_';
+                      strSldValveOrLineLocation += '${line.location}_';
 
                       standaloneSelection.add({
                         'id': line.id,
@@ -179,16 +182,18 @@ class _RunByManualState extends State<RunByManual> {
 
                 }
 
-                strSldValveOrLine = strSldValveOrLine.isNotEmpty ? strSldValveOrLine.substring(0, strSldValveOrLine.length - 1) : '';
+                strSldValveOrLineSno = strSldValveOrLineSno.isNotEmpty ? strSldValveOrLineSno.substring(0, strSldValveOrLineSno.length - 1) : '';
                 List<String> nonEmptyStrings = [
                   strSldSourcePump,
                   strSldIrrigationPump,
                   strSldMainValve,
                   strSldCtrlFilter,
-                  strSldValveOrLine
+                  strSldValveOrLineSno
                 ];
 
-                if (strSldIrrigationPump.isNotEmpty && strSldValveOrLine.isEmpty) {
+                strSldValveOrLineLocation = strSldValveOrLineLocation.isNotEmpty ? strSldValveOrLineLocation.substring(0, strSldValveOrLineLocation.length - 1) : '';
+
+                if (strSldIrrigationPump.isNotEmpty && strSldValveOrLineSno.isEmpty) {
                   showDialog<String>(
                       context: context,
                       builder: (BuildContext dgContext) => AlertDialog(
@@ -201,7 +206,7 @@ class _RunByManualState extends State<RunByManual> {
                           ),
                           TextButton(
                             onPressed: () {
-                              sendCommandToControllerAndMqtt(nonEmptyStrings);
+                              sendCommandToControllerAndMqtt(nonEmptyStrings, strSldValveOrLineLocation);
                               Navigator.pop(dgContext, 'OK');
                             },
                             child: const Text('Yes'),
@@ -210,7 +215,7 @@ class _RunByManualState extends State<RunByManual> {
                       )
                   );
                 }else{
-                  sendCommandToControllerAndMqtt(nonEmptyStrings);
+                  sendCommandToControllerAndMqtt(nonEmptyStrings, strSldValveOrLineLocation);
                 }
               },
               icon: const Icon(
@@ -243,24 +248,15 @@ class _RunByManualState extends State<RunByManual> {
     );
   }
 
-  void sendCommandToControllerAndMqtt(List<String> nonEmptyStrings){
+  void sendCommandToControllerAndMqtt(List<String> nonEmptyStrings, location){
     String finalResult = nonEmptyStrings.where((s) => s.isNotEmpty).join('_');
-
-    // 1st position on off = always = 1
-    // 2nd position valve based / program based = always = 1/2
-    // 3rd position Program Category = 0 valve based = program based its come IL1
-    String payload = '${1},${ddSelection+1},${ddSelection==0? 0:finalResult},$finalResult,${0},${segmentIndex==0?3:1},${segmentIndex==0? '0': segmentIndex==1? strDuration : strFlow}';
+    String payload = '${location==''?0:1},${ddSelection==0?1:2},${location==''?0:location},${ddSelection==0?0:ddSelectionId},${finalResult==''?0:finalResult},0,${segmentIndex==0?3:1},${segmentIndex==0?'0':segmentIndex==1?strDuration:strFlow}';
     String payLoadFinal = jsonEncode({
       "800": [{"801": payload}]
     });
     //print(payLoadFinal);
-    //MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
+    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
 
-    if(segmentIndex==0){
-      //functionSendPayloadToMqtt(3, '0', finalResult);
-    }else{
-      //functionSendPayloadToMqtt(1, '$strDuration:00', finalResult);
-    }
     Map<String, dynamic> manualOperation = {
       "method": segmentIndex+1,
       "time": strDuration,

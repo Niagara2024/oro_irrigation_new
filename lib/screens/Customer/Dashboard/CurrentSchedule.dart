@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
 
@@ -88,18 +89,23 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
               child: DataTable2(
                 columnSpacing: 12,
                 horizontalMargin: 12,
-                minWidth: 650,
+                minWidth: 1000,
                 dataRowHeight: 55.0,
                 headingRowHeight: 35.0,
                 headingRowColor: MaterialStateProperty.all<Color>(myTheme.primaryColor.withOpacity(0.1)),
                 columns: const [
                   DataColumn2(
                       label: Text('Program', style: TextStyle(fontSize: 13),),
-                      size: ColumnSize.M
+                      size: ColumnSize.S
+                  ),
+                  DataColumn2(
+                      label: Text('Method', style: TextStyle(fontSize: 13)),
+                      fixedWidth: 70
+
                   ),
                   DataColumn2(
                       label: Text('Line', style: TextStyle(fontSize: 13),),
-                      fixedWidth: 70
+                      size: ColumnSize.S
                   ),
                   DataColumn2(
                       label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
@@ -132,28 +138,29 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                 ],
                 rows: List<DataRow>.generate(provider.currentSchedule.length, (index) => DataRow(cells: [
                   DataCell(Text(provider.currentSchedule[index]['ProgName'])),
+                  DataCell(Center(child: Text(provider.currentSchedule[index]['SchedulingMethod']==1?'NS':provider.currentSchedule[index]['SchedulingMethod']==2?'SRL':'SD'))),
                   DataCell(Text(provider.currentSchedule[index]['ProgCategory'])),
                   DataCell(Center(child: Text('${provider.currentSchedule[index]['CurrentZone']}/${provider.currentSchedule[index]['TotalZone']}'))),
                   DataCell(Center(child: Text(provider.currentSchedule[index]['ZoneName']))),
                   DataCell(Center(child: Text(_convertTime(provider.currentSchedule[index]['StartTime'])))),
                   DataCell(Center(child: Text(provider.currentSchedule[index]['Duration_Qty']))),
-                  DataCell(Center(child: Text(provider.currentSchedule[index]['Duration_QtyLeft']))),
-                  DataCell(Center(child: GridView.count(
+                  DataCell(Center(child: provider.currentSchedule[index]['Message']=='Running.'? Text(provider.currentSchedule[index]['Duration_QtyLeft']) : const LoadingIndicator(indicatorType: Indicator.ballPulse))),
+                  DataCell(Center(child: provider.currentSchedule[index]['Message']=='Running.'? GridView.count(
                     crossAxisCount: 3,
                     children: List.generate(
                       provider.currentSchedule[index]['Valve'].length,
                           (vIndex) => Center(
-                            child : IconButton(tooltip: '${provider.currentSchedule[index]['Valve'][vIndex]['Name']}', onPressed: (){}, icon: CircleAvatar(
-                              backgroundColor: provider.currentSchedule[index]['Valve'][vIndex]['Status']==0 ? Colors.orange.shade100 :
-                              provider.currentSchedule[index]['Valve'][vIndex]['Status']==1 ? Colors.green.shade100 :
-                              provider.currentSchedule[index]['Valve'][vIndex]['Status']==2 ? Colors.orange.shade100 :
-                              provider.currentSchedule[index]['Valve'][vIndex]['Status']==3 ? Colors.red.shade100 : Colors.blue.shade100,
-                              backgroundImage: const AssetImage('assets/images/valve.png'),
-                            )),
+                        child : IconButton(tooltip: '${provider.currentSchedule[index]['Valve'][vIndex]['Name']}', onPressed: (){}, icon: CircleAvatar(
+                          backgroundColor: provider.currentSchedule[index]['Valve'][vIndex]['Status']==0 ? Colors.orange.shade100 :
+                          provider.currentSchedule[index]['Valve'][vIndex]['Status']==1 ? Colors.green.shade100 :
+                          provider.currentSchedule[index]['Valve'][vIndex]['Status']==2 ? Colors.orange.shade100 :
+                          provider.currentSchedule[index]['Valve'][vIndex]['Status']==3 ? Colors.red.shade100 : Colors.blue.shade100,
+                          backgroundImage: const AssetImage('assets/images/valve.png'),
+                        )),
 
                       ),
                     ),
-                  ))),
+                  ) : Text(provider.currentSchedule[index]['Message']))),
                   DataCell(Center(child: Center(
                     child: IconButton(tooltip:'Skip next',onPressed: (){
                       String payload = '${provider.currentSchedule[index]['ProgType']}, 0';
@@ -182,36 +189,43 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
   void durationUpdatingFunction() {
     timer?.cancel();
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-      final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
-      for (int i = 0; i < provider.currentSchedule.length; i++) {
+      try{
+        final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
+        for (int i = 0; i < provider.currentSchedule.length; i++) {
+          if(provider.currentSchedule[i]['Duration_QtyLeft']!=null){
+            List<String> parts = provider.currentSchedule[i]['Duration_QtyLeft'].split(':');
+            int hours = int.parse(parts[0]);
+            int minutes = int.parse(parts[1]);
+            int seconds = int.parse(parts[2]);
 
-        List<String> parts = provider.currentSchedule[i]['Duration_QtyLeft'].split(':');
-        int hours = int.parse(parts[0]);
-        int minutes = int.parse(parts[1]);
-        int seconds = int.parse(parts[2]);
+            if (seconds > 0) {
+              seconds--;
+            } else {
+              if (minutes > 0) {
+                minutes--;
+                seconds = 59;
+              } else {
+                if (hours > 0) {
+                  hours--;
+                  minutes = 59;
+                  seconds = 59;
+                }
+              }
+            }
 
-        if (seconds > 0) {
-          seconds--;
-        } else {
-          if (minutes > 0) {
-            minutes--;
-            seconds = 59;
-          } else {
-            if (hours > 0) {
-              hours--;
-              minutes = 59;
-              seconds = 59;
+            String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+            if(provider.currentSchedule[i]['Duration_QtyLeft']!='00:00:00'){
+              setState(() {
+                provider.currentSchedule[i]['Duration_QtyLeft'] = updatedDurationQtyLeft;
+              });
             }
           }
         }
-
-        String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-        if(provider.currentSchedule[i]['Duration_QtyLeft']!='00:00:00'){
-          setState(() {
-            provider.currentSchedule[i]['Duration_QtyLeft'] = updatedDurationQtyLeft;
-          });
-        }
       }
+      catch(e){
+        print(e);
+      }
+
     });
 
   }

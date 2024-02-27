@@ -162,6 +162,7 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
     return Scaffold(
       backgroundColor: myTheme.primaryColor.withOpacity(0.01),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('Dashboard'),
         actions: <Widget>[
           Row(
@@ -361,7 +362,7 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                                       ),
                                       DataColumn2(
                                         label: Text('M.Date', style: TextStyle(fontWeight: FontWeight.bold),),
-                                        fixedWidth: 90,
+                                        fixedWidth: 95,
                                       ),
                                       DataColumn2(
                                         label: Center(child: Text('Warranty', style: TextStyle(fontWeight: FontWeight.bold),)),

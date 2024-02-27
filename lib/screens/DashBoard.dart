@@ -216,8 +216,21 @@ class _DashboardWideState extends State<DashboardWide> {
       ),
     ) : Scaffold(
       appBar: userData.userType =='3'? AppBar(
-        leading: const Image(image: AssetImage("assets/images/niagara_logo.png")),
+        leading: const Padding(
+          padding: EdgeInsets.only(left: 10, top: 8, bottom: 8),
+          child: Image(image: AssetImage("assets/images/oro_logo_white.png")),
+        ),
         leadingWidth: 100,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerRight,
+              end: Alignment.centerLeft,
+              tileMode: TileMode.clamp,
+              colors: [myTheme.primaryColorDark, myTheme.primaryColor], // Define your gradient colors
+            ),
+          ),
+        ),
         actions: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -408,7 +421,7 @@ class _DashboardWideState extends State<DashboardWide> {
         ],
       ) : null,
       body: userData.userType =='3'? Container(
-        color: Colors.yellow,
+        color: Colors.white,
         width: double.infinity,
         height: double.infinity,
         child: CustomerHome(customerID: userData.userId, customerName: userData.userName, mobileNo: '+${userData.countryCode}-${userData.mobileNo}', comingFrom: 'Customer',),
@@ -417,15 +430,13 @@ class _DashboardWideState extends State<DashboardWide> {
         children: [
           NavigationRail(
             selectedIndex: _selectedIndex,
-            backgroundColor: Colors.white,
+            backgroundColor: myTheme.primaryColorDark,
             labelType: NavigationRailLabelType.all,
-            indicatorColor: myTheme.primaryColor,
-            indicatorShape: const CircleBorder(eccentricity: 0.3),
-            //unselectedIconTheme: const IconThemeData(color: Colors.grey),
+            indicatorColor: myTheme.primaryColorLight,
             elevation: 5,
             leading: const Column(
               children: [
-                Image(image: AssetImage("assets/images/company_logo.png"), height: 60,),
+                Image(image: AssetImage("assets/images/oro_logo_white.png"), height: 40, width: 60,),
                 SizedBox(height: 20),
               ],
             ),
@@ -525,21 +536,41 @@ class _DashboardWideState extends State<DashboardWide> {
               ),
             ],
           ),
-          Expanded(
-            child: userData.userType == '1'?
-            _selectedIndex == 0 ? AdminDealerHomePage(userName: userData.userName, countryCode: userData.countryCode, mobileNo: userData.mobileNo, fromLogin: true, userId: 0, userType: 0,) :
-            _selectedIndex == 1 ? ProductInventory(userName: userData.userName) :
-            _selectedIndex == 2 ? const AllEntry():
-            _selectedIndex == 3 ?  MyPreference(userID: userData.userId,) : const MyWebView() :
-
-            _selectedIndex == 0 ? AdminDealerHomePage(userName: userData.userName, countryCode: userData.countryCode, mobileNo: userData.mobileNo, fromLogin: true, userId: 0, userType: 0,) :
-            _selectedIndex == 1 ? ProductInventory(userName: userData.userName) :
-            _selectedIndex == 2 ? MyPreference(userID: userData.userId,) : const MyWebView(),
-          ),
+          buildExpandedWidget(userData),
         ],
       ),
     );
 
+  }
+
+  Widget buildExpandedWidget(userData) {
+    return Expanded(
+      child: selectedWidget(_selectedIndex, userData),
+    );
+  }
+
+  Widget selectedWidget(int index, userData) {
+    switch (index) {
+      case 0:
+        return AdminDealerHomePage(
+          userName: userData.userName,
+          countryCode: userData.countryCode,
+          mobileNo: userData.mobileNo,
+          fromLogin: true,
+          userId: 0,
+          userType: 0,
+        );
+      case 1:
+        return ProductInventory(
+          userName: userData.userName,
+        );
+      case 2:
+        return userData.userType == '1' ? const AllEntry() : MyPreference(userID: userData.userId);
+      case 3:
+        return userData.userType == '1' ? MyPreference(userID: userData.userId) : const MyWebView();
+      default:
+        return const SizedBox(); // Return an empty widget by default or handle error case
+    }
   }
 
   void indicatorViewShow() {

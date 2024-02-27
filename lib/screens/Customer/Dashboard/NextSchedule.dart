@@ -1,12 +1,17 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../constants/theme.dart';
 import '../../../state_management/MqttPayloadProvider.dart';
+import '../ScheduleView.dart';
 
 class NextSchedule extends StatefulWidget {
-  const NextSchedule({Key? key}) : super(key: key);
+  const NextSchedule({Key? key, required this.siteData, required this.userID, required this.customerID}) : super(key: key);
+  final DashboardModel siteData;
+  final int userID, customerID;
 
   @override
   State<NextSchedule> createState() => _NextScheduleState();
@@ -23,6 +28,22 @@ class _NextScheduleState extends State<NextSchedule> {
           ListTile(
             tileColor: myTheme.primaryColor.withOpacity(0.2),
             title: const Text('NEXT SCHEDULE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                      tooltip: 'Schedule details',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ScheduleViewScreen(deviceId: widget.siteData.deviceId, userId: widget.userID, controllerId: widget.siteData.controllerId, customerId: widget.customerID,),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.view_list_outlined)),
+                ]
+            ),
           ),
           SizedBox(
             height: provider.nextSchedule.isNotEmpty? (provider.nextSchedule.length * 45) + 35 : 50,
@@ -60,7 +81,7 @@ class _NextScheduleState extends State<NextSchedule> {
                     fixedWidth: 100
                 ),
                 DataColumn2(
-                    label: Center(child: Text('Duration', style: TextStyle(fontSize: 13),)),
+                    label: Center(child: Text('Duration -\n(Time/Flow)', style: TextStyle(fontSize: 13),)),
                     fixedWidth: 100
                 ),
               ],
@@ -70,7 +91,7 @@ class _NextScheduleState extends State<NextSchedule> {
                 DataCell(Text(provider.nextSchedule[index]['ProgCategory'])),
                 DataCell(Center(child: Text('${provider.nextSchedule[index]['CurrentZone']}'))),
                 DataCell(Center(child: Center(child: Text(provider.nextSchedule[index]['ZoneName'])))),
-                DataCell(Center(child: Text(provider.nextSchedule[index]['StartTime']))),
+                DataCell(Center(child: Text(_convertTime(provider.nextSchedule[index]['StartTime'])))),
                 DataCell(Center(child: Text(provider.nextSchedule[index]['IrrigationDuration_Quantity']))),
               ])),
             ) :
@@ -79,5 +100,11 @@ class _NextScheduleState extends State<NextSchedule> {
         ],
       ),
     );
+  }
+
+  String _convertTime(String timeString) {
+    final parsedTime = DateFormat('HH:mm:ss').parse(timeString);
+    final formattedTime = DateFormat('hh:mm a').format(parsedTime);
+    return formattedTime;
   }
 }

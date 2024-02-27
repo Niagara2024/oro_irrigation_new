@@ -226,6 +226,7 @@ class ProductInventoryState extends State<ProductInventory> {
     return Scaffold(
       backgroundColor: myTheme.primaryColor.withOpacity(0.02),
       appBar: userType != 3 ? AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('Product Inventory'),
         actions: <Widget>[
           Row(

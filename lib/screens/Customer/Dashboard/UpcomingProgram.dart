@@ -77,7 +77,7 @@ class UpcomingProgram extends StatelessWidget {
                 DataCell(Center(child: Text('${provider.upcomingProgram[index]['StartTime']}'))),
                 DataCell(Center(child: Text('${provider.upcomingProgram[index]['EndDate']}'))),
                 DataCell(Row(children: [
-                  IconButton(tooltip:'Start',onPressed: (){
+                  IconButton(tooltip:'Start by Manual',onPressed: (){
                     String localFilePath = 'assets/audios/button_click_sound.mp3';
                     audioPlayer.play(UrlSource(localFilePath));
                     String payload = '${provider.upcomingProgram[index]['SNo']},1';
@@ -87,7 +87,7 @@ class UpcomingProgram extends StatelessWidget {
                     MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
 
                   }, icon: const Icon(Icons.start, color: Colors.green,)),
-                  IconButton(tooltip:'Stop',onPressed: (){
+                  IconButton(tooltip:'Stop by Manual',onPressed: (){
                     String localFilePath = 'assets/audios/audio_off.mp3';
                     audioPlayer.play(UrlSource(localFilePath));
                     String payload = '${provider.upcomingProgram[index]['SNo']},0';

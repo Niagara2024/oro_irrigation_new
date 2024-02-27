@@ -59,6 +59,7 @@ dependencies:
   chat_bubbles: ^1.5.0
   sleek_circular_slider: ^2.0.1
   audioplayers: ^5.2.1
+  flutter_svg: ^0.22.0
 
 dev_dependencies:
   flutter_test:
@@ -194,6 +195,11 @@ flutter:
      - assets/images/minsClock.png
      - assets/audios/button_click_sound.mp3
      - assets/audios/audio_off.mp3
+     - assets/SVGPicture/login_left_picture.svg
+     - assets/SVGPicture/oro_logo.svg
+     - assets/SVGPicture/top_corner.svg
+     - assets/images/login_top_corner.png
+     - assets/images/oro_logo_white.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

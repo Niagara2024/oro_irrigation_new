@@ -81,7 +81,8 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
       animationDuration: Duration.zero,
       child: Scaffold(
         appBar: widget.comingFrom == 'AdminORDealer'? AppBar(title: Text('${widget.customerName} - DASHBOARD')) : null,
-        backgroundColor: myTheme.primaryColor.withOpacity(0.05),
+        backgroundColor: Colors.white,
+        extendBody: true,
         body: Container(
           width: double.infinity,
           height: double.infinity,
@@ -89,11 +90,11 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
           child: Column(
             children: [
               siteListFinal.length >1 ? TabBar(
-                indicatorColor: myTheme.primaryColor,
+                indicatorColor: myTheme.primaryColorDark,
+                labelColor: myTheme.primaryColorDark,
+                unselectedLabelColor: Colors.black38,
                 isScrollable: true,
-                labelColor: myTheme.primaryColor,
-                unselectedLabelColor: Colors.black,
-                dividerColor: myTheme.primaryColor.withOpacity(0.2),
+                //dividerColor: myTheme.primaryColorDark,
                 labelStyle: const TextStyle(fontSize: 16),
                 tabs: [
                   for (var i = 0; i < siteListFinal.length; i++)
@@ -109,7 +110,85 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                 child: visibleLoading ? buildLoadingIndicator(visibleLoading, screenWidth) : Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    NavigationRail(
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [myTheme.primaryColor, myTheme.primaryColorDark], // You can adjust the colors here
+                        ),
+                      ),
+                      child: NavigationRail(
+                        selectedIndex: _selectedIndex,
+                        backgroundColor: Colors.transparent,
+                        elevation: 2,
+                        minWidth: 100,
+                        onDestinationSelected: (int index) {
+                          setState(() {
+                            _selectedIndex = index;
+                          });
+                        },
+                        destinations: const [
+                          NavigationRailDestination(
+                            padding: EdgeInsets.only(top: 5),
+                            icon: Icon(Icons.dashboard_outlined),
+                            selectedIcon: Icon(Icons.dashboard_outlined, color: Colors.white,),
+                            label: Text('Dashboard'),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.devices_other),
+                            selectedIcon: Icon(Icons.devices_other, color: Colors.white),
+                            label: Text('Product'),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.message_outlined),
+                            selectedIcon: Icon(Icons.message_outlined, color: Colors.white,),
+                            label: Text('Irrigation Logs'),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.stacked_bar_chart),
+                            selectedIcon: Icon(Icons.stacked_bar_chart, color: Colors.white,),
+                            label: Text('Reports'),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.question_answer_outlined),
+                            selectedIcon: Icon(Icons.question_answer_outlined, color: Colors.white,),
+                            label: Text('Sent & Received'),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.settings_outlined),
+                            selectedIcon: Icon(Icons.settings_outlined, color: Colors.white,),
+                            label: Text('Device Setting'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    /*Container(
+                      width: 200,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.topRight,
+                          tileMode: TileMode.clamp,
+                          colors: [myTheme.primaryColor, myTheme.primaryColorDark], // Define your gradient colors
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ListView(
+                          padding: EdgeInsets.zero,
+                          children: <Widget>[
+                            buildListTile(0, 'Dashboard', Icons.dashboard_outlined),
+                            buildListTile(1, 'Product', Icons.assignment_outlined),
+                            buildListTile(2, 'Irrigation Logs', Icons.message_outlined),
+                            buildListTile(3, 'Sent & Received', Icons.question_answer_outlined),
+                            buildListTile(4, 'Report overview', Icons.insert_chart_outlined),
+                            buildListTile(5, 'Device Setting', Icons.settings_outlined),
+                          ],
+                        ),
+                      ),
+                    ),*/
+                    /*NavigationRail(
                       selectedIndex: _selectedIndex,
                       minWidth: 100,
                       onDestinationSelected: (int index) {
@@ -146,7 +225,7 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                         ),
                       ],
                     ),
-                    VerticalDivider(width: 2, color: myTheme.primaryColor.withOpacity(0.5)),
+                    VerticalDivider(width: 2, color: myTheme.primaryColor.withOpacity(0.5)),*/
                     Expanded(
                       child:
                       _selectedIndex == 0 ? CustomerDashboard(customerID: widget.customerID, type: 0, customerName: widget.customerName, userID: widget.customerID, mobileNo: '+${widget.mobileNo}', siteData: siteListFinal[siteIndex], siteLength: siteListFinal.length) :
@@ -181,6 +260,34 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
         padding: EdgeInsets.symmetric(horizontal: width / 2 - 25),
         child: const LoadingIndicator(
           indicatorType: Indicator.ballPulse,
+        ),
+      ),
+    );
+  }
+
+  Container buildListTile(int index, String title, IconData icon) {
+    return Container(
+      decoration: BoxDecoration(
+        color: index == _selectedIndex ? myTheme.primaryColorLight : Colors.transparent,
+        borderRadius: const BorderRadius.all(Radius.circular(5)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 8.0,right: 8.0),
+        child: ListTile(
+          leading: Icon(icon, color: Colors.white),
+          title: Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+            ),
+          ),
+          onTap: () {
+            setState(() {
+              _selectedIndex = index; // Update selected index
+            });
+          },
+          contentPadding: EdgeInsetsDirectional.zero,
         ),
       ),
     );

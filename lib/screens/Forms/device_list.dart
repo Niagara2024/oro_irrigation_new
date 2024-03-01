@@ -984,23 +984,27 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                 DataCell(Center(
                                   child: IconButton(
                                       onPressed: () async {
-                                        Map<String, dynamic> body = {
-                                          "userId": widget.customerID,
-                                          "controllerId": data.userDeviceListId,
-                                          "modifyUser": widget.userID,
-                                          "productId": data.productId,
-                                        };
-                                        final response = await HttpService().putRequest("removeNodeInMaster", body);
-                                        if (response.statusCode == 200) {
-                                          var data = jsonDecode(response.body);
-                                          if (data["code"] == 200) {
-                                            _showSnackBar(data["message"]);
-                                            getCustomerSite();
-                                            getNodeStockList();
+                                        if(data.active==''||data.active=='0'){
+                                          Map<String, dynamic> body = {
+                                            "userId": widget.customerID,
+                                            "controllerId": data.userDeviceListId,
+                                            "modifyUser": widget.userID,
+                                            "productId": data.productId,
+                                          };
+                                          final response = await HttpService().putRequest("removeNodeInMaster", body);
+                                          if (response.statusCode == 200) {
+                                            var data = jsonDecode(response.body);
+                                            if (data["code"] == 200) {
+                                              _showSnackBar(data["message"]);
+                                              getCustomerSite();
+                                              getNodeStockList();
+                                            }
+                                            else {
+                                              _showSnackBar(data["message"]);
+                                            }
                                           }
-                                          else {
-                                            _showSnackBar(data["message"]);
-                                          }
+                                        }else{
+                                          _showSnackBar('You can not delete the device, Because the device is used in config maker');
                                         }
                                       },
                                       icon: const Icon(Icons.delete_outline, color: Colors.red,)),
@@ -1043,7 +1047,13 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
           myMap = {"productId": nodeStockList[i].productId.toString(), 'categoryName': nodeStockList[i].categoryName, 'referenceNumber': 0, 'serialNumber': missingSrlNumber[0]};
           missingSrlNumber.removeAt(0);
         }else{
-          myMap = {"productId": nodeStockList[i].productId.toString(), 'categoryName': nodeStockList[i].categoryName, 'referenceNumber': 0, 'serialNumber': usedNodeList[currentSite].length+1};
+          int serialNumber = (usedNodeList[currentSite].length + selectedNodeList.length) + 1;
+          myMap = {
+            "productId": nodeStockList[i].productId.toString(),
+            'categoryName': nodeStockList[i].categoryName,
+            'referenceNumber': 0,
+            'serialNumber': serialNumber
+          };
         }
         selectedNodeList.add(myMap);
       }

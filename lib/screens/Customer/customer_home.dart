@@ -6,6 +6,7 @@ import '../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../constants/MQTTManager.dart';
 import '../../constants/http_service.dart';
 import '../../constants/theme.dart';
+import '../../state_management/MqttPayloadProvider.dart';
 import '../product_inventory.dart';
 import 'CustomerDashboard.dart';
 
@@ -94,13 +95,14 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                 labelColor: myTheme.primaryColorDark,
                 unselectedLabelColor: Colors.black38,
                 isScrollable: true,
-                //dividerColor: myTheme.primaryColorDark,
-                labelStyle: const TextStyle(fontSize: 16),
+                labelStyle: const TextStyle(fontSize: 17),
                 tabs: [
                   for (var i = 0; i < siteListFinal.length; i++)
                     Tab(text: siteListFinal[i].siteName ?? '',),
                 ],
                 onTap: (index) {
+                  MqttPayloadProvider provider = MqttPayloadProvider();
+                  provider.clearData();
                   siteIndex = index;
                   subscribeAndUpdateSite();
                 },
@@ -115,14 +117,15 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                         gradient: LinearGradient(
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
-                          colors: [myTheme.primaryColor, myTheme.primaryColorDark], // You can adjust the colors here
+                          tileMode: TileMode.mirror,
+                          colors: [myTheme.primaryColorDark, myTheme.primaryColor], // You can adjust the colors here
                         ),
                       ),
                       child: NavigationRail(
                         selectedIndex: _selectedIndex,
                         backgroundColor: Colors.transparent,
-                        elevation: 2,
-                        minWidth: 100,
+                        elevation: 1,
+                        minWidth: 125,
                         onDestinationSelected: (int index) {
                           setState(() {
                             _selectedIndex = index;
@@ -300,9 +303,11 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
   }
 
   void indicatorViewHide() {
-    setState(() {
-      visibleLoading = false;
-    });
+    if(mounted){
+      setState(() {
+        visibleLoading = false;
+      });
+    }
   }
 
 }

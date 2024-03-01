@@ -5,6 +5,7 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/screens/Forms/create_account.dart';
+import 'package:oro_irrigation_new/screens/NarrowLayout/Customer/HomeScreenN.dart';
 import 'package:oro_irrigation_new/screens/product_inventory.dart';
 import 'package:oro_irrigation_new/screens/web_view.dart';
 import 'package:provider/provider.dart';
@@ -54,7 +55,6 @@ class _MainDashBoardState extends State<MainDashBoard> {
     manager.connect();
   }
 
-
   @override
   Widget build(BuildContext context)
   {
@@ -64,7 +64,6 @@ class _MainDashBoardState extends State<MainDashBoard> {
         if (snapshot.connectionState != ConnectionState.done) {
           return Container();
         }
-
         final sharedPreferences = snapshot.data!;
         final userId = sharedPreferences.getString('userId') ?? '';
         final userName = sharedPreferences.getString('userName') ?? '';
@@ -76,7 +75,6 @@ class _MainDashBoardState extends State<MainDashBoard> {
 
         MqttPayloadProvider provider = MqttPayloadProvider();
         provider.clearData();
-
 
         if (userId.isNotEmpty) {
           return UserData(
@@ -124,7 +122,8 @@ class DashboardNarrow extends StatefulWidget {
 class _DashboardNarrowState extends State<DashboardNarrow> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    final userData = UserData.of(context)!;
+    return HomeScreenN(userId: userData.userId);
   }
 }
 
@@ -224,8 +223,8 @@ class _DashboardWideState extends State<DashboardWide> {
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              begin: Alignment.centerRight,
-              end: Alignment.centerLeft,
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
               tileMode: TileMode.clamp,
               colors: [myTheme.primaryColorDark, myTheme.primaryColor], // Define your gradient colors
             ),

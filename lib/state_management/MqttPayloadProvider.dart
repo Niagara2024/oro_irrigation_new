@@ -10,6 +10,7 @@ class MqttPayloadProvider with ChangeNotifier {
   String dashBoardPayload = '', schedulePayload = '';
   late ScheduleViewProvider mySchedule;
 
+  int wifiStrength = 0;
   late List<dynamic> currentSchedule = [];
   late List<dynamic> nextSchedule = [];
   late List<dynamic> upcomingProgram = [];

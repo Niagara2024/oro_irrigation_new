@@ -81,7 +81,7 @@ class _NextScheduleState extends State<NextSchedule> {
                     fixedWidth: 100
                 ),
                 DataColumn2(
-                    label: Center(child: Text('Duration -\n(Time/Flow)', style: TextStyle(fontSize: 13),)),
+                    label: Center(child: Text('Total(T/F)', style: TextStyle(fontSize: 13),)),
                     fixedWidth: 100
                 ),
               ],

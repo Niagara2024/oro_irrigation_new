@@ -98,7 +98,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
       setState(() {
         if (data['2400'][0].containsKey('WifiStrength')) {
           wifiStrength = data['2400'][0]['WifiStrength'];
-          lastSyncData = '${getCurrentDate()}-${getCurrentTime()}';
+          lastSyncData = getCurrentDateAndTime();
         }
         if (data['2400'][0].containsKey('2401')) {
           for (var item in data['2400'][0]['2401']) {
@@ -948,15 +948,11 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
     );
   }
 
-  String getCurrentDate() {
-    var now = DateTime.now();
-    return DateFormat('MMMM dd, yyyy').format(now);
+  String getCurrentDateAndTime() {
+    var nowDT = DateTime.now();
+    return '${DateFormat('MMMM dd, yyyy').format(nowDT)}-${DateFormat('hh:mm:ss').format(nowDT)}';
   }
 
-  String getCurrentTime() {
-    var now = DateTime.now();
-    return DateFormat('hh:mm:ss').format(now);
-  }
 
   int getNodePositionInNodeList(int siteIndex, int srlNo)
   {

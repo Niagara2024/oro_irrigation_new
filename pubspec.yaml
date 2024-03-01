@@ -60,6 +60,7 @@ dependencies:
   sleek_circular_slider: ^2.0.1
   audioplayers: ^5.2.1
   flutter_svg: ^0.22.0
+  snapping_sheet: ^3.1.0
 
 dev_dependencies:
   flutter_test:

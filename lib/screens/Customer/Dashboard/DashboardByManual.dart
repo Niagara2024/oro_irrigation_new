@@ -54,6 +54,7 @@ class _DashboardByManualState extends State<DashboardByManual> {
       scheduleType: '',
       firstSequence: '',
       duration: '',
+      programCategory: '',
     );
 
     bool programWithNameExists = false;

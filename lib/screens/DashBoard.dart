@@ -398,6 +398,8 @@ class _DashboardWideState extends State<DashboardWide> {
                                   await prefs.remove('mobileNumber');
                                   await prefs.remove('subscribeTopic');
                                   if (context.mounted){
+                                    MqttPayloadProvider provider = MqttPayloadProvider();
+                                    provider.clearData();
                                     Navigator.pushReplacementNamed(context, '/login');
                                   }
                                 },

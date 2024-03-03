@@ -17,7 +17,6 @@ class LineOrSequence {
     var valveList = json['valve'] as List;
     var sensors = json['sensor'] as List;
 
-
     List<DashBoardValve> valves = valveList.map((valveJson) => DashBoardValve.fromJson(valveJson)).toList();
     List<Sensor> sensor = sensors.map((valveJson) => Sensor.fromJson(valveJson)).toList();
 

@@ -88,7 +88,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                             )
                         ),
                         const SizedBox(
-                            width: 20,
+                            width: 10,
                             child: Padding(
                               padding: EdgeInsets.all(5.0),
                               child: Column(
@@ -113,7 +113,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                             )
                         ),
                         SizedBox(
-                            width: 150,
+                            width: 175,
                             child: Padding(
                               padding: const EdgeInsets.all(5.0),
                               child: Column(
@@ -140,45 +140,118 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                             )
                         ),
                         SizedBox(
-                          width: MediaQuery.sizeOf(context).width-884,
+                          width: MediaQuery.sizeOf(context).width-894,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              const Text('Main valve'),
-                              SizedBox(
-                                width: MediaQuery.sizeOf(context).width-884,
-                                height: 65,
-                                child: provider.currentSchedule[index]['MainValve'].length > 0 ? Row(
-                                  children: [
-                                    for(int mvIndex=0; mvIndex<provider.currentSchedule[index]['MainValve'].length; mvIndex++)
-                                      Padding(
-                                        padding: const EdgeInsets.all(5.0),
-                                        child: Column(
-                                          children: [
-                                            CircleAvatar(
-                                              radius: 18,
-                                              backgroundColor: provider.currentSchedule[index]['MainValve'][mvIndex]['Status']==0 ? Colors.grey :
-                                              provider.currentSchedule[index]['MainValve'][mvIndex]['Status']==1 ? Colors.greenAccent :
-                                              provider.currentSchedule[index]['MainValve'][mvIndex]['Status']==2 ? Colors.orangeAccent:
-                                              provider.currentSchedule[index]['MainValve'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
-                                              backgroundImage: const AssetImage('assets/images/main_valve.png'),
-                                            ),
-                                            const SizedBox(height: 3),
-                                            Text('${provider.currentSchedule[index]['MainValve'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
-                                          ],
+                              Row(
+                                children: [
+                                  Expanded(
+                                    flex:1,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          const Text('Main valve'),
+                                          SizedBox(
+                                            width: MediaQuery.sizeOf(context).width-894,
+                                            height: 65,
+                                            child: provider.currentSchedule[index]['MainValve'].length > 0 ? Row(
+                                              children: [
+                                                for(int mvIndex=0; mvIndex<provider.currentSchedule[index]['MainValve'].length; mvIndex++)
+                                                  Padding(
+                                                    padding: const EdgeInsets.all(5.0),
+                                                    child: Column(
+                                                      children: [
+                                                        CircleAvatar(
+                                                          radius: 18,
+                                                          backgroundColor: provider.currentSchedule[index]['MainValve'][mvIndex]['Status']==0 ? Colors.grey :
+                                                          provider.currentSchedule[index]['MainValve'][mvIndex]['Status']==1 ? Colors.greenAccent :
+                                                          provider.currentSchedule[index]['MainValve'][mvIndex]['Status']==2 ? Colors.orangeAccent:
+                                                          provider.currentSchedule[index]['MainValve'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
+                                                          backgroundImage: const AssetImage('assets/images/main_valve.png'),
+                                                        ),
+                                                        const SizedBox(height: 3),
+                                                        Text('${provider.currentSchedule[index]['MainValve'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
+                                                      ],
+                                                    ),
+                                                  )
+                                              ],
+                                            ):
+                                            const Center(child: Text('-----')),
+                                          ),
+                                        ],
+                                      ),
+                                  ),
+                                  Expanded(
+                                    flex:1,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        const Text('Pump'),
+                                        SizedBox(
+                                          width: MediaQuery.sizeOf(context).width-894,
+                                          height: 65,
+                                          child : provider.currentSchedule[index]['Message']=='Running.'? Row(
+                                            children: [
+                                              for(int pIndex=0; pIndex<provider.currentSchedule[index]['Pump'].length; pIndex++)
+                                                Padding(
+                                                  padding: const EdgeInsets.all(5.0),
+                                                  child: Column(
+                                                    children: [
+                                                      CircleAvatar(
+                                                        radius: 18,
+                                                        backgroundColor: provider.currentSchedule[index]['Pump'][pIndex]['Status']==0 ? Colors.grey :
+                                                        provider.currentSchedule[index]['Pump'][pIndex]['Status']==1 ? Colors.greenAccent :
+                                                        provider.currentSchedule[index]['Pump'][pIndex]['Status']==2 ? Colors.orangeAccent:
+                                                        provider.currentSchedule[index]['Pump'][pIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
+                                                        backgroundImage: const AssetImage('assets/images/irrigation_pump.png'),
+                                                      ),
+                                                      const SizedBox(height: 3),
+                                                      Text('${provider.currentSchedule[index]['Pump'][pIndex]['Name']}', style: const TextStyle(fontSize: 10),),
+                                                    ],
+                                                  ),
+                                                )
+                                            ],
+                                          ):
+                                          Text('${provider.currentSchedule[index]['Message']}(${provider.currentSchedule[index]['OnDelayTimeLeft']})'),
                                         ),
-                                      )
-                                  ],
-                                ):
-                                const Center(child: Text('-----')),
+                                      ],
+                                    ),
+                                  )
+                                ],
                               ),
                               const Divider(),
                               const Text('Valve'),
                               SizedBox(
                                 width: MediaQuery.sizeOf(context).width-884,
                                 height: 65,
-                                child: provider.currentSchedule[index]['Message']=='Running.'? provider.currentSchedule[index]['Valve'].length > 0 ? Row(
+                                child: provider.currentSchedule[index]['Valve'].length > 0 ? Row(
+                                  children: [
+                                    for(int vIndex=0; vIndex<provider.currentSchedule[index]['Valve'].length;vIndex++)
+                                      Padding(
+                                        padding: const EdgeInsets.all(5.0),
+                                        child: Column(
+                                          children: [
+                                            CircleAvatar(
+                                              radius: 18,
+                                              backgroundColor: provider.currentSchedule[index]['Valve'][vIndex]['Status']==0 ? Colors.grey :
+                                              provider.currentSchedule[index]['Valve'][vIndex]['Status']==1 ? Colors.greenAccent :
+                                              provider.currentSchedule[index]['Valve'][vIndex]['Status']==2 ? Colors.orangeAccent:
+                                              provider.currentSchedule[index]['Valve'][vIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
+                                              backgroundImage: const AssetImage('assets/images/valve.png'),
+                                            ),
+                                            const SizedBox(height: 3),
+                                            Text('${provider.currentSchedule[index]['Valve'][vIndex]['Name']}', style: const TextStyle(fontSize: 10),),
+                                          ],
+                                        ),
+                                      ),
+                                  ],
+                                ) :
+                                const Center(child: Text('-----')),
+                                /*child: provider.currentSchedule[index]['Message']=='Running.'? provider.currentSchedule[index]['Valve'].length > 0 ? Row(
                                   children: [
                                     for(int vIndex=0; vIndex<provider.currentSchedule[index]['Valve'].length;vIndex++)
                                       Padding(
@@ -200,13 +273,13 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                       )
                                   ],
                                 ):
-                                const Center(child: Text('-----')) : Text('${provider.currentSchedule[index]['Message']}(${provider.currentSchedule[index]['OnDelayTimeLeft']})'),
+                                const Center(child: Text('-----')) : Text('${provider.currentSchedule[index]['Message']}(${provider.currentSchedule[index]['OnDelayTimeLeft']})'),*/
                               ),
                             ],
                           )
                         ),
                         SizedBox(
-                          width: 50,
+                          width: 45,
                           child:  Center(
                               child: IconButton(
                                 tooltip: 'Skip next',

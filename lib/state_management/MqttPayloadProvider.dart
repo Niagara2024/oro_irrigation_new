@@ -11,6 +11,7 @@ class MqttPayloadProvider with ChangeNotifier {
   late ScheduleViewProvider mySchedule;
 
   int wifiStrength = 0;
+  late List<dynamic> mainLine = [];
   late List<dynamic> currentSchedule = [];
   late List<dynamic> nextSchedule = [];
   late List<dynamic> upcomingProgram = [];
@@ -26,6 +27,9 @@ class MqttPayloadProvider with ChangeNotifier {
       if (data.containsKey('2400') && data['2400'] != null && data['2400'].isNotEmpty) {
         dashBoardPayload = payload;
 
+        if (data['2400'][0].containsKey('2405')) {
+          mainLine = data['2400'][0]['2405'];
+        }
         if (data['2400'][0].containsKey('2402')) {
           currentSchedule = data['2400'][0]['2402'];
         }
@@ -57,6 +61,7 @@ class MqttPayloadProvider with ChangeNotifier {
 
   void clearData() {
     dashBoardPayload = '';
+    mainLine.clear();
     currentSchedule.clear();
     upcomingProgram.clear();
     nextSchedule.clear();

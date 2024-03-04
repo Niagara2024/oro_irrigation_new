@@ -6,7 +6,6 @@ import 'package:loading_indicator/loading_indicator.dart';
 
 import '../../../Models/Customer/Dashboard/DashBoardValve.dart';
 import '../../../Models/Customer/Dashboard/DashboardDataProvider.dart';
-import '../../../Models/Customer/Dashboard/FertilizerChanel.dart';
 import '../../../Models/Customer/Dashboard/LineOrSequence.dart';
 import '../../../Models/Customer/Dashboard/ProgramList.dart';
 import '../../../constants/MQTTManager.dart';
@@ -105,6 +104,7 @@ class _RunByManualState extends State<RunByManual> {
     final response = await HttpService().postRequest("getCustomerDashboardByManual", body);
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
+      print(response.body);
       indicatorViewHide();
       if (jsonResponse['data'] != null) {
         dynamic data = jsonResponse['data'];
@@ -176,11 +176,10 @@ class _RunByManualState extends State<RunByManual> {
                       });
                     }
                   }
-
                 }
 
                 strSldValveOrLineSno = strSldValveOrLineSno.isNotEmpty ? strSldValveOrLineSno.substring(0, strSldValveOrLineSno.length - 1) : '';
-                List<String> nonEmptyStrings = [
+                List<String> allRelaySrlNo = [
                   strSldSourcePump,
                   strSldIrrigationPump,
                   strSldMainValve,
@@ -203,7 +202,7 @@ class _RunByManualState extends State<RunByManual> {
                           ),
                           TextButton(
                             onPressed: () {
-                              sendCommandToControllerAndMqtt(nonEmptyStrings, strProgramCategory);
+                              sendCommandToControllerAndMqtt(allRelaySrlNo, strProgramCategory);
                               Navigator.pop(dgContext, 'OK');
                             },
                             child: const Text('Yes'),
@@ -212,7 +211,7 @@ class _RunByManualState extends State<RunByManual> {
                       )
                   );
                 }else{
-                  sendCommandToControllerAndMqtt(nonEmptyStrings, strProgramCategory);
+                  sendCommandToControllerAndMqtt(allRelaySrlNo, strProgramCategory);
                 }
               },
               icon: const Icon(
@@ -363,23 +362,217 @@ class _RunByManualState extends State<RunByManual> {
                                   child: Text('Central Filter Site'),
                                 ),
                                 SizedBox(
-                                  height: dashBoardData[0].centralFilterSite.length  * 57,
+                                  height: dashBoardData[0].centralFilterSite.length * 160,
                                   child: ListView.builder(
+                                    scrollDirection: Axis.vertical,
                                     itemCount: dashBoardData[0].centralFilterSite.length,
                                     itemBuilder: (context, index) {
-                                      return Column(
-                                        children: [
-                                          CheckboxListTile(
-                                            title: Text(dashBoardData[0].centralFilterSite[index].name),
-                                            secondary: Image.asset('assets/images/central_filtration.png'),
-                                            value: dashBoardData[0].centralFilterSite[index].selected,
-                                            onChanged: (bool? newValue) {
-                                              setState(() {
-                                                dashBoardData[0].centralFilterSite[index].selected = newValue!;
-                                              });
-                                            },
-                                          ),
-                                        ],
+                                      List<FilterList> fertilizers = dashBoardData[0].centralFilterSite[index].filter;
+                                      return Card(
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Padding(
+                                                  padding: const EdgeInsets.only(left: 5),
+                                                  child: SizedBox(
+                                                    width: 60,
+                                                    height: 60,
+                                                    child: Padding(
+                                                      padding: const EdgeInsets.only(top: 8),
+                                                      child: Image.asset('assets/images/central_filtration.png'),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding: const EdgeInsets.all(5.0),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(dashBoardData[0].centralFilterSite[index].name, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                      Text(dashBoardData[0].centralFilterSite[index].id, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                      Text('Location : ${dashBoardData[0].centralFilterSite[index].location}', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  const Padding(
+                                                    padding: EdgeInsets.only(right: 8, left: 5, top: 3),
+                                                    child: Text('filter', style: TextStyle(fontSize: 11),),
+                                                  ),
+
+                                                  SizedBox(
+                                                      width: MediaQuery.sizeOf(context).width-740,
+                                                      height: 46,
+                                                      child: Column(
+                                                        children: [
+                                                          const Padding(
+                                                            padding: EdgeInsets.only(left: 5, right: 5),
+                                                            child: Divider(),
+                                                          ),
+                                                          SizedBox(
+                                                            width: 310,
+                                                            height: 30,
+                                                            child: ListView.builder(
+                                                              scrollDirection: Axis.horizontal,
+                                                              itemCount: fertilizers.length,
+                                                              itemBuilder: (BuildContext context, int index) {
+                                                                return Row(
+                                                                  children: [
+                                                                    Padding(
+                                                                      padding: const EdgeInsets.only(left: 5),
+                                                                      child: Column(
+                                                                        children: [
+                                                                          InkWell(
+                                                                            child: CircleAvatar(
+                                                                              radius: 15,
+                                                                              backgroundColor: fertilizers[index].selected? Colors.green : Colors.grey,
+                                                                              child: Text('${index+1}', style: const TextStyle(fontSize: 13, color: Colors.white),),
+                                                                            ),
+                                                                            onTap: (){
+                                                                              setState(() {
+                                                                                fertilizers[index].selected = !fertilizers[index].selected;
+                                                                              });
+                                                                            },
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                );
+                                                              },
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      )
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ): Container(),
+
+                        if (dashBoardData.isNotEmpty)
+                          dashBoardData[0].localFilterSite.isNotEmpty ? Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
+                                  child: Text('Local Filter Site'),
+                                ),
+                                SizedBox(
+                                  height: dashBoardData[0].localFilterSite.length * 160,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.vertical,
+                                    itemCount: dashBoardData[0].localFilterSite.length,
+                                    itemBuilder: (context, index) {
+                                      List<FilterList> fertilizers = dashBoardData[0].localFilterSite[index].filter;
+                                      return Card(
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Padding(
+                                                  padding: const EdgeInsets.only(left: 5),
+                                                  child: SizedBox(
+                                                    width: 60,
+                                                    height: 60,
+                                                    child: Padding(
+                                                      padding: const EdgeInsets.only(top: 8),
+                                                      child: Image.asset('assets/images/filter.png'),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding: const EdgeInsets.all(5.0),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(dashBoardData[0].localFilterSite[index].name, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                      Text(dashBoardData[0].localFilterSite[index].id, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                      Text('Location : ${dashBoardData[0].localFilterSite[index].location}', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  const Padding(
+                                                    padding: EdgeInsets.only(right: 8, left: 5, top: 3),
+                                                    child: Text('filter', style: TextStyle(fontSize: 11),),
+                                                  ),
+
+                                                  SizedBox(
+                                                      width: MediaQuery.sizeOf(context).width-740,
+                                                      height: 46,
+                                                      child: Column(
+                                                        children: [
+                                                          const Padding(
+                                                            padding: EdgeInsets.only(left: 5, right: 5),
+                                                            child: Divider(),
+                                                          ),
+                                                          SizedBox(
+                                                            width: 310,
+                                                            height: 30,
+                                                            child: ListView.builder(
+                                                              scrollDirection: Axis.horizontal,
+                                                              itemCount: fertilizers.length,
+                                                              itemBuilder: (BuildContext context, int index) {
+                                                                return Row(
+                                                                  children: [
+                                                                    Padding(
+                                                                      padding: const EdgeInsets.only(left: 5),
+                                                                      child: Column(
+                                                                        children: [
+                                                                          InkWell(
+                                                                            child: CircleAvatar(
+                                                                              radius: 15,
+                                                                              backgroundColor: fertilizers[index].selected? Colors.green : Colors.grey,
+                                                                              child: Text('${index+1}', style: const TextStyle(fontSize: 13, color: Colors.white),),
+                                                                            ),
+                                                                            onTap: (){
+                                                                              setState(() {
+                                                                                fertilizers[index].selected = !fertilizers[index].selected;
+                                                                              });
+                                                                            },
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                );
+                                                              },
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      )
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       );
                                     },
                                   ),
@@ -502,6 +695,121 @@ class _RunByManualState extends State<RunByManual> {
                               ],
                             ),
                           ): Container(),
+
+                        if (dashBoardData.isNotEmpty)
+                          dashBoardData[0].localFertilizerSite.isNotEmpty ? Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
+                                  child: Text('Local Fertilizer Site'),
+                                ),
+                                SizedBox(
+                                  height: dashBoardData[0].localFertilizerSite.length * 160,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.vertical,
+                                    itemCount: dashBoardData[0].localFertilizerSite.length,
+                                    itemBuilder: (context, index) {
+                                      List<FertilizerChanel> fertilizers = dashBoardData[0].localFertilizerSite[index].fertilizer;
+                                      return Card(
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Padding(
+                                                  padding: const EdgeInsets.only(left: 5),
+                                                  child: SizedBox(
+                                                    width: 60,
+                                                    height: 60,
+                                                    child: Padding(
+                                                      padding: const EdgeInsets.only(top: 8),
+                                                      child: Image.asset('assets/images/central_dosing.png'),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding: const EdgeInsets.all(5.0),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(dashBoardData[0].localFertilizerSite[index].name, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                      Text(dashBoardData[0].localFertilizerSite[index].id, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                      Text('Location : ${dashBoardData[0].localFertilizerSite[index].location}', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  const Padding(
+                                                    padding: EdgeInsets.only(right: 8, left: 5, top: 3),
+                                                    child: Text('Chanel', style: TextStyle(fontSize: 11),),
+                                                  ),
+
+                                                  SizedBox(
+                                                      width: MediaQuery.sizeOf(context).width-740,
+                                                      height: 46,
+                                                      child: Column(
+                                                        children: [
+                                                          const Padding(
+                                                            padding: EdgeInsets.only(left: 5, right: 5),
+                                                            child: Divider(),
+                                                          ),
+                                                          SizedBox(
+                                                            width: 310,
+                                                            height: 30,
+                                                            child: ListView.builder(
+                                                              scrollDirection: Axis.horizontal,
+                                                              itemCount: fertilizers.length,
+                                                              itemBuilder: (BuildContext context, int index) {
+                                                                return Row(
+                                                                  children: [
+                                                                    Padding(
+                                                                      padding: const EdgeInsets.only(left: 5),
+                                                                      child: Column(
+                                                                        children: [
+                                                                          InkWell(
+                                                                            child: CircleAvatar(
+                                                                              radius: 15,
+                                                                              backgroundColor: fertilizers[index].selected? Colors.green : Colors.grey,
+                                                                              child: Text('${index+1}', style: const TextStyle(fontSize: 13, color: Colors.white),),
+                                                                            ),
+                                                                            onTap: (){
+                                                                              setState(() {
+                                                                                fertilizers[index].selected = !fertilizers[index].selected;
+                                                                              });
+                                                                            },
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                );
+                                                              },
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      )
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ): Container(),
                       ],
                     ),
                   ),
@@ -522,13 +830,13 @@ class _RunByManualState extends State<RunByManual> {
     );
   }
 
-  void sendCommandToControllerAndMqtt(List<String> nonEmptyStrings, location){
-    String finalResult = nonEmptyStrings.where((s) => s.isNotEmpty).join('_');
+  void sendCommandToControllerAndMqtt(List<String> allRelaySrlNo, location){
+    String finalResult = allRelaySrlNo.where((s) => s.isNotEmpty).join('_');
     String payload = '';
     if(ddSelection==0){
-      payload = '${location==''?0:1},${ddSelection==0?1:2},${location==''?0:location},${ddSelection==0?0:ddSelectionId},${finalResult==''?0:finalResult},0,${segmentIndex==0?3:1},${segmentIndex==0?'0':segmentIndex==1?strDuration:strFlow}';
+      payload = '${finalResult==''?0:1},${ddSelection==0?1:2},${location==''?0:location},${ddSelection==0?0:ddSelectionId},${finalResult==''?0:finalResult},0,${segmentIndex==0?3:1},${segmentIndex==0?'0':segmentIndex==1?strDuration:strFlow}';
     }else{
-      payload = '${finalResult==''?0:1},${2},${widget.programList[ddSelection].programCategory},${widget.programList[ddSelection].serialNumber},${finalResult==''?0:finalResult},0,${segmentIndex==0?3:1},${segmentIndex==0?'0':segmentIndex==1?strDuration:strFlow}';
+      payload = '${finalResult.isEmpty?0:1},${2},${widget.programList[ddSelection].programCategory},${widget.programList[ddSelection].serialNumber},${finalResult==''?0:finalResult},0,${segmentIndex==0?3:1},${segmentIndex==0?'0':segmentIndex==1?strDuration:strFlow}';
     }
 
     String payLoadFinal = jsonEncode({

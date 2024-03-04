@@ -70,7 +70,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
       final response = await HttpService().postRequest("getUserProgramNameList", body);
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
-        print(response.body);
+        //print(response.body);
         List<dynamic> programsJson = jsonResponse['data'];
         setState(() {
           programList = [

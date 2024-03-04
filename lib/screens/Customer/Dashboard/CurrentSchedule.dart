@@ -281,7 +281,18 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                         SizedBox(
                           width: 45,
                           child:  Center(
-                              child: IconButton(
+                              child: provider.currentSchedule[index]['ProgType']==3? IconButton(
+                                tooltip: 'Stop',
+                                onPressed: provider.currentSchedule[index]['Message']=='Running.'? (){
+                                  String payload = '0,1,0,${provider.currentSchedule[index]['ScheduleS_No']},0,0,${provider.currentSchedule[index]['ProgType']},0';
+                                  String payLoadFinal = jsonEncode({
+                                    "800": [{"801": payload}]
+                                  });
+                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                } : null,
+                                icon: const Icon(Icons.stop_circle_outlined,color: Colors.red),
+                              ):
+                              IconButton(
                                 tooltip: 'Skip next',
                                 onPressed: provider.currentSchedule[index]['Message']=='Running.'? (){
                                   String payload = '${provider.currentSchedule[index]['ScheduleS_No']},0';
@@ -292,7 +303,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                 } : null,
                                 icon: const Icon(Icons.skip_next_outlined),
                               ),
-                            )
+                            ),
                         ),
                       ],
                     ),

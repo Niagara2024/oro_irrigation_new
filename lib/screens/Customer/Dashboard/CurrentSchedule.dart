@@ -59,9 +59,9 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
             ),
             Container(
               color: Colors.white,
-              height: provider.currentSchedule.isNotEmpty? (provider.currentSchedule.length * 187): 50,
+              height: provider.currentSchedule.isNotEmpty? (provider.currentSchedule.length * 233): 50,
               child: provider.currentSchedule.isNotEmpty? SizedBox(
-                height: (provider.currentSchedule.length * 187),
+                height: (provider.currentSchedule.length * 233),
                 child: Column(
                   children: [
                     for(int index=0; index<provider.currentSchedule.length; index++)
@@ -82,6 +82,10 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                         Text('Irrigation Line',style: TextStyle(fontSize: 13,fontWeight: FontWeight.normal)),
                                         SizedBox(height: 6,),
                                         Text('Zone',style: TextStyle(fontSize: 13,fontWeight: FontWeight.normal)),
+                                        SizedBox(height: 6,),
+                                        Text('RTC',style: TextStyle(fontSize: 13,fontWeight: FontWeight.normal)),
+                                        SizedBox(height: 6,),
+                                        Text('Cyclic',style: TextStyle(fontSize: 13,fontWeight: FontWeight.normal)),
                                         SizedBox(height: 6,),
                                         Text('Zone Name',style: TextStyle(fontSize: 13,fontWeight: FontWeight.normal)),
                                         SizedBox(height: 6,),
@@ -115,6 +119,10 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                         Text(':',style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
                                         SizedBox(height: 6,),
                                         Text(':',style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
+                                        SizedBox(height: 6,),
+                                        Text(':',style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
+                                        SizedBox(height: 6,),
+                                        Text(':',style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
                                       ],
                                     ),
                                   )
@@ -132,6 +140,10 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                         Text(provider.currentSchedule[index]['ProgCategory'],style: const TextStyle(fontSize: 13)),
                                         const SizedBox(height: 6),
                                         Text('${provider.currentSchedule[index]['CurrentZone']}/${provider.currentSchedule[index]['TotalZone']}',style: TextStyle(fontSize: 13)),
+                                        const SizedBox(height: 6),
+                                        Text('${provider.currentSchedule[index]['CurrentRtc']}/${provider.currentSchedule[index]['TotalRtc']}',style: TextStyle(fontSize: 13)),
+                                        const SizedBox(height: 6),
+                                        Text('${provider.currentSchedule[index]['CurrentCycle']}/${provider.currentSchedule[index]['TotalCycle']}',style: TextStyle(fontSize: 13)),
                                         const SizedBox(height: 6),
                                         Text(provider.currentSchedule[index]['ZoneName'],style: const TextStyle(fontSize: 13)),
                                         const SizedBox(height: 6),

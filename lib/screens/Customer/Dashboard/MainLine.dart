@@ -25,7 +25,7 @@ class _MainLineState extends State<MainLine> {
       child: Row(
         children: [
           SizedBox(
-            width: 250,
+            width: 280,
             child: Column(
               children: [
                 const ListTile(
@@ -33,163 +33,160 @@ class _MainLineState extends State<MainLine> {
                 ),
                 widget.siteData.irrigationPump.isNotEmpty
                     ||widget.siteData.centralFilterSite.isNotEmpty?
-                Padding(
-                  padding: const EdgeInsets.only(left: 5),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 49.5,
-                        height: 145,
-                        child: ListView.builder(
-                          itemCount: widget.siteData.irrigationPump.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            if (index < widget.siteData.irrigationPump.length) {
-                              return Column(
-                                children: [
-                                  PopupMenuButton(
-                                    tooltip: 'Details',
-                                    itemBuilder: (context) {
-                                      return [
-                                        PopupMenuItem(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: [
-                                              Text(widget.siteData.irrigationPump[index].name, style: const TextStyle(fontWeight: FontWeight.bold),),
-                                              const Divider(),
-                                              Text('ID : ${widget.siteData.irrigationPump[index].id}'),
-                                              Text('Location : ${widget.siteData.irrigationPump[index].location}'),
-                                            ],
-                                          ),
-                                        ),
-                                      ];
-                                    },
-                                    child: widget.siteData.irrigationPump.length ==1?
-                                    Image.asset('assets/images/dp_irr_pump.png'):
-                                    widget.siteData.irrigationPump.length==2 && index==0?
-                                    Image.asset('assets/images/dp_irr_pump_1.png'):
-                                    widget.siteData.irrigationPump.length==2 && index==1?
-                                    Image.asset('assets/images/dp_irr_pump_3.png'):
-                                    widget.siteData.irrigationPump.length==3 && index==0?
-                                    Image.asset('assets/images/dp_irr_pump_1.png'):
-                                    widget.siteData.irrigationPump.length==3 && index==1?
-                                    Image.asset('assets/images/dp_irr_pump_2.png'):
-                                    Image.asset('assets/images/dp_irr_pump_3.png'),
-                                  ),
-                                ],
-                              ); // Replace 'yourKey' with the key from your API response
-                            } else {
-                              return Text(''); // or any placeholder/error message
-                            }
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        width: 49.5,
-                        height: 145,
-                        child: ListView.builder(
-                          itemCount: 1,
-                          itemBuilder: (BuildContext context, int index) {
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 70,
+                      height: 160,
+                      child: ListView.builder(
+                        itemCount: widget.siteData.irrigationPump.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          if (index < widget.siteData.irrigationPump.length) {
                             return Column(
                               children: [
                                 PopupMenuButton(
                                   tooltip: 'Details',
                                   itemBuilder: (context) {
                                     return [
-                                      const PopupMenuItem(
+                                      PopupMenuItem(
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           mainAxisAlignment: MainAxisAlignment.start,
                                           children: [
-                                            Text('Pressure Sensor', style: TextStyle(fontWeight: FontWeight.bold),),
-                                            Divider(),
+                                            Text(widget.siteData.irrigationPump[index].name, style: const TextStyle(fontWeight: FontWeight.bold),),
+                                            const Divider(),
+                                            Text('ID : ${widget.siteData.irrigationPump[index].id}'),
+                                            Text('Location : ${widget.siteData.irrigationPump[index].location}'),
                                           ],
                                         ),
                                       ),
                                     ];
                                   },
-                                  child: Image.asset('assets/images/dp_prs_sensor.png',),
+                                  child: widget.siteData.irrigationPump.length ==1?
+                                  Image.asset('assets/images/dp_irr_pump.png'):
+                                  widget.siteData.irrigationPump.length==2 && index==0?
+                                  Image.asset('assets/images/dp_irr_pump_1.png'):
+                                  widget.siteData.irrigationPump.length==2 && index==1?
+                                  Image.asset('assets/images/dp_irr_pump_3.png'):
+                                  widget.siteData.irrigationPump.length==3 && index==0?
+                                  Image.asset('assets/images/dp_irr_pump_1.png'):
+                                  widget.siteData.irrigationPump.length==3 && index==1?
+                                  Image.asset('assets/images/dp_irr_pump_2.png'):
+                                  Image.asset('assets/images/dp_irr_pump_3.png'),
                                 ),
-                                const Text('Prs In',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
-                                const Text('7.0 bar',style: TextStyle(fontSize: 10),),
                               ],
-                            );
-                          },
-                        ),
+                            ); // Replace 'yourKey' with the key from your API response
+                          } else {
+                            return Text(''); // or any placeholder/error message
+                          }
+                        },
                       ),
-                      SizedBox(
-                        width: 49.5,
-                        height: 145,
-                        child: ListView.builder(
-                          itemCount: 1,
-                          itemBuilder: (BuildContext context, int index) {
-                            if (index < widget.siteData.centralFilterSite.length) {
-                              return Column(
-                                children: [
-                                  PopupMenuButton(
-                                    tooltip: 'Details',
-                                    itemBuilder: (context) {
-                                      return [
-                                        PopupMenuItem(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: [
-                                              Text(widget.siteData.centralFilterSite[index].name, style: const TextStyle(fontWeight: FontWeight.bold),),
-                                              const Divider(),
-                                              Text('ID : ${widget.siteData.centralFilterSite[index].id}'),
-                                              Text('Location : ${widget.siteData.centralFilterSite[index].location}'),
-                                            ],
-                                          ),
-                                        ),
-                                      ];
-                                    },
-                                    child: Image.asset('assets/images/dp_filter.png',),
-                                  ),
-                                ],
-                              ); // Replace 'yourKey' with the key from your API response
-                            } else {
-                              return const Text(''); // or any placeholder/error message
-                            }
-                          },
-                        ),
+                    ),
+                    SizedBox(
+                      width: 70,
+                      height: 160,
+                      child: ListView.builder(
+                        itemCount: 1,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Column(
+                            children: [
+                              PopupMenuButton(
+                                tooltip: 'Details',
+                                itemBuilder: (context) {
+                                  return [
+                                    const PopupMenuItem(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          Text('Pressure Sensor', style: TextStyle(fontWeight: FontWeight.bold),),
+                                          Divider(),
+                                        ],
+                                      ),
+                                    ),
+                                  ];
+                                },
+                                child: Image.asset('assets/images/dp_prs_sensor.png',),
+                              ),
+                              const Text('Prs In',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
+                              const Text('7.0 bar',style: TextStyle(fontSize: 10),),
+                            ],
+                          );
+                        },
                       ),
-                      SizedBox(
-                        width: 49.5,
-                        height: 145,
-                        child: ListView.builder(
-                          itemCount: 1,
-                          itemBuilder: (BuildContext context, int index) {
+                    ),
+                    SizedBox(
+                      width: 70,
+                      height: 160,
+                      child: ListView.builder(
+                        itemCount: 1,
+                        itemBuilder: (BuildContext context, int index) {
+                          if (index < widget.siteData.centralFilterSite.length) {
                             return Column(
                               children: [
                                 PopupMenuButton(
                                   tooltip: 'Details',
                                   itemBuilder: (context) {
                                     return [
-                                      const PopupMenuItem(
+                                      PopupMenuItem(
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           mainAxisAlignment: MainAxisAlignment.start,
                                           children: [
-                                            Text('Pressure Sensor', style: TextStyle(fontWeight: FontWeight.bold),),
-                                            Divider(),
+                                            Text(widget.siteData.centralFilterSite[0].name, style: const TextStyle(fontWeight: FontWeight.bold),),
+                                            const Divider(),
+                                            //Text('ID : ${widget.siteData.centralFilterSite[0].filter[index].id}'),
+                                            //Text('Location : ${widget.siteData.centralFilterSite[0].filter[index].location}'),
                                           ],
                                         ),
                                       ),
                                     ];
                                   },
-                                  child: Image.asset('assets/images/dp_prs_sensor.png',),
+                                  child: Image.asset('assets/images/dp_filter.png',),
                                 ),
-                                const Text('Prs Out',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
-                                const Text('6.2 bar',style: TextStyle(fontSize: 10),),
                               ],
-                            );
-                          },
-                        ),
+                            ); // Replace 'yourKey' with the key from your API response
+                          } else {
+                            return const Text(''); // or any placeholder/error message
+                          }
+                        },
                       ),
-                    ],
-                  ),
+                    ),
+                    SizedBox(
+                      width: 70,
+                      height: 160,
+                      child: ListView.builder(
+                        itemCount: 1,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Column(
+                            children: [
+                              PopupMenuButton(
+                                tooltip: 'Details',
+                                itemBuilder: (context) {
+                                  return [
+                                    const PopupMenuItem(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          Text('Pressure Sensor', style: TextStyle(fontWeight: FontWeight.bold),),
+                                          Divider(),
+                                        ],
+                                      ),
+                                    ),
+                                  ];
+                                },
+                                child: Image.asset('assets/images/dp_prs_sensor.png',),
+                              ),
+                              const Text('Prs Out',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
+                              const Text('6.2 bar',style: TextStyle(fontSize: 10),),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ):
                 const Column(
                   crossAxisAlignment: CrossAxisAlignment.center,

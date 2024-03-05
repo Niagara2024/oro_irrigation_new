@@ -117,7 +117,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                     List<RelayStatus> rlyStatusList = rlyStatusJsonList.map((rs) => RelayStatus.fromJson(rs)).toList();
                     widget.siteData.nodeList[position].rlyStatus = rlyStatusList;
                   }
-
                 } else {
                   print('${item['SNo']} The serial number not found');
                 }

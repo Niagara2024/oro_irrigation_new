@@ -43,6 +43,7 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
     {
       siteListFinal.clear();
       var data = jsonDecode(response.body);
+      print(response.body);
       if(data["code"]==200)
       {
         final cntList = data["data"] as List;

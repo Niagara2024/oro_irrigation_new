@@ -12,11 +12,9 @@ class DashboardModel {
   List<IrrigationPump> irrigationPump;
   List<MainValve> mainValve;
   List<CentralFertilizerSite> centralFertilizerSite;
-  List<dynamic> centralFertilizer;
   List<dynamic> localFertilizer;
-  List<CentralFilterSite> centralFilterSite;
+  List<FilterModel> centralFilterSite;
   List<dynamic> localFilter;
-
 
   DashboardModel({
     required this.controllerId,
@@ -32,7 +30,6 @@ class DashboardModel {
     required this.irrigationPump,
     required this.mainValve,
     required this.centralFertilizerSite,
-    required this.centralFertilizer,
     required this.localFertilizer,
     required this.centralFilterSite,
     required this.localFilter,
@@ -60,18 +57,11 @@ class DashboardModel {
       nodeList: nodes,
       currentProgram: cProgram,
       nextProgram: nxtProgram,
-      irrigationPump: List<IrrigationPump>.from(
-          json['irrigationPump'].map((x) => IrrigationPump.fromJson(x))),
-      mainValve: List<MainValve>.from(
-          json['mainValve'].map((x) => MainValve.fromJson(x))),
-      centralFertilizerSite: List<CentralFertilizerSite>.from(
-          json['centralFertilizerSite']
-              .map((x) => CentralFertilizerSite.fromJson(x))),
-      centralFertilizer: List<dynamic>.from(json['centralFertilizer']),
+      irrigationPump: List<IrrigationPump>.from(json['irrigationPump'].map((x) => IrrigationPump.fromJson(x))),
+      mainValve: List<MainValve>.from(json['mainValve'].map((x) => MainValve.fromJson(x))),
+      centralFertilizerSite: List<CentralFertilizerSite>.from(json['centralFertilizerSite'].map((x) => CentralFertilizerSite.fromJson(x))),
       localFertilizer: List<dynamic>.from(json['localFertilizer']),
-      centralFilterSite: List<CentralFilterSite>.from(
-          json['centralFilterSite']
-              .map((x) => CentralFilterSite.fromJson(x))),
+      centralFilterSite: List<FilterModel>.from(json['centralFilterSite'].map((x) => FilterModel.fromJson(x))),
       localFilter: List<dynamic>.from(json['localFilter']),
     );
 
@@ -124,7 +114,6 @@ class NodeModel {
     );
   }
 }
-
 
 class CurrentProgram {
   final String programName, programCategory,zoneName,startTime, duration_Qty, duration_QtyCompleted;
@@ -287,48 +276,64 @@ class CentralFertilizerSite {
   String id;
   String location;
   String name;
-  int status;
 
   CentralFertilizerSite({
     required this.sNo,
     required this.id,
     required this.location,
     required this.name,
-    required this.status,
   });
 
   factory CentralFertilizerSite.fromJson(Map<String, dynamic> json) {
+
     return CentralFertilizerSite(
       sNo: json['sNo'],
       id: json['id'],
       location: json['location'],
       name: json['name'],
-      status: json['status'],
     );
   }
 }
 
-class CentralFilterSite {
+class FilterModel {
   int sNo;
   String id;
-  String location;
   String name;
-  int status;
+  String location;
+  List<Filters> filter;
 
-  CentralFilterSite({
-    required this.sNo,
-    required this.id,
-    required this.location,
-    required this.name,
-    required this.status,
-  });
+  FilterModel({required this.sNo, required this.id, required this.name, required this.location, required this.filter});
+  factory FilterModel.fromJson(Map<String, dynamic> json) {
 
-  factory CentralFilterSite.fromJson(Map<String, dynamic> json) {
-    return CentralFilterSite(
+    var filterList = json['filter'] as List;
+    List<Filters> filter = filterList.map((filter) => Filters.fromJson(filter)).toList();
+
+    return FilterModel(
       sNo: json['sNo'],
       id: json['id'],
-      location: json['location'],
       name: json['name'],
+      location: json['location'],
+      filter: filter,
+    );
+  }
+}
+
+class Filters {
+  int sNo;
+  String id;
+  String name;
+  String location;
+  int status;
+
+  Filters({required this.sNo, required this.id, required this.name, required this.location,
+    required this.status});
+
+  factory Filters.fromJson(Map<String, dynamic> json) {
+    return Filters(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      location: json['location'],
       status: json['status'],
     );
   }

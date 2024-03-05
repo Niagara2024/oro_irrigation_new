@@ -146,33 +146,29 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Card(
-                      elevation: 5,
-                      surfaceTintColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5), // make it circular
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(3.0),
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                height: 220,
-                                child: MainLine(siteData: widget.siteData),
-                              ),
-                              SizedBox(
-                                child: CurrentSchedule(siteData: widget.siteData),
-                              ),
-                              SizedBox(
-                                child: NextSchedule(siteData: widget.siteData, userID: widget.userID, customerID: widget.customerID),
-                              ),
-                              SizedBox(
-                                child: UpcomingProgram(siteData: widget.siteData),
-                              ),
-                            ],
-                          ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(3.0),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 220,
+                              child: MainLine(siteData: widget.siteData),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 5),
+                              child: CurrentSchedule(siteData: widget.siteData),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 5),
+                              child: NextSchedule(siteData: widget.siteData, userID: widget.userID, customerID: widget.customerID),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 5),
+                              child: UpcomingProgram(siteData: widget.siteData),
+                            ),
+                          ],
                         ),
                       ),
                     ),

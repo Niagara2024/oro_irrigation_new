@@ -136,10 +136,29 @@ class _RunByManualState extends State<RunByManual> {
               tooltip: 'Start',
               onPressed: () {
                 standaloneSelection.clear();
-                String strSldSourcePump = buildSelectedItemsString(dashBoardData[0].sourcePump);
-                String strSldIrrigationPump = buildSelectedItemsString(dashBoardData[0].irrigationPump);
-                String strSldMainValve = buildSelectedItemsString(dashBoardData[0].mainValve);
-                String strSldCtrlFilter = buildSelectedItemsString(dashBoardData[0].centralFilterSite);
+                String strSldSourcePump ='',strSldIrrigationPump ='',strSldMainValve ='',strSldCtrlFilter ='',strSldLocFilter =''
+                ,strSldCrlFetFilter ='',strSldLocFetFilter ='';
+                if(dashBoardData[0].sourcePump.isNotEmpty){
+                  strSldSourcePump = buildSelectedItemsString(dashBoardData[0].sourcePump);
+                }
+                if(dashBoardData[0].irrigationPump.isNotEmpty){
+                  strSldIrrigationPump = buildSelectedItemsString(dashBoardData[0].irrigationPump);
+                }
+                if(dashBoardData[0].mainValve.isNotEmpty){
+                  strSldMainValve = buildSelectedItemsString(dashBoardData[0].mainValve);
+                }
+                if(dashBoardData[0].centralFilterSite.isNotEmpty){
+                  strSldCtrlFilter = buildSelectedItemsString(dashBoardData[0].centralFilterSite[0].filter);
+                }
+                if(dashBoardData[0].localFilterSite.isNotEmpty){
+                  strSldLocFilter = buildSelectedItemsString(dashBoardData[0].localFilterSite[0].filter);
+                }
+                if(dashBoardData[0].centralFertilizerSite.isNotEmpty){
+                  strSldCrlFetFilter = buildSelectedItemsString(dashBoardData[0].centralFertilizerSite[0].fertilizer);
+                }
+                if(dashBoardData[0].localFertilizerSite.isNotEmpty){
+                  strSldLocFetFilter = buildSelectedItemsString(dashBoardData[0].localFertilizerSite[0].fertilizer);
+                }
 
                 String strSldValveOrLineSno = '';
                 String strProgramCategory= '';
@@ -184,7 +203,10 @@ class _RunByManualState extends State<RunByManual> {
                   strSldIrrigationPump,
                   strSldMainValve,
                   strSldCtrlFilter,
-                  strSldValveOrLineSno
+                  strSldValveOrLineSno,
+                  strSldLocFilter,
+                  strSldCrlFetFilter,
+                  strSldLocFetFilter
                 ];
 
                 strProgramCategory = strProgramCategory.isNotEmpty ? strProgramCategory.substring(0, strProgramCategory.length - 1) : '';

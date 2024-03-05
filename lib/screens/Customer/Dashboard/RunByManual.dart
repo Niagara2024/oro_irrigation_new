@@ -104,6 +104,7 @@ class _RunByManualState extends State<RunByManual> {
     final response = await HttpService().postRequest("getCustomerDashboardByManual", body);
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
+      print('kamaral');
       print(response.body);
       indicatorViewHide();
       if (jsonResponse['data'] != null) {
@@ -137,7 +138,8 @@ class _RunByManualState extends State<RunByManual> {
               onPressed: () {
                 standaloneSelection.clear();
                 String strSldSourcePump ='',strSldIrrigationPump ='',strSldMainValve ='',strSldCtrlFilter ='',strSldLocFilter =''
-                ,strSldCrlFetFilter ='',strSldLocFetFilter ='';
+                ,strSldCrlFetFilter ='',strSldLocFetFilter ='', strSldAgitator ='', strSldFan ='', strSldFogger ='';
+
                 if(dashBoardData[0].sourcePump.isNotEmpty){
                   strSldSourcePump = buildSelectedItemsString(dashBoardData[0].sourcePump);
                 }
@@ -159,6 +161,17 @@ class _RunByManualState extends State<RunByManual> {
                 if(dashBoardData[0].localFertilizerSite.isNotEmpty){
                   strSldLocFetFilter = buildSelectedItemsString(dashBoardData[0].localFertilizerSite[0].fertilizer);
                 }
+                if(dashBoardData[0].agitator.isNotEmpty){
+                  strSldAgitator = buildSelectedItemsString(dashBoardData[0].agitator);
+                }
+                if(dashBoardData[0].fan.isNotEmpty){
+                  strSldFan = buildSelectedItemsString(dashBoardData[0].fan);
+                }
+                if(dashBoardData[0].fogger.isNotEmpty){
+                  strSldFogger = buildSelectedItemsString(dashBoardData[0].fogger);
+                }
+
+
 
                 String strSldValveOrLineSno = '';
                 String strProgramCategory= '';
@@ -206,7 +219,10 @@ class _RunByManualState extends State<RunByManual> {
                   strSldValveOrLineSno,
                   strSldLocFilter,
                   strSldCrlFetFilter,
-                  strSldLocFetFilter
+                  strSldLocFetFilter,
+                  strSldAgitator,
+                  strSldFan,
+                  strSldFogger,
                 ];
 
                 strProgramCategory = strProgramCategory.isNotEmpty ? strProgramCategory.substring(0, strProgramCategory.length - 1) : '';
@@ -832,6 +848,115 @@ class _RunByManualState extends State<RunByManual> {
                               ],
                             ),
                           ): Container(),
+
+                        if (dashBoardData.isNotEmpty)
+                          dashBoardData[0].agitator.isNotEmpty ? Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
+                                  child: Text('Agitator'),
+                                ),
+                                SizedBox(
+                                  height: dashBoardData[0].agitator.length  * 50,
+                                  child: ListView.builder(
+                                    itemCount: dashBoardData[0].agitator.length,
+                                    itemBuilder: (context, index) {
+                                      return Column(
+                                        children: [
+                                          CheckboxListTile(
+                                            title: Text(dashBoardData[0].agitator[index].name),
+                                            secondary: Image.asset('assets/images/agitator.png'),
+                                            value: dashBoardData[0].agitator[index].selected,
+                                            onChanged: (bool? newValue) {
+                                              setState(() {
+                                                dashBoardData[0].agitator[index].selected = newValue!;
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ): Container(),
+
+                        if (dashBoardData.isNotEmpty)
+                          dashBoardData[0].fan.isNotEmpty ? Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
+                                  child: Text('Fan'),
+                                ),
+                                SizedBox(
+                                  height: dashBoardData[0].fan.length  * 50,
+                                  child: ListView.builder(
+                                    itemCount: dashBoardData[0].fan.length,
+                                    itemBuilder: (context, index) {
+                                      return Column(
+                                        children: [
+                                          CheckboxListTile(
+                                            title: Text(dashBoardData[0].fan[index].name),
+                                            secondary: Image.asset('assets/images/fan.png'),
+                                            value: dashBoardData[0].fan[index].selected,
+                                            onChanged: (bool? newValue) {
+                                              setState(() {
+                                                dashBoardData[0].fan[index].selected = newValue!;
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ): Container(),
+
+                        if (dashBoardData.isNotEmpty)
+                          dashBoardData[0].fogger.isNotEmpty ? Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
+                                  child: Text('Fogger'),
+                                ),
+                                SizedBox(
+                                  height: dashBoardData[0].fogger.length  * 50,
+                                  child: ListView.builder(
+                                    itemCount: dashBoardData[0].fogger.length,
+                                    itemBuilder: (context, index) {
+                                      return Column(
+                                        children: [
+                                          CheckboxListTile(
+                                            title: Text(dashBoardData[0].fogger[index].name),
+                                            secondary: Image.asset('assets/images/fogger.png'),
+                                            value: dashBoardData[0].fogger[index].selected,
+                                            onChanged: (bool? newValue) {
+                                              setState(() {
+                                                dashBoardData[0].fogger[index].selected = newValue!;
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ): Container(),
+
                       ],
                     ),
                   ),

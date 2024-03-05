@@ -15,6 +15,7 @@ class DashboardModel {
   List<dynamic> localFertilizer;
   List<FilterModel> centralFilterSite;
   List<dynamic> localFilter;
+  List<Agitator> agitator;
 
   DashboardModel({
     required this.controllerId,
@@ -33,6 +34,7 @@ class DashboardModel {
     required this.localFertilizer,
     required this.centralFilterSite,
     required this.localFilter,
+    required this.agitator,
   });
 
   factory DashboardModel.fromJson(Map<String, dynamic> json) {
@@ -63,6 +65,7 @@ class DashboardModel {
       localFertilizer: List<dynamic>.from(json['localFertilizer']),
       centralFilterSite: List<FilterModel>.from(json['centralFilterSite'].map((x) => FilterModel.fromJson(x))),
       localFilter: List<dynamic>.from(json['localFilter']),
+      agitator: List<Agitator>.from(json['agitator'].map((x) => Agitator.fromJson(x))),
     );
 
   }
@@ -330,6 +333,27 @@ class Filters {
 
   factory Filters.fromJson(Map<String, dynamic> json) {
     return Filters(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      location: json['location'],
+      status: json['status'],
+    );
+  }
+}
+
+class Agitator {
+  int sNo;
+  String id;
+  String name;
+  String location;
+  int status;
+
+  Agitator({required this.sNo, required this.id, required this.name, required this.location,
+    required this.status});
+
+  factory Agitator.fromJson(Map<String, dynamic> json) {
+    return Agitator(
       sNo: json['sNo'],
       id: json['id'],
       name: json['name'],

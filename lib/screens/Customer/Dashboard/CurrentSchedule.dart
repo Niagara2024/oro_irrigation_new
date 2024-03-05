@@ -59,9 +59,9 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
             ),
             Container(
               color: Colors.white,
-              height: provider.currentSchedule.isNotEmpty? (provider.currentSchedule.length * 233): 50,
+              height: provider.currentSchedule.isNotEmpty? (provider.currentSchedule.length * 232): 50,
               child: provider.currentSchedule.isNotEmpty? SizedBox(
-                height: (provider.currentSchedule.length * 233),
+                height: (provider.currentSchedule.length * 232),
                 child: Column(
                   children: [
                     for(int index=0; index<provider.currentSchedule.length; index++)

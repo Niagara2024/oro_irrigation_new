@@ -164,6 +164,9 @@ flutter:
      - assets/images/w52.gif
      - assets/images/db_valve.png
      - assets/images/dp_filter.png
+     - assets/images/dp_filter1.png
+     - assets/images/dp_filter2.png
+     - assets/images/dp_filter3.png
      - assets/images/dp_prs_sensor.png
      - assets/images/dp_irr_pump.png
      - assets/images/dp_irr_pump_1.png

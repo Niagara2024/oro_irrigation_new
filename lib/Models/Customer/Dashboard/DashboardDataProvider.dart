@@ -13,6 +13,11 @@ class DashboardDataProvider
   List<FertilizerModel> localFertilizerSite;
   List<FilterModel> centralFilterSite;
   List<FilterModel> localFilterSite;
+  List<Agitator> agitator;
+  List<Fan> fan;
+  List<Fogger> fogger;
+
+
 
   DashboardDataProvider({
     required this.startTogether,
@@ -27,6 +32,9 @@ class DashboardDataProvider
     required this.localFertilizerSite,
     required this.centralFilterSite,
     required this.localFilterSite,
+    required this.agitator,
+    required this.fan,
+    required this.fogger,
   });
 
   factory DashboardDataProvider.fromJson(Map<String, dynamic> json) {
@@ -66,7 +74,17 @@ class DashboardDataProvider
         .map((localFertilizer) => FertilizerModel.fromJson(localFertilizer))
         .toList();
 
+    List<Agitator> agitator = (json['agitator'] as List)
+        .map((agitator) => Agitator.fromJson(agitator))
+        .toList();
 
+    List<Fan> fan = (json['fan'] as List)
+        .map((fan) => Fan.fromJson(fan))
+        .toList();
+
+    List<Fogger> fogger = (json['fogger'] as List)
+        .map((fogger) => Fogger.fromJson(fogger))
+        .toList();
 
     return DashboardDataProvider(
       startTogether: startTogetherStatus,
@@ -81,6 +99,9 @@ class DashboardDataProvider
       localFertilizerSite: localFertilizerSite,
       centralFilterSite: centralFilterSite,
       localFilterSite: localFilterSite,
+      agitator: agitator,
+      fan: fan,
+      fogger: fogger,
     );
   }
 
@@ -237,6 +258,69 @@ class FertilizerChanel {
       location: json['location'],
       time: json['time'],
       flow: json['flow'],
+      selected: json['selected'],
+    );
+  }
+}
+
+class Agitator {
+  int sNo;
+  String id;
+  String name;
+  String location;
+  bool selected;
+
+  Agitator({required this.sNo, required this.id, required this.name, required this.location,
+    required this.selected});
+
+  factory Agitator.fromJson(Map<String, dynamic> json) {
+    return Agitator(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      location: json['location'],
+      selected: json['selected'],
+    );
+  }
+}
+
+class Fan {
+  int sNo;
+  String id;
+  String name;
+  String location;
+  bool selected;
+
+  Fan({required this.sNo, required this.id, required this.name, required this.location,
+    required this.selected});
+
+  factory Fan.fromJson(Map<String, dynamic> json) {
+    return Fan(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      location: json['location'],
+      selected: json['selected'],
+    );
+  }
+}
+
+class Fogger {
+  int sNo;
+  String id;
+  String name;
+  String location;
+  bool selected;
+
+  Fogger({required this.sNo, required this.id, required this.name, required this.location,
+    required this.selected});
+
+  factory Fogger.fromJson(Map<String, dynamic> json) {
+    return Fogger(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      location: json['location'],
       selected: json['selected'],
     );
   }

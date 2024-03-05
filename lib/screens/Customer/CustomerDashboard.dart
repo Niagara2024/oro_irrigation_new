@@ -152,7 +152,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                         child: Column(
                           children: [
                             SizedBox(
-                              height: 220,
+                              height: getMaxCount(widget.siteData.irrigationPump, widget.siteData.centralFilterSite.isNotEmpty? widget.siteData.centralFilterSite[0].filter:[]) > 3? getMaxCount(widget.siteData.irrigationPump, widget.siteData.centralFilterSite.isNotEmpty? widget.siteData.centralFilterSite[0].filter:[]) * 80 : 225,
                               child: MainLine(siteData: widget.siteData),
                             ),
                             Padding(
@@ -590,6 +590,12 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
         ],
       ),
     );
+  }
+
+  int getMaxCount(List<dynamic> array1, List<dynamic> array2) {
+    int count1 = array1.length;
+    int count2 = array2.length;
+    return count1 > count2 ? count1 : count2;
   }
 
   void initRotationAnimation(){

@@ -16,6 +16,8 @@ class DashboardDataProvider
   List<Agitator> agitator;
   List<Fan> fan;
   List<Fogger> fogger;
+  List<BoosterPump> boosterPump;
+  List<Selector> selector;
 
 
 
@@ -35,6 +37,8 @@ class DashboardDataProvider
     required this.agitator,
     required this.fan,
     required this.fogger,
+    required this.boosterPump,
+    required this.selector,
   });
 
   factory DashboardDataProvider.fromJson(Map<String, dynamic> json) {
@@ -43,15 +47,15 @@ class DashboardDataProvider
     String flowVal = json['flow'];
     int method = json['method'];
     List<SourcePump> sourcePumpList = (json['sourcePump'] as List)
-        .map((sourcePumpJson) => SourcePump.fromJson(sourcePumpJson))
+        .map((sourcePump) => SourcePump.fromJson(sourcePump))
         .toList();
 
     List<IrrigationPump> irrigationPump = (json['irrigationPump'] as List)
-        .map((sourcePumpJson) => IrrigationPump.fromJson(sourcePumpJson))
+        .map((irrigationPump) => IrrigationPump.fromJson(irrigationPump))
         .toList();
 
     List<MainValve> mainValve = (json['mainValve'] as List)
-        .map((sourcePumpJson) => MainValve.fromJson(sourcePumpJson))
+        .map((mainValve) => MainValve.fromJson(mainValve))
         .toList();
 
     List<LineOrSequence> lineOrSequence = (json['lineOrSequence'] as List)
@@ -86,6 +90,14 @@ class DashboardDataProvider
         .map((fogger) => Fogger.fromJson(fogger))
         .toList();
 
+    List<BoosterPump> boosterPump = (json['boosterPump'] as List)
+        .map((boosterPump) => BoosterPump.fromJson(boosterPump))
+        .toList();
+
+    List<Selector> selector = (json['selector'] as List)
+        .map((selector) => Selector.fromJson(selector))
+        .toList();
+
     return DashboardDataProvider(
       startTogether: startTogetherStatus,
       time: timeVal,
@@ -102,9 +114,10 @@ class DashboardDataProvider
       agitator: agitator,
       fan: fan,
       fogger: fogger,
+      boosterPump: boosterPump,
+      selector: selector,
     );
   }
-
 }
 
 class SourcePump {
@@ -317,6 +330,48 @@ class Fogger {
 
   factory Fogger.fromJson(Map<String, dynamic> json) {
     return Fogger(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      location: json['location'],
+      selected: json['selected'],
+    );
+  }
+}
+
+class BoosterPump {
+  int sNo;
+  String id;
+  String name;
+  String location;
+  bool selected;
+
+  BoosterPump({required this.sNo, required this.id, required this.name, required this.location,
+    required this.selected});
+
+  factory BoosterPump.fromJson(Map<String, dynamic> json) {
+    return BoosterPump(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      location: json['location'],
+      selected: json['selected'],
+    );
+  }
+}
+
+class Selector {
+  int sNo;
+  String id;
+  String name;
+  String location;
+  bool selected;
+
+  Selector({required this.sNo, required this.id, required this.name, required this.location,
+    required this.selected});
+
+  factory Selector.fromJson(Map<String, dynamic> json) {
+    return Selector(
       sNo: json['sNo'],
       id: json['id'],
       name: json['name'],

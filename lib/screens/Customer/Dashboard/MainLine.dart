@@ -20,14 +20,25 @@ class _MainLineState extends State<MainLine> {
   Widget build(BuildContext context) {
     final provider = Provider.of<MqttPayloadProvider>(context);
 
+    /*if (provider.filters.isNotEmpty) {
+      provider.filters.forEach((filter) {
+        print(filter);
+        widget.siteData.centralFilterSite[0].filter.forEach((centralFilter) {
+          if (filter['id'] == centralFilter.sNo) {
+            print(centralFilter.id);
+            centralFilter.sNo = filter['Status'];
+          }
+        });
+      });
+    }*/
+
     return Row(
       children: [
         SizedBox(
           width: 280,
           child: Column(
             children: [
-              widget.siteData.irrigationPump.isNotEmpty
-                  ||widget.siteData.centralFilterSite.isNotEmpty?
+              widget.siteData.irrigationPump.isNotEmpty || widget.siteData.centralFilterSite.isNotEmpty?
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -101,13 +112,13 @@ class _MainLineState extends State<MainLine> {
                       },
                     ),
                   ),
-                  widget.siteData.centralFilterSite.isNotEmpty? SizedBox(
+                  provider.filters.isNotEmpty? SizedBox(
                     width: 70,
-                    height: widget.siteData.centralFilterSite[0].filter.length * 75,
+                    height: provider.filters[0]['FilterStatus'].length * 75,
                     child: ListView.builder(
-                      itemCount: widget.siteData.centralFilterSite[0].filter.length,
+                      itemCount: provider.filters[0]['FilterStatus'].length,
                       itemBuilder: (BuildContext context, int index) {
-                        if (index < widget.siteData.centralFilterSite[0].filter.length) {
+                        if (index < provider.filters[0]['FilterStatus'].length) {
                           return Column(
                             children: [
                               PopupMenuButton(
@@ -119,16 +130,16 @@ class _MainLineState extends State<MainLine> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         mainAxisAlignment: MainAxisAlignment.start,
                                         children: [
-                                          Text(widget.siteData.centralFilterSite[0].name, style: const TextStyle(fontWeight: FontWeight.bold),),
+                                          Text(provider.filters[0]['FilterStatus'][index]['Name'], style: const TextStyle(fontWeight: FontWeight.bold),),
                                           const Divider(),
-                                          Text('ID : ${widget.siteData.centralFilterSite[0].filter[index].id}'),
-                                          Text('Location : ${widget.siteData.centralFilterSite[0].filter[index].location}'),
+                                          //Text('ID : ${widget.siteData.centralFilterSite[0].filter[index].id}'),
+                                          //Text('Location : ${widget.siteData.centralFilterSite[0].filter[index].location}'),
                                         ],
                                       ),
                                     ),
                                   ];
                                 },
-                                child: buildFilterImage(index),
+                                child: buildFilterImage(index, provider.filters[0]['FilterStatus'][index]['Status'], provider.filters[0]['FilterStatus'].length),
                               ),
                             ],
                           ); // Replace 'yourKey' with the key from your API response
@@ -345,39 +356,41 @@ class _MainLineState extends State<MainLine> {
     return child;
   }
 
-  Widget buildFilterImage(int index) {
-    Widget child;
-    if (widget.siteData.centralFilterSite[0].filter.length == 1) {
-      child = Image.asset('assets/images/dp_filter.png');
-    } else if (widget.siteData.centralFilterSite[0].filter.length == 2) {
-      if (index == 0) {
-        child = Image.asset('assets/images/dp_filter1.png');
-      } else {
-        child = Image.asset('assets/images/dp_filter3.png');
-      }
-    } else if (widget.siteData.centralFilterSite[0].filter.length == 3) {
-      if (index == 0) {
-        child = Image.asset('assets/images/dp_filter1.png');
-      } else if (index == 1) {
-        child = Image.asset('assets/images/dp_filter2.png');
-      } else {
-        child = Image.asset('assets/images/dp_filter3.png');
-      }
-    } else if (widget.siteData.centralFilterSite[0].filter.length == 4) {
-      if (index == 0) {
-        child = Image.asset('assets/images/dp_filter1.png');
-      } else if (index == 1) {
-        child = Image.asset('assets/images/dp_filter2.png');
-      }else if (index == 2) {
-        child = Image.asset('assets/images/dp_filter2.png');
-      } else {
-        child = Image.asset('assets/images/dp_filter3.png');
-      }
+  Widget buildFilterImage(int cIndex, int status, int filterLength) {
+    String imageName;
+    if (filterLength == 1) {
+      imageName = 'dp_filter';
+    } else if (filterLength == 2) {
+      imageName = cIndex == 0 ? 'dp_filter1' : 'dp_filter3';
     } else {
-      child = Image.asset('assets/images/dp_filter3.png');
+      int totalFilters = widget.siteData.centralFilterSite[0].filter.length;
+      switch (totalFilters) {
+        case 3:
+          imageName = cIndex == 0 ? 'dp_filter1' : (cIndex == 1 ? 'dp_filter2' : 'dp_filter3');
+          break;
+        case 4:
+          imageName = cIndex == 0 ? 'dp_filter1' : (cIndex == 1 ? 'dp_filter2' : (cIndex == 2 ? 'dp_filter2' : 'dp_filter3'));
+          break;
+        default:
+          imageName = 'dp_filter3';
+      }
     }
 
-    return child;
+    switch (status) {
+      case 0:
+        imageName += '.png';
+        break;
+      case 1:
+        imageName += '_g.png';
+        break;
+      case 2:
+        imageName += '_y.png';
+        break;
+      default:
+        imageName += '_r.png';
+    }
+
+    return Image.asset('assets/images/$imageName');
   }
 
 }

@@ -15,7 +15,7 @@ class MqttPayloadProvider with ChangeNotifier {
   late List<dynamic> currentSchedule = [];
   late List<dynamic> nextSchedule = [];
   late List<dynamic> upcomingProgram = [];
-  late List<dynamic> filterDetails = [];
+  List<dynamic> filters = [];
 
   void editMySchedule(ScheduleViewProvider instance){
     mySchedule = instance;
@@ -33,6 +33,10 @@ class MqttPayloadProvider with ChangeNotifier {
         }
         if (data['2400'][0].containsKey('2402')) {
           currentSchedule = data['2400'][0]['2402'];
+        /*  if(currentSchedule.isNotEmpty && currentSchedule[0].containsKey('FL')){
+            //print(currentSchedule[0]['FL'].runtimeType);
+            filters = currentSchedule[0]['FL'];
+          }*/
         }
         if (data['2400'][0].containsKey('2403')) {
           nextSchedule = data['2400'][0]['2403'];
@@ -41,7 +45,7 @@ class MqttPayloadProvider with ChangeNotifier {
           upcomingProgram = data['2400'][0]['2404'];
         }
         if (data['2400'][0].containsKey('2405')) {
-          filterDetails = data['2400'][0]['2405'];
+          filters = data['2400'][0]['2405'];
         }
 
       }
@@ -65,11 +69,11 @@ class MqttPayloadProvider with ChangeNotifier {
 
   void clearData() {
     dashBoardPayload = '';
-    mainLine.clear();
-    currentSchedule.clear();
-    upcomingProgram.clear();
-    nextSchedule.clear();
-    filterDetails.clear();
+    mainLine = [];
+    currentSchedule = [];
+    upcomingProgram = [];
+    nextSchedule = [];
+    filters = [];
     notifyListeners();
   }
 

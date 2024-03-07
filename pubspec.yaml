@@ -204,6 +204,15 @@ flutter:
      - assets/SVGPicture/top_corner.svg
      - assets/images/login_top_corner.png
      - assets/images/oro_logo_white.png
+     - assets/images/dp_filter1_g.png
+     - assets/images/dp_filter2_g.png
+     - assets/images/dp_filter3_g.png
+     - assets/images/dp_filter1_y.png
+     - assets/images/dp_filter2_y.png
+     - assets/images/dp_filter3_y.png
+     - assets/images/dp_filter1_r.png
+     - assets/images/dp_filter2_r.png
+     - assets/images/dp_filter3_r.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

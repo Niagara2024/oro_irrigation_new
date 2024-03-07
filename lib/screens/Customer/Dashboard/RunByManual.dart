@@ -104,7 +104,6 @@ class _RunByManualState extends State<RunByManual> {
     final response = await HttpService().postRequest("getCustomerDashboardByManual", body);
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
-      print('kamaral');
       print(response.body);
       indicatorViewHide();
       if (jsonResponse['data'] != null) {
@@ -138,7 +137,8 @@ class _RunByManualState extends State<RunByManual> {
               onPressed: () {
                 standaloneSelection.clear();
                 String strSldSourcePump ='',strSldIrrigationPump ='',strSldMainValve ='',strSldCtrlFilter ='',strSldLocFilter =''
-                ,strSldCrlFetFilter ='',strSldLocFetFilter ='', strSldAgitator ='', strSldFan ='', strSldFogger ='';
+                ,strSldCrlFetFilter ='',strSldLocFetFilter ='', strSldAgitator ='', strSldFan ='', strSldFogger =''
+                , strSldBoosterPump ='', strSldSelector ='';
 
                 if(dashBoardData[0].sourcePump.isNotEmpty){
                   strSldSourcePump = buildSelectedItemsString(dashBoardData[0].sourcePump);
@@ -170,8 +170,12 @@ class _RunByManualState extends State<RunByManual> {
                 if(dashBoardData[0].fogger.isNotEmpty){
                   strSldFogger = buildSelectedItemsString(dashBoardData[0].fogger);
                 }
-
-
+                if(dashBoardData[0].boosterPump.isNotEmpty){
+                  strSldBoosterPump = buildSelectedItemsString(dashBoardData[0].boosterPump);
+                }
+                if(dashBoardData[0].selector.isNotEmpty){
+                  strSldSelector = buildSelectedItemsString(dashBoardData[0].selector);
+                }
 
                 String strSldValveOrLineSno = '';
                 String strProgramCategory= '';
@@ -223,6 +227,8 @@ class _RunByManualState extends State<RunByManual> {
                   strSldAgitator,
                   strSldFan,
                   strSldFogger,
+                  strSldBoosterPump,
+                  strSldSelector,
                 ];
 
                 strProgramCategory = strProgramCategory.isNotEmpty ? strProgramCategory.substring(0, strProgramCategory.length - 1) : '';
@@ -945,6 +951,78 @@ class _RunByManualState extends State<RunByManual> {
                                             onChanged: (bool? newValue) {
                                               setState(() {
                                                 dashBoardData[0].fogger[index].selected = newValue!;
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ): Container(),
+
+                        if (dashBoardData.isNotEmpty)
+                          dashBoardData[0].boosterPump.isNotEmpty ? Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
+                                  child: Text('Booster Pump'),
+                                ),
+                                SizedBox(
+                                  height: dashBoardData[0].boosterPump.length  * 50,
+                                  child: ListView.builder(
+                                    itemCount: dashBoardData[0].boosterPump.length,
+                                    itemBuilder: (context, index) {
+                                      return Column(
+                                        children: [
+                                          CheckboxListTile(
+                                            title: Text(dashBoardData[0].boosterPump[index].name),
+                                            secondary: Image.asset('assets/images/booster_pump.png'),
+                                            value: dashBoardData[0].boosterPump[index].selected,
+                                            onChanged: (bool? newValue) {
+                                              setState(() {
+                                                dashBoardData[0].boosterPump[index].selected = newValue!;
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ): Container(),
+
+                        if (dashBoardData.isNotEmpty)
+                          dashBoardData[0].selector.isNotEmpty ? Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
+                                  child: Text('Selector'),
+                                ),
+                                SizedBox(
+                                  height: dashBoardData[0].selector.length  * 50,
+                                  child: ListView.builder(
+                                    itemCount: dashBoardData[0].selector.length,
+                                    itemBuilder: (context, index) {
+                                      return Column(
+                                        children: [
+                                          CheckboxListTile(
+                                            title: Text(dashBoardData[0].selector[index].name),
+                                            secondary: Image.asset('assets/images/selector.png'),
+                                            value: dashBoardData[0].selector[index].selected,
+                                            onChanged: (bool? newValue) {
+                                              setState(() {
+                                                dashBoardData[0].selector[index].selected = newValue!;
                                               });
                                             },
                                           ),

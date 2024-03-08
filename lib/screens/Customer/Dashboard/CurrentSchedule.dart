@@ -60,9 +60,9 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
             ),
             Container(
               color: Colors.white,
-              height: provider.currentSchedule.isNotEmpty? (provider.currentSchedule.length * 232): 50,
+              height: provider.currentSchedule.isNotEmpty? (provider.currentSchedule.length * 233): 50,
               child: provider.currentSchedule.isNotEmpty? SizedBox(
-                height: (provider.currentSchedule.length * 232),
+                height: (provider.currentSchedule.length * 233),
                 child: Column(
                   children: [
                     for(int index=0; index<provider.currentSchedule.length; index++)
@@ -164,6 +164,8 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
+                                    provider.currentSchedule[0]['OnDelayTimeLeft']!='00:00:00'? Text('On Delay Time Left : ${provider.currentSchedule[0]['OnDelayTimeLeft']}') :
+                                    const Text(''),
                                     Row(
                                       children: [
                                         Expanded(
@@ -663,7 +665,6 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
       }
 
     });
-
   }
 
 }

@@ -150,13 +150,15 @@ class _LoginFormState extends State<LoginForm> {
                                 SizedBox(
                                   width: 150.0,
                                   height: 40.0,
-                                  child: TextButton(
+                                  child: MaterialButton(
+                                    color: myTheme.primaryColor,
+                                    textColor: Colors.white,
+                                    child: const Text('CONTINUE'),
                                     onPressed: () async {
                                       setState(() {
                                         _mobileNoController.text.isEmpty ||_passwordController.text.isEmpty ? _showSnackBar('Value Can\'t Be Empty') :
                                         _mobileNoController.text.length < 6 || _passwordController.text.length < 5 ? _showSnackBar('Invalid Mobile number or Password') : _validate = true;
                                       });
-
                                       if(_validate)
                                       {
                                         Map<String, Object> body = {
@@ -195,7 +197,6 @@ class _LoginFormState extends State<LoginForm> {
                                         }
                                       }
                                     },
-                                    child: const Text('CONTINUE'),
                                   ),
                                 ),
                                 const SizedBox(height: 15,),

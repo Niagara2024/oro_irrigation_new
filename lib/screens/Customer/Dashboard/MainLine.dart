@@ -1,10 +1,13 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../constants/theme.dart';
-import '../../../state_management/MqttPayloadProvider.dart';
+import 'CentralFilter.dart';
+
 
 class MainLine extends StatefulWidget {
   const MainLine({Key? key, required this.siteData}) : super(key: key);
@@ -18,19 +21,6 @@ class _MainLineState extends State<MainLine> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<MqttPayloadProvider>(context);
-
-    /*if (provider.filters.isNotEmpty) {
-      provider.filters.forEach((filter) {
-        print(filter);
-        widget.siteData.centralFilterSite[0].filter.forEach((centralFilter) {
-          if (filter['id'] == centralFilter.sNo) {
-            print(centralFilter.id);
-            centralFilter.sNo = filter['Status'];
-          }
-        });
-      });
-    }*/
 
     return Row(
       children: [
@@ -69,7 +59,7 @@ class _MainLineState extends State<MainLine> {
                                     ),
                                   ];
                                 },
-                                child: buildIrrigationPumpImage(index),
+                                child: buildIrPumpImage(index, widget.siteData.irrigationPump[index].status,widget.siteData.irrigationPump.length),
                               ),
                             ],
                           ); // Replace 'yourKey' with the key from your API response
@@ -112,43 +102,7 @@ class _MainLineState extends State<MainLine> {
                       },
                     ),
                   ),
-                  provider.filters.isNotEmpty? SizedBox(
-                    width: 70,
-                    height: provider.filters[0]['FilterStatus'].length * 75,
-                    child: ListView.builder(
-                      itemCount: provider.filters[0]['FilterStatus'].length,
-                      itemBuilder: (BuildContext context, int index) {
-                        if (index < provider.filters[0]['FilterStatus'].length) {
-                          return Column(
-                            children: [
-                              PopupMenuButton(
-                                tooltip: 'Details',
-                                itemBuilder: (context) {
-                                  return [
-                                    PopupMenuItem(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        children: [
-                                          Text(provider.filters[0]['FilterStatus'][index]['Name'], style: const TextStyle(fontWeight: FontWeight.bold),),
-                                          const Divider(),
-                                          //Text('ID : ${widget.siteData.centralFilterSite[0].filter[index].id}'),
-                                          //Text('Location : ${widget.siteData.centralFilterSite[0].filter[index].location}'),
-                                        ],
-                                      ),
-                                    ),
-                                  ];
-                                },
-                                child: buildFilterImage(index, provider.filters[0]['FilterStatus'][index]['Status'], provider.filters[0]['FilterStatus'].length),
-                              ),
-                            ],
-                          ); // Replace 'yourKey' with the key from your API response
-                        } else {
-                          return const Text(''); // or any placeholder/error message
-                        }
-                      },
-                    ),
-                  ):
+                  widget.siteData.centralFilterSite.isNotEmpty? const CentralFilter() :
                   const SizedBox(),
                   SizedBox(
                     width: 70,
@@ -321,58 +275,23 @@ class _MainLineState extends State<MainLine> {
     );
   }
 
-  Widget buildIrrigationPumpImage(int index) {
-    Widget child;
-    if (widget.siteData.irrigationPump.length == 1) {
-      child = Image.asset('assets/images/dp_irr_pump.png');
-    } else if (widget.siteData.irrigationPump.length == 2) {
-      if (index == 0) {
-        child = Image.asset('assets/images/dp_irr_pump_1.png');
-      } else {
-        child = Image.asset('assets/images/dp_irr_pump_3.png');
-      }
-    } else if (widget.siteData.irrigationPump.length == 3) {
-      if (index == 0) {
-        child = Image.asset('assets/images/dp_irr_pump_1.png');
-      } else if (index == 1) {
-        child = Image.asset('assets/images/dp_irr_pump_2.png');
-      } else {
-        child = Image.asset('assets/images/dp_irr_pump_3.png');
-      }
-    } else if (widget.siteData.irrigationPump.length == 4) {
-      if (index == 0) {
-        child = Image.asset('assets/images/dp_irr_pump_1.png');
-      } else if (index == 1) {
-        child = Image.asset('assets/images/dp_irr_pump_2.png');
-      }else if (index == 2) {
-        child = Image.asset('assets/images/dp_irr_pump_2.png');
-      } else {
-        child = Image.asset('assets/images/dp_irr_pump_3.png');
-      }
-    } else {
-      child = Image.asset('assets/images/dp_irr_pump_3.png');
-    }
-
-    return child;
-  }
-
-  Widget buildFilterImage(int cIndex, int status, int filterLength) {
+  Widget buildIrPumpImage(int cIndex, int status, int irPumpLength) {
     String imageName;
-    if (filterLength == 1) {
-      imageName = 'dp_filter';
-    } else if (filterLength == 2) {
-      imageName = cIndex == 0 ? 'dp_filter1' : 'dp_filter3';
+    if (irPumpLength == 1) {
+      imageName = 'dp_irr_pump';
+    } else if (irPumpLength == 2) {
+      imageName = cIndex == 0 ? 'dp_irr_pump_1' : 'dp_irr_pump_3';
     } else {
       int totalFilters = widget.siteData.centralFilterSite[0].filter.length;
       switch (totalFilters) {
         case 3:
-          imageName = cIndex == 0 ? 'dp_filter1' : (cIndex == 1 ? 'dp_filter2' : 'dp_filter3');
+          imageName = cIndex == 0 ? 'dp_irr_pump_1' : (cIndex == 1 ? 'dp_irr_pump_2' : 'dp_irr_pump_3');
           break;
         case 4:
-          imageName = cIndex == 0 ? 'dp_filter1' : (cIndex == 1 ? 'dp_filter2' : (cIndex == 2 ? 'dp_filter2' : 'dp_filter3'));
+          imageName = cIndex == 0 ? 'dp_irr_pump_1' : (cIndex == 1 ? 'dp_irr_pump_2' : (cIndex == 2 ? 'dp_irr_pump_2' : 'dp_irr_pump_3'));
           break;
         default:
-          imageName = 'dp_filter3';
+          imageName = 'dp_irr_pump_3';
       }
     }
 
@@ -389,8 +308,126 @@ class _MainLineState extends State<MainLine> {
       default:
         imageName += '_r.png';
     }
-
     return Image.asset('assets/images/$imageName');
   }
 
+}
+
+class CountdownTimer extends StatefulWidget {
+  @override
+  _CountdownTimerState createState() => _CountdownTimerState();
+}
+
+class _CountdownTimerState extends State<CountdownTimer> {
+  int _seconds = 30;
+  late Timer _timer;
+  double _percentage = 1.0;
+
+  @override
+  void initState() {
+    super.initState();
+    startTimer();
+  }
+
+  void startTimer() {
+    const oneSec = Duration(seconds: 1);
+    _timer = Timer.periodic(
+      oneSec,
+          (Timer timer) {
+        setState(() {
+          if (_seconds < 1) {
+            timer.cancel();
+          } else {
+            _seconds -= 1;
+            _percentage = _seconds / 30.0; // Change 10.0 to the total time in seconds
+          }
+        });
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Container(
+          width: 30,
+          height: 30,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.greenAccent, // Set your desired background color
+          ),
+        ),
+        Positioned(
+          top: 0,
+          left: 0,
+          child: CustomPaint(
+            size: const Size(30, 30),
+            painter: TimerPainter(
+              percentage: _percentage,
+            ),
+          ),
+        ),
+        Positioned(
+          top: 7,
+          left: 2.5,
+          child: Container(
+            width: 25,
+            child: Center(
+              child: Text('$_seconds', style: const TextStyle(fontSize: 11),
+              ),
+            ),
+          ),
+        )
+
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+}
+
+class TimerPainter extends CustomPainter {
+  final double percentage;
+
+  TimerPainter({required this.percentage});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint = Paint()
+      ..color = Colors.blue
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawCircle(
+      Offset(size.width / 2, size.height / 2),
+      size.width / 2,
+      paint,
+    );
+
+    Paint progressPaint = Paint()
+      ..color = Colors.red
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    double angle = 2 * math.pi * percentage;
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2),
+      -math.pi / 2,
+      -angle,
+      false,
+      progressPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(TimerPainter oldDelegate) {
+    return oldDelegate.percentage != percentage;
+  }
 }

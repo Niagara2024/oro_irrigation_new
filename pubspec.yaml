@@ -213,6 +213,19 @@ flutter:
      - assets/images/dp_filter1_r.png
      - assets/images/dp_filter2_r.png
      - assets/images/dp_filter3_r.png
+     - assets/images/dp_irr_pump_y.png
+     - assets/images/dp_irr_pump_1_y.png
+     - assets/images/dp_irr_pump_2_y.png
+     - assets/images/dp_irr_pump_3_y.png
+     - assets/images/dp_irr_pump_r.png
+     - assets/images/dp_irr_pump_1_r.png
+     - assets/images/dp_irr_pump_2_r.png
+     - assets/images/dp_irr_pump_3_r.png
+     - assets/images/dp_irr_pump_g.png
+     - assets/images/dp_irr_pump_1_g.png
+     - assets/images/dp_irr_pump_2_g.png
+     - assets/images/dp_irr_pump_2_g.png
+
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -3,10 +3,13 @@ import 'dart:math' as math;
 
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../constants/theme.dart';
+import '../../../state_management/MqttPayloadProvider.dart';
 import 'CentralFilter.dart';
+import 'IrrigationPumpList.dart';
 
 
 class MainLine extends StatefulWidget {
@@ -22,6 +25,8 @@ class _MainLineState extends State<MainLine> {
   @override
   Widget build(BuildContext context) {
 
+    final provider = Provider.of<MqttPayloadProvider>(context);
+
     return Row(
       children: [
         SizedBox(
@@ -32,43 +37,8 @@ class _MainLineState extends State<MainLine> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    width: 70,
-                    height: widget.siteData.irrigationPump.length * 72,
-                    child: ListView.builder(
-                      itemCount: widget.siteData.irrigationPump.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        if (index < widget.siteData.irrigationPump.length) {
-                          return Column(
-                            children: [
-                              PopupMenuButton(
-                                tooltip: 'Details',
-                                itemBuilder: (context) {
-                                  return [
-                                    PopupMenuItem(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        children: [
-                                          Text(widget.siteData.irrigationPump[index].name, style: const TextStyle(fontWeight: FontWeight.bold),),
-                                          const Divider(),
-                                          Text('ID : ${widget.siteData.irrigationPump[index].id}'),
-                                          Text('Location : ${widget.siteData.irrigationPump[index].location}'),
-                                        ],
-                                      ),
-                                    ),
-                                  ];
-                                },
-                                child: buildIrPumpImage(index, widget.siteData.irrigationPump[index].status,widget.siteData.irrigationPump.length),
-                              ),
-                            ],
-                          ); // Replace 'yourKey' with the key from your API response
-                        } else {
-                          return Text(''); // or any placeholder/error message
-                        }
-                      },
-                    ),
-                  ),
+                  widget.siteData.irrigationPump.isNotEmpty? const IrrigationPumpList():
+                  const SizedBox(),
                   SizedBox(
                     width: 70,
                     height: 160,
@@ -96,13 +66,15 @@ class _MainLineState extends State<MainLine> {
                               child: Image.asset('assets/images/dp_prs_sensor.png',),
                             ),
                             const Text('Prs In',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
-                            const Text('7.0 bar',style: TextStyle(fontSize: 10),),
+                            provider.PrsIn.isNotEmpty
+                                ? Text('${double.parse(provider.PrsIn[0]['Value']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10))
+                                : const Text('0.0 bar'),
                           ],
                         );
                       },
                     ),
                   ),
-                  widget.siteData.centralFilterSite.isNotEmpty? const CentralFilter() :
+                  widget.siteData.centralFilterSite.isNotEmpty? const CentralFilter():
                   const SizedBox(),
                   SizedBox(
                     width: 70,
@@ -131,7 +103,9 @@ class _MainLineState extends State<MainLine> {
                               child: Image.asset('assets/images/dp_prs_sensor.png',),
                             ),
                             const Text('Prs Out',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
-                            const Text('6.2 bar',style: TextStyle(fontSize: 10),),
+                            provider.PrsOut.isNotEmpty
+                                ? Text('${double.parse(provider.PrsOut[0]['Value']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10))
+                                : const Text('0.0 bar'),
                           ],
                         );
                       },
@@ -273,42 +247,6 @@ class _MainLineState extends State<MainLine> {
         ),
       ],
     );
-  }
-
-  Widget buildIrPumpImage(int cIndex, int status, int irPumpLength) {
-    String imageName;
-    if (irPumpLength == 1) {
-      imageName = 'dp_irr_pump';
-    } else if (irPumpLength == 2) {
-      imageName = cIndex == 0 ? 'dp_irr_pump_1' : 'dp_irr_pump_3';
-    } else {
-      int totalFilters = widget.siteData.centralFilterSite[0].filter.length;
-      switch (totalFilters) {
-        case 3:
-          imageName = cIndex == 0 ? 'dp_irr_pump_1' : (cIndex == 1 ? 'dp_irr_pump_2' : 'dp_irr_pump_3');
-          break;
-        case 4:
-          imageName = cIndex == 0 ? 'dp_irr_pump_1' : (cIndex == 1 ? 'dp_irr_pump_2' : (cIndex == 2 ? 'dp_irr_pump_2' : 'dp_irr_pump_3'));
-          break;
-        default:
-          imageName = 'dp_irr_pump_3';
-      }
-    }
-
-    switch (status) {
-      case 0:
-        imageName += '.png';
-        break;
-      case 1:
-        imageName += '_g.png';
-        break;
-      case 2:
-        imageName += '_y.png';
-        break;
-      default:
-        imageName += '_r.png';
-    }
-    return Image.asset('assets/images/$imageName');
   }
 
 }

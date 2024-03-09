@@ -11,11 +11,14 @@ class MqttPayloadProvider with ChangeNotifier {
   late ScheduleViewProvider mySchedule;
 
   int wifiStrength = 0;
-  late List<dynamic> mainLine = [];
-  late List<dynamic> currentSchedule = [];
-  late List<dynamic> nextSchedule = [];
-  late List<dynamic> upcomingProgram = [];
+  List<dynamic> mainLine = [];
+  List<dynamic> currentSchedule = [];
+  List<dynamic> PrsIn = [];
+  List<dynamic> PrsOut = [];
+  List<dynamic> nextSchedule = [];
+  List<dynamic> upcomingProgram = [];
   List<dynamic> filters = [];
+  List<dynamic> irrigationPump = [];
 
   void editMySchedule(ScheduleViewProvider instance){
     mySchedule = instance;
@@ -33,10 +36,12 @@ class MqttPayloadProvider with ChangeNotifier {
         }
         if (data['2400'][0].containsKey('2402')) {
           currentSchedule = data['2400'][0]['2402'];
-        /*  if(currentSchedule.isNotEmpty && currentSchedule[0].containsKey('FL')){
-            //print(currentSchedule[0]['FL'].runtimeType);
-            filters = currentSchedule[0]['FL'];
-          }*/
+          if(currentSchedule.isNotEmpty && currentSchedule[0].containsKey('PrsIn')){
+            //print(currentSchedule[0]['PrsIn'].runtimeType);
+            //print(currentSchedule[0]['PrsOut'].runtimeType);
+            PrsIn = currentSchedule[0]['PrsIn'];
+            PrsOut = currentSchedule[0]['PrsOut'];
+          }
         }
         if (data['2400'][0].containsKey('2403')) {
           nextSchedule = data['2400'][0]['2403'];
@@ -46,6 +51,10 @@ class MqttPayloadProvider with ChangeNotifier {
         }
         if (data['2400'][0].containsKey('2405')) {
           filters = data['2400'][0]['2405'];
+        }
+        if (data['2400'][0].containsKey('2407')) {
+          List<dynamic> items = data['2400'][0]['2407'];
+          irrigationPump = items.where((item) => item['Type'] == 2).toList();
         }
 
       }
@@ -74,6 +83,7 @@ class MqttPayloadProvider with ChangeNotifier {
     upcomingProgram = [];
     nextSchedule = [];
     filters = [];
+    irrigationPump = [];
     notifyListeners();
   }
 

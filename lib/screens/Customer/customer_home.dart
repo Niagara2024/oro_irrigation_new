@@ -113,59 +113,49 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                 child: visibleLoading ? buildLoadingIndicator(visibleLoading, screenWidth) : Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          tileMode: TileMode.mirror,
-                          colors: [myTheme.primaryColorDark, myTheme.primaryColor], // You can adjust the colors here
+                    NavigationRail(
+                      selectedIndex: _selectedIndex,
+                      backgroundColor: myTheme.primaryColorDark,
+                      elevation: 1,
+                      minWidth: 50,
+                      onDestinationSelected: (int index) {
+                        setState(() {
+                          _selectedIndex = index;
+                        });
+                      },
+                      destinations: const [
+                        NavigationRailDestination(
+                          padding: EdgeInsets.only(top: 5),
+                          icon: Icon(Icons.dashboard_outlined),
+                          selectedIcon: Icon(Icons.dashboard_outlined, color: Colors.white,),
+                          label: Text(''),
                         ),
-                      ),
-                      child: NavigationRail(
-                        selectedIndex: _selectedIndex,
-                        backgroundColor: Colors.transparent,
-                        elevation: 1,
-                        minWidth: 125,
-                        onDestinationSelected: (int index) {
-                          setState(() {
-                            _selectedIndex = index;
-                          });
-                        },
-                        destinations: const [
-                          NavigationRailDestination(
-                            padding: EdgeInsets.only(top: 5),
-                            icon: Icon(Icons.dashboard_outlined),
-                            selectedIcon: Icon(Icons.dashboard_outlined, color: Colors.white,),
-                            label: Text('Dashboard'),
-                          ),
-                          NavigationRailDestination(
-                            icon: Icon(Icons.devices_other),
-                            selectedIcon: Icon(Icons.devices_other, color: Colors.white),
-                            label: Text('Product'),
-                          ),
-                          NavigationRailDestination(
-                            icon: Icon(Icons.message_outlined),
-                            selectedIcon: Icon(Icons.message_outlined, color: Colors.white,),
-                            label: Text('Irrigation Logs'),
-                          ),
-                          NavigationRailDestination(
-                            icon: Icon(Icons.stacked_bar_chart),
-                            selectedIcon: Icon(Icons.stacked_bar_chart, color: Colors.white,),
-                            label: Text('Reports'),
-                          ),
-                          NavigationRailDestination(
-                            icon: Icon(Icons.question_answer_outlined),
-                            selectedIcon: Icon(Icons.question_answer_outlined, color: Colors.white,),
-                            label: Text('Sent & Received'),
-                          ),
-                          NavigationRailDestination(
-                            icon: Icon(Icons.settings_outlined),
-                            selectedIcon: Icon(Icons.settings_outlined, color: Colors.white,),
-                            label: Text('Device Setting'),
-                          ),
-                        ],
-                      ),
+                        NavigationRailDestination(
+                          icon: Icon(Icons.devices_other),
+                          selectedIcon: Icon(Icons.devices_other, color: Colors.white),
+                          label: Text(''),
+                        ),
+                        NavigationRailDestination(
+                          icon: Icon(Icons.message_outlined),
+                          selectedIcon: Icon(Icons.message_outlined, color: Colors.white,),
+                          label: Text(''),
+                        ),
+                        NavigationRailDestination(
+                          icon: Icon(Icons.stacked_bar_chart),
+                          selectedIcon: Icon(Icons.stacked_bar_chart, color: Colors.white,),
+                          label: Text(''),
+                        ),
+                        NavigationRailDestination(
+                          icon: Icon(Icons.question_answer_outlined),
+                          selectedIcon: Icon(Icons.question_answer_outlined, color: Colors.white,),
+                          label: Text(''),
+                        ),
+                        NavigationRailDestination(
+                          icon: Icon(Icons.settings_outlined),
+                          selectedIcon: Icon(Icons.settings_outlined, color: Colors.white,),
+                          label: Text(''),
+                        ),
+                      ],
                     ),
                     /*Container(
                       width: 200,

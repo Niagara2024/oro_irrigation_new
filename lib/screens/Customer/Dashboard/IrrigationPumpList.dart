@@ -1,5 +1,9 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
 
 import '../../../state_management/MqttPayloadProvider.dart';
@@ -12,6 +16,21 @@ class IrrigationPumpList extends StatefulWidget {
 }
 
 class _IrrigationPumpListState extends State<IrrigationPumpList> {
+
+  Timer? timer;
+
+  @override
+  void initState() {
+    super.initState();
+    durationUpdatingFunction();
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<MqttPayloadProvider>(context);
@@ -23,7 +42,33 @@ class _IrrigationPumpListState extends State<IrrigationPumpList> {
         itemCount: provider.irrigationPump.length,
         itemBuilder: (BuildContext context, int index) {
           if (index < provider.irrigationPump.length) {
-            return Column(
+            return provider.irrigationPump[index]['OnDelayLeft'] !='00:00:00'? Stack(
+              children: [
+                PopupMenuButton(
+                  tooltip: 'Details',
+                  itemBuilder: (context) {
+                    return [
+                      PopupMenuItem(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(provider.irrigationPump[index]['Name'], style: const TextStyle(fontWeight: FontWeight.bold),),
+                          ],
+                        ),
+                      ),
+                    ];
+                  },
+                  child: buildIrPumpImage(index, provider.irrigationPump[index]['Status'], provider.irrigationPump.length),
+                ),
+                Positioned(
+                  top: 0,
+                  left: 12,
+                  child: CircleAvatar(radius: 23, backgroundColor: Colors.orange, child: Text(provider.irrigationPump[index]['OnDelayLeft'], style: TextStyle(fontSize: 10),),),
+                ),
+              ],
+            ) :
+            Column(
               children: [
                 PopupMenuButton(
                   tooltip: 'Details',
@@ -43,9 +88,31 @@ class _IrrigationPumpListState extends State<IrrigationPumpList> {
                   child: buildIrPumpImage(index, provider.irrigationPump[index]['Status'], provider.irrigationPump.length),
                 ),
               ],
-            ); // Replace 'yourKey' with the key from your API response
+            );
+            buildIrPumpImage(index, provider.irrigationPump[index]['Status'], provider.irrigationPump.length);
+            /*return Column(
+              children: [
+                PopupMenuButton(
+                  tooltip: 'Details',
+                  itemBuilder: (context) {
+                    return [
+                      PopupMenuItem(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(provider.irrigationPump[index]['Name'], style: const TextStyle(fontWeight: FontWeight.bold),),
+                          ],
+                        ),
+                      ),
+                    ];
+                  },
+                  child: buildIrPumpImage(index, provider.irrigationPump[index]['Status'], provider.irrigationPump.length),
+                ),
+              ],
+            ); */// Replace 'yourKey' with the key from your API response
           } else {
-            return Text(''); // or any placeholder/error message
+            return const Text(''); // or any placeholder/error message
           }
         },
       ),
@@ -77,14 +144,62 @@ class _IrrigationPumpListState extends State<IrrigationPumpList> {
         imageName += '.png';
         break;
       case 1:
-        imageName += '_g.png';
+        imageName += '_g.gif';
         break;
       case 2:
-        imageName += '_y.png';
+        imageName += '_y.gif';
         break;
       default:
-        imageName += '_r.png';
+        imageName += '_r.gif';
     }
-    return Image.asset('assets/images/$imageName');
+
+    if(imageName.contains('.png')){
+      return Image.asset('assets/images/$imageName');
+    }
+    return Image.asset('assets/GifFile/$imageName');
+  }
+
+  void durationUpdatingFunction() {
+    timer?.cancel();
+    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+      try{
+        final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
+        for (int i = 0; i < provider.irrigationPump.length; i++) {
+          if(provider.irrigationPump[i]['OnDelayLeft']!=null){
+            List<String> parts = provider.irrigationPump[i]['OnDelayLeft'].split(':');
+            int hours = int.parse(parts[0]);
+            int minutes = int.parse(parts[1]);
+            int seconds = int.parse(parts[2]);
+
+            if (seconds > 0) {
+              seconds--;
+            } else {
+              if (minutes > 0) {
+                minutes--;
+                seconds = 59;
+              } else {
+                if (hours > 0) {
+                  hours--;
+                  minutes = 59;
+                  seconds = 59;
+                }
+              }
+            }
+
+            String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+            if(provider.irrigationPump[i]['OnDelayLeft']!='00:00:00'){
+              setState(() {
+                provider.irrigationPump[i]['OnDelayLeft'] = updatedDurationQtyLeft;
+              });
+            }
+          }
+        }
+      }
+      catch(e){
+        print(e);
+      }
+
+    });
   }
 }
+

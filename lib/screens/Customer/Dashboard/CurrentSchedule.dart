@@ -26,7 +26,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
   @override
   void initState() {
     super.initState();
-    durationUpdatingFunction();
+    //durationUpdatingFunction();
   }
 
   @override
@@ -39,9 +39,10 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
   Widget build(BuildContext context) {
     final provider = Provider.of<MqttPayloadProvider>(context);
 
+    return const SizedBox();
     return Container(
       decoration: BoxDecoration(
-        color: myTheme.primaryColor.withOpacity(0.2),
+        color: myTheme.primaryColor.withOpacity(0.1),
         borderRadius: const BorderRadius.all(Radius.circular(5)),
       ),
       child: Padding(
@@ -54,15 +55,15 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
               trailing: provider.currentSchedule.isNotEmpty ? Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset('assets/GiffFile/water_drop_animation.gif'),
+                    Image.asset('assets/GifFile/water_drop_animation.gif'),
                   ]
               ): null,
             ),
             Container(
               color: Colors.white,
-              height: provider.currentSchedule.isNotEmpty? (provider.currentSchedule.length * 233): 50,
+              height: provider.currentSchedule.isNotEmpty? (provider.currentSchedule.length * 206): 50,
               child: provider.currentSchedule.isNotEmpty? SizedBox(
-                height: (provider.currentSchedule.length * 233),
+                height: (provider.currentSchedule.length * 206),
                 child: Column(
                   children: [
                     for(int index=0; index<provider.currentSchedule.length; index++)
@@ -70,96 +71,8 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                         children: [
                           Row(
                             children: [
-                              const SizedBox(
-                                  width: 150,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(5.0),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: [
-                                        Text('Program Name',style: TextStyle(fontSize: 13,fontWeight: FontWeight.normal)),
-                                        SizedBox(height: 6,),
-                                        Text('Irrigation Line',style: TextStyle(fontSize: 13,fontWeight: FontWeight.normal)),
-                                        SizedBox(height: 6,),
-                                        Text('Zone',style: TextStyle(fontSize: 13,fontWeight: FontWeight.normal)),
-                                        SizedBox(height: 6,),
-                                        Text('RTC',style: TextStyle(fontSize: 13,fontWeight: FontWeight.normal)),
-                                        SizedBox(height: 6,),
-                                        Text('Cyclic',style: TextStyle(fontSize: 13,fontWeight: FontWeight.normal)),
-                                        SizedBox(height: 6,),
-                                        Text('Zone Name',style: TextStyle(fontSize: 13,fontWeight: FontWeight.normal)),
-                                        SizedBox(height: 6,),
-                                        Text('Start Time',style: TextStyle(fontSize: 13,fontWeight: FontWeight.normal)),
-                                        SizedBox(height: 6,),
-                                        Text('Total(Duration/Flow)',style: TextStyle(fontSize: 13,fontWeight: FontWeight.normal)),
-                                        SizedBox(height: 6,),
-                                        Text('Left(Duration/Flow)',style: TextStyle(fontSize: 13,fontWeight: FontWeight.normal)),
-                                      ],
-                                    ),
-                                  )
-                              ),
-                              const SizedBox(
-                                  width: 10,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(5.0),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: [
-                                        Text(':',style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
-                                        SizedBox(height: 6,),
-                                        Text(':',style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
-                                        SizedBox(height: 6,),
-                                        Text(':',style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
-                                        SizedBox(height: 6,),
-                                        Text(':',style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
-                                        SizedBox(height: 6,),
-                                        Text(':',style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
-                                        SizedBox(height: 6,),
-                                        Text(':',style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
-                                        SizedBox(height: 6,),
-                                        Text(':',style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
-                                        SizedBox(height: 6,),
-                                        Text(':',style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
-                                        SizedBox(height: 6,),
-                                        Text(':',style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
-                                      ],
-                                    ),
-                                  )
-                              ),
                               SizedBox(
-                                  width: 175,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(5.0),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: [
-                                        Text(provider.currentSchedule[index]['ProgName'],style: const TextStyle(fontSize: 13)),
-                                        const SizedBox(height: 6),
-                                        Text(provider.currentSchedule[index]['ProgCategory'],style: const TextStyle(fontSize: 13)),
-                                        const SizedBox(height: 6),
-                                        Text('${provider.currentSchedule[index]['CurrentZone']}/${provider.currentSchedule[index]['TotalZone']}',style: TextStyle(fontSize: 13)),
-                                        const SizedBox(height: 6),
-                                        Text('${provider.currentSchedule[index]['CurrentRtc']}/${provider.currentSchedule[index]['TotalRtc']}',style: TextStyle(fontSize: 13)),
-                                        const SizedBox(height: 6),
-                                        Text('${provider.currentSchedule[index]['CurrentCycle']}/${provider.currentSchedule[index]['TotalCycle']}',style: TextStyle(fontSize: 13)),
-                                        const SizedBox(height: 6),
-                                        Text(provider.currentSchedule[index]['ZoneName'],style: const TextStyle(fontSize: 13)),
-                                        const SizedBox(height: 6),
-                                        Text(_convertTime(provider.currentSchedule[index]['StartTime']),style: const TextStyle(fontSize: 13)),
-                                        const SizedBox(height: 6),
-                                        Text(provider.currentSchedule[index]['Duration_Qty'],style: const TextStyle(fontSize: 13)),
-                                        const SizedBox(height: 6),
-                                        provider.currentSchedule[index]['Message']=='Running.'? Text(provider.currentSchedule[index]['Duration_QtyLeft'],style: TextStyle(fontSize: 14, color:myTheme.primaryColorDark) ):
-                                            const SizedBox(width : 50, height : 15, child: LoadingIndicator(indicatorType: Indicator.ballPulse)),
-                                      ],
-                                    ),
-                                  )
-                              ),
-                              SizedBox(
-                                width: MediaQuery.sizeOf(context).width-894,
+                                width: MediaQuery.sizeOf(context).width-502,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.start,
@@ -170,31 +83,33 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                       children: [
                                         Expanded(
                                           flex:1,
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment: MainAxisAlignment.start,
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 8),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              mainAxisAlignment: MainAxisAlignment.start,
                                               children: [
-                                                const Text('Main valve'),
+                                                const Text('SP'),
                                                 SizedBox(
-                                                  width: MediaQuery.sizeOf(context).width-894,
+                                                  width: MediaQuery.sizeOf(context).width-502,
                                                   height: 65,
-                                                  child: provider.currentSchedule[index].containsKey('MV')? provider.currentSchedule[index]['MV'].length > 0 ? Row(
+                                                  child: provider.currentSchedule[index].containsKey('SP')? provider.currentSchedule[index]['SP'].length > 0 ? Row(
                                                     children: [
-                                                      for(int mvIndex=0; mvIndex<provider.currentSchedule[index]['MV'].length; mvIndex++)
+                                                      for(int mvIndex=0; mvIndex<provider.currentSchedule[index]['SP'].length; mvIndex++)
                                                         Padding(
                                                           padding: const EdgeInsets.all(5.0),
                                                           child: Column(
                                                             children: [
                                                               CircleAvatar(
                                                                 radius: 18,
-                                                                backgroundColor: provider.currentSchedule[index]['MV'][mvIndex]['Status']==0 ? Colors.grey :
-                                                                provider.currentSchedule[index]['MV'][mvIndex]['Status']==1 ? Colors.greenAccent :
-                                                                provider.currentSchedule[index]['MV'][mvIndex]['Status']==2 ? Colors.orangeAccent:
-                                                                provider.currentSchedule[index]['MV'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
+                                                                backgroundColor: provider.currentSchedule[index]['SP'][mvIndex]['Status']==0 ? Colors.grey :
+                                                                provider.currentSchedule[index]['SP'][mvIndex]['Status']==1 ? Colors.greenAccent :
+                                                                provider.currentSchedule[index]['SP'][mvIndex]['Status']==2 ? Colors.orangeAccent:
+                                                                provider.currentSchedule[index]['SP'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
                                                                 backgroundImage: const AssetImage('assets/images/main_valve.png'),
                                                               ),
                                                               const SizedBox(height: 3),
-                                                              Text('${provider.currentSchedule[index]['MV'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
+                                                              Text('${provider.currentSchedule[index]['SP'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
                                                             ],
                                                           ),
                                                         )
@@ -204,79 +119,6 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                                 ),
                                               ],
                                             ),
-                                        ),
-                                        Expanded(
-                                          flex:1,
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: [
-                                              const Text('IP'),
-                                              SizedBox(
-                                                width: MediaQuery.sizeOf(context).width-894,
-                                                height: 65,
-                                                child: provider.currentSchedule[index].containsKey('IP')? provider.currentSchedule[index]['IP'].length > 0 ? Row(
-                                                  children: [
-                                                    for(int mvIndex=0; mvIndex<provider.currentSchedule[index]['IP'].length; mvIndex++)
-                                                      Padding(
-                                                        padding: const EdgeInsets.all(5.0),
-                                                        child: Column(
-                                                          children: [
-                                                            CircleAvatar(
-                                                              radius: 18,
-                                                              backgroundColor: provider.currentSchedule[index]['IP'][mvIndex]['Status']==0 ? Colors.grey :
-                                                              provider.currentSchedule[index]['IP'][mvIndex]['Status']==1 ? Colors.greenAccent :
-                                                              provider.currentSchedule[index]['IP'][mvIndex]['Status']==2 ? Colors.orangeAccent:
-                                                              provider.currentSchedule[index]['IP'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
-                                                              backgroundImage: const AssetImage('assets/images/main_valve.png'),
-                                                            ),
-                                                            const SizedBox(height: 3),
-                                                            Text('${provider.currentSchedule[index]['IP'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
-                                                          ],
-                                                        ),
-                                                      )
-                                                  ],
-                                                ):
-                                                const Center(child: Text('-----')):const Center(child: Text('-----')),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Expanded(
-                                          flex:1,
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: [
-                                              const Text('SP'),
-                                              SizedBox(
-                                                width: MediaQuery.sizeOf(context).width-894,
-                                                height: 65,
-                                                child: provider.currentSchedule[index].containsKey('SP')? provider.currentSchedule[index]['SP'].length > 0 ? Row(
-                                                  children: [
-                                                    for(int mvIndex=0; mvIndex<provider.currentSchedule[index]['SP'].length; mvIndex++)
-                                                      Padding(
-                                                        padding: const EdgeInsets.all(5.0),
-                                                        child: Column(
-                                                          children: [
-                                                            CircleAvatar(
-                                                              radius: 18,
-                                                              backgroundColor: provider.currentSchedule[index]['SP'][mvIndex]['Status']==0 ? Colors.grey :
-                                                              provider.currentSchedule[index]['SP'][mvIndex]['Status']==1 ? Colors.greenAccent :
-                                                              provider.currentSchedule[index]['SP'][mvIndex]['Status']==2 ? Colors.orangeAccent:
-                                                              provider.currentSchedule[index]['SP'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
-                                                              backgroundImage: const AssetImage('assets/images/main_valve.png'),
-                                                            ),
-                                                            const SizedBox(height: 3),
-                                                            Text('${provider.currentSchedule[index]['SP'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
-                                                          ],
-                                                        ),
-                                                      )
-                                                  ],
-                                                ):
-                                                const Center(child: Text('-----')):const Center(child: Text('-----')),
-                                              ),
-                                            ],
                                           ),
                                         ),
                                         Expanded(
@@ -287,7 +129,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                             children: [
                                               const Text('SL'),
                                               SizedBox(
-                                                width: MediaQuery.sizeOf(context).width-894,
+                                                width: MediaQuery.sizeOf(context).width-502,
                                                 height: 65,
                                                 child: provider.currentSchedule[index].containsKey('SL')? provider.currentSchedule[index]['SL'].length > 0 ? Row(
                                                   children: [
@@ -324,7 +166,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                             children: [
                                               const Text('FN'),
                                               SizedBox(
-                                                width: MediaQuery.sizeOf(context).width-894,
+                                                width: MediaQuery.sizeOf(context).width-502,
                                                 height: 65,
                                                 child: provider.currentSchedule[index].containsKey('FN')? provider.currentSchedule[index]['FN'].length > 0 ? Row(
                                                   children: [
@@ -360,76 +202,42 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                       children: [
                                         Expanded(
                                           flex:1,
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: [
-                                              const Text('Valve'),
-                                              SizedBox(
-                                                width: MediaQuery.sizeOf(context).width-894,
-                                                height: 65,
-                                                child: provider.currentSchedule[index].containsKey('VL')? provider.currentSchedule[index]['VL'].length > 0 ? Row(
-                                                  children: [
-                                                    for(int mvIndex=0; mvIndex<provider.currentSchedule[index]['VL'].length; mvIndex++)
-                                                      Padding(
-                                                        padding: const EdgeInsets.all(5.0),
-                                                        child: Column(
-                                                          children: [
-                                                            CircleAvatar(
-                                                              radius: 18,
-                                                              backgroundColor: provider.currentSchedule[index]['VL'][mvIndex]['Status']==0 ? Colors.grey :
-                                                              provider.currentSchedule[index]['VL'][mvIndex]['Status']==1 ? Colors.greenAccent :
-                                                              provider.currentSchedule[index]['VL'][mvIndex]['Status']==2 ? Colors.orangeAccent:
-                                                              provider.currentSchedule[index]['VL'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
-                                                              backgroundImage: const AssetImage('assets/images/valve.png'),
-                                                            ),
-                                                            const SizedBox(height: 3),
-                                                            Text('${provider.currentSchedule[index]['VL'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
-                                                          ],
-                                                        ),
-                                                      )
-                                                  ],
-                                                ):
-                                                const Center(child: Text('-----')):const Center(child: Text('-----')),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Expanded(
-                                          flex:1,
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: [
-                                              const Text('AG'),
-                                              SizedBox(
-                                                width: MediaQuery.sizeOf(context).width-894,
-                                                height: 65,
-                                                child: provider.currentSchedule[index].containsKey('AG')? provider.currentSchedule[index]['AG'].length > 0 ? Row(
-                                                  children: [
-                                                    for(int mvIndex=0; mvIndex<provider.currentSchedule[index]['AG'].length; mvIndex++)
-                                                      Padding(
-                                                        padding: const EdgeInsets.all(5.0),
-                                                        child: Column(
-                                                          children: [
-                                                            CircleAvatar(
-                                                              radius: 18,
-                                                              backgroundColor: provider.currentSchedule[index]['AG'][mvIndex]['Status']==0 ? Colors.grey :
-                                                              provider.currentSchedule[index]['AG'][mvIndex]['Status']==1 ? Colors.greenAccent :
-                                                              provider.currentSchedule[index]['AG'][mvIndex]['Status']==2 ? Colors.orangeAccent:
-                                                              provider.currentSchedule[index]['AG'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
-                                                              backgroundImage: const AssetImage('assets/images/main_valve.png'),
-                                                            ),
-                                                            const SizedBox(height: 3),
-                                                            Text('${provider.currentSchedule[index]['AG'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
-                                                          ],
-                                                        ),
-                                                      )
-                                                  ],
-                                                ):
-                                                const Center(child: Text('-----')):const Center(child: Text('-----')),
-                                              ),
-                                            ],
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 8),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              children: [
+                                                const Text('AG'),
+                                                SizedBox(
+                                                  width: MediaQuery.sizeOf(context).width-502,
+                                                  height: 65,
+                                                  child: provider.currentSchedule[index].containsKey('AG')? provider.currentSchedule[index]['AG'].length > 0 ? Row(
+                                                    children: [
+                                                      for(int mvIndex=0; mvIndex<provider.currentSchedule[index]['AG'].length; mvIndex++)
+                                                        Padding(
+                                                          padding: const EdgeInsets.all(5.0),
+                                                          child: Column(
+                                                            children: [
+                                                              CircleAvatar(
+                                                                radius: 18,
+                                                                backgroundColor: provider.currentSchedule[index]['AG'][mvIndex]['Status']==0 ? Colors.grey :
+                                                                provider.currentSchedule[index]['AG'][mvIndex]['Status']==1 ? Colors.greenAccent :
+                                                                provider.currentSchedule[index]['AG'][mvIndex]['Status']==2 ? Colors.orangeAccent:
+                                                                provider.currentSchedule[index]['AG'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
+                                                                backgroundImage: const AssetImage('assets/images/main_valve.png'),
+                                                              ),
+                                                              const SizedBox(height: 3),
+                                                              Text('${provider.currentSchedule[index]['AG'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
+                                                            ],
+                                                          ),
+                                                        )
+                                                    ],
+                                                  ):
+                                                  const Center(child: Text('-----')):const Center(child: Text('-----')),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                         Expanded(
@@ -440,7 +248,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                             children: [
                                               const Text('Booster'),
                                               SizedBox(
-                                                width: MediaQuery.sizeOf(context).width-894,
+                                                width: MediaQuery.sizeOf(context).width-502,
                                                 height: 65,
                                                 child: provider.currentSchedule[index].containsKey('FB')? provider.currentSchedule[index]['FB'].length > 0 ? Row(
                                                   children: [
@@ -477,7 +285,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                             children: [
                                               const Text('fogger'),
                                               SizedBox(
-                                                width: MediaQuery.sizeOf(context).width-894,
+                                                width: MediaQuery.sizeOf(context).width-502,
                                                 height: 65,
                                                 child: provider.currentSchedule[index].containsKey('FG')? provider.currentSchedule[index]['FG'].length > 0 ? Row(
                                                   children: [
@@ -508,65 +316,8 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                         ),
                                       ],
                                     ),
-                                    /*SizedBox(
-                                      width: MediaQuery.sizeOf(context).width-884,
-                                      height: 65,
-                                      child: provider.currentSchedule[index].containsKey('VL')? provider.currentSchedule[index]['VL'].length > 0 ? SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: Row(
-                                          children: [
-                                            for(int vIndex=0; vIndex<provider.currentSchedule[index]['VL'].length;vIndex++)
-                                              Padding(
-                                                padding: const EdgeInsets.all(5.0),
-                                                child: Column(
-                                                  children: [
-                                                    CircleAvatar(
-                                                      radius: 18,
-                                                      backgroundColor: provider.currentSchedule[index]['VL'][vIndex]['Status']==0 ? Colors.grey :
-                                                      provider.currentSchedule[index]['VL'][vIndex]['Status']==1 ? Colors.greenAccent :
-                                                      provider.currentSchedule[index]['VL'][vIndex]['Status']==2 ? Colors.orangeAccent:
-                                                      provider.currentSchedule[index]['VL'][vIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
-                                                      backgroundImage: const AssetImage('assets/images/valve.png'),
-                                                    ),
-                                                    const SizedBox(height: 3),
-                                                    Text('${provider.currentSchedule[index]['VL'][vIndex]['Name']}', style: const TextStyle(fontSize: 10),),
-                                                  ],
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-                                      ) :
-                                      const Center(child: Text('-----')) : const Center(child: Text('-----')),
-                                    ),*/
                                   ],
                                 )
-                              ),
-                              SizedBox(
-                                width: 45,
-                                child:  Center(
-                                    child: provider.currentSchedule[index]['ProgType']==3? IconButton(
-                                      tooltip: 'Stop',
-                                      onPressed: provider.currentSchedule[index]['Message']=='Running.'? (){
-                                        String payload = '0,1,0,${provider.currentSchedule[index]['ScheduleS_No']},0,0,${provider.currentSchedule[index]['ProgType']},0';
-                                        String payLoadFinal = jsonEncode({
-                                          "800": [{"801": payload}]
-                                        });
-                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                      } : null,
-                                      icon: const Icon(Icons.stop_circle_outlined,color: Colors.red),
-                                    ):
-                                    IconButton(
-                                      tooltip: 'Skip next',
-                                      onPressed: provider.currentSchedule[index]['Message']=='Running.'? (){
-                                        String payload = '${provider.currentSchedule[index]['ScheduleS_No']},0';
-                                        String payLoadFinal = jsonEncode({
-                                          "3700": [{"3701": payload}]
-                                        });
-                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                      } : null,
-                                      icon: const Icon(Icons.skip_next_outlined),
-                                    ),
-                                  ),
                               ),
                             ],
                           ),
@@ -583,8 +334,6 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
       ),
     );
   }
-
-
 
   String _convertTime(String timeString) {
     final parsedTime = DateFormat('HH:mm:ss').parse(timeString);

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
@@ -22,15 +21,138 @@ class MainLine extends StatefulWidget {
 
 class _MainLineState extends State<MainLine> {
 
+
+
   @override
   Widget build(BuildContext context) {
-
     final provider = Provider.of<MqttPayloadProvider>(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 287,
+          decoration: BoxDecoration(
+            color: myTheme.primaryColor.withOpacity(0.2),
+            borderRadius: const BorderRadius.all(Radius.circular(5)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(3.0),
+            child: Column(
+              children: [
+                ListTile(
+                  tileColor: myTheme.primaryColor.withOpacity(0.2),
+                  title: const Text('CENTRAL SITE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                ),
+                Container(
+                  color: Colors.white,
+                  width: 287,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 7, top: 5),
+                    child: Column(
+                      children: [
+                        widget.siteData.irrigationPump.isNotEmpty || widget.siteData.centralFilterSite.isNotEmpty?
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            widget.siteData.irrigationPump.isNotEmpty? const IrrigationPumpList():
+                            const SizedBox(),
+                            SizedBox(
+                              width: 70,
+                              height: 160,
+                              child: ListView.builder(
+                                itemCount: 1,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return Column(
+                                    children: [
+                                      PopupMenuButton(
+                                        tooltip: 'Details',
+                                        itemBuilder: (context) {
+                                          return [
+                                            const PopupMenuItem(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                children: [
+                                                  Text('Pressure Sensor', style: TextStyle(fontWeight: FontWeight.bold),),
+                                                  Divider(),
+                                                ],
+                                              ),
+                                            ),
+                                          ];
+                                        },
+                                        child: Image.asset('assets/images/dp_prs_sensor.png',),
+                                      ),
+                                      const Text('Prs In',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
+                                      provider.PrsIn.isNotEmpty
+                                          ? Text('${double.parse(provider.PrsIn[0]['Value']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10))
+                                          : const Text('0.0 bar', style: TextStyle(fontSize: 10)),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                            widget.siteData.centralFilterSite.isNotEmpty? const CentralFilter():
+                            const SizedBox(),
+                            SizedBox(
+                              width: 70,
+                              height: 160,
+                              child: ListView.builder(
+                                itemCount: 1,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return Column(
+                                    children: [
+                                      PopupMenuButton(
+                                        tooltip: 'Details',
+                                        itemBuilder: (context) {
+                                          return [
+                                            const PopupMenuItem(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                children: [
+                                                  Text('Pressure Sensor', style: TextStyle(fontWeight: FontWeight.bold),),
+                                                  Divider(),
+                                                ],
+                                              ),
+                                            ),
+                                          ];
+                                        },
+                                        child: Image.asset('assets/images/dp_prs_sensor.png',),
+                                      ),
+                                      const Text('Prs Out',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
+                                      provider.PrsOut.isNotEmpty
+                                          ? Text('${double.parse(provider.PrsOut[0]['Value']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10))
+                                          : const Text('0.0 bar', style: TextStyle(fontSize: 10)),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ) :
+                        const Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(height: 50,),
+                            Text('No Device Available'),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
 
     return Row(
       children: [
         SizedBox(
-          width: 280,
+          width: 287,
           child: Column(
             children: [
               widget.siteData.irrigationPump.isNotEmpty || widget.siteData.centralFilterSite.isNotEmpty?
@@ -68,7 +190,7 @@ class _MainLineState extends State<MainLine> {
                             const Text('Prs In',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
                             provider.PrsIn.isNotEmpty
                                 ? Text('${double.parse(provider.PrsIn[0]['Value']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10))
-                                : const Text('0.0 bar'),
+                                : const Text('0.0 bar', style: TextStyle(fontSize: 10)),
                           ],
                         );
                       },
@@ -105,7 +227,7 @@ class _MainLineState extends State<MainLine> {
                             const Text('Prs Out',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
                             provider.PrsOut.isNotEmpty
                                 ? Text('${double.parse(provider.PrsOut[0]['Value']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10))
-                                : const Text('0.0 bar'),
+                                : const Text('0.0 bar', style: TextStyle(fontSize: 10)),
                           ],
                         );
                       },
@@ -123,10 +245,10 @@ class _MainLineState extends State<MainLine> {
             ],
           ),
         ),
-        const VerticalDivider(width: 0),
-        Expanded(
+        const Expanded(
           flex :1,
-          child: Column(
+          child: SizedBox(),
+          /*child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const ListTile(
@@ -243,129 +365,11 @@ class _MainLineState extends State<MainLine> {
                   )
               ),
             ],
-          ),
+          ),*/
         ),
       ],
     );
   }
 
-}
 
-class CountdownTimer extends StatefulWidget {
-  @override
-  _CountdownTimerState createState() => _CountdownTimerState();
-}
-
-class _CountdownTimerState extends State<CountdownTimer> {
-  int _seconds = 30;
-  late Timer _timer;
-  double _percentage = 1.0;
-
-  @override
-  void initState() {
-    super.initState();
-    startTimer();
-  }
-
-  void startTimer() {
-    const oneSec = Duration(seconds: 1);
-    _timer = Timer.periodic(
-      oneSec,
-          (Timer timer) {
-        setState(() {
-          if (_seconds < 1) {
-            timer.cancel();
-          } else {
-            _seconds -= 1;
-            _percentage = _seconds / 30.0; // Change 10.0 to the total time in seconds
-          }
-        });
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          width: 30,
-          height: 30,
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.greenAccent, // Set your desired background color
-          ),
-        ),
-        Positioned(
-          top: 0,
-          left: 0,
-          child: CustomPaint(
-            size: const Size(30, 30),
-            painter: TimerPainter(
-              percentage: _percentage,
-            ),
-          ),
-        ),
-        Positioned(
-          top: 7,
-          left: 2.5,
-          child: Container(
-            width: 25,
-            child: Center(
-              child: Text('$_seconds', style: const TextStyle(fontSize: 11),
-              ),
-            ),
-          ),
-        )
-
-      ],
-    );
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-}
-
-class TimerPainter extends CustomPainter {
-  final double percentage;
-
-  TimerPainter({required this.percentage});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    Paint paint = Paint()
-      ..color = Colors.blue
-      ..strokeWidth = 2.5
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-
-    canvas.drawCircle(
-      Offset(size.width / 2, size.height / 2),
-      size.width / 2,
-      paint,
-    );
-
-    Paint progressPaint = Paint()
-      ..color = Colors.red
-      ..strokeWidth = 2.5
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-
-    double angle = 2 * math.pi * percentage;
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2),
-      -math.pi / 2,
-      -angle,
-      false,
-      progressPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(TimerPainter oldDelegate) {
-    return oldDelegate.percentage != percentage;
-  }
 }

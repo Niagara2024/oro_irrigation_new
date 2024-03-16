@@ -1,8 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:mqtt_client/mqtt_client.dart';
+import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/screens/Forms/create_account.dart';
 import 'package:oro_irrigation_new/screens/NarrowLayout/Customer/HomeScreenN.dart';
@@ -13,6 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Models/Customer/Dashboard/DashboardNode.dart';
 import '../Models/language.dart';
 import '../constants/MQTTManager.dart';
+import '../constants/MqttServer.dart';
 import '../constants/UserData.dart';
 import '../constants/http_service.dart';
 import '../main.dart';
@@ -40,12 +45,20 @@ class MainDashBoard extends StatefulWidget
 class _MainDashBoardState extends State<MainDashBoard> {
 
   late MQTTManager manager = MQTTManager();
+  late MqttServer mqttServer = MqttServer();
+
 
   @override
   void initState() {
     super.initState();
     Future.delayed(const Duration(milliseconds: 500), () async {
-      mqttConfigureAndConnect();
+      if (kIsWeb) {
+        print('Running on the web platform');
+        mqttConfigureAndConnect();
+      } else {
+        print('other platform');
+        mqttSeverConfigureAndConnect();
+      }
     });
   }
 
@@ -54,6 +67,12 @@ class _MainDashBoardState extends State<MainDashBoard> {
     manager.initializeMQTTClient(state: payloadProvider);
     manager.connect();
   }
+
+  void mqttSeverConfigureAndConnect() {
+    MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context,listen: false);
+    mqttServer.initializeMQTTServer(state: payloadProvider);
+  }
+
 
   @override
   Widget build(BuildContext context)

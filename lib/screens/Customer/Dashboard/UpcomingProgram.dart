@@ -26,12 +26,12 @@ class UpcomingProgram extends StatelessWidget {
         child: Column(
           children: [
             ListTile(
-              tileColor: myTheme.primaryColor.withOpacity(0.2),
+              tileColor: myTheme.primaryColor.withOpacity(0.1),
               title: const Text('UPCOMING PROGRAM', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
             ),
             Container(
               color: Colors.white,
-              height: provider.upcomingProgram.isNotEmpty? (provider.upcomingProgram.length * 45) + 35 : 50,
+              height: provider.upcomingProgram.isNotEmpty? (provider.upcomingProgram.length * 45) + 35 : 25,
               child: provider.upcomingProgram.isNotEmpty? DataTable2(
                 columnSpacing: 12,
                 horizontalMargin: 12,
@@ -105,7 +105,13 @@ class UpcomingProgram extends StatelessWidget {
                   ],)),
                 ])),
               ) :
-              const Center(child: Text('Upcoming Program not Available')),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 15),
+                  child: Text('Upcoming Program not Available', style: TextStyle(fontWeight: FontWeight.normal), textAlign: TextAlign.left),
+                ),
+              ),
             ),
           ],
         ),

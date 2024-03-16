@@ -32,7 +32,7 @@ class _NextScheduleState extends State<NextSchedule> {
           children: [
             ListTile(
               tileColor: myTheme.primaryColor.withOpacity(0.2),
-              title: const Text('NEXT SCHEDULE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+              title: const Text('NEXT SCHEDULE IN QUEUE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
               trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -52,7 +52,7 @@ class _NextScheduleState extends State<NextSchedule> {
             ),
             Container(
               color: Colors.white,
-              height: provider.nextSchedule.isNotEmpty? (provider.nextSchedule.length * 45) + 35 : 50,
+              height: provider.nextSchedule.isNotEmpty? (provider.nextSchedule.length * 45) + 35 : 25,
               child: provider.nextSchedule.isNotEmpty? DataTable2(
                 columnSpacing: 12,
                 horizontalMargin: 12,
@@ -87,7 +87,7 @@ class _NextScheduleState extends State<NextSchedule> {
                       fixedWidth: 100
                   ),
                   DataColumn2(
-                      label: Center(child: Text('Total(T/F)', style: TextStyle(fontSize: 13),)),
+                      label: Center(child: Text('Total(D/F)', style: TextStyle(fontSize: 13),)),
                       fixedWidth: 100
                   ),
                 ],
@@ -101,7 +101,13 @@ class _NextScheduleState extends State<NextSchedule> {
                   DataCell(Center(child: Text(provider.nextSchedule[index]['IrrigationDuration_Quantity']))),
                 ])),
               ) :
-              const Center(child: Text('Upcoming schedule not Available')),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 15),
+                  child: Text('Next schedule not Available', style: TextStyle(fontWeight: FontWeight.normal), textAlign: TextAlign.left),
+                ),
+              ),
             ),
           ],
         ),

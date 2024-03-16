@@ -68,18 +68,34 @@ class _CentralFilterState extends State<CentralFilter> {
                               buildFilterImage(index, provider.filters[0]['FilterStatus'][index]['Status'], provider.filters[0]['FilterStatus'].length),
                               Positioned(
                                 top: 47.8,
-                                left: 13,
+                                left: 10,
                                 child: provider.filters[0]['DurationLeft']!='00:00:00'? provider.filters[0]['Status'] == (index+1)? Container(
                                   color: Colors.greenAccent,
                                   width: 50,
-                                  child: Text(provider.filters[0]['DurationLeft'], style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  child: Center(
+                                    child: Text(provider.filters[0]['DurationLeft'], style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    ),
                                   ),
                                 ):
                                 const SizedBox(): const SizedBox(),
+                              ),
+                              Positioned(
+                                top: 0,
+                                left: 25,
+                                child: Container(
+                                    decoration: const BoxDecoration(
+                                      color:Colors.yellow,
+                                      borderRadius: BorderRadius.all(Radius.circular(2)),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 3,right: 3),
+                                      child: Text('${provider.filters[0]['DpValue']}', style: const TextStyle(fontSize: 10),),
+                                    )
+                                ),
                               ),
                             ],
                           ),
@@ -93,7 +109,6 @@ class _CentralFilterState extends State<CentralFilter> {
                 },
               ),
             ),
-            Text('${provider.filters[0]['DpValue']}'),
           ],
         ),
       ],
@@ -106,17 +121,17 @@ class _CentralFilterState extends State<CentralFilter> {
     if (filterLength == 1) {
       imageName = 'dp_filter';
     } else if (filterLength == 2) {
-      imageName = cIndex == 0 ? 'dp_filter1' : 'dp_filter3';
+      imageName = cIndex == 0 ? 'dp_filter_1' : 'dp_filter_3';
     } else {
       switch (filterLength) {
         case 3:
-          imageName = cIndex == 0 ? 'dp_filter1' : (cIndex == 1 ? 'dp_filter2' : 'dp_filter3');
+          imageName = cIndex == 0 ? 'dp_filter_1' : (cIndex == 1 ? 'dp_filter_2' : 'dp_filter_3');
           break;
         case 4:
-          imageName = cIndex == 0 ? 'dp_filter1' : (cIndex == 1 ? 'dp_filter2' : (cIndex == 2 ? 'dp_filter2' : 'dp_filter3'));
+          imageName = cIndex == 0 ? 'dp_filter_1' : (cIndex == 1 ? 'dp_filter_2' : (cIndex == 2 ? 'dp_filter_2' : 'dp_filter_3'));
           break;
         default:
-          imageName = 'dp_filter3';
+          imageName = 'dp_filter_3';
       }
     }
 
@@ -125,15 +140,19 @@ class _CentralFilterState extends State<CentralFilter> {
         imageName += '.png';
         break;
       case 1:
-        imageName += '_g.png';
+        imageName += '_g.gif';
         break;
       case 2:
-        imageName += '_y.png';
+        imageName += '_y.gif';
         break;
       default:
-        imageName += '_r.png';
+        imageName += '_r.gif';
     }
-    return Image.asset('assets/images/$imageName');
+    if(imageName.contains('.png')){
+      return Image.asset('assets/images/$imageName');
+    }
+    return Image.asset('assets/GifFile/$imageName');
+
   }
 
   void durationUpdatingFunction() {

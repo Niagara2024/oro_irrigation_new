@@ -148,10 +148,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                 scrollDirection: Axis.vertical,
                 child: Column(
                   children: [
-                    SizedBox(
-                      height: getMaxCount(widget.siteData.irrigationPump, widget.siteData.centralFilterSite.isNotEmpty? widget.siteData.centralFilterSite[0].filter:[]) >= 3? getMaxCount(widget.siteData.irrigationPump, widget.siteData.centralFilterSite.isNotEmpty? widget.siteData.centralFilterSite[0].filter:[]) * 95 : 250,
-                      child: MainLine(siteData: widget.siteData),
-                    ),
+                    MainLine(siteData: widget.siteData),
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8, top: 8),
                       child: CurrentScheduleFinal(siteData: widget.siteData),

@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 import '../../../state_management/MqttPayloadProvider.dart';
@@ -33,82 +35,113 @@ class _CentralFilterState extends State<CentralFilter> {
     final provider = Provider.of<MqttPayloadProvider>(context);
 
     return provider.filters.isNotEmpty? Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Column(
+        Row(
           children: [
-            SizedBox(
-              width: 70,
-              height: provider.filters[0]['FilterStatus'].length * 75,
-              child: ListView.builder(
-                itemCount: provider.filters[0]['FilterStatus'].length,
-                itemBuilder: (BuildContext context, int index) {
-                  if (index < provider.filters[0]['FilterStatus'].length) {
-                    return Column(
+            for(int i=0; i<provider.filters.length; i++)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  provider.filters[i]['PrsIn']!='-'?
+                  SizedBox(
+                    width: 70,
+                    height: 160,
+                    child: Column(
                       children: [
-                        PopupMenuButton(
-                          tooltip: 'Details',
-                          itemBuilder: (context) {
-                            return [
-                              PopupMenuItem(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Text(provider.filters[0]['FilterSite'], style: const TextStyle(fontWeight: FontWeight.bold),),
-                                    const Divider(),
-                                    Text(provider.filters[0]['FilterStatus'][index]['Name']),
-                                    Text('${provider.filters[0]['FilterStatus'][index]['Status']}'),
-                                  ],
-                                ),
-                              ),
-                            ];
-                          },
-                          child : Stack(
-                            children: [
-                              buildFilterImage(index, provider.filters[0]['FilterStatus'][index]['Status'], provider.filters[0]['FilterStatus'].length),
-                              Positioned(
-                                top: 47.8,
-                                left: 10,
-                                child: provider.filters[0]['DurationLeft']!='00:00:00'? provider.filters[0]['Status'] == (index+1)? Container(
-                                  color: Colors.greenAccent,
-                                  width: 50,
-                                  child: Center(
-                                    child: Text(provider.filters[0]['DurationLeft'], style: const TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                        Image.asset('assets/images/dp_prs_sensor.png',),
+                        const Text('Prs In',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
+                        Text('${double.parse(provider.filters[i]['PrsIn']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10)),
+                      ],
+                    ),
+                  ) :
+                  const SizedBox(),
+                  SizedBox(
+                    width: 70,
+                    height: provider.filters[i]['FilterStatus'].length * 75,
+                    child: ListView.builder(
+                      itemCount: provider.filters[i]['FilterStatus'].length,
+                      itemBuilder: (BuildContext context, int flIndex) {
+                        return Column(
+                          children: [
+                            PopupMenuButton(
+                              tooltip: 'Details',
+                              itemBuilder: (context) {
+                                return [
+                                  PopupMenuItem(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Text(provider.filters[i]['FilterSite'], style: const TextStyle(fontWeight: FontWeight.bold),),
+                                        const Divider(),
+                                        Text(provider.filters[i]['FilterStatus'][flIndex]['Name']),
+                                        Text('${provider.filters[i]['FilterStatus'][flIndex]['Status']}'),
+                                      ],
                                     ),
                                   ),
-                                ):
-                                const SizedBox(): const SizedBox(),
+                                ];
+                              },
+                              child : Stack(
+                                children: [
+                                  buildFilterImage(flIndex, provider.filters[i]['FilterStatus'][flIndex]['Status'], provider.filters[i]['FilterStatus'].length),
+                                  Positioned(
+                                    top: 47.8,
+                                    left: 10,
+                                    child: provider.filters[i]['DurationLeft']!='00:00:00'? provider.filters[0]['Status'] == (flIndex+1)? Container(
+                                      color: Colors.greenAccent,
+                                      width: 50,
+                                      child: Center(
+                                        child: Text(provider.filters[i]['DurationLeft'], style: const TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        ),
+                                      ),
+                                    ):
+                                    const SizedBox(): const SizedBox(),
+                                  ),
+                                  Positioned(
+                                    top: 0,
+                                    left: 25,
+                                    child: provider.filters[i]['PrsIn']!='-'? Container(
+                                        decoration: const BoxDecoration(
+                                          color:Colors.yellow,
+                                          borderRadius: BorderRadius.all(Radius.circular(2)),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(left: 3,right: 3),
+                                          child: Text('${provider.filters[i]['DpValue']}', style: const TextStyle(fontSize: 10),),
+                                        )
+                                    ):
+                                    const SizedBox(),
+                                  ),
+                                ],
                               ),
-                              Positioned(
-                                top: 0,
-                                left: 25,
-                                child: Container(
-                                    decoration: const BoxDecoration(
-                                      color:Colors.yellow,
-                                      borderRadius: BorderRadius.all(Radius.circular(2)),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(left: 3,right: 3),
-                                      child: Text('${provider.filters[0]['DpValue']}', style: const TextStyle(fontSize: 10),),
-                                    )
-                                ),
-                              ),
-                            ],
-                          ),
-                          /*child: buildFilterImage(index, provider.filters[0]['FilterStatus'][index]['Status'], provider.filters[0]['FilterStatus'].length),*/
-                        ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                  provider.filters[i]['PrsOut'] != '-'?
+                  SizedBox(
+                    width: 70,
+                    height: 160,
+                    child: Column(
+                      children: [
+                        Image.asset('assets/images/dp_prs_sensor.png',),
+                        const Text('Prs Out',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
+                        Text('${double.parse(provider.filters[i]['PrsOut']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10)),
                       ],
-                    ); // Replace 'yourKey' with the key from your API response
-                  } else {
-                    return const Text(''); // or any placeholder/error message
-                  }
-                },
+                    ),
+                  ) :
+                  const SizedBox(),
+                ],
               ),
-            ),
           ],
         ),
       ],

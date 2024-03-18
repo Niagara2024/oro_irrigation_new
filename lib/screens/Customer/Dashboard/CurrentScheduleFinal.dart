@@ -52,10 +52,10 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
             ),
             Container(
               color: Colors.white,
-              height: provider.currentSchedule.isNotEmpty? (provider.currentSchedule.length * 45) + 100 : 25,
+              height: provider.currentSchedule.isNotEmpty? (provider.currentSchedule.length * 146) : 25,
               child: provider.currentSchedule.isNotEmpty? ListView.builder(
                 itemCount: provider.currentSchedule.length,
-                itemBuilder: (BuildContext context, int index) {
+                itemBuilder: (BuildContext context, int csIndex) {
                   return Column(
                     children: [
                       SizedBox(
@@ -108,20 +108,20 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                 fixedWidth: 45
                             ),
                           ],
-                          rows: List<DataRow>.generate(1, (index) => DataRow(cells: [
-                            DataCell(Text(provider.currentSchedule[index]['ProgName'])),
-                            DataCell(Text(provider.currentSchedule[index]['ProgCategory'])),
-                            DataCell(Text('${provider.currentSchedule[index]['CurrentZone']}/${provider.currentSchedule[index]['TotalZone']}')),
-                            DataCell(Text(provider.currentSchedule[index]['ZoneName'])),
-                            DataCell(Center(child: Text('${provider.currentSchedule[index]['CurrentRtc']}/${provider.currentSchedule[index]['TotalRtc']}'))),
-                            DataCell(Center(child: Center(child: Text('${provider.currentSchedule[index]['CurrentCycle']}/${provider.currentSchedule[index]['TotalCycle']}')))),
-                            DataCell(Center(child: Text(_convertTime(provider.currentSchedule[index]['StartTime'])))),
-                            DataCell(Center(child: Text('${provider.currentSchedule[index]['Duration_Qty']}'))),
+                          rows: List<DataRow>.generate(1, (lsIndex) => DataRow(cells: [
+                            DataCell(Text(provider.currentSchedule[csIndex]['ProgName'])),
+                            DataCell(Text(provider.currentSchedule[csIndex]['ProgCategory'])),
+                            DataCell(Text('${provider.currentSchedule[csIndex]['CurrentZone']}/${provider.currentSchedule[csIndex]['TotalZone']}')),
+                            DataCell(Text(provider.currentSchedule[csIndex]['ZoneName'])),
+                            DataCell(Center(child: Text('${provider.currentSchedule[csIndex]['CurrentRtc']}/${provider.currentSchedule[csIndex]['TotalRtc']}'))),
+                            DataCell(Center(child: Center(child: Text('${provider.currentSchedule[csIndex]['CurrentCycle']}/${provider.currentSchedule[csIndex]['TotalCycle']}')))),
+                            DataCell(Center(child: Text(_convertTime(provider.currentSchedule[csIndex]['StartTime'])))),
+                            DataCell(Center(child: Text('${provider.currentSchedule[csIndex]['Duration_Qty']}'))),
                             DataCell(Center(
-                              child: provider.currentSchedule[index]['ProgType']==3? IconButton(
+                              child: provider.currentSchedule[csIndex]['ProgType']==3? IconButton(
                                 tooltip: 'Stop',
-                                onPressed: provider.currentSchedule[index]['Message']=='Running.'? (){
-                                  String payload = '0,1,0,${provider.currentSchedule[index]['ScheduleS_No']},0,0,${provider.currentSchedule[index]['ProgType']},0';
+                                onPressed: provider.currentSchedule[csIndex]['Message']=='Running.'? (){
+                                  String payload = '0,1,0,${provider.currentSchedule[csIndex]['ScheduleS_No']},0,0,${provider.currentSchedule[csIndex]['ProgType']},0';
                                   String payLoadFinal = jsonEncode({
                                     "800": [{"801": payload}]
                                   });
@@ -131,8 +131,8 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                               ):
                               IconButton(
                                 tooltip: 'Skip next',
-                                onPressed: provider.currentSchedule[index]['Message']=='Running.'? (){
-                                  String payload = '${provider.currentSchedule[index]['ScheduleS_No']},0';
+                                onPressed: provider.currentSchedule[csIndex]['Message']=='Running.'? (){
+                                  String payload = '${provider.currentSchedule[csIndex]['ScheduleS_No']},0';
                                   String payLoadFinal = jsonEncode({
                                     "3700": [{"3701": payload}]
                                   });
@@ -150,10 +150,10 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                         height: 65,
                         child :  Column(
                           children: [
-                            (provider.currentSchedule[index].containsKey('MV') && provider.currentSchedule[index]['MV'].length > 0) &&
-                                (provider.currentSchedule[index].containsKey('VL') && provider.currentSchedule[index]['VL'].length > 0)? Row(
+                            (provider.currentSchedule[csIndex].containsKey('MV') && provider.currentSchedule[csIndex]['MV'].length > 0) &&
+                                (provider.currentSchedule[csIndex].containsKey('VL') && provider.currentSchedule[csIndex]['VL'].length > 0)? Row(
                               children: [
-                                for(int mvIndex=0; mvIndex<provider.currentSchedule[index]['MV'].length; mvIndex++)
+                                for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['MV'].length; mvIndex++)
                                   Expanded(
                                     flex: 1,
                                     child: Column(
@@ -161,18 +161,18 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                         const SizedBox(height: 5),
                                         CircleAvatar(
                                           radius: 18,
-                                          backgroundColor: provider.currentSchedule[index]['MV'][mvIndex]['Status']==0 ? Colors.grey :
-                                          provider.currentSchedule[index]['MV'][mvIndex]['Status']==1 ? Colors.greenAccent :
-                                          provider.currentSchedule[index]['MV'][mvIndex]['Status']==2 ? Colors.orangeAccent:
-                                          provider.currentSchedule[index]['MV'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
+                                          backgroundColor: provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==0 ? Colors.grey :
+                                          provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==1 ? Colors.greenAccent :
+                                          provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==2 ? Colors.orangeAccent:
+                                          provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
                                           backgroundImage: const AssetImage('assets/images/main_valve.png'),
                                         ),
                                         const SizedBox(height: 3),
-                                        Text('${provider.currentSchedule[index]['MV'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
+                                        Text('${provider.currentSchedule[csIndex]['MV'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
                                       ],
                                     ),
                                   ),
-                                for(int mvIndex=0; mvIndex<provider.currentSchedule[index]['VL'].length; mvIndex++)
+                                for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['VL'].length; mvIndex++)
                                   Expanded(
                                     flex: 1,
                                     child: Padding(
@@ -182,14 +182,14 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                           const SizedBox(height: 5),
                                           CircleAvatar(
                                             radius: 18,
-                                            backgroundColor: provider.currentSchedule[index]['VL'][mvIndex]['Status']==0 ? Colors.grey :
-                                            provider.currentSchedule[index]['VL'][mvIndex]['Status']==1 ? Colors.greenAccent :
-                                            provider.currentSchedule[index]['VL'][mvIndex]['Status']==2 ? Colors.orangeAccent:
-                                            provider.currentSchedule[index]['VL'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
+                                            backgroundColor: provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==0 ? Colors.grey :
+                                            provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==1 ? Colors.greenAccent :
+                                            provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==2 ? Colors.orangeAccent:
+                                            provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
                                             backgroundImage: const AssetImage('assets/images/valve.png'),
                                           ),
                                           const SizedBox(height: 3),
-                                          Text('${provider.currentSchedule[index]['VL'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
+                                          Text('${provider.currentSchedule[csIndex]['VL'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
                                         ],
                                       ),
                                     ),
@@ -202,17 +202,17 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                   width: 250,
                                   child: Row(
                                     children: [
-                                      Text('${provider.currentSchedule[index]['Duration_QtyLeft']}'.contains(':') ? 'Remaining(hh:mm:ss) : ':'Remaining(liters) : '),
-                                      provider.currentSchedule[index]['Message']=='Running.'? Text(provider.currentSchedule[index]['Duration_QtyLeft'], style: const TextStyle(fontSize: 18, color:Colors.black)):
-                                      const Text('----', style: TextStyle(fontSize: 18, color: Colors.black))
+                                      Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining(hh:mm:ss) : ':'Remaining(liters) : '),
+                                      provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
+                                      Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'000000', style: const TextStyle(fontSize: 18, color: Colors.black))
                                     ],
                                   ),
                                 )
                               ],
                             ) :
-                            provider.currentSchedule[index].containsKey('VL') && provider.currentSchedule[index]['VL'].length > 0 ? Row(
+                            provider.currentSchedule[csIndex].containsKey('VL') && provider.currentSchedule[csIndex]['VL'].length > 0 ? Row(
                               children: [
-                                for(int mvIndex=0; mvIndex<provider.currentSchedule[index]['VL'].length; mvIndex++)
+                                for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['VL'].length; mvIndex++)
                                   Expanded(
                                     flex: 1,
                                     child: Padding(
@@ -222,14 +222,14 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                           const SizedBox(height: 5),
                                           CircleAvatar(
                                             radius: 18,
-                                            backgroundColor: provider.currentSchedule[index]['VL'][mvIndex]['Status']==0 ? Colors.grey :
-                                            provider.currentSchedule[index]['VL'][mvIndex]['Status']==1 ? Colors.greenAccent :
-                                            provider.currentSchedule[index]['VL'][mvIndex]['Status']==2 ? Colors.orangeAccent:
-                                            provider.currentSchedule[index]['VL'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
+                                            backgroundColor: provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==0 ? Colors.grey :
+                                            provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==1 ? Colors.greenAccent :
+                                            provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==2 ? Colors.orangeAccent:
+                                            provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
                                             backgroundImage: const AssetImage('assets/images/valve.png'),
                                           ),
                                           const SizedBox(height: 3),
-                                          Text('${provider.currentSchedule[index]['VL'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
+                                          Text('${provider.currentSchedule[csIndex]['VL'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
                                         ],
                                       ),
                                     ),
@@ -242,9 +242,9 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                   width: 250,
                                   child: Row(
                                     children: [
-                                      Text('${provider.currentSchedule[index]['Duration_QtyLeft']}'.contains(':') ? 'Remaining(hh:mm:ss) : ':'Remaining(liters) : '),
-                                      provider.currentSchedule[index]['Message']=='Running.'? Text('${provider.currentSchedule[index]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
-                                      const Text('----', style: TextStyle(fontSize: 18, color: Colors.black))
+                                      Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining(hh:mm:ss) : ':'Remaining(liters) : '),
+                                      provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
+                                      Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'000000', style: TextStyle(fontSize: 18, color: Colors.black))
                                     ],
                                   ),
                                 )
@@ -318,6 +318,15 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
             }
             else{
               //flow
+              print(provider.currentSchedule[i]['Duration_QtyLeft']);
+              if(provider.currentSchedule[i]['Duration_QtyLeft']>0){
+                setState(() {
+                  int remainFlow = provider.currentSchedule[i]['Duration_QtyLeft'];
+                  int flowRate = provider.currentSchedule[i]['AverageFlowRate'];
+                  remainFlow = remainFlow - flowRate;
+                  provider.currentSchedule[i]['Duration_QtyLeft'] = remainFlow;
+                });
+              }
             }
           }
         }

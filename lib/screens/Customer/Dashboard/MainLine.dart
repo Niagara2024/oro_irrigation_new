@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:data_table_2/data_table_2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -30,8 +31,11 @@ class _MainLineState extends State<MainLine> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 287,
+        widget.siteData.irrigationPump.isNotEmpty? const IrrigationPumpList(): const SizedBox(),
+        widget.siteData.centralFilterSite.isNotEmpty? const CentralFilter(): const SizedBox(),
+
+        /*Container(
+          width: 500,
           decoration: BoxDecoration(
             color: myTheme.primaryColor.withOpacity(0.2),
             borderRadius: const BorderRadius.all(Radius.circular(5)),
@@ -44,9 +48,9 @@ class _MainLineState extends State<MainLine> {
                   tileColor: myTheme.primaryColor.withOpacity(0.2),
                   title: const Text('CENTRAL SITE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                 ),
-                Container(
-                  color: Colors.white,
-                  width: 287,
+                Expanded(
+                  //color: Colors.white,
+                  //width: 295,
                   child: Padding(
                     padding: const EdgeInsets.only(left: 7, top: 5),
                     child: Column(
@@ -145,14 +149,14 @@ class _MainLineState extends State<MainLine> {
               ],
             ),
           ),
-        ),
+        ),*/
       ],
     );
 
     return Row(
       children: [
         SizedBox(
-          width: 287,
+          width: 293,
           child: Column(
             children: [
               widget.siteData.irrigationPump.isNotEmpty || widget.siteData.centralFilterSite.isNotEmpty?

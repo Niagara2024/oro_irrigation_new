@@ -31,120 +31,118 @@ class _CentralFilterState extends State<CentralFilter> {
 
   @override
   Widget build(BuildContext context) {
-
     final provider = Provider.of<MqttPayloadProvider>(context);
 
-    return provider.filters.isNotEmpty? Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            for(int i=0; i<provider.filters.length; i++)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  provider.filters[i]['PrsIn']!='-'?
-                  SizedBox(
-                    width: 70,
-                    height: 160,
-                    child: Column(
-                      children: [
-                        Image.asset('assets/images/dp_prs_sensor.png',),
-                        const Text('Prs In',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
-                        Text('${double.parse(provider.filters[i]['PrsIn']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10)),
-                      ],
-                    ),
-                  ) :
-                  const SizedBox(),
-                  SizedBox(
-                    width: 70,
-                    height: provider.filters[i]['FilterStatus'].length * 75,
-                    child: ListView.builder(
-                      itemCount: provider.filters[i]['FilterStatus'].length,
-                      itemBuilder: (BuildContext context, int flIndex) {
-                        return Column(
-                          children: [
-                            PopupMenuButton(
-                              tooltip: 'Details',
-                              itemBuilder: (context) {
-                                return [
-                                  PopupMenuItem(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: [
-                                        Text(provider.filters[i]['FilterSite'], style: const TextStyle(fontWeight: FontWeight.bold),),
-                                        const Divider(),
-                                        Text(provider.filters[i]['FilterStatus'][flIndex]['Name']),
-                                        Text('${provider.filters[i]['FilterStatus'][flIndex]['Status']}'),
-                                      ],
-                                    ),
-                                  ),
-                                ];
-                              },
-                              child : Stack(
-                                children: [
-                                  buildFilterImage(flIndex, provider.filters[i]['FilterStatus'][flIndex]['Status'], provider.filters[i]['FilterStatus'].length),
-                                  Positioned(
-                                    top: 47.8,
-                                    left: 10,
-                                    child: provider.filters[i]['DurationLeft']!='00:00:00'? provider.filters[0]['Status'] == (flIndex+1)? Container(
-                                      color: Colors.greenAccent,
-                                      width: 50,
-                                      child: Center(
-                                        child: Text(provider.filters[i]['DurationLeft'], style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        ),
-                                      ),
-                                    ):
-                                    const SizedBox(): const SizedBox(),
-                                  ),
-                                  Positioned(
-                                    top: 0,
-                                    left: 25,
-                                    child: provider.filters[i]['PrsIn']!='-'? Container(
-                                        decoration: const BoxDecoration(
-                                          color:Colors.yellow,
-                                          borderRadius: BorderRadius.all(Radius.circular(2)),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(left: 3,right: 3),
-                                          child: Text('${provider.filters[i]['DpValue']}', style: const TextStyle(fontSize: 10),),
-                                        )
-                                    ):
-                                    const SizedBox(),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
+    return provider.filters.isNotEmpty? Align(
+      alignment: Alignment.topLeft,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for(int i=0; i<provider.filters.length; i++)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                provider.filters[i]['PrsIn']!='-'?
+                SizedBox(
+                  width: 70,
+                  height: 160,
+                  child: Column(
+                    children: [
+                      Image.asset('assets/images/dp_prs_sensor.png',),
+                      const Text('Prs In',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
+                      Text('${double.parse(provider.filters[i]['PrsIn']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10)),
+                    ],
                   ),
-                  provider.filters[i]['PrsOut'] != '-'?
-                  SizedBox(
-                    width: 70,
-                    height: 160,
-                    child: Column(
-                      children: [
-                        Image.asset('assets/images/dp_prs_sensor.png',),
-                        const Text('Prs Out',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
-                        Text('${double.parse(provider.filters[i]['PrsOut']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10)),
-                      ],
-                    ),
-                  ) :
-                  const SizedBox(),
-                ],
-              ),
-          ],
-        ),
-      ],
+                ) :
+                const SizedBox(),
+                SizedBox(
+                  width: 70,
+                  height: provider.filters[i]['FilterStatus'].length * 75,
+                  child: ListView.builder(
+                    itemCount: provider.filters[i]['FilterStatus'].length,
+                    itemBuilder: (BuildContext context, int flIndex) {
+                      return Column(
+                        children: [
+                          PopupMenuButton(
+                            tooltip: 'Details',
+                            itemBuilder: (context) {
+                              return [
+                                PopupMenuItem(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Text(provider.filters[i]['FilterSite'], style: const TextStyle(fontWeight: FontWeight.bold),),
+                                      const Divider(),
+                                      Text(provider.filters[i]['FilterStatus'][flIndex]['Name']),
+                                      Text('${provider.filters[i]['FilterStatus'][flIndex]['Status']}'),
+                                    ],
+                                  ),
+                                ),
+                              ];
+                            },
+                            child : Stack(
+                              children: [
+                                buildFilterImage(flIndex, provider.filters[i]['FilterStatus'][flIndex]['Status'], provider.filters[i]['FilterStatus'].length),
+                                Positioned(
+                                  top: 47.8,
+                                  left: 10,
+                                  child: provider.filters[i]['DurationLeft']!='00:00:00'? provider.filters[0]['Status'] == (flIndex+1)? Container(
+                                    color: Colors.greenAccent,
+                                    width: 50,
+                                    child: Center(
+                                      child: Text(provider.filters[i]['DurationLeft'], style: const TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      ),
+                                    ),
+                                  ):
+                                  const SizedBox(): const SizedBox(),
+                                ),
+                                Positioned(
+                                  top: 0,
+                                  left: 25,
+                                  child: provider.filters[i]['PrsIn']!='-'? Container(
+                                      decoration: const BoxDecoration(
+                                        color:Colors.yellow,
+                                        borderRadius: BorderRadius.all(Radius.circular(2)),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(left: 3,right: 3),
+                                        child: Text('${provider.filters[i]['DpValue']}', style: const TextStyle(fontSize: 10),),
+                                      )
+                                  ):
+                                  const SizedBox(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+                provider.filters[i]['PrsOut'] != '-'?
+                SizedBox(
+                  width: 70,
+                  height: 160,
+                  child: Column(
+                    children: [
+                      Image.asset('assets/images/dp_prs_sensor.png',),
+                      const Text('Prs Out',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
+                      Text('${double.parse(provider.filters[i]['PrsOut']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10)),
+                    ],
+                  ),
+                ) :
+                const SizedBox(),
+              ],
+            ),
+        ],
+      ),
     ) :
     const SizedBox();
   }

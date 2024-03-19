@@ -89,28 +89,6 @@ class _IrrigationPumpListState extends State<IrrigationPumpList> {
                 ),
               ],
             );
-            buildIrPumpImage(index, provider.irrigationPump[index]['Status'], provider.irrigationPump.length);
-            /*return Column(
-              children: [
-                PopupMenuButton(
-                  tooltip: 'Details',
-                  itemBuilder: (context) {
-                    return [
-                      PopupMenuItem(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text(provider.irrigationPump[index]['Name'], style: const TextStyle(fontWeight: FontWeight.bold),),
-                          ],
-                        ),
-                      ),
-                    ];
-                  },
-                  child: buildIrPumpImage(index, provider.irrigationPump[index]['Status'], provider.irrigationPump.length),
-                ),
-              ],
-            ); */// Replace 'yourKey' with the key from your API response
           } else {
             return const Text(''); // or any placeholder/error message
           }

@@ -587,12 +587,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
     );
   }
 
-  int getMaxCount(List<dynamic> array1, List<dynamic> array2) {
-    int count1 = array1.length;
-    int count2 = array2.length;
-    return count1 > count2 ? count1 : count2;
-  }
-
   void initRotationAnimation(){
     animationController = AnimationController(
       vsync: this,
@@ -646,17 +640,23 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
             children: [
               Card(
                 elevation: 5,
-                shape: const RoundedRectangleBorder(),
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(topLeft: Radius.circular(5), topRight: Radius.circular(5)),
+                ),
                 surfaceTintColor: Colors.white,
                 margin: EdgeInsets.zero,
                 child: ListTile(
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(topLeft: Radius.circular(5), topRight: Radius.circular(5)),
+                  ),
                   tileColor: myTheme.primaryColor,
                   textColor: Colors.white,
-                  title: const Text('Node Details'),
+                  title: const Text('All Node Details'),
                 ),
               ),
-              const SizedBox(
+              Container(
                 height: 40,
+                color: myTheme.primaryColor.withOpacity(0.25),
                 child: Column(
                   children: [
                     Row(
@@ -740,7 +740,17 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                                       children: [
                                         CircleAvatar(
                                           backgroundColor: Colors.transparent,
-                                          backgroundImage: widget.siteData.nodeList[i].rlyStatus[index].name.contains("VL") ? const AssetImage('assets/images/valve.png') : const AssetImage('assets/images/irrigation_pump.png'),
+                                          backgroundImage: widget.siteData.nodeList[i].rlyStatus[index].name.contains("SP") ?
+                                          const AssetImage('assets/images/dp_src_pump.png') :
+                                          widget.siteData.nodeList[i].rlyStatus[index].name.contains("IP") ?
+                                          const AssetImage('assets/images/irrigation_pump.png') :
+                                          widget.siteData.nodeList[i].rlyStatus[index].name.contains("VL") ?
+                                          const AssetImage('assets/images/valve.png'):
+                                          widget.siteData.nodeList[i].rlyStatus[index].name.contains("MV") ?
+                                          const AssetImage('assets/images/main_valve.png'):
+                                          widget.siteData.nodeList[i].rlyStatus[index].name.contains("FL") ?
+                                          const AssetImage('assets/images/dp_filter.png'):
+                                          const AssetImage('assets/images/pressure_sensor.png'),
                                         ),
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.center,

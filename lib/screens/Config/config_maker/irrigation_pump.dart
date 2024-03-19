@@ -112,7 +112,7 @@ class _IrrigationPumpTableState extends State<IrrigationPumpTable> {
                       }else{
                         return AlertDialog(
                           backgroundColor: myTheme.primaryColor,
-                          shape: RoundedRectangleBorder(
+                          shape: const RoundedRectangleBorder(
                               borderRadius: BorderRadius.all(Radius.circular(0))
                           ),
                           title: Text('Add Batch of Pumps with Same Properties',style: TextStyle(color: Colors.white,fontSize: 14),),

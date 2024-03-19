@@ -238,7 +238,7 @@ class _DashboardWideState extends State<DashboardWide> {
           padding: EdgeInsets.only(left: 10, top: 8, bottom: 8),
           child: Image(image: AssetImage("assets/images/oro_logo_white.png")),
         ),
-        leadingWidth: 100,
+        leadingWidth: 75,
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(

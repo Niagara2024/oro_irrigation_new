@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 const primaryColorDark = Color(0xFF036673);
 const primaryColorMedium = Color(0xFF1D808E);
-const primaryColorLight = Color(0x644BDCEF);
+const primaryColorLight = Color(0x6438D3E8);
 
 const textColorWhite = Colors.white;
 const textColorBlack = Colors.black;
@@ -18,7 +18,7 @@ final ThemeData myTheme = ThemeData(
   primaryColorLight: primaryColorLight,
 
   fontFamily: GoogleFonts.poppins().fontFamily,
-  navigationRailTheme: const NavigationRailThemeData(
+  /*navigationRailTheme: const NavigationRailThemeData(
     backgroundColor: primaryColorDark,
     elevation: 5,
     labelType: NavigationRailLabelType.all,
@@ -26,7 +26,14 @@ final ThemeData myTheme = ThemeData(
     unselectedLabelTextStyle: TextStyle(color: Colors.white),
     selectedLabelTextStyle: TextStyle(color: Colors.white),
     unselectedIconTheme: IconThemeData(color: Colors.white),
+  ),*/
+  navigationRailTheme: NavigationRailThemeData(
+    backgroundColor: primaryColorDark.withOpacity(0.2),
+    elevation: 0,
+    labelType: NavigationRailLabelType.all,
+    indicatorColor: primaryColorDark,
   ),
+
   appBarTheme: const AppBarTheme(
     backgroundColor: primaryColorDark,
     titleTextStyle: TextStyle(color: textColorWhite, fontSize: 22),

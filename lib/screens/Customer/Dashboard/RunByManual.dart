@@ -1059,7 +1059,7 @@ class _RunByManualState extends State<RunByManual> {
     String finalResult = allRelaySrlNo.where((s) => s.isNotEmpty).join('_');
     String payload = '';
     if(ddSelection==0){
-      payload = '${finalResult==''?0:1},${ddSelection==0?1:2},${location==''?0:location},${ddSelection==0?0:ddSelectionId},${finalResult==''?0:finalResult},0,${segmentIndex==0?3:1},${segmentIndex==0?'0':segmentIndex==1?strDuration:strFlow}';
+      payload = '${finalResult==''?0:1},${finalResult==''?0:finalResult},${segmentIndex==0?3:1},${segmentIndex==0?'0':segmentIndex==1?strDuration:strFlow}';
     }else{
       payload = '${finalResult.isEmpty?0:1},${2},${widget.programList[ddSelection].programCategory},${widget.programList[ddSelection].serialNumber},${finalResult==''?0:finalResult},0,${segmentIndex==0?3:1},${segmentIndex==0?'0':segmentIndex==1?strDuration:strFlow}';
     }
@@ -1067,6 +1067,7 @@ class _RunByManualState extends State<RunByManual> {
     String payLoadFinal = jsonEncode({
       "800": [{"801": payload}]
     });
+    //print(payLoadFinal);
     MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
 
     Map<String, dynamic> manualOperation = {

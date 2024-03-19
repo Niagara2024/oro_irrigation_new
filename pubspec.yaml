@@ -234,6 +234,8 @@ flutter:
      - assets/images/line_horizontal_gray.png
      - assets/images/line_vertical_blue.png
      - assets/images/line_vertical_gray.png
+     - assets/images/dp_main_valve.png
+     - assets/images/dp_source_pump.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

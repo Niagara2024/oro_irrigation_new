@@ -96,7 +96,7 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                 labelColor: myTheme.primaryColorDark,
                 unselectedLabelColor: Colors.black38,
                 isScrollable: true,
-                labelStyle: const TextStyle(fontSize: 17),
+                labelStyle: const TextStyle(fontSize: 15),
                 tabs: [
                   for (var i = 0; i < siteListFinal.length; i++)
                     Tab(text: siteListFinal[i].siteName ?? '',),
@@ -115,9 +115,7 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                   children: [
                     NavigationRail(
                       selectedIndex: _selectedIndex,
-                      backgroundColor: myTheme.primaryColorDark,
-                      elevation: 1,
-                      minWidth: 50,
+                      labelType: NavigationRailLabelType.all,
                       onDestinationSelected: (int index) {
                         setState(() {
                           _selectedIndex = index;
@@ -182,44 +180,7 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                         ),
                       ),
                     ),*/
-                    /*NavigationRail(
-                      selectedIndex: _selectedIndex,
-                      minWidth: 100,
-                      onDestinationSelected: (int index) {
-                        setState(() {
-                          _selectedIndex = index;
-                        });
-                      },
-                      destinations: const <NavigationRailDestination>[
-                        NavigationRailDestination(
-                          padding: EdgeInsets.only(top: 5),
-                          icon: Icon(Icons.dashboard_outlined),
-                          selectedIcon: Icon(Icons.dashboard_outlined, color: Colors.white,),
-                          label: Text('Dashboard'),
-                        ),
-                        NavigationRailDestination(
-                          icon: Icon(Icons.devices_other),
-                          selectedIcon: Icon(Icons.devices_other, color: Colors.white),
-                          label: Text('Product'),
-                        ),
-                        NavigationRailDestination(
-                          icon: Icon(Icons.message_outlined),
-                          selectedIcon: Icon(Icons.message_outlined, color: Colors.white,),
-                          label: Text('Irrigation Logs'),
-                        ),
-                        NavigationRailDestination(
-                          icon: Icon(Icons.question_answer_outlined),
-                          selectedIcon: Icon(Icons.question_answer_outlined, color: Colors.white,),
-                          label: Text('Sent &\nReceived'),
-                        ),
-                        NavigationRailDestination(
-                          icon: Icon(Icons.settings_outlined),
-                          selectedIcon: Icon(Icons.settings_outlined, color: Colors.white,),
-                          label: Text('Settings'),
-                        ),
-                      ],
-                    ),
-                    VerticalDivider(width: 2, color: myTheme.primaryColor.withOpacity(0.5)),*/
+                    VerticalDivider(width: 2, color: myTheme.primaryColor.withOpacity(0.5)),
                     Expanded(
                       child:
                       _selectedIndex == 0 ? CustomerDashboard(customerID: widget.customerID, type: 0, customerName: widget.customerName, userID: widget.customerID, mobileNo: '+${widget.mobileNo}', siteData: siteListFinal[siteIndex], siteLength: siteListFinal.length) :

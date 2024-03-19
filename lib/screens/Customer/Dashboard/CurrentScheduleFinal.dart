@@ -8,12 +8,14 @@ import 'package:provider/provider.dart';
 
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../constants/MQTTManager.dart';
+import '../../../constants/http_service.dart';
 import '../../../constants/theme.dart';
 import '../../../state_management/MqttPayloadProvider.dart';
 
 class CurrentScheduleFinal extends StatefulWidget {
-  const CurrentScheduleFinal({Key? key, required this.siteData}) : super(key: key);
+  const CurrentScheduleFinal({Key? key, required this.siteData, required this.customerID}) : super(key: key);
   final DashboardModel siteData;
+  final int customerID;
 
   @override
   State<CurrentScheduleFinal> createState() => _CurrentScheduleFinalState();
@@ -71,11 +73,11 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                           columns: const [
                             DataColumn2(
                                 label: Text('Name', style: TextStyle(fontSize: 13),),
-                                size: ColumnSize.S
+                                size: ColumnSize.L
                             ),
                             DataColumn2(
                                 label: Text('Line', style: TextStyle(fontSize: 13)),
-                                size: ColumnSize.M
+                                size: ColumnSize.S
 
                             ),
                             DataColumn2(
@@ -89,11 +91,11 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                             ),
                             DataColumn2(
                                 label: Center(child: Text('RTC', style: TextStyle(fontSize: 13),)),
-                                size: ColumnSize.M
+                                size: ColumnSize.S
                             ),
                             DataColumn2(
                                 label: Center(child: Text('Cyclic', style: TextStyle(fontSize: 13),)),
-                                fixedWidth: 100
+                                size: ColumnSize.S
                             ),
                             DataColumn2(
                                 label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
@@ -121,11 +123,19 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                               child: provider.currentSchedule[csIndex]['ProgType']==3? IconButton(
                                 tooltip: 'Stop',
                                 onPressed: provider.currentSchedule[csIndex]['Message']=='Running.'? (){
-                                  String payload = '0,1,0,${provider.currentSchedule[csIndex]['ScheduleS_No']},0,0,${provider.currentSchedule[csIndex]['ProgType']},0';
+                                  //String payload = '0,1,0,${provider.currentSchedule[csIndex]['ScheduleS_No']},0,0,${provider.currentSchedule[csIndex]['ProgType']},0';
+                                  String payload = '0,0,0,0';
                                   String payLoadFinal = jsonEncode({
                                     "800": [{"801": payload}]
                                   });
                                   MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                  Map<String, dynamic> manualOperation = {
+                                    "method": 1,
+                                    "time": '00:00',
+                                    "flow": '0',
+                                    "selected": [],
+                                  };
+                                  sentManualModeToServer(manualOperation);
                                 } : null,
                                 icon: const Icon(Icons.stop_circle_outlined,color: Colors.red),
                               ):
@@ -165,7 +175,7 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                           provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==1 ? Colors.greenAccent :
                                           provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==2 ? Colors.orangeAccent:
                                           provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
-                                          backgroundImage: const AssetImage('assets/images/main_valve.png'),
+                                          backgroundImage: const AssetImage('assets/images/dp_main_valve.png'),
                                         ),
                                         const SizedBox(height: 3),
                                         Text('${provider.currentSchedule[csIndex]['MV'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
@@ -336,6 +346,18 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
       }
 
     });
+  }
+
+  Future<void>sentManualModeToServer(manualOperation) async {
+    try {
+      final body = {"userId": widget.customerID, "controllerId": widget.siteData.controllerId, "manualOperation": manualOperation, "createUser": widget.customerID};
+      final response = await HttpService().postRequest("createUserManualOperation", body);
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 
 }

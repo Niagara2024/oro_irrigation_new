@@ -378,7 +378,7 @@ class _RunByManualState extends State<RunByManual> {
                                         children: [
                                           CheckboxListTile(
                                             title: Text(dashBoardData[0].mainValve[index].name),
-                                            secondary: Image.asset('assets/images/main_valve.png'),
+                                            secondary: Image.asset('assets/images/dp_main_valve.png'),
                                             value: dashBoardData[0].mainValve[index].selected,
                                             onChanged: (bool? newValue) {
                                               setState(() {

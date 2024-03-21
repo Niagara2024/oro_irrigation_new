@@ -22,135 +22,45 @@ class MainLine extends StatefulWidget {
 
 class _MainLineState extends State<MainLine> {
 
-
-
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<MqttPayloadProvider>(context);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        widget.siteData.irrigationPump.isNotEmpty? const IrrigationPumpList(): const SizedBox(),
-        widget.siteData.centralFilterSite.isNotEmpty? const CentralFilter(): const SizedBox(),
-
-        /*Container(
-          width: 500,
-          decoration: BoxDecoration(
-            color: myTheme.primaryColor.withOpacity(0.2),
-            borderRadius: const BorderRadius.all(Radius.circular(5)),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(3.0),
-            child: Column(
-              children: [
-                ListTile(
-                  tileColor: myTheme.primaryColor.withOpacity(0.2),
-                  title: const Text('CENTRAL SITE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                ),
-                Expanded(
-                  //color: Colors.white,
-                  //width: 295,
+    return Container(
+      decoration: BoxDecoration(
+        color: myTheme.primaryColor.withOpacity(0.2),
+        borderRadius: const BorderRadius.all(Radius.circular(5)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(3.0),
+        child: Column(
+          children: [
+            const ListTile(
+              title: Text('CENTRAL SITE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            ),
+            Container(
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8,right: 8, top: 8),
+                child: widget.siteData.irrigationPump.isNotEmpty && widget.siteData.centralFilterSite.isNotEmpty? Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    widget.siteData.irrigationPump.isNotEmpty? const IrrigationPumpList(): const SizedBox(),
+                    widget.siteData.centralFilterSite.isNotEmpty? const CentralFilter(): const SizedBox(),
+                  ],
+                ) :
+                const Align(
+                  alignment: Alignment.centerLeft,
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 7, top: 5),
-                    child: Column(
-                      children: [
-                        widget.siteData.irrigationPump.isNotEmpty || widget.siteData.centralFilterSite.isNotEmpty?
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            widget.siteData.irrigationPump.isNotEmpty? const IrrigationPumpList():
-                            const SizedBox(),
-                            SizedBox(
-                              width: 70,
-                              height: 160,
-                              child: ListView.builder(
-                                itemCount: 1,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return Column(
-                                    children: [
-                                      PopupMenuButton(
-                                        tooltip: 'Details',
-                                        itemBuilder: (context) {
-                                          return [
-                                            const PopupMenuItem(
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                children: [
-                                                  Text('Pressure Sensor', style: TextStyle(fontWeight: FontWeight.bold),),
-                                                  Divider(),
-                                                ],
-                                              ),
-                                            ),
-                                          ];
-                                        },
-                                        child: Image.asset('assets/images/dp_prs_sensor.png',),
-                                      ),
-                                      const Text('Prs In',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
-                                      provider.PrsIn.isNotEmpty
-                                          ? Text('${double.parse(provider.PrsIn[0]['Value']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10))
-                                          : const Text('0.0 bar', style: TextStyle(fontSize: 10)),
-                                    ],
-                                  );
-                                },
-                              ),
-                            ),
-                            widget.siteData.centralFilterSite.isNotEmpty? const CentralFilter():
-                            const SizedBox(),
-                            SizedBox(
-                              width: 70,
-                              height: 160,
-                              child: ListView.builder(
-                                itemCount: 1,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return Column(
-                                    children: [
-                                      PopupMenuButton(
-                                        tooltip: 'Details',
-                                        itemBuilder: (context) {
-                                          return [
-                                            const PopupMenuItem(
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                children: [
-                                                  Text('Pressure Sensor', style: TextStyle(fontWeight: FontWeight.bold),),
-                                                  Divider(),
-                                                ],
-                                              ),
-                                            ),
-                                          ];
-                                        },
-                                        child: Image.asset('assets/images/dp_prs_sensor.png',),
-                                      ),
-                                      const Text('Prs Out',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
-                                      provider.PrsOut.isNotEmpty
-                                          ? Text('${double.parse(provider.PrsOut[0]['Value']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10))
-                                          : const Text('0.0 bar', style: TextStyle(fontSize: 10)),
-                                    ],
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
-                        ) :
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            SizedBox(height: 50,),
-                            Text('No Device Available'),
-                          ],
-                        ),
-                      ],
-                    ),
+                    padding: EdgeInsets.only(left: 15),
+                    child: Text('Main line installation pending', style: TextStyle(fontWeight: FontWeight.normal), textAlign: TextAlign.left),
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
-        ),*/
-      ],
+          ],
+        ),
+      ),
     );
 
     return Row(

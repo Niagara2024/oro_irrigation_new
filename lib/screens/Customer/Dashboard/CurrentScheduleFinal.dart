@@ -209,7 +209,7 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                   child: Container(width: 1, height: 40, color: Colors.grey,),
                                 ),
                                 SizedBox(
-                                  width: 250,
+                                  width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 250 : 210,
                                   child: Row(
                                     children: [
                                       Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining(hh:mm:ss) : ':'Remaining(liters) : '),
@@ -249,7 +249,7 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                   child: Container(width: 1, height: 40, color: Colors.grey,),
                                 ),
                                 SizedBox(
-                                  width: 250,
+                                  width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 250 : 210,
                                   child: Row(
                                     children: [
                                       Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining(hh:mm:ss) : ':'Remaining(liters) : '),
@@ -260,6 +260,46 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                 )
                               ],
                             ) :
+                            provider.currentSchedule[csIndex].containsKey('MV') && provider.currentSchedule[csIndex]['MV'].length > 0 ? Row(
+                              children: [
+                                for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['MV'].length; mvIndex++)
+                                  Expanded(
+                                    flex: 1,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(right: 8),
+                                      child: Column(
+                                        children: [
+                                          const SizedBox(height: 5),
+                                          CircleAvatar(
+                                            radius: 18,
+                                            backgroundColor: provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==0 ? Colors.grey :
+                                            provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==1 ? Colors.greenAccent :
+                                            provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==2 ? Colors.orangeAccent:
+                                            provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
+                                            backgroundImage: const AssetImage('assets/images/dp_main_valve.png'),
+                                          ),
+                                          const SizedBox(height: 3),
+                                          Text('${provider.currentSchedule[csIndex]['MV'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Container(width: 1, height: 40, color: Colors.grey,),
+                                ),
+                                SizedBox(
+                                  width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 250 : 210,
+                                  child: Row(
+                                    children: [
+                                      Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining(hh:mm:ss) : ':'Remaining(liters) : '),
+                                      provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
+                                      Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'000000', style: const TextStyle(fontSize: 18, color: Colors.black))
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ):
                             const SizedBox(),
 
                           ],

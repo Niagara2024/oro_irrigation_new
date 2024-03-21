@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
 
 import '../../../state_management/MqttPayloadProvider.dart';
@@ -37,7 +35,7 @@ class _IrrigationPumpListState extends State<IrrigationPumpList> {
 
     return provider.irrigationPump.isNotEmpty? SizedBox(
       width: 70,
-      height: provider.irrigationPump.length * 72,
+      height: provider.irrigationPump.length * 70,
       child: ListView.builder(
         itemCount: provider.irrigationPump.length,
         itemBuilder: (BuildContext context, int index) {
@@ -64,7 +62,7 @@ class _IrrigationPumpListState extends State<IrrigationPumpList> {
                 Positioned(
                   top: 0,
                   left: 12,
-                  child: CircleAvatar(radius: 23, backgroundColor: Colors.orange, child: Text(provider.irrigationPump[index]['OnDelayLeft'], style: TextStyle(fontSize: 10),),),
+                  child: CircleAvatar(radius: 23, backgroundColor: Colors.orange, child: Text(provider.irrigationPump[index]['OnDelayLeft'], style: const TextStyle(fontSize: 10),),),
                 ),
               ],
             ) :

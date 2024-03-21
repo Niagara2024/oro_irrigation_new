@@ -37,11 +37,9 @@ class _ConfigScreenState extends State<ConfigScreen> with SingleTickerProviderSt
         NavigationRail(
           selectedIndex: nvRSelection,
           onDestinationSelected: (int index) {
-            // Handle item selection
             setState(() {
               nvRSelection = index;
             });
-
           },
           labelType: NavigationRailLabelType.all,
           destinations: const [

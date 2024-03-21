@@ -18,20 +18,13 @@ final ThemeData myTheme = ThemeData(
   primaryColorLight: primaryColorLight,
 
   fontFamily: GoogleFonts.poppins().fontFamily,
-  /*navigationRailTheme: const NavigationRailThemeData(
+
+  navigationRailTheme: const NavigationRailThemeData(
     backgroundColor: primaryColorDark,
-    elevation: 5,
-    labelType: NavigationRailLabelType.all,
-    indicatorColor: primaryColorLight,
-    unselectedLabelTextStyle: TextStyle(color: Colors.white),
-    selectedLabelTextStyle: TextStyle(color: Colors.white),
-    unselectedIconTheme: IconThemeData(color: Colors.white),
-  ),*/
-  navigationRailTheme: NavigationRailThemeData(
-    backgroundColor: primaryColorDark.withOpacity(0.2),
     elevation: 0,
     labelType: NavigationRailLabelType.all,
-    indicatorColor: primaryColorDark,
+    indicatorColor: primaryColorLight,
+    unselectedIconTheme: IconThemeData(color: Colors.white),
   ),
 
   appBarTheme: const AppBarTheme(

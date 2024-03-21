@@ -25,9 +25,8 @@ class UpcomingProgram extends StatelessWidget {
         padding: const EdgeInsets.all(3.0),
         child: Column(
           children: [
-            ListTile(
-              tileColor: myTheme.primaryColor.withOpacity(0.1),
-              title: const Text('UPCOMING PROGRAM', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            const ListTile(
+              title: Text('SCHEDULED PROGRAM', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
             ),
             Container(
               color: Colors.white,

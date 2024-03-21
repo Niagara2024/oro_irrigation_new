@@ -31,7 +31,6 @@ class MQTTManager {
       _client!.keepAlivePeriod = 60;
       _client!.onDisconnected = onDisconnected;
       _client!.logging(on: false);
-
       _client!.onConnected = onConnected;
       _client!.onSubscribed = onSubscribed;
 
@@ -99,12 +98,8 @@ class MQTTManager {
       print('OnDisconnected callback is solicited, this is correct');
     }
     providerState?.setAppConnectionState(MQTTConnectionState.disconnected);
+    connect();
 
-    // Attempt reconnection after a delay
-    Future.delayed(const Duration(seconds: 03), () {
-      //_client!.disconnect();
-      //connect();
-    });
   }
 
   void onConnected() {
@@ -112,4 +107,5 @@ class MQTTManager {
     providerState?.setAppConnectionState(MQTTConnectionState.connected);
     print('Mosquitto client connected....');
   }
+
 }

@@ -89,7 +89,7 @@ class _CentralFilterState extends State<CentralFilter> {
                                 Positioned(
                                   top: 47.8,
                                   left: 10,
-                                  child: provider.filters[i]['DurationLeft']!='00:00:00'? provider.filters[0]['Status'] == (flIndex+1)? Container(
+                                  child: provider.filters[i]['DurationLeft']!='00:00:00'? provider.filters[i]['Status'] == (flIndex+1) ? Container(
                                     color: Colors.greenAccent,
                                     width: 50,
                                     child: Center(
@@ -100,7 +100,7 @@ class _CentralFilterState extends State<CentralFilter> {
                                       ),
                                       ),
                                     ),
-                                  ):
+                                  ) :
                                   const SizedBox(): const SizedBox(),
                                 ),
                                 Positioned(

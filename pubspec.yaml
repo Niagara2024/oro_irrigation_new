@@ -236,6 +236,7 @@ flutter:
      - assets/images/line_vertical_gray.png
      - assets/images/dp_main_valve.png
      - assets/images/dp_source_pump.png
+     - assets/images/no_signal.jpg
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

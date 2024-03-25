@@ -98,7 +98,7 @@ class MQTTManager {
       print('OnDisconnected callback is solicited, this is correct');
     }
     providerState?.setAppConnectionState(MQTTConnectionState.disconnected);
-    connect();
+    //connect();
 
   }
 

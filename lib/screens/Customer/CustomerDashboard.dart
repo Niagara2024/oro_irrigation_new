@@ -4,11 +4,13 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/CurrentScheduleFinal.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/NextSchedule.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/UpcomingProgram.dart';
 import 'package:provider/provider.dart';
+import 'package:side_sheet/side_sheet.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../Models/Customer/Dashboard/ProgramList.dart';
 import '../../constants/MQTTManager.dart';
@@ -18,6 +20,7 @@ import '../../constants/theme.dart';
 import '../../state_management/MqttPayloadProvider.dart';
 import 'Dashboard/CurrentSchedule.dart';
 import 'Dashboard/MainLine.dart';
+import 'Dashboard/MainLineLocal.dart';
 import 'Dashboard/RunByManual.dart';
 import 'ProgramSchedule.dart';
 
@@ -39,6 +42,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
   late AnimationController animationController;
   late Animation<double> rotationAnimation;
   List<ProgramList> programList = [];
+
+  bool _isMenuOpen = false;
 
   @override
   void initState() {
@@ -137,15 +142,51 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
     }
 
     return Container(
-      color: const Color(0xffefefef),
-      child: Padding(
-        padding: const EdgeInsets.only(left: 8, top: 5),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Expanded(
+      color: wifiStrength != 0? const Color(0xffefefef) : Colors.white,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
               child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Column(
+                  children: [
+                    provider.filtersLocal.isNotEmpty? Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Flexible(
+                          flex: 2,
+                          child: MainLine(siteData: widget.siteData),
+                        ),
+                        const SizedBox(width: 5),
+                        Flexible(
+                          flex: 1,
+                          child: MainLineLocal(siteData: widget.siteData),
+                        ),
+                      ],
+                    ):
+                    MainLine(siteData: widget.siteData),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8, top: 8),
+                      child: CurrentScheduleFinal(siteData: widget.siteData, customerID: widget.customerID),
+                    ),
+                    CurrentSchedule(siteData: widget.siteData),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: NextSchedule(siteData: widget.siteData, userID: widget.userID, customerID: widget.customerID),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: UpcomingProgram(siteData: widget.siteData),
+                    ),
+                  ],
+                ),
+              ),
+              /*child: wifiStrength != 0? SingleChildScrollView(
                 scrollDirection: Axis.vertical,
                 child: Column(
                   children: [
@@ -165,465 +206,882 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
                     ),
                   ],
                 ),
-              ),
+              ):
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text('DEVICE SIGNAL DISCONNECTED', style: TextStyle(fontSize: 20, color: myTheme.primaryColorDark),),
+                  //const SizedBox(height: 10),
+                  //Image.asset('assets/images/no_signal.jpg', height: 400,),
+                ],
+              ),*/
             ),
-            const SizedBox(width: 5),
-            Column(
-              children: [
-                Card(
-                  shape: RoundedRectangleBorder(
+          ),
+          /*const SizedBox(width: 5),
+          Column(
+            children: [
+              Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                elevation: 2,
+                child: Container(
+                  width: 346,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    gradient:  const LinearGradient(
+                      begin: Alignment.centerRight,
+                      end: Alignment.centerLeft,
+                      //colors: [myTheme.primaryColor.withOpacity(0.2), myTheme.primaryColor.withOpacity(0.2)],
+                      colors: [Colors.white, Colors.white],
+                    ),
                     borderRadius: BorderRadius.circular(5),
                   ),
-                  elevation: 2,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 3),
+                      Row(
+                        children: [
+                          SizedBox(
+                            height: 40,
+                            width: 40,
+                            child: Padding(
+                              padding: const EdgeInsets.all(3.0),
+                              child: Image.asset('assets/images/oro_gem.png'),
+                            ),
+                          ),
+                          Expanded(child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(widget.siteData.deviceName, style: const TextStyle(color: Colors.black, fontSize: 12)),
+                              Text('${widget.siteData.categoryName} - Last sync : $lastSyncData', style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 10, color: Colors.black,),),
+                            ],
+                          ))
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              color: myTheme.primaryColor.withOpacity(0.2)
+                            ),
+                            width: 45,
+                            height: 45,
+                            child: IconButton(
+                              tooltip: '$wifiStrength %',
+                              icon: Icon(wifiStrength == 0? Icons.wifi_off:
+                              wifiStrength >= 1 && wifiStrength <= 20 ? Icons.network_wifi_1_bar_outlined:
+                              wifiStrength >= 21 && wifiStrength <= 40 ? Icons.network_wifi_2_bar_outlined:
+                              wifiStrength >= 41 && wifiStrength <= 60 ? Icons.network_wifi_3_bar_outlined:
+                              wifiStrength >= 61 && wifiStrength <= 80 ? Icons.network_wifi_outlined:
+                              Icons.wifi, color: myTheme.primaryColorDark,),
+                              onPressed: null,
+                            ),
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5),
+                                color: myTheme.primaryColor.withOpacity(0.2)
+                            ),
+                            width: 45,
+                            height: 45,
+                            child: RotationTransition(
+                              turns: rotationAnimation,
+                              child: IconButton(
+                                tooltip: 'refresh',
+                                icon: Icon(Icons.refresh, color: myTheme.primaryColorDark,),
+                                onPressed: onRefreshClicked,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5),
+                                color: myTheme.primaryColorDark.withOpacity(0.2)
+                            ),
+                            width: 45,
+                            height: 45,
+                            child: IconButton(tooltip:'View all Node details', onPressed: (){
+                              showNodeDetailsBottomSheet(context);
+                            }, icon: Icon(Icons.grid_view, color: myTheme.primaryColorDark)),
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5),
+                                color: myTheme.primaryColor.withOpacity(0.2)
+                            ),
+                            width: 45,
+                            height: 45,
+                            child: IconButton(
+                              tooltip: 'Manual Mode',
+                              icon: Icon(Icons.touch_app_outlined, color: myTheme.primaryColorDark,),
+                              onPressed: () async {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => RunByManual(siteID: widget.siteData.siteId,
+                                        siteName: widget.siteData.siteName,
+                                        controllerID: widget.siteData.controllerId,
+                                        customerID: widget.customerID,
+                                        imeiNo: widget.siteData.deviceId,
+                                        programList: programList, callbackFunction: callbackFunction),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5),
+                                color: myTheme.primaryColor.withOpacity(0.2)
+                            ),
+                            width: 45,
+                            height: 45,
+                            child: IconButton(
+                              tooltip: 'Planning',
+                              icon: Icon(Icons.list_alt, color: myTheme.primaryColorDark,),
+                              onPressed: () async {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ProgramSchedule(
+                                      customerID: widget.customerID,
+                                      controllerID: widget.siteData.controllerId,
+                                      siteName: widget.siteData.siteName,
+                                      imeiNumber: widget.siteData.deviceId,
+                                      userId: widget.customerID,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              Card(
+                elevation: 2,
+                surfaceTintColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(3.0),
                   child: Container(
-                    width: 346,
-                    height: 100,
+                    width: 340,
+                    height: widget.siteLength > 1? MediaQuery.sizeOf(context).height-242 : MediaQuery.sizeOf(context).height-188,
                     decoration: BoxDecoration(
-                      gradient:  const LinearGradient(
+                      gradient: const LinearGradient(
                         begin: Alignment.centerRight,
                         end: Alignment.centerLeft,
-                        //colors: [myTheme.primaryColor.withOpacity(0.2), myTheme.primaryColor.withOpacity(0.2)],
+                         //colors: [myTheme.primaryColor, myTheme.primaryColorDark],
                         colors: [Colors.white, Colors.white],
+                        //colors: [Colors.white54, Colors.white54],
                       ),
                       borderRadius: BorderRadius.circular(5),
                     ),
                     child: Column(
                       children: [
-                        const SizedBox(height: 3),
-                        Row(
-                          children: [
-                            SizedBox(
-                              height: 40,
-                              width: 40,
-                              child: Padding(
-                                padding: const EdgeInsets.all(3.0),
-                                child: Image.asset('assets/images/oro_gem.png'),
+                        SizedBox(
+                          height: 50,
+                          child: Row(
+                            children: [
+                              Row(
+                                children: [
+                                  const SizedBox(width: 5),
+                                  const Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          SizedBox(width: 5),
+                                          CircleAvatar(radius: 5, backgroundColor: Colors.green,),
+                                          SizedBox(width: 5),
+                                          Text('Connected', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          SizedBox(width: 5),
+                                          CircleAvatar(radius: 5, backgroundColor: Colors.grey),
+                                          SizedBox(width: 5),
+                                          Text('No Communication', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(width: 10),
+                                  const Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          SizedBox(width: 10),
+                                          CircleAvatar(radius: 5, backgroundColor: Colors.redAccent,),
+                                          SizedBox(width: 5),
+                                          Text('Set Serial Error', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          SizedBox(width: 10),
+                                          CircleAvatar(radius: 5, backgroundColor: Colors.yellow),
+                                          SizedBox(width: 5),
+                                          Text('Low Battery', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(width: 20),
+                                  SizedBox(
+                                    width: 40,
+                                    child: IconButton(
+                                      tooltip: 'Set serial for all Nodes',
+                                      icon: Icon(Icons.format_list_numbered, color: myTheme.primaryColorDark),
+                                      onPressed: () async {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text('Confirmation'),
+                                              content: const Text('Are you sure! you want to proceed to reset all node ids?'),
+                                              actions: <Widget>[
+                                                MaterialButton(
+                                                  color: Colors.redAccent,
+                                                  textColor: Colors.white,
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: const Text('Cancel'),
+                                                ),
+                                                MaterialButton(
+                                                  color: myTheme.primaryColor,
+                                                  textColor: Colors.white,
+                                                  onPressed: () {
+                                                    String payLoadFinal = jsonEncode({
+                                                      "2300": [
+                                                        {"2301": ""},
+                                                      ]
+                                                    });
+                                                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                                    GlobalSnackBar.show(context, 'Sent your comment successfully', 200);
+                                                  },
+                                                  child: const Text('Yes'),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            Expanded(child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(widget.siteData.deviceName, style: const TextStyle(color: Colors.black, fontSize: 12)),
-                                Text('${widget.siteData.categoryName} - Last sync : $lastSyncData', style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 10, color: Colors.black,),),
-                              ],
-                            ))
-                          ],
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 3),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5),
-                                color: myTheme.primaryColor.withOpacity(0.2)
+                        Expanded(
+                          flex: 1,
+                          child: DataTable2(
+                            columnSpacing: 12,
+                            horizontalMargin: 12,
+                            minWidth: 325,
+                            dataRowHeight: 40.0,
+                            headingRowHeight: 35.0,
+                            headingRowColor: MaterialStateProperty.all<Color>(myTheme.primaryColorDark.withOpacity(0.2)),
+                            columns: const [
+                              DataColumn2(
+                                  label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
+                                  fixedWidth: 35
                               ),
-                              width: 45,
-                              height: 45,
-                              child: IconButton(
-                                tooltip: '$wifiStrength %',
-                                icon: Icon(wifiStrength == 0? Icons.wifi_off:
-                                wifiStrength >= 1 && wifiStrength <= 20 ? Icons.network_wifi_1_bar_outlined:
-                                wifiStrength >= 21 && wifiStrength <= 40 ? Icons.network_wifi_2_bar_outlined:
-                                wifiStrength >= 41 && wifiStrength <= 60 ? Icons.network_wifi_3_bar_outlined:
-                                wifiStrength >= 61 && wifiStrength <= 80 ? Icons.network_wifi_outlined:
-                                Icons.wifi, color: myTheme.primaryColorDark,),
-                                onPressed: null,
+                              DataColumn2(
+                                label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
+                                fixedWidth: 55,
                               ),
-                            ),
-                            Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  color: myTheme.primaryColor.withOpacity(0.2)
+                              DataColumn2(
+                                label: Center(child: Text('Rf.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
+                                fixedWidth: 45,
                               ),
-                              width: 45,
-                              height: 45,
-                              child: RotationTransition(
-                                turns: rotationAnimation,
-                                child: IconButton(
-                                  tooltip: 'refresh',
-                                  icon: Icon(Icons.refresh, color: myTheme.primaryColorDark,),
-                                  onPressed: onRefreshClicked,
-                                ),
+                              DataColumn2(
+                                label: Text('Category', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),),
+                                size: ColumnSize.M,
+                                numeric: true,
                               ),
-                            ),
-                            Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  color: myTheme.primaryColorDark.withOpacity(0.2)
+                              DataColumn2(
+                                label: Text('Info', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),),
+                                fixedWidth: 40,
                               ),
-                              width: 45,
-                              height: 45,
-                              child: IconButton(tooltip:'View all Node details', onPressed: (){
-                                showNodeDetailsBottomSheet(context);
-                              }, icon: Icon(Icons.grid_view, color: myTheme.primaryColorDark)),
-                            ),
-                            Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  color: myTheme.primaryColor.withOpacity(0.2)
-                              ),
-                              width: 45,
-                              height: 45,
-                              child: IconButton(
-                                tooltip: 'Manual Mode',
-                                icon: Icon(Icons.touch_app_outlined, color: myTheme.primaryColorDark,),
-                                onPressed: () async {
-                                  /*showModalBottomSheet(
+                            ],
+                            rows: List<DataRow>.generate(widget.siteData.nodeList.length, (index) => DataRow(cells: [
+                              DataCell(Center(child: Text('${widget.siteData.nodeList[index].serialNumber}', style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black),))),
+                              DataCell(Center(child: CircleAvatar(radius: 7, backgroundColor:
+                              widget.siteData.nodeList[index].status == 1 ? Colors.green.shade400:
+                              widget.siteData.nodeList[index].status == 2 ? Colors.grey :
+                              widget.siteData.nodeList[index].status == 3 ? Colors.redAccent :
+                              widget.siteData.nodeList[index].status == 4 ? Colors.yellow :
+                              Colors.grey,
+                              ))),
+                              DataCell(Center(child: Text('${widget.siteData.nodeList[index].referenceNumber}', style: TextStyle(fontWeight: FontWeight.normal, color: Colors.black)))),
+                              DataCell(Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(widget.siteData.nodeList[index].categoryName, style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black)),
+                                  Text(widget.siteData.nodeList[index].deviceId, style: const TextStyle(fontWeight: FontWeight.normal,fontSize: 11, color: Colors.black)),
+                                ],
+                              )),
+                              DataCell(Center(child: IconButton(tooltip: 'View Relay status',
+                                icon: widget.siteData.nodeList[index].rlyStatus.any((rly) => rly.status == 2 || rly.status == 3)? const Icon(Icons.warning, color: Colors.orangeAccent):
+                                Icon(Icons.info_outline, color: myTheme.primaryColorDark), // Icon to display
+                                onPressed: () {
+                                  showModalBottomSheet(
                                     context: context,
                                     builder: (BuildContext context) {
-                                      return RunByManual(siteID: widget.siteData.siteId,
-                                          siteName: widget.siteData.siteName,
-                                          controllerID: widget.siteData.controllerId,
-                                          customerID: widget.customerID,
-                                          imeiNo: widget.siteData.deviceId,
-                                          programList: programList, callbackFunction: callbackFunction);
+                                      return SizedBox(
+                                        height: widget.siteData.nodeList[index].rlyStatus.length > 8? 275 : 200,
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          children: <Widget>[
+                                            ListTile(
+                                              tileColor: myTheme.primaryColor,
+                                              textColor: Colors.white,
+                                              leading: const Icon(Icons.developer_board_rounded, color: Colors.white),
+                                              title: Text('${widget.siteData.nodeList[index].categoryName} - ${widget.siteData.nodeList[index].deviceId}'),
+                                              trailing: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  const Icon(Icons.solar_power_outlined, color: Colors.white),
+                                                  const SizedBox(width: 5,),
+                                                  Text('${widget.siteData.nodeList[index].slrVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                  const SizedBox(width: 5,),
+                                                  const Icon(Icons.battery_3_bar_rounded, color: Colors.white),
+                                                  const SizedBox(width: 5,),
+                                                  Text('${widget.siteData.nodeList[index].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                  const SizedBox(width: 5,),
+                                                  IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
+                                                    String payLoadFinal = jsonEncode({
+                                                      "2300": [
+                                                        {"2301": "${widget.siteData.nodeList[index].serialNumber}"},
+                                                      ]
+                                                    });
+                                                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                                  }, icon: Icon(Icons.fact_check_outlined, color: Colors.white))
+                                                ],
+                                              ),
+                                            ),
+                                            const Divider(height: 0),
+                                            SizedBox(
+                                              width : double.infinity,
+                                              height : widget.siteData.nodeList[index].rlyStatus.length > 8? 206 : 130,
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(8.0),
+                                                child: widget.siteData.nodeList[index].rlyStatus.isNotEmpty ? Column(
+                                                  children: [
+                                                    const SizedBox(
+                                                      width: double.infinity,
+                                                      height : 40,
+                                                      child: Row(
+                                                        children: [
+                                                          SizedBox(width: 10),
+                                                          CircleAvatar(radius: 5,backgroundColor: Colors.green,),
+                                                          SizedBox(width: 5),
+                                                          Text('ON'),
+                                                          SizedBox(width: 20),
+                                                          CircleAvatar(radius: 5,backgroundColor: Colors.black45),
+                                                          SizedBox(width: 5),
+                                                          Text('OFF'),
+                                                          SizedBox(width: 20),
+                                                          CircleAvatar(radius: 5,backgroundColor: Colors.orange),
+                                                          SizedBox(width: 5),
+                                                          Text('ON IN OFF'),
+                                                          SizedBox(width: 20),
+                                                          CircleAvatar(radius: 5,backgroundColor: Colors.redAccent),
+                                                          SizedBox(width: 5),
+                                                          Text('OFF IN ON'),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      width: double.infinity,
+                                                      height : widget.siteData.nodeList[index].rlyStatus.length > 8? 150 : 70,
+                                                      child: GridView.builder(
+                                                        itemCount: widget.siteData.nodeList[index].rlyStatus.length, // Number of items in the grid
+                                                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                                          crossAxisCount: 8,
+                                                          crossAxisSpacing: 10.0,
+                                                          mainAxisSpacing: 10.0,
+                                                        ),
+                                                        itemBuilder: (BuildContext context, int indexGv) {
+                                                          return Column(
+                                                            children: [
+                                                              CircleAvatar(
+                                                                backgroundColor: widget.siteData.nodeList[index].rlyStatus[indexGv].status==0 ? Colors.grey :
+                                                                widget.siteData.nodeList[index].rlyStatus[indexGv].status==1 ? Colors.green :
+                                                                widget.siteData.nodeList[index].rlyStatus[indexGv].status==2 ? Colors.orange :
+                                                                widget.siteData.nodeList[index].rlyStatus[indexGv].status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
+                                                                child: Text((widget.siteData.nodeList[index].rlyStatus[indexGv].rlyNo).toString(), style: const TextStyle(color: Colors.white)),
+                                                              ),
+                                                              Text((widget.siteData.nodeList[index].rlyStatus[indexGv].name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                                            ],
+                                                          );
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ) :
+                                                const Center(child: Text('Relay Status Not Found')),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
                                     },
-                                  );*/
-                  
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => RunByManual(siteID: widget.siteData.siteId,
-                                          siteName: widget.siteData.siteName,
-                                          controllerID: widget.siteData.controllerId,
-                                          customerID: widget.customerID,
-                                          imeiNo: widget.siteData.deviceId,
-                                          programList: programList, callbackFunction: callbackFunction),
-                                    ),
                                   );
                                 },
-                              ),
-                            ),
-                            Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  color: myTheme.primaryColor.withOpacity(0.2)
-                              ),
-                              width: 45,
-                              height: 45,
-                              child: IconButton(
-                                tooltip: 'Planning',
-                                icon: Icon(Icons.list_alt, color: myTheme.primaryColorDark,),
-                                onPressed: () async {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ProgramSchedule(
-                                        customerID: widget.customerID,
-                                        controllerID: widget.siteData.controllerId,
-                                        siteName: widget.siteData.siteName,
-                                        imeiNumber: widget.siteData.deviceId,
-                                        userId: widget.customerID,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
+                              ))),
+                            ])),
+                          ),
                         )
                       ],
                     ),
                   ),
                 ),
-                Card(
-                  elevation: 2,
-                  surfaceTintColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(3.0),
-                    child: Container(
-                      width: 340,
-                      height: widget.siteLength > 1? MediaQuery.sizeOf(context).height-242 : MediaQuery.sizeOf(context).height-188,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: Alignment.centerRight,
-                          end: Alignment.centerLeft,
-                           //colors: [myTheme.primaryColor, myTheme.primaryColorDark],
-                          colors: [Colors.white, Colors.white],
-                          //colors: [Colors.white54, Colors.white54],
-                        ),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            height: 50,
-                            child: Row(
-                              children: [
-                                Row(
-                                  children: [
-                                    const SizedBox(width: 5),
-                                    const Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            SizedBox(width: 5),
-                                            CircleAvatar(radius: 5, backgroundColor: Colors.green,),
-                                            SizedBox(width: 5),
-                                            Text('Connected', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            SizedBox(width: 5),
-                                            CircleAvatar(radius: 5, backgroundColor: Colors.grey),
-                                            SizedBox(width: 5),
-                                            Text('No Communication', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(width: 10),
-                                    const Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            SizedBox(width: 10),
-                                            CircleAvatar(radius: 5, backgroundColor: Colors.redAccent,),
-                                            SizedBox(width: 5),
-                                            Text('Set Serial Error', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            SizedBox(width: 10),
-                                            CircleAvatar(radius: 5, backgroundColor: Colors.yellow),
-                                            SizedBox(width: 5),
-                                            Text('Low Battery', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(width: 20),
-                                    SizedBox(
-                                      width: 40,
-                                      child: IconButton(
-                                        tooltip: 'Set serial for all Nodes',
-                                        icon: Icon(Icons.format_list_numbered, color: myTheme.primaryColorDark),
+              ),
+            ],
+          ),*/
+          Container(
+            width: 70,
+            height: MediaQuery.sizeOf(context).height,
+            color: myTheme.primaryColor.withOpacity(0.2),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const SizedBox(height: 10),
+                CircleAvatar(
+                  radius: 25,
+                  backgroundColor: myTheme.primaryColor,
+                  child: SizedBox(
+                    height: 45,
+                    width: 45,
+                    child: IconButton(tooltip:'Show node list', onPressed: (){
+                      SideSheet.right(
+                        width: 350,
+                          body: Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: Container(
+                              width: MediaQuery.sizeOf(context).width,
+                              height: MediaQuery.sizeOf(context).height,
+                              color: Colors.white,
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                        tooltip: 'Close',
+                                        icon: const Icon(Icons.arrow_back_outlined, color: Colors.redAccent),
                                         onPressed: () async {
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                title: const Text('Confirmation'),
-                                                content: const Text('Are you sure! you want to proceed to reset all node ids?'),
-                                                actions: <Widget>[
-                                                  MaterialButton(
-                                                    color: Colors.redAccent,
-                                                    textColor: Colors.white,
-                                                    onPressed: () {
-                                                      Navigator.of(context).pop();
-                                                    },
-                                                    child: const Text('Cancel'),
-                                                  ),
-                                                  MaterialButton(
-                                                    color: myTheme.primaryColor,
-                                                    textColor: Colors.white,
-                                                    onPressed: () {
-                                                      String payLoadFinal = jsonEncode({
-                                                        "2300": [
-                                                          {"2301": ""},
-                                                        ]
-                                                      });
-                                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                                      GlobalSnackBar.show(context, 'Sent your comment successfully', 200);
-                                                    },
-                                                    child: const Text('Yes'),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
+                                          Navigator.of(context).pop();
                                         },
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: DataTable2(
-                              columnSpacing: 12,
-                              horizontalMargin: 12,
-                              minWidth: 325,
-                              dataRowHeight: 40.0,
-                              headingRowHeight: 35.0,
-                              headingRowColor: MaterialStateProperty.all<Color>(myTheme.primaryColorDark.withOpacity(0.2)),
-                              columns: const [
-                                DataColumn2(
-                                    label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
-                                    fixedWidth: 35
-                                ),
-                                DataColumn2(
-                                  label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
-                                  fixedWidth: 55,
-                                ),
-                                DataColumn2(
-                                  label: Center(child: Text('Rf.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
-                                  fixedWidth: 45,
-                                ),
-                                DataColumn2(
-                                  label: Text('Category', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),),
-                                  size: ColumnSize.M,
-                                  numeric: true,
-                                ),
-                                DataColumn2(
-                                  label: Text('Info', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),),
-                                  fixedWidth: 40,
-                                ),
-                              ],
-                              rows: List<DataRow>.generate(widget.siteData.nodeList.length, (index) => DataRow(cells: [
-                                DataCell(Center(child: Text('${widget.siteData.nodeList[index].serialNumber}', style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black),))),
-                                DataCell(Center(child: CircleAvatar(radius: 7, backgroundColor:
-                                widget.siteData.nodeList[index].status == 1 ? Colors.green.shade400:
-                                widget.siteData.nodeList[index].status == 2 ? Colors.grey :
-                                widget.siteData.nodeList[index].status == 3 ? Colors.redAccent :
-                                widget.siteData.nodeList[index].status == 4 ? Colors.yellow :
-                                Colors.grey,
-                                ))),
-                                DataCell(Center(child: Text('${widget.siteData.nodeList[index].referenceNumber}', style: TextStyle(fontWeight: FontWeight.normal, color: Colors.black)))),
-                                DataCell(Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(widget.siteData.nodeList[index].categoryName, style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black)),
-                                    Text(widget.siteData.nodeList[index].deviceId, style: const TextStyle(fontWeight: FontWeight.normal,fontSize: 11, color: Colors.black)),
-                                  ],
-                                )),
-                                DataCell(Center(child: IconButton(tooltip: 'View Relay status',
-                                  icon: widget.siteData.nodeList[index].rlyStatus.any((rly) => rly.status == 2 || rly.status == 3)? const Icon(Icons.warning, color: Colors.orangeAccent):
-                                  Icon(Icons.info_outline, color: myTheme.primaryColorDark), // Icon to display
-                                  onPressed: () {
-                                    showModalBottomSheet(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return SizedBox(
-                                          height: widget.siteData.nodeList[index].rlyStatus.length > 8? 275 : 200,
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: <Widget>[
-                                              ListTile(
-                                                tileColor: myTheme.primaryColor,
-                                                textColor: Colors.white,
-                                                leading: const Icon(Icons.developer_board_rounded, color: Colors.white),
-                                                title: Text('${widget.siteData.nodeList[index].categoryName} - ${widget.siteData.nodeList[index].deviceId}'),
-                                                trailing: Row(
-                                                  mainAxisSize: MainAxisSize.min,
+                                    ],
+                                  ),
+                                  CircleAvatar(
+                                    radius: 30,
+                                    backgroundColor:myTheme.primaryColorDark.withOpacity(0.2),
+                                    child: Image.asset('assets/images/oro_gem.png', width: 40, height: 40,),
+                                  ),
+                                  Text(widget.siteData.deviceName, style: const TextStyle(color: Colors.black, fontSize: 13)),
+                                  Text('${widget.siteData.categoryName} - Last sync : $lastSyncData', style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 11, color: Colors.black,),),
+                                  Divider(),
+                                  SizedBox(
+                                    height: 50,
+                                    child: Row(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            const SizedBox(width: 5),
+                                            const Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
                                                   children: [
-                                                    const Icon(Icons.solar_power_outlined, color: Colors.white),
-                                                    const SizedBox(width: 5,),
-                                                    Text('${widget.siteData.nodeList[index].slrVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                    const SizedBox(width: 5,),
-                                                    const Icon(Icons.battery_3_bar_rounded, color: Colors.white),
-                                                    const SizedBox(width: 5,),
-                                                    Text('${widget.siteData.nodeList[index].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                    const SizedBox(width: 5,),
-                                                    IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
-                                                      String payLoadFinal = jsonEncode({
-                                                        "2300": [
-                                                          {"2301": "${widget.siteData.nodeList[index].serialNumber}"},
-                                                        ]
-                                                      });
-                                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
-                                                    }, icon: Icon(Icons.fact_check_outlined, color: Colors.white))
+                                                    SizedBox(width: 5),
+                                                    CircleAvatar(radius: 5, backgroundColor: Colors.green,),
+                                                    SizedBox(width: 5),
+                                                    Text('Connected', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
                                                   ],
                                                 ),
+                                                Row(
+                                                  children: [
+                                                    SizedBox(width: 5),
+                                                    CircleAvatar(radius: 5, backgroundColor: Colors.grey),
+                                                    SizedBox(width: 5),
+                                                    Text('No Communication', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(width: 10),
+                                            const Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    SizedBox(width: 10),
+                                                    CircleAvatar(radius: 5, backgroundColor: Colors.redAccent,),
+                                                    SizedBox(width: 5),
+                                                    Text('Set Serial Error', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    SizedBox(width: 10),
+                                                    CircleAvatar(radius: 5, backgroundColor: Colors.yellow),
+                                                    SizedBox(width: 5),
+                                                    Text('Low Battery', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(width: 20),
+                                            SizedBox(
+                                              width: 40,
+                                              child: IconButton(
+                                                tooltip: 'Set serial for all Nodes',
+                                                icon: Icon(Icons.format_list_numbered, color: myTheme.primaryColorDark),
+                                                onPressed: () async {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (BuildContext context) {
+                                                      return AlertDialog(
+                                                        title: const Text('Confirmation'),
+                                                        content: const Text('Are you sure! you want to proceed to reset all node ids?'),
+                                                        actions: <Widget>[
+                                                          MaterialButton(
+                                                            color: Colors.redAccent,
+                                                            textColor: Colors.white,
+                                                            onPressed: () {
+                                                              Navigator.of(context).pop();
+                                                            },
+                                                            child: const Text('Cancel'),
+                                                          ),
+                                                          MaterialButton(
+                                                            color: myTheme.primaryColor,
+                                                            textColor: Colors.white,
+                                                            onPressed: () {
+                                                              String payLoadFinal = jsonEncode({
+                                                                "2300": [
+                                                                  {"2301": ""},
+                                                                ]
+                                                              });
+                                                              MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                                              GlobalSnackBar.show(context, 'Sent your comment successfully', 200);
+                                                            },
+                                                            child: const Text('Yes'),
+                                                          ),
+                                                        ],
+                                                      );
+                                                    },
+                                                  );
+                                                },
                                               ),
-                                              const Divider(height: 0),
-                                              SizedBox(
-                                                width : double.infinity,
-                                                height : widget.siteData.nodeList[index].rlyStatus.length > 8? 206 : 130,
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(8.0),
-                                                  child: widget.siteData.nodeList[index].rlyStatus.isNotEmpty ? Column(
-                                                    children: [
-                                                      const SizedBox(
-                                                        width: double.infinity,
-                                                        height : 40,
-                                                        child: Row(
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 1,
+                                    child: DataTable2(
+                                      columnSpacing: 12,
+                                      horizontalMargin: 12,
+                                      minWidth: 325,
+                                      dataRowHeight: 40.0,
+                                      headingRowHeight: 35.0,
+                                      headingRowColor: MaterialStateProperty.all<Color>(myTheme.primaryColorDark.withOpacity(0.2)),
+                                      columns: const [
+                                        DataColumn2(
+                                            label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
+                                            fixedWidth: 35
+                                        ),
+                                        DataColumn2(
+                                          label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
+                                          fixedWidth: 55,
+                                        ),
+                                        DataColumn2(
+                                          label: Center(child: Text('Rf.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
+                                          fixedWidth: 45,
+                                        ),
+                                        DataColumn2(
+                                          label: Text('Category', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),),
+                                          size: ColumnSize.M,
+                                          numeric: true,
+                                        ),
+                                        DataColumn2(
+                                          label: Text('Info', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),),
+                                          fixedWidth: 40,
+                                        ),
+                                      ],
+                                      rows: List<DataRow>.generate(widget.siteData.nodeList.length, (index) => DataRow(cells: [
+                                        DataCell(Center(child: Text('${widget.siteData.nodeList[index].serialNumber}', style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black),))),
+                                        DataCell(Center(child: CircleAvatar(radius: 7, backgroundColor:
+                                        widget.siteData.nodeList[index].status == 1 ? Colors.green.shade400:
+                                        widget.siteData.nodeList[index].status == 2 ? Colors.grey :
+                                        widget.siteData.nodeList[index].status == 3 ? Colors.redAccent :
+                                        widget.siteData.nodeList[index].status == 4 ? Colors.yellow :
+                                        Colors.grey,
+                                        ))),
+                                        DataCell(Center(child: Text('${widget.siteData.nodeList[index].referenceNumber}', style: TextStyle(fontWeight: FontWeight.normal, color: Colors.black)))),
+                                        DataCell(Column(
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(widget.siteData.nodeList[index].categoryName, style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black)),
+                                            Text(widget.siteData.nodeList[index].deviceId, style: const TextStyle(fontWeight: FontWeight.normal,fontSize: 11, color: Colors.black)),
+                                          ],
+                                        )),
+                                        DataCell(Center(child: IconButton(tooltip: 'View Relay status',
+                                          icon: widget.siteData.nodeList[index].rlyStatus.any((rly) => rly.status == 2 || rly.status == 3)? const Icon(Icons.warning, color: Colors.orangeAccent):
+                                          Icon(Icons.info_outline, color: myTheme.primaryColorDark), // Icon to display
+                                          onPressed: () {
+                                            showModalBottomSheet(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return SizedBox(
+                                                  height: widget.siteData.nodeList[index].rlyStatus.length > 8? 275 : 200,
+                                                  child: Column(
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    children: <Widget>[
+                                                      ListTile(
+                                                        tileColor: myTheme.primaryColor,
+                                                        textColor: Colors.white,
+                                                        leading: const Icon(Icons.developer_board_rounded, color: Colors.white),
+                                                        title: Text('${widget.siteData.nodeList[index].categoryName} - ${widget.siteData.nodeList[index].deviceId}'),
+                                                        trailing: Row(
+                                                          mainAxisSize: MainAxisSize.min,
                                                           children: [
-                                                            SizedBox(width: 10),
-                                                            CircleAvatar(radius: 5,backgroundColor: Colors.green,),
-                                                            SizedBox(width: 5),
-                                                            Text('ON'),
-                                                            SizedBox(width: 20),
-                                                            CircleAvatar(radius: 5,backgroundColor: Colors.black45),
-                                                            SizedBox(width: 5),
-                                                            Text('OFF'),
-                                                            SizedBox(width: 20),
-                                                            CircleAvatar(radius: 5,backgroundColor: Colors.orange),
-                                                            SizedBox(width: 5),
-                                                            Text('ON IN OFF'),
-                                                            SizedBox(width: 20),
-                                                            CircleAvatar(radius: 5,backgroundColor: Colors.redAccent),
-                                                            SizedBox(width: 5),
-                                                            Text('OFF IN ON'),
+                                                            const Icon(Icons.solar_power_outlined, color: Colors.white),
+                                                            const SizedBox(width: 5,),
+                                                            Text('${widget.siteData.nodeList[index].slrVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                            const SizedBox(width: 5,),
+                                                            const Icon(Icons.battery_3_bar_rounded, color: Colors.white),
+                                                            const SizedBox(width: 5,),
+                                                            Text('${widget.siteData.nodeList[index].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                            const SizedBox(width: 5,),
+                                                            IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
+                                                              String payLoadFinal = jsonEncode({
+                                                                "2300": [
+                                                                  {"2301": "${widget.siteData.nodeList[index].serialNumber}"},
+                                                                ]
+                                                              });
+                                                              MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                                            }, icon: Icon(Icons.fact_check_outlined, color: Colors.white))
                                                           ],
                                                         ),
                                                       ),
+                                                      const Divider(height: 0),
                                                       SizedBox(
-                                                        width: double.infinity,
-                                                        height : widget.siteData.nodeList[index].rlyStatus.length > 8? 150 : 70,
-                                                        child: GridView.builder(
-                                                          itemCount: widget.siteData.nodeList[index].rlyStatus.length, // Number of items in the grid
-                                                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                                            crossAxisCount: 8,
-                                                            crossAxisSpacing: 10.0,
-                                                            mainAxisSpacing: 10.0,
-                                                          ),
-                                                          itemBuilder: (BuildContext context, int indexGv) {
-                                                            return Column(
-                                                              children: [
-                                                                CircleAvatar(
-                                                                  backgroundColor: widget.siteData.nodeList[index].rlyStatus[indexGv].status==0 ? Colors.grey :
-                                                                  widget.siteData.nodeList[index].rlyStatus[indexGv].status==1 ? Colors.green :
-                                                                  widget.siteData.nodeList[index].rlyStatus[indexGv].status==2 ? Colors.orange :
-                                                                  widget.siteData.nodeList[index].rlyStatus[indexGv].status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
-                                                                  child: Text((widget.siteData.nodeList[index].rlyStatus[indexGv].rlyNo).toString(), style: const TextStyle(color: Colors.white)),
+                                                        width : double.infinity,
+                                                        height : widget.siteData.nodeList[index].rlyStatus.length > 8? 206 : 130,
+                                                        child: Padding(
+                                                          padding: const EdgeInsets.all(8.0),
+                                                          child: widget.siteData.nodeList[index].rlyStatus.isNotEmpty ? Column(
+                                                            children: [
+                                                              const SizedBox(
+                                                                width: double.infinity,
+                                                                height : 40,
+                                                                child: Row(
+                                                                  children: [
+                                                                    SizedBox(width: 10),
+                                                                    CircleAvatar(radius: 5,backgroundColor: Colors.green,),
+                                                                    SizedBox(width: 5),
+                                                                    Text('ON'),
+                                                                    SizedBox(width: 20),
+                                                                    CircleAvatar(radius: 5,backgroundColor: Colors.black45),
+                                                                    SizedBox(width: 5),
+                                                                    Text('OFF'),
+                                                                    SizedBox(width: 20),
+                                                                    CircleAvatar(radius: 5,backgroundColor: Colors.orange),
+                                                                    SizedBox(width: 5),
+                                                                    Text('ON IN OFF'),
+                                                                    SizedBox(width: 20),
+                                                                    CircleAvatar(radius: 5,backgroundColor: Colors.redAccent),
+                                                                    SizedBox(width: 5),
+                                                                    Text('OFF IN ON'),
+                                                                  ],
                                                                 ),
-                                                                Text((widget.siteData.nodeList[index].rlyStatus[indexGv].name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
-                                                              ],
-                                                            );
-                                                          },
+                                                              ),
+                                                              SizedBox(
+                                                                width: double.infinity,
+                                                                height : widget.siteData.nodeList[index].rlyStatus.length > 8? 150 : 70,
+                                                                child: GridView.builder(
+                                                                  itemCount: widget.siteData.nodeList[index].rlyStatus.length, // Number of items in the grid
+                                                                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                                                    crossAxisCount: 8,
+                                                                    crossAxisSpacing: 10.0,
+                                                                    mainAxisSpacing: 10.0,
+                                                                  ),
+                                                                  itemBuilder: (BuildContext context, int indexGv) {
+                                                                    return Column(
+                                                                      children: [
+                                                                        CircleAvatar(
+                                                                          backgroundColor: widget.siteData.nodeList[index].rlyStatus[indexGv].status==0 ? Colors.grey :
+                                                                          widget.siteData.nodeList[index].rlyStatus[indexGv].status==1 ? Colors.green :
+                                                                          widget.siteData.nodeList[index].rlyStatus[indexGv].status==2 ? Colors.orange :
+                                                                          widget.siteData.nodeList[index].rlyStatus[indexGv].status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
+                                                                          child: Text((widget.siteData.nodeList[index].rlyStatus[indexGv].rlyNo).toString(), style: const TextStyle(color: Colors.white)),
+                                                                        ),
+                                                                        Text((widget.siteData.nodeList[index].rlyStatus[indexGv].name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                                                      ],
+                                                                    );
+                                                                  },
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ) :
+                                                          const Center(child: Text('Relay Status Not Found')),
                                                         ),
                                                       ),
                                                     ],
-                                                  ) :
-                                                  const Center(child: Text('Relay Status Not Found')),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
-                                ))),
-                              ])),
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          },
+                                        ))),
+                                      ])),
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
-                          )
-                        ],
-                      ),
+                          ),
+                          context: context
+                      );
+                    }, icon: const Icon(Icons.menu, color: Colors.white)),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: myTheme.primaryColor.withOpacity(0.3)
+                  ),
+                  width: 45,
+                  height: 45,
+                  child: RotationTransition(
+                    turns: rotationAnimation,
+                    child: IconButton(
+                      tooltip: 'refresh',
+                      icon: Icon(Icons.refresh, color: myTheme.primaryColorDark,),
+                      onPressed: onRefreshClicked,
                     ),
                   ),
                 ),
+                const SizedBox(height: 20),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: myTheme.primaryColor.withOpacity(0.3)
+                  ),
+                  width: 45,
+                  height: 45,
+                  child: IconButton(
+                    tooltip: '$wifiStrength %',
+                    icon: Icon(wifiStrength == 0? Icons.wifi_off:
+                    wifiStrength >= 1 && wifiStrength <= 20 ? Icons.network_wifi_1_bar_outlined:
+                    wifiStrength >= 21 && wifiStrength <= 40 ? Icons.network_wifi_2_bar_outlined:
+                    wifiStrength >= 41 && wifiStrength <= 60 ? Icons.network_wifi_3_bar_outlined:
+                    wifiStrength >= 61 && wifiStrength <= 80 ? Icons.network_wifi_outlined:
+                    Icons.wifi, color: wifiStrength == 0? Colors.redAccent : myTheme.primaryColorDark,),
+                    onPressed: null,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: myTheme.primaryColor.withOpacity(0.3)
+                  ),
+                  width: 45,
+                  height: 45,
+                  child: IconButton(
+                    tooltip: 'Planning',
+                    icon: Icon(Icons.list_alt, color: myTheme.primaryColorDark,),
+                    onPressed: () async {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProgramSchedule(
+                            customerID: widget.customerID,
+                            controllerID: widget.siteData.controllerId,
+                            siteName: widget.siteData.siteName,
+                            imeiNumber: widget.siteData.deviceId,
+                            userId: widget.customerID,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: myTheme.primaryColor.withOpacity(0.3)
+                  ),
+                  width: 45,
+                  height: 45,
+                  child: IconButton(
+                    tooltip: 'Manual Mode',
+                    icon: Icon(Icons.touch_app_outlined, color: myTheme.primaryColorDark,),
+                    onPressed: () async {
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RunByManual(siteID: widget.siteData.siteId,
+                              siteName: widget.siteData.siteName,
+                              controllerID: widget.siteData.controllerId,
+                              customerID: widget.customerID,
+                              imeiNo: widget.siteData.deviceId,
+                              programList: programList, callbackFunction: callbackFunction),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: myTheme.primaryColorDark.withOpacity(0.3)
+                  ),
+                  width: 45,
+                  height: 45,
+                  child: IconButton(tooltip:'View all Node details', onPressed: (){
+                    showNodeDetailsBottomSheet(context);
+                  }, icon: Icon(Icons.grid_view, color: myTheme.primaryColorDark)),
+                ),
               ],
             ),
-            const SizedBox(width: 5),
-          ],
-        ),
+          )
+        ],
       ),
     );
   }

@@ -54,7 +54,7 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
             ),
             Container(
               color: Colors.white,
-              height: provider.currentSchedule.isNotEmpty? (provider.currentSchedule.length * 146) : 25,
+              height: provider.currentSchedule.isNotEmpty? (provider.currentSchedule.length * 151) : 25,
               child: provider.currentSchedule.isNotEmpty? ListView.builder(
                 itemCount: provider.currentSchedule.length,
                 itemBuilder: (BuildContext context, int csIndex) {
@@ -62,12 +62,12 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                     children: [
                       SizedBox(
                         width: MediaQuery.sizeOf(context).width,
-                        height: 80,
+                        height: 85,
                         child: DataTable2(
                           columnSpacing: 12,
                           horizontalMargin: 12,
                           minWidth: 625,
-                          dataRowHeight: 45.0,
+                          dataRowHeight: 50.0,
                           headingRowHeight: 35.0,
                           headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
                           columns: const [
@@ -91,23 +91,23 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                             ),
                             DataColumn2(
                                 label: Center(child: Text('RTC', style: TextStyle(fontSize: 13),)),
-                                size: ColumnSize.S
+                                size: ColumnSize.M
                             ),
                             DataColumn2(
                                 label: Center(child: Text('Cyclic', style: TextStyle(fontSize: 13),)),
-                                size: ColumnSize.S
+                                size: ColumnSize.M
                             ),
                             DataColumn2(
                                 label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
-                                fixedWidth: 100
+                                size: ColumnSize.M
                             ),
                             DataColumn2(
-                                label: Center(child: Text('Total(D/F)', style: TextStyle(fontSize: 13),)),
-                                fixedWidth: 100
+                                label: Center(child: Text('Total(Duration/Flow)', style: TextStyle(fontSize: 13),)),
+                                size: ColumnSize.M
                             ),
                             DataColumn2(
                                 label: Center(child: Text('')),
-                                fixedWidth: 45
+                                fixedWidth: 90
                             ),
                           ],
                           rows: List<DataRow>.generate(1, (lsIndex) => DataRow(cells: [
@@ -120,8 +120,10 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                             DataCell(Center(child: Text(_convertTime(provider.currentSchedule[csIndex]['StartTime'])))),
                             DataCell(Center(child: Text('${provider.currentSchedule[csIndex]['Duration_Qty']}'))),
                             DataCell(Center(
-                              child: provider.currentSchedule[csIndex]['ProgType']==3? IconButton(
-                                tooltip: 'Stop',
+                              child: provider.currentSchedule[csIndex]['ProgName']=='StandAlone - Manual'?
+                              MaterialButton(
+                                color: Colors.redAccent,
+                                textColor: Colors.white,
                                 onPressed: provider.currentSchedule[csIndex]['Message']=='Running.'? (){
                                   //String payload = '0,1,0,${provider.currentSchedule[csIndex]['ScheduleS_No']},0,0,${provider.currentSchedule[csIndex]['ProgType']},0';
                                   String payload = '0,0,0,0';
@@ -137,10 +139,11 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                   };
                                   sentManualModeToServer(manualOperation);
                                 } : null,
-                                icon: const Icon(Icons.stop_circle_outlined,color: Colors.red),
-                              ):
-                              IconButton(
-                                tooltip: 'Skip next',
+                                child: const Text('Stop'),
+                              ) :
+                              MaterialButton(
+                                color: Colors.green,
+                                textColor: Colors.white,
                                 onPressed: provider.currentSchedule[csIndex]['Message']=='Running.'? (){
                                   String payload = '${provider.currentSchedule[csIndex]['ScheduleS_No']},0';
                                   String payLoadFinal = jsonEncode({
@@ -148,7 +151,7 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                   });
                                   MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
                                 } : null,
-                                icon: const Icon(Icons.skip_next_outlined),
+                                child: const Text('Skip'),
                               ),
                             )),
                           ])),
@@ -209,12 +212,12 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                   child: Container(width: 1, height: 40, color: Colors.grey,),
                                 ),
                                 SizedBox(
-                                  width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 250 : 210,
+                                  width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 250 : 215,
                                   child: Row(
                                     children: [
                                       Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining(hh:mm:ss) : ':'Remaining(liters) : '),
                                       provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
-                                      Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'000000', style: const TextStyle(fontSize: 18, color: Colors.black))
+                                      Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
                                     ],
                                   ),
                                 )
@@ -249,12 +252,12 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                   child: Container(width: 1, height: 40, color: Colors.grey,),
                                 ),
                                 SizedBox(
-                                  width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 250 : 210,
+                                  width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 250 : 215,
                                   child: Row(
                                     children: [
                                       Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining(hh:mm:ss) : ':'Remaining(liters) : '),
                                       provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
-                                      Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'000000', style: TextStyle(fontSize: 18, color: Colors.black))
+                                      Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: TextStyle(fontSize: 18, color: Colors.black))
                                     ],
                                   ),
                                 )
@@ -289,12 +292,12 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                   child: Container(width: 1, height: 40, color: Colors.grey,),
                                 ),
                                 SizedBox(
-                                  width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 250 : 210,
+                                  width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 250 : 215,
                                   child: Row(
                                     children: [
                                       Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining(hh:mm:ss) : ':'Remaining(liters) : '),
                                       provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
-                                      Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'000000', style: const TextStyle(fontSize: 18, color: Colors.black))
+                                      Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
                                     ],
                                   ),
                                 )
@@ -376,6 +379,11 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                   remainFlow = remainFlow - flowRate;
                   provider.currentSchedule[i]['Duration_QtyLeft'] = remainFlow;
                 });
+              }else{
+                setState(() {
+                  provider.currentSchedule[i]['Duration_QtyLeft'] = '0';
+                });
+
               }
             }
           }

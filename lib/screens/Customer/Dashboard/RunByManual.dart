@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:oro_irrigation_new/constants/snack_bar.dart';
 
 import '../../../Models/Customer/Dashboard/DashBoardValve.dart';
 import '../../../Models/Customer/Dashboard/DashboardDataProvider.dart';
@@ -136,58 +137,122 @@ class _RunByManualState extends State<RunByManual> {
               tooltip: 'Start',
               onPressed: () {
                 standaloneSelection.clear();
-                String strSldSourcePump ='',strSldIrrigationPump ='',strSldMainValve ='',strSldCtrlFilter ='',strSldLocFilter =''
-                ,strSldCrlFetFilter ='',strSldLocFetFilter ='', strSldAgitator ='', strSldFan ='', strSldFogger =''
-                , strSldBoosterPump ='', strSldSelector ='';
 
-                if(dashBoardData[0].sourcePump.isNotEmpty){
-                  strSldSourcePump = buildSelectedItemsString(dashBoardData[0].sourcePump);
-                }
-                if(dashBoardData[0].irrigationPump.isNotEmpty){
-                  strSldIrrigationPump = buildSelectedItemsString(dashBoardData[0].irrigationPump);
-                }
-                if(dashBoardData[0].mainValve.isNotEmpty){
-                  strSldMainValve = buildSelectedItemsString(dashBoardData[0].mainValve);
-                }
-                if(dashBoardData[0].centralFilterSite.isNotEmpty){
-                  strSldCtrlFilter = buildSelectedItemsString(dashBoardData[0].centralFilterSite[0].filter);
-                }
-                if(dashBoardData[0].localFilterSite.isNotEmpty){
-                  strSldLocFilter = buildSelectedItemsString(dashBoardData[0].localFilterSite[0].filter);
-                }
-                if(dashBoardData[0].centralFertilizerSite.isNotEmpty){
-                  strSldCrlFetFilter = buildSelectedItemsString(dashBoardData[0].centralFertilizerSite[0].fertilizer);
-                }
-                if(dashBoardData[0].localFertilizerSite.isNotEmpty){
-                  strSldLocFetFilter = buildSelectedItemsString(dashBoardData[0].localFertilizerSite[0].fertilizer);
-                }
-                if(dashBoardData[0].agitator.isNotEmpty){
-                  strSldAgitator = buildSelectedItemsString(dashBoardData[0].agitator);
-                }
-                if(dashBoardData[0].fan.isNotEmpty){
-                  strSldFan = buildSelectedItemsString(dashBoardData[0].fan);
-                }
-                if(dashBoardData[0].fogger.isNotEmpty){
-                  strSldFogger = buildSelectedItemsString(dashBoardData[0].fogger);
-                }
-                if(dashBoardData[0].boosterPump.isNotEmpty){
-                  strSldBoosterPump = buildSelectedItemsString(dashBoardData[0].boosterPump);
-                }
-                if(dashBoardData[0].selector.isNotEmpty){
-                  strSldSelector = buildSelectedItemsString(dashBoardData[0].selector);
-                }
+                if(ddSelection==0){
+                  List<String> allRelaySrlNo = [];
+                  String strSldValveOrLineSrlNo = '';
+                  String strSldSourcePumpSrlNo ='',strSldIrrigationPumpSrlNo ='',strSldMainValveSrlNo ='',strSldCtrlFilterSrlNo ='',strSldLocFilterSrlNo =''
+                  ,strSldCrlFetFilterSrlNo ='',strSldLocFetFilterSrlNo ='', strSldAgitatorSrlNo ='', strSldFanSrlNo ='', strSldFoggerSrlNo =''
+                  , strSldBoosterPumpSrlNo ='', strSldSelectorSrlNo ='';
 
-                String strSldValveOrLineSno = '';
-                String strProgramCategory= '';
-                Map<String, List<DashBoardValve>> groupedValves = {};
-                for (int i = 0; i < dashBoardData[0].lineOrSequence.length; i++) {
-                  LineOrSequence line = dashBoardData[0].lineOrSequence[i];
-                  if(ddSelection==0){
+                  if(dashBoardData[0].sourcePump.isNotEmpty){
+                    strSldSourcePumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].sourcePump);
+                  }
+                  if(dashBoardData[0].irrigationPump.isNotEmpty){
+                    strSldIrrigationPumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].irrigationPump);
+                  }
+                  if(dashBoardData[0].mainValve.isNotEmpty){
+                    strSldMainValveSrlNo = getSelectedRelaySrlNo(dashBoardData[0].mainValve);
+                  }
+                  if(dashBoardData[0].centralFilterSite.isNotEmpty){
+                    strSldCtrlFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[0].filter);
+                  }
+                  if(dashBoardData[0].localFilterSite.isNotEmpty){
+                    strSldLocFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].localFilterSite[0].filter);
+                  }
+                  if(dashBoardData[0].centralFertilizerSite.isNotEmpty){
+                    strSldCrlFetFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].centralFertilizerSite[0].fertilizer);
+                  }
+                  if(dashBoardData[0].localFertilizerSite.isNotEmpty){
+                    strSldLocFetFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].localFertilizerSite[0].fertilizer);
+                  }
+                  if(dashBoardData[0].agitator.isNotEmpty){
+                    strSldAgitatorSrlNo = getSelectedRelaySrlNo(dashBoardData[0].agitator);
+                  }
+                  if(dashBoardData[0].fan.isNotEmpty){
+                    strSldFanSrlNo = getSelectedRelaySrlNo(dashBoardData[0].fan);
+                  }
+                  if(dashBoardData[0].fogger.isNotEmpty){
+                    strSldFoggerSrlNo = getSelectedRelaySrlNo(dashBoardData[0].fogger);
+                  }
+                  if(dashBoardData[0].boosterPump.isNotEmpty){
+                    strSldBoosterPumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].boosterPump);
+                  }
+                  if(dashBoardData[0].selector.isNotEmpty){
+                    strSldSelectorSrlNo = getSelectedRelaySrlNo(dashBoardData[0].selector);
+                  }
+
+                  Map<String, List<DashBoardValve>> groupedValves = {};
+                  for (int i = 0; i < dashBoardData[0].lineOrSequence.length; i++) {
+                    LineOrSequence line = dashBoardData[0].lineOrSequence[i];
                     groupedValves = groupValvesByLocation(line.valves);
                     groupedValves.forEach((location, valves) {
                       for (int j = 0; j < valves.length; j++) {
                         if (valves[j].isOn) {
-                          strSldValveOrLineSno += '${valves[j].sNo}_';
+                          strSldValveOrLineSrlNo += '${valves[j].sNo}_';
+                          standaloneSelection.add({
+                            'id': valves[j].id,
+                            'sNo': valves[j].sNo,
+                            'name': valves[j].name,
+                            'location': valves[j].location,
+                            'selected': valves[j].isOn,
+                          });
+                        }
+                      }
+                    });
+                  }
+
+                  strSldValveOrLineSrlNo = strSldValveOrLineSrlNo.isNotEmpty ? strSldValveOrLineSrlNo.substring(0, strSldValveOrLineSrlNo.length - 1) : '';
+                  allRelaySrlNo = [
+                    strSldSourcePumpSrlNo,
+                    strSldIrrigationPumpSrlNo,
+                    strSldMainValveSrlNo,
+                    strSldCtrlFilterSrlNo,
+                    strSldValveOrLineSrlNo,
+                    strSldLocFilterSrlNo,
+                    strSldCrlFetFilterSrlNo,
+                    strSldLocFetFilterSrlNo,
+                    strSldAgitatorSrlNo,
+                    strSldFanSrlNo,
+                    strSldFoggerSrlNo,
+                    strSldBoosterPumpSrlNo,
+                    strSldSelectorSrlNo,
+                  ];
+
+                  if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
+                    showDialog<String>(
+                        context: context,
+                        builder: (BuildContext dgContext) => AlertDialog(
+                          title: const Text('StandAlone'),
+                          content: const Text('Valve is not open! Are you sure! You want to Start the Selected Pump?'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.pop(dgContext, 'Cancel'),
+                              child: const Text('No'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                startByStandaloneDefault(allRelaySrlNo);
+                                Navigator.pop(dgContext, 'OK');
+                              },
+                              child: const Text('Yes'),
+                            ),
+                          ],
+                        )
+                    );
+                  }
+
+                }
+                else{
+
+                  /*Map<String, List<DashBoardValve>> groupedValves = {};
+                  for (int i = 0; i < dashBoardData[0].lineOrSequence.length; i++) {
+                    LineOrSequence line = dashBoardData[0].lineOrSequence[i];
+                    groupedValves = groupValvesByLocation(line.valves);
+                    groupedValves.forEach((location, valves) {
+                      for (int j = 0; j < valves.length; j++) {
+                        if (valves[j].isOn) {
+                          strSldValveOrLineSrlNo += '${valves[j].sNo}_';
                           strProgramCategory += '${valves[j].location}_';
 
                           standaloneSelection.add({
@@ -200,63 +265,75 @@ class _RunByManualState extends State<RunByManual> {
                         }
                       }
                     });
-                  }else{
-                    if (line.selected) {
-                      strSldValveOrLineSno += '${line.sNo}_';
-                      standaloneSelection.add({
-                        'id': line.id,
-                        'sNo': line.sNo,
-                        'name': line.name,
-                        'location': line.location,
-                        'selected': line.selected,
-                      });
-                    }
                   }
+
+                  strSldValveOrLineSrlNo = strSldValveOrLineSrlNo.isNotEmpty ? strSldValveOrLineSrlNo.substring(0, strSldValveOrLineSrlNo.length - 1) : '';
+                  allRelaySrlNo = [
+                    strSldSourcePumpSrlNo,
+                    strSldIrrigationPumpSrlNo,
+                    strSldMainValveSrlNo,
+                    strSldCtrlFilterSrlNo,
+                    strSldValveOrLineSrlNo,
+                    strSldLocFilterSrlNo,
+                    strSldCrlFetFilterSrlNo,
+                    strSldLocFetFilterSrlNo,
+                    strSldAgitatorSrlNo,
+                    strSldFanSrlNo,
+                    strSldFoggerSrlNo,
+                    strSldBoosterPumpSrlNo,
+                    strSldSelectorSrlNo,
+                  ];
+
+                  strProgramCategory = strProgramCategory.isNotEmpty ? strProgramCategory.substring(0, strProgramCategory.length - 1) : '';*/
                 }
 
-                strSldValveOrLineSno = strSldValveOrLineSno.isNotEmpty ? strSldValveOrLineSno.substring(0, strSldValveOrLineSno.length - 1) : '';
-                List<String> allRelaySrlNo = [
-                  strSldSourcePump,
-                  strSldIrrigationPump,
-                  strSldMainValve,
-                  strSldCtrlFilter,
-                  strSldValveOrLineSno,
-                  strSldLocFilter,
-                  strSldCrlFetFilter,
-                  strSldLocFetFilter,
-                  strSldAgitator,
-                  strSldFan,
-                  strSldFogger,
-                  strSldBoosterPump,
-                  strSldSelector,
-                ];
 
-                strProgramCategory = strProgramCategory.isNotEmpty ? strProgramCategory.substring(0, strProgramCategory.length - 1) : '';
 
-                if (strSldIrrigationPump.isNotEmpty && strSldValveOrLineSno.isEmpty) {
-                  showDialog<String>(
-                      context: context,
-                      builder: (BuildContext dgContext) => AlertDialog(
-                        title: const Text('StandAlone'),
-                        content: const Text('Valve is not open! Are you sure! You want to Start the Selected Pump?'),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () => Navigator.pop(dgContext, 'Cancel'),
-                            child: const Text('No'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              sendCommandToControllerAndMqtt(allRelaySrlNo, strProgramCategory);
-                              Navigator.pop(dgContext, 'OK');
-                            },
-                            child: const Text('Yes'),
-                          ),
-                        ],
-                      )
-                  );
+
+
+                /*if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
+                  if(ddSelection==0){
+                    showDialog<String>(
+                        context: context,
+                        builder: (BuildContext dgContext) => AlertDialog(
+                          title: const Text('StandAlone'),
+                          content: const Text('Valve is not open! Are you sure! You want to Start the Selected Pump?'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.pop(dgContext, 'Cancel'),
+                              child: const Text('No'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                sendCommandToControllerAndMqtt(allRelaySrlNo, strProgramCategory);
+                                Navigator.pop(dgContext, 'OK');
+                              },
+                              child: const Text('Yes'),
+                            ),
+                          ],
+                        )
+                    );
+                  }else{
+                    showDialog<String>(
+                        context: context,
+                        builder: (BuildContext dgContext) => AlertDialog(
+                          title: const Text('Standalone Program base'),
+                          content: const Text('Zone is not selected, Please select your zone and try again'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(dgContext, 'OK');
+                              },
+                              child: const Text('Ok'),
+                            ),
+                          ],
+                        )
+                    );
+                  }
+
                 }else{
                   sendCommandToControllerAndMqtt(allRelaySrlNo, strProgramCategory);
-                }
+                }*/
               },
               icon: const Icon(
                 Icons.not_started_outlined,
@@ -1055,28 +1132,88 @@ class _RunByManualState extends State<RunByManual> {
     );
   }
 
-  void sendCommandToControllerAndMqtt(List<String> allRelaySrlNo, location){
+  void startByStandaloneDefault(List<String> allRelaySrlNo){
     String finalResult = allRelaySrlNo.where((s) => s.isNotEmpty).join('_');
     String payload = '';
-    if(ddSelection==0){
-      payload = '${finalResult==''?0:1},${finalResult==''?0:finalResult},${segmentIndex==0?3:1},${segmentIndex==0?'0':segmentIndex==1?strDuration:strFlow}';
-    }else{
-      payload = '${finalResult.isEmpty?0:1},${2},${widget.programList[ddSelection].programCategory},${widget.programList[ddSelection].serialNumber},${finalResult==''?0:finalResult},0,${segmentIndex==0?3:1},${segmentIndex==0?'0':segmentIndex==1?strDuration:strFlow}';
+    String payLoadFinal = '';
+    if(segmentIndex==1){
+      int count = strDuration.split(':').length - 1;
+      if(count==1){
+        strDuration = '$strDuration:00';
+      }
     }
 
-    String payLoadFinal = jsonEncode({
-      "800": [{"801": payload}]
-    });
-    //print(payLoadFinal);
-    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
+    if(segmentIndex==1 && strDuration=='00:00:00'){
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invalid Duration input'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }else{
+      payload = '${finalResult==''?0:1},${finalResult==''?0:finalResult},${segmentIndex==0?3:1},${segmentIndex==0?'0':segmentIndex==1?strDuration:strFlow}';
+      payLoadFinal = jsonEncode({
+        "800": [{"801": payload}]
+      });
 
-    Map<String, dynamic> manualOperation = {
-      "method": segmentIndex+1,
-      "time": strDuration,
-      "flow": strFlow,
-      "selected": standaloneSelection,
-    };
-    sentManualModeToServer(manualOperation);
+      //print(payLoadFinal);
+
+      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
+      Map<String, dynamic> manualOperation = {
+        "method": segmentIndex+1,
+        "time": strDuration,
+        "flow": strFlow,
+        "selected": standaloneSelection,
+      };
+      sentManualModeToServer(manualOperation);
+    }
+
+  }
+
+  void sendCommandToControllerAndMqttProgram(List<String> allRelaySrlNo){
+    String finalResult = allRelaySrlNo.where((s) => s.isNotEmpty).join('_');
+    String payload = '';
+    String payLoadFinal = '';
+    if(segmentIndex==1){
+      int count = strDuration.split(':').length - 1;
+      if(count==1){
+        strDuration = '$strDuration:00';
+      }
+    }
+
+    if(segmentIndex==1 && strDuration=='00:00:00'){
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invalid Duration input'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }else{
+      if(ddSelection==0){
+        payload = '${finalResult==''?0:1},${finalResult==''?0:finalResult},${segmentIndex==0?3:1},${segmentIndex==0?'0':segmentIndex==1?strDuration:strFlow}';
+        payLoadFinal = jsonEncode({
+          "800": [{"801": payload}]
+        });
+      }else{
+        payload = '${finalResult.isEmpty?0:1},${2},${widget.programList[ddSelection].programCategory},${widget.programList[ddSelection].serialNumber},${finalResult==''?0:finalResult},0,${segmentIndex==0?3:1},${segmentIndex==0?'0':segmentIndex==1?strDuration:strFlow}';
+        payLoadFinal = jsonEncode({
+          "3900": [{"3901": payload}]
+        });
+      }
+
+      print(payLoadFinal);
+
+     /* MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
+
+      Map<String, dynamic> manualOperation = {
+        "method": segmentIndex+1,
+        "time": strDuration,
+        "flow": strFlow,
+        "selected": standaloneSelection,
+      };
+      sentManualModeToServer(manualOperation);*/
+    }
+
   }
 
   Future<void>sentManualModeToServer(manualOperation) async {
@@ -1116,7 +1253,7 @@ class _RunByManualState extends State<RunByManual> {
     });
   }
 
-  String buildSelectedItemsString(itemList) {
+  String getSelectedRelaySrlNo(itemList) {
     String result = '';
     for (int i = 0; i < itemList.length; i++) {
       if (itemList[i].selected) {
@@ -1470,7 +1607,6 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
     );
   }
 
-
   Map<String, List<DashBoardValve>> groupValvesByLocation(List<DashBoardValve> valves) {
     Map<String, List<DashBoardValve>> groupedValves = {};
     for (var valve in valves) {
@@ -1481,7 +1617,6 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
     }
     return groupedValves;
   }
-
 
   Future<void> _selectTimeDuration(BuildContext context, TimeOfDay time) async {
     TimeOfDay? selectedTime = await showTimePicker(

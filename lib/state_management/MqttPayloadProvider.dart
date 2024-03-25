@@ -17,7 +17,8 @@ class MqttPayloadProvider with ChangeNotifier {
   List<dynamic> PrsOut = [];
   List<dynamic> nextSchedule = [];
   List<dynamic> upcomingProgram = [];
-  List<dynamic> filters = [];
+  List<dynamic> filtersCentral = [];
+  List<dynamic> filtersLocal = [];
   List<dynamic> irrigationPump = [];
 
   void editMySchedule(ScheduleViewProvider instance){
@@ -50,7 +51,19 @@ class MqttPayloadProvider with ChangeNotifier {
           upcomingProgram = data['2400'][0]['2404'];
         }
         if (data['2400'][0].containsKey('2405')) {
-          filters = data['2400'][0]['2405'];
+          List<dynamic> filtersJson = data['2400'][0]['2405'];
+          filtersCentral = [];
+          filtersLocal = [];
+
+          for (var filter in filtersJson) {
+            if (filter['Type'] == 1) {
+              filtersCentral.add(filter);
+            } else if (filter['Type'] == 2) {
+              filtersLocal.add(filter);
+            }
+          }
+
+          //filters = data['2400'][0]['2405'];
         }
         if (data['2400'][0].containsKey('2407')) {
           List<dynamic> items = data['2400'][0]['2407'];
@@ -77,14 +90,19 @@ class MqttPayloadProvider with ChangeNotifier {
   MQTTConnectionState get getAppConnectionState => _appConnectionState;
 
   void clearData() {
+    wifiStrength = 0;
     dashBoardPayload = '';
     mainLine = [];
     currentSchedule = [];
+    PrsIn = [];
+    PrsOut = [];
     upcomingProgram = [];
     nextSchedule = [];
-    filters = [];
+    filtersCentral = [];
+    filtersLocal = [];
     irrigationPump = [];
     notifyListeners();
+
   }
 
 }

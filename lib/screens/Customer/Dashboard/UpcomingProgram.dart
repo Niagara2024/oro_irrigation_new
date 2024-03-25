@@ -30,18 +30,18 @@ class UpcomingProgram extends StatelessWidget {
             ),
             Container(
               color: Colors.white,
-              height: provider.upcomingProgram.isNotEmpty? (provider.upcomingProgram.length * 45) + 35 : 25,
+              height: provider.upcomingProgram.isNotEmpty? (provider.upcomingProgram.length * 50) + 35 : 25,
               child: provider.upcomingProgram.isNotEmpty? DataTable2(
                 columnSpacing: 12,
                 horizontalMargin: 12,
                 minWidth: 600,
-                dataRowHeight: 45.0,
+                dataRowHeight: 50.0,
                 headingRowHeight: 35.0,
                 headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
                 columns: const [
                   DataColumn2(
                       label: Text('Name', style: TextStyle(fontSize: 13),),
-                      size: ColumnSize.M
+                      size: ColumnSize.L
                   ),
                   DataColumn2(
                       label: Text('Method', style: TextStyle(fontSize: 13)),
@@ -58,19 +58,19 @@ class UpcomingProgram extends StatelessWidget {
                   ),
                   DataColumn2(
                       label: Center(child: Text('Start Date', style: TextStyle(fontSize: 13),)),
-                      fixedWidth: 100
+                      size: ColumnSize.M
                   ),
                   DataColumn2(
                       label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
-                      fixedWidth: 100
+                      size: ColumnSize.M
                   ),
                   DataColumn2(
                       label: Center(child: Text('End Date', style: TextStyle(fontSize: 13),)),
-                      fixedWidth: 100
+                      size: ColumnSize.M
                   ),
                   DataColumn2(
                       label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
-                      fixedWidth: 90
+                      fixedWidth: 175
                   ),
                 ],
                 rows: List<DataRow>.generate(provider.upcomingProgram.length, (index) => DataRow(cells: [
@@ -82,25 +82,35 @@ class UpcomingProgram extends StatelessWidget {
                   DataCell(Center(child: Text('${provider.upcomingProgram[index]['StartTime']}'))),
                   DataCell(Center(child: Text('${provider.upcomingProgram[index]['EndDate']}'))),
                   DataCell(Row(children: [
-                    IconButton(tooltip:'Start by Manual',onPressed: (){
-                      String localFilePath = 'assets/audios/button_click_sound.mp3';
-                      audioPlayer.play(UrlSource(localFilePath));
-                      String payload = '${provider.upcomingProgram[index]['SNo']},1';
-                      String payLoadFinal = jsonEncode({
-                        "2900": [{"2901": payload}]
-                      });
-                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
-
-                    }, icon: const Icon(Icons.start, color: Colors.green,)),
-                    IconButton(tooltip:'Stop by Manual',onPressed: (){
-                      String localFilePath = 'assets/audios/audio_off.mp3';
-                      audioPlayer.play(UrlSource(localFilePath));
-                      String payload = '${provider.upcomingProgram[index]['SNo']},0';
-                      String payLoadFinal = jsonEncode({
-                        "2900": [{"2901": payload}]
-                      });
-                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
-                    }, icon: const Icon(Icons.stop_circle_outlined, color: Colors.red,))
+                    MaterialButton(
+                      color: Colors.green,
+                      textColor: Colors.white,
+                      onPressed: () {
+                        String localFilePath = 'assets/audios/button_click_sound.mp3';
+                        audioPlayer.play(UrlSource(localFilePath));
+                        String payload = '${provider.upcomingProgram[index]['SNo']},1';
+                        String payLoadFinal = jsonEncode({
+                          "2900": [{"2901": payload}]
+                        });
+                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
+                      },
+                      child: const Text('Start'),
+                    ),
+                    const SizedBox(width: 5,),
+                    MaterialButton(
+                      color: Colors.redAccent,
+                      textColor: Colors.white,
+                      onPressed: () {
+                        String localFilePath = 'assets/audios/audio_off.mp3';
+                        audioPlayer.play(UrlSource(localFilePath));
+                        String payload = '${provider.upcomingProgram[index]['SNo']},0';
+                        String payLoadFinal = jsonEncode({
+                          "2900": [{"2901": payload}]
+                        });
+                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
+                      },
+                      child: const Text('Stop'),
+                    ),
                   ],)),
                 ])),
               ) :

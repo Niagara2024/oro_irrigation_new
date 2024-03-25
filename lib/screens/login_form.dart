@@ -7,6 +7,7 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/http_service.dart';
+import '../state_management/MqttPayloadProvider.dart';
 
 
 TextEditingController _mobileNoController = TextEditingController();
@@ -169,6 +170,9 @@ class _LoginFormState extends State<LoginForm> {
                                         //print(response.body);
                                         if(response.statusCode == 200)
                                         {
+                                          MqttPayloadProvider provider = MqttPayloadProvider();
+                                          provider.clearData();
+
                                           var data = jsonDecode(response.body);
                                           if(data["code"]==200)
                                           {

@@ -29,6 +29,7 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
   bool visibleLoading = false;
   int _selectedIndex = 0;
 
+
   @override
   void initState() {
     super.initState();
@@ -180,7 +181,7 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                         ),
                       ),
                     ),*/
-                    VerticalDivider(width: 2, color: myTheme.primaryColor.withOpacity(0.5)),
+                    //VerticalDivider(width: 2, color: myTheme.primaryColor.withOpacity(0.5)),
                     Expanded(
                       child:
                       _selectedIndex == 0 ? CustomerDashboard(customerID: widget.customerID, type: 0, customerName: widget.customerName, userID: widget.customerID, mobileNo: '+${widget.mobileNo}', siteData: siteListFinal[siteIndex], siteLength: siteListFinal.length) :

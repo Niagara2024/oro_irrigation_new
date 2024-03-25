@@ -56,14 +56,14 @@ class _NextScheduleState extends State<NextSchedule> {
               child: provider.nextSchedule.isNotEmpty? DataTable2(
                 columnSpacing: 12,
                 horizontalMargin: 12,
-                minWidth: 625,
+                minWidth: 600,
                 dataRowHeight: 45.0,
                 headingRowHeight: 35.0,
                 headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
                 columns: const [
                   DataColumn2(
                       label: Text('Name', style: TextStyle(fontSize: 13),),
-                      size: ColumnSize.S
+                      size: ColumnSize.L
                   ),
                   DataColumn2(
                       label: Text('Method', style: TextStyle(fontSize: 13)),
@@ -76,7 +76,7 @@ class _NextScheduleState extends State<NextSchedule> {
                   ),
                   DataColumn2(
                       label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
-                      fixedWidth: 45
+                      size: ColumnSize.S
                   ),
                   DataColumn2(
                       label: Center(child: Text('Zone Name', style: TextStyle(fontSize: 13),)),
@@ -84,11 +84,11 @@ class _NextScheduleState extends State<NextSchedule> {
                   ),
                   DataColumn2(
                       label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
-                      fixedWidth: 100
+                      size: ColumnSize.M
                   ),
                   DataColumn2(
-                      label: Center(child: Text('Total(D/F)', style: TextStyle(fontSize: 13),)),
-                      fixedWidth: 100
+                      label: Center(child: Text('Total(Duration/Flow)', style: TextStyle(fontSize: 13),)),
+                      size: ColumnSize.M
                   ),
                 ],
                 rows: List<DataRow>.generate(provider.nextSchedule.length, (index) => DataRow(cells: [

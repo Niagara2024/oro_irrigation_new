@@ -33,18 +33,18 @@ class _CentralFilterState extends State<CentralFilter> {
   Widget build(BuildContext context) {
     final provider = Provider.of<MqttPayloadProvider>(context);
 
-    return provider.filters.isNotEmpty? Align(
+    return provider.filtersCentral.isNotEmpty? Align(
       alignment: Alignment.topLeft,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for(int i=0; i<provider.filters.length; i++)
+          for(int i=0; i<provider.filtersCentral.length; i++)
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                provider.filters[i]['PrsIn']!='-'?
+                provider.filtersCentral[i]['PrsIn']!='-'?
                 SizedBox(
                   width: 70,
                   height: 160,
@@ -52,16 +52,16 @@ class _CentralFilterState extends State<CentralFilter> {
                     children: [
                       Image.asset('assets/images/dp_prs_sensor.png',),
                       const Text('Prs In',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
-                      Text('${double.parse(provider.filters[i]['PrsIn']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10)),
+                      Text('${double.parse(provider.filtersCentral[i]['PrsIn']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10)),
                     ],
                   ),
                 ) :
                 const SizedBox(),
                 SizedBox(
                   width: 70,
-                  height: provider.filters[i]['FilterStatus'].length * 75,
+                  height: provider.filtersCentral[i]['FilterStatus'].length * 75,
                   child: ListView.builder(
-                    itemCount: provider.filters[i]['FilterStatus'].length,
+                    itemCount: provider.filtersCentral[i]['FilterStatus'].length,
                     itemBuilder: (BuildContext context, int flIndex) {
                       return Column(
                         children: [
@@ -74,10 +74,10 @@ class _CentralFilterState extends State<CentralFilter> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
-                                      Text(provider.filters[i]['FilterSite'], style: const TextStyle(fontWeight: FontWeight.bold),),
+                                      Text(provider.filtersCentral[i]['FilterSite'], style: const TextStyle(fontWeight: FontWeight.bold),),
                                       const Divider(),
-                                      Text(provider.filters[i]['FilterStatus'][flIndex]['Name']),
-                                      Text('${provider.filters[i]['FilterStatus'][flIndex]['Status']}'),
+                                      Text(provider.filtersCentral[i]['FilterStatus'][flIndex]['Name']),
+                                      Text('${provider.filtersCentral[i]['FilterStatus'][flIndex]['Status']}'),
                                     ],
                                   ),
                                 ),
@@ -85,15 +85,15 @@ class _CentralFilterState extends State<CentralFilter> {
                             },
                             child : Stack(
                               children: [
-                                buildFilterImage(flIndex, provider.filters[i]['FilterStatus'][flIndex]['Status'], provider.filters[i]['FilterStatus'].length),
+                                buildFilterImage(flIndex, provider.filtersCentral[i]['FilterStatus'][flIndex]['Status'], provider.filtersCentral[i]['FilterStatus'].length),
                                 Positioned(
                                   top: 47.8,
                                   left: 10,
-                                  child: provider.filters[i]['DurationLeft']!='00:00:00'? provider.filters[i]['Status'] == (flIndex+1) ? Container(
+                                  child: provider.filtersCentral[i]['DurationLeft']!='00:00:00'? provider.filtersCentral[i]['Status'] == (flIndex+1) ? Container(
                                     color: Colors.greenAccent,
                                     width: 50,
                                     child: Center(
-                                      child: Text(provider.filters[i]['DurationLeft'], style: const TextStyle(
+                                      child: Text(provider.filtersCentral[i]['DurationLeft'], style: const TextStyle(
                                         color: Colors.black,
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
@@ -106,14 +106,14 @@ class _CentralFilterState extends State<CentralFilter> {
                                 Positioned(
                                   top: 0,
                                   left: 25,
-                                  child: provider.filters[i]['PrsIn']!='-'? Container(
+                                  child: provider.filtersCentral[i]['PrsIn']!='-'? Container(
                                       decoration: const BoxDecoration(
                                         color:Colors.yellow,
                                         borderRadius: BorderRadius.all(Radius.circular(2)),
                                       ),
                                       child: Padding(
                                         padding: const EdgeInsets.only(left: 3,right: 3),
-                                        child: Text('${provider.filters[i]['DpValue']}', style: const TextStyle(fontSize: 10),),
+                                        child: Text('${provider.filtersCentral[i]['DpValue']}', style: const TextStyle(fontSize: 10),),
                                       )
                                   ):
                                   const SizedBox(),
@@ -126,7 +126,7 @@ class _CentralFilterState extends State<CentralFilter> {
                     },
                   ),
                 ),
-                provider.filters[i]['PrsOut'] != '-'?
+                provider.filtersCentral[i]['PrsOut'] != '-'?
                 SizedBox(
                   width: 70,
                   height: 160,
@@ -134,7 +134,7 @@ class _CentralFilterState extends State<CentralFilter> {
                     children: [
                       Image.asset('assets/images/dp_prs_sensor.png',),
                       const Text('Prs Out',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
-                      Text('${double.parse(provider.filters[i]['PrsOut']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10)),
+                      Text('${double.parse(provider.filtersCentral[i]['PrsOut']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10)),
                     ],
                   ),
                 ) :
@@ -191,10 +191,10 @@ class _CentralFilterState extends State<CentralFilter> {
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       try{
         final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
-        if(provider.filters.isNotEmpty) {
-          if(provider.filters[0]['DurationLeft']!='00:00:00'){
+        if(provider.filtersCentral.isNotEmpty) {
+          if(provider.filtersCentral[0]['DurationLeft']!='00:00:00'){
             print('Duration Left updating....');
-            List<String> parts = provider.filters[0]['DurationLeft'].split(':');
+            List<String> parts = provider.filtersCentral[0]['DurationLeft'].split(':');
             int hours = int.parse(parts[0]);
             int minutes = int.parse(parts[1]);
             int seconds = int.parse(parts[2]);
@@ -216,7 +216,7 @@ class _CentralFilterState extends State<CentralFilter> {
 
             String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
             setState(() {
-              provider.filters[0]['DurationLeft'] = updatedDurationQtyLeft;
+              provider.filtersCentral[0]['DurationLeft'] = updatedDurationQtyLeft;
             });
           }
         }

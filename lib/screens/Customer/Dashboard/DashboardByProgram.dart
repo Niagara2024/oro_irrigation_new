@@ -55,7 +55,6 @@ class _DashboardByProgramState extends State<DashboardByProgram>
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
       indicatorViewHide();
-      print(jsonResponse);
       if (jsonResponse['data'] != null) {
         dynamic data = jsonResponse['data'];
         if (data is Map<String, dynamic>) {

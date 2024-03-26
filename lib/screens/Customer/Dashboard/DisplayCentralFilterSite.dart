@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../Models/Customer/Dashboard/CentralFilterSite.dart';
+
+import '../../../Models/Customer/Dashboard/DashboardDataProvider.dart';
 
 class DisplayCentralFilterSite extends StatelessWidget
 {
   const DisplayCentralFilterSite({super.key, required this.centralFilterSite});
-  final List<CentralFilterSite> centralFilterSite;
+  final List<FilterModel> centralFilterSite;
 
   @override
   Widget build(BuildContext context) {

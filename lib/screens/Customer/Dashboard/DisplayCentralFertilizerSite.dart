@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../Models/Customer/Dashboard/CentralFertilizerSite.dart';
-import '../../../Models/Customer/Dashboard/FertilizerChanel.dart';
+import '../../../Models/Customer/Dashboard/DashboardDataProvider.dart';
 
 class DisplayCentralFertilizerSite extends StatelessWidget
 {
   const DisplayCentralFertilizerSite({super.key, required this.centralFertilizationSite});
-  final List<CentralFertilizerSite> centralFertilizationSite;
+  final List<FertilizerModel> centralFertilizationSite;
 
   @override
   Widget build(BuildContext context) {

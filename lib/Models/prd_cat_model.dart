@@ -4,18 +4,20 @@ class PrdCateModel
     this.categoryId = 0,
     this.categoryName = '',
     this.smsFormat = '',
-    this.relayCount = 0,
+    this.inputCount = 0,
+    this.outputCount = 0,
     this.active = '',
   });
 
-  int categoryId, relayCount;
+  int categoryId, inputCount, outputCount;
   String categoryName, smsFormat, active;
 
   factory PrdCateModel.fromJson(Map<String, dynamic> json) => PrdCateModel(
     categoryId: json['categoryId'],
     categoryName: json['categoryName'],
-    smsFormat: json['smsFormat'],
-    relayCount: json['relayCount'],
+    smsFormat: json['smsFormat'] ?? 0,
+    inputCount: json['inputCount'],
+    outputCount: json['outputCount'],
     active: json['active'],
   );
 
@@ -23,7 +25,8 @@ class PrdCateModel
     'categoryId': categoryId,
     'categoryName': categoryName,
     'smsFormat': smsFormat,
-    'relayCount': relayCount,
+    'inputCount': inputCount,
+    'outputCount': outputCount,
     'active': active,
   };
 }

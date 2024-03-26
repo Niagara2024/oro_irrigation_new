@@ -2,7 +2,7 @@ import 'DashBoardValve.dart';
 import 'Sensor.dart';
 
 class LineOrSequence {
-  int sNo;
+  dynamic sNo;
   String id;
   String name, location, time, flow, type;
   List<DashBoardValve> valves;
@@ -16,7 +16,6 @@ class LineOrSequence {
   factory LineOrSequence.fromJson(Map<String, dynamic> json) {
     var valveList = json['valve'] as List;
     var sensors = json['sensor'] as List;
-
 
     List<DashBoardValve> valves = valveList.map((valveJson) => DashBoardValve.fromJson(valveJson)).toList();
     List<Sensor> sensor = sensors.map((valveJson) => Sensor.fromJson(valveJson)).toList();

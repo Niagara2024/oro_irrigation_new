@@ -752,7 +752,7 @@ class _IrrigationProgramState extends State<IrrigationProgram> with SingleTicker
           OutlinedButton(
             key: UniqueKey(),
             onPressed: () async{
-              // MQTTManager().publish(dataToMqtt.toString(), 'AppToFirmware/12345');
+              MQTTManager().publish(dataToMqtt.toString(), 'AppToFirmware/${widget.deviceId}');
               print(dataToMqtt);
               ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(message: 'Sent successfully'));
             },

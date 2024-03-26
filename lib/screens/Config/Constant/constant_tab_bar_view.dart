@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:oro_irrigation_new/screens/Config/Constant/pump_in_constant.dart';
 import 'package:oro_irrigation_new/screens/Config/Constant/valve_in_constant.dart';
 import 'package:oro_irrigation_new/screens/Config/Constant/water_meter_in_constant.dart';
 import 'package:provider/provider.dart';
@@ -24,8 +25,8 @@ import 'main_valve_in_constant.dart';
 import 'moisture_sensor_in_constant.dart';
 
 class ConstantInConfig extends StatefulWidget {
-  const ConstantInConfig({super.key, required this.userId, required this.controllerId, required this.customerId, required this.deviceId});
-  final dynamic userId, controllerId, customerId, deviceId;
+  const ConstantInConfig({super.key, required this.userId, required this.deviceId, required this.customerId, required this.controllerId});
+  final userId, deviceId, customerId, controllerId;
 
   @override
   State<ConstantInConfig> createState() => _ConstantInConfigState();
@@ -47,7 +48,7 @@ class _ConstantInConfigState extends State<ConstantInConfig> with SingleTickerPr
     // constantPvd.sendDataToHW();
     HttpService service = HttpService();
     try{
-      var response = await service.postRequest('getUserConstant', {'userId' : widget.customerId,'controllerId' : widget.controllerId});
+      var response = await service.postRequest('getUserConstant', {'userId' : widget.customerId, 'controllerId' : widget.controllerId});
       var jsonData = jsonDecode(response.body);
       print('jsonData : ${jsonEncode(jsonData)}');
       // if(jsonData['data']['isNewConfig'] == '0'){
@@ -139,19 +140,20 @@ class _ConstantInConfigState extends State<ConstantInConfig> with SingleTickerPr
                     children: [
                       // ...dynamicTab()
                       GeneralInConstant(),
+                      const PumpInConstant(),
                       const IrrigationLinesConstant(),
                       const MainValveConstant(),
                       const ValveConstant(),
                       const WaterMeterConstant(),
                       const FertilizerConstant(),
                       const EcPhInConstant(),
-                      const FilterConstant(),
+                      // const FilterConstant(),
                       const AnalogSensorConstant(),
                       const MoistureSensorInConstant(),
                       const LevelSensorInConstant(),
                       const AlarmInConstant(),
                       const CriticalAlarmInConstant(),
-                      FinishInConstant(userId: widget.userId, controllerId: widget.controllerId, customerId: widget.customerId, deviceId: widget.deviceId,)
+                      FinishInConstant(userId: widget.userId, controllerId: widget.controllerId, customerId: widget.customerId,)
                     ]
                 ),
               )

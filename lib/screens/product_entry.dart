@@ -71,7 +71,7 @@ class _AllEntryState extends State<AllEntry> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
+    /*return DefaultTabController(
       length: _tabCont.length, // Number of tabs
       child: Column(
         children: [
@@ -102,10 +102,10 @@ class _AllEntryState extends State<AllEntry> with SingleTickerProviderStateMixin
           ),
         ],
       ),
-    );
+    );*/
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Product Entry'),
+        title: const Text('Master'),
         bottom: TabBar(
           controller: _tabCont,
           isScrollable: true,

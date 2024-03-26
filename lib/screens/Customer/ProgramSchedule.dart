@@ -96,7 +96,7 @@ class _ProgramScheduleState extends State<ProgramSchedule> with SingleTickerProv
           WeatherScreen(userId: widget.userId, controllerId: widget.controllerID),
           SystemDefinition(userId: widget.userId, controllerId: widget.controllerID),
           ProgramQueueScreen(userId: widget.userId, controllerId: widget.controllerID, cutomerId: widget.customerID,),
-          const ScheduleViewScreen(),
+          ScheduleViewScreen(userId: widget.userId, controllerId: widget.controllerID, customerId: widget.customerID, deviceId: widget.imeiNumber,),
         ],
       ),
     );

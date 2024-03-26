@@ -135,8 +135,7 @@ class _CustomTabsState extends State<CustomTabView> with TickerProviderStateMixi
           child: TabBarView(
             controller: controller,
             children: List.generate(
-              widget.itemCount,
-                  (index) => widget.pageBuilder(context, index),
+              widget.itemCount, (index) => widget.pageBuilder(context, index),
             ),
           ),
         ),

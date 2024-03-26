@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:mqtt_client/mqtt_browser_client.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:uuid/uuid.dart';
@@ -23,13 +25,12 @@ class MQTTManager {
     print('Unique ID: $uniqueId');
 
     if (_client == null) {
-      providerState = state;
+       providerState = state;
       _client = MqttBrowserClient('ws://192.168.1.141', uniqueId);
       _client!.port = 9001;
       _client!.keepAlivePeriod = 60;
       _client!.onDisconnected = onDisconnected;
       _client!.logging(on: false);
-
       _client!.onConnected = onConnected;
       _client!.onSubscribed = onSubscribed;
 
@@ -72,10 +73,7 @@ class MQTTManager {
       final MqttPublishMessage recMess = c![0].payload as MqttPublishMessage;
 
       final String pt = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-      providerState?.setReceivedText(pt);
-
-     // print('Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
-      //print('');
+      providerState?.updateReceivedPayload(pt);
 
     });
 
@@ -100,12 +98,8 @@ class MQTTManager {
       print('OnDisconnected callback is solicited, this is correct');
     }
     providerState?.setAppConnectionState(MQTTConnectionState.disconnected);
+    //connect();
 
-    // Attempt reconnection after a delay
-    Future.delayed(const Duration(seconds: 03), () {
-      //_client!.disconnect();
-      //connect();
-    });
   }
 
   void onConnected() {
@@ -113,4 +107,5 @@ class MQTTManager {
     providerState?.setAppConnectionState(MQTTConnectionState.connected);
     print('Mosquitto client connected....');
   }
+
 }

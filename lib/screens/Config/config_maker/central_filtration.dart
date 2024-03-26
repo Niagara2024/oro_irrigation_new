@@ -18,7 +18,29 @@ class CentralFiltrationTable extends StatefulWidget {
 
 class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
   ScrollController scrollController = ScrollController();
-
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        var configPvd = Provider.of<ConfigMakerProvider>(context,listen: false);
+        configPvd.sourcePumpFunctionality(['editsourcePumpSelection',false]);
+        configPvd.irrigationPumpFunctionality(['editIrrigationPumpSelection',false]);
+        configPvd.centralDosingFunctionality(['c_dosingSelectAll',false]);
+        configPvd.centralDosingFunctionality(['c_dosingSelection',false]);
+        configPvd.centralFiltrationFunctionality(['centralFiltrationSelection',false]);
+        configPvd.centralFiltrationFunctionality(['centralFiltrationSelectAll',false]);
+        configPvd.irrigationLinesFunctionality(['editIrrigationSelection',false]);
+        configPvd.irrigationLinesFunctionality(['editIrrigationSelectAll',false]);
+        configPvd.localDosingFunctionality(['edit_l_DosingSelectAll',false]);
+        configPvd.localDosingFunctionality(['edit_l_DosingSelection',false]);
+        configPvd.localFiltrationFunctionality(['edit_l_filtrationSelection',false]);
+        configPvd.localFiltrationFunctionality(['edit_l_filtrationSelectALL',false]);
+        configPvd.cancelSelection();
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
@@ -204,7 +226,7 @@ class _CentralFiltrationTableState extends State<CentralFiltrationTable> {
             Container(
               child: Row(
                 children: [
-                  topBtmLftRgt('#', '(${configPvd.totalCentralFiltration})'),
+                  topBtmLftRgt('Site', '(${configPvd.totalCentralFiltration})'),
                   topBtmRgt('Filters','(${configPvd.totalFilter})'),
                   topBtmRgt('D.stream','Valve(${configPvd.total_D_s_valve})'),
                   topBtmRgt('P.Sense','in(${configPvd.total_p_sensor})'),

@@ -8,8 +8,10 @@ import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/widgets/time_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../../main.dart';
 import '../../../state_management/constant_provider.dart';
 import '../../../state_management/overall_use.dart';
+import '../../../widgets/HoursMinutesSeconds.dart';
 import '../../../widgets/SCustomWidgets/custom_time_picker.dart';
 import '../../../widgets/drop_down_button.dart';
 import '../../../widgets/my_number_picker.dart';
@@ -38,7 +40,8 @@ class _FertilizerConstantState extends State<FertilizerConstant> {
         return FertilizerConstant_M();
       }
       return myTable(
-          [expandedTableCell_Text('Site','name'),
+          [
+            fixedTableCell_Text('Site','name',110,width < 1100 ? constant_style : null),
             fixedTableCell_Text('Used in','lines',80,width < 1100 ? constant_style : null),
             fixedTableCell_Text('No flow','behavior',200,width < 1100 ? constant_style : null),
             fixedTableCell_Text('Minimal','on time',90,width < 1100 ? constant_style : null),
@@ -63,7 +66,7 @@ class _FertilizerConstantState extends State<FertilizerConstant> {
                     ),
                     child: Row(
                       children: [
-                        expandedCustomCell(Text('${constantPvd.fertilizerUpdated[index]['name']}',style: width < 1100 ? constant_style : TextStyle(color: Colors.black),),null,null,40 * constantPvd.fertilizerUpdated[index]['fertilizer'].length),
+                        fixedSizeCustomCell(Text('${constantPvd.fertilizerUpdated[index]['name']}',style: width < 1100 ? constant_style : TextStyle(color: Colors.black),), 110,40 * constantPvd.fertilizerUpdated[index]['fertilizer'].length as double,false),
                         fixedSizeCustomCell(Text('${constantPvd.fertilizerUpdated[index]['location'] == '' ? 'null' : constantPvd.fertilizerUpdated[index]['location']}',style: width < 1100 ? constant_style : TextStyle(color: Colors.black),), 80,40 * constantPvd.fertilizerUpdated[index]['fertilizer'].length as double,false),
                         fixedSizeCustomCell(Container(color: Colors.white,margin: EdgeInsets.all(5),child: MyDropDown(initialValue: constantPvd.fertilizerUpdated[index]['noFlowBehavior'], itemList: ['Stop Faulty Fertilizer','Stop Fertigation','Stop Irrigation','Inform Only'], pvdName: 'fertilizer/noFlowBehavior', index: index)), 200,40 * constantPvd.fertilizerUpdated[index]['fertilizer'].length as double,false),
                         fixedSizeCustomCell(CustomTimePickerSiva(purpose: 'fertilizer_minimalOnTime/$index', index: index, value: '${constantPvd.fertilizerUpdated[index]['minimalOnTime']}', displayHours: false, displayMins: false, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,additional: 'split',), 90,40 * constantPvd.fertilizerUpdated[index]['fertilizer'].length as double,false),
@@ -72,7 +75,7 @@ class _FertilizerConstantState extends State<FertilizerConstant> {
                         fixedSizeCustomCell(CustomTimePickerSiva(purpose: 'fertilizer_boosterOffDelay/$index', index: index, value: '${constantPvd.fertilizerUpdated[index]['boosterOffDelay']}', displayHours: false, displayMins: false, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,additional: 'split',), 90,40 * constantPvd.fertilizerUpdated[index]['fertilizer'].length as double,false),
                         expandedNestedCustomCell([
                           for(var i = 0;i < constantPvd.fertilizerUpdated[index]['fertilizer'].length;i++)
-                            expandedCustomCell(Text('${constantPvd.fertilizerUpdated[index]['fertilizer'][i]['name']}',style: width < 1100 ? constant_style1 : TextStyle(color: Colors.black),))
+                            expandedCustomCell(Text('${constantPvd.fertilizerUpdated[index]['fertilizer'][i]['name']}',style: width < 1100 ? constant_style1 : TextStyle(color: Colors.black,fontSize: 12),))
                         ]),
                         expandedNestedCustomCell([
                           for(var i = 0;i < constantPvd.fertilizerUpdated[index]['fertilizer'].length;i++)
@@ -101,6 +104,92 @@ class _FertilizerConstantState extends State<FertilizerConstant> {
   }
 }
 
+Widget minimalOnTime(BuildContext context,constantPvd,overAllPvd,site){
+  return TextButton(
+      style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all(Colors.transparent)
+      ),
+      onPressed: ()async{
+        showDialog(context: context, builder: (context){
+          return AlertDialog(
+            content: HoursMinutesSeconds(
+              initialTime: '${constantPvd.fertilizerUpdated[site]['minimalOnTime']}',
+              onPressed: (){
+                constantPvd.fertilizerFunctionality(['fertilizer_minimalOnTime',site,'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                Navigator.pop(context);
+              },
+            ),
+          );
+        });
+      },
+      child: Text('${constantPvd.fertilizerUpdated[site]['minimalOnTime']}',style: TextStyle(color: Colors.black87),)
+  );
+}
+Widget minimalOffTime(BuildContext context,constantPvd,overAllPvd,site){
+  return TextButton(
+      style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all(Colors.transparent)
+      ),
+      onPressed: ()async{
+        showDialog(context: context, builder: (context){
+          return AlertDialog(
+            content: HoursMinutesSeconds(
+              initialTime: '${constantPvd.fertilizerUpdated[site]['minimalOffTime']}',
+              onPressed: (){
+                constantPvd.fertilizerFunctionality(['fertilizer_minimalOffTime',site,'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                Navigator.pop(context);
+              },
+            ),
+          );
+        });
+      },
+      child: Text('${constantPvd.fertilizerUpdated[site]['minimalOffTime']}',style: TextStyle(color: Colors.black87),)
+  );
+}
+Widget waterFlow(BuildContext context,constantPvd,overAllPvd,site){
+  return TextButton(
+      style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all(Colors.transparent)
+      ),
+      onPressed: ()async{
+        showDialog(context: context, builder: (context){
+          return AlertDialog(
+            content: HoursMinutesSeconds(
+              initialTime: '${constantPvd.fertilizerUpdated[site]['waterFlowStabilityTime']}',
+              onPressed: (){
+                constantPvd.fertilizerFunctionality(['fertilizer_waterFlowStabilityTime',site,'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                Navigator.pop(context);
+              },
+            ),
+          );
+        });
+      },
+      child: Text('${constantPvd.fertilizerUpdated[site]['waterFlowStabilityTime']}',style: TextStyle(color: Colors.black87),)
+  );
+}
+Widget boosterOffDelay(BuildContext context,constantPvd,overAllPvd,site){
+  return TextButton(
+      style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all(Colors.transparent)
+      ),
+      onPressed: ()async{
+        showDialog(context: context, builder: (context){
+          return AlertDialog(
+            content: HoursMinutesSeconds(
+              initialTime: '${constantPvd.fertilizerUpdated[site]['boosterOffDelay']}',
+              onPressed: (){
+                constantPvd.fertilizerFunctionality(['fertilizer_boosterOffDelay',site,'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                Navigator.pop(context);
+              },
+            ),
+          );
+        });
+      },
+      child: Text('${constantPvd.fertilizerUpdated[site]['boosterOffDelay']}',style: TextStyle(color: Colors.black87),)
+  );
+}
+
+
 TextStyle constant_style = TextStyle(fontSize: 12,color: Colors.white);
 TextStyle constant_style1 = TextStyle(fontSize: 12,color: Colors.black);
 
@@ -118,156 +207,381 @@ class _FertilizerConstant_MState extends State<FertilizerConstant_M> {
   Widget build(BuildContext context) {
     var constantPvd = Provider.of<ConstantProvider>(context,listen: true);
     var overAllPvd = Provider.of<OverAllUse>(context,listen: true);
-    return LayoutBuilder(builder: (context,constraints){
-      return Padding(
-        padding: EdgeInsets.all(8),
+
+    return Container(
+      padding: EdgeInsets.all(10),
+      color: Color(0xfff3f3f3),
+      child: SingleChildScrollView(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             SizedBox(height: 5,),
-            ElevatedButton(
-              style: ButtonStyle(
-                  minimumSize: MaterialStateProperty.all(Size(300, 40)),
-                  backgroundColor: MaterialStateProperty.all(myTheme.primaryColor)
-              ),
-              onPressed: (){
-                showDialog(context: context, builder: (BuildContext context){
-                  return AlertDialog(
-                    backgroundColor: Colors.white,
-                    title: Text('Select site',style: TextStyle(color: Colors.black),),
-                    content: DropDownValue(),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text('Cancel',style: TextStyle(color: Colors.red,fontWeight: FontWeight.bold),),
-                      ),
-                      TextButton(
-                        onPressed: (){
-                          constantPvd.fertilizerFunctionality(['fertilizer/noFlowBehavior',overAllPvd.other - 1,constantPvd.dropDownValue!]);
-                          setState(() {
-                            selectedSite = overAllPvd.other - 1;
-                            selectedFertilizer = 0;
-                          });
-                          Navigator.pop(context);
-                        },
-                        child: Text('OK',style: TextStyle(color: myTheme.primaryColor,fontWeight: FontWeight.bold)),
-                      ),
-                    ],
-                  );
-                });
-              },
-              child: Text('Click to select site',style: TextStyle(color: Colors.yellow,fontSize: 16),),
-            ),
-            SizedBox(height: 10,),
             Container(
-              margin: EdgeInsets.only(bottom: 8),
-              height: 30,
-              color: myTheme.primaryColor,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.white
+              ),
               width: double.infinity,
+              height: 60,
               child: Center(
-                child: Text('Select fertilizer in site ${selectedSite + 1}', style: TextStyle(color: Colors.white)),
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.only(left: 10),
-              width: double.infinity,
-              height: 50,
-              child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: constantPvd.fertilizer[selectedSite][3].length,
-                  itemBuilder: (BuildContext context,int index){
-                    print(constantPvd.fertilizer[selectedSite][3].length);
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Container(
-                          width: 60,
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                width: 60,
-                                height: 40,
-                                child: GestureDetector(
-                                  onTap: (){
-                                    setState(() {
-                                      selectedFertilizer = index;
-                                    });
-                                  },
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: index == 0 ? BorderRadius.only(topLeft: Radius.circular(20)) : constantPvd.fertilizer[selectedSite][3].length -1 == index ? BorderRadius.only(topRight: Radius.circular(20)) : BorderRadius.circular(5),
-                                      color: selectedFertilizer == index ? myTheme.primaryColor : Colors.blue.shade100,
-                                    ),
-                                    child: Center(child: Text('${index + 1}',style: TextStyle(color: selectedFertilizer == index ? Colors.white : null),)),
-                                  ),
-                                ),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  SizedBox(width: 3,),
-                                  Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        color: Colors.black
-                                    ),
-                                  ),
-                                  Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        color: Colors.black
-                                    ),
-                                  ),
-                                  SizedBox(width: 3,),
-                                ],
-                              )
-                            ],
-                          ),
+                child: ListTile(
+                  title: Text('Site'),
+                  leading: SizedBox(
+                    width: 30,
+                    height: 30,
+                    child: Image.asset('assets/images/central_fertilizer_site2.png'),
+                  ),
+                  trailing:  PopupMenuButton<int>(
+                    child: Text('${selectedSite + 1}',style: TextStyle(fontSize: 20),),
+                    itemBuilder: (context) => [
+                      for(var i = 0;i < constantPvd.fertilizerUpdated.length;i++)
+                        PopupMenuItem(
+                            value: i,
+                            child: Text('${i+1}')
                         ),
-                        if(constantPvd.fertilizer[selectedSite][3].length -1 != index)
-                          Text('-')
-                      ],
-                    );
-                  }),
-            ),
-            Container(
-              margin: EdgeInsets.only(bottom: 8),
-              height: 30,
-              color: myTheme.primaryColor,
-              width: double.infinity,
-              child: Center(
-                child: Text('Fertilizer ${selectedFertilizer + 1} in site ${selectedSite + 1}', style: TextStyle(color: Colors.white)),
-              ),
-            ),
-            Expanded(
-              child: Container(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      returnMyListTile('Site name', Text('${constantPvd.fertilizer[selectedSite][0]}',style: TextStyle(fontSize: 14))),
-                      returnMyListTile('Used in lines', Text('${constantPvd.fertilizer[selectedSite][1]}',style: TextStyle(fontSize: 14))),
-                      returnMyListTile('No flow behavior', Text('${constantPvd.fertilizer[selectedSite][2]}',style: TextStyle(fontSize: 14))),
-                      returnMyListTile('Fertilizer', Text('${constantPvd.fertilizer[selectedSite][3][selectedFertilizer][0]}',style: TextStyle(fontSize: 14))),
-                      returnMyListTile('Name', Text('${constantPvd.fertilizer[selectedSite][3][selectedFertilizer][1]}',style: TextStyle(fontSize: 14))),
-                      returnMyListTile('Dosing meter', Text('${constantPvd.fertilizer[selectedSite][3][selectedFertilizer][2]}',style: TextStyle(fontSize: 14))),
-                      returnMyListTile('Ratio (l/pulse)', TextFieldForConstant(index: -1, initialValue: constantPvd.fertilizer[selectedSite][3][selectedFertilizer][3], constantPvd: constantPvd, purpose: 'fertilizer_ratio/${selectedSite}/3/${selectedFertilizer}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
-                      returnMyListTile('Shortest pulse(sec)', CustomTimePickerSiva(purpose: 'fertilizer_shortestPulse/${selectedSite}/3/${selectedFertilizer}', index: selectedSite, value: '${constantPvd.fertilizer[selectedSite][3][selectedFertilizer][4]}', displayHours: false, displayMins: false, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,additional: 'split',)),
-                      returnMyListTile('Nominal flow(l/h)', TextFieldForConstant(index: -1, initialValue: constantPvd.fertilizer[selectedSite][3][selectedFertilizer][5], constantPvd: constantPvd, purpose: 'fertilizer_nominal_flow/${selectedSite}/3/${selectedFertilizer}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
-                      returnMyListTile('Injector mode', fixedContainer(MyDropDown(initialValue: constantPvd.fertilizer[selectedSite][3][selectedFertilizer][6], itemList: ['Concentration','PH_controlled','EC_controlled','Regular'], pvdName: 'fertilizer_injector_mode/${selectedSite}/3/${selectedFertilizer}', index: selectedSite))),
                     ],
+                    offset: Offset(0, 50),
+                    color: Colors.white,
+                    elevation: 2,
+                    // on selected we show the dialog box
+                    onSelected: (value) {
+                      setState(() {
+                        selectedSite = value;
+                      });
+                    },
                   ),
                 ),
               ),
-            )
+            ),
+            SizedBox(height: 5,),
+            SizedBox(
+              height: 320,
+              child: GridView.count(
+                crossAxisCount: 2,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: MediaQuery.sizeOf(context).width/210,
+        
+                children: <Widget>[
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Icon(Icons.production_quantity_limits,color: myTheme.primaryColor,),
+                            Text('Ratio',style: TextStyle(color: myTheme.primaryColor),),
+                          ],
+                        ),
+                        DropdownButton(
+                          focusColor: Colors.transparent,
+                          // style: ioText,
+                          value: constantPvd.fertilizerUpdated[selectedSite]['noFlowBehavior'],
+                          underline: Container(),
+                          items: ['Stop Faulty Fertilizer','Stop Fertigation','Stop Irrigation','Inform Only'].map((dynamic items) {
+                            return DropdownMenuItem(
+                              value: items,
+                              child: Container(
+                                  child: Text(items,style: TextStyle(fontSize: 11,color: Colors.black),)
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            constantPvd.fertilizerFunctionality(['fertilizer/noFlowBehavior',selectedSite,value!]);
+                          },
+                          // After selecting the desired option,it will
+                          // change button value to selected value
+        
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Icon(Icons.ev_station,color: myTheme.primaryColor,),
+                            Text('minimal on time',style: TextStyle(color: myTheme.primaryColor),),
+                          ],
+                        ),
+                        minimalOnTime(context, constantPvd, overAllPvd, selectedSite)
+                      ],
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Icon(Icons.ev_station,color: myTheme.primaryColor,),
+                            Text('minimal off time',style: TextStyle(color: myTheme.primaryColor),),
+                          ],
+                        ),
+                        minimalOffTime(context, constantPvd, overAllPvd, selectedSite)
+                      ],
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Icon(Icons.ev_station,color: myTheme.primaryColor,),
+                            Text('water flow time',style: TextStyle(color: myTheme.primaryColor),),
+                          ],
+                        ),
+                        waterFlow(context, constantPvd, overAllPvd, selectedSite)
+                      ],
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Icon(Icons.ev_station,color: myTheme.primaryColor,),
+                            Text('Booster off delay',style: TextStyle(color: myTheme.primaryColor),),
+                          ],
+                        ),
+                        boosterOffDelay(context, constantPvd, overAllPvd, selectedSite)
+                      ],
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Colors.green.shade50,
+                              Colors.white,
+                            ]
+                        )
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Icon(Icons.local_activity_outlined,color: myTheme.primaryColor,),
+                            Text('Name'),
+                          ],
+                        ),
+                        Text('${constantPvd.fertilizerUpdated[selectedSite]['name']}')
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: 100,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: constantPvd.fertilizerUpdated[selectedSite]['fertilizer'].length,
+                  itemBuilder: (context,index){
+                  return InkWell(
+                    onTap: (){
+                      setState(() {
+                        selectedFertilizer = index;
+                      });
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: selectedFertilizer == index ? myTheme.primaryColor : Colors.white,
+                      ),
+                      child: Center(child: Text('${constantPvd.fertilizerUpdated[selectedSite]['fertilizer'][selectedFertilizer]['name']}',style: TextStyle(color: selectedFertilizer == index ? Colors.white : Colors.black87),)),
+                      margin: EdgeInsets.all(10),
+                      padding: EdgeInsets.all(10),
+                      width: 150,
+                      height: 50,
+                    ),
+                  );
+              }),
+            ),
+            SizedBox(
+              height: 320,
+              child: GridView.count(
+                crossAxisCount: 2,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: MediaQuery.sizeOf(context).width/210,
+        
+                children: <Widget>[
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Icon(Icons.production_quantity_limits,color: myTheme.primaryColor,),
+                            Text('Ratio',style: TextStyle(color: myTheme.primaryColor),),
+                          ],
+                        ),
+
+                        SizedBox(width:60,height:55,child: TextFieldForConstant(index: -1, initialValue: constantPvd.fertilizerUpdated[selectedSite]['fertilizer'][selectedFertilizer]['ratio'], constantPvd: constantPvd, purpose: 'fertilizer_ratio/${selectedSite}/fertilizer/${selectedFertilizer}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],))                      ],
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Icon(Icons.ev_station,color: myTheme.primaryColor,),
+                            Text('shortest pulse',style: TextStyle(color: myTheme.primaryColor),),
+                          ],
+                        ),
+                        DropdownButton(
+                          focusColor: Colors.transparent,
+                          // style: ioText,
+                          value: constantPvd.fertilizerUpdated[selectedSite]['fertilizer'][selectedFertilizer]['shortestPulse'],
+                          underline: Container(),
+                          items: ['1','2','3','4','5','6','7','8','9','10'].map((dynamic items) {
+                            return DropdownMenuItem(
+                              value: items,
+                              child: Container(
+                                  child: Text(items,style: TextStyle(fontSize: 11,color: Colors.black),)
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            constantPvd.fertilizerFunctionality(['fertilizer_shortestPulse',selectedSite,'fertilizer',selectedFertilizer,value!]);
+                          },
+                        ),
+                      ]
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Icon(Icons.ev_station,color: myTheme.primaryColor,),
+                            Text('nominal flow',style: TextStyle(color: myTheme.primaryColor),),
+                          ],
+                        ),
+                        SizedBox(width:60,height:55,child: TextFieldForConstant(index: -1, initialValue: constantPvd.fertilizerUpdated[selectedSite]['fertilizer'][selectedFertilizer]['nominalFlow'], constantPvd: constantPvd, purpose: 'fertilizer_nominalFlow/${selectedSite}/fertilizer/${selectedFertilizer}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],))                      ],
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Icon(Icons.ev_station,color: myTheme.primaryColor,),
+                            Text('Injector mode',style: TextStyle(color: myTheme.primaryColor),),
+                          ],
+                        ),
+                        DropdownButton(
+                          focusColor: Colors.transparent,
+                          // style: ioText,
+                          value: constantPvd.fertilizerUpdated[selectedSite]['fertilizer'][selectedFertilizer]['injectorMode'],
+                          underline: Container(),
+                          items: ['Concentration','Ec controlled','Ph controlled','Regular'].map((dynamic items) {
+                            return DropdownMenuItem(
+                              value: items,
+                              child: Container(
+                                  child: Text(items,style: TextStyle(fontSize: 11,color: Colors.black),)
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            constantPvd.fertilizerFunctionality(['fertilizer_injectorMode',selectedSite,'fertilizer',selectedFertilizer,value!]);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Colors.green.shade50,
+                              Colors.white,
+                            ]
+                        )
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Icon(Icons.local_activity_outlined,color: myTheme.primaryColor,),
+                            Text('Fertilizer name'),
+                          ],
+                        ),
+                        Text('${constantPvd.fertilizerUpdated[selectedSite]['name']}')
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
-      );
-    });
+      ),
+    );
   }
 }
 class DropDownValue extends StatefulWidget {

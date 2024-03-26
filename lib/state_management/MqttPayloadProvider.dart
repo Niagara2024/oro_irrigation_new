@@ -1,42 +1,82 @@
-
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
+import 'package:oro_irrigation_new/state_management/scheule_view_provider.dart';
+
 
 enum MQTTConnectionState { connected, disconnected, connecting }
-class MqttPayloadProvider with ChangeNotifier{
+
+class MqttPayloadProvider with ChangeNotifier {
   MQTTConnectionState _appConnectionState = MQTTConnectionState.disconnected;
-  String _receivedText = '';
-  int _wifiStrength = 0;
-  List<dynamic> _list2401 = [];
+  String dashBoardPayload = '', schedulePayload = '';
+  late ScheduleViewProvider mySchedule;
 
-  void setReceivedText(String payload) {
-    _receivedText = payload;
+  int wifiStrength = 0;
+  List<dynamic> mainLine = [];
+  List<dynamic> currentSchedule = [];
+  List<dynamic> PrsIn = [];
+  List<dynamic> PrsOut = [];
+  List<dynamic> nextSchedule = [];
+  List<dynamic> upcomingProgram = [];
+  List<dynamic> filtersCentral = [];
+  List<dynamic> filtersLocal = [];
+  List<dynamic> irrigationPump = [];
 
+  void editMySchedule(ScheduleViewProvider instance){
+    mySchedule = instance;
+    notifyListeners();
+  }
+
+  void updateReceivedPayload(String payload) {
     try {
-
-      // Parse JSON
       Map<String, dynamic> data = jsonDecode(payload);
-      // Access values
-      _wifiStrength = data['2400'][0]['WifiStregth'];
-      _list2401 = data['2400'][0]['2401'];
+      if (data.containsKey('2400') && data['2400'] != null && data['2400'].isNotEmpty) {
+        dashBoardPayload = payload;
 
-      for (var item in _list2401) {
-        Map<String, dynamic> entry = item as Map<String, dynamic>;
+        if (data['2400'][0].containsKey('2405')) {
+          mainLine = data['2400'][0]['2405'];
+        }
+        if (data['2400'][0].containsKey('2402')) {
+          currentSchedule = data['2400'][0]['2402'];
+          if(currentSchedule.isNotEmpty && currentSchedule[0].containsKey('PrsIn')){
+            //print(currentSchedule[0]['PrsIn'].runtimeType);
+            //print(currentSchedule[0]['PrsOut'].runtimeType);
+            PrsIn = currentSchedule[0]['PrsIn'];
+            PrsOut = currentSchedule[0]['PrsOut'];
+          }
+        }
+        if (data['2400'][0].containsKey('2403')) {
+          nextSchedule = data['2400'][0]['2403'];
+        }
+        if (data['2400'][0].containsKey('2404')) {
+          upcomingProgram = data['2400'][0]['2404'];
+        }
+        if (data['2400'][0].containsKey('2405')) {
+          List<dynamic> filtersJson = data['2400'][0]['2405'];
+          filtersCentral = [];
+          filtersLocal = [];
 
-        // print('SNo: ${entry['SNo']}');
-        // print('SVolt: ${entry['SVolt']}');
-        // print('BatVolt: ${entry['BatVolt']}');
-        // print('RlyStatus: ${entry['RlyStatus']}');
-        // print('Sensor: ${entry['Sensor']}');
-        // print('Status: ${entry['Status']}');
-        // print('---');
+          for (var filter in filtersJson) {
+            if (filter['Type'] == 1) {
+              filtersCentral.add(filter);
+            } else if (filter['Type'] == 2) {
+              filtersLocal.add(filter);
+            }
+          }
+
+          //filters = data['2400'][0]['2405'];
+        }
+        if (data['2400'][0].containsKey('2407')) {
+          List<dynamic> items = data['2400'][0]['2407'];
+          irrigationPump = items.where((item) => item['Type'] == 2).toList();
+        }
+
       }
-
+      else if(data.containsKey('2900') && data['2900'] != null && data['2900'].isNotEmpty){
+        schedulePayload = payload;
+      }
     } catch (e) {
       print('Error parsing JSON: $e');
     }
-
     notifyListeners();
   }
 
@@ -45,9 +85,24 @@ class MqttPayloadProvider with ChangeNotifier{
     notifyListeners();
   }
 
-  String get getReceivedText => _receivedText;
-  int get receivedWifiStrength => _wifiStrength;
-  List<dynamic> get receivedNodeStatus => _list2401;
+  String get receivedDashboardPayload => dashBoardPayload;
+  String get receivedSchedulePayload => schedulePayload;
   MQTTConnectionState get getAppConnectionState => _appConnectionState;
+
+  void clearData() {
+    wifiStrength = 0;
+    dashBoardPayload = '';
+    mainLine = [];
+    currentSchedule = [];
+    PrsIn = [];
+    PrsOut = [];
+    upcomingProgram = [];
+    nextSchedule = [];
+    filtersCentral = [];
+    filtersLocal = [];
+    irrigationPump = [];
+    notifyListeners();
+
+  }
 
 }

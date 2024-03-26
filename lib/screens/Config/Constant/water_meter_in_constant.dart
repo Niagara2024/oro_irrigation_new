@@ -1,3 +1,4 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
@@ -27,159 +28,260 @@ class _WaterMeterConstantState extends State<WaterMeterConstant> {
     var overAllPvd = Provider.of<OverAllUse>(context,listen: true);
     return LayoutBuilder(builder: (context,constraints){
       if(constraints.maxWidth < 800){
-        return WaterMeterConstant_M();
+        return WaterMeterConstantForMobile();
       }
-      return myTable(
-          [expandedTableCell_Text('ID',''),
-            expandedTableCell_Text('Location',''),
-            expandedTableCell_Text('Name',''),
-            expandedTableCell_Text('Ratio','l/pulse'),
-            expandedTableCell_Text('Maximum','flow l/hr'),
+      return  Padding(
+        padding: const EdgeInsets.all(16),
+        child: DataTable2(
+          columnSpacing: 12,
+          horizontalMargin: 12,
+          minWidth: 600,
+          dataRowHeight: 40.0,
+          headingRowHeight: 40,
+          headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
+          border: TableBorder.all(color: Colors.grey),
+          columns: [
+            DataColumn2(
+              label: Text('Name'),
+              size: ColumnSize.L,
+            ),
+            DataColumn(
+              label: Text('Id'),
+            ),
+            DataColumn(
+              label: Text('Location'),
+            ),
+            DataColumn(
+              label: Text('Ratio'),
+            ),
+            DataColumn(
+              label: Text('Maximum flow'),
+            ),
           ],
-          Expanded(
-            child: ListView.builder(
-                itemCount: constantPvd.waterMeterUpdated.length,
-                itemBuilder: (BuildContext context,int index){
-                  return Container(
-                    margin: index == constantPvd.waterMeterUpdated.length - 1 ? EdgeInsets.only(bottom: 60) : null,
-                    decoration: BoxDecoration(
-                      border: Border(bottom: BorderSide(width: 1)),
-                      color: Colors.white70,
-                    ),
-                    child: Row(
-                      children: [
-                        expandedCustomCell(Text('${constantPvd.waterMeterUpdated[index]['id']}'),),
-                        expandedCustomCell(Text('${constantPvd.waterMeterUpdated[index]['location']}'),),
-                        expandedCustomCell(Text('${constantPvd.waterMeterUpdated[index]['name']}'),),
-                        expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.waterMeterUpdated[index]['ratio'], constantPvd: constantPvd, purpose: 'wm_ratio/${index}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
-                        expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.waterMeterUpdated[index]['maximumFlow'], constantPvd: constantPvd, purpose: 'maximum_flow/${index}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
-                      ],
-                    ),
-                  );
-                }),
-          )
+          rows: [
+            for(var i = 0;i < constantPvd.waterMeterUpdated.length;i++)
+              DataRow(cells: [
+                DataCell(Text('${constantPvd.waterMeterUpdated[i]['name']}')),
+                DataCell(Text('${constantPvd.waterMeterUpdated[i]['id']}')),
+                DataCell(Text('${constantPvd.waterMeterUpdated[i]['location']}')),
+                DataCell(
+                    TextFieldForConstant(index: -1, initialValue: constantPvd.waterMeterUpdated[i]['ratio'], constantPvd: constantPvd, purpose: 'wm_ratio/$i', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)
+                ),
+                DataCell(TextFieldForConstant(index: -1, initialValue: constantPvd.waterMeterUpdated[i]['maximumFlow'], constantPvd: constantPvd, purpose: 'maximum_flow/${i}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
+
+              ])
+          ],
+        ),
       );
     });
 
   }
 }
 
-class WaterMeterConstant_M extends StatefulWidget {
-  const WaterMeterConstant_M({super.key});
+class WaterMeterConstantForMobile extends StatefulWidget {
+  const WaterMeterConstantForMobile({super.key});
 
   @override
-  State<WaterMeterConstant_M> createState() => _WaterMeterConstant_MState();
+  State<WaterMeterConstantForMobile> createState() => _WaterMeterConstantForMobileState();
 }
 
-class _WaterMeterConstant_MState extends State<WaterMeterConstant_M> {
+class _WaterMeterConstantForMobileState extends State<WaterMeterConstantForMobile> {
   int selectedWaterMeter = 0;
   @override
   Widget build(BuildContext context) {
     var constantPvd = Provider.of<ConstantProvider>(context,listen: true);
-    var overAllPvd = Provider.of<OverAllUse>(context,listen: true);
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
+    return Container(
+      padding: EdgeInsets.all(10),
+      color: Color(0xfff3f3f3),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
+          SizedBox(height: 5,),
           Container(
-              margin: EdgeInsets.only(bottom: 8),
-              height: 30,
-              color: myTheme.primaryColor,
-              width : double.infinity,
-              child: Center(child: Text('Select water meter',style: TextStyle(color: Colors.white),))
-          ),
-          Container(
-            padding: EdgeInsets.only(left: 10),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.white
+            ),
             width: double.infinity,
-            height: 50,
-            child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: constantPvd.waterMeter.length,
-                itemBuilder: (BuildContext context,int index){
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Container(
-                        width: 60,
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              width: 60,
-                              height: 40,
-                              child: GestureDetector(
-                                onTap: (){
-                                  setState(() {
-                                    selectedWaterMeter = index;
-                                  });
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: index == 0 ? BorderRadius.only(topLeft: Radius.circular(20)) : constantPvd.waterMeter.length -1 == index ? BorderRadius.only(topRight: Radius.circular(20)) : BorderRadius.circular(5),
-                                    color: selectedWaterMeter == index ? myTheme.primaryColor : Colors.blue.shade100,
-                                  ),
-                                  child: Center(child: Text('${index + 1}',style: TextStyle(color: selectedWaterMeter == index ? Colors.white : null),)),
-                                ),
-                              ),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(width: 3,),
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      color: Colors.black
-                                  ),
-                                ),
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      color: Colors.black
-                                  ),
-                                ),
-                                SizedBox(width: 3,),
-                              ],
-                            )
-                          ],
-                        ),
+            height: 60,
+            child: Center(
+              child: ListTile(
+                title: Text('Pump'),
+                leading: SizedBox(
+                  width: 30,
+                  height: 30,
+                  child: Image.asset('assets/images/water_meter.png'),
+                ),
+                trailing:  PopupMenuButton<int>(
+                  child: Text('${selectedWaterMeter + 1}',style: TextStyle(fontSize: 20),),
+                  itemBuilder: (context) => [
+                    for(var i = 0;i < constantPvd.waterMeterUpdated.length;i++)
+                      PopupMenuItem(
+                          value: i,
+                          child: Text('${i+1}')
                       ),
-                      if(constantPvd.waterMeter.length - 1 != index)
-                        Text('-')
-                    ],
-                  );
-                }),
-          ),
-          Container(
-              margin: EdgeInsets.only(bottom: 8),
-              height: 30,
-              color: myTheme.primaryColor,
-              width : double.infinity,
-              child: Center(child: Text('Water meter ${selectedWaterMeter + 1}',style: TextStyle(color: Colors.white),))
-          ),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                // color: Color(0XFFF3F3F3)
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  // mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    returnMyListTile('ID', Text('${selectedWaterMeter + 1}',style: TextStyle(fontSize: 14))),
-                    returnMyListTile('Location', Text('${constantPvd.waterMeter[selectedWaterMeter][1]}',style: TextStyle(fontSize: 14))),
-                    returnMyListTile('Name', Text('${constantPvd.waterMeter[selectedWaterMeter][2]}',style: TextStyle(fontSize: 14))),
-                    returnMyListTile('Ratio l/pulse', TextFieldForConstant(index: -1, initialValue: constantPvd.waterMeter[selectedWaterMeter][3], constantPvd: constantPvd, purpose: 'wm_ratio/${selectedWaterMeter}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
-                    returnMyListTile('Maximum flow l/hr', TextFieldForConstant(index: -1, initialValue: constantPvd.waterMeter[selectedWaterMeter][4], constantPvd: constantPvd, purpose: 'maximum_flow/${selectedWaterMeter}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
                   ],
+                  offset: Offset(0, 50),
+                  color: Colors.white,
+                  elevation: 2,
+                  // on selected we show the dialog box
+                  onSelected: (value) {
+                    setState(() {
+                      selectedWaterMeter = value;
+                    });
+                  },
                 ),
               ),
             ),
-          )
+          ),
+          SizedBox(height: 5,),
+          Expanded(
+            child: GridView.count(
+              crossAxisCount: 2,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              childAspectRatio: MediaQuery.sizeOf(context).width/210,
+
+              children: <Widget>[
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.production_quantity_limits,color: myTheme.primaryColor,),
+                          Text('Ratio',style: TextStyle(color: myTheme.primaryColor),),
+                        ],
+                      ),
+                      SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: TextFieldForConstant(index: -1, initialValue: constantPvd.waterMeterUpdated[selectedWaterMeter]['ratio'], constantPvd: constantPvd, purpose: 'wm_ratio/$selectedWaterMeter', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)
+                      )
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.ev_station,color: myTheme.primaryColor,),
+                          Text('Maximum flow',style: TextStyle(color: myTheme.primaryColor),),
+                        ],
+                      ),
+                      SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: TextFieldForConstant(index: -1, initialValue: constantPvd.waterMeterUpdated[selectedWaterMeter]['maximumFlow'], constantPvd: constantPvd, purpose: 'maximum_flow/${selectedWaterMeter}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)
+                      )
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.green.shade50,
+                            Colors.white,
+                          ]
+                      )
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.perm_identity,color: myTheme.primaryColor,),
+                          Text('Name',style: TextStyle(color: myTheme.primaryColor),),
+                        ],
+                      ),
+                      SizedBox(
+                          width: double.infinity,
+                          height: 60,
+                          child: Center(child: Text('${constantPvd.waterMeterUpdated[selectedWaterMeter]['name']}'))
+                      )
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.green.shade50,
+                            Colors.white,
+                          ]
+                      )
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.local_activity_outlined,color: myTheme.primaryColor,),
+                          Text('Id',style: TextStyle(color: myTheme.primaryColor),),
+                        ],
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 60,
+                        child: Center(child: Text('${constantPvd.waterMeterUpdated[selectedWaterMeter]['name']}')),
+                      )
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.green.shade50,
+                            Colors.white,
+                          ]
+                      )
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.location_pin,color: myTheme.primaryColor,),
+                          Text('Location',style: TextStyle(color: myTheme.primaryColor),),
+                        ],
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 60,
+                        child: Center(child: Text('${constantPvd.waterMeterUpdated[selectedWaterMeter]['location']}')),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

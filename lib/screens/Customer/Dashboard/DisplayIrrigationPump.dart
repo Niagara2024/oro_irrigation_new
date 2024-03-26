@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../../../Models/Customer/Dashboard/IrrigationPump.dart';
+
+import '../../../Models/Customer/Dashboard/DashboardDataProvider.dart';
 
 class DisplayIrrigationPump extends StatelessWidget
 {

@@ -1,17 +1,28 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:mqtt_client/mqtt_client.dart';
+import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/screens/Forms/create_account.dart';
+import 'package:oro_irrigation_new/screens/NarrowLayout/Customer/HomeScreenN.dart';
 import 'package:oro_irrigation_new/screens/product_inventory.dart';
 import 'package:oro_irrigation_new/screens/web_view.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Models/Customer/Dashboard/DashboardNode.dart';
+import '../Models/language.dart';
 import '../constants/MQTTManager.dart';
+import '../constants/MqttServer.dart';
+import '../constants/UserData.dart';
 import '../constants/http_service.dart';
+import '../main.dart';
 import '../state_management/MqttPayloadProvider.dart';
+import 'Customer/AccountManagement.dart';
 import 'Customer/Dashboard/SentAndReceived.dart';
 import 'Customer/Dashboard/FarmSettings.dart';
 import 'Customer/customer_home.dart';
@@ -21,112 +32,101 @@ import 'AdminDealerHomePage.dart';
 import 'login_form.dart';
 
 
-String appBarTitle = 'Home';
-get formKey => null;
-TextEditingController dateCtl = TextEditingController();
-String selectedCategory = '';
-
 enum Calendar { day, week, month, year }
 
-class MainDashBoard extends StatelessWidget
+class MainDashBoard extends StatefulWidget
 {
   const MainDashBoard({super.key});
 
   @override
-  Widget build(BuildContext context)
-  {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: myTheme,
-      routes: {
-        '/': (context) => const DashBoardMain(),
-        '/login': (context) => const LoginForm(),
-      },
-    );
-  }
+  State<MainDashBoard> createState() => _MainDashBoardState();
 }
 
+class _MainDashBoardState extends State<MainDashBoard> {
 
-class DashBoardMain extends StatefulWidget
-{
-  const DashBoardMain({super.key});
+  late MQTTManager manager = MQTTManager();
+  late MqttServer mqttServer = MqttServer();
 
-  @override
-  DashBoardMainState createState() => DashBoardMainState();
-}
-
-class DashBoardMainState extends State<DashBoardMain> with TickerProviderStateMixin
-{
-  NavigationRailLabelType labelType = NavigationRailLabelType.all;
-  bool showLeading = false;
-  bool showTrailing = false;
-  double groupAlignment = -1.0;
-
-  get formKey => null;
-  String selectedCategory = '';
-  String appBarTitle = 'Home';
-  int userID = 0;
-  String userName = '', userType = '', userCountryCode = '', userMobileNo = '';
-  final List<Map> myProducts =  List.generate(5, (index) => {"id": index, "name": "Product $index"}).toList();
-
-  late MqttPayloadProvider payloadProvider;
-  late MQTTManager manager;
 
   @override
   void initState() {
     super.initState();
-    manager = MQTTManager();
-    _executeSharedPreferences();
-    Future.delayed(const Duration(milliseconds: 1500), () async {
-      mqttConfigureAndConnect();
-    });
-  }
-
-
-  Future _executeSharedPreferences() async
-  {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userName = (prefs.getString('userName') ?? "");
-      userType = (prefs.getString('userType') ?? "");
-      userCountryCode = (prefs.getString('countryCode') ?? "");
-      userMobileNo = (prefs.getString('mobileNumber') ?? "");
-      userID = int.parse(prefs.getString('userId') ?? "");
+    Future.delayed(const Duration(milliseconds: 500), () async {
+      if (kIsWeb) {
+        print('Running on the web platform');
+        mqttConfigureAndConnect();
+      } else {
+        print('other platform');
+        mqttSeverConfigureAndConnect();
+      }
     });
   }
 
   void mqttConfigureAndConnect() {
+    MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context,listen: false);
     manager.initializeMQTTClient(state: payloadProvider);
     manager.connect();
   }
 
+  void mqttSeverConfigureAndConnect() {
+    MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context,listen: false);
+    mqttServer.initializeMQTTServer(state: payloadProvider);
+  }
+
+
   @override
   Widget build(BuildContext context)
   {
-    payloadProvider = Provider.of<MqttPayloadProvider>(context,listen: false);
-    return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints)
-        {
-          if (constraints.maxWidth < 600) {
-            return const DashboardNarrow();//mobile
-          } else if (constraints.maxWidth > 600 && constraints.maxWidth < 900) {
-            return const DashboardMiddle();//pad or tap
-          } else {
-            return DashboardWide(userName: userName, userType: userType, countryCode: userCountryCode, mobileNo: userMobileNo, userID: userID, screenWidth: MediaQuery.sizeOf(context).width,);//desktop or web
-          }
-        },
-      ),
+    return FutureBuilder<SharedPreferences>(
+      future: SharedPreferences.getInstance(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return Container();
+        }
+        final sharedPreferences = snapshot.data!;
+        final userId = sharedPreferences.getString('userId') ?? '';
+        final userName = sharedPreferences.getString('userName') ?? '';
+        final userType = sharedPreferences.getString('userType') ?? '';
+        final countryCode = sharedPreferences.getString('countryCode') ?? '';
+        final mobileNo = sharedPreferences.getString('mobileNumber') ?? '';
+        final userEmailId = sharedPreferences.getString('email') ?? '';
+        final password = sharedPreferences.getString('password') ?? '';
+
+        MqttPayloadProvider provider = MqttPayloadProvider();
+        provider.clearData();
+
+        if (userId.isNotEmpty) {
+          return UserData(
+            userId: int.parse(userId),
+            userName: userName,
+            userType: userType,
+            countryCode: countryCode,
+            mobileNo: mobileNo,
+            userEmailId: userEmailId,
+            password: password,
+            child: Scaffold(
+              body: LayoutBuilder(
+                builder: (context, constraints)
+                {
+                  if (constraints.maxWidth < 600) {
+                    return const DashboardNarrow();//mobile
+                  } else if (constraints.maxWidth > 600 && constraints.maxWidth < 900) {
+                    return const DashboardMiddle();//pad or tap
+                  } else {
+                    return const DashboardWide();
+                  }
+                },
+              ),
+            ),
+          );
+        } else {
+          return const LoginForm();
+        }
+      },
     );
-  }
 
-  @override
-  void dispose() {
-    super.dispose();
   }
-
 }
-
 
 
 //Narrow-------------------------------------------------------------------------------------------------
@@ -141,7 +141,8 @@ class DashboardNarrow extends StatefulWidget {
 class _DashboardNarrowState extends State<DashboardNarrow> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    final userData = UserData.of(context)!;
+    return HomeScreenN(userId: userData.userId);
   }
 }
 
@@ -166,10 +167,7 @@ class _DashboardMiddleState extends State<DashboardMiddle> {
 
 class DashboardWide extends StatefulWidget
 {
-  const DashboardWide({Key? key, required this.userName, required this.userType, required this.countryCode,  required this.mobileNo, required this.userID, required this.screenWidth}) : super(key: key);
-  final String userType, userName, countryCode, mobileNo;
-  final int userID;
-  final double screenWidth;
+  const DashboardWide({Key? key}) : super(key: key);
 
   @override
   State<DashboardWide> createState() => _DashboardWideState();
@@ -177,117 +175,289 @@ class DashboardWide extends StatefulWidget
 
 class _DashboardWideState extends State<DashboardWide> {
 
-  int _selectedIndex = 0;
+  String appBarTitle = 'Home';
   NavigationRailLabelType labelType = NavigationRailLabelType.all;
-  double groupAlignment = -1.0;
-  Calendar calendarView = Calendar.day;
-  late Widget _centerWidget;
-  String currentTap = 'Dashboard';
-  List<DashboardModel> siteList = [];
+  int _selectedIndex = 0;
+  bool visibleLoading = false;
+
+  final List<LanguageList> languageList = <LanguageList>[];
+  String _mySelection = 'English';
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
-    getCustomerSite();
+    indicatorViewShow();
+    getLanguage();
   }
 
-  Future<void> getCustomerSite() async
+  void callbackFunction(message)
   {
-    _centerWidget = Center(child: Container(
-      color: Colors.white,
-      padding: EdgeInsets.symmetric(horizontal: widget.screenWidth/2 - 160),
-      child: const LoadingIndicator(
-        indicatorType: Indicator.ballPulse,
-      ),
-    ));
+    Navigator.pop(context);
+    _showSnackBar(message);
+  }
 
-    final prefs = await SharedPreferences.getInstance();
-    Map<String, Object> body = {"userId" : int.parse(prefs.getString('userId') ?? "")};
-    final response = await HttpService().postRequest("getUserDeviceListForCustomer", body);
+  Future<void> getLanguage() async
+  {
+    final response = await HttpService().postRequest("getLanguageByActive", {"active": '1'});
     if (response.statusCode == 200)
     {
-      siteList.clear();
+      languageList.clear();
       var data = jsonDecode(response.body);
       if(data["code"]==200)
       {
         final cntList = data["data"] as List;
-        try {
-          siteList = cntList.map((json) => DashboardModel.fromJson(json)).toList();
-        } catch (e) {
-          print('Error: $e');
+        for (int i=0; i < cntList.length; i++) {
+          languageList.add(LanguageList.fromJson(cntList[i]));
         }
       }
-      callCustomerDashboard();
+      indicatorViewHide();
     }
     else{
-      //_showSnackBar(response.body);
+      indicatorViewHide();
     }
-  }
-
-  Future<void> callCustomerDashboard()  async {
-    await Future.delayed(const Duration(seconds: 2));
-    if(widget.userType =='3'){
-      onOptionSelected('Dashboard');
-    }
-  }
-
-  void onOptionSelected(String option) {
-    currentTap = option;
-    setState(() {
-      if (option == 'Dashboard') {
-        _centerWidget = CustomerHome(customerID: widget.userID, type: 0, customerName: '', userID: widget.userID, siteList: siteList,);
-      } else if (option == 'My Product') {
-        _centerWidget = ProductInventory(userName: widget.userName);
-      } else if (option == 'Device Settings') {
-        _centerWidget = FarmSettings(customerID: widget.userID, siteList: siteList,);
-      }
-      else if (option == 'Sent And Received') {
-        _centerWidget = SentAndReceived(customerID: widget.userID, siteList: siteList,);
-      }
-      // Add more conditions for additional options
-    });
   }
 
   @override
   Widget build(BuildContext context)  {
-    //var appState = Provider.of<MqttPayloadProvider>(context,listen: true);
-    return Scaffold(
-      backgroundColor: myTheme.primaryColor.withOpacity(0.1),
-      body: widget.userType =='3'? Stack(
-        children: [
-          MyDrawer(
-            userName: widget.userName, countryCode: widget.countryCode, phoneNo: widget.mobileNo, onOptionSelected: onOptionSelected, currentTap: currentTap,
+    final mediaQuery = MediaQuery.of(context);
+    final userData = UserData.of(context)!;
+    return visibleLoading? Center(
+      child: Visibility(
+        visible: visibleLoading,
+        child: Container(
+          padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 25, 0, mediaQuery.size.width/2 - 25, 0),
+          child: const LoadingIndicator(
+            indicatorType: Indicator.ballPulse,
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 250),
-            child: Container(
-                color:Colors.white,
-                child: _centerWidget
+        ),
+      ),
+    ) : Scaffold(
+      appBar: userData.userType =='3'? AppBar(
+        leading: const Padding(
+          padding: EdgeInsets.only(left: 10, top: 8, bottom: 8),
+          child: Image(image: AssetImage("assets/images/oro_logo_white.png")),
+        ),
+        leadingWidth: 75,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              tileMode: TileMode.clamp,
+              colors: [myTheme.primaryColorDark, myTheme.primaryColor], // Define your gradient colors
             ),
           ),
+        ),
+        actions: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(tooltip : 'Help & Support', onPressed: (){
+                showMenu(
+                  context: context,
+                  color: Colors.white,
+                  position: const RelativeRect.fromLTRB(100, 0, 95, 0),
+                  items: <PopupMenuEntry>[
+                    PopupMenuItem(
+                      child: Column(
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.help_outline),
+                            title: const Text('Help'),
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.model_training),
+                            title: const Text('Training'),
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.update),
+                            title: const Text('Updates'),
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          const Divider(height: 0),
+                          ListTile(
+                            leading: const Icon(Icons.feedback_outlined),
+                            title: const Text('Send feedback'),
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              }, icon: const CircleAvatar(
+                radius: 17,
+                backgroundColor: Colors.white,
+                child: Icon(Icons.live_help_outlined),
+              )),
+              IconButton(tooltip : 'App Settings', onPressed: (){
+                showMenu(
+                  context: context,
+                  position: const RelativeRect.fromLTRB(100, 0, 70, 0),
+                  items: <PopupMenuEntry>[
+                    PopupMenuItem(
+                      child: Column(
+                        children: [
+                          ListTile(
+                            title: const Text('Language'),
+                            leading: Icon(Icons.language, color: myTheme.primaryColor,),
+                            trailing: DropdownButton(
+                              items: languageList.map((item) {
+                                return DropdownMenuItem(
+                                  value: item.languageName,
+                                  child: Text(item.languageName),
+                                );
+                              }).toList(),
+                              onChanged: (newVal) {
+                                setState(() {
+                                  _mySelection = newVal!;
+                                });
+                              },
+                              value: _mySelection,
+                            ),
+                          ),
+                          ListTile(
+                            title: const Text('Theme(Light/Dark)'),
+                            leading: Icon(Icons.color_lens_outlined,  color: myTheme.primaryColor,),
+                            onTap: (){
+                              Navigator.pop(context);
+                              ThemeData initialTheme = Theme.of(context);
+                              showDialog(
+                                context: context,
+                                builder: (context) => ThemeChangeDialog(initialTheme: initialTheme),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              }, icon: const CircleAvatar(
+                radius: 17,
+                backgroundColor: Colors.white,
+                child: Icon(Icons.settings_outlined),
+              )),
+              IconButton(tooltip : 'Niagara Account\n${userData.userName}\n+${userData.countryCode} ${userData.mobileNo}', onPressed: (){
+                showMenu(
+                  context: context,
+                  position: const RelativeRect.fromLTRB(100, 0, 10, 0),
+                  surfaceTintColor: myTheme.primaryColor,
+                  items: <PopupMenuEntry>[
+                    PopupMenuItem(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Stack(
+                            children: [
+                              Center(
+                                child: CircleAvatar(radius: 35, backgroundColor: myTheme.primaryColor.withOpacity(0.1), child: Text(userData.userName.substring(0, 1).toUpperCase(), style: const TextStyle(fontSize: 25)),),
+                              ),
+                              Positioned(
+                                bottom: 0.0,
+                                right: 70.0,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle, // Optional: Makes the container circular
+                                    color: myTheme.primaryColor, // Set the background color here
+                                  ),
+                                  child: IconButton(
+                                    tooltip:'Edit',
+                                    icon: const Icon(Icons.edit_outlined, color: Colors.white),
+                                    onPressed: () {},
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text('Hi, ${userData.userName}!',style: const TextStyle(fontSize: 20)),
+                          Text(userData.userEmailId, style: const TextStyle(fontSize: 13)),
+                          Text('+${userData.countryCode} ${userData.mobileNo}', style: const TextStyle(fontSize: 13)),
+                          const SizedBox(height: 15),
+                          MaterialButton(
+                            color: myTheme.primaryColor,
+                            textColor: Colors.white,
+                            child: const Text('Manage Your Niagara Account'),
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AccountManagement(userID: userData.userId, callback: callbackFunction);
+                                },
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(
+                                tooltip:'Logout',
+                                icon: const Icon(Icons.exit_to_app, color: Colors.red),
+                                onPressed: () async {
+                                  final prefs = await SharedPreferences.getInstance();
+                                  await prefs.remove('userId');
+                                  await prefs.remove('userName');
+                                  await prefs.remove('userType');
+                                  await prefs.remove('countryCode');
+                                  await prefs.remove('mobileNumber');
+                                  await prefs.remove('subscribeTopic');
+                                  if (context.mounted){
+                                    MqttPayloadProvider provider = MqttPayloadProvider();
+                                    provider.clearData();
+                                    Navigator.pushReplacementNamed(context, '/login');
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Add more menu items as needed
+                  ],
+                );
+              }, icon: CircleAvatar(
+                radius: 17,
+                backgroundColor: Colors.white,
+                child: Text(userData.userName.substring(0, 1).toUpperCase()),
+              )),
+            ],),
+          const SizedBox(width: 10),
         ],
-      ):
-      Row(
+      ) : null,
+      body: userData.userType =='3'? Container(
+        color: Colors.white,
+        width: double.infinity,
+        height: double.infinity,
+        child: CustomerHome(customerID: userData.userId, customerName: userData.userName, mobileNo: '+${userData.countryCode}-${userData.mobileNo}', comingFrom: 'Customer',),
+      ): Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           NavigationRail(
             selectedIndex: _selectedIndex,
-            backgroundColor: Colors.white,
+            backgroundColor: myTheme.primaryColorDark,
             labelType: NavigationRailLabelType.all,
-            indicatorColor: Colors.black,
-            indicatorShape: const CircleBorder(side: BorderSide(color: Colors.black12)),
-            //unselectedIconTheme: const IconThemeData(color: Colors.grey),
+            indicatorColor: myTheme.primaryColorLight,
             elevation: 5,
-            leading: Column(
+            leading: const Column(
               children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage("assets/images/company_logo.png"),
-                  backgroundColor: Colors.white,
-                ),
-                Divider()
+                Image(image: AssetImage("assets/images/oro_logo_white.png"), height: 40, width: 60,),
+                SizedBox(height: 20),
               ],
             ),
             trailing: Expanded(
@@ -300,11 +470,12 @@ class _DashboardWideState extends State<DashboardWide> {
                       final prefs = await SharedPreferences.getInstance();
                       await prefs.remove('userId');
                       await prefs.remove('userName');
+                      await prefs.remove('userType');
                       await prefs.remove('countryCode');
                       await prefs.remove('mobileNumber');
                       await prefs.remove('subscribeTopic');
                       if (mounted){
-                        Navigator.pushNamedAndRemoveUntil(context, '/login', ModalRoute.withName('/login'));
+                        Navigator.pushReplacementNamed(context, '/login');
                       }
                     },
                   ),
@@ -323,36 +494,36 @@ class _DashboardWideState extends State<DashboardWide> {
                 }
               });
             },
-            destinations: widget.userType == '1'? <NavigationRailDestination>[
+            destinations: userData.userType == '1'? <NavigationRailDestination>[
               const NavigationRailDestination(
                 padding: EdgeInsets.only(top: 5),
                 icon: Icon(Icons.dashboard_outlined),
-                selectedIcon: Icon(Icons.dashboard_outlined, color: Color(0xFF0D5D9A),),
+                selectedIcon: Icon(Icons.dashboard_outlined, color: Colors.white,),
                 label: Text(''),
               ),
               const NavigationRailDestination(
-                icon: Icon(Icons.add_chart),
-                selectedIcon: Icon(Icons.add_chart, color: Color(0xFF0D5D9A),),
+                icon: Icon(Icons.list),
+                selectedIcon: Icon(Icons.list, color: Colors.white,),
                 label: Text(''),
               ),
               const NavigationRailDestination(
                 icon: Icon(Icons.topic_outlined),
-                selectedIcon: Icon(Icons.topic_outlined, color: Color(0xFF0D5D9A),),
+                selectedIcon: Icon(Icons.topic_outlined, color: Colors.white,),
                 label: Text(''),
               ),
               const NavigationRailDestination(
                 icon: Icon(Icons.settings_outlined),
-                selectedIcon: Icon(Icons.settings_outlined, color: Color(0xFF0D5D9A),),
+                selectedIcon: Icon(Icons.settings_outlined, color: Colors.white,),
                 label: Text(''),
               ),
               const NavigationRailDestination(
                 icon: Icon(Icons.info_outline),
-                selectedIcon: Icon(Icons.info_outline, color: Color(0xFF0D5D9A),),
+                selectedIcon: Icon(Icons.info_outline, color: Colors.white,),
                 label: Text(''),
               ),
               const NavigationRailDestination(
                 icon: Icon(Icons.help_outline),
-                selectedIcon: Icon(Icons.help_outline, color: Color(0xFF0D5D9A),),
+                selectedIcon: Icon(Icons.help_outline, color: Colors.white,),
                 label: Text(''),
               ),
             ]:
@@ -360,347 +531,209 @@ class _DashboardWideState extends State<DashboardWide> {
               const NavigationRailDestination(
                 padding: EdgeInsets.only(top: 5),
                 icon: Icon(Icons.dashboard_outlined),
-                selectedIcon: Icon(Icons.dashboard_outlined, color: Color(0xFF0D5D9A),),
+                selectedIcon: Icon(Icons.dashboard_outlined, color: Colors.white,),
                 label: Text(''),
               ),
               const NavigationRailDestination(
-                icon: Icon(Icons.add_chart),
-                selectedIcon: Icon(Icons.add_chart, color: Color(0xFF0D5D9A),),
+                icon: Icon(Icons.list),
+                selectedIcon: Icon(Icons.list, color: Colors.white),
                 label: Text(''),
               ),
               const NavigationRailDestination(
                 icon: Icon(Icons.settings_outlined),
-                selectedIcon: Icon(Icons.settings_outlined, color: Color(0xFF0D5D9A),),
+                selectedIcon: Icon(Icons.settings_outlined, color: Colors.white,),
                 label: Text(''),
               ),
               const NavigationRailDestination(
                 icon: Icon(Icons.info_outline),
-                selectedIcon: Icon(Icons.info_outline, color: Color(0xFF0D5D9A),),
+                selectedIcon: Icon(Icons.info_outline, color: Colors.white,),
                 label: Text(''),
               ),
               const NavigationRailDestination(
                 icon: Icon(Icons.help_outline),
-                selectedIcon: Icon(Icons.help_outline, color: Color(0xFF0D5D9A),),
+                selectedIcon: Icon(Icons.help_outline, color: Colors.white,),
                 label: Text(''),
               ),
             ],
           ),
-          Expanded(
-            child: widget.userType == '1'?
-            _selectedIndex == 0 ? AdminDealerHomePage(userName: widget.userName, countryCode: widget.countryCode, mobileNo: widget.mobileNo, fromLogin: true, userId: 0, userType: 0,) :
-            _selectedIndex == 1 ? ProductInventory(userName: widget.userName) :
-            _selectedIndex == 2 ? const AllEntry():
-            _selectedIndex == 2 ? const MyPreference(userID: 1,) : const MyWebView() :
-
-            _selectedIndex == 0 ? AdminDealerHomePage(userName: widget.userName, countryCode: widget.countryCode, mobileNo: widget.mobileNo, fromLogin: true, userId: 0, userType: 0,) :
-            _selectedIndex == 1 ? ProductInventory(userName: widget.userName) :
-            _selectedIndex == 2 ? const MyPreference(userID: 1,) : const MyWebView(),
-          ),
+          buildExpandedWidget(userData),
         ],
-      )
+      ),
     );
 
-    return widget.userType =='3'? Scaffold(
-      body: Stack(
-        children: [
-          MyDrawer(
-            userName: widget.userName, countryCode: widget.countryCode, phoneNo: widget.mobileNo, onOptionSelected: onOptionSelected, currentTap: currentTap,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 250),
-            child: Container(
-                color:Colors.white,
-                child: _centerWidget
-            ),
-          ),
-        ],
-      ),
-    ):
-    Scaffold(
-      appBar: widget.userType =='1'?  AppBar(
-        title: Text (appBarTitle),
-        actions: _selectedIndex==0?[
-          IconButton(tooltip: 'Create Dealer account', icon: const Icon(Icons.person_add_outlined), color: Colors.white, onPressed: () async
-          {
-            await showDialog<void>(
-                context: context,
-                builder: (context) => const AlertDialog(
-                  content: CreateAccount(),
-                ));
+  }
 
-          }),
-          const SizedBox(width: 20,),
-          const Icon(Icons.notifications_none, color: Colors.white,),
-          const SizedBox(width: 30,),
-        ] : [],
-      ) :
-      AppBar(
-        title: const Text ('Dashboard'),
-        actions: _selectedIndex==0?[
-          IconButton(tooltip: 'Create customer account', icon: const Icon(Icons.person_add_outlined), color: Colors.white, onPressed: () async
-          {
-            await showDialog<void>(
-                context: context,
-                builder: (context) => const AlertDialog(
-                  content: CreateAccount(),
-                ));
+  Widget buildExpandedWidget(userData) {
+    return Expanded(
+      child: selectedWidget(_selectedIndex, userData),
+    );
+  }
 
-          }),
-          const SizedBox(width: 20,),
-          const Icon(Icons.notifications_none, color: Colors.white,),
-          const SizedBox(width: 30,),
-        ] : [
-          const SizedBox(width: 20,),
-        ],
-      ),
-      body: Row(
-        children: <Widget>[
-          SizedBox(
-            width: 150,
-            child: NavigationRail(
-              indicatorColor: myTheme.primaryColor.withOpacity(0.1),
-              minWidth: 145.0,
-              selectedIndex: _selectedIndex,
-              groupAlignment: groupAlignment,
-              labelType: NavigationRailLabelType.all,
-              leading: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const CircleAvatar(
-                      radius: 35,
-                      backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
-                      backgroundColor: Colors.transparent,
-                    ),
-                    const SizedBox(height: 3,),
-                    Text(widget.userName, style: myTheme.textTheme.titleSmall,),
-                    const SizedBox(height: 3,),
-                    Text('+${widget.countryCode} ${widget.mobileNo}', style: myTheme.textTheme.titleSmall,),
-                  ],
-                ),
-              ),
-              trailing: Expanded(
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: IconButton(tooltip: 'Logout', icon: const Icon(Icons.logout, color: Colors.redAccent,),
-                      onPressed: () async {
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.remove('userId');
-                        await prefs.remove('userName');
-                        await prefs.remove('countryCode');
-                        await prefs.remove('mobileNumber');
-                        await prefs.remove('subscribeTopic');
+  Widget selectedWidget(int index, userData) {
+    switch (index) {
+      case 0:
+        return AdminDealerHomePage(
+          userName: userData.userName,
+          countryCode: userData.countryCode,
+          mobileNo: userData.mobileNo,
+          fromLogin: true,
+          userId: 0,
+          userType: 0,
+        );
+      case 1:
+        return ProductInventory(
+          userName: userData.userName,
+        );
+      case 2:
+        return userData.userType == '1' ? const AllEntry() : MyPreference(userID: userData.userId);
+      case 3:
+        return userData.userType == '1' ? MyPreference(userID: userData.userId) : const MyWebView();
+      default:
+        return const SizedBox(); // Return an empty widget by default or handle error case
+    }
+  }
 
-                        if (mounted){
-                          Navigator.pushNamedAndRemoveUntil(context, '/login', ModalRoute.withName('/login'));
-                        }
-                      },
-                    ),
-                  ),
-                ),
-              ),
-              onDestinationSelected: (int index) {
-                setState(() {
-                  _selectedIndex = index;
-                  if(_selectedIndex==0){
-                    appBarTitle = 'Home';
-                  }else if(_selectedIndex==1){
-                    appBarTitle = 'Product';
-                  }else{
-                    appBarTitle = 'My Preference';
-                  }
-                });
-              },
-              destinations: widget.userType == '1'? <NavigationRailDestination>[
-                const NavigationRailDestination(
-                  padding: EdgeInsets.only(top: 5),
-                  icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home_outlined, color: Color(0xFF0D5D9A),),
-                  label: Text('Home'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.add_chart),
-                  selectedIcon: Icon(Icons.add_chart, color: Color(0xFF0D5D9A),),
-                  label: Text('Product'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.topic_outlined),
-                  selectedIcon: Icon(Icons.topic_outlined, color: Color(0xFF0D5D9A),),
-                  label: Text('Master'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.settings_outlined),
-                  selectedIcon: Icon(Icons.settings_outlined, color: Color(0xFF0D5D9A),),
-                  label: Text('My Preference'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.info_outline),
-                  selectedIcon: Icon(Icons.info_outline, color: Color(0xFF0D5D9A),),
-                  label: Text('App Info'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.help_outline),
-                  selectedIcon: Icon(Icons.help_outline, color: Color(0xFF0D5D9A),),
-                  label: Text('Help & Support'),
-                ),
-              ]:
-              <NavigationRailDestination>[
-                const NavigationRailDestination(
-                  padding: EdgeInsets.only(top: 5),
-                  icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home_outlined, color: Color(0xFF0D5D9A),),
-                  label: Text('Home'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.add_chart),
-                  selectedIcon: Icon(Icons.add_chart, color: Color(0xFF0D5D9A),),
-                  label: Text('Product'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.settings_outlined),
-                  selectedIcon: Icon(Icons.settings_outlined, color: Color(0xFF0D5D9A),),
-                  label: Text('My Preference'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.info_outline),
-                  selectedIcon: Icon(Icons.info_outline, color: Color(0xFF0D5D9A),),
-                  label: Text('App Info'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.help_outline),
-                  selectedIcon: Icon(Icons.help_outline, color: Color(0xFF0D5D9A),),
-                  label: Text('Help & Support'),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: _selectedIndex == 0 ? const AdminDealerHomePage(userName: '', countryCode: '', mobileNo: '', fromLogin: true, userId: 0, userType: 0,) :
-            _selectedIndex == 1 ? ProductInventory(userName: widget.userName) :
-            _selectedIndex == 2 ? widget.userType =='1'? const AllEntry() : const MyPreference(userID: 1,) : const MyWebView(),
-          ),
-        ],
+  void indicatorViewShow() {
+    setState(() {
+      visibleLoading = true;
+    });
+  }
+
+  void indicatorViewHide() {
+    setState(() {
+      visibleLoading = false;
+    });
+  }
+
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 3),
       ),
     );
   }
 
 }
 
-class MyDrawer extends StatelessWidget {
-  final Function(String) onOptionSelected;
-  const MyDrawer({super.key, required this.onOptionSelected, required this.userName, required this.countryCode, required this.phoneNo, required this.currentTap});
-  final String userName, countryCode, phoneNo, currentTap;
+class ThemeChangeDialog extends StatefulWidget {
+  final ThemeData initialTheme;
+  ThemeChangeDialog({super.key, required this.initialTheme});
+
+  @override
+  _ThemeChangeDialogState createState() => _ThemeChangeDialogState();
+}
+
+class _ThemeChangeDialogState extends State<ThemeChangeDialog> {
+  late ThemeData _selectedTheme;
+
+  @override
+  void initState() {
+    _selectedTheme = widget.initialTheme;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    print(MediaQuery.of(context).size.height);
-    return SingleChildScrollView(
-      child: Container(
-        width: 250,
-        height: MediaQuery.of(context).size.height < 675 ? 675 : MediaQuery.of(context).size.height,
-        color: myTheme.primaryColor.withOpacity(0.9),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              color: myTheme.primaryColor,
-              width: 250,
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    const CircleAvatar(
-                      radius: 25,
-                      backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
-                      backgroundColor: Colors.transparent,
-                    ),
-                    const SizedBox(width: 5),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(userName, style: const TextStyle(fontSize: 15, color: Colors.white)),
-                        const SizedBox(height: 3,),
-                        Text('+$countryCode $phoneNo', style: const TextStyle(fontSize: 13, color: Colors.white)),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+    return AlertDialog(
+      title: Text('Select Theme'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          RadioListTile(
+            title: Container(
+              color: Colors.cyan,
+              width: 150,
+              height: 75,
+              child: const Center(child: Text('Theme cyan')),
             ),
-            const Padding(
-              padding: EdgeInsets.only(left: 10, bottom: 5, top: 10),
-              child: Text('HOME', style: TextStyle(color: Colors.white)),
+            value: ThemeData.light(),
+            groupValue: _selectedTheme,
+            onChanged: (value) {
+              setState(() {
+                _selectedTheme = value!;
+              });
+            },
+          ),
+          RadioListTile(
+            title: Container(
+              color: Colors.yellow,
+              width: 150,
+              height: 75,
+              child: Center(child: const Text('Theme yellow')),
             ),
-            buildCustomListTile('Dashboard', Icons.dashboard_outlined, 'Dashboard'),
-            buildCustomListTile('My Product', Icons.topic_outlined, 'My Product'),
-            buildCustomListTile('Report Overview', Icons.my_library_books_outlined, 'Report Overview'),
-            buildCustomListTile('Sent And Received', Icons.question_answer_outlined, 'Sent And Received'),
-            buildCustomListTile('Controller Logs', Icons.message_outlined, 'Controller Logs'),
-            buildCustomListTile('Device Settings', Icons.settings_outlined, 'Device Settings'),
-            const Padding(
-              padding: EdgeInsets.only(left: 10, top: 10, bottom: 5),
-              child: Text('ORGANIZATION', style: TextStyle(color: Colors.white)),
+            value: ThemeData.light(),
+            groupValue: _selectedTheme,
+            onChanged: (value) {
+              setState(() {
+                _selectedTheme = value!;
+              });
+            },
+          ),
+          RadioListTile(
+            title: Container(
+              color: Colors.green,
+              width: 150,
+              height: 75,
+              child: Center(child: const Text('Theme green')),
             ),
-            buildCustomListTile('App Info', Icons.info_outline, 'App Info'),
-            buildCustomListTile('Help & Support', Icons.help_outline, 'Help & Support'),
-            const Padding(
-              padding: EdgeInsets.only(left: 10, top: 10, bottom: 5),
-              child: Text('ACCOUNT', style: TextStyle(color: Colors.white)),
+            value: ThemeData.light(),
+            groupValue: _selectedTheme,
+            onChanged: (value) {
+              setState(() {
+                _selectedTheme = value!;
+              });
+            },
+          ),
+          RadioListTile(
+            title: Container(
+              color: Colors.pink,
+              width: 150,
+              height: 75,
+              child: Center(child: const Text('Theme pink')),
             ),
-            buildCustomListTile('My Preference', Icons.settings_outlined, 'My Preference'),
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red,),
-              title: const Text('Logout', style: TextStyle(fontSize: 14, color: Colors.white)),
-              onTap: () async {
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.remove('userId');
-                await prefs.remove('userName');
-                await prefs.remove('countryCode');
-                await prefs.remove('mobileNumber');
-                await prefs.remove('subscribeTopic');
-                if (context.mounted){
-                  Navigator.pushNamedAndRemoveUntil(context, '/login', ModalRoute.withName('/login'));
-                }
-              },
+            value: ThemeData.light(),
+            groupValue: _selectedTheme,
+            onChanged: (value) {
+              setState(() {
+                _selectedTheme = value!;
+              });
+            },
+          ),
+          RadioListTile(
+            title: Container(
+              color: Colors.purple,
+              width: 150,
+              height: 75,
+              child: Center(child: const Text('Theme purple')),
             ),
-            // Add more ListTile widgets for additional options
-          ],
-        ),
+            value: ThemeData.light(),
+            groupValue: _selectedTheme,
+            onChanged: (value) {
+              setState(() {
+                _selectedTheme = value!;
+              });
+            },
+          ),
+        ],
       ),
-    );
-  }
-
-  Widget buildCustomListTile(String title, IconData icon, String tapOption) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8),
-      child: Container(
-        decoration: BoxDecoration(
-          color: currentTap == tapOption ? Colors.white : Colors.transparent,
-          borderRadius: const BorderRadius.only(topLeft: Radius.circular(30), bottomLeft: Radius.circular(30)), // Adjust the radius as needed
-        ),
-        child: ListTile(
-          leading: Icon(
-            icon,
-            color: currentTap == tapOption ? myTheme.primaryColor : Colors.white,
-          ),
-          title: Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              color: currentTap == tapOption ? myTheme.primaryColor : Colors.white,
-            ),
-          ),
-          onTap: () {
-            onOptionSelected(tapOption);
+      actions: <Widget>[
+        MaterialButton(
+          onPressed: () {
+            Navigator.pop(context); // Close the dialog
           },
+          child: Text('Cancel'),
         ),
-      ),
+        MaterialButton(
+          onPressed: () {
+            // Update the theme and close the dialog
+            //ThemeController().updateTheme(_selectedTheme);
+            Navigator.pop(context);
+          },
+          child: Text('OK'),
+        ),
+      ],
     );
   }
 }

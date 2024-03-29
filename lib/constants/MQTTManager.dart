@@ -22,17 +22,23 @@ class MQTTManager {
   void initializeMQTTClient({MqttPayloadProvider? state}) {
 
     String uniqueId = const Uuid().v4();
-    print('Unique ID: $uniqueId');
+
+    String baseURL = 'ws://192.168.68.141';
+    int port = 9001;
+
+    /*String baseURL = 'ws://test.mosquitto.org';
+    int port = 8080;*/
 
     if (_client == null) {
        providerState = state;
-      _client = MqttBrowserClient('ws://192.168.1.141', uniqueId);
-      _client!.port = 9001;
+      _client = MqttBrowserClient(baseURL, uniqueId);
+      _client!.port = port;
       _client!.keepAlivePeriod = 60;
       _client!.onDisconnected = onDisconnected;
       _client!.logging(on: false);
       _client!.onConnected = onConnected;
       _client!.onSubscribed = onSubscribed;
+      _client!.websocketProtocols = MqttClientConstants.protocolsSingleDefault;
 
       final MqttConnectMessage connMess = MqttConnectMessage()
           .withClientIdentifier(uniqueId)
@@ -40,7 +46,7 @@ class MQTTManager {
           .withWillMessage('My Will message')
           .startClean()
           .withWillQos(MqttQos.atLeastOnce);
-      print('Mosquitto client connecting....');
+          print('Mosquitto client connecting....');
       _client!.connectionMessage = connMess;
     }
   }

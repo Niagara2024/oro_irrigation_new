@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:mqtt_client/mqtt_browser_client.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
@@ -53,8 +54,9 @@ class _MainDashBoardState extends State<MainDashBoard> {
     super.initState();
     Future.delayed(const Duration(milliseconds: 500), () async {
       if (kIsWeb) {
-        print('Running on the web platform');
+
         mqttConfigureAndConnect();
+
       } else {
         print('other platform');
         mqttSeverConfigureAndConnect();
@@ -235,9 +237,10 @@ class _DashboardWideState extends State<DashboardWide> {
     ) : Scaffold(
       appBar: userData.userType =='3'? AppBar(
         leading: const Padding(
-          padding: EdgeInsets.only(left: 10, top: 8, bottom: 8),
+          padding: EdgeInsets.only(left: 10),
           child: Image(image: AssetImage("assets/images/oro_logo_white.png")),
         ),
+        //title: const Center(child: Text('Shakith')),
         leadingWidth: 75,
         flexibleSpace: Container(
           decoration: BoxDecoration(

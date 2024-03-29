@@ -5,7 +5,8 @@ import 'package:http/http.dart' as http;
 
 class HttpService
 {
-  final String baseURL = "http://192.168.1.141:3000/api/v1/";//development
+  final String baseURL = "http://192.168.68.141:3000/api/v1/";//development
+  //final String baseURL = "http://192.168.68.141:3001/api/v1/";//development
   Future<http.Response> postRequest(String action, Map<String, dynamic> data) async
   {
     var headers = {

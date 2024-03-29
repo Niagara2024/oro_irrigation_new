@@ -66,7 +66,7 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                         child: DataTable2(
                           columnSpacing: 12,
                           horizontalMargin: 12,
-                          minWidth: 625,
+                          minWidth: 600,
                           dataRowHeight: 50.0,
                           headingRowHeight: 35.0,
                           headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),

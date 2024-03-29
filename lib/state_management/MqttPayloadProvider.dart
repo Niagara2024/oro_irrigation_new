@@ -20,6 +20,8 @@ class MqttPayloadProvider with ChangeNotifier {
   List<dynamic> filtersCentral = [];
   List<dynamic> filtersLocal = [];
   List<dynamic> irrigationPump = [];
+  List<dynamic> fertilizerCentral = [];
+  List<dynamic> flowMeter = [];
 
   void editMySchedule(ScheduleViewProvider instance){
     mySchedule = instance;
@@ -62,22 +64,40 @@ class MqttPayloadProvider with ChangeNotifier {
               filtersLocal.add(filter);
             }
           }
-
-          //filters = data['2400'][0]['2405'];
         }
+
+        if (data['2400'][0].containsKey('2406')) {
+          List<dynamic> fertilizerJson = data['2400'][0]['2406'];
+          fertilizerCentral = [];
+
+          for (var fertilizer in fertilizerJson) {
+            if (fertilizer['Type'] == 1) {
+              fertilizerCentral.add(fertilizer);
+            } else if (fertilizer['Type'] == 2) {
+              //filtersLocal.add(filter);
+            }
+          }
+        }
+
         if (data['2400'][0].containsKey('2407')) {
           List<dynamic> items = data['2400'][0]['2407'];
           irrigationPump = items.where((item) => item['Type'] == 2).toList();
+        }
+
+        if (data['2400'][0].containsKey('2408')) {
+          List<dynamic> items = data['2400'][0]['2408'];
+          flowMeter.addAll(items.where((item) => item['Watermeter'] != '-').map((item) => item['Watermeter']));
         }
 
       }
       else if(data.containsKey('2900') && data['2900'] != null && data['2900'].isNotEmpty){
         schedulePayload = payload;
       }
+      notifyListeners();
     } catch (e) {
       print('Error parsing JSON: $e');
     }
-    notifyListeners();
+    //notifyListeners();
   }
 
   void setAppConnectionState(MQTTConnectionState state) {
@@ -101,8 +121,8 @@ class MqttPayloadProvider with ChangeNotifier {
     filtersCentral = [];
     filtersLocal = [];
     irrigationPump = [];
+    fertilizerCentral = [];
     notifyListeners();
-
   }
 
 }

@@ -199,6 +199,9 @@ flutter:
      - assets/SVGPicture/top_corner.svg
      - assets/images/login_top_corner.png
      - assets/images/oro_logo_white.png
+     - assets/GifFile/dp_filter_y.gif
+     - assets/GifFile/dp_filter_g.gif
+     - assets/GifFile/dp_filter_r.gif
      - assets/GifFile/dp_filter_1_g.gif
      - assets/GifFile/dp_filter_2_g.gif
      - assets/GifFile/dp_filter_3_g.gif
@@ -237,6 +240,23 @@ flutter:
      - assets/images/dp_main_valve.png
      - assets/images/dp_source_pump.png
      - assets/images/no_signal.jpg
+     - assets/images/dp_agitator.png
+     - assets/images/dp_agitator_line1.png
+     - assets/images/dp_fert_first_tank.png
+     - assets/images/dp_fert_center_tank.png
+     - assets/images/dp_fert_channel_center.png
+     - assets/images/dp_fert_channel_center_g.png
+     - assets/images/dp_fert_channel_center_y.png
+     - assets/images/dp_fert_channel_center_r.png
+     - assets/images/dp_agitator_right.png
+     - assets/images/dp_fert_last_tank.png
+     - assets/images/dp_fert_channel_last.png
+     - assets/images/dp_fert_channel_last_g.png
+     - assets/images/dp_fert_channel_last_y.png
+     - assets/images/dp_fert_channel_last_r.png
+     - assets/images/dp_fert_nrv.png
+     - assets/images/dp_fert_booster_pump.png
+     - assets/images/dp_flowmeter.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

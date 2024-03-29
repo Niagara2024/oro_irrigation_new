@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
@@ -40,13 +41,14 @@ class _MainLineState extends State<MainLine> {
             Container(
               color: Colors.white,
               child: Padding(
-                padding: const EdgeInsets.only(left: 8,right: 8, top: 8),
-                child: widget.siteData.irrigationPump.isNotEmpty && widget.siteData.centralFilterSite.isNotEmpty? Row(
+                padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
+                child: widget.siteData.irrigationPump.isNotEmpty? Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     widget.siteData.irrigationPump.isNotEmpty? const IrrigationPumpList(): const SizedBox(),
                     widget.siteData.centralFilterSite.isNotEmpty? const CentralFilter(): const SizedBox(),
+                    widget.siteData.centralFertilizerSite.isNotEmpty? const CentralFertilizer(): const SizedBox(),
                   ],
                 ) :
                 const Align(
@@ -63,227 +65,258 @@ class _MainLineState extends State<MainLine> {
       ),
     );
 
-    return Row(
-      children: [
-        SizedBox(
-          width: 293,
-          child: Column(
-            children: [
-              widget.siteData.irrigationPump.isNotEmpty || widget.siteData.centralFilterSite.isNotEmpty?
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  widget.siteData.irrigationPump.isNotEmpty? const IrrigationPumpList():
-                  const SizedBox(),
-                  SizedBox(
-                    width: 70,
-                    height: 160,
-                    child: ListView.builder(
-                      itemCount: 1,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Column(
-                          children: [
-                            PopupMenuButton(
-                              tooltip: 'Details',
-                              itemBuilder: (context) {
-                                return [
-                                  const PopupMenuItem(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: [
-                                        Text('Pressure Sensor', style: TextStyle(fontWeight: FontWeight.bold),),
-                                        Divider(),
-                                      ],
-                                    ),
-                                  ),
-                                ];
-                              },
-                              child: Image.asset('assets/images/dp_prs_sensor.png',),
-                            ),
-                            const Text('Prs In',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
-                            provider.PrsIn.isNotEmpty
-                                ? Text('${double.parse(provider.PrsIn[0]['Value']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10))
-                                : const Text('0.0 bar', style: TextStyle(fontSize: 10)),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                  widget.siteData.centralFilterSite.isNotEmpty? const CentralFilter():
-                  const SizedBox(),
-                  SizedBox(
-                    width: 70,
-                    height: 160,
-                    child: ListView.builder(
-                      itemCount: 1,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Column(
-                          children: [
-                            PopupMenuButton(
-                              tooltip: 'Details',
-                              itemBuilder: (context) {
-                                return [
-                                  const PopupMenuItem(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: [
-                                        Text('Pressure Sensor', style: TextStyle(fontWeight: FontWeight.bold),),
-                                        Divider(),
-                                      ],
-                                    ),
-                                  ),
-                                ];
-                              },
-                              child: Image.asset('assets/images/dp_prs_sensor.png',),
-                            ),
-                            const Text('Prs Out',style: TextStyle(fontSize: 10,fontWeight: FontWeight.normal),),
-                            provider.PrsOut.isNotEmpty
-                                ? Text('${double.parse(provider.PrsOut[0]['Value']).toStringAsFixed(2)} bar', style: const TextStyle(fontSize: 10))
-                                : const Text('0.0 bar', style: TextStyle(fontSize: 10)),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ):
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(height: 50,),
-                  Text('No Device Available'),
-                ],
-              ),
-            ],
+  }
+}
+
+class CentralFertilizer extends StatefulWidget {
+  const CentralFertilizer({Key? key}) : super(key: key);
+
+  @override
+  State<CentralFertilizer> createState() => _CentralFertilizerState();
+}
+
+class _CentralFertilizerState extends State<CentralFertilizer> {
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = Provider.of<MqttPayloadProvider>(context);
+
+    return provider.fertilizerCentral.isNotEmpty? Align(
+      alignment: Alignment.topLeft,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 52),
+            child: Container(
+              width: 4,
+              height: 175,
+              color: Colors.black45,
+            ),
           ),
-        ),
-        const Expanded(
-          flex :1,
-          child: SizedBox(),
-          /*child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const ListTile(
-                title: Text('Dosing Recipes - NPK1'),
-              ),
-              SizedBox(
-                height: 40,
-                child: Row(
-                  children: [
-                    const SizedBox(width : 40, child: Icon(Icons.account_tree_rounded)),
-                    const SizedBox(width: 10,),
-                    const Expanded(
-                      flex: 3,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('EC',style: TextStyle(fontSize: 10)),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text('Actual:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
-                              Text('00.0',style: TextStyle(fontSize: 10)),
-                              SizedBox(width: 5,),
-                              Text('Target:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
-                              Text('00.0',style: TextStyle(fontSize: 10)),
-                            ],
-                          ),
-                        ],
+          SizedBox(
+            width: (provider.fertilizerCentral[0]['Fertilizer'].length * 75) + 150,
+            height: 225,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 70,
+                  height: 210,
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        width: 70,
+                        height: 70,
+                        child: Image.asset('assets/images/dp_fert_booster_pump.png'),
                       ),
-                    ),
-                    const Expanded(
-                      flex: 3,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text('PH',style: TextStyle(fontSize: 10)),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text('Actual:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
-                              Text('00.0',style: TextStyle(fontSize: 10)),
-                              SizedBox(width: 5,),
-                              Text('Target:',style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),),
-                              Text('00.0',style: TextStyle(fontSize: 10)),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(width : 40, child: Image.asset('assets/images/injector.png',)),
-                  ],),
-              ),
-              Flexible(
-                  flex: 2,
-                  child: DataTable2(
-                    columnSpacing: 12,
-                    horizontalMargin: 12,
-                    minWidth: 400,
-                    dataRowHeight: 20.0,
-                    headingRowHeight: 20,
-                    headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
-                    columns: const [
-                      DataColumn2(
-                          label: Center(child: Text('Channel', style: TextStyle(fontSize: 10),)),
-                          size: ColumnSize.M
-                      ),
-                      DataColumn2(
-                          label: Center(child: Text('1', style: TextStyle(fontSize: 10),)),
-                          fixedWidth: 37
-                      ),
-                      DataColumn2(
-                          label: Center(child: Text('2', style: TextStyle(fontSize: 10),)),
-                          fixedWidth: 37
-                      ),
-                      DataColumn2(
-                          label: Center(child: Text('3', style: TextStyle(fontSize: 10),)),
-                          fixedWidth: 37
-                      ),
-                      DataColumn2(
-                          label: Center(child: Text('4', style: TextStyle(fontSize: 10),)),
-                          fixedWidth: 37
-                      ),
-                      DataColumn2(
-                          label: Center(child: Text('5', style: TextStyle(fontSize: 10),)),
-                          fixedWidth: 37
-                      ),
-                      DataColumn2(
-                          label: Center(child: Text('6', style: TextStyle(fontSize: 10),)),
-                          fixedWidth: 37
-                      ),
-                      DataColumn2(
-                          label: Center(child: Text('7', style: TextStyle(fontSize: 10),)),
-                          fixedWidth: 37
-                      ),
-                      DataColumn2(
-                          label: Center(child: Text('8', style: TextStyle(fontSize: 10),)),
-                          fixedWidth: 30
+                      SizedBox(
+                        width: 70,
+                        height: 70,
+                        child: Image.asset('assets/images/dp_fert_nrv.png'),
                       ),
                     ],
-                    rows: List<DataRow>.generate(5, (index) => DataRow(cells: [
-                      DataCell(Center(child: Text(index==0? 'Open(%)':index==1?'Flow(l/h)':index==2?'Qty Delivered': index==3?'Time Delivered':'Set Point',
-                          style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                      DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                      DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                      DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                      DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                      DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                      DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                      DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                      DataCell(Center(child: Text('1000', style: TextStyle(fontWeight: FontWeight.normal,fontSize: 10)))),
-                    ])),
-                  )
-              ),
-            ],
-          ),*/
-        ),
-      ],
-    );
+                  ),
+                ),
+                SizedBox(
+                  height: 210,
+                  width: provider.fertilizerCentral[0]['Fertilizer'].length * 70,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: provider.fertilizerCentral[0]['Fertilizer'].length,
+                    itemBuilder: (BuildContext context, int index) {
+                      var fertilizer = provider.fertilizerCentral[0]['Fertilizer'][index];
+                      return Row(
+                        children: [
+                          SizedBox(
+                            width: 70, // Set the desired width for each fertilizer item
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  width: 70,
+                                  height: 70,
+                                  child: index==0?Image.asset('assets/images/dp_fert_first_tank.png',):
+                                  index == provider.fertilizerCentral[0]['Fertilizer'].length - 1
+                                      ? Image.asset('assets/images/dp_fert_last_tank.png',):
+                                  Image.asset('assets/images/dp_fert_center_tank.png',),
+                                ),
+                                SizedBox(
+                                  width: 70,
+                                  height: 70,
+                                  child: Column(
+                                    children: [
+                                      PopupMenuButton(
+                                        tooltip: 'Details',
+                                        itemBuilder: (context) {
+                                          return [
+                                            PopupMenuItem(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                children: [
+                                                  Text(provider.fertilizerCentral[0]['FertilizerSite'], style: const TextStyle(fontWeight: FontWeight.bold),),
+                                                  const Divider(),
+                                                  Text(fertilizer['Name']),
+                                                ],
+                                              ),
+                                            ),
+                                          ];
+                                        },
+                                        child : Stack(
+                                          children: [
+                                            buildFertCheImage(index, fertilizer['Status'], provider.fertilizerCentral[0]['Fertilizer'].length),
+                                            Positioned(
+                                              top: 47.8,
+                                              left: 10,
+                                              child: fertilizer['DurationLeft']!='00:00:00'? fertilizer['Status'] == (index+1) ? Container(
+                                                color: Colors.greenAccent,
+                                                width: 50,
+                                                child: Center(
+                                                  child: Text(fertilizer['DurationLeft'], style: const TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                  ),
+                                                ),
+                                              ) :
+                                              const SizedBox(): const SizedBox(),
+                                            ),
+                                            /*Positioned(
+                                              top: 0,
+                                              left: 25,
+                                              child: provider.filtersCentral[i]['PrsIn']!='-'? Container(
+                                                  decoration: const BoxDecoration(
+                                                    color:Colors.yellow,
+                                                    borderRadius: BorderRadius.all(Radius.circular(2)),
+                                                  ),
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.only(left: 3,right: 3),
+                                                    child: Text('${provider.filtersCentral[i]['DpValue']}', style: const TextStyle(fontSize: 10),),
+                                                  )
+                                              ):
+                                              const SizedBox(),
+                                            ),*/
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                ),
+                                index==0 ? SizedBox(
+                                  width: 70,
+                                  height: 70,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Text('Selector'),
+                                      Container(
+                                        color: Colors.green.shade100,
+                                        width: 70,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(3.0),
+                                          child: Center(child: const Text('1', style: TextStyle(fontSize: 17),)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ) :
+                                const SizedBox(),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: 70,
+                  height: 210,
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        width: 70,
+                        height: 70,
+                        child: Image.asset('assets/images/dp_agitator_right.png'),
+                      ),
+                      SizedBox(
+                        width: 70,
+                        height: 70,
+                        child: Container(
+                          color: Colors.green.shade100,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('EC Actual', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                              const Text('0.00', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 11)),
+                              const Text('EC Target', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                              const Text('0.00', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 11)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 70,
+                        height: 70,
+                        child: Container(
+                          color: Colors.orange.shade100,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('PH Actual', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                              const Text('0.00', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 11)),
+                              const Text('PH Target', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                              const Text('0.00', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 11)),
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ) :
+    const SizedBox();
   }
 
+  Widget buildFertCheImage(int cIndex, int status, int cheLength) {
+    String imageName;
+
+    if(cIndex == cheLength - 1){
+      imageName='dp_fert_channel_last';
+    }else{
+      imageName='dp_fert_channel_center';
+    }
+
+    switch (status) {
+      case 0:
+        imageName += '.png';
+        break;
+      case 1:
+        imageName += '_g.png';
+        break;
+      case 2:
+        imageName += '_y.png';
+        break;
+      default:
+        imageName += '_r.png';
+    }
+
+    return Image.asset('assets/images/$imageName');
+
+  }
 
 }

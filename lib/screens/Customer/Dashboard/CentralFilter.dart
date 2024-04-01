@@ -193,7 +193,6 @@ class _CentralFilterState extends State<CentralFilter> {
         final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
         if(provider.filtersCentral.isNotEmpty) {
           if(provider.filtersCentral[0]['DurationLeft']!='00:00:00'){
-            print('Duration Left updating....');
             List<String> parts = provider.filtersCentral[0]['DurationLeft'].split(':');
             int hours = int.parse(parts[0]);
             int minutes = int.parse(parts[1]);

@@ -7,7 +7,6 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/http_service.dart';
-import '../state_management/MqttPayloadProvider.dart';
 
 
 TextEditingController _mobileNoController = TextEditingController();
@@ -170,26 +169,27 @@ class _LoginFormState extends State<LoginForm> {
                                         //print(response.body);
                                         if(response.statusCode == 200)
                                         {
-                                          MqttPayloadProvider provider = MqttPayloadProvider();
-                                          provider.clearData();
-
                                           var data = jsonDecode(response.body);
                                           if(data["code"]==200)
                                           {
                                             _mobileNoController.clear();
                                             _passwordController.clear();
 
-                                            final userDetails = data["data"];
-                                            final regDetails = userDetails["user"];
+                                            final customerData = data["data"];
+                                            final customerInfo = customerData["user"];
+
+                                            /*List<dynamic> siteData = data['data']['site'];
+                                            List<String> siteList = siteData.map((site) => json.encode(site)).toList();*/
 
                                             final prefs = await SharedPreferences.getInstance();
-                                            await prefs.setString('userType', regDetails["userType"].toString());
-                                            await prefs.setString('userName', regDetails["userName"].toString());
-                                            await prefs.setString('userId', regDetails["userId"].toString());
-                                            await prefs.setString('countryCode', regDetails["countryCode"].toString());
-                                            await prefs.setString('mobileNumber', regDetails["mobileNumber"].toString());
-                                            await prefs.setString('password', regDetails["password"].toString());
-                                            await prefs.setString('email', regDetails["email"].toString());
+                                            await prefs.setString('userType', customerInfo["userType"].toString());
+                                            await prefs.setString('userName', customerInfo["userName"].toString());
+                                            await prefs.setString('userId', customerInfo["userId"].toString());
+                                            await prefs.setString('countryCode', customerInfo["countryCode"].toString());
+                                            await prefs.setString('mobileNumber', customerInfo["mobileNumber"].toString());
+                                            await prefs.setString('password', customerInfo["password"].toString());
+                                            await prefs.setString('email', customerInfo["email"].toString());
+                                            //await prefs.setStringList('site', siteList);
 
                                             if (mounted){
                                               Navigator.pushReplacementNamed(context, '/dashboard');

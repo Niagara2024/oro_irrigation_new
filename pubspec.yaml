@@ -256,7 +256,14 @@ flutter:
      - assets/images/dp_fert_channel_last_r.png
      - assets/images/dp_fert_nrv.png
      - assets/images/dp_fert_booster_pump.png
+     - assets/images/dp_fert_booster_pump_g.png
+     - assets/images/dp_fert_booster_pump_y.png
+     - assets/images/dp_fert_booster_pump_r.png
      - assets/images/dp_flowmeter.png
+     - assets/images/valve_gray.png
+     - assets/images/valve_green.png
+     - assets/images/valve_red.png
+     - assets/images/valve_orange.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

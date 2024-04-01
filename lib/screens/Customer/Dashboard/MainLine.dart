@@ -77,6 +77,20 @@ class CentralFertilizer extends StatefulWidget {
 
 class _CentralFertilizerState extends State<CentralFertilizer> {
 
+  Timer? timer;
+
+  @override
+  void initState() {
+    super.initState();
+    durationUpdatingFunction();
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<MqttPayloadProvider>(context);
@@ -107,11 +121,16 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
                   height: 210,
                   child: Column(
                     children: [
-                      SizedBox(
+                      provider.fertilizerCentral[0]['Booster'].isNotEmpty ? SizedBox(
                         width: 70,
                         height: 70,
-                        child: Image.asset('assets/images/dp_fert_booster_pump.png'),
-                      ),
+                        child: provider.fertilizerCentral[0]['Booster'][0]['Status'] ==1 ?
+                        Image.asset('assets/images/dp_fert_booster_pump_g.png') :
+                        provider.fertilizerCentral[0]['Booster'][0]['Status']==2 ?
+                        Image.asset('assets/images/dp_fert_booster_pump_y.png') :
+                        Image.asset('assets/images/dp_fert_booster_pump.png'),
+                      ):
+                      const SizedBox(),
                       SizedBox(
                         width: 70,
                         height: 70,
@@ -170,9 +189,9 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
                                           children: [
                                             buildFertCheImage(index, fertilizer['Status'], provider.fertilizerCentral[0]['Fertilizer'].length),
                                             Positioned(
-                                              top: 47.8,
+                                              top: 2,
                                               left: 10,
-                                              child: fertilizer['DurationLeft']!='00:00:00'? fertilizer['Status'] == (index+1) ? Container(
+                                              child: fertilizer['Status'] !=0 ? Container(
                                                 color: Colors.greenAccent,
                                                 width: 50,
                                                 child: Center(
@@ -184,23 +203,8 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
                                                   ),
                                                 ),
                                               ) :
-                                              const SizedBox(): const SizedBox(),
-                                            ),
-                                            /*Positioned(
-                                              top: 0,
-                                              left: 25,
-                                              child: provider.filtersCentral[i]['PrsIn']!='-'? Container(
-                                                  decoration: const BoxDecoration(
-                                                    color:Colors.yellow,
-                                                    borderRadius: BorderRadius.all(Radius.circular(2)),
-                                                  ),
-                                                  child: Padding(
-                                                    padding: const EdgeInsets.only(left: 3,right: 3),
-                                                    child: Text('${provider.filtersCentral[i]['DpValue']}', style: const TextStyle(fontSize: 10),),
-                                                  )
-                                              ):
                                               const SizedBox(),
-                                            ),*/
+                                            ),
                                           ],
                                         ),
                                       ),
@@ -221,7 +225,7 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
                                         width: 70,
                                         child: Padding(
                                           padding: const EdgeInsets.all(3.0),
-                                          child: Center(child: const Text('1', style: TextStyle(fontSize: 17),)),
+                                          child: Center(child: Text(provider.fertilizerCentral[0]['FertilizerTankSelector'].isNotEmpty? provider.fertilizerCentral[0]['FertilizerTankSelector'][0]['Name'] :'0', style: const TextStyle(fontSize: 17),)),
                                         ),
                                       ),
                                     ],
@@ -317,6 +321,68 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
 
     return Image.asset('assets/images/$imageName');
 
+  }
+
+  void durationUpdatingFunction() {
+    timer?.cancel();
+    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+      try{
+        final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
+        for (int i = 0; i < provider.fertilizerCentral[0]['Fertilizer'].length; i++) {
+          if(provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft']!=null){
+
+            if('${provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft']}'.contains(':'))
+            {
+              List<String> parts = provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft'].split(':');
+              int hours = int.parse(parts[0]);
+              int minutes = int.parse(parts[1]);
+              int seconds = int.parse(parts[2]);
+
+              if (seconds > 0) {
+                seconds--;
+              } else {
+                if (minutes > 0) {
+                  minutes--;
+                  seconds = 59;
+                } else {
+                  if (hours > 0) {
+                    hours--;
+                    minutes = 59;
+                    seconds = 59;
+                  }
+                }
+              }
+
+              String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+              if(provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft']!='00:00:00'){
+                setState(() {
+                  provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft'] = updatedDurationQtyLeft;
+                });
+              }
+            }
+            else{
+              if(provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft']>0){
+                setState(() {
+                  int remainFlow = provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft'];
+                  int flowRate = provider.fertilizerCentral[i]['AverageFlowRate'];
+                  remainFlow = remainFlow - flowRate;
+                  provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft'] = remainFlow;
+                });
+              }else{
+                setState(() {
+                  provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft'] = '0';
+                });
+
+              }
+            }
+          }
+        }
+      }
+      catch(e){
+        print(e);
+      }
+
+    });
   }
 
 }

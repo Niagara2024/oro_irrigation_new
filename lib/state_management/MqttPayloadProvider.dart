@@ -109,20 +109,4 @@ class MqttPayloadProvider with ChangeNotifier {
   String get receivedSchedulePayload => schedulePayload;
   MQTTConnectionState get getAppConnectionState => _appConnectionState;
 
-  void clearData() {
-    wifiStrength = 0;
-    dashBoardPayload = '';
-    mainLine = [];
-    currentSchedule = [];
-    PrsIn = [];
-    PrsOut = [];
-    upcomingProgram = [];
-    nextSchedule = [];
-    filtersCentral = [];
-    filtersLocal = [];
-    irrigationPump = [];
-    fertilizerCentral = [];
-    notifyListeners();
-  }
-
 }

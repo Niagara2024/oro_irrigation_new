@@ -70,42 +70,42 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                           dataRowHeight: 50.0,
                           headingRowHeight: 35.0,
                           headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
-                          columns: const [
-                            DataColumn2(
+                          columns: [
+                            const DataColumn2(
                                 label: Text('Name', style: TextStyle(fontSize: 13),),
                                 size: ColumnSize.L
                             ),
-                            DataColumn2(
+                            const DataColumn2(
                                 label: Text('Line', style: TextStyle(fontSize: 13)),
                                 size: ColumnSize.S
 
                             ),
-                            DataColumn2(
+                            const DataColumn2(
                                 label: Text('Zone', style: TextStyle(fontSize: 13),),
                                 size: ColumnSize.S
                             ),
-                            DataColumn2(
+                            const DataColumn2(
                                 label: Text('Zone Name', style: TextStyle(fontSize: 13)),
                                 size: ColumnSize.M
 
                             ),
-                            DataColumn2(
+                            const DataColumn2(
                                 label: Center(child: Text('RTC', style: TextStyle(fontSize: 13),)),
                                 size: ColumnSize.M
                             ),
-                            DataColumn2(
+                            const DataColumn2(
                                 label: Center(child: Text('Cyclic', style: TextStyle(fontSize: 13),)),
                                 size: ColumnSize.M
                             ),
-                            DataColumn2(
+                            const DataColumn2(
                                 label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
                                 size: ColumnSize.M
                             ),
                             DataColumn2(
-                                label: Center(child: Text('Total(Duration/Flow)', style: TextStyle(fontSize: 13),)),
-                                size: ColumnSize.M
+                                label: Center(child: Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Total Duration(hh:mm:ss)' : 'Total Flow(Liters)', style: const TextStyle(fontSize: 13),)),
+                                size: ColumnSize.L
                             ),
-                            DataColumn2(
+                            const DataColumn2(
                                 label: Center(child: Text('')),
                                 fixedWidth: 90
                             ),
@@ -125,7 +125,6 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                 color: Colors.redAccent,
                                 textColor: Colors.white,
                                 onPressed: provider.currentSchedule[csIndex]['Message']=='Running.'? (){
-                                  //String payload = '0,1,0,${provider.currentSchedule[csIndex]['ScheduleS_No']},0,0,${provider.currentSchedule[csIndex]['ProgType']},0';
                                   String payload = '0,0,0,0';
                                   String payLoadFinal = jsonEncode({
                                     "800": [{"801": payload}]
@@ -171,16 +170,17 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                     flex: 1,
                                     child: Column(
                                       children: [
-                                        const SizedBox(height: 5),
-                                        CircleAvatar(
-                                          radius: 18,
-                                          backgroundColor: provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==0 ? Colors.grey :
-                                          provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==1 ? Colors.greenAccent :
-                                          provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==2 ? Colors.orangeAccent:
-                                          provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
-                                          backgroundImage: const AssetImage('assets/images/dp_main_valve.png'),
+                                        const SizedBox(height: 2),
+                                        Image.asset(
+                                          width: 47,
+                                          height: 47,
+                                          provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==0 ?
+                                          'assets/images/valve_gray.png':
+                                          provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==1 ?
+                                          'assets/images/valve_green.png':
+                                          provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==2 ?
+                                          'assets/images/valve_orange.png': 'assets/images/valve_red.png',
                                         ),
-                                        const SizedBox(height: 3),
                                         Text('${provider.currentSchedule[csIndex]['MV'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
                                       ],
                                     ),
@@ -192,16 +192,17 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                       padding: const EdgeInsets.only(right: 8),
                                       child: Column(
                                         children: [
-                                          const SizedBox(height: 5),
-                                          CircleAvatar(
-                                            radius: 18,
-                                            backgroundColor: provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==0 ? Colors.grey :
-                                            provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==1 ? Colors.greenAccent :
-                                            provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==2 ? Colors.orangeAccent:
-                                            provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
-                                            backgroundImage: const AssetImage('assets/images/valve.png'),
+                                          const SizedBox(height: 2),
+                                          Image.asset(
+                                            width: 47,
+                                            height: 47,
+                                              provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==0 ?
+                                              'assets/images/valve_gray.png':
+                                              provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==1 ?
+                                              'assets/images/valve_green.png':
+                                              provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==2 ?
+                                              'assets/images/valve_orange.png': 'assets/images/valve_red.png',
                                           ),
-                                          const SizedBox(height: 3),
                                           Text('${provider.currentSchedule[csIndex]['VL'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
                                         ],
                                       ),
@@ -212,10 +213,10 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                   child: Container(width: 1, height: 40, color: Colors.grey,),
                                 ),
                                 SizedBox(
-                                  width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 250 : 215,
+                                  width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 200 : 215,
                                   child: Row(
                                     children: [
-                                      Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining(hh:mm:ss) : ':'Remaining(liters) : '),
+                                      Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining : ':'Remaining : '),
                                       provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
                                       Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
                                     ],
@@ -252,10 +253,10 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                   child: Container(width: 1, height: 40, color: Colors.grey,),
                                 ),
                                 SizedBox(
-                                  width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 250 : 215,
+                                  width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 200 : 215,
                                   child: Row(
                                     children: [
-                                      Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining(hh:mm:ss) : ':'Remaining(liters) : '),
+                                      Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining : ':'Remaining : '),
                                       provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
                                       Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: TextStyle(fontSize: 18, color: Colors.black))
                                     ],
@@ -292,10 +293,10 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                   child: Container(width: 1, height: 40, color: Colors.grey,),
                                 ),
                                 SizedBox(
-                                  width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 250 : 215,
+                                  width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 200 : 215,
                                   child: Row(
                                     children: [
-                                      Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining(hh:mm:ss) : ':'Remaining(liters) : '),
+                                      Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining : ':'Remaining : '),
                                       provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
                                       Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
                                     ],

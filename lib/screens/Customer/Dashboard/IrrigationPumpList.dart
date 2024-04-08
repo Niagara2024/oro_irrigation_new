@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
 
 import '../../../state_management/MqttPayloadProvider.dart';
@@ -60,9 +61,20 @@ class _IrrigationPumpListState extends State<IrrigationPumpList> {
                   child: buildIrPumpImage(index, provider.irrigationPump[index]['Status'], provider.irrigationPump.length),
                 ),
                 Positioned(
-                  top: 0,
-                  left: 12,
-                  child: CircleAvatar(radius: 23, backgroundColor: Colors.orange, child: Text(provider.irrigationPump[index]['OnDelayLeft'], style: const TextStyle(fontSize: 10),),),
+                  top: 47.8,
+                  left: 10,
+                  child: Container(
+                    color: Colors.greenAccent,
+                    width: 50,
+                    child: Center(
+                      child: Text(provider.irrigationPump[index]['OnDelayLeft'], style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ) :

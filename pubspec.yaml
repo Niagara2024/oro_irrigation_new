@@ -264,6 +264,10 @@ flutter:
      - assets/images/valve_green.png
      - assets/images/valve_red.png
      - assets/images/valve_orange.png
+     - assets/images/dp_main_valve_closed.png
+     - assets/images/dp_main_valve_open.png
+     - assets/images/dp_main_valve_wait.png
+     - assets/images/dp_main_valve_not_open.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

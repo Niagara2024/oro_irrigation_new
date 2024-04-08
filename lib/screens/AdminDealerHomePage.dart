@@ -71,8 +71,8 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
   {
     final prefs = await SharedPreferences.getInstance();
     if(widget.fromLogin){
-      userType = int.parse(prefs.getString('userType') ?? "");
-      userId = int.parse(prefs.getString('userId') ?? "");
+      userType = int.parse(prefs.getString('userType') ?? "0");
+      userId = int.parse(prefs.getString('userId') ?? "0");
     }else{
       userType = widget.userType;
       userId = widget.userId;

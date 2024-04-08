@@ -180,6 +180,9 @@ class _DashboardWideState extends State<DashboardWide> {
   @override
   Widget build(BuildContext context)  {
     final userData = UserData.of(context)!;
+    print(userData.userId);
+    print(userData.userType);
+    print(userData.userName);
     return  Scaffold(
       body: userData.userType =='3'? CustomerHome(customerID: userData.userId, customerName: userData.userName, mobileNo: '+${userData.countryCode}-${userData.mobileNo}', comingFrom: 'Customer',): Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -313,8 +316,8 @@ class _DashboardWideState extends State<DashboardWide> {
           countryCode: userData.countryCode,
           mobileNo: userData.mobileNo,
           fromLogin: true,
-          userId: 0,
-          userType: 0,
+          userId: userData.userId,
+          userType: int.parse(userData.userType ?? 0),
         );
       case 1:
         return ProductInventory(

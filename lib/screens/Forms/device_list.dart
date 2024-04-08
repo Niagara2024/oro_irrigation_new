@@ -801,7 +801,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                       ListTile(
                         leading: Image.asset('assets/images/oro_gem.png'),
                         title: Text(customerSiteList[siteIndex].categoryName),
-                        subtitle: Text(customerSiteList[siteIndex].deviceId.toString()),
+                        subtitle: SelectableText(customerSiteList[siteIndex].deviceId.toString()),
                         trailing: usedNodeList[siteIndex].isNotEmpty? Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

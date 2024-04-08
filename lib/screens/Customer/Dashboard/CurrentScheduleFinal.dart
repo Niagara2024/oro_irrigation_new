@@ -54,7 +54,7 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
             ),
             Container(
               color: Colors.white,
-              height: provider.currentSchedule.isNotEmpty? (provider.currentSchedule.length * 151) : 25,
+              height: provider.currentSchedule.isNotEmpty? (provider.currentSchedule.length * 145) : 25,
               child: provider.currentSchedule.isNotEmpty? ListView.builder(
                 itemCount: provider.currentSchedule.length,
                 itemBuilder: (BuildContext context, int csIndex) {
@@ -62,12 +62,12 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                     children: [
                       SizedBox(
                         width: MediaQuery.sizeOf(context).width,
-                        height: 85,
+                        height: 80,
                         child: DataTable2(
                           columnSpacing: 12,
                           horizontalMargin: 12,
                           minWidth: 600,
-                          dataRowHeight: 50.0,
+                          dataRowHeight: 45.0,
                           headingRowHeight: 35.0,
                           headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
                           columns: [
@@ -159,7 +159,7 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                       const Divider(height: 0),
                       SizedBox(
                         width: MediaQuery.sizeOf(context).width,
-                        height: 65,
+                        height: 60,
                         child :  Column(
                           children: [
                             (provider.currentSchedule[csIndex].containsKey('MV') && provider.currentSchedule[csIndex]['MV'].length > 0) &&
@@ -170,17 +170,18 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                     flex: 1,
                                     child: Column(
                                       children: [
-                                        const SizedBox(height: 2),
+                                        const SizedBox(height: 3),
                                         Image.asset(
-                                          width: 47,
-                                          height: 47,
+                                          width: 40,
+                                          height: 40,
                                           provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==0 ?
-                                          'assets/images/valve_gray.png':
+                                          'assets/images/dp_main_valve_not_open.png':
                                           provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==1 ?
-                                          'assets/images/valve_green.png':
+                                          'assets/images/dp_main_valve_open.png':
                                           provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==2 ?
-                                          'assets/images/valve_orange.png': 'assets/images/valve_red.png',
+                                          'assets/images/dp_main_valve_wait.png': 'assets/images/dp_main_valve_closed.png',
                                         ),
+                                        const SizedBox(height: 3),
                                         Text('${provider.currentSchedule[csIndex]['MV'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
                                       ],
                                     ),
@@ -192,10 +193,10 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                       padding: const EdgeInsets.only(right: 8),
                                       child: Column(
                                         children: [
-                                          const SizedBox(height: 2),
+                                          const SizedBox(height: 3),
                                           Image.asset(
-                                            width: 47,
-                                            height: 47,
+                                            width: 40,
+                                            height: 40,
                                               provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==0 ?
                                               'assets/images/valve_gray.png':
                                               provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==1 ?
@@ -203,6 +204,7 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                               provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==2 ?
                                               'assets/images/valve_orange.png': 'assets/images/valve_red.png',
                                           ),
+                                          const SizedBox(height: 3),
                                           Text('${provider.currentSchedule[csIndex]['VL'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
                                         ],
                                       ),
@@ -233,14 +235,16 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                       padding: const EdgeInsets.only(right: 8),
                                       child: Column(
                                         children: [
-                                          const SizedBox(height: 5),
-                                          CircleAvatar(
-                                            radius: 18,
-                                            backgroundColor: provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==0 ? Colors.grey :
-                                            provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==1 ? Colors.greenAccent :
-                                            provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==2 ? Colors.orangeAccent:
-                                            provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
-                                            backgroundImage: const AssetImage('assets/images/valve.png'),
+                                          const SizedBox(height: 3),
+                                          Image.asset(
+                                            width: 40,
+                                            height: 40,
+                                            provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==0 ?
+                                            'assets/images/valve_gray.png':
+                                            provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==1 ?
+                                            'assets/images/valve_green.png':
+                                            provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==2 ?
+                                            'assets/images/valve_orange.png': 'assets/images/valve_red.png',
                                           ),
                                           const SizedBox(height: 3),
                                           Text('${provider.currentSchedule[csIndex]['VL'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
@@ -273,14 +277,16 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                       padding: const EdgeInsets.only(right: 8),
                                       child: Column(
                                         children: [
-                                          const SizedBox(height: 5),
-                                          CircleAvatar(
-                                            radius: 18,
-                                            backgroundColor: provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==0 ? Colors.grey :
-                                            provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==1 ? Colors.greenAccent :
-                                            provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==2 ? Colors.orangeAccent:
-                                            provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==3 ? Colors.redAccent : Colors.lightBlueAccent,
-                                            backgroundImage: const AssetImage('assets/images/dp_main_valve.png'),
+                                          const SizedBox(height: 3),
+                                          Image.asset(
+                                            width: 40,
+                                            height: 40,
+                                            provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==0 ?
+                                            'assets/images/dp_main_valve_not_open.png':
+                                            provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==1 ?
+                                            'assets/images/dp_main_valve_open.png':
+                                            provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==2 ?
+                                            'assets/images/dp_main_valve_wait.png': 'assets/images/dp_main_valve_closed.png',
                                           ),
                                           const SizedBox(height: 3),
                                           Text('${provider.currentSchedule[csIndex]['MV'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),

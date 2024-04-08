@@ -1,12 +1,11 @@
 import 'dart:async';
 
-import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
+import '../../../constants/data_convertion.dart';
 import '../../../constants/theme.dart';
 import '../../../state_management/MqttPayloadProvider.dart';
 import 'CentralFilter.dart';
@@ -129,12 +128,27 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
                         provider.fertilizerCentral[0]['Booster'][0]['Status']==2 ?
                         Image.asset('assets/images/dp_fert_booster_pump_y.png') :
                         Image.asset('assets/images/dp_fert_booster_pump.png'),
-                      ):
+                      ) :
                       const SizedBox(),
                       SizedBox(
                         width: 70,
                         height: 70,
                         child: Image.asset('assets/images/dp_fert_nrv.png'),
+                      ),
+                      const SizedBox(
+                        width: 70,
+                        height: 70,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(height: 5,),
+                            Text('Channel', style: TextStyle(fontSize: 10),),
+                            SizedBox(height: 5,),
+                            Text('Set', style: TextStyle(fontSize: 10),),
+                            SizedBox(height: 5,),
+                            Text('Flow(L/h)', style: TextStyle(fontSize: 10),),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -166,53 +180,47 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
                                 SizedBox(
                                   width: 70,
                                   height: 70,
-                                  child: Column(
+                                  child: Stack(
                                     children: [
-                                      PopupMenuButton(
-                                        tooltip: 'Details',
-                                        itemBuilder: (context) {
-                                          return [
-                                            PopupMenuItem(
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                children: [
-                                                  Text(provider.fertilizerCentral[0]['FertilizerSite'], style: const TextStyle(fontWeight: FontWeight.bold),),
-                                                  const Divider(),
-                                                  Text(fertilizer['Name']),
-                                                ],
-                                              ),
+                                      buildFertCheImage(index, fertilizer['Status'], provider.fertilizerCentral[0]['Fertilizer'].length),
+                                      Positioned(
+                                        top: 0,
+                                        left: 10,
+                                        child: fertilizer['Status'] !=0 ? Container(
+                                          color: Colors.greenAccent,
+                                          width: 50,
+                                          child: Center(
+                                            child: Text(fertilizer['FertMethod']=='1' || fertilizer['FertMethod']=='3'
+                                                ? fertilizer['DurationLeft']
+                                                : '${fertilizer['QtyLeft'].toStringAsFixed(2)} L' , style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
                                             ),
-                                          ];
-                                        },
-                                        child : Stack(
-                                          children: [
-                                            buildFertCheImage(index, fertilizer['Status'], provider.fertilizerCentral[0]['Fertilizer'].length),
-                                            Positioned(
-                                              top: 2,
-                                              left: 10,
-                                              child: fertilizer['Status'] !=0 ? Container(
-                                                color: Colors.greenAccent,
-                                                width: 50,
-                                                child: Center(
-                                                  child: Text(fertilizer['DurationLeft'], style: const TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                  ),
-                                                ),
-                                              ) :
-                                              const SizedBox(),
                                             ),
-                                          ],
-                                        ),
+                                          ),
+                                        ) :
+                                        const SizedBox(),
                                       ),
                                     ],
                                   ),
-
                                 ),
-                                index==0 ? SizedBox(
+                                SizedBox(
+                                  width: 70,
+                                  height: 70,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      SizedBox(height: 5,),
+                                      Text(fertilizer['Name'], style: TextStyle(fontSize: 10),),
+                                      SizedBox(height: 5,),
+                                      Text(fertilizer['FertMethod']=='1'? fertilizer['Duration']:'${fertilizer['Qty']} L', style: TextStyle(fontSize: 10),),
+                                      SizedBox(height: 5,),
+                                      Text('${fertilizer['Qty']}', style: TextStyle(fontSize: 10),),
+                                    ],
+                                  ),
+                                ),
+                                /*index==0 ? SizedBox(
                                   width: 70,
                                   height: 70,
                                   child: Column(
@@ -231,7 +239,7 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
                                     ],
                                   ),
                                 ) :
-                                const SizedBox(),
+                                const SizedBox(),*/
                               ],
                             ),
                           ),
@@ -251,39 +259,98 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
                         child: Image.asset('assets/images/dp_agitator_right.png'),
                       ),
                       SizedBox(
-                        width: 70,
-                        height: 70,
+                        width: 75,
+                        height: 65,
                         child: Container(
-                          color: Colors.green.shade100,
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade100,
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: Colors.green.shade500,
+                              width: 0.5,
+                            ),
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              const Text('EC Actual', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
-                              const Text('0.00', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 11)),
-                              const Text('EC Target', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
-                              const Text('0.00', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 11)),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade200,
+                                  borderRadius: const BorderRadius.only(topRight: Radius.circular(5), topLeft: Radius.circular(5)),
+                                ),
+                                width: 70, height: 20,
+                                child: const Center(child: Text('EC',style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10))),
+                              ),
+                              SizedBox(height: 3),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text('Actual : ', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 10)),
+                                  const Text('0.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10)),
+                                ],
+                              ),
+                              SizedBox(height: 3),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text('Target : ', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 10)),
+                                  const Text('0.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10)),
+                                ],
+                              ),
                             ],
                           ),
                         ),
                       ),
+                      SizedBox(height: 10,),
                       SizedBox(
-                        width: 70,
-                        height: 70,
+                        width: 75,
+                        height: 65,
                         child: Container(
-                          color: Colors.orange.shade100,
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade100,
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: Colors.orange.shade500,
+                              width: 0.5,
+                            ),
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              const Text('PH Actual', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
-                              const Text('0.00', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 11)),
-                              const Text('PH Target', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
-                              const Text('0.00', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 11)),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.shade200,
+                                  borderRadius: const BorderRadius.only(topRight: Radius.circular(5), topLeft: Radius.circular(5)),
+                                ),
+                                width: 75, height: 20,
+                                child: const Center(child: Text('PH',style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10))),
+                              ),
+                              SizedBox(height: 3),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text('Actual : ', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 10)),
+                                  const Text('0.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10)),
+                                ],
+                              ),
+                              SizedBox(height: 3),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text('Target : ', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 10)),
+                                  const Text('0.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10)),
+                                ],
+                              ),
                             ],
                           ),
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -315,6 +382,9 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
       case 2:
         imageName += '_y.png';
         break;
+      case 3:
+        imageName += '.png';
+        break;
       default:
         imageName += '_r.png';
     }
@@ -329,9 +399,11 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
       try{
         final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
         for (int i = 0; i < provider.fertilizerCentral[0]['Fertilizer'].length; i++) {
-          if(provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft']!=null){
 
-            if('${provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft']}'.contains(':'))
+          if(provider.fertilizerCentral[0]['Fertilizer'][i]['Status']!=0){
+
+            if(provider.fertilizerCentral[0]['Fertilizer'][i]['FertMethod']=='1' ||
+                provider.fertilizerCentral[0]['Fertilizer'][i]['FertMethod']=='3')
             {
               List<String> parts = provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft'].split(':');
               int hours = int.parse(parts[0]);
@@ -354,27 +426,163 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
               }
 
               String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-              if(provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft']!='00:00:00'){
-                setState(() {
-                  provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft'] = updatedDurationQtyLeft;
-                });
+              if(provider.fertilizerCentral[0]['Fertilizer'][i]['FertMethod']=='3')
+              {
+                double onTime = double.parse(provider.fertilizerCentral[0]['Fertilizer'][i]['OnTime']);
+                double offTime = double.parse(provider.fertilizerCentral[0]['Fertilizer'][i]['OffTime']);
+
+                if (provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalOnTime'] == null) {
+                  provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalOnTime'] = provider.fertilizerCentral[0]['Fertilizer'][i]['OnTime'];
+                }
+                if (provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalOffTime'] == null) {
+                  provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalOffTime'] = provider.fertilizerCentral[0]['Fertilizer'][i]['OffTime'];
+                }
+                if (provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalStatus'] == null) {
+                  provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalStatus'] = provider.fertilizerCentral[0]['Fertilizer'][i]['Status'];
+                }
+
+                if(onTime.toInt()>0){
+                  int updatedOnTime = onTime.toInt() - 1;
+                  provider.fertilizerCentral[0]['Fertilizer'][i]['OnTime'] = updatedOnTime.toString();
+                  setState(() {
+                    provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft'] = updatedDurationQtyLeft;
+                    provider.fertilizerCentral[0]['Fertilizer'][i]['Status'] = provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalStatus'];
+                  });
+                }else if(offTime.toInt()>0){
+                  int updatedOffTime = offTime.toInt() - 1;
+                  provider.fertilizerCentral[0]['Fertilizer'][i]['OffTime'] = updatedOffTime.toString();
+                  setState(() {
+                    provider.fertilizerCentral[0]['Fertilizer'][i]['Status'] = 3;
+                  });
+                  if(updatedOffTime==0){
+                    provider.fertilizerCentral[0]['Fertilizer'][i]['OnTime'] = provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalOnTime'];
+                    provider.fertilizerCentral[0]['Fertilizer'][i]['OffTime'] = provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalOffTime'];
+                  }
+                }
+              }
+              else
+              {
+                if(provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft']!='00:00:00'){
+                  setState(() {
+                    provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft'] = updatedDurationQtyLeft;
+                  });
+                }
               }
             }
-            else{
-              if(provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft']>0){
+            else
+            {
+              double qtyDouble = double.parse(provider.fertilizerCentral[0]['Fertilizer'][i]['Qty']);
+              int roundedQty = qtyDouble.round();
+              double qtyLeftDouble = provider.fertilizerCentral[0]['Fertilizer'][i]['QtyLeft'];
+              int roundedQtyLeft = qtyLeftDouble.round();
+
+              if(roundedQty >= roundedQtyLeft) {
                 setState(() {
-                  int remainFlow = provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft'];
-                  int flowRate = provider.fertilizerCentral[i]['AverageFlowRate'];
-                  remainFlow = remainFlow - flowRate;
-                  provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft'] = remainFlow;
+                  if(provider.fertilizerCentral[0]['Fertilizer'][i]['FertMethod']=='4' ||
+                      provider.fertilizerCentral[0]['Fertilizer'][i]['FertMethod']=='5') {
+                    double onTime = double.parse(provider.fertilizerCentral[0]['Fertilizer'][i]['OnTime']);
+                    double offTime = double.parse(provider.fertilizerCentral[0]['Fertilizer'][i]['OffTime']);
+
+                    if (provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalOnTime'] == null) {
+                      provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalOnTime'] = provider.fertilizerCentral[0]['Fertilizer'][i]['OnTime'];
+                    }
+                    if (provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalOffTime'] == null) {
+                      provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalOffTime'] = provider.fertilizerCentral[0]['Fertilizer'][i]['OffTime'];
+                    }
+                    if (provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalStatus'] == null) {
+                      provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalStatus'] = provider.fertilizerCentral[0]['Fertilizer'][i]['Status'];
+                    }
+
+                    if(onTime.round()>0){
+                      int updatedOnTime = onTime.round() - 1;
+                      provider.fertilizerCentral[0]['Fertilizer'][i]['OnTime'] = updatedOnTime.toString();
+                      setState(() {
+                        double remainQty = provider.fertilizerCentral[0]['Fertilizer'][i]['QtyLeft'];
+                        double flowRate = double.parse(provider.fertilizerCentral[0]['Fertilizer'][i]['FlowRate']);
+                        remainQty = remainQty - flowRate;
+                        provider.fertilizerCentral[0]['Fertilizer'][i]['QtyLeft'] = remainQty > 0 ? remainQty : 0;
+                        provider.fertilizerCentral[0]['Fertilizer'][i]['Status'] = provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalStatus'];
+                        if(offTime.round() <=0){
+                          provider.fertilizerCentral[0]['Fertilizer'][i]['OnTime'] = provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalOnTime'];
+                          provider.fertilizerCentral[0]['Fertilizer'][i]['OffTime'] = provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalOffTime'];
+                        }
+                      });
+                    }else if(offTime.round()>0){
+                      int updatedOffTime = offTime.round() - 1;
+                      provider.fertilizerCentral[0]['Fertilizer'][i]['OffTime'] = updatedOffTime.toString();
+                      setState(() {
+                        provider.fertilizerCentral[0]['Fertilizer'][i]['Status'] = 3;
+                      });
+                      if(updatedOffTime==0){
+                        provider.fertilizerCentral[0]['Fertilizer'][i]['OnTime'] = provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalOnTime'];
+                        provider.fertilizerCentral[0]['Fertilizer'][i]['OffTime'] = provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalOffTime'];
+                      }
+                    }else{
+                      //provider.fertilizerCentral[0]['Fertilizer'][i]['OnTime'] = provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalOnTime'];
+                     // provider.fertilizerCentral[0]['Fertilizer'][i]['OffTime'] = provider.fertilizerCentral[0]['Fertilizer'][i]['OriginalOffTime'];
+                    }
+
+                  }
+                  else{
+                    double remainQty = provider.fertilizerCentral[0]['Fertilizer'][i]['QtyLeft'];
+                    double flowRate = double.parse(provider.fertilizerCentral[0]['Fertilizer'][i]['FlowRate']);
+                    remainQty = remainQty - flowRate;
+                    provider.fertilizerCentral[0]['Fertilizer'][i]['QtyLeft'] = remainQty > 0 ? remainQty : 0;
+                  }
+
                 });
               }else{
                 setState(() {
-                  provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft'] = '0';
+                  provider.fertilizerCentral[0]['Fertilizer'][i]['QtyLeft'] = provider.fertilizerCentral[0]['Fertilizer'][i]['Qty'];
                 });
-
               }
             }
+            /*else if(['3','4','5'].contains(provider.fertilizerCentral[0]['Fertilizer'][i]['FertMethod']))
+            {
+              print('proportionate : ${provider.fertilizerCentral[0]['Fertilizer'][i]['FertMethod']}');
+              setState(() {
+
+                dynamic onOffMode = provider.fertilizerCentral[0]['Fertilizer'][i]['onOffMode'];
+                if(onOffMode == null){
+                  provider.fertilizerCentral[0]['Fertilizer'][i]['onOffMode'] = 1;
+                  provider.fertilizerCentral[0]['Fertilizer'][i]['onOffValue'] = 0;
+                  provider.fertilizerCentral[0]['Fertilizer'][i]['statusFromNode'] = 0;
+                  provider.fertilizerCentral[0]['Fertilizer'][i]['totalSeconds'] = DataConvert().parseTimeString(provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft']);
+                }else{
+                  if(provider.fertilizerCentral[0]['Fertilizer'][i]['Status'] == 1){
+                    provider.fertilizerCentral[0]['Fertilizer'][i]['statusFromNode'] = 1;
+                  }
+                  int statusFromNode = provider.fertilizerCentral[0]['Fertilizer'][i]['statusFromNode'];
+                  if(onOffMode == 1){
+                    if(provider.fertilizerCentral[0]['Fertilizer'][i]['onOffValue'] < double.parse(provider.fertilizerCentral[0]['Fertilizer'][i]['OnTime']).toInt()){
+                      provider.fertilizerCentral[0]['Fertilizer'][i]['onOffValue'] += 1;
+                      provider.fertilizerCentral[0]['Fertilizer'][i]['totalSeconds'] -= 1;
+                      double remainQty = provider.fertilizerCentral[0]['Fertilizer'][i]['QtyLeft'];
+                      double flowRate = double.parse(provider.fertilizerCentral[0]['Fertilizer'][i]['FlowRate']);
+                      remainQty = remainQty - flowRate;
+                      provider.fertilizerCentral[0]['Fertilizer'][i]['QtyLeft'] = remainQty;
+                      //var totalSeconds = DataConvert().parseTimeString(provider.fertilizerCentral[0]['Fertilizer'][i]['DurationLeft']);
+                      provider.fertilizerCentral[0]['Fertilizer'][i]['Status'] = statusFromNode == 0 ? 2 : 1;
+                    }else{
+                      provider.fertilizerCentral[0]['Fertilizer'][i]['onOffMode'] = 2;
+                      provider.fertilizerCentral[0]['Fertilizer'][i]['onOffValue'] = 0;
+                      provider.fertilizerCentral[0]['Fertilizer'][i]['Status'] = 3;
+                    }
+
+                  }else{
+                    if(provider.fertilizerCentral[0]['Fertilizer'][i]['onOffValue'] < double.parse(provider.fertilizerCentral[0]['Fertilizer'][i]['OffTime']).toInt()){
+                      provider.fertilizerCentral[0]['Fertilizer'][i]['onOffValue'] += 1;
+                      provider.fertilizerCentral[0]['Fertilizer'][i]['Status'] = 3;
+                    }else{
+                      provider.fertilizerCentral[0]['Fertilizer'][i]['onOffMode'] = 1;
+                      provider.fertilizerCentral[0]['Fertilizer'][i]['onOffValue'] = 0;
+                      provider.fertilizerCentral[0]['Fertilizer'][i]['Status'] = statusFromNode == 0 ? 2 : 1;
+                    }
+                  }
+                }
+              });
+            }*/
+
           }
         }
       }

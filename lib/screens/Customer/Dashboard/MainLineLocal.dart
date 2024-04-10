@@ -21,41 +21,13 @@ class _MainLineLocalState extends State<MainLineLocal> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: myTheme.primaryColor.withOpacity(0.2),
-        borderRadius: const BorderRadius.all(Radius.circular(5)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(3.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            const ListTile(
-              title: Text('MAIN LINE - LOCAL', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-            ),
-            Container(
-              color: Colors.white,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 8,right: 8, top: 8),
-                child: widget.siteData.localFilter.isNotEmpty? Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    widget.siteData.localFilter.isNotEmpty? const LocalFilter(): const SizedBox(),
-                  ],
-                ) :
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 15),
-                    child: Text('Main line installation pending', style: TextStyle(fontWeight: FontWeight.normal), textAlign: TextAlign.left),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+      color: Colors.white,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          widget.siteData.localFilter.isNotEmpty? const LocalFilter(): const SizedBox(),
+        ],
       ),
     );
   }

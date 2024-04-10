@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
@@ -10,6 +11,7 @@ import '../../../constants/theme.dart';
 import '../../../state_management/MqttPayloadProvider.dart';
 import 'CentralFilter.dart';
 import 'IrrigationPumpList.dart';
+import 'MainLineLocal.dart';
 
 
 class MainLine extends StatefulWidget {
@@ -34,20 +36,34 @@ class _MainLineState extends State<MainLine> {
         padding: const EdgeInsets.all(3.0),
         child: Column(
           children: [
-            const ListTile(
-              title: Text('MAIN LINE - CENTRAL', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            ListTile(
+              title: const Text('MAIN LINE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+              trailing: MaterialButton(
+                color: Colors.redAccent,
+                textColor: Colors.white,
+                onPressed:  (){
+                },
+                child: const Text('Pause all program'),
+              ),
             ),
             Container(
               color: Colors.white,
               child: Padding(
                 padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
-                child: widget.siteData.irrigationPump.isNotEmpty? Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                child: widget.siteData.irrigationPump.isNotEmpty? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    widget.siteData.irrigationPump.isNotEmpty? const IrrigationPumpList(): const SizedBox(),
-                    widget.siteData.centralFilterSite.isNotEmpty? const CentralFilter(): const SizedBox(),
-                    widget.siteData.centralFertilizerSite.isNotEmpty? const CentralFertilizer(): const SizedBox(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        widget.siteData.irrigationPump.isNotEmpty? const IrrigationPumpList(): const SizedBox(),
+                        widget.siteData.centralFilterSite.isNotEmpty? const CentralFilter(): const SizedBox(),
+                        widget.siteData.centralFertilizerSite.isNotEmpty? const CentralFertilizer(): const SizedBox(),
+                        VerticalDivider(),
+                        provider.filtersLocal.isNotEmpty?  MainLineLocal(siteData: widget.siteData) : const SizedBox()
+                      ],
+                    ),
                   ],
                 ) :
                 const Align(
@@ -100,14 +116,6 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 52),
-            child: Container(
-              width: 4,
-              height: 175,
-              color: Colors.black45,
-            ),
-          ),
           SizedBox(
             width: (provider.fertilizerCentral[0]['Fertilizer'].length * 75) + 150,
             height: 225,
@@ -133,7 +141,46 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
                       SizedBox(
                         width: 70,
                         height: 70,
-                        child: Image.asset('assets/images/dp_fert_nrv.png'),
+                        // child: Image.asset('assets/images/dp_fert_nrv.png'),
+                        child : Stack(
+                          children: [
+                            Image.asset('assets/images/dp_fert_nrv.png'),
+                            Positioned(
+                              top: 15,
+                              left: 15,
+                              child: provider.fertilizerCentral[0]['FertilizerTankSelector'].isNotEmpty ? const SizedBox(
+                                width: 50,
+                                child: Center(
+                                  child: Text('Selector' , style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  ),
+                                ),
+                              ) :
+                              const SizedBox(),
+                            ),
+                            Positioned(
+                              top: 30,
+                              left: 15,
+                              child: provider.fertilizerCentral[0]['FertilizerTankSelector'].isNotEmpty ? Container(
+                                color: Colors.greenAccent,
+                                width: 50,
+                                height: 25,
+                                child: Center(
+                                  child: Text('00' , style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  ),
+                                ),
+                              ) :
+                              const SizedBox(),
+                            ),
+                          ],
+                        )
                       ),
                       const SizedBox(
                         width: 70,
@@ -141,11 +188,11 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            SizedBox(height: 5,),
+                            SizedBox(height: 6,),
                             Text('Channel', style: TextStyle(fontSize: 10),),
-                            SizedBox(height: 5,),
+                            SizedBox(height: 7,),
                             Text('Set', style: TextStyle(fontSize: 10),),
-                            SizedBox(height: 5,),
+                            SizedBox(height: 7,),
                             Text('Flow(L/h)', style: TextStyle(fontSize: 10),),
                           ],
                         ),
@@ -161,6 +208,17 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
                     itemCount: provider.fertilizerCentral[0]['Fertilizer'].length,
                     itemBuilder: (BuildContext context, int index) {
                       var fertilizer = provider.fertilizerCentral[0]['Fertilizer'][index];
+                      double fertilizerQty = 0.0;
+                      var qtyValue = fertilizer['Qty'];
+                      if (qtyValue != null) {
+                        bool isString = fertilizer['Qty'] is String;
+                        if(isString){
+                          fertilizerQty = double.parse(fertilizer['Qty']);
+                        }else{
+                          fertilizerQty = fertilizer['Qty'];
+                        }
+                      }
+
                       return Row(
                         children: [
                           SizedBox(
@@ -172,10 +230,17 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
                                 SizedBox(
                                   width: 70,
                                   height: 70,
-                                  child: index==0?Image.asset('assets/images/dp_fert_first_tank.png',):
-                                  index == provider.fertilizerCentral[0]['Fertilizer'].length - 1
-                                      ? Image.asset('assets/images/dp_fert_last_tank.png',):
-                                  Image.asset('assets/images/dp_fert_center_tank.png',),
+                                  child: index == 0
+                                      ? provider.fertilizerCentral[0]['Agitator'].isNotEmpty
+                                      ? Image.asset('assets/images/dp_fert_first_tank.png')
+                                      : Image.asset('assets/images/dp_fert_first_tank1.png')
+                                      : index == provider.fertilizerCentral[0]['Fertilizer'].length - 1
+                                      ? provider.fertilizerCentral[0]['Agitator'].isNotEmpty
+                                      ? Image.asset('assets/images/dp_fert_last_tank.png')
+                                      : Image.asset('assets/images/dp_fert_last_tank1.png')
+                                      : provider.fertilizerCentral[0]['Agitator'].isNotEmpty
+                                      ? Image.asset('assets/images/dp_fert_center_tank.png')
+                                      : Image.asset('assets/images/dp_fert_first_tank1.png'),
                                 ),
                                 SizedBox(
                                   width: 70,
@@ -186,7 +251,7 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
                                       Positioned(
                                         top: 0,
                                         left: 10,
-                                        child: fertilizer['Status'] !=0 ? Container(
+                                        child: fertilizer['Status'] !=0 && fertilizer['FertSelection'] !='_'? Container(
                                           color: Colors.greenAccent,
                                           width: 50,
                                           child: Center(
@@ -205,19 +270,29 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
                                     ],
                                   ),
                                 ),
-                                SizedBox(
-                                  width: 70,
-                                  height: 70,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      SizedBox(height: 5,),
-                                      Text(fertilizer['Name'], style: TextStyle(fontSize: 10),),
-                                      SizedBox(height: 5,),
-                                      Text(fertilizer['FertMethod']=='1'? fertilizer['Duration']:'${fertilizer['Qty']} L', style: TextStyle(fontSize: 10),),
-                                      SizedBox(height: 5,),
-                                      Text('${fertilizer['Qty']}', style: TextStyle(fontSize: 10),),
-                                    ],
+                                Padding(
+                                  padding:  EdgeInsets.only(top: 5, right: index==provider.fertilizerCentral[0]['Fertilizer'].length - 1 ? 5:0),
+                                  child: Container(
+                                    width: 70,
+                                    height: 65,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Colors.grey,
+                                        width: 0.5,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        const SizedBox(height: 3),
+                                        Text(fertilizer['Name'], style: const TextStyle(fontSize: 10),),
+                                        const Divider(height: 7),
+                                        Text(fertilizer['FertMethod']=='1' || fertilizer['FertMethod']=='3'? fertilizer['Duration'] :
+                                        '${fertilizerQty.toStringAsFixed(2)} L', style: const TextStyle(fontSize: 10),),
+                                        const Divider(height: 7),
+                                        Text('${fertilizer['FlowRate_LpH']}', style: const TextStyle(fontSize: 10),),
+                                      ],
+                                    ),
                                   ),
                                 ),
                                 /*index==0 ? SizedBox(
@@ -253,12 +328,13 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
                   height: 210,
                   child: Column(
                     children: [
-                      SizedBox(
+                      provider.fertilizerCentral[0]['Agitator'].isNotEmpty ? SizedBox(
                         width: 70,
                         height: 70,
                         child: Image.asset('assets/images/dp_agitator_right.png'),
-                      ),
-                      SizedBox(
+                      ) :
+                      const SizedBox(),
+                      provider.fertilizerCentral[0]['EcSet']!=0 ? SizedBox(
                         width: 75,
                         height: 65,
                         child: Container(
@@ -303,9 +379,10 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
                             ],
                           ),
                         ),
-                      ),
-                      SizedBox(height: 10,),
-                      SizedBox(
+                      ):
+                      const SizedBox(),
+                      const SizedBox(height: 10,),
+                      provider.fertilizerCentral[0]['PhSet']!=0 ? SizedBox(
                         width: 75,
                         height: 65,
                         child: Container(
@@ -350,7 +427,8 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
                             ],
                           ),
                         ),
-                      ),
+                      ):
+                      const SizedBox(),
                     ],
                   ),
                 ),

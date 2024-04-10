@@ -33,22 +33,6 @@ class _NextScheduleState extends State<NextSchedule> {
             ListTile(
               tileColor: myTheme.primaryColor.withOpacity(0.2),
               title: const Text('NEXT SCHEDULE IN QUEUE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-              trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                        tooltip: 'Schedule details',
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ScheduleViewScreen(deviceId: widget.siteData.deviceId, userId: widget.userID, controllerId: widget.siteData.controllerId, customerId: widget.customerID,),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.view_list_outlined)),
-                  ]
-              ),
             ),
             Container(
               color: Colors.white,

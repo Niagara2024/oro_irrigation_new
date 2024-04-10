@@ -147,6 +147,7 @@ class _CentralFilterState extends State<CentralFilter> {
     const SizedBox();
   }
 
+
   Widget buildFilterImage(int cIndex, int status, int filterLength) {
     String imageName;
     if (filterLength == 1) {

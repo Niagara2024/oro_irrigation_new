@@ -70,7 +70,7 @@ class UpcomingProgram extends StatelessWidget {
                   ),
                   DataColumn2(
                       label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
-                      fixedWidth: 175
+                      fixedWidth: 80
                   ),
                 ],
                 rows: List<DataRow>.generate(provider.upcomingProgram.length, (index) => DataRow(cells: [
@@ -81,11 +81,11 @@ class UpcomingProgram extends StatelessWidget {
                   DataCell(Center(child: Text('${provider.upcomingProgram[index]['StartDate']}'))),
                   DataCell(Center(child: Text('${provider.upcomingProgram[index]['StartTime']}'))),
                   DataCell(Center(child: Text('${provider.upcomingProgram[index]['EndDate']}'))),
-                  DataCell(Row(children: [
-                    MaterialButton(
+                  DataCell(
+                    provider.upcomingProgram[index]['ProgOnOff'] == 0 ? MaterialButton(
                       color: Colors.green,
                       textColor: Colors.white,
-                      onPressed: () {
+                      onPressed:() {
                         String localFilePath = 'assets/audios/button_click_sound.mp3';
                         audioPlayer.play(UrlSource(localFilePath));
                         String payload = '${provider.upcomingProgram[index]['SNo']},1';
@@ -95,12 +95,11 @@ class UpcomingProgram extends StatelessWidget {
                         MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
                       },
                       child: const Text('Start'),
-                    ),
-                    const SizedBox(width: 5,),
+                    ) :
                     MaterialButton(
                       color: Colors.redAccent,
                       textColor: Colors.white,
-                      onPressed: () {
+                      onPressed:() {
                         String localFilePath = 'assets/audios/audio_off.mp3';
                         audioPlayer.play(UrlSource(localFilePath));
                         String payload = '${provider.upcomingProgram[index]['SNo']},0';
@@ -111,7 +110,7 @@ class UpcomingProgram extends StatelessWidget {
                       },
                       child: const Text('Stop'),
                     ),
-                  ],)),
+                  ),
                 ])),
               ) :
               const Align(

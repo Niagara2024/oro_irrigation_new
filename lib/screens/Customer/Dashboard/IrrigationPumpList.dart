@@ -34,6 +34,58 @@ class _IrrigationPumpListState extends State<IrrigationPumpList> {
   Widget build(BuildContext context) {
     final provider = Provider.of<MqttPayloadProvider>(context);
 
+    /*return provider.irrigationPump.isNotEmpty? SizedBox(
+      width: provider.irrigationPump.length * 70,
+      height: 80,
+      child: ListView.builder(
+        itemCount: provider.irrigationPump.length,
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (BuildContext context, int index) {
+          return Stack(
+            children: [
+              SizedBox(
+                width: 70,
+                height: 70,
+                child: displayIrrigationPumpIcon(index, provider.irrigationPump[index]['Status']),
+              ),
+              provider.irrigationPump[index]['OnDelayLeft'] !='00:00:00'? Positioned(
+                top: 47.7,
+                left: 10,
+                child: Container(
+                  color: Colors.greenAccent,
+                  width: 50,
+                  child: Center(
+                    child: Text(provider.irrigationPump[index]['OnDelayLeft'], style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    ),
+                  ),
+                ),
+              ) :
+              const SizedBox(),
+              Positioned(
+                top: 63,
+                left: 0,
+                child: SizedBox(
+                  width: 70,
+                  child: Center(
+                    child: Text(provider.irrigationPump[index]['Name'], style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    ) : const SizedBox();*/
+
     return provider.irrigationPump.isNotEmpty? SizedBox(
       width: 70,
       height: provider.irrigationPump.length * 70,
@@ -106,6 +158,29 @@ class _IrrigationPumpListState extends State<IrrigationPumpList> {
       ),
     ):
     const SizedBox();
+  }
+
+  Widget displayIrrigationPumpIcon(int cIndex, int status) {
+    String imageName = 'dp_irr_pump';
+
+    switch (status) {
+      case 0:
+        imageName += '.png';
+        break;
+      case 1:
+        imageName += '_g.gif';
+        break;
+      case 2:
+        imageName += '_y.gif';
+        break;
+      default:
+        imageName += '_r.gif';
+    }
+
+    if(imageName.contains('.png')){
+      return Image.asset('assets/images/$imageName');
+    }
+    return Image.asset('assets/GifFile/$imageName');
   }
 
   Widget buildIrPumpImage(int cIndex, int status, int irPumpLength) {

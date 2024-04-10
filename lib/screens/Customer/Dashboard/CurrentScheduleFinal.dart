@@ -11,6 +11,7 @@ import '../../../constants/MQTTManager.dart';
 import '../../../constants/http_service.dart';
 import '../../../constants/theme.dart';
 import '../../../state_management/MqttPayloadProvider.dart';
+import '../ScheduleView.dart';
 
 class CurrentScheduleFinal extends StatefulWidget {
   const CurrentScheduleFinal({Key? key, required this.siteData, required this.customerID}) : super(key: key);
@@ -49,8 +50,24 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
         padding: const EdgeInsets.all(3.0),
         child: Column(
           children: [
-            const ListTile(
-              title: Text('CURRENT SCHEDULE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            ListTile(
+              title: const Text('CURRENT SCHEDULE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+              trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                        tooltip: 'Schedule details',
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ScheduleViewScreen(deviceId: widget.siteData.deviceId, userId: widget.customerID, controllerId: widget.siteData.controllerId, customerId: widget.customerID,),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.view_list_outlined)),
+                  ]
+              ),
             ),
             Container(
               color: Colors.white,
@@ -61,7 +78,7 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                   return Column(
                     children: [
                       SizedBox(
-                        width: MediaQuery.sizeOf(context).width,
+                        width: MediaQuery.sizeOf(context).width-163,
                         height: 80,
                         child: DataTable2(
                           columnSpacing: 12,

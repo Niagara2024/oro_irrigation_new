@@ -4,6 +4,7 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:oro_irrigation_new/screens/Customer/Dashboard/SentAndReceived.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
@@ -201,6 +202,8 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context)
   {
+    final provider = Provider.of<MqttPayloadProvider>(context);
+
     if(widget.comingFrom == 'AdminORDealer'){
 
       final screenWidth = MediaQuery.of(context).size.width;
@@ -286,7 +289,6 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                       width: 45,
                       child: IconButton(tooltip:'Show node list', onPressed: (){
                         sideSheet();
-
                       }, icon: const Icon(Icons.menu, color: Colors.white)),
                     ),
                   ),
@@ -401,9 +403,10 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                     height: 45,
                     child: BadgeButton(
                       onPressed: () {
+                        showAlarmBottomSheet(context, provider);
                       },
                       icon: Icons.alarm,
-                      badgeNumber: 3, // Set your badge number here
+                      badgeNumber: provider.alarmList.length,
                     ),
                   ),
                 ],
@@ -448,6 +451,13 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                       PopupMenuItem(
                         child: Column(
                           children: [
+                            ListTile(
+                              leading: const Icon(Icons.info_outline),
+                              title: const Text('App info'),
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                            ),
                             ListTile(
                               leading: const Icon(Icons.help_outline),
                               title: const Text('Help'),
@@ -728,9 +738,11 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: _selectedIndex == 0 ? CustomerDashboard(customerID: widget.customerID, type: 1, customerName: widget.customerName, userID: widget.customerID, mobileNo: '+${widget.mobileNo}', siteData: siteListFinal[siteIndex]) :
-                    _selectedIndex == 1 ? ProductInventory(userName: widget.customerName) :
+                    _selectedIndex == 1 ? ProductInventory(userName: widget.customerName):
                     _selectedIndex == 2 ? ProductInventory(userName: widget.customerName):
-                    _selectedIndex == 3 ?  ProductInventory(userName: widget.customerName) :  ProductInventory(userName: widget.customerName),
+                    _selectedIndex == 3 ?  ProductInventory(userName: widget.customerName):
+                    _selectedIndex == 4 ?  SentAndReceived(customerID: widget.customerID, controllerId: siteListFinal[siteIndex].controllerId):
+                    ProductInventory(userName: widget.customerName),
                   ),
                 ),
               ),
@@ -866,9 +878,10 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
                       height: 45,
                       child: BadgeButton(
                         onPressed: () {
+                          showAlarmBottomSheet(context, provider);
                         },
                         icon: Icons.alarm,
-                        badgeNumber: 3, // Set your badge number here
+                        badgeNumber: provider.alarmList.length, // Set your badge number here
                       ),
                     ),
                   ],
@@ -899,304 +912,7 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
             borderRadius: BorderRadius.zero,
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter stateSetter) {
-                return Container(
-                  padding: const EdgeInsets.all(15),
-                  // margin: EdgeInsets.all(10),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.zero,
-                  ),
-                  height: MediaQuery.sizeOf(context).height,
-                  width: 400,
-                  child: SingleChildScrollView(
-                    child:Column(
-                      children: [
-                        Row(
-                          children: [
-                            IconButton(
-                              tooltip: 'Close',
-                              icon: const Icon(Icons.arrow_back_outlined, color: Colors.redAccent),
-                              onPressed: () async {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        ),
-                        CircleAvatar(
-                          radius: 30,
-                          backgroundColor:myTheme.primaryColorDark.withOpacity(0.2),
-                          child: Image.asset('assets/images/oro_gem.png', width: 40, height: 40,),
-                        ),
-                        Text(siteListFinal[siteIndex].deviceName, style: const TextStyle(color: Colors.black, fontSize: 13)),
-                        //Text('${siteListFinal[siteIndex].categoryName} - Last sync : $lastSyncData', style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 11, color: Colors.black,),),
-                        Divider(),
-                        SizedBox(
-                          height: 50,
-                          child: Row(
-                            children: [
-                              Row(
-                                children: [
-                                  const SizedBox(width: 5),
-                                  const Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          SizedBox(width: 5),
-                                          CircleAvatar(radius: 5, backgroundColor: Colors.green,),
-                                          SizedBox(width: 5),
-                                          Text('Connected', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          SizedBox(width: 5),
-                                          CircleAvatar(radius: 5, backgroundColor: Colors.grey),
-                                          SizedBox(width: 5),
-                                          Text('No Communication', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(width: 10),
-                                  const Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          SizedBox(width: 10),
-                                          CircleAvatar(radius: 5, backgroundColor: Colors.redAccent,),
-                                          SizedBox(width: 5),
-                                          Text('Set Serial Error', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          SizedBox(width: 10),
-                                          CircleAvatar(radius: 5, backgroundColor: Colors.yellow),
-                                          SizedBox(width: 5),
-                                          Text('Low Battery', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(width: 20),
-                                  SizedBox(
-                                    width: 40,
-                                    child: IconButton(
-                                      tooltip: 'Set serial for all Nodes',
-                                      icon: Icon(Icons.format_list_numbered, color: myTheme.primaryColorDark),
-                                      onPressed: () async {
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: const Text('Confirmation'),
-                                              content: const Text('Are you sure! you want to proceed to reset all node ids?'),
-                                              actions: <Widget>[
-                                                MaterialButton(
-                                                  color: Colors.redAccent,
-                                                  textColor: Colors.white,
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                  child: const Text('Cancel'),
-                                                ),
-                                                MaterialButton(
-                                                  color: myTheme.primaryColor,
-                                                  textColor: Colors.white,
-                                                  onPressed: () {
-                                                    String payLoadFinal = jsonEncode({
-                                                      "2300": [
-                                                        {"2301": ""},
-                                                      ]
-                                                    });
-                                                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteListFinal[siteIndex].deviceId}');
-                                                    GlobalSnackBar.show(context, 'Sent your comment successfully', 200);
-                                                  },
-                                                  child: const Text('Yes'),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          width: 400,
-                          height: 400,
-                          child: DataTable2(
-                            columnSpacing: 12,
-                            horizontalMargin: 12,
-                            minWidth: 325,
-                            dataRowHeight: 40.0,
-                            headingRowHeight: 35.0,
-                            headingRowColor: MaterialStateProperty.all<Color>(myTheme.primaryColorDark.withOpacity(0.2)),
-                            columns: const [
-                              DataColumn2(
-                                  label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
-                                  fixedWidth: 35
-                              ),
-                              DataColumn2(
-                                label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
-                                fixedWidth: 55,
-                              ),
-                              DataColumn2(
-                                label: Center(child: Text('Rf.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
-                                fixedWidth: 45,
-                              ),
-                              DataColumn2(
-                                label: Text('Category', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),),
-                                size: ColumnSize.M,
-                                numeric: true,
-                              ),
-                              DataColumn2(
-                                label: Text('Info', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),),
-                                fixedWidth: 40,
-                              ),
-                            ],
-                            rows: List<DataRow>.generate(siteListFinal[siteIndex].nodeList.length, (index) => DataRow(cells: [
-                              DataCell(Center(child: Text('${siteListFinal[siteIndex].nodeList[index].serialNumber}', style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black),))),
-                              DataCell(Center(child: CircleAvatar(radius: 7, backgroundColor:
-                              siteListFinal[siteIndex].nodeList[index].status == 1 ? Colors.green.shade400:
-                              siteListFinal[siteIndex].nodeList[index].status == 2 ? Colors.grey :
-                              siteListFinal[siteIndex].nodeList[index].status == 3 ? Colors.redAccent :
-                              siteListFinal[siteIndex].nodeList[index].status == 4 ? Colors.yellow :
-                              Colors.grey,
-                              ))),
-                              DataCell(Center(child: Text('${siteListFinal[siteIndex].nodeList[index].referenceNumber}', style: TextStyle(fontWeight: FontWeight.normal, color: Colors.black)))),
-                              DataCell(Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(siteListFinal[siteIndex].nodeList[index].categoryName, style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black)),
-                                  Text(siteListFinal[siteIndex].nodeList[index].deviceId, style: const TextStyle(fontWeight: FontWeight.normal,fontSize: 11, color: Colors.black)),
-                                ],
-                              )),
-                              DataCell(Center(child: IconButton(tooltip: 'View Relay status',
-                                icon: siteListFinal[siteIndex].nodeList[index].rlyStatus.any((rly) => rly.status == 2 || rly.status == 3)? const Icon(Icons.warning, color: Colors.orangeAccent):
-                                Icon(Icons.info_outline, color: myTheme.primaryColorDark), // Icon to display
-                                onPressed: () {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return SizedBox(
-                                        height: siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 275 : 200,
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          children: <Widget>[
-                                            ListTile(
-                                              tileColor: myTheme.primaryColor,
-                                              textColor: Colors.white,
-                                              leading: const Icon(Icons.developer_board_rounded, color: Colors.white),
-                                              title: Text('${siteListFinal[siteIndex].nodeList[index].categoryName} - ${siteListFinal[siteIndex].nodeList[index].deviceId}'),
-                                              trailing: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  const Icon(Icons.solar_power_outlined, color: Colors.white),
-                                                  const SizedBox(width: 5,),
-                                                  Text('${siteListFinal[siteIndex].nodeList[index].slrVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                  const SizedBox(width: 5,),
-                                                  const Icon(Icons.battery_3_bar_rounded, color: Colors.white),
-                                                  const SizedBox(width: 5,),
-                                                  Text('${siteListFinal[siteIndex].nodeList[index].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                  const SizedBox(width: 5,),
-                                                  IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
-                                                    String payLoadFinal = jsonEncode({
-                                                      "2300": [
-                                                        {"2301": "${siteListFinal[siteIndex].nodeList[index].serialNumber}"},
-                                                      ]
-                                                    });
-                                                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteListFinal[siteIndex].deviceId}');
-                                                  }, icon: Icon(Icons.fact_check_outlined, color: Colors.white))
-                                                ],
-                                              ),
-                                            ),
-                                            const Divider(height: 0),
-                                            SizedBox(
-                                              width : double.infinity,
-                                              height : siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 206 : 130,
-                                              child: Padding(
-                                                padding: const EdgeInsets.all(8.0),
-                                                child: siteListFinal[siteIndex].nodeList[index].rlyStatus.isNotEmpty ? Column(
-                                                  children: [
-                                                    const SizedBox(
-                                                      width: double.infinity,
-                                                      height : 40,
-                                                      child: Row(
-                                                        children: [
-                                                          SizedBox(width: 10),
-                                                          CircleAvatar(radius: 5,backgroundColor: Colors.green,),
-                                                          SizedBox(width: 5),
-                                                          Text('ON'),
-                                                          SizedBox(width: 20),
-                                                          CircleAvatar(radius: 5,backgroundColor: Colors.black45),
-                                                          SizedBox(width: 5),
-                                                          Text('OFF'),
-                                                          SizedBox(width: 20),
-                                                          CircleAvatar(radius: 5,backgroundColor: Colors.orange),
-                                                          SizedBox(width: 5),
-                                                          Text('ON IN OFF'),
-                                                          SizedBox(width: 20),
-                                                          CircleAvatar(radius: 5,backgroundColor: Colors.redAccent),
-                                                          SizedBox(width: 5),
-                                                          Text('OFF IN ON'),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    SizedBox(
-                                                      width: double.infinity,
-                                                      height : siteListFinal[siteIndex].nodeList[index].rlyStatus.length > 8? 150 : 70,
-                                                      child: GridView.builder(
-                                                        itemCount: siteListFinal[siteIndex].nodeList[index].rlyStatus.length, // Number of items in the grid
-                                                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                                          crossAxisCount: 8,
-                                                          crossAxisSpacing: 10.0,
-                                                          mainAxisSpacing: 10.0,
-                                                        ),
-                                                        itemBuilder: (BuildContext context, int indexGv) {
-                                                          return Column(
-                                                            children: [
-                                                              CircleAvatar(
-                                                                backgroundColor: siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv].status==0 ? Colors.grey :
-                                                                siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv].status==1 ? Colors.green :
-                                                                siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv].status==2 ? Colors.orange :
-                                                                siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv].status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
-                                                                child: Text((siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv].rlyNo).toString(), style: const TextStyle(color: Colors.white)),
-                                                              ),
-                                                              Text((siteListFinal[siteIndex].nodeList[index].rlyStatus[indexGv].name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
-                                                            ],
-                                                          );
-                                                        },
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ) :
-                                                const Center(child: Text('Relay Status Not Found')),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                              ))),
-                            ])),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                );
+                return SideSheetClass(customerID: widget.customerID, siteData: siteListFinal[siteIndex],);
               },
             ),
           ),
@@ -1408,6 +1124,131 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
     );
   }
 
+  Future<void>showAlarmBottomSheet(BuildContext context, MqttPayloadProvider provider) async{
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return  SizedBox(
+          height: 600,
+          child: Column(
+            children: [
+              Card(
+                elevation: 5,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(5), topRight: Radius.circular(5)),
+                ),
+                surfaceTintColor: Colors.white,
+                margin: EdgeInsets.zero,
+                child: ListTile(
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(topLeft: Radius.circular(5), topRight: Radius.circular(5)),
+                  ),
+                  tileColor: myTheme.primaryColor,
+                  textColor: Colors.white,
+                  title: const Text('Alarm List'),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: provider.alarmList.isNotEmpty? DataTable2(
+                  columnSpacing: 12,
+                  horizontalMargin: 12,
+                  minWidth: 600,
+                  dataRowHeight: 45.0,
+                  headingRowHeight: 35.0,
+                  headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
+                  columns: const [
+                    DataColumn2(
+                      label: Text('S-No', style: TextStyle(fontSize: 13),),
+                      fixedWidth: 50,
+                    ),
+                    DataColumn2(
+                        label: Text('', style: TextStyle(fontSize: 13)),
+                        fixedWidth: 40,
+                    ),
+                    DataColumn2(
+                        label: Text('Message', style: TextStyle(fontSize: 13),),
+                        size: ColumnSize.L
+                    ),
+                    DataColumn2(
+                        label: Text('Location', style: TextStyle(fontSize: 13),),
+                        size: ColumnSize.L
+                    ),
+                    DataColumn2(
+                      label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
+                      fixedWidth: 80,
+                    ),
+                  ],
+                  rows: List<DataRow>.generate(provider.alarmList.length, (index) => DataRow(cells: [
+                    DataCell(Text('${index+1}')),
+                    DataCell(Icon(Icons.warning_amber, color: provider.alarmList[index]['Status']==1 ? Colors.orangeAccent : Colors.redAccent,)),
+                    DataCell(Text(getAlarmMessage(provider.alarmList[index]['AlarmType']))),
+                    DataCell(Text(provider.alarmList[index]['Location'])),
+                    DataCell(Center(child: MaterialButton(
+                      color: Colors.redAccent,
+                      textColor: Colors.white,
+                      onPressed: (){
+                        String payload =  '${provider.alarmList[index]['S_No']}';
+                        String payLoadFinal = jsonEncode({
+                          "4100": [{"4101": payload}]
+                        });
+                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteListFinal[siteIndex].deviceId}');
+
+                      },
+                      child: const Text('Reset'),
+                    ))),
+                  ])),
+                ):
+                const Center(child: Text('Alarm not found'),),
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  String getAlarmMessage(int alarmType) {
+    String msg = '';
+
+    switch (alarmType) {
+      case 1:
+        msg ='Low Flow';
+        break;
+      case 2:
+        msg ='High Flow';
+        break;
+      case 3:
+        msg ='No Flow';
+        break;
+      case 4:
+        msg ='Ec High';
+        break;
+      case 5:
+        msg ='Ph Low';
+        break;
+      case 6:
+        msg ='Ph High';
+        break;
+      case 7:
+        msg ='Pressure Low';
+        break;
+      case 8:
+        msg ='Pressure High';
+        break;
+      case 9:
+        msg ='No Power Supply';
+        break;
+      case 10:
+        msg ='No Communication';
+        break;
+      default:
+        msg ='alarmType default';
+    }
+
+    return msg;
+  }
+
   Widget buildLoadingIndicator(bool isVisible, double width)
   {
     return Visibility(
@@ -1545,7 +1386,7 @@ class _ThemeChangeDialogState extends State<ThemeChangeDialog> {
           onPressed: () {
             Navigator.pop(context); // Close the dialog
           },
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
         ),
         MaterialButton(
           onPressed: () {
@@ -1559,6 +1400,7 @@ class _ThemeChangeDialogState extends State<ThemeChangeDialog> {
     );
   }
 }
+
 class BadgeButton extends StatelessWidget {
   final VoidCallback onPressed;
   final IconData icon;
@@ -1576,6 +1418,7 @@ class BadgeButton extends StatelessWidget {
     return Stack(
       children: [
         IconButton(
+          tooltip: 'Alarm list',
           onPressed: onPressed,
           icon: Icon(icon, color: Colors.white,),
         ),
@@ -1605,5 +1448,370 @@ class BadgeButton extends StatelessWidget {
           ),
       ],
     );
+  }
+}
+
+
+class SideSheetClass extends StatefulWidget {
+  const SideSheetClass({Key? key, required this.customerID, required this.siteData}) : super(key: key);
+  final int customerID;
+  final DashboardModel siteData;
+
+
+  @override
+  State<SideSheetClass> createState() => _SideSheetClassState();
+}
+
+class _SideSheetClassState extends State<SideSheetClass> {
+
+  String lastSyncData = '';
+
+  @override
+  Widget build(BuildContext context) {
+
+    var provider = Provider.of<MqttPayloadProvider>(context, listen: true);
+    try{
+      Map<String, dynamic> data = jsonDecode(provider.receivedDashboardPayload);
+      setState(() {
+        if (data['2400'][0].containsKey('2401')) {
+          for (var item in data['2400'][0]['2401']) {
+            if (item is Map<String, dynamic>) {
+              try {
+                int position = getNodePositionInNodeList(0, item['SNo']);
+                if (position != -1) {
+                  widget.siteData.nodeList[position].status = item['Status'];
+                  widget.siteData.nodeList[position].batVolt = item['BatVolt'];
+                  widget.siteData.nodeList[position].slrVolt = item['SVolt'];
+                  widget.siteData.nodeList[position].rlyStatus = [];
+                  if (item['RlyStatus'] != null) {
+                    List<dynamic> rlyStatusJsonList = item['RlyStatus'];
+                    List<RelayStatus> rlyStatusList = rlyStatusJsonList.map((rs) => RelayStatus.fromJson(rs)).toList();
+                    widget.siteData.nodeList[position].rlyStatus = rlyStatusList;
+                  }
+                } else {
+                  print('${item['SNo']} The serial number not found');
+                }
+              } catch (e) {
+                print('Error updating node properties: $e');
+              }
+            }
+          }
+        }
+
+      });
+    }
+    catch(e){
+      print(e);
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(15),
+      // margin: EdgeInsets.all(10),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.zero,
+      ),
+      height: MediaQuery.sizeOf(context).height,
+      width: 400,
+      child: SingleChildScrollView(
+        child:Column(
+          children: [
+            Row(
+              children: [
+                IconButton(
+                  tooltip: 'Close',
+                  icon: const Icon(Icons.arrow_back_outlined, color: Colors.redAccent),
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+            CircleAvatar(
+              radius: 30,
+              backgroundColor:myTheme.primaryColorDark.withOpacity(0.2),
+              child: Image.asset('assets/images/oro_gem.png', width: 40, height: 40,),
+            ),
+            Text(widget.siteData.deviceName, style: const TextStyle(color: Colors.black, fontSize: 13)),
+            Text('${widget.siteData.categoryName} - Last sync : $lastSyncData', style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 11, color: Colors.black,),),
+            const Divider(),
+            SizedBox(
+              height: 50,
+              child: Row(
+                children: [
+                  Row(
+                    children: [
+                      const SizedBox(width: 5),
+                      const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              SizedBox(width: 5),
+                              CircleAvatar(radius: 5, backgroundColor: Colors.green,),
+                              SizedBox(width: 5),
+                              Text('Connected', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              SizedBox(width: 5),
+                              CircleAvatar(radius: 5, backgroundColor: Colors.grey),
+                              SizedBox(width: 5),
+                              Text('No Communication', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 10),
+                      const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              SizedBox(width: 10),
+                              CircleAvatar(radius: 5, backgroundColor: Colors.redAccent,),
+                              SizedBox(width: 5),
+                              Text('Set Serial Error', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              SizedBox(width: 10),
+                              CircleAvatar(radius: 5, backgroundColor: Colors.yellow),
+                              SizedBox(width: 5),
+                              Text('Low Battery', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black))
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 20),
+                      SizedBox(
+                        width: 40,
+                        child: IconButton(
+                          tooltip: 'Set serial for all Nodes',
+                          icon: Icon(Icons.format_list_numbered, color: myTheme.primaryColorDark),
+                          onPressed: () async {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Confirmation'),
+                                  content: const Text('Are you sure! you want to proceed to reset all node ids?'),
+                                  actions: <Widget>[
+                                    MaterialButton(
+                                      color: Colors.redAccent,
+                                      textColor: Colors.white,
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text('Cancel'),
+                                    ),
+                                    MaterialButton(
+                                      color: myTheme.primaryColor,
+                                      textColor: Colors.white,
+                                      onPressed: () {
+                                        String payLoadFinal = jsonEncode({
+                                          "2300": [
+                                            {"2301": ""},
+                                          ]
+                                        });
+                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                        GlobalSnackBar.show(context, 'Sent your comment successfully', 200);
+                                      },
+                                      child: const Text('Yes'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              width: 400,
+              height: 400,
+              child: DataTable2(
+                columnSpacing: 12,
+                horizontalMargin: 12,
+                minWidth: 325,
+                dataRowHeight: 40.0,
+                headingRowHeight: 35.0,
+                headingRowColor: MaterialStateProperty.all<Color>(myTheme.primaryColorDark.withOpacity(0.2)),
+                columns: const [
+                  DataColumn2(
+                      label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
+                      fixedWidth: 35
+                  ),
+                  DataColumn2(
+                    label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
+                    fixedWidth: 55,
+                  ),
+                  DataColumn2(
+                    label: Center(child: Text('Rf.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
+                    fixedWidth: 45,
+                  ),
+                  DataColumn2(
+                    label: Text('Category', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),),
+                    size: ColumnSize.M,
+                    numeric: true,
+                  ),
+                  DataColumn2(
+                    label: Text('Info', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),),
+                    fixedWidth: 40,
+                  ),
+                ],
+                rows: List<DataRow>.generate(widget.siteData.nodeList.length, (index) => DataRow(cells: [
+                  DataCell(Center(child: Text('${widget.siteData.nodeList[index].serialNumber}', style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black),))),
+                  DataCell(Center(child: CircleAvatar(radius: 7, backgroundColor:
+                  widget.siteData.nodeList[index].status == 1 ? Colors.green.shade400:
+                  widget.siteData.nodeList[index].status == 2 ? Colors.grey :
+                  widget.siteData.nodeList[index].status == 3 ? Colors.redAccent :
+                  widget.siteData.nodeList[index].status == 4 ? Colors.yellow :
+                  Colors.grey,
+                  ))),
+                  DataCell(Center(child: Text('${widget.siteData.nodeList[index].referenceNumber}', style: TextStyle(fontWeight: FontWeight.normal, color: Colors.black)))),
+                  DataCell(Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(widget.siteData.nodeList[index].categoryName, style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black)),
+                      Text(widget.siteData.nodeList[index].deviceId, style: const TextStyle(fontWeight: FontWeight.normal,fontSize: 11, color: Colors.black)),
+                    ],
+                  )),
+                  DataCell(Center(child: IconButton(tooltip: 'View Relay status',
+                    icon: widget.siteData.nodeList[index].rlyStatus.any((rly) => rly.status == 2 || rly.status == 3)? const Icon(Icons.warning, color: Colors.orangeAccent):
+                    Icon(Icons.info_outline, color: myTheme.primaryColorDark), // Icon to display
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return SizedBox(
+                            height: widget.siteData.nodeList[index].rlyStatus.length > 8? 275 : 200,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: <Widget>[
+                                ListTile(
+                                  tileColor: myTheme.primaryColor,
+                                  textColor: Colors.white,
+                                  leading: const Icon(Icons.developer_board_rounded, color: Colors.white),
+                                  title: Text('${widget.siteData.nodeList[index].categoryName} - ${widget.siteData.nodeList[index].deviceId}'),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.solar_power_outlined, color: Colors.white),
+                                      const SizedBox(width: 5,),
+                                      Text('${widget.siteData.nodeList[index].slrVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                      const SizedBox(width: 5,),
+                                      const Icon(Icons.battery_3_bar_rounded, color: Colors.white),
+                                      const SizedBox(width: 5,),
+                                      Text('${widget.siteData.nodeList[index].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                      const SizedBox(width: 5,),
+                                      IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
+                                        String payLoadFinal = jsonEncode({
+                                          "2300": [
+                                            {"2301": "${widget.siteData.nodeList[index].serialNumber}"},
+                                          ]
+                                        });
+                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                      }, icon: Icon(Icons.fact_check_outlined, color: Colors.white))
+                                    ],
+                                  ),
+                                ),
+                                const Divider(height: 0),
+                                SizedBox(
+                                  width : double.infinity,
+                                  height : widget.siteData.nodeList[index].rlyStatus.length > 8? 206 : 130,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: widget.siteData.nodeList[index].rlyStatus.isNotEmpty ? Column(
+                                      children: [
+                                        const SizedBox(
+                                          width: double.infinity,
+                                          height : 40,
+                                          child: Row(
+                                            children: [
+                                              SizedBox(width: 10),
+                                              CircleAvatar(radius: 5,backgroundColor: Colors.green,),
+                                              SizedBox(width: 5),
+                                              Text('ON'),
+                                              SizedBox(width: 20),
+                                              CircleAvatar(radius: 5,backgroundColor: Colors.black45),
+                                              SizedBox(width: 5),
+                                              Text('OFF'),
+                                              SizedBox(width: 20),
+                                              CircleAvatar(radius: 5,backgroundColor: Colors.orange),
+                                              SizedBox(width: 5),
+                                              Text('ON IN OFF'),
+                                              SizedBox(width: 20),
+                                              CircleAvatar(radius: 5,backgroundColor: Colors.redAccent),
+                                              SizedBox(width: 5),
+                                              Text('OFF IN ON'),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: double.infinity,
+                                          height : widget.siteData.nodeList[index].rlyStatus.length > 8? 150 : 70,
+                                          child: GridView.builder(
+                                            itemCount: widget.siteData.nodeList[index].rlyStatus.length, // Number of items in the grid
+                                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: 8,
+                                              crossAxisSpacing: 10.0,
+                                              mainAxisSpacing: 10.0,
+                                            ),
+                                            itemBuilder: (BuildContext context, int indexGv) {
+                                              return Column(
+                                                children: [
+                                                  CircleAvatar(
+                                                    backgroundColor: widget.siteData.nodeList[index].rlyStatus[indexGv].status==0 ? Colors.grey :
+                                                    widget.siteData.nodeList[index].rlyStatus[indexGv].status==1 ? Colors.green :
+                                                    widget.siteData.nodeList[index].rlyStatus[indexGv].status==2 ? Colors.orange :
+                                                    widget.siteData.nodeList[index].rlyStatus[indexGv].status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
+                                                    child: Text((widget.siteData.nodeList[index].rlyStatus[indexGv].rlyNo).toString(), style: const TextStyle(color: Colors.white)),
+                                                  ),
+                                                  Text((widget.siteData.nodeList[index].rlyStatus[indexGv].name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                                ],
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ) :
+                                    const Center(child: Text('Relay Status Not Found')),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ))),
+                ])),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  int getNodePositionInNodeList(int siteIndex, int srlNo)
+  {
+    List<NodeModel> nodeList = widget.siteData.nodeList;
+    for (int i = 0; i < nodeList.length; i++) {
+      if (nodeList[i].serialNumber == srlNo) {
+        return i;
+      }
+    }
+    return -1;
   }
 }

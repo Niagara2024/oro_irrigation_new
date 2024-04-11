@@ -87,7 +87,6 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
      - assets/images/otp_illustrator.png
-     - assets/images/login_illustrator.png
      - assets/images/user_thumbnail.png
      - assets/images/no_data.jpg
      - assets/images/irrigation_pump.png
@@ -268,7 +267,6 @@ flutter:
      - assets/images/dp_main_valve_open.png
      - assets/images/dp_main_valve_wait.png
      - assets/images/dp_main_valve_not_open.png
-     - assets/images/dp_fert_tpipe.png
      - assets/images/dp_fert_last_tank1.png
      - assets/images/dp_fert_first_tank1.png
 

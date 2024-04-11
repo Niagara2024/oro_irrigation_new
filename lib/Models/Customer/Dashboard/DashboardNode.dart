@@ -16,6 +16,7 @@ class DashboardModel {
   List<FilterModel> centralFilterSite;
   List<dynamic> localFilter;
   List<Agitator> agitator;
+  List<IrrigationLine> irrigationLine;
 
   DashboardModel({
     required this.controllerId,
@@ -35,6 +36,7 @@ class DashboardModel {
     required this.centralFilterSite,
     required this.localFilter,
     required this.agitator,
+    required this.irrigationLine,
   });
 
   factory DashboardModel.fromJson(Map<String, dynamic> json) {
@@ -66,6 +68,7 @@ class DashboardModel {
       centralFilterSite: List<FilterModel>.from(json['centralFilterSite'].map((x) => FilterModel.fromJson(x))),
       localFilter: List<dynamic>.from(json['localFilter']),
       agitator: List<Agitator>.from(json['agitator'].map((x) => Agitator.fromJson(x))),
+      irrigationLine: List<IrrigationLine>.from(json['irrigationLine'].map((x) => IrrigationLine.fromJson(x))),
     );
 
   }
@@ -358,6 +361,108 @@ class Agitator {
       id: json['id'],
       name: json['name'],
       location: json['location'],
+      status: json['status'],
+    );
+  }
+}
+
+class IrrigationLine {
+  int sNo;
+  String id;
+  String hid;
+  String name;
+  String location;
+  String type;
+  List<MainValve> mainValve;
+  List<Valve> valve;
+  List<PressureSensor> pressureSensor;
+
+  IrrigationLine({
+    required this.sNo,
+    required this.id,
+    required this.hid,
+    required this.name,
+    required this.location,
+    required this.type,
+    required this.mainValve,
+    required this.valve,
+    required this.pressureSensor,
+  });
+
+  factory IrrigationLine.fromJson(Map<String, dynamic> json) {
+    return IrrigationLine(
+      sNo: json['sNo'],
+      id: json['id'],
+      hid: json['hid'],
+      name: json['name'],
+      location: json['location'],
+      type: json['type'],
+      mainValve: List<MainValve>.from(json['mainValve'].map((x) => MainValve.fromJson(x))),
+      valve: List<Valve>.from(json['valve'].map((x) => Valve.fromJson(x))),
+      pressureSensor: List<PressureSensor>.from(json['pressureSensor'].map((x) => PressureSensor.fromJson(x))),
+    );
+  }
+}
+
+class Valve {
+  int sNo;
+  String id;
+  String hid;
+  String name;
+  String location;
+  String type;
+  int status;
+
+  Valve({
+    required this.sNo,
+    required this.id,
+    required this.hid,
+    required this.name,
+    required this.location,
+    required this.type,
+    required this.status,
+  });
+
+  factory Valve.fromJson(Map<String, dynamic> json) {
+    return Valve(
+      sNo: json['sNo'],
+      id: json['id'],
+      hid: json['hid'],
+      name: json['name'],
+      location: json['location'],
+      type: json['type'],
+      status: json['status'],
+    );
+  }
+}
+
+class PressureSensor {
+  int sNo;
+  String id;
+  String hid;
+  String name;
+  String location;
+  String type;
+  int status;
+
+  PressureSensor({
+    required this.sNo,
+    required this.id,
+    required this.hid,
+    required this.name,
+    required this.location,
+    required this.type,
+    required this.status,
+  });
+
+  factory PressureSensor.fromJson(Map<String, dynamic> json) {
+    return PressureSensor(
+      sNo: json['sNo'],
+      id: json['id'],
+      hid: json['hid'],
+      name: json['name'],
+      location: json['location'],
+      type: json['type'],
       status: json['status'],
     );
   }

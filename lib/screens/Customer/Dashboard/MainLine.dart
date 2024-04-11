@@ -27,56 +27,82 @@ class _MainLineState extends State<MainLine> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<MqttPayloadProvider>(context);
-    return Container(
-      decoration: BoxDecoration(
-        color: myTheme.primaryColor.withOpacity(0.2),
-        borderRadius: const BorderRadius.all(Radius.circular(5)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(3.0),
-        child: Column(
-          children: [
-            ListTile(
-              title: const Text('MAIN LINE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-              trailing: MaterialButton(
-                color: Colors.redAccent,
-                textColor: Colors.white,
-                onPressed:  (){
-                },
-                child: const Text('Pause all program'),
+    return Padding(
+      padding: const EdgeInsets.all(3.0),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: myTheme.primaryColorLight,
+                  borderRadius: const BorderRadius.only(
+                    topRight: Radius.circular(20),
+                    bottomRight: Radius.circular(0),
+                  ),
+                ),
+                child: const Text('MAIN LINE - CENTRAL & LOCAL',  style: TextStyle(color: Colors.black)),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: myTheme.primaryColorLight,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    bottomLeft: Radius.circular(0),
+                  ),
+                ),
+                child: MaterialButton(
+                  color: Colors.redAccent,
+                  textColor: Colors.white,
+                  onPressed:  (){
+                  },
+                  child: const Text('Pause all program'),
+                ),
+              ),
+            ],
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(
+                color: myTheme.primaryColor.withOpacity(0.5),
+                width: 1,
+              ),
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(5),
+                bottomRight: Radius.circular(5),
               ),
             ),
-            Container(
-              color: Colors.white,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
-                child: widget.siteData.irrigationPump.isNotEmpty? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        widget.siteData.irrigationPump.isNotEmpty? const IrrigationPumpList(): const SizedBox(),
-                        widget.siteData.centralFilterSite.isNotEmpty? const CentralFilter(): const SizedBox(),
-                        widget.siteData.centralFertilizerSite.isNotEmpty? const CentralFertilizer(): const SizedBox(),
-                        VerticalDivider(),
-                        provider.filtersLocal.isNotEmpty?  MainLineLocal(siteData: widget.siteData) : const SizedBox()
-                      ],
-                    ),
-                  ],
-                ) :
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 15),
-                    child: Text('Main line installation pending', style: TextStyle(fontWeight: FontWeight.normal), textAlign: TextAlign.left),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
+              child: widget.siteData.irrigationPump.isNotEmpty? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      widget.siteData.irrigationPump.isNotEmpty? const IrrigationPumpList(): const SizedBox(),
+                      widget.siteData.centralFilterSite.isNotEmpty? const CentralFilter(): const SizedBox(),
+                      widget.siteData.centralFertilizerSite.isNotEmpty? const CentralFertilizer(): const SizedBox(),
+                      const VerticalDivider(),
+                      provider.filtersLocal.isNotEmpty?  MainLineLocal(siteData: widget.siteData) : const SizedBox()
+                    ],
                   ),
+                ],
+              ) :
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 15),
+                  child: Text('Main line installation pending', style: TextStyle(fontWeight: FontWeight.normal), textAlign: TextAlign.left),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
 
@@ -251,7 +277,13 @@ class _CentralFertilizerState extends State<CentralFertilizer> {
                                       Positioned(
                                         top: 0,
                                         left: 10,
-                                        child: fertilizer['Status'] !=0 && fertilizer['FertSelection'] !='_'? Container(
+                                        child: fertilizer['Status'] !=0
+                                            &&
+                                            fertilizer['FertSelection'] !='_'
+                                            &&
+                                            fertilizer['DurationLeft'] !='00:00:00'
+                                            ?
+                                        Container(
                                           color: Colors.greenAccent,
                                           width: 50,
                                           child: Center(

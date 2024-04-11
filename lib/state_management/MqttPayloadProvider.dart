@@ -22,6 +22,7 @@ class MqttPayloadProvider with ChangeNotifier {
   List<dynamic> irrigationPump = [];
   List<dynamic> fertilizerCentral = [];
   List<dynamic> flowMeter = [];
+  List<dynamic> alarmList = [];
 
   void editMySchedule(ScheduleViewProvider instance){
     mySchedule = instance;
@@ -87,6 +88,10 @@ class MqttPayloadProvider with ChangeNotifier {
         if (data['2400'][0].containsKey('2408')) {
           List<dynamic> items = data['2400'][0]['2408'];
           flowMeter.addAll(items.where((item) => item['Watermeter'] != '-').map((item) => item['Watermeter']));
+        }
+
+        if (data['2400'][0].containsKey('2409')) {
+          alarmList = data['2400'][0]['2409'];
         }
 
       }

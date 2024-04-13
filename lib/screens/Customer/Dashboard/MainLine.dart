@@ -31,76 +31,63 @@ class _MainLineState extends State<MainLine> {
       padding: const EdgeInsets.all(3.0),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Stack(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                decoration: BoxDecoration(
-                  color: myTheme.primaryColorLight,
-                  borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(20),
-                    bottomRight: Radius.circular(0),
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(
+                      color: Colors.grey.shade300,
+                      width: 1,
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(5),
+                      bottomRight: Radius.circular(5),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
+                    child: widget.siteData.irrigationPump.isNotEmpty? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            widget.siteData.irrigationPump.isNotEmpty? const IrrigationPumpList(): const SizedBox(),
+                            widget.siteData.centralFilterSite.isNotEmpty? const CentralFilter(): const SizedBox(),
+                            widget.siteData.centralFertilizerSite.isNotEmpty? const CentralFertilizer(): const SizedBox(),
+                            const VerticalDivider(),
+                            provider.filtersLocal.isNotEmpty?  MainLineLocal(siteData: widget.siteData) : const SizedBox()
+                          ],
+                        ),
+                      ],
+                    ) :
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 15),
+                        child: Text('Main line installation pending', style: TextStyle(fontWeight: FontWeight.normal), textAlign: TextAlign.left),
+                      ),
+                    ),
                   ),
                 ),
-                child: const Text('MAIN LINE - CENTRAL & LOCAL',  style: TextStyle(color: Colors.black)),
               ),
-              Container(
-                decoration: BoxDecoration(
-                  color: myTheme.primaryColorLight,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    bottomLeft: Radius.circular(0),
+              Positioned(
+                top: 7.5,
+                left: 5,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: myTheme.primaryColor,
+                    borderRadius: const BorderRadius.all(Radius.circular(4)),
                   ),
-                ),
-                child: MaterialButton(
-                  color: Colors.redAccent,
-                  textColor: Colors.white,
-                  onPressed:  (){
-                  },
-                  child: const Text('Pause all program'),
+                  child: const Text('MAIN LINE - CENTRAL & LOCAL',  style: TextStyle(color: Colors.white)),
                 ),
               ),
             ],
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(
-                color: myTheme.primaryColor.withOpacity(0.5),
-                width: 1,
-              ),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(5),
-                bottomRight: Radius.circular(5),
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
-              child: widget.siteData.irrigationPump.isNotEmpty? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      widget.siteData.irrigationPump.isNotEmpty? const IrrigationPumpList(): const SizedBox(),
-                      widget.siteData.centralFilterSite.isNotEmpty? const CentralFilter(): const SizedBox(),
-                      widget.siteData.centralFertilizerSite.isNotEmpty? const CentralFertilizer(): const SizedBox(),
-                      const VerticalDivider(),
-                      provider.filtersLocal.isNotEmpty?  MainLineLocal(siteData: widget.siteData) : const SizedBox()
-                    ],
-                  ),
-                ],
-              ) :
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 15),
-                  child: Text('Main line installation pending', style: TextStyle(fontWeight: FontWeight.normal), textAlign: TextAlign.left),
-                ),
-              ),
-            ),
           ),
         ],
       ),

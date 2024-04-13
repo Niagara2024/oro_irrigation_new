@@ -13,7 +13,7 @@ import '../Models/product_stock.dart';
 import '../constants/http_service.dart';
 import '../constants/theme.dart';
 import '../state_management/mqtt_message_provider.dart';
-import 'Customer/customer_home.dart';
+import 'Customer/CustomerScreenController.dart';
 import 'Forms/add_product.dart';
 import 'Forms/create_account.dart';
 import 'Forms/device_list.dart';
@@ -432,7 +432,7 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                             if(userType==1){
                               Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyDealers(dealerId: myCustomerList[index].userId, dealerName: myCustomerList[index].userName)),);
                             }else{
-                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerHome(customerID: myCustomerList[index].userId, comingFrom: 'AdminORDealer', customerName: myCustomerList[index].userName, mobileNo: '+${myCustomerList[index].countryCode}-${myCustomerList[index].mobileNumber}',)));
+                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerScreenController(customerID: myCustomerList[index].userId, comingFrom: 'AdminORDealer', customerName: myCustomerList[index].userName, mobileNo: '+${myCustomerList[index].countryCode}-${myCustomerList[index].mobileNumber}',)));
                             }
                           }),
                           title: Text(myCustomerList[index].userName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),

@@ -23,16 +23,16 @@ import 'Dashboard/RunByManual.dart';
 import 'ProgramSchedule.dart';
 
 
-class CustomerHome extends StatefulWidget {
-  const CustomerHome({Key? key, required this.customerID, required this.customerName, required this.mobileNo, required this.comingFrom}) : super(key: key);
+class CustomerScreenController extends StatefulWidget {
+  const CustomerScreenController({Key? key, required this.customerID, required this.customerName, required this.mobileNo, required this.comingFrom}) : super(key: key);
   final int customerID;
   final String customerName, mobileNo, comingFrom;
 
   @override
-  _CustomerHomeState createState() => _CustomerHomeState();
+  _CustomerScreenControllerState createState() => _CustomerScreenControllerState();
 }
 
-class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderStateMixin
+class _CustomerScreenControllerState extends State<CustomerScreenController> with SingleTickerProviderStateMixin
 {
   List<DashboardModel> siteListFinal = [];
   int siteIndex = 0;
@@ -442,6 +442,14 @@ class _CustomerHomeState extends State<CustomerHome> with SingleTickerProviderSt
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                MaterialButton(
+                  color: Colors.white,
+                  textColor: Colors.black,
+                  onPressed:  (){
+                  },
+                  child: const Text('Pause all program'),
+                ),
+                const SizedBox(width: 10),
                 IconButton(tooltip : 'Help & Support', onPressed: (){
                   showMenu(
                     context: context,

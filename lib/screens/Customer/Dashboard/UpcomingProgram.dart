@@ -24,146 +24,141 @@ class UpcomingProgram extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Stack(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                decoration: const BoxDecoration(
-                  color: Colors.yellow,
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(20),
-                    bottomRight: Radius.circular(0),
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(
+                      color: Colors.grey.shade300,
+                      width: 1,
+                    ),
+                    borderRadius: const BorderRadius.only(
+                        bottomRight: Radius.circular(5),
+                        bottomLeft: Radius.circular(5)
+                    ),
                   ),
-                ),
-                child: const Text('SCHEDULED PROGRAM',  style: TextStyle(color: Colors.black)),
-              ),
-              Container(
-                decoration: const BoxDecoration(
-                  color: Colors.yellow,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    bottomLeft: Radius.circular(0),
-                  ),
-                ),
-                child: IconButton(
-                    tooltip: 'Schedule details',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ScheduleViewScreen(deviceId: siteData.deviceId, userId: customerId, controllerId: siteData.controllerId, customerId: customerId),
+                  height: provider.upcomingProgram.isNotEmpty? (provider.upcomingProgram.length * 40) + 55 : 40,
+                  child: provider.upcomingProgram.isNotEmpty? DataTable2(
+                    columnSpacing: 12,
+                    horizontalMargin: 12,
+                    minWidth: 600,
+                    dataRowHeight: 50.0,
+                    headingRowHeight: 40.0,
+                    headingRowColor: MaterialStateProperty.all<Color>(Colors.yellow.shade50),
+                    columns:  [
+                      const DataColumn2(
+                          label: Text('Name', style: TextStyle(fontSize: 13),),
+                          size: ColumnSize.L
+                      ),
+                      const DataColumn2(
+                          label: Text('Method', style: TextStyle(fontSize: 13)),
+                          size: ColumnSize.M
+
+                      ),
+                      const DataColumn2(
+                          label: Text('Line', style: TextStyle(fontSize: 13),),
+                          size: ColumnSize.M
+                      ),
+                      const DataColumn2(
+                          label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
+                          fixedWidth: 50
+                      ),
+                      const DataColumn2(
+                          label: Center(child: Text('Start Date', style: TextStyle(fontSize: 13),)),
+                          size: ColumnSize.M
+                      ),
+                      const DataColumn2(
+                          label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
+                          size: ColumnSize.M
+                      ),
+                      const DataColumn2(
+                          label: Center(child: Text('End Date', style: TextStyle(fontSize: 13),)),
+                          size: ColumnSize.M
+                      ),
+                      DataColumn2(
+                          label: Center(child: IconButton(
+                              tooltip: 'Schedule details',
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ScheduleViewScreen(deviceId: siteData.deviceId, userId: customerId, controllerId: siteData.controllerId, customerId: customerId),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.view_list_outlined))),
+                          fixedWidth: 80
+                      ),
+                    ],
+                    rows: List<DataRow>.generate(provider.upcomingProgram.length, (index) => DataRow(cells: [
+                      DataCell(Text(provider.upcomingProgram[index]['ProgName'])),
+                      DataCell(Text(provider.upcomingProgram[index]['SchedulingMethod']==1?'No Schedule':provider.upcomingProgram[index]['SchedulingMethod']==2?'Schedule by days':'Schedule as run list')),
+                      DataCell(Text(provider.upcomingProgram[index]['ProgCategory'])),
+                      DataCell(Center(child: Text('${provider.upcomingProgram[index]['TotalZone']}'))),
+                      DataCell(Center(child: Text('${provider.upcomingProgram[index]['StartDate']}'))),
+                      DataCell(Center(child: Text('${provider.upcomingProgram[index]['StartTime']}'))),
+                      DataCell(Center(child: Text('${provider.upcomingProgram[index]['EndDate']}'))),
+                      DataCell(
+                        provider.upcomingProgram[index]['ProgOnOff'] == 0 ? MaterialButton(
+                          color: Colors.green,
+                          textColor: Colors.white,
+                          onPressed:() {
+                            String localFilePath = 'assets/audios/button_click_sound.mp3';
+                            audioPlayer.play(UrlSource(localFilePath));
+                            String payload = '${provider.upcomingProgram[index]['SNo']},1';
+                            String payLoadFinal = jsonEncode({
+                              "2900": [{"2901": payload}]
+                            });
+                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
+                            sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Started by Manual', payLoadFinal);
+                          },
+                          child: const Text('Start'),
+                        ) :
+                        MaterialButton(
+                          color: Colors.redAccent,
+                          textColor: Colors.white,
+                          onPressed:() {
+                            String localFilePath = 'assets/audios/audio_off.mp3';
+                            audioPlayer.play(UrlSource(localFilePath));
+                            String payload = '${provider.upcomingProgram[index]['SNo']},0';
+                            String payLoadFinal = jsonEncode({
+                              "2900": [{"2901": payload}]
+                            });
+                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
+                            sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Stopped by Manual', payLoadFinal);
+                          },
+                          child: const Text('Stop'),
                         ),
-                      );
-                    },
-                    icon: const Icon(Icons.view_list_outlined)),
+                      ),
+                    ])),
+                  ) :
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 15),
+                      child: Text('Upcoming Program not Available', style: TextStyle(fontWeight: FontWeight.normal), textAlign: TextAlign.left),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 7.5,
+                left: 5,
+                child: Container(
+                  width: 200,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.yellow.shade200,
+                    borderRadius: const BorderRadius.all(Radius.circular(2)),
+                  ),
+                  child: const Text('SCHEDULED PROGRAM',  style: TextStyle(color: Colors.black)),
+                ),
               ),
             ],
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(
-                color: Colors.yellow.shade100,
-                width: 1,
-              ),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(5),
-                bottomRight: Radius.circular(5),
-              ),
-            ),
-            height: provider.upcomingProgram.isNotEmpty? (provider.upcomingProgram.length * 50) + 35 : 40,
-            child: provider.upcomingProgram.isNotEmpty? DataTable2(
-              columnSpacing: 12,
-              horizontalMargin: 12,
-              minWidth: 600,
-              dataRowHeight: 50.0,
-              headingRowHeight: 35.0,
-              headingRowColor: MaterialStateProperty.all<Color>(Colors.yellow.shade50),
-              columns: const [
-                DataColumn2(
-                    label: Text('Name', style: TextStyle(fontSize: 13),),
-                    size: ColumnSize.L
-                ),
-                DataColumn2(
-                    label: Text('Method', style: TextStyle(fontSize: 13)),
-                    size: ColumnSize.M
 
-                ),
-                DataColumn2(
-                    label: Text('Line', style: TextStyle(fontSize: 13),),
-                    size: ColumnSize.M
-                ),
-                DataColumn2(
-                    label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
-                    fixedWidth: 50
-                ),
-                DataColumn2(
-                    label: Center(child: Text('Start Date', style: TextStyle(fontSize: 13),)),
-                    size: ColumnSize.M
-                ),
-                DataColumn2(
-                    label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
-                    size: ColumnSize.M
-                ),
-                DataColumn2(
-                    label: Center(child: Text('End Date', style: TextStyle(fontSize: 13),)),
-                    size: ColumnSize.M
-                ),
-                DataColumn2(
-                    label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
-                    fixedWidth: 80
-                ),
-              ],
-              rows: List<DataRow>.generate(provider.upcomingProgram.length, (index) => DataRow(cells: [
-                DataCell(Text(provider.upcomingProgram[index]['ProgName'])),
-                DataCell(Text(provider.upcomingProgram[index]['SchedulingMethod']==1?'No Schedule':provider.upcomingProgram[index]['SchedulingMethod']==2?'Schedule by days':'Schedule as run list')),
-                DataCell(Text(provider.upcomingProgram[index]['ProgCategory'])),
-                DataCell(Center(child: Text('${provider.upcomingProgram[index]['TotalZone']}'))),
-                DataCell(Center(child: Text('${provider.upcomingProgram[index]['StartDate']}'))),
-                DataCell(Center(child: Text('${provider.upcomingProgram[index]['StartTime']}'))),
-                DataCell(Center(child: Text('${provider.upcomingProgram[index]['EndDate']}'))),
-                DataCell(
-                  provider.upcomingProgram[index]['ProgOnOff'] == 0 ? MaterialButton(
-                    color: Colors.green,
-                    textColor: Colors.white,
-                    onPressed:() {
-                      String localFilePath = 'assets/audios/button_click_sound.mp3';
-                      audioPlayer.play(UrlSource(localFilePath));
-                      String payload = '${provider.upcomingProgram[index]['SNo']},1';
-                      String payLoadFinal = jsonEncode({
-                        "2900": [{"2901": payload}]
-                      });
-                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
-                      sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Started by Manual', payLoadFinal);
-                    },
-                    child: const Text('Start'),
-                  ) :
-                  MaterialButton(
-                    color: Colors.redAccent,
-                    textColor: Colors.white,
-                    onPressed:() {
-                      String localFilePath = 'assets/audios/audio_off.mp3';
-                      audioPlayer.play(UrlSource(localFilePath));
-                      String payload = '${provider.upcomingProgram[index]['SNo']},0';
-                      String payLoadFinal = jsonEncode({
-                        "2900": [{"2901": payload}]
-                      });
-                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
-                      sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Stopped by Manual', payLoadFinal);
-                    },
-                    child: const Text('Stop'),
-                  ),
-                ),
-              ])),
-            ) :
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: EdgeInsets.only(left: 15),
-                child: Text('Upcoming Program not Available', style: TextStyle(fontWeight: FontWeight.normal), textAlign: TextAlign.left),
-              ),
-            ),
           ),
         ],
       ),

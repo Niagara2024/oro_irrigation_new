@@ -26,7 +26,7 @@ import '../state_management/MqttPayloadProvider.dart';
 import 'Customer/AccountManagement.dart';
 import 'Customer/Dashboard/SentAndReceived.dart';
 import 'Customer/Dashboard/FarmSettings.dart';
-import 'Customer/customer_home.dart';
+import 'Customer/CustomerScreenController.dart';
 import 'my_preference.dart';
 import 'product_entry.dart';
 import 'AdminDealerHomePage.dart';
@@ -184,7 +184,7 @@ class _DashboardWideState extends State<DashboardWide> {
     print(userData.userType);
     print(userData.userName);
     return  Scaffold(
-      body: userData.userType =='3'? CustomerHome(customerID: userData.userId, customerName: userData.userName, mobileNo: '+${userData.countryCode}-${userData.mobileNo}', comingFrom: 'Customer',): Row(
+      body: userData.userType =='3'? CustomerScreenController(customerID: userData.userId, customerName: userData.userName, mobileNo: '+${userData.countryCode}-${userData.mobileNo}', comingFrom: 'Customer',): Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           NavigationRail(

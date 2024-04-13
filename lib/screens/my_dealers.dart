@@ -9,7 +9,7 @@ import '../Models/customer_list.dart';
 import '../Models/product_stock.dart';
 import '../constants/http_service.dart';
 import '../constants/theme.dart';
-import 'Customer/customer_home.dart';
+import 'Customer/CustomerScreenController.dart';
 import 'Forms/create_account.dart';
 import 'Forms/device_list.dart';
 
@@ -220,7 +220,7 @@ class MyDealersState extends State<MyDealers> {
                             ),
                             trailing: IconButton(tooltip: 'View Customer Dashboard', icon: const Icon(Icons.view_quilt_outlined), color: myTheme.primaryColor, onPressed: () async
                             {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerHome(customerID: customerOfDealer[index].userId, comingFrom: 'AdminORDealer', customerName: customerOfDealer[index].userName, mobileNo: '+${customerOfDealer[index].countryCode}-${customerOfDealer[index].mobileNumber}',)),);
+                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerScreenController(customerID: customerOfDealer[index].userId, comingFrom: 'AdminORDealer', customerName: customerOfDealer[index].userName, mobileNo: '+${customerOfDealer[index].countryCode}-${customerOfDealer[index].mobileNumber}',)),);
                             }),
                             title: Text(customerOfDealer[index].userName),
                             subtitle: Text('+${customerOfDealer[index].countryCode} ${customerOfDealer[index].mobileNumber}'),

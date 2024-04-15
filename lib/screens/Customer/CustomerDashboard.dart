@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/CurrentScheduleFinal.dart';
+import 'package:oro_irrigation_new/screens/Customer/Dashboard/LocalSite.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/NextSchedule.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/UpcomingProgram.dart';
 import 'package:provider/provider.dart';
@@ -62,34 +63,9 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
         children: [
           //MainLine(siteData: widget.siteData),
           PumpLineCentral(siteData: widget.siteData),
+          LocalSite(siteData: widget.siteData),
           //DisplayIrrigationLine(siteData: widget.siteData),
           CurrentScheduleFinal(siteData: widget.siteData, customerID: widget.customerID),
-          /*provider.flowMeter.isNotEmpty? Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: 70,
-                width: 70,
-                child: Image.asset('assets/images/dp_flowmeter.png',),
-              ),
-              const SizedBox(
-                height: 70,
-                width: 70,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Actual', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
-                    Text('0000 - m3/h', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 11)),
-                    Text('Nominal', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
-                    Text('0000 - m3/h', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 11)),
-                  ],
-                ),
-              ),
-            ],
-          ):
-          const SizedBox(),*/
           provider.nextSchedule.isNotEmpty?
           NextSchedule(siteData: widget.siteData, userID: widget.userID, customerID: widget.customerID):
           const SizedBox(),

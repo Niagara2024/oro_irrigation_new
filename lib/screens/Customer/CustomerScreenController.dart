@@ -96,7 +96,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   void clearMQTTPayload(){
     MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context,listen: false);
-    payloadProvider.mainLine=[];
+    //payloadProvider.mainLine=[];
     payloadProvider.currentSchedule=[];
     payloadProvider.PrsIn=[];
     payloadProvider.PrsOut=[];
@@ -106,6 +106,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     payloadProvider.filtersLocal=[];
     payloadProvider.irrigationPump=[];
     payloadProvider.fertilizerCentral=[];
+    payloadProvider.fertilizerLocal=[];
     //payloadProvider.flowMeter=[];
     payloadProvider.wifiStrength = 0;
   }
@@ -203,7 +204,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   Widget build(BuildContext context)
   {
     final screenWidth = MediaQuery.of(context).size.width;
-    final userData = UserData.of(context)!;
     final provider = Provider.of<MqttPayloadProvider>(context);
 
     if(widget.comingFrom == 'AdminORDealer'){
@@ -419,6 +419,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
     }else{
 
+      final userData = UserData.of(context)!;
       return loadingSite? buildLoadingIndicator(loadingSite, screenWidth):
       Scaffold(
         appBar: AppBar(
@@ -1512,9 +1513,8 @@ class _SideSheetClassState extends State<SideSheetClass> {
       print(e);
     }
 
-    return Container(
+    return provider.receivedDashboardPayload.isNotEmpty ? Container(
       padding: const EdgeInsets.all(15),
-      // margin: EdgeInsets.all(10),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.zero,
@@ -1528,7 +1528,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
               children: [
                 IconButton(
                   tooltip: 'Close',
-                  icon: const Icon(Icons.arrow_back_outlined, color: Colors.redAccent),
+                  icon: const Icon(Icons.close, color: Colors.redAccent),
                   onPressed: () async {
                     Navigator.of(context).pop();
                   },
@@ -1809,6 +1809,12 @@ class _SideSheetClassState extends State<SideSheetClass> {
           ],
         ),
       ),
+    ):
+    Container(
+        height: MediaQuery.sizeOf(context).height,
+        width: 400,
+        color: Colors.white,
+        child: const Center(child: Text('Loading datas...'))
     );
   }
 

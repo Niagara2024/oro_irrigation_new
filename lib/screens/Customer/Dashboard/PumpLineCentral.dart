@@ -248,12 +248,23 @@ class DisplaySensor extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = Provider.of<MqttPayloadProvider>(context);
     Map<String, dynamic> jsonData = provider.payload2408[0];
+    double totalWidth = 0.0;
 
-    return jsonData.isNotEmpty ? SizedBox(
-      width: jsonData.keys.length * 70, // Multiply by 70 for each item's width
+    for( var key in jsonData.keys){
+      dynamic value = jsonData[key];
+      if(key!='Line'){
+        if(value!='-'){
+          totalWidth += 70;
+        }
+      }
+    }
+    print(totalWidth);
+
+    return jsonData.isNotEmpty  ? SizedBox(
+      width: totalWidth,
       height: 85,
       child: ListView.builder(
-        itemCount: jsonData.keys.length, // Use the length of the keys
+        itemCount: jsonData.keys.length,
         scrollDirection: Axis.horizontal,
         itemBuilder: (BuildContext context, int index) {
           String key = jsonData.keys.elementAt(index);
@@ -304,7 +315,7 @@ class DisplaySensor extends StatelessWidget {
       ),
     ) : const SizedBox();
 
-    return provider.payload2408.isNotEmpty? SizedBox(
+    /*return provider.payload2408.isNotEmpty? SizedBox(
       width: provider.payload2408.length * 70,
       height: 85,
       child: ListView.builder(
@@ -353,7 +364,7 @@ class DisplaySensor extends StatelessWidget {
           );
         },
       ),
-    ) : const SizedBox();
+    ) : const SizedBox();*/
 
   }
 }
@@ -716,7 +727,7 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                             SizedBox(
                               width: 70,
                               height: 70,
-                              child: index == 0
+                              child: index == 0 && provider.fertilizerLocal[0]['Fertilizer'].length!=1
                                   ? provider.fertilizerCentral[0]['Agitator'].isNotEmpty
                                   ? Image.asset('assets/images/dp_fert_first_tank.png')
                                   : Image.asset('assets/images/dp_fert_first_tank1.png')

@@ -11,7 +11,7 @@ class MqttPayloadProvider with ChangeNotifier {
   late ScheduleViewProvider mySchedule;
 
   int wifiStrength = 0;
-  List<dynamic> mainLine = [];
+  //List<dynamic> mainLine = [];
   List<dynamic> currentSchedule = [];
   List<dynamic> PrsIn = [];
   List<dynamic> PrsOut = [];
@@ -21,6 +21,7 @@ class MqttPayloadProvider with ChangeNotifier {
   List<dynamic> filtersLocal = [];
   List<dynamic> irrigationPump = [];
   List<dynamic> fertilizerCentral = [];
+  List<dynamic> fertilizerLocal = [];
   //List<dynamic> flowMeter = [];
   List<dynamic> waterMeter = [];
   List<dynamic> alarmList = [];
@@ -38,13 +39,11 @@ class MqttPayloadProvider with ChangeNotifier {
         dashBoardPayload = payload;
 
         if (data['2400'][0].containsKey('2405')) {
-          mainLine = data['2400'][0]['2405'];
+          //mainLine = data['2400'][0]['2405'];
         }
         if (data['2400'][0].containsKey('2402')) {
           currentSchedule = data['2400'][0]['2402'];
           if(currentSchedule.isNotEmpty && currentSchedule[0].containsKey('PrsIn')){
-            //print(currentSchedule[0]['PrsIn'].runtimeType);
-            //print(currentSchedule[0]['PrsOut'].runtimeType);
             PrsIn = currentSchedule[0]['PrsIn'];
             PrsOut = currentSchedule[0]['PrsOut'];
           }
@@ -77,7 +76,7 @@ class MqttPayloadProvider with ChangeNotifier {
             if (fertilizer['Type'] == 1) {
               fertilizerCentral.add(fertilizer);
             } else if (fertilizer['Type'] == 2) {
-              //filtersLocal.add(filter);
+              fertilizerLocal.add(fertilizer);
             }
           }
         }

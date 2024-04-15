@@ -169,7 +169,7 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                           height: 60,
                           child :  Column(
                             children: [
-                              (provider.currentSchedule[csIndex].containsKey('MV') && provider.currentSchedule[csIndex]['MV'].length > 0)
+                              /*(provider.currentSchedule[csIndex].containsKey('MV') && provider.currentSchedule[csIndex]['MV'].length > 0)
                                   && (provider.currentSchedule[csIndex].containsKey('VL') && provider.currentSchedule[csIndex]['VL'].length > 0)
                                   && (provider.currentSchedule[csIndex].containsKey('Watermeter') && provider.currentSchedule[csIndex]['Watermeter'].length > 0) ?
                               Row(
@@ -193,7 +193,7 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                                     color: Colors.greenAccent,
                                                     borderRadius: BorderRadius.all(Radius.circular(2)),
                                                   ),
-                                                  child: Center(child: Text(provider.currentSchedule[csIndex]['Watermeter'][mvIndex]['Value'],  style: TextStyle(color: Colors.black, fontSize: 10))),
+                                                  child: Center(child: Text('${provider.currentSchedule[csIndex]['Watermeter'][mvIndex]['Value']}',  style: TextStyle(color: Colors.black, fontSize: 10))),
                                                 ),
                                               ),
                                             ],
@@ -231,7 +231,7 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                     ),
                                   ),
                                 ],
-                              ): (provider.currentSchedule[csIndex].containsKey('MV') && provider.currentSchedule[csIndex]['MV'].length > 0)
+                              ): */(provider.currentSchedule[csIndex].containsKey('MV') && provider.currentSchedule[csIndex]['MV'].length > 0)
                                   && (provider.currentSchedule[csIndex].containsKey('VL') && provider.currentSchedule[csIndex]['VL'].length > 0) ?
                               Row(
                                 children: [

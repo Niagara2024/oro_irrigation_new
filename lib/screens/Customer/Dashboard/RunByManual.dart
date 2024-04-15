@@ -218,6 +218,8 @@ class _RunByManualState extends State<RunByManual> {
                     strSldBoosterPumpSrlNo,
                     strSldSelectorSrlNo,
                   ];
+                  print(strSldIrrigationPumpSrlNo);
+                  print(strSldValveOrLineSrlNo);
 
                   if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
                     showDialog<String>(
@@ -240,6 +242,8 @@ class _RunByManualState extends State<RunByManual> {
                           ],
                         )
                     );
+                  }else{
+                    startByStandaloneDefault(allRelaySrlNo);
                   }
 
                 }
@@ -1203,15 +1207,14 @@ class _RunByManualState extends State<RunByManual> {
 
       print(payLoadFinal);
 
-     /* MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
-
+      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
       Map<String, dynamic> manualOperation = {
         "method": segmentIndex+1,
         "time": strDuration,
         "flow": strFlow,
         "selected": standaloneSelection,
       };
-      sentManualModeToServer(manualOperation);*/
+      sentManualModeToServer(manualOperation);
     }
 
   }

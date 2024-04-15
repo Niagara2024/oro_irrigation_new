@@ -5,13 +5,12 @@ import 'package:chat_bubbles/bubbles/bubble_special_two.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:oro_irrigation_new/Models/Customer/Dashboard/SentAndReceivedModel.dart';
-import 'package:oro_irrigation_new/constants/theme.dart';
+
 import '../../../constants/http_service.dart';
 
 class SentAndReceived extends StatefulWidget {
   const SentAndReceived({Key? key, required this.customerID, required this.controllerId}) : super(key: key);
   final int customerID, controllerId;
-
 
   @override
   State<SentAndReceived> createState() => _SentAndReceivedState();
@@ -37,62 +36,62 @@ class _SentAndReceivedState extends State<SentAndReceived> {
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[200],
+      appBar: AppBar(
+        title: Column(children: [
+          const Text("Sent And Received",),
+          GestureDetector(child: Text(finalDate, style: const TextStyle(fontSize: 15.0),),
+          )
+        ]),
+        actions: <Widget>[
+          IconButton(icon: const Icon(Icons.calendar_month), onPressed: () async {_selectDate(context); }),
+          const SizedBox(width: 10,),
+        ],
+      ),
+      body: ListView.builder(
+        padding: const EdgeInsets.only(top: 10),
+        itemCount: sentAndReceivedList.length,
+        itemBuilder: (context, index)
+        {
+          if(sentAndReceivedList[index].messageType == 'RECEIVED')
+          {
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: BubbleSpecialOne(
+                textStyle: const TextStyle(fontSize: 12),
+                text: '${sentAndReceivedList[index].message}\n\n${sentAndReceivedList[index].time},',
+                color: Colors.red.shade100,
+              ),
+            );
+          }
+          else
+          {
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: BubbleSpecialTwo(
+                text: '${sentAndReceivedList[index].message}\n${sentAndReceivedList[index].time}',
+                isSender: false,
+                color: Colors.blue.shade100,
+                textStyle: const TextStyle(fontSize: 12,),
+              ),
+            );
+          }
 
-    return Column(
-      children: [
-        SizedBox(
-          width: MediaQuery.sizeOf(context).width,
-          height: 40,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              IconButton(icon: const Icon(Icons.calendar_month), onPressed: () async {_selectDate(context); }),
-              GestureDetector(child: Text(finalDate, style: const TextStyle(fontSize: 15.0),)),
-            ],
-          ),
-        ),
-        Expanded(
-          child: sentAndReceivedList.isNotEmpty ? ListView.builder(
-            padding: const EdgeInsets.only(top: 10),
-            itemCount: sentAndReceivedList.length,
-            itemBuilder: (context, index) {
-              if (sentAndReceivedList[index].messageType == 'RECEIVED') {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: BubbleSpecialOne(
-                    textStyle: const TextStyle(fontSize: 13),
-                    text: '${sentAndReceivedList[index].message}\n\n${sentAndReceivedList[index].time},',
-                    color: Colors.red.shade100,
-                  ),
-                );
-              } else {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: BubbleSpecialTwo(
-                    text: '${sentAndReceivedList[index].message}\n${sentAndReceivedList[index].time}',
-                    isSender: false,
-                    color: myTheme.primaryColorLight.withOpacity(0.3),
-                    textStyle: const TextStyle(fontSize: 13),
-                  ),
-                );
-              }
-            },
-          ):
-          const Center(child: Text('No Data Available'),),
-        ),
-      ],
+        },
+      ),
+
     );
-
   }
 
   Future<void> getLogs(int controllerId, String date) async {
     try {
       sentAndReceivedList.clear();
       Map<String, Object> body = {"userId": widget.customerID, "controllerId": controllerId, "fromDate":date, "toDate":date};
-      final response = await HttpService().postRequest("getUserSentAndReceivedMessageStatus", body);
+      final response = await HttpService().postRequest("getUserSentAndReceivedMessage", body);
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
-        print(jsonResponse);
+        //print(jsonResponse);
         if(jsonResponse['code']==200){
           sentAndReceivedList = [
             ...jsonResponse['data'].map((programJson) => SentAndReceivedModel.fromJson(programJson)).toList(),

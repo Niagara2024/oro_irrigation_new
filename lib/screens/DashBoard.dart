@@ -1,31 +1,17 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
-import 'package:loading_indicator/loading_indicator.dart';
-import 'package:mqtt_client/mqtt_browser_client.dart';
-import 'package:mqtt_client/mqtt_client.dart';
-import 'package:mqtt_client/mqtt_server_client.dart';
+
 import 'package:oro_irrigation_new/constants/theme.dart';
-import 'package:oro_irrigation_new/screens/Forms/create_account.dart';
 import 'package:oro_irrigation_new/screens/NarrowLayout/Customer/HomeScreenN.dart';
 import 'package:oro_irrigation_new/screens/product_inventory.dart';
 import 'package:oro_irrigation_new/screens/web_view.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Models/Customer/Dashboard/DashboardNode.dart';
-import '../Models/language.dart';
 import '../constants/MQTTManager.dart';
 import '../constants/MqttServer.dart';
 import '../constants/UserData.dart';
-import '../constants/http_service.dart';
-import '../main.dart';
 import '../state_management/MqttPayloadProvider.dart';
-import 'Customer/AccountManagement.dart';
-import 'Customer/Dashboard/SentAndReceived.dart';
-import 'Customer/Dashboard/FarmSettings.dart';
 import 'Customer/CustomerScreenController.dart';
 import 'my_preference.dart';
 import 'product_entry.dart';
@@ -180,11 +166,10 @@ class _DashboardWideState extends State<DashboardWide> {
   @override
   Widget build(BuildContext context)  {
     final userData = UserData.of(context)!;
-    print(userData.userId);
-    print(userData.userType);
-    print(userData.userName);
     return  Scaffold(
-      body: userData.userType =='3'? CustomerScreenController(customerID: userData.userId, customerName: userData.userName, mobileNo: '+${userData.countryCode}-${userData.mobileNo}', comingFrom: 'Customer',): Row(
+      body: userData.userType=='3'?
+      CustomerScreenController(customerID: userData.userId, customerName: userData.userName, mobileNo: '+${userData.countryCode}-${userData.mobileNo}', comingFrom: 'Customer'):
+      Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           NavigationRail(

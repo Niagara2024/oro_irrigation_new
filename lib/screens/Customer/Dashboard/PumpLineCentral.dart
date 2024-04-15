@@ -8,8 +8,7 @@ import 'package:provider/provider.dart';
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../constants/theme.dart';
 import '../../../state_management/MqttPayloadProvider.dart';
-import 'CentralFilter.dart';
-import 'IrrigationPumpList.dart';
+
 
 class PumpLineCentral extends StatefulWidget {
   const PumpLineCentral({Key? key, required this.siteData}) : super(key: key);
@@ -22,6 +21,7 @@ class PumpLineCentral extends StatefulWidget {
 class _PumpLineCentralState extends State<PumpLineCentral> {
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<MqttPayloadProvider>(context);
     return Padding(
       padding: const EdgeInsets.all(3.0),
       child: Column(
@@ -58,6 +58,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   widget.siteData.irrigationPump.isNotEmpty? const DisplayIrrigationPump() : const SizedBox(),
+                                  provider.payload2408.isNotEmpty? const DisplaySensor() : const SizedBox(),
                                   widget.siteData.centralFilterSite.isNotEmpty? const DisplayFilter(): const SizedBox(),
                                   widget.siteData.centralFertilizerSite.isNotEmpty? const DisplayFertilizer(): const SizedBox(),
                                 ],
@@ -90,6 +91,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
     );
   }
 }
+
 
 class DisplayIrrigationPump extends StatefulWidget {
   const DisplayIrrigationPump({Key? key}) : super(key: key);
@@ -237,6 +239,125 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
     });
   }
 }
+
+
+class DisplaySensor extends StatelessWidget {
+  const DisplaySensor({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = Provider.of<MqttPayloadProvider>(context);
+    Map<String, dynamic> jsonData = provider.payload2408[0];
+
+    return jsonData.isNotEmpty ? SizedBox(
+      width: jsonData.keys.length * 70, // Multiply by 70 for each item's width
+      height: 85,
+      child: ListView.builder(
+        itemCount: jsonData.keys.length, // Use the length of the keys
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (BuildContext context, int index) {
+          String key = jsonData.keys.elementAt(index);
+          dynamic value = jsonData[key];
+          print(value);
+          return index!=0 && value !='-' ? Stack(
+            children: [
+              SizedBox(
+                width: 70,
+                height: 70,
+                child: key=='PrsIn' || key=='PrsOut' ? Image.asset('assets/images/dp_prs_sensor.png') : Image.asset('assets/images/dp_flowmeter.png'),
+              ),
+              Positioned(
+                top: 47.7,
+                left: 18,
+                child: Container(
+                  color: Colors.greenAccent,
+                  width: 35,
+                  child: Center(
+                    child: Text(value, style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 65,
+                left: 0,
+                child: SizedBox(
+                  width: 70,
+                  child: Center(
+                    child: Text(jsonData['Line'], style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ):
+          const SizedBox();
+        },
+      ),
+    ) : const SizedBox();
+
+    return provider.payload2408.isNotEmpty? SizedBox(
+      width: provider.payload2408.length * 70,
+      height: 85,
+      child: ListView.builder(
+        itemCount: provider.payload2408.length,
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (BuildContext context, int index) {
+          return Stack(
+            children: [
+              SizedBox(
+                width: 70,
+                height: 70,
+                child: Image.asset('assets/images/dp_prs_sensor.png'),
+              ),
+              Positioned(
+                top: 47.7,
+                left: 18,
+                child: Container(
+                  color: Colors.greenAccent,
+                  width: 35,
+                  child: Center(
+                    child: Text(provider.payload2408[index]['PrsIn'], style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 65,
+                left: 0,
+                child: SizedBox(
+                  width: 70,
+                  child: Center(
+                    child: Text(provider.payload2408[index]['Line'], style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    ) : const SizedBox();
+
+  }
+}
+
 
 class DisplayFilter extends StatefulWidget {
   const DisplayFilter({Key? key}) : super(key: key);

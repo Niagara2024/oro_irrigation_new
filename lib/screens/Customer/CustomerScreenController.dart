@@ -106,7 +106,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     payloadProvider.filtersLocal=[];
     payloadProvider.irrigationPump=[];
     payloadProvider.fertilizerCentral=[];
-    payloadProvider.flowMeter=[];
+    //payloadProvider.flowMeter=[];
     payloadProvider.wifiStrength = 0;
   }
 
@@ -202,11 +202,12 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   @override
   Widget build(BuildContext context)
   {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final userData = UserData.of(context)!;
     final provider = Provider.of<MqttPayloadProvider>(context);
 
     if(widget.comingFrom == 'AdminORDealer'){
 
-      final screenWidth = MediaQuery.of(context).size.width;
       return loadingSite? buildLoadingIndicator(loadingSite, screenWidth):
       Scaffold(
         appBar: AppBar(
@@ -417,8 +418,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       );
 
     }else{
-      final screenWidth = MediaQuery.of(context).size.width;
-      final userData = UserData.of(context)!;
+
       return loadingSite? buildLoadingIndicator(loadingSite, screenWidth):
       Scaffold(
         appBar: AppBar(

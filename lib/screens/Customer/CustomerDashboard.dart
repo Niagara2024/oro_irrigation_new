@@ -64,7 +64,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
           PumpLineCentral(siteData: widget.siteData),
           //DisplayIrrigationLine(siteData: widget.siteData),
           CurrentScheduleFinal(siteData: widget.siteData, customerID: widget.customerID),
-          provider.flowMeter.isNotEmpty? Column(
+          /*provider.flowMeter.isNotEmpty? Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
@@ -89,7 +89,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
               ),
             ],
           ):
-          const SizedBox(),
+          const SizedBox(),*/
           provider.nextSchedule.isNotEmpty?
           NextSchedule(siteData: widget.siteData, userID: widget.userID, customerID: widget.customerID):
           const SizedBox(),

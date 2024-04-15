@@ -60,8 +60,8 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                     bottomLeft: Radius.circular(5)
                   ),
                 ),
-                height: provider.currentSchedule.isNotEmpty? (provider.currentSchedule.length * 148) : 45,
-                child: provider.currentSchedule.isNotEmpty? ListView.builder(
+                height: provider.currentSchedule.isNotEmpty ? (provider.currentSchedule.length * 148) : 45,
+                child: provider.currentSchedule.isNotEmpty ? ListView.builder(
                   itemCount: provider.currentSchedule.length,
                   itemBuilder: (BuildContext context, int csIndex) {
                     return Column(
@@ -163,57 +163,57 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                           ),
                         ),
                         const Divider(height: 0),
+
                         SizedBox(
                           width: MediaQuery.sizeOf(context).width,
                           height: 60,
                           child :  Column(
                             children: [
-                              (provider.currentSchedule[csIndex].containsKey('MV') && provider.currentSchedule[csIndex]['MV'].length > 0) &&
-                                  (provider.currentSchedule[csIndex].containsKey('VL') && provider.currentSchedule[csIndex]['VL'].length > 0)? Row(
+                              (provider.currentSchedule[csIndex].containsKey('MV') && provider.currentSchedule[csIndex]['MV'].length > 0)
+                                  && (provider.currentSchedule[csIndex].containsKey('VL') && provider.currentSchedule[csIndex]['VL'].length > 0)
+                                  && (provider.currentSchedule[csIndex].containsKey('Watermeter') && provider.currentSchedule[csIndex]['Watermeter'].length > 0) ?
+                              Row(
                                 children: [
+                                  for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['Watermeter'].length; mvIndex++)
+                                    Expanded(
+                                      flex: 1,
+                                      child : SizedBox(
+                                        width: 40,
+                                        height: 60,
+                                        child: Center(
+                                          child: Stack(
+                                            children: [
+                                              buildWidget('Watermeter', 0, provider.currentSchedule[csIndex]['Watermeter'][mvIndex]['Name']),
+                                              Positioned(
+                                                top: 32,
+                                                left: 0,
+                                                child: Container(
+                                                  width: 40,
+                                                  decoration: const BoxDecoration(
+                                                    color: Colors.greenAccent,
+                                                    borderRadius: BorderRadius.all(Radius.circular(2)),
+                                                  ),
+                                                  child: Center(child: Text(provider.currentSchedule[csIndex]['Watermeter'][mvIndex]['Value'],  style: TextStyle(color: Colors.black, fontSize: 10))),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['MV'].length; mvIndex++)
                                     Expanded(
                                       flex: 1,
-                                      child: Column(
-                                        children: [
-                                          const SizedBox(height: 3),
-                                          Image.asset(
-                                            width: 40,
-                                            height: 40,
-                                            provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==0 ?
-                                            'assets/images/dp_main_valve_not_open.png':
-                                            provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==1 ?
-                                            'assets/images/dp_main_valve_open.png':
-                                            provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==2 ?
-                                            'assets/images/dp_main_valve_wait.png': 'assets/images/dp_main_valve_closed.png',
-                                          ),
-                                          const SizedBox(height: 3),
-                                          Text('${provider.currentSchedule[csIndex]['MV'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
-                                        ],
-                                      ),
+                                      child: buildWidget('MV', provider.currentSchedule[csIndex]['MV'][mvIndex]['Status'],
+                                          provider.currentSchedule[csIndex]['MV'][mvIndex]['Name']),
                                     ),
                                   for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['VL'].length; mvIndex++)
                                     Expanded(
                                       flex: 1,
                                       child: Padding(
                                         padding: const EdgeInsets.only(right: 8),
-                                        child: Column(
-                                          children: [
-                                            const SizedBox(height: 3),
-                                            Image.asset(
-                                              width: 40,
-                                              height: 40,
-                                              provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==0 ?
-                                              'assets/images/valve_gray.png':
-                                              provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==1 ?
-                                              'assets/images/valve_green.png':
-                                              provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==2 ?
-                                              'assets/images/valve_orange.png': 'assets/images/valve_red.png',
-                                            ),
-                                            const SizedBox(height: 3),
-                                            Text('${provider.currentSchedule[csIndex]['VL'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
-                                          ],
-                                        ),
+                                        child: buildWidget('VL', provider.currentSchedule[csIndex]['VL'][mvIndex]['Status'],
+                                            provider.currentSchedule[csIndex]['VL'][mvIndex]['Name']),
                                       ),
                                     ),
                                   Padding(
@@ -229,9 +229,43 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                         Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
                                       ],
                                     ),
-                                  )
+                                  ),
                                 ],
-                              ) :
+                              ): (provider.currentSchedule[csIndex].containsKey('MV') && provider.currentSchedule[csIndex]['MV'].length > 0)
+                                  && (provider.currentSchedule[csIndex].containsKey('VL') && provider.currentSchedule[csIndex]['VL'].length > 0) ?
+                              Row(
+                                children: [
+                                  for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['MV'].length; mvIndex++)
+                                    Expanded(
+                                      flex: 1,
+                                      child: buildWidget('MV', provider.currentSchedule[csIndex]['MV'][mvIndex]['Status'],
+                                          provider.currentSchedule[csIndex]['MV'][mvIndex]['Name']),
+                                    ),
+                                  for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['VL'].length; mvIndex++)
+                                    Expanded(
+                                      flex: 1,
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(right: 8),
+                                        child: buildWidget('VL', provider.currentSchedule[csIndex]['VL'][mvIndex]['Status'],
+                                            provider.currentSchedule[csIndex]['VL'][mvIndex]['Name']),
+                                      ),
+                                    ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Container(width: 1, height: 40, color: Colors.grey,),
+                                  ),
+                                  SizedBox(
+                                    width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 200 : 215,
+                                    child: Row(
+                                      children: [
+                                        Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining : ':'Remaining : '),
+                                        provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
+                                        Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ):
                               provider.currentSchedule[csIndex].containsKey('VL') && provider.currentSchedule[csIndex]['VL'].length > 0 ? Row(
                                 children: [
                                   for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['VL'].length; mvIndex++)
@@ -353,6 +387,76 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
     );
   }
 
+  Widget buildWidget(String type, int status, String name) {
+    String imagePath;
+    if(type=='MV'){
+      if (status == 0) {
+        imagePath = 'assets/images/dp_main_valve_not_open.png';
+      } else if (status == 1) {
+        imagePath = 'assets/images/dp_main_valve_open.png';
+      } else if (status == 2) {
+        imagePath = 'assets/images/dp_main_valve_wait.png';
+      } else {
+        imagePath = 'assets/images/dp_main_valve_closed.png';
+      }
+    }
+    else if(type=='VL'){
+      if (status == 0) {
+        imagePath = 'assets/images/valve_gray.png';
+      } else if (status == 1) {
+        imagePath = 'assets/images/valve_green.png';
+      } else if (status == 2) {
+        imagePath = 'assets/images/valve_orange.png';
+      } else {
+        imagePath = 'assets/images/valve_red.png';
+      }
+    }else{
+      imagePath = 'assets/images/virtual_water_meter.png';
+    }
+
+    return Column(
+      children: [
+        const SizedBox(height: 3),
+        Image.asset(imagePath, width: 40, height: 40),
+        const SizedBox(height: 3),
+        Text(name, style: const TextStyle(fontSize: 10)),
+      ],
+    );
+  }
+
+  List<Widget> buildValveRows(List<Map<String, dynamic>> valveData) {
+    return valveData.map((valve) {
+      return Expanded(
+        flex: 1,
+        child: Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: Column(
+            children: [
+              const SizedBox(height: 3),
+              Image.asset(
+                width: 40,
+                height: 40,
+                // Assuming 'Status' is a key in the valve map
+                valve['Status'] == 0
+                    ? 'assets/images/valve_gray.png'
+                    : valve['Status'] == 1
+                    ? 'assets/images/valve_green.png'
+                    : valve['Status'] == 2
+                    ? 'assets/images/valve_orange.png'
+                    : 'assets/images/valve_red.png',
+              ),
+              const SizedBox(height: 3),
+              Text(
+                '${valve['Name']}',
+                style: const TextStyle(fontSize: 10),
+              ),
+            ],
+          ),
+        ),
+      );
+    }).toList();
+  }
+
   String _convertTime(String timeString) {
     final parsedTime = DateFormat('HH:mm:ss').parse(timeString);
     final formattedTime = DateFormat('hh:mm a').format(parsedTime);
@@ -410,7 +514,6 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                 setState(() {
                   provider.currentSchedule[i]['Duration_QtyLeft'] = '0';
                 });
-
               }
             }
           }

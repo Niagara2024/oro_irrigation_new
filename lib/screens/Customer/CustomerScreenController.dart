@@ -107,7 +107,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     payloadProvider.irrigationPump=[];
     payloadProvider.fertilizerCentral=[];
     payloadProvider.fertilizerLocal=[];
-    //payloadProvider.flowMeter=[];
+    payloadProvider.waterMeter=[];
     payloadProvider.wifiStrength = 0;
   }
 
@@ -205,6 +205,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   {
     final screenWidth = MediaQuery.of(context).size.width;
     final provider = Provider.of<MqttPayloadProvider>(context);
+
+    /*print('userId :${widget.customerID}');
+    print('controllerId :${siteListFinal[siteIndex].controllerId}');*/
 
     if(widget.comingFrom == 'AdminORDealer'){
 
@@ -889,7 +892,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                         onPressed: () {
                           showAlarmBottomSheet(context, provider);
                         },
-                        icon: Icons.alarm,
+                        icon: Icons.notifications_none,
                         badgeNumber: provider.alarmList.length, // Set your badge number here
                       ),
                     ),
@@ -1514,7 +1517,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
     }
 
     return provider.receivedDashboardPayload.isNotEmpty ? Container(
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.all(10),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.zero,
@@ -1628,6 +1631,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                         });
                                         MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
                                         GlobalSnackBar.show(context, 'Sent your comment successfully', 200);
+                                        Navigator.of(context).pop();
                                       },
                                       child: const Text('Yes'),
                                     ),
@@ -1635,6 +1639,23 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                 );
                               },
                             );
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        width: 40,
+                        child: IconButton(
+                          tooltip: 'Test Communication',
+                          icon: Icon(Icons.network_check, color: myTheme.primaryColorDark),
+                          onPressed: () async {
+                            String payLoadFinal = jsonEncode({
+                              "4500": [
+                                {"4501": ""},
+                              ]
+                            });
+                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                            GlobalSnackBar.show(context, 'Sent your comment successfully', 200);
+                            Navigator.of(context).pop();
                           },
                         ),
                       ),

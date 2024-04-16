@@ -142,6 +142,21 @@ class _CustomerNodeListState extends State<CustomerNodeList>{
                     },
                   ),
                 ),
+                SizedBox(
+                  width: 40,
+                  child: IconButton(
+                    tooltip: 'Test Communication',
+                    icon: const Icon(Icons.network_check, color: Colors.white),
+                    onPressed: () async {
+                      /*String payLoadFinal = jsonEncode({
+                        "2300": [
+                          {"2301": ""},
+                        ]
+                      });
+                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');*/
+                    },
+                  ),
+                ),
               ],
             ),
           ),

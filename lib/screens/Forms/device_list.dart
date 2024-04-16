@@ -837,7 +837,8 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                   Map<String, dynamic> body = {
                                     "userId": widget.customerID,
                                     "products": updatedInterface,
-                                    "modifyUser": widget.userID,
+                                    "createUser": widget.userID,
+                                    "controllerId": customerSiteList[siteIndex].controllerId,
                                   };
 
                                   List<dynamic> payLoad = [];

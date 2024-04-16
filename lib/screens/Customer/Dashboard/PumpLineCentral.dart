@@ -76,6 +76,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                 top: 7.5,
                 left: 5,
                 child: Container(
+                  width: 200,
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                   decoration: BoxDecoration(
                     color: myTheme.primaryColor,
@@ -284,7 +285,7 @@ class DisplaySensor extends StatelessWidget {
                   color: Colors.greenAccent,
                   width: 35,
                   child: Center(
-                    child: Text(value, style: const TextStyle(
+                    child: Text('${value}', style: const TextStyle(
                       color: Colors.black,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
@@ -647,9 +648,11 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                   width: 70,
                   height: 70,
                   child: provider.fertilizerCentral[0]['Booster'][0]['Status'] ==1 ?
-                  Image.asset('assets/images/dp_fert_booster_pump_g.png') :
+                  Image.asset('assets/images/dp_fert_booster_pump_g.png'):
                   provider.fertilizerCentral[0]['Booster'][0]['Status']==2 ?
                   Image.asset('assets/images/dp_fert_booster_pump_y.png') :
+                  provider.fertilizerCentral[0]['Booster'][0]['Status']==3 ?
+                  Image.asset('assets/images/dp_fert_booster_pump_r.png'):
                   Image.asset('assets/images/dp_fert_booster_pump.png'),
                 ) :
                 const SizedBox(),
@@ -679,13 +682,17 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                           top: 30,
                           left: 15,
                           child: provider.fertilizerCentral[0]['FertilizerTankSelector'].isNotEmpty ? Container(
-                            color: Colors.greenAccent,
+                            decoration: BoxDecoration(
+                              color: provider.fertilizerCentral[0]['FertilizerTankSelector'][0]['Status']!=0? Colors.greenAccent : Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
                             width: 50,
                             height: 25,
                             child: Center(
-                              child: Text('00' , style: const TextStyle(
+                              child: Text(provider.fertilizerCentral[0]['FertilizerTankSelector'][0]['Status']!=0?
+                              provider.fertilizerCentral[0]['FertilizerTankSelector'][0]['Name'] : '--' , style: const TextStyle(
                                 color: Colors.black,
-                                fontSize: 15,
+                                fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
                               ),
@@ -727,7 +734,7 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                             SizedBox(
                               width: 70,
                               height: 70,
-                              child: index == 0 && provider.fertilizerLocal[0]['Fertilizer'].length!=1
+                              child: index == 0 && provider.fertilizerCentral[0]['Fertilizer'].length!=1
                                   ? provider.fertilizerCentral[0]['Agitator'].isNotEmpty
                                   ? Image.asset('assets/images/dp_fert_first_tank.png')
                                   : Image.asset('assets/images/dp_fert_first_tank1.png')
@@ -924,10 +931,10 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
         imageName += '_y.png';
         break;
       case 3:
-        imageName += '.png';
+        imageName += '_r.png';
         break;
       default:
-        imageName += '_r.png';
+        imageName += '.png';
     }
 
     return Image.asset('assets/images/$imageName');

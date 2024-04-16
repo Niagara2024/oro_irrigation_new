@@ -40,12 +40,12 @@ class UpcomingProgram extends StatelessWidget {
                         bottomLeft: Radius.circular(5)
                     ),
                   ),
-                  height: provider.upcomingProgram.isNotEmpty? (provider.upcomingProgram.length * 40) + 55 : 40,
+                  height: provider.upcomingProgram.isNotEmpty? (provider.upcomingProgram.length * 45) + 55 : 40,
                   child: provider.upcomingProgram.isNotEmpty? DataTable2(
                     columnSpacing: 12,
                     horizontalMargin: 12,
                     minWidth: 600,
-                    dataRowHeight: 50.0,
+                    dataRowHeight: 45.0,
                     headingRowHeight: 40.0,
                     headingRowColor: MaterialStateProperty.all<Color>(Colors.yellow.shade50),
                     columns:  [

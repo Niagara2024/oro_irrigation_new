@@ -32,108 +32,108 @@ class UpcomingProgram extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(
-                      color: Colors.grey.shade300,
-                      width: 1,
+                      color: Colors.grey,
+                      width: 0.5,
                     ),
-                    borderRadius: const BorderRadius.only(
-                        bottomRight: Radius.circular(5),
-                        bottomLeft: Radius.circular(5)
-                    ),
+                    borderRadius: const BorderRadius.all(Radius.circular(5)),
                   ),
-                  height: provider.upcomingProgram.isNotEmpty? (provider.upcomingProgram.length * 45) + 55 : 40,
-                  child: provider.upcomingProgram.isNotEmpty? DataTable2(
-                    columnSpacing: 12,
-                    horizontalMargin: 12,
-                    minWidth: 600,
-                    dataRowHeight: 45.0,
-                    headingRowHeight: 40.0,
-                    headingRowColor: MaterialStateProperty.all<Color>(Colors.yellow.shade50),
-                    columns:  [
-                      const DataColumn2(
-                          label: Text('Name', style: TextStyle(fontSize: 13),),
-                          size: ColumnSize.L
-                      ),
-                      const DataColumn2(
-                          label: Text('Method', style: TextStyle(fontSize: 13)),
-                          size: ColumnSize.M
-
-                      ),
-                      const DataColumn2(
-                          label: Text('Line', style: TextStyle(fontSize: 13),),
-                          size: ColumnSize.M
-                      ),
-                      const DataColumn2(
-                          label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
-                          fixedWidth: 50
-                      ),
-                      const DataColumn2(
-                          label: Center(child: Text('Start Date', style: TextStyle(fontSize: 13),)),
-                          size: ColumnSize.M
-                      ),
-                      const DataColumn2(
-                          label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
-                          size: ColumnSize.M
-                      ),
-                      const DataColumn2(
-                          label: Center(child: Text('End Date', style: TextStyle(fontSize: 13),)),
-                          size: ColumnSize.M
-                      ),
-                      DataColumn2(
-                          label: Center(child: IconButton(
-                              tooltip: 'Schedule details',
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ScheduleViewScreen(deviceId: siteData.deviceId, userId: customerId, controllerId: siteData.controllerId, customerId: customerId),
-                                  ),
-                                );
-                              },
-                              icon: const Icon(Icons.view_list_outlined))),
-                          fixedWidth: 80
-                      ),
-                    ],
-                    rows: List<DataRow>.generate(provider.upcomingProgram.length, (index) => DataRow(cells: [
-                      DataCell(Text(provider.upcomingProgram[index]['ProgName'])),
-                      DataCell(Text(provider.upcomingProgram[index]['SchedulingMethod']==1?'No Schedule':provider.upcomingProgram[index]['SchedulingMethod']==2?'Schedule by days':'Schedule as run list')),
-                      DataCell(Text(provider.upcomingProgram[index]['ProgCategory'])),
-                      DataCell(Center(child: Text('${provider.upcomingProgram[index]['TotalZone']}'))),
-                      DataCell(Center(child: Text('${provider.upcomingProgram[index]['StartDate']}'))),
-                      DataCell(Center(child: Text('${provider.upcomingProgram[index]['StartTime']}'))),
-                      DataCell(Center(child: Text('${provider.upcomingProgram[index]['EndDate']}'))),
-                      DataCell(
-                        provider.upcomingProgram[index]['ProgOnOff'] == 0 ? MaterialButton(
-                          color: Colors.green,
-                          textColor: Colors.white,
-                          onPressed:() {
-                            String localFilePath = 'assets/audios/button_click_sound.mp3';
-                            audioPlayer.play(UrlSource(localFilePath));
-                            String payload = '${provider.upcomingProgram[index]['SNo']},1';
-                            String payLoadFinal = jsonEncode({
-                              "2900": [{"2901": payload}]
-                            });
-                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
-                            sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Started by Manual', payLoadFinal);
-                          },
-                          child: const Text('Start'),
-                        ) :
-                        MaterialButton(
-                          color: Colors.redAccent,
-                          textColor: Colors.white,
-                          onPressed:() {
-                            String localFilePath = 'assets/audios/audio_off.mp3';
-                            audioPlayer.play(UrlSource(localFilePath));
-                            String payload = '${provider.upcomingProgram[index]['SNo']},0';
-                            String payLoadFinal = jsonEncode({
-                              "2900": [{"2901": payload}]
-                            });
-                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
-                            sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Stopped by Manual', payLoadFinal);
-                          },
-                          child: const Text('Stop'),
+                  height: provider.upcomingProgram.isNotEmpty? (provider.upcomingProgram.length * 45) + 45 : 50,
+                  child: provider.upcomingProgram.isNotEmpty? Padding(
+                    padding: const EdgeInsets.all(1.0),
+                    child: DataTable2(
+                      columnSpacing: 12,
+                      horizontalMargin: 12,
+                      minWidth: 600,
+                      dataRowHeight: 45.0,
+                      headingRowHeight: 40.0,
+                      headingRowColor: MaterialStateProperty.all<Color>(Colors.yellow.shade50),
+                      columns:  [
+                        const DataColumn2(
+                            label: Text('Name', style: TextStyle(fontSize: 13),),
+                            size: ColumnSize.L
                         ),
-                      ),
-                    ])),
+                        const DataColumn2(
+                            label: Text('Method', style: TextStyle(fontSize: 13)),
+                            size: ColumnSize.M
+
+                        ),
+                        const DataColumn2(
+                            label: Text('Line', style: TextStyle(fontSize: 13),),
+                            size: ColumnSize.M
+                        ),
+                        const DataColumn2(
+                            label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
+                            fixedWidth: 50
+                        ),
+                        const DataColumn2(
+                            label: Center(child: Text('Start Date', style: TextStyle(fontSize: 13),)),
+                            size: ColumnSize.M
+                        ),
+                        const DataColumn2(
+                            label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
+                            size: ColumnSize.M
+                        ),
+                        const DataColumn2(
+                            label: Center(child: Text('End Date', style: TextStyle(fontSize: 13),)),
+                            size: ColumnSize.M
+                        ),
+                        DataColumn2(
+                            label: Center(child: IconButton(
+                                tooltip: 'Schedule details',
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ScheduleViewScreen(deviceId: siteData.deviceId, userId: customerId, controllerId: siteData.controllerId, customerId: customerId),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.view_list_outlined))),
+                            fixedWidth: 80
+                        ),
+                      ],
+                      rows: List<DataRow>.generate(provider.upcomingProgram.length, (index) => DataRow(cells: [
+                        DataCell(Text(provider.upcomingProgram[index]['ProgName'])),
+                        DataCell(Text(provider.upcomingProgram[index]['SchedulingMethod']==1?'No Schedule':provider.upcomingProgram[index]['SchedulingMethod']==2?'Schedule by days':'Schedule as run list')),
+                        DataCell(Text(provider.upcomingProgram[index]['ProgCategory'])),
+                        DataCell(Center(child: Text('${provider.upcomingProgram[index]['TotalZone']}'))),
+                        DataCell(Center(child: Text('${provider.upcomingProgram[index]['StartDate']}'))),
+                        DataCell(Center(child: Text('${provider.upcomingProgram[index]['StartTime']}'))),
+                        DataCell(Center(child: Text('${provider.upcomingProgram[index]['EndDate']}'))),
+                        DataCell(
+                          provider.upcomingProgram[index]['ProgOnOff'] == 0 ? MaterialButton(
+                            color: Colors.green,
+                            textColor: Colors.white,
+                            onPressed:() {
+                              String localFilePath = 'assets/audios/button_click_sound.mp3';
+                              audioPlayer.play(UrlSource(localFilePath));
+                              String payload = '${provider.upcomingProgram[index]['SNo']},1';
+                              String payLoadFinal = jsonEncode({
+                                "2900": [{"2901": payload}]
+                              });
+                              MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
+                              sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Started by Manual', payLoadFinal);
+                            },
+                            child: const Text('Start'),
+                          ) :
+                          MaterialButton(
+                            color: Colors.redAccent,
+                            textColor: Colors.white,
+                            onPressed:() {
+                              String localFilePath = 'assets/audios/audio_off.mp3';
+                              audioPlayer.play(UrlSource(localFilePath));
+                              String payload = '${provider.upcomingProgram[index]['SNo']},0';
+                              String payLoadFinal = jsonEncode({
+                                "2900": [{"2901": payload}]
+                              });
+                              MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
+                              sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Stopped by Manual', payLoadFinal);
+                            },
+                            child: const Text('Stop'),
+                          ),
+                        ),
+                      ])),
+                    ),
                   ) :
                   const Align(
                     alignment: Alignment.centerLeft,
@@ -145,14 +145,15 @@ class UpcomingProgram extends StatelessWidget {
                 ),
               ),
               Positioned(
-                top: 7.5,
-                left: 5,
+                top: 5,
+                left: 0,
                 child: Container(
                   width: 200,
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 2),
                   decoration: BoxDecoration(
                     color: Colors.yellow.shade200,
                     borderRadius: const BorderRadius.all(Radius.circular(2)),
+                    border: Border.all(width: 0.5, color: Colors.grey)
                   ),
                   child: const Text('SCHEDULED PROGRAM',  style: TextStyle(color: Colors.black)),
                 ),

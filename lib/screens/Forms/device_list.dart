@@ -895,7 +895,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                 tooltip : 'Clear serial',
                                 onPressed: () async {
                                   String payLoadFinal = jsonEncode({
-                                    "2400": [{"2401": ''},]
+                                    "2400": [{"2401": "0"},]
                                   });
                                   MQTTManager().publish(payLoadFinal, 'AppToFirmware/${customerSiteList[siteIndex].deviceId}');
                                 },

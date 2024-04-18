@@ -35,13 +35,10 @@ class _LocalSiteState extends State<LocalSite> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(
-                      color: Colors.grey.shade300,
-                      width: 1,
+                      color: Colors.grey,
+                      width: 0.5,
                     ),
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(5),
-                      bottomRight: Radius.circular(5),
-                    ),
+                    borderRadius: const BorderRadius.all(Radius.circular(5)),
                   ),
                   child : ScrollConfiguration(
                     behavior: const ScrollBehavior(),
@@ -72,16 +69,17 @@ class _LocalSiteState extends State<LocalSite> {
                 ),
               ),
               Positioned(
-                top: 7.5,
-                left: 5,
+                top: 5,
+                left: 0,
                 child: Container(
                   width: 200,
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 2),
                   decoration: BoxDecoration(
-                    color: myTheme.primaryColor,
-                    borderRadius: const BorderRadius.all(Radius.circular(4)),
+                      color: Colors.blueGrey.shade200,
+                      borderRadius: const BorderRadius.all(Radius.circular(2)),
+                      border: Border.all(width: 0.5, color: Colors.grey)
                   ),
-                  child: const Text('LOCAL SITE',  style: TextStyle(color: Colors.white)),
+                  child: const Text('LOCAL SITE',  style: TextStyle(color: Colors.black)),
                 ),
               ),
             ],

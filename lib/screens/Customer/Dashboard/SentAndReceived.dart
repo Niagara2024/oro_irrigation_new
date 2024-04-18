@@ -36,51 +36,74 @@ class _SentAndReceivedState extends State<SentAndReceived> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[200],
-      appBar: AppBar(
-        title: Column(children: [
-          const Text("Sent And Received",),
-          GestureDetector(child: Text(finalDate, style: const TextStyle(fontSize: 15.0),),
-          )
-        ]),
-        actions: <Widget>[
-          IconButton(icon: const Icon(Icons.calendar_month), onPressed: () async {_selectDate(context); }),
-          const SizedBox(width: 10,),
-        ],
-      ),
-      body: ListView.builder(
-        padding: const EdgeInsets.only(top: 10),
-        itemCount: sentAndReceivedList.length,
-        itemBuilder: (context, index)
-        {
-          if(sentAndReceivedList[index].messageType == 'RECEIVED')
-          {
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: BubbleSpecialOne(
-                textStyle: const TextStyle(fontSize: 12),
-                text: '${sentAndReceivedList[index].message}\n\n${sentAndReceivedList[index].time},',
-                color: Colors.red.shade100,
-              ),
-            );
-          }
-          else
-          {
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: BubbleSpecialTwo(
-                text: '${sentAndReceivedList[index].message}\n${sentAndReceivedList[index].time}',
-                isSender: false,
-                color: Colors.blue.shade100,
-                textStyle: const TextStyle(fontSize: 12,),
-              ),
-            );
-          }
+    return SizedBox(
+      width: MediaQuery.sizeOf(context).width,
+      height:  MediaQuery.sizeOf(context).height,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+       children: [
+         SizedBox(
+           width: MediaQuery.sizeOf(context).width,
+           child: TextButton(
+             onPressed: () {
+               _selectDate(context);
+             },
+             style: ButtonStyle(
+               backgroundColor: MaterialStateProperty.all<Color>(Colors.grey.shade300),
+               shape: MaterialStateProperty.all<OutlinedBorder>(
+                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+               ),
+             ),
+             child: Row(
+               mainAxisSize: MainAxisSize.min,
+               children: [
+                 const Icon(Icons.calendar_month_outlined, color: Colors.black),
+                 const SizedBox(width: 10),
+                 Text(finalDate, style: const TextStyle(color: Colors.black, fontSize: 15)),
+               ],
+             ),
+           ),
+         ),
+         Padding(
+           padding: const EdgeInsets.only(top: 5),
+           child: SizedBox(
+             width: MediaQuery.sizeOf(context).width,
+             height: MediaQuery.sizeOf(context).height-110,
+             child: ListView.builder(
+               padding: const EdgeInsets.only(top: 10),
+               itemCount: sentAndReceivedList.length,
+               itemBuilder: (context, index)
+               {
+                 if(sentAndReceivedList[index].messageType == 'RECEIVED')
+                 {
+                   return Padding(
+                     padding: const EdgeInsets.all(5.0),
+                     child: BubbleSpecialOne(
+                       textStyle: const TextStyle(fontSize: 12),
+                       text: '${sentAndReceivedList[index].message}\n\n${sentAndReceivedList[index].time},',
+                       color: Colors.green.shade50,
+                     ),
+                   );
+                 }
+                 else
+                 {
+                   return Padding(
+                     padding: const EdgeInsets.all(5.0),
+                     child: BubbleSpecialTwo(
+                       text: '${sentAndReceivedList[index].message}\n${sentAndReceivedList[index].time}',
+                       isSender: false,
+                       color: Colors.blue.shade50,
+                       textStyle: const TextStyle(fontSize: 12,),
+                     ),
+                   );
+                 }
 
-        },
+               },
+             ),
+           ),
+         )
+       ],
       ),
-
     );
   }
 
@@ -91,7 +114,6 @@ class _SentAndReceivedState extends State<SentAndReceived> {
       final response = await HttpService().postRequest("getUserSentAndReceivedMessage", body);
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
-        //print(jsonResponse);
         if(jsonResponse['code']==200){
           sentAndReceivedList = [
             ...jsonResponse['data'].map((programJson) => SentAndReceivedModel.fromJson(programJson)).toList(),

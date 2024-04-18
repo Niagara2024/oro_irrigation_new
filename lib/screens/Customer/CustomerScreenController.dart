@@ -446,12 +446,23 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                MaterialButton(
-                  color: Colors.white,
-                  textColor: Colors.black,
-                  onPressed:  (){
+                TextButton(
+                  onPressed: () {
                   },
-                  child: const Text('Pause all program'),
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(Colors.red.shade300),
+                    shape: MaterialStateProperty.all<OutlinedBorder>(
+                      RoundedRectangleBorder(borderRadius: BorderRadius.circular(5),),
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.pause, color: Colors.white),
+                      SizedBox(width:5),
+                      Text('PAUSE', style: TextStyle(color: Colors.white)),
+                    ],
+                  ),
                 ),
                 const SizedBox(width: 10),
                 IconButton(tooltip : 'Help & Support', onPressed: (){
@@ -940,6 +951,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   }
 
   Future<void>showNodeDetailsBottomSheet(BuildContext context) async{
+    print(siteListFinal[siteIndex].nodeList);
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -999,6 +1011,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 flex: 1,
                 child: ListView(
                   children: [
+
                     for (int i = 0; i < siteListFinal[siteIndex].nodeList.length; i++)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

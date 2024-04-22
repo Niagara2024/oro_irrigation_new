@@ -348,7 +348,49 @@ class _CurrentScheduleFinalState extends State<CurrentScheduleFinal> {
                                       ),
                                     )
                                   ],
-                                ):
+                                ) :
+                                provider.currentSchedule[csIndex].containsKey('AG') && provider.currentSchedule[csIndex]['AG'].length > 0 ? Row(
+                                  children: [
+                                    for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['AG'].length; mvIndex++)
+                                      Expanded(
+                                        flex: 1,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(right: 8),
+                                          child: Column(
+                                            children: [
+                                              const SizedBox(height: 3),
+                                              Image.asset(
+                                                width: 40,
+                                                height: 40,
+                                                provider.currentSchedule[csIndex]['AG'][mvIndex]['Status']==0 ?
+                                                'assets/images/dp_agitator_right.png':
+                                                provider.currentSchedule[csIndex]['AG'][mvIndex]['Status']==1 ?
+                                                'assets/images/dp_agitator_right_g.png':
+                                                provider.currentSchedule[csIndex]['AG'][mvIndex]['Status']==2 ?
+                                                'assets/images/dp_agitator_right_y.png': 'assets/images/dp_agitator_right_r.png',
+                                              ),
+                                              const SizedBox(height: 3),
+                                              Text('${provider.currentSchedule[csIndex]['AG'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Container(width: 1, height: 40, color: Colors.grey,),
+                                    ),
+                                    SizedBox(
+                                      width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 200 : 215,
+                                      child: Row(
+                                        children: [
+                                          Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining : ':'Remaining : '),
+                                          provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
+                                          Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ) :
                                 const SizedBox(),
 
                               ],

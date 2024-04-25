@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/SentAndReceived.dart';
 import 'package:provider/provider.dart';
@@ -1007,7 +1008,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 flex: 1,
                 child: ListView(
                   children: [
-
                     for (int i = 0; i < siteListFinal[siteIndex].nodeList.length; i++)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1058,33 +1058,33 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                       children: [
                                         CircleAvatar(
                                           backgroundColor: Colors.transparent,
-                                          backgroundImage: siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("SP") ?
-                                          const AssetImage('assets/images/dp_src_pump.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("IP") ?
+                                          backgroundImage: siteListFinal[siteIndex].nodeList[i].rlyStatus[index].Name!.contains("SP") ?
                                           const AssetImage('assets/images/irrigation_pump.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("VL") ?
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].Name!.contains("IP") ?
+                                          const AssetImage('assets/images/irrigation_pump.png'):
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].Name!.contains("VL") ?
                                           const AssetImage('assets/images/valve_gray.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("MV") ?
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].Name!.contains("MV") ?
                                           const AssetImage('assets/images/dp_main_valve.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("FL") ?
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].Name!.contains("FL") ?
                                           const AssetImage('assets/images/dp_filter.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("FC") ?
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].Name!.contains("FC") ?
                                           const AssetImage('assets/images/fert_chanel.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("FG") ?
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].Name!.contains("FG") ?
                                           const AssetImage('assets/images/fogger.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("FB") ?
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].Name!.contains("FB") ?
                                           const AssetImage('assets/images/booster_pump.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("AG") ?
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].Name!.contains("AG") ?
                                           const AssetImage('assets/images/dp_agitator_gray.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("DV") ?
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].Name!.contains("DV") ?
                                           const AssetImage('assets/images/downstream_valve.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("SL") ?
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].Name!.contains("SL") ?
                                           const AssetImage('assets/images/selector.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("FN") ?
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].Name!.contains("FN") ?
                                           const AssetImage('assets/images/fan.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("LI") ?
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].Name!.contains("LI") ?
                                           const AssetImage('assets/images/pressure_sensor.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("LO") ?
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].Name!.contains("LO") ?
                                           const AssetImage('assets/images/pressure_sensor.png'):
                                           const AssetImage('assets/images/pressure_sensor.png'),
                                         ),
@@ -1096,7 +1096,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                               backgroundColor: Colors.grey,
                                             ),
                                             const SizedBox(width: 3),
-                                            Text('${siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name']}(${siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['RlyNo']})', style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                            Text('${siteListFinal[siteIndex].nodeList[i].rlyStatus[index].Name!}(${siteListFinal[siteIndex].nodeList[i].rlyStatus[index].RlyNo})', style: const TextStyle(color: Colors.black, fontSize: 10)),
                                           ],
                                         ),
                                       ],
@@ -1115,36 +1115,29 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                       children: [
                                         CircleAvatar(
                                           backgroundColor: Colors.transparent,
-                                            backgroundImage:  siteListFinal[siteIndex].nodeList[i].sensor[index]['Name'].contains("SM") ?
+                                            backgroundImage:  siteListFinal[siteIndex].nodeList[i].sensor[index].Name!.contains("SM") ?
                                             const AssetImage('assets/images/dp_src_pump.png') :
-                                            siteListFinal[siteIndex].nodeList[i].sensor[index]['Name'].contains("IF") ?
+                                            siteListFinal[siteIndex].nodeList[i].sensor[index].Name!.contains("IF") ?
                                             const AssetImage('assets/images/irrigation_pump.png') :
-                                            siteListFinal[siteIndex].nodeList[i].sensor[index]['Name'].contains("LI") ?
+                                            siteListFinal[siteIndex].nodeList[i].sensor[index].Name!.contains("LI") ?
                                             const AssetImage('assets/images/irrigation_pump.png') :
-                                            siteListFinal[siteIndex].nodeList[i].sensor[index]['Name'].contains("LO") ?
+                                            siteListFinal[siteIndex].nodeList[i].sensor[index].Name!.contains("LO") ?
                                             const AssetImage('assets/images/irrigation_pump.png') :
-                                            siteListFinal[siteIndex].nodeList[i].sensor[index]['Name'].contains("LW") ?
+                                            siteListFinal[siteIndex].nodeList[i].sensor[index].Name!.contains("LW") ?
                                             const AssetImage('assets/images/irrigation_pump.png') :
-                                            siteListFinal[siteIndex].nodeList[i].sensor[index]['Name'].contains("PSP") ?
+                                            siteListFinal[siteIndex].nodeList[i].sensor[index].Name!.contains("PSP") ?
                                             const AssetImage('assets/images/irrigation_pump.png') :
-                                            siteListFinal[siteIndex].nodeList[i].sensor[index]['Name'].contains("EC") ?
+                                            siteListFinal[siteIndex].nodeList[i].sensor[index].Name!.contains("EC") ?
                                             const AssetImage('assets/images/pressure_sensor.png') :
-                                            siteListFinal[siteIndex].nodeList[i].sensor[index]['Name'].contains("PH") ?
+                                            siteListFinal[siteIndex].nodeList[i].sensor[index].Name!.contains("PH") ?
                                             const AssetImage('assets/images/pressure_sensor.png') :
                                             const AssetImage('assets/images/irrigation_pump.png')
                                         ),
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
-                                            CircleAvatar(
-                                              radius: 5,
-                                              backgroundColor: siteListFinal[siteIndex].nodeList[i].sensor[index]['Status']==0 ? Colors.grey :
-                                              siteListFinal[siteIndex].nodeList[i].sensor[index]['Status']==1 ? Colors.green :
-                                              siteListFinal[siteIndex].nodeList[i].sensor[index]['Status']==2 ? Colors.orange :
-                                              siteListFinal[siteIndex].nodeList[i].sensor[index]['Status']==3 ? Colors.redAccent : Colors.black12,
-                                            ),
-                                            const SizedBox(width: 3),
-                                            Text('${siteListFinal[siteIndex].nodeList[i].sensor[index]['Name']}(${siteListFinal[siteIndex].nodeList[i].sensor[index]['AngIpNo']})', style: const TextStyle(color: Colors.black, fontSize: 10)),
+
+                                            Text('${siteListFinal[siteIndex].nodeList[i].sensor[index].Name!}(${siteListFinal[siteIndex].nodeList[i].sensor[index].Value})', style: const TextStyle(color: Colors.black, fontSize: 10)),
                                           ],
                                         ),
                                       ],
@@ -1224,7 +1217,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   ],
                   rows: List<DataRow>.generate(provider.alarmList.length, (index) => DataRow(cells: [
                     DataCell(Text('${index+1}')),
-                    DataCell(Icon(Icons.warning_amber, color: provider.alarmList[index]['Status']==1 ? Colors.orangeAccent : Colors.redAccent,)),
+                    DataCell(Icon(Icons.warning_amber, color: provider.alarmList[index].Status==1 ? Colors.orangeAccent : Colors.redAccent,)),
                     DataCell(Text(getAlarmMessage(provider.alarmList[index]['AlarmType']))),
                     DataCell(Text(provider.alarmList[index]['Location'])),
                     DataCell(Center(child: MaterialButton(
@@ -1530,6 +1523,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                     List<dynamic> rlyStatusJsonList = item['RlyStatus'];
                     print('rlyStatusJsonList:${rlyStatusJsonList}');
                     List<RelayStatus> rlyStatusList = rlyStatusJsonList.map((rs) => RelayStatus.fromJson(rs)).toList();
+                    print(rlyStatusList);
                     widget.siteData.nodeList[position].rlyStatus = rlyStatusList;
                   }
                 } else {
@@ -1698,7 +1692,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
             ),
             SizedBox(
               width: 400,
-              height: 400,
+              height: MediaQuery.sizeOf(context).height-230,
               child: DataTable2(
                 columnSpacing: 12,
                 horizontalMargin: 12,
@@ -1748,7 +1742,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                     ],
                   )),
                   DataCell(Center(child: IconButton(tooltip: 'View Relay status',
-                    icon: widget.siteData.nodeList[index].rlyStatus.any((rly) => rly.status == 2 || rly.status == 3)? const Icon(Icons.warning, color: Colors.orangeAccent):
+                    icon: widget.siteData.nodeList[index].rlyStatus.any((rly) => rly.Status == 2 || rly.Status == 3)? const Icon(Icons.warning, color: Colors.orangeAccent):
                     Icon(Icons.info_outline, color: myTheme.primaryColorDark), // Icon to display
                     onPressed: () {
                       showModalBottomSheet(
@@ -1829,16 +1823,17 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                               mainAxisSpacing: 10.0,
                                             ),
                                             itemBuilder: (BuildContext context, int indexGv) {
+                                              //print(widget.siteData.nodeList[index].rlyStatus[indexGv].s);
                                               return Column(
                                                 children: [
                                                   CircleAvatar(
-                                                    backgroundColor: widget.siteData.nodeList[index].rlyStatus[indexGv]['Status']==0 ? Colors.grey :
-                                                    widget.siteData.nodeList[index].rlyStatus[indexGv]['Status']==1 ? Colors.green :
-                                                    widget.siteData.nodeList[index].rlyStatus[indexGv]['Status']==2 ? Colors.orange :
-                                                    widget.siteData.nodeList[index].rlyStatus[indexGv]['Status']==3 ? Colors.redAccent : Colors.black12, // Avatar background color
-                                                    child: Text((widget.siteData.nodeList[index].rlyStatus[indexGv]['RlyNo']).toString(), style: const TextStyle(color: Colors.white)),
+                                                    backgroundColor: widget.siteData.nodeList[index].rlyStatus[indexGv].Status==0 ? Colors.grey :
+                                                    widget.siteData.nodeList[index].rlyStatus[indexGv].Status==1 ? Colors.green :
+                                                    widget.siteData.nodeList[index].rlyStatus[indexGv].Status==2 ? Colors.orange :
+                                                    widget.siteData.nodeList[index].rlyStatus[indexGv].Status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
+                                                    child: Text((widget.siteData.nodeList[index].rlyStatus[indexGv].RlyNo).toString(), style: const TextStyle(color: Colors.white)),
                                                   ),
-                                                  Text((widget.siteData.nodeList[index].rlyStatus[indexGv]['Name']).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                                  Text((widget.siteData.nodeList[index].rlyStatus[indexGv].Name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
                                                 ],
                                               );
                                             },

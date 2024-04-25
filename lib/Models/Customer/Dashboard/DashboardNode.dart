@@ -83,8 +83,8 @@ class NodeModel {
   final int referenceNumber;
   double slrVolt;
   double batVolt;
-  List<dynamic> rlyStatus;
-  List<dynamic> sensor;
+  List<RelayStatus> rlyStatus;
+  List<Sensor> sensor;
   int status;
 
   NodeModel({
@@ -104,6 +104,12 @@ class NodeModel {
 
   factory NodeModel.fromJson(Map<String, dynamic> json) {
 
+    var rlyStatusList = json['RlyStatus'] as List;
+    List<RelayStatus> rlyStatus = rlyStatusList.map((rlyStatus) => RelayStatus.fromJson(rlyStatus)).toList();
+
+    var sensorList = json['Sensor'] as List;
+    List<Sensor> sensor = sensorList.map((sensor) => Sensor.fromJson(sensor)).toList();
+
     return NodeModel(
       controllerId: json['controllerId'],
       serialNumber: json['serialNumber'],
@@ -114,8 +120,8 @@ class NodeModel {
       referenceNumber: json['referenceNumber'],
       slrVolt: json['SVolt'] ?? 0.0,
       batVolt: json['BatVolt'] ?? 0.0,
-      rlyStatus: json['RlyStatus'] ?? [],
-      sensor: json['Sensor'] ?? [],
+      rlyStatus: rlyStatus,
+      sensor: sensor,
       status: json['Status'] ?? 0,
     );
   }
@@ -206,21 +212,38 @@ class NextProgram {
 }
 
 class RelayStatus {
-  final String? name;
-  final int? rlyNo;
-  final int? status;
+  final String? Name;
+  final int? RlyNo;
+  final int? Status;
 
   RelayStatus({
-    required this.name,
-    required this.rlyNo,
-    required this.status,
+    required this.Name,
+    required this.RlyNo,
+    required this.Status,
   });
 
   factory RelayStatus.fromJson(Map<String, dynamic> json) {
     return RelayStatus(
-      name: json['Name'],
-      rlyNo: json['RlyNo'],
-      status: json['Status'],
+      Name: json['Name'],
+      RlyNo: json['RlyNo'],
+      Status: json['Status'],
+    );
+  }
+}
+
+class Sensor {
+  final String? Name;
+  final String? Value;
+
+  Sensor({
+    required this.Name,
+    required this.Value,
+  });
+
+  factory Sensor.fromJson(Map<String, dynamic> json) {
+    return Sensor(
+      Name: json['Name'],
+      Value: json['Value'],
     );
   }
 }

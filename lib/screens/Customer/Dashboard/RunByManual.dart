@@ -163,10 +163,12 @@ class _RunByManualState extends State<RunByManual> {
                   if(dashBoardData[0].centralFertilizerSite.isNotEmpty){
                     for(int i=0; i<dashBoardData[0].centralFertilizerSite.length; i++){
                       String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFertilizerSite[i].fertilizer);
-                      strSldCrlFetFilterSrlNo += '_$concatenatedString';
+                      if(concatenatedString.isNotEmpty){
+                        strSldCrlFetFilterSrlNo += '${concatenatedString}_';
+                      }
                     }
-                    if (strSldCrlFetFilterSrlNo.isNotEmpty && strSldCrlFetFilterSrlNo.startsWith('_')) {
-                      strSldCrlFetFilterSrlNo = strSldCrlFetFilterSrlNo.substring(1);
+                    if (strSldCrlFetFilterSrlNo.isNotEmpty && strSldCrlFetFilterSrlNo.endsWith('_')) {
+                      strSldCrlFetFilterSrlNo = strSldCrlFetFilterSrlNo.replaceRange(strSldCrlFetFilterSrlNo.length - 1, strSldCrlFetFilterSrlNo.length, '');
                     }
                   }
                   if(dashBoardData[0].localFertilizerSite.isNotEmpty){
@@ -227,7 +229,7 @@ class _RunByManualState extends State<RunByManual> {
                   //print(strSldIrrigationPumpSrlNo);
                   //print(strSldValveOrLineSrlNo);
                   //print(strSldCrlFetFilterSrlNo);
-
+                  //print(allRelaySrlNo);
 
                   if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
                     showDialog<String>(
@@ -298,10 +300,6 @@ class _RunByManualState extends State<RunByManual> {
 
                   strProgramCategory = strProgramCategory.isNotEmpty ? strProgramCategory.substring(0, strProgramCategory.length - 1) : '';*/
                 }
-
-
-
-
 
                 /*if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
                   if(ddSelection==0){

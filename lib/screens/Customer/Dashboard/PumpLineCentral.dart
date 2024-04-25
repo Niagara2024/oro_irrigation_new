@@ -252,7 +252,7 @@ class DisplaySensor extends StatelessWidget {
 
     for( var key in jsonData.keys){
       dynamic value = jsonData[key];
-      if(key!='Line' && key!='DpValue'){
+      if((key=='PrsIn'||key=='PrsOut'||key=='Watermeter') && value!='_'){
         if(value!='-'){
           totalWidth += 70;
         }
@@ -269,7 +269,7 @@ class DisplaySensor extends StatelessWidget {
           String key = jsonData.keys.elementAt(index);
           dynamic value = jsonData[key];
           print(value);
-          return index!=0 && index!=3 && value !='-' ? Column(
+          return (key=='PrsIn'||key=='PrsOut'||key=='Watermeter') && value!='_' ? Column(
             children: [
               Stack(
                 children: [
@@ -590,7 +590,7 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                           children: [
                             AppImages.getAsset('booster', provider.fertilizerCentral[fIndex]['Booster'][0]['Status']),
                             Positioned(
-                              top: 15,
+                              top: 70,
                               left: 15,
                               child: provider.fertilizerCentral[fIndex]['FertilizerTankSelector'].isNotEmpty ? const SizedBox(
                                 width: 50,
@@ -598,7 +598,7 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                                   child: Text('Selector' , style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 10,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.normal,
                                   ),
                                   ),
                                 ),
@@ -606,20 +606,20 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                               const SizedBox(),
                             ),
                             Positioned(
-                              top: 30,
-                              left: 15,
+                              top: 85,
+                              left: 18,
                               child: provider.fertilizerCentral[fIndex]['FertilizerTankSelector'].isNotEmpty ? Container(
                                 decoration: BoxDecoration(
                                   color: provider.fertilizerCentral[fIndex]['FertilizerTankSelector'][0]['Status']!=0? Colors.greenAccent : Colors.grey.shade300,
                                   borderRadius: BorderRadius.circular(3),
                                 ),
-                                width: 50,
-                                height: 25,
+                                width: 45,
+                                height: 22,
                                 child: Center(
                                   child: Text(provider.fertilizerCentral[fIndex]['FertilizerTankSelector'][0]['Status']!=0?
                                   provider.fertilizerCentral[fIndex]['FertilizerTankSelector'][0]['Name'] : '--' , style: const TextStyle(
                                     color: Colors.black,
-                                    fontSize: 14,
+                                    fontSize: 13,
                                     fontWeight: FontWeight.bold,
                                   ),
                                   ),
@@ -665,41 +665,16 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                                     children: [
                                       buildFertCheImage(index, fertilizer['Status'], provider.fertilizerCentral[fIndex]['Fertilizer'].length, provider.fertilizerCentral[fIndex]['Agitator']),
                                       Positioned(
+                                        top: 34,
+                                        left: 5,
+                                        child: CircleAvatar(
+                                          radius: 8,
+                                          backgroundColor: Colors.lightBlueAccent,
+                                          child: Text('${index+1}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),),
+                                        ),
+                                      ),
+                                      Positioned(
                                         top: 50,
-                                        left: 18,
-                                        child: SizedBox(
-                                          width: 60,
-                                          child: Center(
-                                            child: Text('${fertilizer['Name']}', style: const TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 9,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        top: 67,
-                                        left: 18,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.transparent,
-                                            borderRadius: BorderRadius.circular(3),
-                                          ),
-                                          width: 60,
-                                          child: Center(
-                                            child: Text('${fertilizer['FlowRate_LpH']}', style: const TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 9,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        top: 85,
                                         left: 18,
                                         child: Container(
                                           decoration: BoxDecoration(
@@ -710,6 +685,25 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                                           child: Center(
                                             child: Text(fertilizer['FertMethod']=='1' || fertilizer['FertMethod']=='3'? fertilizer['Duration'] :
                                             '${fertilizerQty.toStringAsFixed(2)} L', style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 65,
+                                        left: 18,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.transparent,
+                                            borderRadius: BorderRadius.circular(3),
+                                          ),
+                                          width: 60,
+                                          child: Center(
+                                            child: Text('${fertilizer['FlowRate_LpH']}-lph', style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 9,
                                               fontWeight: FontWeight.bold,
@@ -759,64 +753,9 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                   ),
                 ),
                 provider.fertilizerCentral[fIndex]['Agitator'].isNotEmpty ? SizedBox(
-                  width: 70,
-                  height: 140,
-                  child: Stack(
-                    children: [
-                      buildAgitatorImage(provider.fertilizerCentral[fIndex]['Agitator'][0]['Status']),
-                      Positioned(
-                        top: 50,
-                        left: 0,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(3),
-                          ),
-                          width: 60,
-                          child: const Text('- Channel', style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 67,
-                        left: 0,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(3),
-                          ),
-                          width: 60,
-                          child: const Text('- Flow(L/h)', style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 85,
-                        left: 0,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(3),
-                          ),
-                          width: 60,
-                          child: const Text('- Set(Hr/Fl)', style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  width: 59,
+                  height: 101,
+                  child: buildAgitatorImage(provider.fertilizerCentral[fIndex]['Agitator'][0]['Status']),
                 ) :
                 const SizedBox(),
                 SizedBox(

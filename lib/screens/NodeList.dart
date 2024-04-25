@@ -211,7 +211,7 @@ class _CustomerNodeListState extends State<CustomerNodeList>{
                   ],
                 )),
                 DataCell(Center(child: IconButton(tooltip: 'View Relay status',
-                  icon: widget.siteData.nodeList[index].rlyStatus.any((rly) => rly.status == 2 || rly.status == 3)? const Icon(Icons.warning, color: Colors.orangeAccent):
+                  icon: widget.siteData.nodeList[index].rlyStatus.any((rly) => rly.Status == 2 || rly.Status == 3)? const Icon(Icons.warning, color: Colors.orangeAccent):
                   const Icon(Icons.info_outline, color: Colors.white), // Icon to display
                   onPressed: () {
                     showModalBottomSheet(
@@ -295,13 +295,13 @@ class _CustomerNodeListState extends State<CustomerNodeList>{
                                             return Column(
                                               children: [
                                                 CircleAvatar(
-                                                  backgroundColor: widget.siteData.nodeList[index].rlyStatus[indexGv].status==0 ? Colors.grey :
-                                                  widget.siteData.nodeList[index].rlyStatus[indexGv].status==1 ? Colors.green :
-                                                  widget.siteData.nodeList[index].rlyStatus[indexGv].status==2 ? Colors.orange :
-                                                  widget.siteData.nodeList[index].rlyStatus[indexGv].status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
-                                                  child: Text((widget.siteData.nodeList[index].rlyStatus[indexGv].rlyNo).toString(), style: const TextStyle(color: Colors.white)),
+                                                  backgroundColor: widget.siteData.nodeList[index].rlyStatus[indexGv].Status==0 ? Colors.grey :
+                                                  widget.siteData.nodeList[index].rlyStatus[indexGv].Status==1 ? Colors.green :
+                                                  widget.siteData.nodeList[index].rlyStatus[indexGv].Status==2 ? Colors.orange :
+                                                  widget.siteData.nodeList[index].rlyStatus[indexGv].Status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
+                                                  child: Text((widget.siteData.nodeList[index].rlyStatus[indexGv].RlyNo).toString(), style: const TextStyle(color: Colors.white)),
                                                 ),
-                                                Text((widget.siteData.nodeList[index].rlyStatus[indexGv].name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                                Text((widget.siteData.nodeList[index].rlyStatus[indexGv].Name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
                                               ],
                                             );
                                           },

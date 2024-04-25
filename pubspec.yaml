@@ -92,7 +92,6 @@ flutter:
      - assets/images/irrigation_pump.png
      - assets/images/source_pump.png
      - assets/images/main_valve.png
-     - assets/images/valve.png
      - assets/images/central_filtration.png
      - assets/images/central_dosing.png
      - assets/images/moisture_sensor.png
@@ -250,12 +249,27 @@ flutter:
      - assets/images/dp_fert_channel_center_g.png
      - assets/images/dp_fert_channel_center_y.png
      - assets/images/dp_fert_channel_center_r.png
+     - assets/images/dp_fert_channel_center_aj.png
+     - assets/images/dp_fert_channel_center_aj_g.png
+     - assets/images/dp_fert_channel_center_aj_y.png
+     - assets/images/dp_fert_channel_center_aj_r.png
      - assets/images/dp_agitator_right.png
+     - assets/images/dp_agitator_right_g.png
+     - assets/images/dp_agitator_right_r.png
+     - assets/images/dp_agitator_right_y.png
+     - assets/images/dp_fert_channel_first_aj.png
+     - assets/images/dp_fert_channel_first_aj_g.png
+     - assets/images/dp_fert_channel_first_aj_y.png
+     - assets/images/dp_fert_channel_first_aj_r.png
      - assets/images/dp_fert_last_tank.png
      - assets/images/dp_fert_channel_last.png
      - assets/images/dp_fert_channel_last_g.png
      - assets/images/dp_fert_channel_last_y.png
      - assets/images/dp_fert_channel_last_r.png
+     - assets/images/dp_fert_channel_last_aj.png
+     - assets/images/dp_fert_channel_last_aj_g.png
+     - assets/images/dp_fert_channel_last_aj_y.png
+     - assets/images/dp_fert_channel_last_aj_r.png
      - assets/images/dp_fert_nrv.png
      - assets/images/dp_fert_booster_pump.png
      - assets/images/dp_fert_booster_pump_g.png
@@ -277,6 +291,10 @@ flutter:
      - assets/images/dp_irr_pump_r.png
      - assets/images/joining_line.png
      - assets/images/dp_sump.png
+     - assets/images/dp_agitator_gray.png
+     - assets/images/dp_agitator_green.png
+     - assets/images/dp_agitator_red.png
+     - assets/images/dp_agitator_yellow.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

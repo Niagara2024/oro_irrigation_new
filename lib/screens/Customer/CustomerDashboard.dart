@@ -1,11 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
-import 'package:oro_irrigation_new/screens/Customer/Dashboard/CurrentScheduleFinal.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/LocalSite.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/NextSchedule.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/UpcomingProgram.dart';
@@ -13,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../constants/MQTTManager.dart';
 import '../../state_management/MqttPayloadProvider.dart';
+import 'Dashboard/CurrentSchedule.dart';
 import 'Dashboard/PumpLineCentral.dart';
 
 class CustomerDashboard extends StatefulWidget {
@@ -61,11 +59,10 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
       scrollDirection: Axis.vertical,
       child: Column(
         children: [
-          //MainLine(siteData: widget.siteData),
           PumpLineCentral(siteData: widget.siteData),
           LocalSite(siteData: widget.siteData),
           //DisplayIrrigationLine(siteData: widget.siteData),
-          CurrentScheduleFinal(siteData: widget.siteData, customerID: widget.customerID),
+          CurrentSchedule(siteData: widget.siteData, customerID: widget.customerID),
           provider.nextSchedule.isNotEmpty?
           NextSchedule(siteData: widget.siteData, userID: widget.userID, customerID: widget.customerID):
           const SizedBox(),

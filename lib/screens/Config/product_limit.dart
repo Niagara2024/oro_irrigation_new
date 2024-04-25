@@ -309,7 +309,7 @@ class _ProductLimitsState extends State<ProductLimits> {
                                             padding: const EdgeInsets.all(8.0),
                                             child: CircleAvatar(radius: 17,
                                               backgroundImage: productLimits[index].product == 'Valve'?
-                                              const AssetImage('assets/images/valve.png'):
+                                              const AssetImage('assets/images/valve_gray.png'):
                                               productLimits[index].product == 'Main Valve'?
                                               const AssetImage('assets/images/main_valve.png'):
                                               productLimits[index].product == 'Source Pump'?

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
+import '../../../constants/AppImages.dart';
 import '../../../state_management/MqttPayloadProvider.dart';
 
 
@@ -43,57 +44,59 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                       scrollDirection: Axis.horizontal,
                       child: Padding(
                         padding: const EdgeInsets.only(top: 15, left: 5, right: 5),
-                        child: widget.siteData.irrigationPump.isNotEmpty? Column(
+                        child: provider.irrigationPump.isNotEmpty? Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                provider.irrigationPump.isNotEmpty? SizedBox(
-                                  width: 52.50,
-                                  height: 70,
-                                  child : Stack(
-                                    children: [
-                                      Image.asset('assets/images/dp_sump.png'),
-                                    ],
+                                provider.irrigationPump.isNotEmpty? Padding(
+                                  padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty?38.4:0),
+                                  child: SizedBox(
+                                    width: 52.50,
+                                    height: 70,
+                                    child : Stack(
+                                      children: [
+                                        Image.asset('assets/images/dp_sump.png'),
+                                      ],
+                                    ),
                                   ),
                                 ):
                                 const SizedBox(),
-                                provider.irrigationPump.isNotEmpty? const DisplayIrrigationPump() : const SizedBox(),
-                                for(int i=0; i<provider.payload2408.length; i++)
-                                  provider.payload2408.isNotEmpty?  DisplaySensor(crInx: i) : const SizedBox(),
-                                //provider.payload2408.isNotEmpty? const DisplaySensor(crInx: 1) : const SizedBox(),
-                                provider.filtersCentral.isNotEmpty? const DisplayFilter(): const SizedBox(),
-                                provider.irrigationPump.isNotEmpty? SizedBox(
-                                  width: 28,
-                                  height: 70,
-                                  child : Stack(
-                                    children: [
-                                      Image.asset('assets/images/joining_line.png',),
-                                    ],
-                                  ),
-                                ) :
+                                provider.irrigationPump.isNotEmpty? Padding(
+                                  padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty?38.4:0),
+                                  child: const DisplayIrrigationPump(),
+                                ):
                                 const SizedBox(),
+                                for(int i=0; i<provider.payload2408.length; i++)
+                                  provider.payload2408.isNotEmpty?  Padding(
+                                    padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty?38.4:0),
+                                    child: DisplaySensor(crInx: i),
+                                  ) : const SizedBox(),
+                                provider.filtersCentral.isNotEmpty? Padding(
+                                  padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty?38.4:0),
+                                  child: const DisplayFilter(),
+                                ): const SizedBox(),
                                 provider.fertilizerCentral.isNotEmpty? const DisplayFertilizer(): const SizedBox(),
                               ],
                             ),
                           ],
                         ):
-                        const SizedBox(),
+                        const SizedBox(height: 20,),
                       ),
                     ),
                   ),
                 ),
               ),
               Positioned(
-                top: 5,
+                top: provider.fertilizerCentral.isNotEmpty?20:5,
                 left: 0,
                 child: Container(
                   width: 200,
                   padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 2),
                   decoration: BoxDecoration(
-                      color: Colors.blueGrey.shade200,
+                      color: Colors.blue.shade200,
                       borderRadius: const BorderRadius.all(Radius.circular(2)),
                       border: Border.all(width: 0.5, color: Colors.grey)
                   ),
@@ -149,11 +152,11 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                   SizedBox(
                     width: 70,
                     height: 70,
-                    child: displayIrrigationPumpIcon(index, provider.irrigationPump[index]['Status']),
+                    child: AppImages.getAsset('irrigationPump', provider.irrigationPump[index]['Status']),
                   ),
                   provider.irrigationPump[index]['OnDelayLeft'] !='00:00:00'?
                   Positioned(
-                    top: 47.7,
+                    top: 48,
                     left: 10,
                     child: Container(
                       color: Colors.greenAccent,
@@ -191,63 +194,6 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
 
   }
 
-  Widget displayIrrigationPumpIcon(int cIndex, int status) {
-    String imageName = 'dp_irr_pump';
-    switch (status) {
-      case 0:
-        imageName += '.png';
-        break;
-      case 1:
-        imageName += '_g.png';
-        break;
-      case 2:
-        imageName += '_y.png';
-        break;
-      default:
-        imageName += '_r.png';
-    }
-
-    return Image.asset('assets/images/$imageName');
-  }
-
-  /*Widget displayIrrigationPumpIcon(int cIndex, int status, int irPumpLength) {
-    String imageName;
-    if (irPumpLength == 1) {
-      imageName = 'dp_irr_pump_1';
-    } else if (irPumpLength == 2) {
-      imageName = cIndex == 0 ? 'dp_irr_pump_2' : 'dp_irr_pump_3';
-    } else {
-      switch (irPumpLength) {
-        case 3:
-          imageName = cIndex == 0 ? 'dp_irr_pump_2' : (cIndex == 1 ? 'dp_irr_pump_2' : 'dp_irr_pump_3');
-          break;
-        case 4:
-          imageName = cIndex == 0 ? 'dp_irr_pump_2' : (cIndex == 1 ? 'dp_irr_pump_2' : (cIndex == 2 ? 'dp_irr_pump_2' : 'dp_irr_pump_3'));
-          break;
-        default:
-          imageName = 'dp_irr_pump_3';
-      }
-    }
-
-    switch (status) {
-      case 0:
-        imageName += '.png';
-        break;
-      case 1:
-        imageName += '_g.gif';
-        break;
-      case 2:
-        imageName += '_y.gif';
-        break;
-      default:
-        imageName += '_r.gif';
-    }
-
-    if(imageName.contains('.png')){
-      return Image.asset('assets/images/$imageName');
-    }
-    return Image.asset('assets/GifFile/$imageName');
-  }*/
 
   void durationUpdatingFunction() {
     timer?.cancel();
@@ -462,7 +408,7 @@ class _DisplayFilterState extends State<DisplayFilter> {
                             SizedBox(
                               width: 70,
                               height: 70,
-                              child: buildFilterImage(flIndex, provider.filtersCentral[i]['FilterStatus'][flIndex]['Status']),
+                              child: AppImages.getAsset('filter', provider.filtersCentral[i]['FilterStatus'][flIndex]['Status']),
                             ),
                             Positioned(
                               top: 40,
@@ -556,47 +502,6 @@ class _DisplayFilterState extends State<DisplayFilter> {
 
   }
 
-  Widget buildFilterImage(int cIndex, int status) {
-    String imageName = 'dp_filter';
-    switch (status) {
-      case 0:
-        imageName += '.png';
-        break;
-      case 1:
-        imageName += '_g.png';
-        break;
-      case 2:
-        imageName += '_y.png';
-        break;
-      default:
-        imageName += '_r.png';
-    }
-    return Image.asset('assets/images/$imageName');
-  }
-
-  /*Widget buildFilterImage(int cIndex, int status) {
-    String imageName = 'dp_filter';
-
-    switch (status) {
-      case 0:
-        imageName += '.png';
-        break;
-      case 1:
-        imageName += '_g.gif';
-        break;
-      case 2:
-        imageName += '_y.gif';
-        break;
-      default:
-        imageName += '_r.gif';
-    }
-    if(imageName.contains('.png')){
-      return Image.asset('assets/images/$imageName');
-    }
-    return Image.asset('assets/GifFile/$imageName');
-
-  }*/
-
   void durationUpdatingFunction() {
     timer?.cancel();
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
@@ -665,7 +570,7 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<MqttPayloadProvider>(context);
-    return Column(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -678,18 +583,12 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
               children: [
                 Column(
                   children: [
-                    provider.fertilizerCentral[fIndex]['Booster'].isNotEmpty ? SizedBox(
-                      width: 70,
-                      height: 70,
-                      child:buildBoosterImage(provider.fertilizerCentral[fIndex]['Booster'][0]['Status']),
-                    ) :
-                    const SizedBox(),
                     SizedBox(
                         width: 70,
-                        height: 70,
+                        height: 140,
                         child : Stack(
                           children: [
-                            Image.asset('assets/images/dp_fert_nrv.png'),
+                            AppImages.getAsset('booster', provider.fertilizerCentral[fIndex]['Booster'][0]['Status']),
                             Positioned(
                               top: 15,
                               left: 15,
@@ -761,28 +660,67 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                               children: [
                                 SizedBox(
                                   width: 70,
-                                  height: 70,
-                                  child: index == 0 && provider.fertilizerCentral[fIndex]['Fertilizer'].length!=1
-                                      ? provider.fertilizerCentral[fIndex]['Agitator'].isNotEmpty
-                                      ? Image.asset('assets/images/dp_fert_first_tank.png')
-                                      : Image.asset('assets/images/dp_fert_first_tank1.png')
-                                      : index == provider.fertilizerCentral[fIndex]['Fertilizer'].length - 1
-                                      ? provider.fertilizerCentral[fIndex]['Agitator'].isNotEmpty
-                                      ? Image.asset('assets/images/dp_fert_last_tank.png')
-                                      : Image.asset('assets/images/dp_fert_last_tank1.png')
-                                      : provider.fertilizerCentral[fIndex]['Agitator'].isNotEmpty
-                                      ? Image.asset('assets/images/dp_fert_center_tank.png')
-                                      : Image.asset('assets/images/dp_fert_first_tank1.png'),
-                                ),
-                                SizedBox(
-                                  width: 70,
-                                  height: 70,
+                                  height: 140,
                                   child: Stack(
                                     children: [
-                                      buildFertCheImage(index, fertilizer['Status'], provider.fertilizerCentral[fIndex]['Fertilizer'].length),
+                                      buildFertCheImage(index, fertilizer['Status'], provider.fertilizerCentral[fIndex]['Fertilizer'].length, provider.fertilizerCentral[fIndex]['Agitator']),
                                       Positioned(
-                                        top: 0,
-                                        left: 10,
+                                        top: 50,
+                                        left: 18,
+                                        child: SizedBox(
+                                          width: 60,
+                                          child: Center(
+                                            child: Text('${fertilizer['Name']}', style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 67,
+                                        left: 18,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.transparent,
+                                            borderRadius: BorderRadius.circular(3),
+                                          ),
+                                          width: 60,
+                                          child: Center(
+                                            child: Text('${fertilizer['FlowRate_LpH']}', style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 85,
+                                        left: 18,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.transparent,
+                                            borderRadius: BorderRadius.circular(3),
+                                          ),
+                                          width: 60,
+                                          child: Center(
+                                            child: Text(fertilizer['FertMethod']=='1' || fertilizer['FertMethod']=='3'? fertilizer['Duration'] :
+                                            '${fertilizerQty.toStringAsFixed(2)} L', style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 103,
+                                        left: 0,
                                         child: fertilizer['Status'] !=0
                                             &&
                                             fertilizer['FertSelection'] !='_'
@@ -790,7 +728,10 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                                             fertilizer['DurationLeft'] !='00:00:00'
                                             ?
                                         Container(
-                                          color: Colors.greenAccent,
+                                          decoration: BoxDecoration(
+                                            color: Colors.greenAccent,
+                                            borderRadius: BorderRadius.circular(3),
+                                          ),
                                           width: 50,
                                           child: Center(
                                             child: Text(fertilizer['FertMethod']=='1' || fertilizer['FertMethod']=='3'
@@ -819,151 +760,124 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                 ),
                 provider.fertilizerCentral[fIndex]['Agitator'].isNotEmpty ? SizedBox(
                   width: 70,
-                  height: 70,
-                  child: provider.fertilizerCentral[fIndex]['Agitator'][0]['Status']==1?
-                  Image.asset('assets/images/dp_agitator_right_g.png'):
-                  provider.fertilizerCentral[fIndex]['Agitator'][0]['Status']==2?
-                  Image.asset('assets/images/dp_agitator_right_y.png'):
-                  provider.fertilizerCentral[fIndex]['Agitator'][0]['Status']==3?
-                  Image.asset('assets/images/dp_agitator_right_r.png'):
-                  Image.asset('assets/images/dp_agitator_right.png'),
+                  height: 140,
+                  child: Stack(
+                    children: [
+                      buildAgitatorImage(provider.fertilizerCentral[fIndex]['Agitator'][0]['Status']),
+                      Positioned(
+                        top: 50,
+                        left: 0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                          width: 60,
+                          child: const Text('- Channel', style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 67,
+                        left: 0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                          width: 60,
+                          child: const Text('- Flow(L/h)', style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 85,
+                        left: 0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                          width: 60,
+                          child: const Text('- Set(Hr/Fl)', style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ) :
                 const SizedBox(),
                 SizedBox(
-                  width: provider.fertilizerCentral[fIndex]['Fertilizer'].length * 70 + 70,
-                  height: 150,
+                  width: 70,
+                  height: 140,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      provider.fertilizerCentral[fIndex]['Ec'].isNotEmpty ? Padding(
-                        padding: const EdgeInsets.only(left: 15),
-                        child: SizedBox(
-                          width: provider.fertilizerCentral[fIndex]['Ec'].length *70,
-                          height: 35,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: provider.fertilizerCentral[fIndex]['Ec'].length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Column(
-                                children: [
-                                  SizedBox(
-                                    width: 70,
-                                    height: 15,
-                                    child: Center(child: Text(provider.fertilizerCentral[fIndex]['Ec'][index]['Name'], style: TextStyle(fontSize: 10))),
-                                  ),
-                                  SizedBox(
-                                    width: 70,
-                                    height: 15,
-                                    child: Center(child: Text(provider.fertilizerCentral[fIndex]['Ec'][index]['Status'], style: TextStyle(fontSize: 10))),
-                                  ),
-                                ],
-                              );
-                              /*return Text('data');*/
-                            },
-                          ),
-                        ),
-                      ) :
-                      const SizedBox(),
-                      provider.fertilizerCentral[fIndex]['Ph'].isNotEmpty ? Padding(
-                        padding: const EdgeInsets.only(left: 15),
-                        child: SizedBox(
-                          width: provider.fertilizerCentral[fIndex]['Ph'].length *70,
-                          height: 35,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: provider.fertilizerCentral[fIndex]['Ph'].length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Column(
-                                children: [
-                                  SizedBox(
-                                    width: 70,
-                                    height: 15,
-                                    child: Center(child: Text(provider.fertilizerCentral[fIndex]['Ph'][index]['Name'], style: TextStyle(fontSize: 10),)),
-                                  ),
-                                  SizedBox(
-                                    width: 70,
-                                    height: 15,
-                                    child: Center(child: Text(provider.fertilizerCentral[fIndex]['Ph'][index]['Status'], style: TextStyle(fontSize: 10))),
-                                  ),
-                                ],
-                              );
-                              /*return Text('data');*/
-                            },
-                          ),
-                        ),
-                      ) :
-                      const SizedBox(),
-                      Row(
-                        children: [
-                          SizedBox(
-                            width: 70,
-                            height: 70,
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 5),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  SizedBox(height: 6,),
-                                  Text('Channel', style: TextStyle(fontSize: 10),),
-                                  SizedBox(height: 7,),
-                                  Text('Set', style: TextStyle(fontSize: 10),),
-                                  SizedBox(height: 7,),
-                                  Text('Flow(L/h)', style: TextStyle(fontSize: 10),),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                width: provider.fertilizerCentral[fIndex]['Fertilizer'].length * 70,
-                                height: 70,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: provider.fertilizerCentral[fIndex]['Fertilizer'].length,
-                                  itemBuilder: (BuildContext context, int index) {
-                                    var fertilizer = provider.fertilizerCentral[fIndex]['Fertilizer'][index];
-                                    double fertilizerQty = 0.0;
-                                    var qtyValue = fertilizer['Qty'];
-                                    if (qtyValue != null) {
-                                      bool isString = fertilizer['Qty'] is String;
-                                      if(isString){
-                                        fertilizerQty = double.parse(fertilizer['Qty']);
-                                      }else{
-                                        fertilizerQty = fertilizer['Qty'];
-                                      }
-                                    }
-                                    return Container(
-                                      width: 70,
-                                      height: 70,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: Colors.grey,
-                                          width: 0.5,
-                                        ),
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          const SizedBox(height: 3),
-                                          Text(fertilizer['Name'], style: const TextStyle(fontSize: 10),),
-                                          const Divider(height: 7),
-                                          Text(fertilizer['FertMethod']=='1' || fertilizer['FertMethod']=='3'? fertilizer['Duration'] :
-                                          '${fertilizerQty.toStringAsFixed(2)} L', style: const TextStyle(fontSize: 10),),
-                                          const Divider(height: 7),
-                                          Text('${fertilizer['FlowRate_LpH']}', style: const TextStyle(fontSize: 10),),
-                                        ],
-                                      ),
-                                    );
-                                  },
+                      provider.fertilizerCentral[fIndex]['Ec'].isNotEmpty ? SizedBox(
+                        width: 70,
+                        height: provider.fertilizerCentral[fIndex]['Ec'].length*35,
+                        child: ListView.builder(
+                          scrollDirection: Axis.vertical,
+                          itemCount: provider.fertilizerCentral[fIndex]['Ec'].length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  width: 70,
+                                  height: 15,
+                                  child: Center(child: Text(provider.fertilizerCentral[fIndex]['Ec'][index]['Name'], style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal))),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                                SizedBox(
+                                  width: 70,
+                                  height: 15,
+                                  child: Center(child: Text(provider.fertilizerCentral[fIndex]['Ec'][index]['Status'], style: TextStyle(fontSize: 10))),
+                                ),
+                              ],
+                            );
+                            /*return Text('data');*/
+                          },
+                        ),
+                      ) :
+                      const SizedBox(),
+                      provider.fertilizerCentral[fIndex]['Ph'].isNotEmpty ? SizedBox(
+                        width: 70,
+                        height: provider.fertilizerCentral[fIndex]['Ph'].length*35,
+                        child: ListView.builder(
+                          scrollDirection: Axis.vertical,
+                          itemCount: provider.fertilizerCentral[fIndex]['Ph'].length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Column(
+                              children: [
+                                SizedBox(
+                                  width: 70,
+                                  height: 15,
+                                  child: Center(child: Text(provider.fertilizerCentral[fIndex]['Ph'][index]['Name'], style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),)),
+                                ),
+                                SizedBox(
+                                  width: 70,
+                                  height: 15,
+                                  child: Center(child: Text(provider.fertilizerCentral[fIndex]['Ph'][index]['Status'], style: TextStyle(fontSize: 10))),
+                                ),
+                              ],
+                            );
+                            /*return Text('data');*/
+                          },
+                        ),
+                      ) :
+                      const SizedBox(),
                     ],
                   ),
                 ),
@@ -974,36 +888,25 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
     );
   }
 
-  Widget buildBoosterImage(int status) {
-    String imageName ='dp_fert_booster_pump';
 
-    switch (status) {
-      case 0:
-        imageName += '.png';
-        break;
-      case 1:
-        imageName += '_g.png';
-        break;
-      case 2:
-        imageName += '_y.png';
-        break;
-      case 3:
-        imageName += '_r.png';
-      default:
-        imageName += '.png';
-    }
-
-    return Image.asset('assets/images/$imageName');
-
-  }
-
-  Widget buildFertCheImage(int cIndex, int status, int cheLength) {
+  Widget buildFertCheImage(int cIndex, int status, int cheLength, List agitatorList) {
     String imageName;
-
     if(cIndex == cheLength - 1){
-      imageName='dp_fert_channel_last';
+      if(agitatorList.isNotEmpty){
+        imageName='dp_fert_channel_last_aj';
+      }else{
+        imageName='dp_fert_channel_last';
+      }
     }else{
-      imageName='dp_fert_channel_center';
+      if(agitatorList.isNotEmpty){
+        if(cIndex==0){
+          imageName='dp_fert_channel_first_aj';
+        }else{
+          imageName='dp_fert_channel_center_aj';
+        }
+      }else{
+        imageName='dp_fert_channel_center';
+      }
     }
 
     switch (status) {
@@ -1021,6 +924,29 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
         break;
       case 4:
         imageName += '.png';
+        break;
+      default:
+        imageName += '.png';
+    }
+
+    return Image.asset('assets/images/$imageName');
+
+  }
+
+  Widget buildAgitatorImage(int status) {
+    String imageName ='dp_agitator_right';
+    switch (status) {
+      case 0:
+        imageName += '.png';
+        break;
+      case 1:
+        imageName += '_g.png';
+        break;
+      case 2:
+        imageName += '_y.png';
+        break;
+      case 3:
+        imageName += '_r.png';
         break;
       default:
         imageName += '.png';

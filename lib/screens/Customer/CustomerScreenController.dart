@@ -109,6 +109,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     payloadProvider.fertilizerLocal=[];
     payloadProvider.waterMeter=[];
     payloadProvider.wifiStrength = 0;
+    payloadProvider.alarmList = [];
+    payloadProvider.payload2408 = [];
+
   }
 
   Future<void> getLanguage() async
@@ -901,9 +904,14 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                       height: 45,
                       child: BadgeButton(
                         onPressed: () {
-                          showAlarmBottomSheet(context, provider);
+                          if(provider.alarmList.isNotEmpty){
+                            showAlarmBottomSheet(context, provider);
+                          }else{
+                            GlobalSnackBar.show(context, 'Alarm is Empty', 200);
+                          }
+
                         },
-                        icon: Icons.notifications_none,
+                        icon: Icons.alarm,
                         badgeNumber: provider.alarmList.length, // Set your badge number here
                       ),
                     ),
@@ -951,7 +959,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   }
 
   Future<void>showNodeDetailsBottomSheet(BuildContext context) async{
-    print(siteListFinal[siteIndex].nodeList);
+    //print(siteListFinal[siteIndex].nodeList);
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -972,39 +980,27 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   ),
                   tileColor: myTheme.primaryColor,
                   textColor: Colors.white,
-                  title: const Text('All Node Details'),
-                ),
-              ),
-              Container(
-                height: 40,
-                color: myTheme.primaryColor.withOpacity(0.25),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        SizedBox(width: 10),
-                        CircleAvatar(radius: 5,backgroundColor: Colors.green,),
-                        SizedBox(width: 5),
-                        Text('On - Status : Normal.', style: TextStyle(fontSize: 13, fontWeight: FontWeight.normal),),
-                        SizedBox(width: 25),
-                        CircleAvatar(radius: 5,backgroundColor: Colors.orange),
-                        SizedBox(width: 5),
-                        Text('Comment Executed to On but still is off', style: TextStyle(fontSize: 13, fontWeight: FontWeight.normal),),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(width: 10),
-                        CircleAvatar(radius: 5,backgroundColor: Colors.black45),
-                        SizedBox(width: 5),
-                        Text('Off - Status : Normal.', style: TextStyle(fontSize: 13, fontWeight: FontWeight.normal),),
-                        SizedBox(width: 25),
-                        CircleAvatar(radius: 5,backgroundColor: Colors.redAccent),
-                        SizedBox(width: 5),
-                        Text('Comment Executed to Off but still is on', style: TextStyle(fontSize: 13, fontWeight: FontWeight.normal),),
-                      ],
-                    ),
-                  ],
+                  title: const Text('All Node Details', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                  trailing: PopupMenuButton<String>(
+                    icon: Icon(Icons.filter_list, color: Colors.white,),
+                    onSelected: (value) {
+                      print('Filter option selected: $value');
+                    },
+                    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                      const PopupMenuItem<String>(
+                        value: 'Sort by Active relay',
+                        child: Text('Sort by Active relays'),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'Sort by In-Active relays',
+                        child: Text('Sort by In-Active relays'),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'Others',
+                        child: Text('Others'),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Expanded(
@@ -1062,40 +1058,45 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                       children: [
                                         CircleAvatar(
                                           backgroundColor: Colors.transparent,
-                                          backgroundImage: siteListFinal[siteIndex].nodeList[i].rlyStatus[index].name.contains("SP") ?
-                                          const AssetImage('assets/images/dp_src_pump.png') :
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].name.contains("IP") ?
-                                          const AssetImage('assets/images/irrigation_pump.png') :
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].name.contains("VL") ?
-                                          const AssetImage('assets/images/valve.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].name.contains("MV") ?
+                                          backgroundImage: siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("SP") ?
+                                          const AssetImage('assets/images/dp_src_pump.png'):
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("IP") ?
+                                          const AssetImage('assets/images/irrigation_pump.png'):
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("VL") ?
+                                          const AssetImage('assets/images/valve_gray.png'):
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("MV") ?
                                           const AssetImage('assets/images/dp_main_valve.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].name.contains("FL") ?
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("FL") ?
                                           const AssetImage('assets/images/dp_filter.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].name.contains("FG") ?
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("FC") ?
+                                          const AssetImage('assets/images/fert_chanel.png'):
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("FG") ?
                                           const AssetImage('assets/images/fogger.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].name.contains("FG") ?
-                                          const AssetImage('assets/images/fogger.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].name.contains("AG") ?
-                                          const AssetImage('assets/images/agitator.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].name.contains("SL") ?
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("FB") ?
+                                          const AssetImage('assets/images/booster_pump.png'):
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("AG") ?
+                                          const AssetImage('assets/images/dp_agitator_gray.png'):
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("DV") ?
+                                          const AssetImage('assets/images/downstream_valve.png'):
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("SL") ?
                                           const AssetImage('assets/images/selector.png'):
-                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index].name.contains("FN") ?
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("FN") ?
                                           const AssetImage('assets/images/fan.png'):
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("LI") ?
+                                          const AssetImage('assets/images/pressure_sensor.png'):
+                                          siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name'].contains("LO") ?
+                                          const AssetImage('assets/images/pressure_sensor.png'):
                                           const AssetImage('assets/images/pressure_sensor.png'),
                                         ),
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
-                                            CircleAvatar(
+                                            const CircleAvatar(
                                               radius: 5,
-                                              backgroundColor: siteListFinal[siteIndex].nodeList[i].rlyStatus[index].status==0 ? Colors.grey :
-                                              siteListFinal[siteIndex].nodeList[i].rlyStatus[index].status==1 ? Colors.green :
-                                              siteListFinal[siteIndex].nodeList[i].rlyStatus[index].status==2 ? Colors.orange :
-                                              siteListFinal[siteIndex].nodeList[i].rlyStatus[index].status==3 ? Colors.redAccent : Colors.black12,
+                                              backgroundColor: Colors.grey,
                                             ),
                                             const SizedBox(width: 3),
-                                            Text('${siteListFinal[siteIndex].nodeList[i].rlyStatus[index].name}(${siteListFinal[siteIndex].nodeList[i].rlyStatus[index].rlyNo})', style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                            Text('${siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['Name']}(${siteListFinal[siteIndex].nodeList[i].rlyStatus[index]['RlyNo']})', style: const TextStyle(color: Colors.black, fontSize: 10)),
                                           ],
                                         ),
                                       ],
@@ -1112,22 +1113,38 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                   itemBuilder: (context, index) {
                                     return Column(
                                       children: [
-                                        const CircleAvatar(
+                                        CircleAvatar(
                                           backgroundColor: Colors.transparent,
-                                          backgroundImage: AssetImage('assets/images/valve.png'),
+                                            backgroundImage:  siteListFinal[siteIndex].nodeList[i].sensor[index]['Name'].contains("SM") ?
+                                            const AssetImage('assets/images/dp_src_pump.png') :
+                                            siteListFinal[siteIndex].nodeList[i].sensor[index]['Name'].contains("IF") ?
+                                            const AssetImage('assets/images/irrigation_pump.png') :
+                                            siteListFinal[siteIndex].nodeList[i].sensor[index]['Name'].contains("LI") ?
+                                            const AssetImage('assets/images/irrigation_pump.png') :
+                                            siteListFinal[siteIndex].nodeList[i].sensor[index]['Name'].contains("LO") ?
+                                            const AssetImage('assets/images/irrigation_pump.png') :
+                                            siteListFinal[siteIndex].nodeList[i].sensor[index]['Name'].contains("LW") ?
+                                            const AssetImage('assets/images/irrigation_pump.png') :
+                                            siteListFinal[siteIndex].nodeList[i].sensor[index]['Name'].contains("PSP") ?
+                                            const AssetImage('assets/images/irrigation_pump.png') :
+                                            siteListFinal[siteIndex].nodeList[i].sensor[index]['Name'].contains("EC") ?
+                                            const AssetImage('assets/images/pressure_sensor.png') :
+                                            siteListFinal[siteIndex].nodeList[i].sensor[index]['Name'].contains("PH") ?
+                                            const AssetImage('assets/images/pressure_sensor.png') :
+                                            const AssetImage('assets/images/irrigation_pump.png')
                                         ),
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
                                             CircleAvatar(
                                               radius: 5,
-                                              backgroundColor: siteListFinal[siteIndex].nodeList[i].sensor[index].status==0 ? Colors.grey :
-                                              siteListFinal[siteIndex].nodeList[i].sensor[index].status==1 ? Colors.green :
-                                              siteListFinal[siteIndex].nodeList[i].sensor[index].status==2 ? Colors.orange :
-                                              siteListFinal[siteIndex].nodeList[i].sensor[index].status==3 ? Colors.redAccent : Colors.black12,
+                                              backgroundColor: siteListFinal[siteIndex].nodeList[i].sensor[index]['Status']==0 ? Colors.grey :
+                                              siteListFinal[siteIndex].nodeList[i].sensor[index]['Status']==1 ? Colors.green :
+                                              siteListFinal[siteIndex].nodeList[i].sensor[index]['Status']==2 ? Colors.orange :
+                                              siteListFinal[siteIndex].nodeList[i].sensor[index]['Status']==3 ? Colors.redAccent : Colors.black12,
                                             ),
                                             const SizedBox(width: 3),
-                                            Text('${siteListFinal[siteIndex].nodeList[i].rlyStatus[index].name}(${siteListFinal[siteIndex].nodeList[i].rlyStatus[index].rlyNo})', style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                            Text('${siteListFinal[siteIndex].nodeList[i].sensor[index]['Name']}(${siteListFinal[siteIndex].nodeList[i].sensor[index]['AngIpNo']})', style: const TextStyle(color: Colors.black, fontSize: 10)),
                                           ],
                                         ),
                                       ],
@@ -1149,12 +1166,13 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     );
   }
 
+
   Future<void>showAlarmBottomSheet(BuildContext context, MqttPayloadProvider provider) async{
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
         return  SizedBox(
-          height: 600,
+          height: 300,
           child: Column(
             children: [
               Card(
@@ -1510,6 +1528,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                   widget.siteData.nodeList[position].rlyStatus = [];
                   if (item['RlyStatus'] != null) {
                     List<dynamic> rlyStatusJsonList = item['RlyStatus'];
+                    print('rlyStatusJsonList:${rlyStatusJsonList}');
                     List<RelayStatus> rlyStatusList = rlyStatusJsonList.map((rs) => RelayStatus.fromJson(rs)).toList();
                     widget.siteData.nodeList[position].rlyStatus = rlyStatusList;
                   }
@@ -1813,13 +1832,13 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                               return Column(
                                                 children: [
                                                   CircleAvatar(
-                                                    backgroundColor: widget.siteData.nodeList[index].rlyStatus[indexGv].status==0 ? Colors.grey :
-                                                    widget.siteData.nodeList[index].rlyStatus[indexGv].status==1 ? Colors.green :
-                                                    widget.siteData.nodeList[index].rlyStatus[indexGv].status==2 ? Colors.orange :
-                                                    widget.siteData.nodeList[index].rlyStatus[indexGv].status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
-                                                    child: Text((widget.siteData.nodeList[index].rlyStatus[indexGv].rlyNo).toString(), style: const TextStyle(color: Colors.white)),
+                                                    backgroundColor: widget.siteData.nodeList[index].rlyStatus[indexGv]['Status']==0 ? Colors.grey :
+                                                    widget.siteData.nodeList[index].rlyStatus[indexGv]['Status']==1 ? Colors.green :
+                                                    widget.siteData.nodeList[index].rlyStatus[indexGv]['Status']==2 ? Colors.orange :
+                                                    widget.siteData.nodeList[index].rlyStatus[indexGv]['Status']==3 ? Colors.redAccent : Colors.black12, // Avatar background color
+                                                    child: Text((widget.siteData.nodeList[index].rlyStatus[indexGv]['RlyNo']).toString(), style: const TextStyle(color: Colors.white)),
                                                   ),
-                                                  Text((widget.siteData.nodeList[index].rlyStatus[indexGv].name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                                  Text((widget.siteData.nodeList[index].rlyStatus[indexGv]['Name']).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
                                                 ],
                                               );
                                             },

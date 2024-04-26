@@ -59,7 +59,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     clearMQTTPayload();
     getLanguage();
     getCustomerSite(widget.customerID);
-    getProgramList();
+
   }
 
   void callbackFunction(message)
@@ -105,6 +105,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     payloadProvider.upcomingProgram=[];
     payloadProvider.filtersCentral=[];
     payloadProvider.filtersLocal=[];
+    payloadProvider.sourcePump=[];
     payloadProvider.irrigationPump=[];
     payloadProvider.fertilizerCentral=[];
     payloadProvider.fertilizerLocal=[];
@@ -144,7 +145,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     {
       siteListFinal.clear();
       var data = jsonDecode(response.body);
-      //print(response.body);
+      print(response.body);
       if(data["code"]==200)
       {
         final cntList = data["data"] as List;
@@ -153,7 +154,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           setState((){
             loadingSite = false;
           });
-          subscribeAndUpdateSite();
+          if(siteListFinal.isNotEmpty){
+            subscribeAndUpdateSite();
+            getProgramList();
+          }
         } catch (e) {
           print('Error: $e');
           indicatorViewHide();

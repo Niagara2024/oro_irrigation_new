@@ -213,9 +213,6 @@ flutter:
      - assets/images/dp_filter_g.png
      - assets/images/dp_filter_y.png
      - assets/images/dp_filter_r.png
-     - assets/images/dp_filter_1.png
-     - assets/images/dp_filter_2.png
-     - assets/images/dp_filter_3.png
      - assets/GifFile/dp_irr_pump_y.gif
      - assets/GifFile/dp_irr_pump_1_y.gif
      - assets/GifFile/dp_irr_pump_2_y.gif
@@ -295,6 +292,7 @@ flutter:
      - assets/images/dp_agitator_green.png
      - assets/images/dp_agitator_red.png
      - assets/images/dp_agitator_yellow.png
+     - assets/images/dp_sump_src.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -96,7 +96,7 @@ class _MainDashBoardState extends State<MainDashBoard> {
                   } else if (constraints.maxWidth > 600 && constraints.maxWidth < 900) {
                     return const DashboardMiddle();//pad or tap
                   } else {
-                    return const DashboardWide();
+                    return const DashboardWide();//web tv
                   }
                 },
               ),

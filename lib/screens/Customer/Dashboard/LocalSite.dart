@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
+import '../../../constants/AppImages.dart';
 import '../../../constants/theme.dart';
 import '../../../state_management/MqttPayloadProvider.dart';
 
@@ -21,7 +22,7 @@ class _LocalSiteState extends State<LocalSite> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<MqttPayloadProvider>(context);
-    return provider.filtersLocal.isNotEmpty && provider.fertilizerLocal.isNotEmpty? Padding(
+    return provider.filtersLocal.isNotEmpty || provider.fertilizerLocal.isNotEmpty? Padding(
       padding: const EdgeInsets.all(3.0),
       child: Column(
         children: [
@@ -52,7 +53,10 @@ class _LocalSiteState extends State<LocalSite> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                provider.filtersLocal.isNotEmpty? const LocalFilter() : const SizedBox(),
+                                provider.filtersLocal.isNotEmpty? Padding(
+                                  padding: EdgeInsets.only(top: provider.fertilizerLocal.isNotEmpty?38.4:0),
+                                  child: const LocalFilter(),
+                                ) : const SizedBox(),
                                 provider.fertilizerLocal.isNotEmpty? const DisplayFertilizer(): const SizedBox(),
 
                               ],
@@ -66,7 +70,7 @@ class _LocalSiteState extends State<LocalSite> {
                 ),
               ),
               Positioned(
-                top: 5,
+                top: provider.filtersLocal.isNotEmpty && provider.fertilizerLocal.isNotEmpty?20:5,
                 left: 0,
                 child: Container(
                   width: 200,
@@ -272,18 +276,16 @@ class _LocalFilterState extends State<LocalFilter> {
         imageName += '.png';
         break;
       case 1:
-        imageName += '_g.gif';
+        imageName += '_g.png';
         break;
       case 2:
-        imageName += '_y.gif';
+        imageName += '_y.png';
         break;
       default:
-        imageName += '_r.gif';
+        imageName += '_r.png';
     }
-    if(imageName.contains('.png')){
-      return Image.asset('assets/images/$imageName');
-    }
-    return Image.asset('assets/GifFile/$imageName');
+
+    return Image.asset('assets/images/$imageName');
 
   }
 
@@ -356,8 +358,7 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<MqttPayloadProvider>(context);
-
-    return Column(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -370,20 +371,14 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
               children: [
                 Column(
                   children: [
-                    provider.fertilizerLocal[fIndex]['Booster'].isNotEmpty ? SizedBox(
-                      width: 70,
-                      height: 70,
-                      child:buildBoosterImage(provider.fertilizerLocal[fIndex]['Booster'][0]['Status']),
-                    ) :
-                    const SizedBox(),
                     SizedBox(
                         width: 70,
-                        height: 70,
+                        height: 140,
                         child : Stack(
                           children: [
-                            Image.asset('assets/images/dp_fert_nrv.png'),
+                            AppImages.getAsset('booster', provider.fertilizerLocal[fIndex]['Booster'][0]['Status']),
                             Positioned(
-                              top: 15,
+                              top: 70,
                               left: 15,
                               child: provider.fertilizerLocal[fIndex]['FertilizerTankSelector'].isNotEmpty ? const SizedBox(
                                 width: 50,
@@ -391,7 +386,7 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                                   child: Text('Selector' , style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 10,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.normal,
                                   ),
                                   ),
                                 ),
@@ -399,20 +394,20 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                               const SizedBox(),
                             ),
                             Positioned(
-                              top: 30,
-                              left: 15,
+                              top: 85,
+                              left: 18,
                               child: provider.fertilizerLocal[fIndex]['FertilizerTankSelector'].isNotEmpty ? Container(
                                 decoration: BoxDecoration(
                                   color: provider.fertilizerLocal[fIndex]['FertilizerTankSelector'][0]['Status']!=0? Colors.greenAccent : Colors.grey.shade300,
                                   borderRadius: BorderRadius.circular(3),
                                 ),
-                                width: 50,
-                                height: 25,
+                                width: 45,
+                                height: 22,
                                 child: Center(
                                   child: Text(provider.fertilizerLocal[fIndex]['FertilizerTankSelector'][0]['Status']!=0?
                                   provider.fertilizerLocal[fIndex]['FertilizerTankSelector'][0]['Name'] : '--' , style: const TextStyle(
                                     color: Colors.black,
-                                    fontSize: 14,
+                                    fontSize: 13,
                                     fontWeight: FontWeight.bold,
                                   ),
                                   ),
@@ -453,28 +448,61 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                               children: [
                                 SizedBox(
                                   width: 70,
-                                  height: 70,
-                                  child: index == 0 && provider.fertilizerLocal[fIndex]['Fertilizer'].length!=1
-                                      ? provider.fertilizerLocal[fIndex]['Agitator'].isNotEmpty
-                                      ? Image.asset('assets/images/dp_fert_first_tank.png')
-                                      : Image.asset('assets/images/dp_fert_first_tank1.png')
-                                      : index == provider.fertilizerLocal[fIndex]['Fertilizer'].length - 1
-                                      ? provider.fertilizerLocal[fIndex]['Agitator'].isNotEmpty
-                                      ? Image.asset('assets/images/dp_fert_last_tank.png')
-                                      : Image.asset('assets/images/dp_fert_last_tank1.png')
-                                      : provider.fertilizerLocal[fIndex]['Agitator'].isNotEmpty
-                                      ? Image.asset('assets/images/dp_fert_center_tank.png')
-                                      : Image.asset('assets/images/dp_fert_first_tank1.png'),
-                                ),
-                                SizedBox(
-                                  width: 70,
-                                  height: 70,
+                                  height: 140,
                                   child: Stack(
                                     children: [
-                                      buildFertCheImage(index, fertilizer['Status'], provider.fertilizerLocal[fIndex]['Fertilizer'].length),
+                                      buildFertCheImage(index, fertilizer['Status'], provider.fertilizerLocal[fIndex]['Fertilizer'].length, provider.fertilizerLocal[fIndex]['Agitator']),
                                       Positioned(
-                                        top: 0,
-                                        left: 10,
+                                        top: 34,
+                                        left: 5,
+                                        child: CircleAvatar(
+                                          radius: 8,
+                                          backgroundColor: Colors.lightBlueAccent,
+                                          child: Text('${index+1}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 50,
+                                        left: 18,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.transparent,
+                                            borderRadius: BorderRadius.circular(3),
+                                          ),
+                                          width: 60,
+                                          child: Center(
+                                            child: Text(fertilizer['FertMethod']=='1' || fertilizer['FertMethod']=='3'? fertilizer['Duration'] :
+                                            '${fertilizerQty.toStringAsFixed(2)} L', style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 65,
+                                        left: 18,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.transparent,
+                                            borderRadius: BorderRadius.circular(3),
+                                          ),
+                                          width: 60,
+                                          child: Center(
+                                            child: Text('${fertilizer['FlowRate_LpH']}-lph', style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 103,
+                                        left: 0,
                                         child: fertilizer['Status'] !=0
                                             &&
                                             fertilizer['FertSelection'] !='_'
@@ -482,7 +510,10 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                                             fertilizer['DurationLeft'] !='00:00:00'
                                             ?
                                         Container(
-                                          color: Colors.greenAccent,
+                                          decoration: BoxDecoration(
+                                            color: Colors.greenAccent,
+                                            borderRadius: BorderRadius.circular(3),
+                                          ),
                                           width: 50,
                                           child: Center(
                                             child: Text(fertilizer['FertMethod']=='1' || fertilizer['FertMethod']=='3'
@@ -510,152 +541,70 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                   ),
                 ),
                 provider.fertilizerLocal[fIndex]['Agitator'].isNotEmpty ? SizedBox(
-                  width: 70,
-                  height: 70,
-                  child: provider.fertilizerLocal[fIndex]['Agitator'][0]['Status']==1?
-                  Image.asset('assets/images/dp_agitator_right_g.png'):
-                  provider.fertilizerLocal[fIndex]['Agitator'][0]['Status']==2?
-                  Image.asset('assets/images/dp_agitator_right_y.png'):
-                  provider.fertilizerLocal[fIndex]['Agitator'][0]['Status']==3?
-                  Image.asset('assets/images/dp_agitator_right_r.png'):
-                  Image.asset('assets/images/dp_agitator_right.png'),
+                  width: 59,
+                  height: 101,
+                  child: buildAgitatorImage(provider.fertilizerLocal[fIndex]['Agitator'][0]['Status']),
                 ) :
                 const SizedBox(),
                 SizedBox(
-                  width: provider.fertilizerLocal[fIndex]['Fertilizer'].length * 70 + 70,
-                  height: 150,
+                  width: 70,
+                  height: 140,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      provider.fertilizerLocal[fIndex]['Ec'].isNotEmpty ? Padding(
-                        padding: const EdgeInsets.only(left: 15),
-                        child: SizedBox(
-                          width: provider.fertilizerLocal[fIndex]['Ec'].length *70,
-                          height: 35,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: provider.fertilizerLocal[fIndex]['Ec'].length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Column(
-                                children: [
-                                  SizedBox(
-                                    width: 70,
-                                    height: 15,
-                                    child: Center(child: Text(provider.fertilizerLocal[fIndex]['Ec'][index]['Name'], style: TextStyle(fontSize: 10))),
-                                  ),
-                                  SizedBox(
-                                    width: 70,
-                                    height: 15,
-                                    child: Center(child: Text(provider.fertilizerLocal[fIndex]['Ec'][index]['Status'], style: TextStyle(fontSize: 10))),
-                                  ),
-                                ],
-                              );
-                              /*return Text('data');*/
-                            },
-                          ),
-                        ),
-                      ) :
-                      const SizedBox(),
-                      provider.fertilizerLocal[fIndex]['Ph'].isNotEmpty ? Padding(
-                        padding: const EdgeInsets.only(left: 15),
-                        child: SizedBox(
-                          width: provider.fertilizerLocal[fIndex]['Ph'].length *70,
-                          height: 35,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: provider.fertilizerLocal[fIndex]['Ph'].length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Column(
-                                children: [
-                                  SizedBox(
-                                    width: 70,
-                                    height: 15,
-                                    child: Center(child: Text(provider.fertilizerLocal[fIndex]['Ph'][index]['Name'], style: TextStyle(fontSize: 10),)),
-                                  ),
-                                  SizedBox(
-                                    width: 70,
-                                    height: 15,
-                                    child: Center(child: Text(provider.fertilizerLocal[fIndex]['Ph'][index]['Status'], style: TextStyle(fontSize: 10))),
-                                  ),
-                                ],
-                              );
-                              /*return Text('data');*/
-                            },
-                          ),
-                        ),
-                      ) :
-                      const SizedBox(),
-                      Row(
-                        children: [
-                          SizedBox(
-                            width: 70,
-                            height: 70,
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 5),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  SizedBox(height: 6,),
-                                  Text('Channel', style: TextStyle(fontSize: 10),),
-                                  SizedBox(height: 7,),
-                                  Text('Set', style: TextStyle(fontSize: 10),),
-                                  SizedBox(height: 7,),
-                                  Text('Flow(L/h)', style: TextStyle(fontSize: 10),),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                width: provider.fertilizerLocal[fIndex]['Fertilizer'].length * 70,
-                                height: 70,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: provider.fertilizerLocal[fIndex]['Fertilizer'].length,
-                                  itemBuilder: (BuildContext context, int index) {
-                                    var fertilizer = provider.fertilizerLocal[fIndex]['Fertilizer'][index];
-                                    double fertilizerQty = 0.0;
-                                    var qtyValue = fertilizer['Qty'];
-                                    if (qtyValue != null) {
-                                      bool isString = fertilizer['Qty'] is String;
-                                      if(isString){
-                                        fertilizerQty = double.parse(fertilizer['Qty']);
-                                      }else{
-                                        fertilizerQty = fertilizer['Qty'];
-                                      }
-                                    }
-                                    return Container(
-                                      width: 70,
-                                      height: 70,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: Colors.grey,
-                                          width: 0.5,
-                                        ),
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          const SizedBox(height: 3),
-                                          Text(fertilizer['Name'], style: const TextStyle(fontSize: 10),),
-                                          const Divider(height: 7),
-                                          Text(fertilizer['FertMethod']=='1' || fertilizer['FertMethod']=='3'? fertilizer['Duration'] :
-                                          '${fertilizerQty.toStringAsFixed(2)} L', style: const TextStyle(fontSize: 10),),
-                                          const Divider(height: 7),
-                                          Text('${fertilizer['FlowRate_LpH']}', style: const TextStyle(fontSize: 10),),
-                                        ],
-                                      ),
-                                    );
-                                  },
+                      provider.fertilizerLocal[fIndex]['Ec'].isNotEmpty ? SizedBox(
+                        width: 70,
+                        height: provider.fertilizerLocal[fIndex]['Ec'].length*35,
+                        child: ListView.builder(
+                          scrollDirection: Axis.vertical,
+                          itemCount: provider.fertilizerLocal[fIndex]['Ec'].length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  width: 70,
+                                  height: 15,
+                                  child: Center(child: Text(provider.fertilizerLocal[fIndex]['Ec'][index]['Name'], style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal))),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                                SizedBox(
+                                  width: 70,
+                                  height: 15,
+                                  child: Center(child: Text(provider.fertilizerLocal[fIndex]['Ec'][index]['Status'], style: TextStyle(fontSize: 10))),
+                                ),
+                              ],
+                            );
+                            /*return Text('data');*/
+                          },
+                        ),
+                      ) :
+                      const SizedBox(),
+                      provider.fertilizerLocal[fIndex]['Ph'].isNotEmpty ? SizedBox(
+                        width: 70,
+                        height: provider.fertilizerLocal[fIndex]['Ph'].length*35,
+                        child: ListView.builder(
+                          scrollDirection: Axis.vertical,
+                          itemCount: provider.fertilizerLocal[fIndex]['Ph'].length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Column(
+                              children: [
+                                SizedBox(
+                                  width: 70,
+                                  height: 15,
+                                  child: Center(child: Text(provider.fertilizerLocal[fIndex]['Ph'][index]['Name'], style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),)),
+                                ),
+                                SizedBox(
+                                  width: 70,
+                                  height: 15,
+                                  child: Center(child: Text(provider.fertilizerLocal[fIndex]['Ph'][index]['Status'], style: TextStyle(fontSize: 10))),
+                                ),
+                              ],
+                            );
+                            /*return Text('data');*/
+                          },
+                        ),
+                      ) :
+                      const SizedBox(),
                     ],
                   ),
                 ),
@@ -664,11 +613,28 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
           ),
       ],
     );
-
   }
 
-  Widget buildBoosterImage(int status) {
-    String imageName ='dp_fert_booster_pump';
+
+  Widget buildFertCheImage(int cIndex, int status, int cheLength, List agitatorList) {
+    String imageName;
+    if(cIndex == cheLength - 1){
+      if(agitatorList.isNotEmpty){
+        imageName='dp_fert_channel_last_aj';
+      }else{
+        imageName='dp_fert_channel_last';
+      }
+    }else{
+      if(agitatorList.isNotEmpty){
+        if(cIndex==0){
+          imageName='dp_fert_channel_first_aj';
+        }else{
+          imageName='dp_fert_channel_center_aj';
+        }
+      }else{
+        imageName='dp_fert_channel_center';
+      }
+    }
 
     switch (status) {
       case 0:
@@ -682,6 +648,10 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
         break;
       case 3:
         imageName += '_r.png';
+        break;
+      case 4:
+        imageName += '.png';
+        break;
       default:
         imageName += '.png';
     }
@@ -690,15 +660,8 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
 
   }
 
-  Widget buildFertCheImage(int cIndex, int status, int cheLength) {
-    String imageName;
-
-    if(cIndex == cheLength - 1){
-      imageName='dp_fert_channel_last';
-    }else{
-      imageName='dp_fert_channel_center';
-    }
-
+  Widget buildAgitatorImage(int status) {
+    String imageName ='dp_agitator_right';
     switch (status) {
       case 0:
         imageName += '.png';
@@ -710,10 +673,10 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
         imageName += '_y.png';
         break;
       case 3:
-        imageName += '.png';
+        imageName += '_r.png';
         break;
       default:
-        imageName += '_r.png';
+        imageName += '.png';
     }
 
     return Image.asset('assets/images/$imageName');
@@ -725,144 +688,146 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       try{
         final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
-        for (int i = 0; i < provider.fertilizerLocal[0]['Fertilizer'].length; i++) {
+        for(int fIndex=0; fIndex<provider.fertilizerLocal.length; fIndex++){
+          for (int i = 0; i < provider.fertilizerLocal[fIndex]['Fertilizer'].length; i++) {
+            if(provider.fertilizerLocal[fIndex]['Fertilizer'][i]['Status']!=0){
 
-          if(provider.fertilizerLocal[0]['Fertilizer'][i]['Status']!=0){
+              if(provider.fertilizerLocal[fIndex]['Fertilizer'][i]['FertMethod']=='1' ||
+                  provider.fertilizerLocal[fIndex]['Fertilizer'][i]['FertMethod']=='3')
+              {
+                List<String> parts = provider.fertilizerLocal[fIndex]['Fertilizer'][i]['DurationLeft'].split(':');
+                int hours = int.parse(parts[0]);
+                int minutes = int.parse(parts[1]);
+                int seconds = int.parse(parts[2]);
 
-            if(provider.fertilizerLocal[0]['Fertilizer'][i]['FertMethod']=='1' ||
-                provider.fertilizerLocal[0]['Fertilizer'][i]['FertMethod']=='3')
-            {
-              List<String> parts = provider.fertilizerLocal[0]['Fertilizer'][i]['DurationLeft'].split(':');
-              int hours = int.parse(parts[0]);
-              int minutes = int.parse(parts[1]);
-              int seconds = int.parse(parts[2]);
-
-              if (seconds > 0) {
-                seconds--;
-              } else {
-                if (minutes > 0) {
-                  minutes--;
-                  seconds = 59;
+                if (seconds > 0) {
+                  seconds--;
                 } else {
-                  if (hours > 0) {
-                    hours--;
-                    minutes = 59;
+                  if (minutes > 0) {
+                    minutes--;
                     seconds = 59;
+                  } else {
+                    if (hours > 0) {
+                      hours--;
+                      minutes = 59;
+                      seconds = 59;
+                    }
                   }
                 }
-              }
 
-              String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-              if(provider.fertilizerLocal[0]['Fertilizer'][i]['FertMethod']=='3')
-              {
-                double onTime = double.parse(provider.fertilizerLocal[0]['Fertilizer'][i]['OnTime']);
-                double offTime = double.parse(provider.fertilizerLocal[0]['Fertilizer'][i]['OffTime']);
+                String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+                if(provider.fertilizerLocal[fIndex]['Fertilizer'][i]['FertMethod']=='3')
+                {
+                  double onTime = double.parse(provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OnTime']);
+                  double offTime = double.parse(provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OffTime']);
 
-                if (provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalOnTime'] == null) {
-                  provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalOnTime'] = provider.fertilizerLocal[0]['Fertilizer'][i]['OnTime'];
-                }
-                if (provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalOffTime'] == null) {
-                  provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalOffTime'] = provider.fertilizerLocal[0]['Fertilizer'][i]['OffTime'];
-                }
-                if (provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalStatus'] == null) {
-                  provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalStatus'] = provider.fertilizerLocal[0]['Fertilizer'][i]['Status'];
-                }
+                  if (provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalOnTime'] == null) {
+                    provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalOnTime'] = provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OnTime'];
+                  }
+                  if (provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalOffTime'] == null) {
+                    provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalOffTime'] = provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OffTime'];
+                  }
+                  if (provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalStatus'] == null) {
+                    provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalStatus'] = provider.fertilizerLocal[fIndex]['Fertilizer'][i]['Status'];
+                  }
 
-                if(onTime.toInt()>0){
-                  int updatedOnTime = onTime.toInt() - 1;
-                  provider.fertilizerLocal[0]['Fertilizer'][i]['OnTime'] = updatedOnTime.toString();
-                  setState(() {
-                    provider.fertilizerLocal[0]['Fertilizer'][i]['DurationLeft'] = updatedDurationQtyLeft;
-                    provider.fertilizerLocal[0]['Fertilizer'][i]['Status'] = provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalStatus'];
-                  });
-                }else if(offTime.toInt()>0){
-                  int updatedOffTime = offTime.toInt() - 1;
-                  provider.fertilizerLocal[0]['Fertilizer'][i]['OffTime'] = updatedOffTime.toString();
-                  setState(() {
-                    provider.fertilizerLocal[0]['Fertilizer'][i]['Status'] = 3;
-                  });
-                  if(updatedOffTime==0){
-                    provider.fertilizerLocal[0]['Fertilizer'][i]['OnTime'] = provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalOnTime'];
-                    provider.fertilizerLocal[0]['Fertilizer'][i]['OffTime'] = provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalOffTime'];
+                  if(onTime.toInt()>0){
+                    int updatedOnTime = onTime.toInt() - 1;
+                    provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OnTime'] = updatedOnTime.toString();
+                    setState(() {
+                      provider.fertilizerLocal[fIndex]['Fertilizer'][i]['DurationLeft'] = updatedDurationQtyLeft;
+                      provider.fertilizerLocal[fIndex]['Fertilizer'][i]['Status'] = provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalStatus'];
+                    });
+                  }else if(offTime.toInt()>0){
+                    int updatedOffTime = offTime.toInt() - 1;
+                    provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OffTime'] = updatedOffTime.toString();
+                    setState(() {
+                      provider.fertilizerLocal[fIndex]['Fertilizer'][i]['Status'] = 4;
+                    });
+                    if(updatedOffTime==0){
+                      provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OnTime'] = provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalOnTime'];
+                      provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OffTime'] = provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalOffTime'];
+                    }
+                  }
+                }
+                else
+                {
+                  if(provider.fertilizerLocal[fIndex]['Fertilizer'][i]['DurationLeft']!='00:00:00'){
+                    setState(() {
+                      provider.fertilizerLocal[fIndex]['Fertilizer'][i]['DurationLeft'] = updatedDurationQtyLeft;
+                    });
                   }
                 }
               }
               else
               {
-                if(provider.fertilizerLocal[0]['Fertilizer'][i]['DurationLeft']!='00:00:00'){
+                double qtyDouble = double.parse(provider.fertilizerLocal[fIndex]['Fertilizer'][i]['Qty']);
+                int roundedQty = qtyDouble.round();
+                double qtyLeftDouble = provider.fertilizerLocal[fIndex]['Fertilizer'][i]['QtyLeft'];
+                int roundedQtyLeft = qtyLeftDouble.round();
+
+                if(roundedQty >= roundedQtyLeft) {
                   setState(() {
-                    provider.fertilizerLocal[0]['Fertilizer'][i]['DurationLeft'] = updatedDurationQtyLeft;
+                    if(provider.fertilizerLocal[fIndex]['Fertilizer'][i]['FertMethod']=='4' ||
+                        provider.fertilizerLocal[fIndex]['Fertilizer'][i]['FertMethod']=='5') {
+                      double onTime = double.parse(provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OnTime']);
+                      double offTime = double.parse(provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OffTime']);
+
+                      if (provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalOnTime'] == null) {
+                        provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalOnTime'] = provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OnTime'];
+                      }
+                      if (provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalOffTime'] == null) {
+                        provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalOffTime'] = provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OffTime'];
+                      }
+                      if (provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalStatus'] == null) {
+                        provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalStatus'] = provider.fertilizerLocal[fIndex]['Fertilizer'][i]['Status'];
+                      }
+
+                      if(onTime.round()>0){
+                        int updatedOnTime = onTime.round() - 1;
+                        provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OnTime'] = updatedOnTime.toString();
+                        setState(() {
+                          double remainQty = provider.fertilizerLocal[fIndex]['Fertilizer'][i]['QtyLeft'];
+                          double flowRate = double.parse(provider.fertilizerLocal[fIndex]['Fertilizer'][i]['FlowRate']);
+                          remainQty = remainQty - flowRate;
+                          provider.fertilizerLocal[fIndex]['Fertilizer'][i]['QtyLeft'] = remainQty > 0 ? remainQty : 0;
+                          provider.fertilizerLocal[fIndex]['Fertilizer'][i]['Status'] = provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalStatus'];
+                          if(offTime.round() <=0){
+                            provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OnTime'] = provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalOnTime'];
+                            provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OffTime'] = provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalOffTime'];
+                          }
+                        });
+                      }else if(offTime.round()>0){
+                        int updatedOffTime = offTime.round() - 1;
+                        provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OffTime'] = updatedOffTime.toString();
+                        setState(() {
+                          provider.fertilizerLocal[fIndex]['Fertilizer'][i]['Status'] = 4;
+                        });
+                        if(updatedOffTime==0){
+                          provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OnTime'] = provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalOnTime'];
+                          provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OffTime'] = provider.fertilizerLocal[fIndex]['Fertilizer'][i]['OriginalOffTime'];
+                        }
+                      }
+
+                    }
+                    else{
+                      double remainQty = provider.fertilizerLocal[fIndex]['Fertilizer'][i]['QtyLeft'];
+                      double flowRate = double.parse(provider.fertilizerLocal[fIndex]['Fertilizer'][i]['FlowRate']);
+                      remainQty = remainQty - flowRate;
+                      provider.fertilizerLocal[fIndex]['Fertilizer'][i]['QtyLeft'] = remainQty > 0 ? remainQty : 0;
+                    }
+
+                  });
+                }else{
+                  setState(() {
+                    provider.fertilizerLocal[fIndex]['Fertilizer'][i]['QtyLeft'] = provider.fertilizerLocal[fIndex]['Fertilizer'][i]['Qty'];
                   });
                 }
               }
             }
-            else
-            {
-              double qtyDouble = double.parse(provider.fertilizerLocal[0]['Fertilizer'][i]['Qty']);
-              int roundedQty = qtyDouble.round();
-              double qtyLeftDouble = provider.fertilizerLocal[0]['Fertilizer'][i]['QtyLeft'];
-              int roundedQtyLeft = qtyLeftDouble.round();
-
-              if(roundedQty >= roundedQtyLeft) {
-                setState(() {
-                  if(provider.fertilizerLocal[0]['Fertilizer'][i]['FertMethod']=='4' ||
-                      provider.fertilizerLocal[0]['Fertilizer'][i]['FertMethod']=='5') {
-                    double onTime = double.parse(provider.fertilizerLocal[0]['Fertilizer'][i]['OnTime']);
-                    double offTime = double.parse(provider.fertilizerLocal[0]['Fertilizer'][i]['OffTime']);
-
-                    if (provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalOnTime'] == null) {
-                      provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalOnTime'] = provider.fertilizerLocal[0]['Fertilizer'][i]['OnTime'];
-                    }
-                    if (provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalOffTime'] == null) {
-                      provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalOffTime'] = provider.fertilizerLocal[0]['Fertilizer'][i]['OffTime'];
-                    }
-                    if (provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalStatus'] == null) {
-                      provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalStatus'] = provider.fertilizerLocal[0]['Fertilizer'][i]['Status'];
-                    }
-
-                    if(onTime.round()>0){
-                      int updatedOnTime = onTime.round() - 1;
-                      provider.fertilizerLocal[0]['Fertilizer'][i]['OnTime'] = updatedOnTime.toString();
-                      setState(() {
-                        double remainQty = provider.fertilizerLocal[0]['Fertilizer'][i]['QtyLeft'];
-                        double flowRate = double.parse(provider.fertilizerLocal[0]['Fertilizer'][i]['FlowRate']);
-                        remainQty = remainQty - flowRate;
-                        provider.fertilizerLocal[0]['Fertilizer'][i]['QtyLeft'] = remainQty > 0 ? remainQty : 0;
-                        provider.fertilizerLocal[0]['Fertilizer'][i]['Status'] = provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalStatus'];
-                        if(offTime.round() <=0){
-                          provider.fertilizerLocal[0]['Fertilizer'][i]['OnTime'] = provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalOnTime'];
-                          provider.fertilizerLocal[0]['Fertilizer'][i]['OffTime'] = provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalOffTime'];
-                        }
-                      });
-                    }else if(offTime.round()>0){
-                      int updatedOffTime = offTime.round() - 1;
-                      provider.fertilizerLocal[0]['Fertilizer'][i]['OffTime'] = updatedOffTime.toString();
-                      setState(() {
-                        provider.fertilizerLocal[0]['Fertilizer'][i]['Status'] = 3;
-                      });
-                      if(updatedOffTime==0){
-                        provider.fertilizerLocal[0]['Fertilizer'][i]['OnTime'] = provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalOnTime'];
-                        provider.fertilizerLocal[0]['Fertilizer'][i]['OffTime'] = provider.fertilizerLocal[0]['Fertilizer'][i]['OriginalOffTime'];
-                      }
-                    }
-
-                  }
-                  else{
-                    double remainQty = provider.fertilizerLocal[0]['Fertilizer'][i]['QtyLeft'];
-                    double flowRate = double.parse(provider.fertilizerLocal[0]['Fertilizer'][i]['FlowRate']);
-                    remainQty = remainQty - flowRate;
-                    provider.fertilizerLocal[0]['Fertilizer'][i]['QtyLeft'] = remainQty > 0 ? remainQty : 0;
-                  }
-
-                });
-              }else{
-                setState(() {
-                  provider.fertilizerLocal[0]['Fertilizer'][i]['QtyLeft'] = provider.fertilizerLocal[0]['Fertilizer'][i]['Qty'];
-                });
-              }
-            }
           }
         }
+
       }
       catch(e){
         print(e);

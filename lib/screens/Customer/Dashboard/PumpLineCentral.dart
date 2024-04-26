@@ -51,6 +51,11 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                provider.sourcePump.isNotEmpty? Padding(
+                                  padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty?38.4:0),
+                                  child: const DisplaySourcePump(),
+                                ):
+                                const SizedBox(),
                                 provider.irrigationPump.isNotEmpty? Padding(
                                   padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty?38.4:0),
                                   child: SizedBox(
@@ -58,6 +63,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                                     height: 70,
                                     child : Stack(
                                       children: [
+                                        provider.sourcePump.isNotEmpty? Image.asset('assets/images/dp_sump_src.png'):
                                         Image.asset('assets/images/dp_sump.png'),
                                       ],
                                     ),
@@ -110,6 +116,134 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
     );
   }
 }
+
+class DisplaySourcePump extends StatefulWidget {
+  const DisplaySourcePump({Key? key}) : super(key: key);
+
+  @override
+  State<DisplaySourcePump> createState() => _DisplaySourcePumpState();
+}
+
+class _DisplaySourcePumpState extends State<DisplaySourcePump> {
+
+  Timer? timer;
+
+  @override
+  void initState() {
+    super.initState();
+    durationUpdatingFunction();
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = Provider.of<MqttPayloadProvider>(context);
+    return SizedBox(
+      width: provider.sourcePump.length * 70,
+      height: 90,
+      child: ListView.builder(
+        itemCount: provider.sourcePump.length,
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (BuildContext context, int index) {
+          return Column(
+            children: [
+              Stack(
+                children: [
+                  SizedBox(
+                    width: 70,
+                    height: 70,
+                    child: AppImages.getAsset('sourcePump', provider.sourcePump[index]['Status']),
+                  ),
+                  provider.sourcePump[index]['OnDelayLeft'] !='00:00:00'?
+                  Positioned(
+                    top: 48,
+                    left: 10,
+                    child: Container(
+                      color: Colors.greenAccent,
+                      width: 50,
+                      child: Center(
+                        child: Text(provider.sourcePump[index]['OnDelayLeft'], style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        ),
+                      ),
+                    ),
+                  ) :
+                  const SizedBox(),
+                ],
+              ),
+              SizedBox(
+                width: 70,
+                height: 20,
+                child: Center(
+                  child: Text(provider.sourcePump[index]['Name'], style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+  }
+
+
+  void durationUpdatingFunction() {
+    timer?.cancel();
+    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+      try{
+        final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
+        for (int i = 0; i < provider.sourcePump.length; i++) {
+          if(provider.sourcePump[i]['OnDelayLeft']!=null){
+            List<String> parts = provider.sourcePump[i]['OnDelayLeft'].split(':');
+            int hours = int.parse(parts[0]);
+            int minutes = int.parse(parts[1]);
+            int seconds = int.parse(parts[2]);
+
+            if (seconds > 0) {
+              seconds--;
+            } else {
+              if (minutes > 0) {
+                minutes--;
+                seconds = 59;
+              } else {
+                if (hours > 0) {
+                  hours--;
+                  minutes = 59;
+                  seconds = 59;
+                }
+              }
+            }
+
+            String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+            if(provider.sourcePump[i]['OnDelayLeft']!='00:00:00'){
+              setState(() {
+                provider.sourcePump[i]['OnDelayLeft'] = updatedDurationQtyLeft;
+              });
+            }
+          }
+        }
+      }
+      catch(e){
+        print(e);
+      }
+
+    });
+  }
+}
+
 
 
 class DisplayIrrigationPump extends StatefulWidget {
@@ -253,7 +387,7 @@ class DisplaySensor extends StatelessWidget {
     for( var key in jsonData.keys){
       dynamic value = jsonData[key];
       if((key=='PrsIn'||key=='PrsOut'||key=='Watermeter') && value!='_'){
-        if(value!='-'){
+        if(value!='_'){
           totalWidth += 70;
         }
       }

@@ -19,6 +19,7 @@ class MqttPayloadProvider with ChangeNotifier {
   List<dynamic> upcomingProgram = [];
   List<dynamic> filtersCentral = [];
   List<dynamic> filtersLocal = [];
+  List<dynamic> sourcePump = [];
   List<dynamic> irrigationPump = [];
   List<dynamic> fertilizerCentral = [];
   List<dynamic> fertilizerLocal = [];
@@ -69,27 +70,16 @@ class MqttPayloadProvider with ChangeNotifier {
         }
 
         if (data['2400'][0].containsKey('2406')) {
-          List<dynamic> fertilizerJson = data['2400'][0]['2406'];
-          fertilizerCentral = [];
-
-          for (var fertilizer in fertilizerJson) {
-            if (fertilizer['Type'] == 1) {
-              fertilizerCentral.add(fertilizer);
-            } else if (fertilizer['Type'] == 2) {
-              fertilizerLocal.add(fertilizer);
-            }
-          }
+          List<dynamic> filters = data['2400'][0]['2406'];
+          fertilizerCentral = filters.where((item) => item['Type'] == 1).toList();
+          fertilizerLocal = filters.where((item) => item['Type'] == 2).toList();
         }
 
         if (data['2400'][0].containsKey('2407')) {
-          List<dynamic> items = data['2400'][0]['2407'];
-          irrigationPump = items.where((item) => item['Type'] == 2).toList();
+          List<dynamic> pumps = data['2400'][0]['2407'];
+          sourcePump = pumps.where((item) => item['Type'] == 1).toList();
+          irrigationPump = pumps.where((item) => item['Type'] == 2).toList();
         }
-
-        /*if (data['2400'][0].containsKey('2408')) {
-          List<dynamic> items = data['2400'][0]['2408'];
-          flowMeter.addAll(items.where((item) => item['Watermeter'] != '-').map((item) => item['Watermeter']));
-        }*/
 
         if (data['2400'][0].containsKey('2408')) {
           payload2408 = data['2400'][0]['2408'];

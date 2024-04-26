@@ -42,6 +42,7 @@ class _RunByManualState extends State<RunByManual> {
   @override
   void initState() {
     super.initState();
+    print( widget.programList);
     ProgramList defaultProgram = ProgramList(
       programId: 0,
       serialNumber: 0,
@@ -105,7 +106,7 @@ class _RunByManualState extends State<RunByManual> {
     final response = await HttpService().postRequest("getCustomerDashboardByManual", body);
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
-      print(response.body);
+      //print(response.body);
       indicatorViewHide();
       if (jsonResponse['data'] != null) {
         dynamic data = jsonResponse['data'];
@@ -155,7 +156,30 @@ class _RunByManualState extends State<RunByManual> {
                     strSldMainValveSrlNo = getSelectedRelaySrlNo(dashBoardData[0].mainValve);
                   }
                   if(dashBoardData[0].centralFilterSite.isNotEmpty){
-                    strSldCtrlFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[0].filter);
+
+                    List<String> filterRelaySrlNos = [];
+                    for (var site in dashBoardData[0].centralFilterSite) {
+                      String relaySrlNo = getSelectedRelaySrlNo(site.filter);
+                      if (relaySrlNo.isNotEmpty) {
+                        filterRelaySrlNos.add(relaySrlNo);
+                      }
+                    }
+                    if (filterRelaySrlNos.isNotEmpty) {
+                      String strSldCtrlFilterSrlNo = filterRelaySrlNos.join('_');
+                      print(strSldCtrlFilterSrlNo);
+                    }
+
+                    /*for(int i=0; i<dashBoardData[0].centralFilterSite.length; i++){
+                      String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[i].filter);
+                      if(concatenatedString.isNotEmpty){
+                        strSldCtrlFilterSrlNo += '${concatenatedString}_';
+                      }
+                    }
+                    if (strSldCtrlFilterSrlNo.isNotEmpty && strSldCtrlFilterSrlNo.endsWith('_')) {
+                      strSldCtrlFilterSrlNo = strSldCtrlFilterSrlNo.replaceRange(strSldCtrlFilterSrlNo.length - 1, strSldCtrlFilterSrlNo.length, '');
+                    }*/
+
+                    //strSldCtrlFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[0].filter);
                   }
                   if(dashBoardData[0].localFilterSite.isNotEmpty){
                     strSldLocFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].localFilterSite[0].filter);
@@ -231,7 +255,7 @@ class _RunByManualState extends State<RunByManual> {
                   //print(strSldCrlFetFilterSrlNo);
                   //print(allRelaySrlNo);
 
-                  if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
+                  /*if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
                     showDialog<String>(
                         context: context,
                         builder: (BuildContext dgContext) => AlertDialog(
@@ -254,7 +278,7 @@ class _RunByManualState extends State<RunByManual> {
                     );
                   }else{
                     startByStandaloneDefault(allRelaySrlNo);
-                  }
+                  }*/
 
                 }
                 else{
@@ -1313,6 +1337,8 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
     // TODO: implement initState
     super.initState();
    // String jsonString = jsonEncode(widget.lineOrSequenc);
+
+    print(widget.programList.length);
 
     if(widget.method == 1){
       segmentViewManual = ManualBaseSegment.manual;

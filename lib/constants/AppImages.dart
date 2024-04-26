@@ -22,7 +22,7 @@ class AppImages {
     String imagePathFinal;
 
     switch (imageKey) {
-      case 'irrigationPump':
+      case 'sourcePump' || 'irrigationPump':
         imagePathFinal = _getIrrigationPumpImagePath(status);
         break;
       case 'filter':

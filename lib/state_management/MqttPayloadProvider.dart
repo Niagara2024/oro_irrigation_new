@@ -98,6 +98,7 @@ class MqttPayloadProvider with ChangeNotifier {
         schedulePayload = payload;
       }
       notifyListeners();
+      print('provider upcomingProgram:${upcomingProgram}');
     } catch (e) {
       print('Error parsing JSON: $e');
     }

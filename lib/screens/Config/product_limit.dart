@@ -54,12 +54,9 @@ class _ProductLimitsState extends State<ProductLimits> {
 
   @override
   void dispose() {
-    print('dispose');
-
     for (var c in myControllers) {
       c.dispose();
     }
-
     super.dispose();
   }
 
@@ -77,7 +74,6 @@ class _ProductLimitsState extends State<ProductLimits> {
       if(data["code"]==200)
       {
         final cntList = data["data"] as List;
-        //print(widget.myCatIds);
         myControllers = [];
         for (int i = 0; i < cntList.length; i++) {
           bool existsInCategory = widget.myCatIds.any((value) => cntList[i]['category'].contains(value.toString()));

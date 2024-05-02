@@ -7,8 +7,8 @@ class DashboardModel {
   final String categoryName;
   final String modelName;
   List<NodeModel> nodeList;
-  List<CurrentProgram> currentProgram;
-  List<NextProgram> nextProgram;
+  //List<CurrentScheduleModel> currentProgram;
+  //List<NextProgram> nextProgram;
   List<IrrigationPump> irrigationPump;
   List<MainValve> mainValve;
   List<CentralFertilizerSite> centralFertilizerSite;
@@ -27,8 +27,8 @@ class DashboardModel {
     required this.categoryName,
     required this.modelName,
     required this.nodeList,
-    required this.currentProgram,
-    required this.nextProgram,
+    //required this.currentProgram,
+    //required this.nextProgram,
     required this.irrigationPump,
     required this.mainValve,
     required this.centralFertilizerSite,
@@ -44,11 +44,11 @@ class DashboardModel {
     var nodeList = json['nodeList'] as List;
     List<NodeModel> nodes = nodeList.isNotEmpty? nodeList.map((node) => NodeModel.fromJson(node)).toList() : [];
 
-    var currentProgram = json['currentSchedule'] as List;
-    List<CurrentProgram> cProgram = nodeList.isNotEmpty? currentProgram.map((crProgram) => CurrentProgram.fromJson(crProgram)).toList() : [];
+    //var currentProgram = json['currentSchedule'] as List;
+    //List<CurrentScheduleModel> cProgram = nodeList.isNotEmpty? currentProgram.map((crProgram) => CurrentScheduleModel.fromJson(crProgram)).toList() : [];
 
-    var nextProgram = json['nextSchedule'] as List;
-    List<NextProgram> nxtProgram = nodeList.isNotEmpty? nextProgram.map((nxtProgram) => NextProgram.fromJson(nxtProgram)).toList() : [];
+    //var nextProgram = json['nextSchedule'] as List;
+    //List<NextProgram> nxtProgram = nodeList.isNotEmpty? nextProgram.map((nxtProgram) => NextProgram.fromJson(nxtProgram)).toList() : [];
 
     return DashboardModel(
       controllerId: json['controllerId'],
@@ -59,8 +59,8 @@ class DashboardModel {
       categoryName: json['categoryName'],
       modelName: json['modelName'],
       nodeList: nodes,
-      currentProgram: cProgram,
-      nextProgram: nxtProgram,
+      //currentProgram: cProgram,
+      //nextProgram: nxtProgram,
       irrigationPump: List<IrrigationPump>.from(json['irrigationPump'].map((x) => IrrigationPump.fromJson(x))),
       mainValve: List<MainValve>.from(json['mainValve'].map((x) => MainValve.fromJson(x))),
       centralFertilizerSite: List<CentralFertilizerSite>.from(json['centralFertilizerSite'].map((x) => CentralFertilizerSite.fromJson(x))),
@@ -127,13 +127,13 @@ class NodeModel {
   }
 }
 
-class CurrentProgram {
+class CurrentScheduleModel {
   final String programName, programCategory,zoneName,startTime, duration_Qty, duration_QtyCompleted;
   String duration_QtyLeft;
   final int programId, programType, totalRtc,currentRtc,totalCycle,currentCycle,totalZone,currentZone;
   List<dynamic> valve;
 
-  CurrentProgram({
+  CurrentScheduleModel({
     required this.programId,
     required this.programName,
     required this.programCategory,
@@ -152,8 +152,8 @@ class CurrentProgram {
     required this.valve,
   });
 
-  factory CurrentProgram.fromJson(Map<String, dynamic> json) {
-    return CurrentProgram(
+  factory CurrentScheduleModel.fromJson(Map<String, dynamic> json) {
+    return CurrentScheduleModel(
       programId: 1,
       programName: json['ProgName'] ?? "",
       programCategory: json['ProgCategory'] ?? "",
@@ -172,6 +172,7 @@ class CurrentProgram {
       valve: json['Valve'] ?? [],
     );
   }
+
 
 }
 

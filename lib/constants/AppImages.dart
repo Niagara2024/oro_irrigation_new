@@ -18,7 +18,11 @@ class AppImages {
   static const String boosterPumpNotON = "dp_fert_booster_pump_y.png";
   static const String boosterPumpNotOFF = "dp_fert_booster_pump_r.png";
 
-  static Widget getAsset(String imageKey, int status) {
+  static const String soilMoistureSensor = "moisture_sensor.png";
+  static const String pressureSensor = "pressure_sensor.png";
+  static const String levelSensor = "level_sensor.png";
+
+  static Widget getAsset(String imageKey, int status, String type) {
     String imagePathFinal;
 
     switch (imageKey) {
@@ -30,6 +34,9 @@ class AppImages {
         break;
       case 'booster':
         imagePathFinal = _getBoosterImagePath(status);
+        break;
+      case 'sensor':
+        imagePathFinal = _getSensorImagePath(type);
         break;
       default:
         imagePathFinal = '';
@@ -80,6 +87,16 @@ class AppImages {
         return boosterPumpNotOFF;
       default:
         return '';
+    }
+  }
+
+  static String _getSensorImagePath(String type) {
+    if(type.contains('SM')){
+      return soilMoistureSensor;
+    }if(type.contains('LV')){
+      return levelSensor;
+    }else{
+      return pressureSensor;
     }
   }
 }

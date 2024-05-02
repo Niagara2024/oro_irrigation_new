@@ -32,6 +32,10 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
   @override
   void initState() {
     super.initState();
+    liveSync();
+  }
+
+  void liveSync(){
     String payLoadFinal = jsonEncode({"3000": [{"3001": ""}]});
     MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
   }

@@ -19,6 +19,8 @@ class UpcomingProgram extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<MqttPayloadProvider>(context);
+
+    print('upcomingProgram:${provider.upcomingProgram}');
     return Padding(
       padding: const EdgeInsets.all(3.0),
       child: Column(
@@ -89,7 +91,7 @@ class UpcomingProgram extends StatelessWidget {
                                   );
                                 },
                                 icon: const Icon(Icons.view_list_outlined))),
-                            fixedWidth: 80
+                            fixedWidth: 175,
                         ),
                       ],
                       rows: List<DataRow>.generate(provider.upcomingProgram.length, (index) => DataRow(cells: [
@@ -101,35 +103,70 @@ class UpcomingProgram extends StatelessWidget {
                         DataCell(Center(child: Text('${provider.upcomingProgram[index]['StartTime']}'))),
                         DataCell(Center(child: Text('${provider.upcomingProgram[index]['EndDate']}'))),
                         DataCell(
-                          provider.upcomingProgram[index]['ProgOnOff'] == 0 ? MaterialButton(
-                            color: Colors.green,
-                            textColor: Colors.white,
-                            onPressed:() {
-                              String localFilePath = 'assets/audios/button_click_sound.mp3';
-                              audioPlayer.play(UrlSource(localFilePath));
-                              String payload = '${provider.upcomingProgram[index]['SNo']},1';
-                              String payLoadFinal = jsonEncode({
-                                "2900": [{"2901": payload}]
-                              });
-                              MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
-                              sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Started by Manual', payLoadFinal);
-                            },
-                            child: const Text('Start'),
-                          ) :
-                          MaterialButton(
-                            color: Colors.redAccent,
-                            textColor: Colors.white,
-                            onPressed:() {
-                              String localFilePath = 'assets/audios/audio_off.mp3';
-                              audioPlayer.play(UrlSource(localFilePath));
-                              String payload = '${provider.upcomingProgram[index]['SNo']},0';
-                              String payLoadFinal = jsonEncode({
-                                "2900": [{"2901": payload}]
-                              });
-                              MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
-                              sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Stopped by Manual', payLoadFinal);
-                            },
-                            child: const Text('Stop'),
+                          Row(
+                            children: [
+                              provider.upcomingProgram[index]['ProgOnOff'] == 0 ? MaterialButton(
+                                color: Colors.green,
+                                textColor: Colors.white,
+                                onPressed:() {
+                                  String localFilePath = 'assets/audios/button_click_sound.mp3';
+                                  audioPlayer.play(UrlSource(localFilePath));
+                                  String payload = '${provider.upcomingProgram[index]['SNo']},1';
+                                  String payLoadFinal = jsonEncode({
+                                    "2900": [{"2901": payload}]
+                                  });
+                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
+                                  sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Started by Manual', payLoadFinal);
+                                },
+                                child: const Text('Start'),
+                              ) :
+                              MaterialButton(
+                                color: Colors.redAccent,
+                                textColor: Colors.white,
+                                onPressed:() {
+                                  String localFilePath = 'assets/audios/audio_off.mp3';
+                                  audioPlayer.play(UrlSource(localFilePath));
+                                  String payload = '${provider.upcomingProgram[index]['SNo']},0';
+                                  String payLoadFinal = jsonEncode({
+                                    "2900": [{"2901": payload}]
+                                  });
+                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
+                                  sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Stopped by Manual', payLoadFinal);
+                                },
+                                child: const Text('Stop'),
+                              ),
+                              const SizedBox(width: 5),
+                              provider.upcomingProgram[index]['ProgPauseResume'] == 1 ? MaterialButton(
+                                color: Colors.orange,
+                                textColor: Colors.white,
+                                onPressed:() {
+                                  /*String localFilePath = 'assets/audios/button_click_sound.mp3';
+                                  audioPlayer.play(UrlSource(localFilePath));
+                                  String payload = '${provider.upcomingProgram[index]['SNo']},1';
+                                  String payLoadFinal = jsonEncode({
+                                    "2900": [{"2901": payload}]
+                                  });
+                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
+                                  sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Paused by Manual', payLoadFinal);*/
+                                },
+                                child: const Text('Pause'),
+                              ) :
+                              MaterialButton(
+                                color: Colors.yellow,
+                                textColor: Colors.white,
+                                onPressed:() {
+                                  /*String localFilePath = 'assets/audios/audio_off.mp3';
+                                  audioPlayer.play(UrlSource(localFilePath));
+                                  String payload = '${provider.upcomingProgram[index]['SNo']},0';
+                                  String payLoadFinal = jsonEncode({
+                                    "2900": [{"2901": payload}]
+                                  });
+                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
+                                  sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Resume by Manual', payLoadFinal);*/
+                                },
+                                child: const Text('Resume'),
+                              ),
+                            ],
                           ),
                         ),
                       ])),

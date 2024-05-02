@@ -376,7 +376,7 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                         height: 140,
                         child : Stack(
                           children: [
-                            AppImages.getAsset('booster', provider.fertilizerLocal[fIndex]['Booster'][0]['Status']),
+                            AppImages.getAsset('booster', provider.fertilizerLocal[fIndex]['Booster'][0]['Status'],''),
                             Positioned(
                               top: 70,
                               left: 15,

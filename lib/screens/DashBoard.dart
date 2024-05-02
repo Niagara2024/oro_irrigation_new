@@ -10,7 +10,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/MQTTManager.dart';
 import '../constants/MqttServer.dart';
-import '../constants/UserData.dart';
 import '../state_management/MqttPayloadProvider.dart';
 import 'Customer/CustomerScreenController.dart';
 import 'my_preference.dart';
@@ -49,7 +48,7 @@ class _MainDashBoardState extends State<MainDashBoard> {
   }
 
   void mqttConfigureAndConnect() {
-    MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context,listen: false);
+    MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
     manager.initializeMQTTClient(state: payloadProvider);
     manager.connect();
   }
@@ -68,42 +67,33 @@ class _MainDashBoardState extends State<MainDashBoard> {
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return Container();
-        }
-        final sharedPreferences = snapshot.data!;
-        final userId = sharedPreferences.getString('userId') ?? '';
-        final userName = sharedPreferences.getString('userName') ?? '';
-        final userType = sharedPreferences.getString('userType') ?? '';
-        final countryCode = sharedPreferences.getString('countryCode') ?? '';
-        final mobileNo = sharedPreferences.getString('mobileNumber') ?? '';
-        final userEmailId = sharedPreferences.getString('email') ?? '';
-        final password = sharedPreferences.getString('password') ?? '';
+        }else{
+          final sharedPreferences = snapshot.data!;
+          final userId = sharedPreferences.getString('userId') ?? '';
+          final userName = sharedPreferences.getString('userName') ?? '';
+          final userType = sharedPreferences.getString('userType') ?? '';
+          final countryCode = sharedPreferences.getString('countryCode') ?? '';
+          final mobileNo = sharedPreferences.getString('mobileNumber') ?? '';
+          final emailId = sharedPreferences.getString('emailId') ?? '';
 
-        if (userId.isNotEmpty) {
-          return UserData(
-            userId: int.parse(userId),
-            userName: userName,
-            userType: userType,
-            countryCode: countryCode,
-            mobileNo: mobileNo,
-            userEmailId: userEmailId,
-            password: password,
-            child: Scaffold(
+          if (userId.isNotEmpty) {
+            return Scaffold(
               body: LayoutBuilder(
                 builder: (context, constraints)
                 {
                   if (constraints.maxWidth < 600) {
-                    return const DashboardNarrow();//mobile
+                    return  DashboardNarrow(userId: int.parse(userId));
                   } else if (constraints.maxWidth > 600 && constraints.maxWidth < 900) {
-                    return const DashboardMiddle();//pad or tap
+                    return const DashboardMiddle();
                   } else {
-                    return const DashboardWide();//web tv
+                    return  DashboardWide(userId: int.parse(userId), userType: int.parse(userType), userName: userName, countryCode: countryCode, mobileNo: mobileNo, emailId: emailId,);
                   }
                 },
               ),
-            ),
-          );
-        } else {
-          return const LoginForm();
+            );
+          } else {
+            return const LoginForm();
+          }
         }
       },
     );
@@ -115,7 +105,8 @@ class _MainDashBoardState extends State<MainDashBoard> {
 //-------------------------------------------------------------------------------------------------------
 
 class DashboardNarrow extends StatefulWidget {
-  const DashboardNarrow({Key? key}) : super(key: key);
+  const DashboardNarrow({Key? key, required this.userId}) : super(key: key);
+  final int userId;
   @override
   State<DashboardNarrow> createState() => _DashboardNarrowState();
 }
@@ -123,8 +114,7 @@ class DashboardNarrow extends StatefulWidget {
 class _DashboardNarrowState extends State<DashboardNarrow> {
   @override
   Widget build(BuildContext context) {
-    final userData = UserData.of(context)!;
-    return HomeScreenN(userId: userData.userId);
+    return HomeScreenN(userId: widget.userId);
   }
 }
 
@@ -149,7 +139,9 @@ class _DashboardMiddleState extends State<DashboardMiddle> {
 
 class DashboardWide extends StatefulWidget
 {
-  const DashboardWide({Key? key}) : super(key: key);
+  const DashboardWide({Key? key, required this.userId, required this.userType, required this.userName, required this.countryCode, required this.mobileNo, required this.emailId}) : super(key: key);
+  final int userId, userType;
+  final String userName, countryCode, mobileNo, emailId;
 
   @override
   State<DashboardWide> createState() => _DashboardWideState();
@@ -165,10 +157,12 @@ class _DashboardWideState extends State<DashboardWide> {
 
   @override
   Widget build(BuildContext context)  {
-    final userData = UserData.of(context)!;
+    print('userName:${widget.userName}');
+    print('userId:${widget.userType}');
+    print('userType:${widget.userType}');
     return  Scaffold(
-      body: userData.userType=='3'?
-      CustomerScreenController(customerID: userData.userId, customerName: userData.userName, mobileNo: '+${userData.countryCode}-${userData.mobileNo}', comingFrom: 'Customer'):
+      body: widget.userType==3?
+      CustomerScreenController(customerId: widget.userId, customerName: widget.userName, mobileNo: '+${widget.countryCode}-${widget.mobileNo}', comingFrom: 'Customer', emailId: widget.emailId,):
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -218,7 +212,7 @@ class _DashboardWideState extends State<DashboardWide> {
                 }
               });
             },
-            destinations: userData.userType == '1'? <NavigationRailDestination>[
+            destinations: widget.userType == 1? <NavigationRailDestination>[
               const NavigationRailDestination(
                 padding: EdgeInsets.only(top: 5),
                 icon: Icon(Icons.dashboard_outlined),
@@ -280,40 +274,36 @@ class _DashboardWideState extends State<DashboardWide> {
               ),
             ],
           ),
-          buildExpandedWidget(userData),
+          Expanded(
+            child: mainMenu(_selectedIndex),
+          ),
         ],
       ),
     );
 
   }
 
-  Widget buildExpandedWidget(userData) {
-    return Expanded(
-      child: selectedWidget(_selectedIndex, userData),
-    );
-  }
-
-  Widget selectedWidget(int index, userData) {
+  Widget mainMenu(int index) {
     switch (index) {
       case 0:
         return AdminDealerHomePage(
-          userName: userData.userName,
-          countryCode: userData.countryCode,
-          mobileNo: userData.mobileNo,
+          userName: widget.userName,
+          countryCode: widget.countryCode,
+          mobileNo: widget.mobileNo,
           fromLogin: true,
-          userId: userData.userId,
-          userType: int.parse(userData.userType ?? 0),
+          userId: widget.userId,
+          userType: widget.userType,
         );
       case 1:
         return ProductInventory(
-          userName: userData.userName,
+          userName: widget.userName,
         );
       case 2:
-        return userData.userType == '1' ? const AllEntry() : MyPreference(userID: userData.userId);
+        return widget.userType == 1 ? const AllEntry() : MyPreference(userID: widget.userId);
       case 3:
-        return userData.userType == '1' ? MyPreference(userID: userData.userId) : const MyWebView();
+        return widget.userType == 1 ? MyPreference(userID: widget.userId) : const MyWebView();
       default:
-        return const SizedBox(); // Return an empty widget by default or handle error case
+        return const SizedBox();
     }
   }
 }

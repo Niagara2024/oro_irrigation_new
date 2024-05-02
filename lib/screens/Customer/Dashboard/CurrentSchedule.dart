@@ -192,7 +192,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                       width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 200 : 215,
                                       child: Row(
                                         children: [
-                                          Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining : ':'Remaining : '),
+                                          const Text('Remaining : '),
                                           provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
                                           Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
                                         ],
@@ -234,9 +234,9 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                       width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 200 : 215,
                                       child: Row(
                                         children: [
-                                          Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining : ':'Remaining : '),
+                                          const Text('Remaining : '),
                                           provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
-                                          Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: TextStyle(fontSize: 18, color: Colors.black))
+                                          Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
                                         ],
                                       ),
                                     )
@@ -276,7 +276,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                       width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 200 : 215,
                                       child: Row(
                                         children: [
-                                          Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining : ':'Remaining : '),
+                                          const Text('Remaining : '),
                                           provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
                                           Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
                                         ],
@@ -318,7 +318,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                       width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 200 : 215,
                                       child: Row(
                                         children: [
-                                          Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Remaining : ':'Remaining : '),
+                                          const Text('Remaining : '),
                                           provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
                                           Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
                                         ],
@@ -480,17 +480,29 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
             }
             else{
               //flow
-              print(provider.currentSchedule[i]['Duration_QtyLeft']);
-              if(provider.currentSchedule[i]['Duration_QtyLeft']>0){
+              double remainFlow;
+              if (provider.currentSchedule[i]['Duration_QtyLeft'] is int) {
+                remainFlow = provider.currentSchedule[i]['Duration_QtyLeft'].toDouble();
+              } else {
+                remainFlow = double.parse(provider.currentSchedule[i]['Duration_QtyLeft']);
+              }
+
+              if(remainFlow>0){
+                dynamic flowRateData = provider.currentSchedule[i]['AverageFlowRate'];
+                double flowRate;
+                if (flowRateData is String) {
+                  flowRate = double.parse(flowRateData);
+                } else {
+                  flowRate = flowRateData;
+                }
+                remainFlow = remainFlow - flowRate;
+                String formattedFlow = remainFlow.toStringAsFixed(2);
                 setState(() {
-                  int remainFlow = provider.currentSchedule[i]['Duration_QtyLeft'];
-                  int flowRate = provider.currentSchedule[i]['AverageFlowRate'];
-                  remainFlow = remainFlow - flowRate;
-                  provider.currentSchedule[i]['Duration_QtyLeft'] = remainFlow;
+                  provider.currentSchedule[i]['Duration_QtyLeft'] = formattedFlow;
                 });
               }else{
                 setState(() {
-                  provider.currentSchedule[i]['Duration_QtyLeft'] = '0';
+                  provider.currentSchedule[i]['Duration_QtyLeft'] = '0.00';
                 });
               }
             }

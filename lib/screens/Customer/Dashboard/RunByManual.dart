@@ -157,7 +157,7 @@ class _RunByManualState extends State<RunByManual> {
                   }
                   if(dashBoardData[0].centralFilterSite.isNotEmpty){
 
-                    List<String> filterRelaySrlNos = [];
+                    /*List<String> filterRelaySrlNos = [];
                     for (var site in dashBoardData[0].centralFilterSite) {
                       String relaySrlNo = getSelectedRelaySrlNo(site.filter);
                       if (relaySrlNo.isNotEmpty) {
@@ -167,9 +167,9 @@ class _RunByManualState extends State<RunByManual> {
                     if (filterRelaySrlNos.isNotEmpty) {
                       String strSldCtrlFilterSrlNo = filterRelaySrlNos.join('_');
                       print(strSldCtrlFilterSrlNo);
-                    }
+                    }*/
 
-                    /*for(int i=0; i<dashBoardData[0].centralFilterSite.length; i++){
+                    for(int i=0; i<dashBoardData[0].centralFilterSite.length; i++){
                       String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[i].filter);
                       if(concatenatedString.isNotEmpty){
                         strSldCtrlFilterSrlNo += '${concatenatedString}_';
@@ -177,7 +177,7 @@ class _RunByManualState extends State<RunByManual> {
                     }
                     if (strSldCtrlFilterSrlNo.isNotEmpty && strSldCtrlFilterSrlNo.endsWith('_')) {
                       strSldCtrlFilterSrlNo = strSldCtrlFilterSrlNo.replaceRange(strSldCtrlFilterSrlNo.length - 1, strSldCtrlFilterSrlNo.length, '');
-                    }*/
+                    }
 
                     //strSldCtrlFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[0].filter);
                   }
@@ -255,7 +255,7 @@ class _RunByManualState extends State<RunByManual> {
                   //print(strSldCrlFetFilterSrlNo);
                   //print(allRelaySrlNo);
 
-                  /*if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
+                  if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
                     showDialog<String>(
                         context: context,
                         builder: (BuildContext dgContext) => AlertDialog(
@@ -278,7 +278,7 @@ class _RunByManualState extends State<RunByManual> {
                     );
                   }else{
                     startByStandaloneDefault(allRelaySrlNo);
-                  }*/
+                  }
 
                 }
                 else{
@@ -1657,7 +1657,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
     TimeOfDay? selectedTime = await showTimePicker(
       context: context,
       initialTime: time,
-      helpText: 'Set Duration(HH:MM)',
+      helpText: 'Set Duration(HH:MM:SS)',
       builder: (BuildContext context, Widget? child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),

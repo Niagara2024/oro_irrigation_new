@@ -51,7 +51,7 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
   @override
   void initState() {
     super.initState();
-    dataResponse = DataResponse();
+    dataResponse = DataResponse(graph: {}, total: []);
     indicatorViewShow();
     getUserInfo();
   }
@@ -432,7 +432,7 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                             if(userType==1){
                               Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyDealers(dealerId: myCustomerList[index].userId, dealerName: myCustomerList[index].userName)),);
                             }else{
-                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerScreenController(customerID: myCustomerList[index].userId, comingFrom: 'AdminORDealer', customerName: myCustomerList[index].userName, mobileNo: '+${myCustomerList[index].countryCode}-${myCustomerList[index].mobileNumber}',)));
+                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerScreenController(customerId: myCustomerList[index].userId, comingFrom: 'AdminORDealer', customerName: myCustomerList[index].userName, mobileNo: '+${myCustomerList[index].countryCode}-${myCustomerList[index].mobileNumber}', emailId: myCustomerList[index].emailId,)));
                             }
                           }),
                           title: Text(myCustomerList[index].userName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),

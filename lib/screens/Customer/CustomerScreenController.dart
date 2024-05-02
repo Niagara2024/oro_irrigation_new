@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/SentAndReceived.dart';
 import 'package:provider/provider.dart';
@@ -11,8 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../Models/Customer/Dashboard/ProgramList.dart';
 import '../../Models/language.dart';
+import '../../constants/AppImages.dart';
 import '../../constants/MQTTManager.dart';
-import '../../constants/UserData.dart';
 import '../../constants/http_service.dart';
 import '../../constants/snack_bar.dart';
 import '../../constants/theme.dart';
@@ -25,9 +23,9 @@ import 'ProgramSchedule.dart';
 
 
 class CustomerScreenController extends StatefulWidget {
-  const CustomerScreenController({Key? key, required this.customerID, required this.customerName, required this.mobileNo, required this.comingFrom}) : super(key: key);
-  final int customerID;
-  final String customerName, mobileNo, comingFrom;
+  const CustomerScreenController({Key? key, required this.customerId, required this.customerName, required this.mobileNo, required this.emailId, required this.comingFrom}) : super(key: key);
+  final int customerId;
+  final String customerName, mobileNo, emailId, comingFrom;
 
   @override
   _CustomerScreenControllerState createState() => _CustomerScreenControllerState();
@@ -37,7 +35,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 {
   List<DashboardModel> siteListFinal = [];
   int siteIndex = 0;
-  bool loadingSite = true;
   bool visibleLoading = false;
   int _selectedIndex = 0;
 
@@ -55,10 +52,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   @override
   void initState() {
     super.initState();
+    indicatorViewShow();
     initRotationAnimation();
     clearMQTTPayload();
     getLanguage();
-    getCustomerSite(widget.customerID);
+    getCustomerSite(widget.customerId);
 
   }
 
@@ -97,7 +95,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   void clearMQTTPayload(){
     MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context,listen: false);
-    //payloadProvider.mainLine=[];
     payloadProvider.currentSchedule=[];
     payloadProvider.PrsIn=[];
     payloadProvider.PrsOut=[];
@@ -130,11 +127,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           languageList.add(LanguageList.fromJson(cntList[i]));
         }
       }
-      indicatorViewHide();
     }
-    else{
-      indicatorViewHide();
-    }
+
   }
 
   Future<void> getCustomerSite(userId) async
@@ -145,15 +139,15 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     {
       siteListFinal.clear();
       var data = jsonDecode(response.body);
-      print(response.body);
+      //print(response.body);
       if(data["code"]==200)
       {
         final cntList = data["data"] as List;
         try {
           siteListFinal = cntList.map((json) => DashboardModel.fromJson(json)).toList();
-          setState((){
-            loadingSite = false;
-          });
+          MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
+          payloadProvider.updateReceivedPayload(jsonEncode(cntList[0]));
+          indicatorViewHide();
           if(siteListFinal.isNotEmpty){
             subscribeAndUpdateSite();
             getProgramList();
@@ -173,15 +167,14 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   {
     programList.clear();
     try {
-      Map<String, Object> body = {"userId": widget.customerID, "controllerId": siteListFinal[siteIndex].controllerId};
+      Map<String, Object> body = {"userId": widget.customerId, "controllerId": siteListFinal[siteIndex].controllerId};
       final response = await HttpService().postRequest("getUserProgramNameList", body);
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         //print(response.body);
         List<dynamic> programsJson = jsonResponse['data'];
         setState(() {
-          programList = [
-            ...programsJson.map((programJson) => ProgramList.fromJson(programJson)).toList(),
+          programList = [...programsJson.map((programJson) => ProgramList.fromJson(programJson)).toList(),
           ];
         });
       }
@@ -200,10 +193,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   }
 
   void subscribeAndUpdateSite() {
-    indicatorViewShow();
     Future.delayed(const Duration(seconds: 3), () {
       MQTTManager().subscribeToTopic('FirmwareToApp/${siteListFinal[siteIndex].deviceId}');
-      indicatorViewHide();
     });
 
   }
@@ -214,12 +205,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     final screenWidth = MediaQuery.of(context).size.width;
     final provider = Provider.of<MqttPayloadProvider>(context);
 
-    /*print('userId :${widget.customerID}');
-    print('controllerId :${siteListFinal[siteIndex].controllerId}');*/
-
     if(widget.comingFrom == 'AdminORDealer'){
-
-      return loadingSite? buildLoadingIndicator(loadingSite, screenWidth):
+      return visibleLoading? buildLoadingIndicator(visibleLoading, screenWidth):
       Scaffold(
         appBar: AppBar(
           title: Text('${widget.customerName} - DASHBOARD'),
@@ -282,7 +269,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           children: [
             Expanded(child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: CustomerDashboard(customerID: widget.customerID, type: 0, customerName: widget.customerName, userID: widget.customerID, mobileNo: '+${widget.mobileNo}', siteData: siteListFinal[siteIndex]),
+              child: CustomerDashboard(customerID: widget.customerId, type: 0, customerName: widget.customerName, userID: widget.customerId, mobileNo: '+${widget.mobileNo}', siteData: siteListFinal[siteIndex],),
             )),
             Container(
               width: 60,
@@ -358,7 +345,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                             builder: (context) => RunByManual(siteID: siteListFinal[siteIndex].siteId,
                                 siteName: siteListFinal[siteIndex].siteName,
                                 controllerID: siteListFinal[siteIndex].controllerId,
-                                customerID: widget.customerID,
+                                customerID: widget.customerId,
                                 imeiNo: siteListFinal[siteIndex].deviceId,
                                 programList: programList, callbackFunction: callbackFunction),
                           ),
@@ -382,11 +369,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                           context,
                           MaterialPageRoute(
                             builder: (context) => ProgramSchedule(
-                              customerID: widget.customerID,
+                              customerID: widget.customerId,
                               controllerID: siteListFinal[siteIndex].controllerId,
                               siteName: siteListFinal[siteIndex].siteName,
                               imeiNumber: siteListFinal[siteIndex].deviceId,
-                              userId: widget.customerID,
+                              userId: widget.customerId,
                             ),
                           ),
                         );
@@ -427,11 +414,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           ],
         ),
       );
-
-    }else{
-
-      final userData = UserData.of(context)!;
-      return loadingSite? buildLoadingIndicator(loadingSite, screenWidth):
+    }
+    else
+    {
+      return visibleLoading? buildLoadingIndicator(visibleLoading, screenWidth):
       Scaffold(
         appBar: AppBar(
           leading: const Padding(
@@ -458,7 +444,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   onPressed: () {
                   },
                   style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(Colors.red.shade300),
+                      backgroundColor: MaterialStateProperty.all<Color>(Colors.white24),
                     shape: MaterialStateProperty.all<OutlinedBorder>(
                       RoundedRectangleBorder(borderRadius: BorderRadius.circular(5),),
                     ),
@@ -466,9 +452,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.pause, color: Colors.white),
+                      Icon(Icons.pause, color: Colors.orange),
                       SizedBox(width:5),
-                      Text('PAUSE', style: TextStyle(color: Colors.white)),
+                      Text('PAUSE ALL', style: TextStyle(color: Colors.white)),
                     ],
                   ),
                 ),
@@ -576,7 +562,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   backgroundColor: Colors.white,
                   child: Icon(Icons.settings_outlined),
                 )),
-                IconButton(tooltip : 'Niagara Account\n${userData.userName}\n+${userData.countryCode} ${userData.mobileNo}', onPressed: (){
+                IconButton(tooltip : 'Niagara Account\n${widget.customerName}\n ${widget.mobileNo}', onPressed: (){
                   showMenu(
                     context: context,
                     position: const RelativeRect.fromLTRB(100, 0, 10, 0),
@@ -590,15 +576,15 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                             Stack(
                               children: [
                                 Center(
-                                  child: CircleAvatar(radius: 35, backgroundColor: myTheme.primaryColor.withOpacity(0.1), child: Text(userData.userName.substring(0, 1).toUpperCase(), style: const TextStyle(fontSize: 25)),),
+                                  child: CircleAvatar(radius: 35, backgroundColor: myTheme.primaryColor.withOpacity(0.1), child: Text(widget.customerName.substring(0, 1).toUpperCase(), style: const TextStyle(fontSize: 25)),),
                                 ),
                                 Positioned(
                                   bottom: 0.0,
                                   right: 70.0,
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      shape: BoxShape.circle, // Optional: Makes the container circular
-                                      color: myTheme.primaryColor, // Set the background color here
+                                      shape: BoxShape.circle,
+                                      color: myTheme.primaryColor,
                                     ),
                                     child: IconButton(
                                       tooltip:'Edit',
@@ -609,9 +595,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                 ),
                               ],
                             ),
-                            Text('Hi, ${userData.userName}!',style: const TextStyle(fontSize: 20)),
-                            Text(userData.userEmailId, style: const TextStyle(fontSize: 13)),
-                            Text('+${userData.countryCode} ${userData.mobileNo}', style: const TextStyle(fontSize: 13)),
+                            Text('Hi, ${widget.customerName}!',style: const TextStyle(fontSize: 20)),
+                            Text(widget.emailId, style: const TextStyle(fontSize: 13)),
+                            Text(widget.mobileNo, style: const TextStyle(fontSize: 13)),
                             const SizedBox(height: 15),
                             MaterialButton(
                               color: myTheme.primaryColor,
@@ -622,7 +608,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                 showModalBottomSheet(
                                   context: context,
                                   builder: (BuildContext context) {
-                                    return AccountManagement(userID: userData.userId, callback: callbackFunction);
+                                    return AccountManagement(userID: widget.customerId, callback: callbackFunction);
                                   },
                                 );
                               },
@@ -660,7 +646,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 }, icon: CircleAvatar(
                   radius: 17,
                   backgroundColor: Colors.white,
-                  child: Text(userData.userName.substring(0, 1).toUpperCase()),
+                  child: Text(widget.customerName.substring(0, 1).toUpperCase()),
                 )),
                 IconButton(tooltip : 'Site List', onPressed: (){
                   showMenu(
@@ -705,7 +691,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           width: double.infinity,
           height: double.infinity,
           color: myTheme.primaryColorLight.withOpacity(0.1),
-          child: visibleLoading ? buildLoadingIndicator(visibleLoading, screenWidth) : Row(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               NavigationRail(
@@ -768,11 +754,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: _selectedIndex == 0 ? CustomerDashboard(customerID: widget.customerID, type: 1, customerName: widget.customerName, userID: widget.customerID, mobileNo: '+${widget.mobileNo}', siteData: siteListFinal[siteIndex]) :
+                    child: _selectedIndex == 0 ? CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: siteListFinal[siteIndex]) :
                     _selectedIndex == 1 ? ProductInventory(userName: widget.customerName):
                     _selectedIndex == 2 ? ProductInventory(userName: widget.customerName):
                     _selectedIndex == 3 ?  ProductInventory(userName: widget.customerName):
-                    _selectedIndex == 4 ?  SentAndReceived(customerID: widget.customerID, controllerId: siteListFinal[siteIndex].controllerId):
+                    _selectedIndex == 4 ?  SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].controllerId):
                     ProductInventory(userName: widget.customerName),
                   ),
                 ),
@@ -852,7 +838,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                               builder: (context) => RunByManual(siteID: siteListFinal[siteIndex].siteId,
                                   siteName: siteListFinal[siteIndex].siteName,
                                   controllerID: siteListFinal[siteIndex].controllerId,
-                                  customerID: widget.customerID,
+                                  customerID: widget.customerId,
                                   imeiNo: siteListFinal[siteIndex].deviceId,
                                   programList: programList, callbackFunction: callbackFunction),
                             ),
@@ -876,11 +862,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                             context,
                             MaterialPageRoute(
                               builder: (context) => ProgramSchedule(
-                                customerID: widget.customerID,
+                                customerID: widget.customerId,
                                 controllerID: siteListFinal[siteIndex].controllerId,
                                 siteName: siteListFinal[siteIndex].siteName,
                                 imeiNumber: siteListFinal[siteIndex].deviceId,
-                                userId: widget.customerID,
+                                userId: widget.customerId,
                               ),
                             ),
                           );
@@ -914,7 +900,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                           }else{
                             GlobalSnackBar.show(context, 'Alarm is Empty', 200);
                           }
-
                         },
                         icon: Icons.alarm,
                         badgeNumber: provider.alarmList.length, // Set your badge number here
@@ -948,7 +933,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             borderRadius: BorderRadius.zero,
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter stateSetter) {
-                return SideSheetClass(customerID: widget.customerID, siteData: siteListFinal[siteIndex],);
+                return SideSheetClass(customerID: widget.customerId, siteData: siteListFinal[siteIndex],);
               },
             ),
           ),
@@ -987,7 +972,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   textColor: Colors.white,
                   title: const Text('All Node Details', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
                   trailing: PopupMenuButton<String>(
-                    icon: Icon(Icons.filter_list, color: Colors.white,),
+                    icon: const Icon(Icons.filter_list, color: Colors.white,),
                     onSelected: (value) {
                       print('Filter option selected: $value');
                     },
@@ -1117,31 +1102,30 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                   itemBuilder: (context, index) {
                                     return Column(
                                       children: [
-                                        CircleAvatar(
-                                          backgroundColor: Colors.transparent,
-                                            backgroundImage:  siteListFinal[siteIndex].nodeList[i].sensor[index].Name!.contains("SM") ?
-                                            const AssetImage('assets/images/dp_src_pump.png') :
-                                            siteListFinal[siteIndex].nodeList[i].sensor[index].Name!.contains("IF") ?
-                                            const AssetImage('assets/images/irrigation_pump.png') :
-                                            siteListFinal[siteIndex].nodeList[i].sensor[index].Name!.contains("LI") ?
-                                            const AssetImage('assets/images/irrigation_pump.png') :
-                                            siteListFinal[siteIndex].nodeList[i].sensor[index].Name!.contains("LO") ?
-                                            const AssetImage('assets/images/irrigation_pump.png') :
-                                            siteListFinal[siteIndex].nodeList[i].sensor[index].Name!.contains("LW") ?
-                                            const AssetImage('assets/images/irrigation_pump.png') :
-                                            siteListFinal[siteIndex].nodeList[i].sensor[index].Name!.contains("PSP") ?
-                                            const AssetImage('assets/images/irrigation_pump.png') :
-                                            siteListFinal[siteIndex].nodeList[i].sensor[index].Name!.contains("EC") ?
-                                            const AssetImage('assets/images/pressure_sensor.png') :
-                                            siteListFinal[siteIndex].nodeList[i].sensor[index].Name!.contains("PH") ?
-                                            const AssetImage('assets/images/pressure_sensor.png') :
-                                            const AssetImage('assets/images/irrigation_pump.png')
+                                        SizedBox(
+                                          width: 40,
+                                          height: 40,
+                                          child: Stack(
+                                            children: [
+                                              AppImages.getAsset('sensor',0, siteListFinal[siteIndex].nodeList[i].sensor[index].Name!),
+                                              Positioned(
+                                                top: 25,
+                                                left: 0,
+                                                child: Container(width: 40, height: 14,
+                                                    decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.circular(3),
+                                                      color: Colors.yellow,
+                                                    ),
+                                                    child: Center(child: Text('${siteListFinal[siteIndex].nodeList[i].sensor[index].Value}', style: const TextStyle(color: Colors.black, fontSize: 10)))
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
-
-                                            Text('${siteListFinal[siteIndex].nodeList[i].sensor[index].Name!}(${siteListFinal[siteIndex].nodeList[i].sensor[index].Value})', style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                            Text(siteListFinal[siteIndex].nodeList[i].sensor[index].Name!, style: const TextStyle(color: Colors.black, fontSize: 10)),
                                           ],
                                         ),
                                       ],
@@ -1293,11 +1277,13 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   {
     return Visibility(
       visible: isVisible,
-      child: Container(
-        color: Colors.white,
-        padding: EdgeInsets.symmetric(horizontal: width / 2 - 25),
-        child: const LoadingIndicator(
-          indicatorType: Indicator.ballPulse,
+      child: Center(
+        child: Container(
+          color: Colors.white,
+          padding: EdgeInsets.symmetric(horizontal: width / 2 - 25),
+          child: const LoadingIndicator(
+            indicatorType: Indicator.ballPulse,
+          ),
         ),
       ),
     );

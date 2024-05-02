@@ -157,7 +157,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                   SizedBox(
                     width: 70,
                     height: 70,
-                    child: AppImages.getAsset('sourcePump', provider.sourcePump[index]['Status']),
+                    child: AppImages.getAsset('sourcePump', provider.sourcePump[index]['Status'],''),
                   ),
                   provider.sourcePump[index]['OnDelayLeft'] !='00:00:00'?
                   Positioned(
@@ -196,7 +196,6 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
         },
       ),
     );
-
   }
 
 
@@ -286,7 +285,7 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                   SizedBox(
                     width: 70,
                     height: 70,
-                    child: AppImages.getAsset('irrigationPump', provider.irrigationPump[index]['Status']),
+                    child: AppImages.getAsset('irrigationPump', provider.irrigationPump[index]['Status'],''),
                   ),
                   provider.irrigationPump[index]['OnDelayLeft'] !='00:00:00'?
                   Positioned(
@@ -330,6 +329,7 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
 
 
   void durationUpdatingFunction() {
+
     timer?.cancel();
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       try{
@@ -542,7 +542,7 @@ class _DisplayFilterState extends State<DisplayFilter> {
                             SizedBox(
                               width: 70,
                               height: 70,
-                              child: AppImages.getAsset('filter', provider.filtersCentral[i]['FilterStatus'][flIndex]['Status']),
+                              child: AppImages.getAsset('filter', provider.filtersCentral[i]['FilterStatus'][flIndex]['Status'],''),
                             ),
                             Positioned(
                               top: 40,
@@ -641,9 +641,10 @@ class _DisplayFilterState extends State<DisplayFilter> {
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       try{
         final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
-        if(provider.filtersCentral.isNotEmpty) {
-          if(provider.filtersCentral[0]['DurationLeft']!='00:00:00'){
-            List<String> parts = provider.filtersCentral[0]['DurationLeft'].split(':');
+        for(int fIndex=0; fIndex<provider.filtersCentral.length; fIndex++){
+          if(provider.filtersCentral[fIndex]['DurationLeft']!='00:00:00'){
+
+            List<String> parts = provider.filtersCentral[fIndex]['DurationLeft'].split(':');
             int hours = int.parse(parts[0]);
             int minutes = int.parse(parts[1]);
             int seconds = int.parse(parts[2]);
@@ -664,9 +665,11 @@ class _DisplayFilterState extends State<DisplayFilter> {
             }
 
             String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-            setState(() {
-              provider.filtersCentral[0]['DurationLeft'] = updatedDurationQtyLeft;
-            });
+            if(updatedDurationQtyLeft!='00:00:00'){
+              setState(() {
+                provider.filtersCentral[fIndex]['DurationLeft'] = updatedDurationQtyLeft;
+              });
+            }
           }
         }
       }
@@ -722,7 +725,7 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                         height: 140,
                         child : Stack(
                           children: [
-                            AppImages.getAsset('booster', provider.fertilizerCentral[fIndex]['Booster'][0]['Status']),
+                            AppImages.getAsset('booster', provider.fertilizerCentral[fIndex]['Booster'][0]['Status'],''),
                             Positioned(
                               top: 70,
                               left: 15,

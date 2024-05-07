@@ -165,7 +165,65 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                             height: 60,
                             child :  Column(
                               children: [
-                                (provider.currentSchedule[csIndex].containsKey('MV') && provider.currentSchedule[csIndex]['MV'].length > 0)
+                                Row(
+                                  children: [
+                                    if((provider.currentSchedule[csIndex].containsKey('MV') && provider.currentSchedule[csIndex]['MV'].length > 0))
+                                      for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['MV'].length; mvIndex++)
+                                        Expanded(
+                                          flex: 1,
+                                          child: buildWidget('MV', provider.currentSchedule[csIndex]['MV'][mvIndex]['Status'],
+                                              provider.currentSchedule[csIndex]['MV'][mvIndex]['Name']),
+                                        ),
+
+                                    if((provider.currentSchedule[csIndex].containsKey('VL') && provider.currentSchedule[csIndex]['VL'].length > 0))
+                                      for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['VL'].length; mvIndex++)
+                                        Expanded(
+                                          flex: 1,
+                                          child: buildWidget('VL', provider.currentSchedule[csIndex]['VL'][mvIndex]['Status'],
+                                              provider.currentSchedule[csIndex]['VL'][mvIndex]['Name']),
+                                        ),
+
+                                    if((provider.currentSchedule[csIndex].containsKey('FG') && provider.currentSchedule[csIndex]['FG'].length > 0))
+                                      for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['FG'].length; mvIndex++)
+                                        Expanded(
+                                          flex: 1,
+                                          child: buildWidget('FG', provider.currentSchedule[csIndex]['FG'][mvIndex]['Status'],
+                                              provider.currentSchedule[csIndex]['FG'][mvIndex]['Name']),
+                                        ),
+
+                                    if((provider.currentSchedule[csIndex].containsKey('SL') && provider.currentSchedule[csIndex]['SL'].length > 0))
+                                      for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['SL'].length; mvIndex++)
+                                        Expanded(
+                                          flex: 1,
+                                          child: buildWidget('SL', provider.currentSchedule[csIndex]['SL'][mvIndex]['Status'],
+                                              provider.currentSchedule[csIndex]['SL'][mvIndex]['Name']),
+                                        ),
+
+                                    if((provider.currentSchedule[csIndex].containsKey('FN') && provider.currentSchedule[csIndex]['FN'].length > 0))
+                                      for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['FN'].length; mvIndex++)
+                                        Expanded(
+                                          flex: 1,
+                                          child: buildWidget('FN', provider.currentSchedule[csIndex]['FN'][mvIndex]['Status'],
+                                              provider.currentSchedule[csIndex]['FN'][mvIndex]['Name']),
+                                        ),
+
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Container(width: 1, height: 40, color: Colors.grey,),
+                                    ),
+                                    SizedBox(
+                                      width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 200 : 215,
+                                      child: Row(
+                                        children: [
+                                          const Text('Remaining : '),
+                                          provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
+                                          Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                )
+                                /*(provider.currentSchedule[csIndex].containsKey('MV') && provider.currentSchedule[csIndex]['MV'].length > 0)
                                     && (provider.currentSchedule[csIndex].containsKey('VL') && provider.currentSchedule[csIndex]['VL'].length > 0) ?
                                 Row(
                                   children: [
@@ -184,6 +242,16 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                               provider.currentSchedule[csIndex]['VL'][mvIndex]['Name']),
                                         ),
                                       ),
+                                    for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['AG'].length; mvIndex++)
+                                      Expanded(
+                                        flex: 1,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(right: 8),
+                                          child: buildWidget('AG', provider.currentSchedule[csIndex]['AG'][mvIndex]['Status'],
+                                              provider.currentSchedule[csIndex]['AG'][mvIndex]['Name']),
+                                        ),
+                                      ),
+
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Container(width: 1, height: 40, color: Colors.grey,),
@@ -326,8 +394,49 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                     )
                                   ],
                                 ) :
-                                const SizedBox(),
-
+                                provider.currentSchedule[csIndex].containsKey('FG') && provider.currentSchedule[csIndex]['FG'].length > 0 ? Row(
+                                  children: [
+                                    for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['FG'].length; mvIndex++)
+                                      Expanded(
+                                        flex: 1,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(right: 8),
+                                          child: Column(
+                                            children: [
+                                              const SizedBox(height: 3),
+                                              Image.asset(
+                                                width: 40,
+                                                height: 40,
+                                                provider.currentSchedule[csIndex]['FG'][mvIndex]['Status']==0 ?
+                                                'assets/images/fogger.png':
+                                                provider.currentSchedule[csIndex]['FG'][mvIndex]['Status']==1 ?
+                                                'assets/images/fogger.png':
+                                                provider.currentSchedule[csIndex]['FG'][mvIndex]['Status']==2 ?
+                                                'assets/images/fogger.png': 'assets/images/fogger.png',
+                                              ),
+                                              const SizedBox(height: 3),
+                                              Text('${provider.currentSchedule[csIndex]['FG'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Container(width: 1, height: 40, color: Colors.grey,),
+                                    ),
+                                    SizedBox(
+                                      width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 200 : 215,
+                                      child: Row(
+                                        children: [
+                                          const Text('Remaining : '),
+                                          provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
+                                          Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ) :
+                                const SizedBox(),*/
                               ],
                             ),
                           )
@@ -387,6 +496,37 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
         imagePath = 'assets/images/valve_orange.png';
       } else {
         imagePath = 'assets/images/valve_red.png';
+      }
+    }
+    else if(type=='FG'){
+      if (status == 0) {
+        imagePath = 'assets/images/fogger.png';
+      } else if (status == 1) {
+        imagePath = 'assets/images/fogger_green.png';
+      } else if (status == 2) {
+        imagePath = 'assets/images/fogger_orange.png';
+      } else {
+        imagePath = 'assets/images/fogger_red.png';
+      }
+    }else if(type=='SL'){
+      if (status == 0) {
+        imagePath = 'assets/images/selector.png';
+      } else if (status == 1) {
+        imagePath = 'assets/images/selector.png';
+      } else if (status == 2) {
+        imagePath = 'assets/images/selector.png';
+      } else {
+        imagePath = 'assets/images/selector.png';
+      }
+    }else if(type=='FN'){
+      if (status == 0) {
+        imagePath = 'assets/images/fan.png';
+      } else if (status == 1) {
+        imagePath = 'assets/images/fan_green.png';
+      } else if (status == 2) {
+        imagePath = 'assets/images/fan_orange.png';
+      } else {
+        imagePath = 'assets/images/fan_red.png';
       }
     }else{
       imagePath = 'assets/images/virtual_water_meter.png';
@@ -480,27 +620,17 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
             }
             else{
               //flow
-              double remainFlow;
-              if (provider.currentSchedule[i]['Duration_QtyLeft'] is int) {
-                remainFlow = provider.currentSchedule[i]['Duration_QtyLeft'].toDouble();
-              } else {
-                remainFlow = double.parse(provider.currentSchedule[i]['Duration_QtyLeft']);
-              }
-
-              if(remainFlow>0){
-                dynamic flowRateData = provider.currentSchedule[i]['AverageFlowRate'];
-                double flowRate;
-                if (flowRateData is String) {
-                  flowRate = double.parse(flowRateData);
-                } else {
-                  flowRate = flowRateData;
-                }
-                remainFlow = remainFlow - flowRate;
+              double remainFlow = double.parse(provider.currentSchedule[i]['Duration_QtyLeft']);
+              if (remainFlow > 0) {
+                double flowRate = provider.currentSchedule[i]['AverageFlowRate'] is String
+                    ? double.parse(provider.currentSchedule[i]['AverageFlowRate'])
+                    : provider.currentSchedule[i]['AverageFlowRate'];
+                remainFlow -= flowRate;
                 String formattedFlow = remainFlow.toStringAsFixed(2);
                 setState(() {
                   provider.currentSchedule[i]['Duration_QtyLeft'] = formattedFlow;
                 });
-              }else{
+              } else {
                 setState(() {
                   provider.currentSchedule[i]['Duration_QtyLeft'] = '0.00';
                 });

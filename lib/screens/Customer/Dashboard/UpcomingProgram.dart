@@ -140,14 +140,12 @@ class UpcomingProgram extends StatelessWidget {
                                 color: Colors.orange,
                                 textColor: Colors.white,
                                 onPressed:() {
-                                  /*String localFilePath = 'assets/audios/button_click_sound.mp3';
-                                  audioPlayer.play(UrlSource(localFilePath));
-                                  String payload = '${provider.upcomingProgram[index]['SNo']},1';
+                                  String payload = '${provider.upcomingProgram[index]['SNo']},3';
                                   String payLoadFinal = jsonEncode({
-                                    "2900": [{"2901": payload}]
+                                    "4900": [{"4901": payload}]
                                   });
                                   MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
-                                  sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Paused by Manual', payLoadFinal);*/
+                                  sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Paused by Manual', payLoadFinal);
                                 },
                                 child: const Text('Pause'),
                               ) :
@@ -155,14 +153,14 @@ class UpcomingProgram extends StatelessWidget {
                                 color: Colors.yellow,
                                 textColor: Colors.white,
                                 onPressed:() {
-                                  /*String localFilePath = 'assets/audios/audio_off.mp3';
+                                  String localFilePath = 'assets/audios/audio_off.mp3';
                                   audioPlayer.play(UrlSource(localFilePath));
-                                  String payload = '${provider.upcomingProgram[index]['SNo']},0';
+                                  String payload = '${provider.upcomingProgram[index]['SNo']},4';
                                   String payLoadFinal = jsonEncode({
                                     "2900": [{"2901": payload}]
                                   });
                                   MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
-                                  sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Resume by Manual', payLoadFinal);*/
+                                  sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Resume by Manual', payLoadFinal);
                                 },
                                 child: const Text('Resume'),
                               ),

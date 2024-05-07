@@ -23,11 +23,10 @@ class CustomerDashboard extends StatefulWidget {
   State<CustomerDashboard> createState() => _CustomerDashboardState();
 }
 
-class _CustomerDashboardState extends State<CustomerDashboard> with SingleTickerProviderStateMixin {
+class _CustomerDashboardState extends State<CustomerDashboard> {
 
   int wifiStrength = 0, siteIndex = 0;
   String lastSyncData = '';
-
 
   @override
   void initState() {
@@ -36,8 +35,10 @@ class _CustomerDashboardState extends State<CustomerDashboard> with SingleTicker
   }
 
   void liveSync(){
-    String payLoadFinal = jsonEncode({"3000": [{"3001": ""}]});
-    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+    Future.delayed(const Duration(seconds: 2), () {
+      String payLoadFinal = jsonEncode({"3000": [{"3001": ""}]});
+      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+    });
   }
 
 

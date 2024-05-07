@@ -16,31 +16,8 @@ class MasterController extends StatefulWidget {
   State<MasterController> createState() => _MasterControllerState();
 }
 
-class _MasterControllerState extends State<MasterController>  with SingleTickerProviderStateMixin{
-  late AnimationController animationController;
-  late Animation<double> rotationAnimation;
+class _MasterControllerState extends State<MasterController>{
 
-  @override
-  void initState() {
-    super.initState();
-    initRotationAnimation();
-  }
-
-  void initRotationAnimation(){
-    animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-    rotationAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: animationController,
-        curve: Curves.linear,
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,13 +92,10 @@ class _MasterControllerState extends State<MasterController>  with SingleTickerP
                 ),
                 width: 45,
                 height: 45,
-                child: RotationTransition(
-                  turns: rotationAnimation,
-                  child: IconButton(
-                    tooltip: 'refresh',
-                    icon: const Icon(Icons.refresh, color: Colors.white,),
-                    onPressed: widget.refreshOnPress,
-                  ),
+                child: IconButton(
+                  tooltip: 'refresh',
+                  icon: const Icon(Icons.refresh, color: Colors.white,),
+                  onPressed: widget.refreshOnPress,
                 ),
               ),
               Container(

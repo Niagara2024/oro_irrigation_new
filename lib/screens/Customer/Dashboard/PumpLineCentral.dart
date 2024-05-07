@@ -779,13 +779,27 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                       double fertilizerQty = 0.0;
                       var qtyValue = fertilizer['Qty'];
                       if (qtyValue != null) {
-                        bool isString = fertilizer['Qty'] is String;
-                        if(isString){
+                        if(fertilizer['Qty'] is String){
                           fertilizerQty = double.parse(fertilizer['Qty']);
+                        }else if(fertilizer['Qty'] is int){
+                          fertilizerQty = fertilizer['Qty'].toDouble();
                         }else{
                           fertilizerQty = fertilizer['Qty'];
                         }
                       }
+
+                      var fertilizerLeftVal = fertilizer['QtyLeft'];
+                      if (fertilizerLeftVal != null) {
+                        if(fertilizerLeftVal is String){
+                          fertilizer['QtyLeft'] = double.parse(fertilizer['QtyLeft']);
+                        }else if(fertilizer['Qty'] is int){
+                          fertilizer['QtyLeft'] = fertilizer['QtyLeft'].toDouble();
+                        }else{
+                          fertilizer['QtyLeft'] = fertilizer['QtyLeft'];
+                        }
+                      }
+
+                     // print('QtyLeft :${fertilizer['QtyLeft']}');
 
                       return Row(
                         children: [
@@ -867,7 +881,7 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                                           child: Center(
                                             child: Text(fertilizer['FertMethod']=='1' || fertilizer['FertMethod']=='3'
                                                 ? fertilizer['DurationLeft']
-                                                : '${fertilizer['QtyLeft'].toStringAsFixed(2)} L' , style: const TextStyle(
+                                                : fertilizer['QtyLeft'] != null ? '${fertilizer['QtyLeft'].toStringAsFixed(2)} L' :'00.0 L' , style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 10,
                                               fontWeight: FontWeight.bold,
@@ -1037,152 +1051,209 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       try{
         final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
-        for(int fIndex=0; fIndex<provider.fertilizerCentral.length; fIndex++){
-          for (int i = 0; i < provider.fertilizerCentral[fIndex]['Fertilizer'].length; i++) {
-            if(provider.fertilizerCentral[fIndex]['Fertilizer'][i]['Status']!=0){
+        for (var central in provider.fertilizerCentral) {
+          central['Fertilizer'].forEach((fertilizer) {
+            int ferMethod = int.parse(fertilizer['FertMethod']);
+            if (fertilizer['Status'] != 0 && ferMethod == 1) {
+              //fertilizer time base
+              List<String> parts = fertilizer['DurationLeft'].split(':');
+              String updatedDurationQtyLeft = formatDuration(parts);
+              setState(() {
+                fertilizer['DurationLeft'] = updatedDurationQtyLeft;
+              });
+            }
+            else if (fertilizer['Status'] != 0 && ferMethod == 2) {
+              //fertilizer flow base
+              double qtyLeftDouble = convertQtyLeftToDouble(fertilizer['QtyLeft']);
+              double flowRate = convertFlowValueToDouble(fertilizer['FlowRate']);
+              qtyLeftDouble -= flowRate;
+              qtyLeftDouble = qtyLeftDouble < 0 ? 0 : qtyLeftDouble;
+              setState(() {
+                fertilizer['QtyLeft'] = qtyLeftDouble;
+              });
+            }
+            else if (fertilizer['Status'] != 0 && ferMethod == 3){
+              //fertilizer proposal time base
+              double fcOnTime = convertQtyLeftToDouble(fertilizer['OnTime']);
+              double fcOffTime = convertQtyLeftToDouble(fertilizer['OffTime']);
+              int fcOnTimeRd = fcOnTime.round();
+              int fcOffTimeRd = fcOffTime.round();
 
-              if(provider.fertilizerCentral[fIndex]['Fertilizer'][i]['FertMethod']=='1' ||
-                  provider.fertilizerCentral[fIndex]['Fertilizer'][i]['FertMethod']=='3')
-              {
-                List<String> parts = provider.fertilizerCentral[fIndex]['Fertilizer'][i]['DurationLeft'].split(':');
-                int hours = int.parse(parts[0]);
-                int minutes = int.parse(parts[1]);
-                int seconds = int.parse(parts[2]);
-
-                if (seconds > 0) {
-                  seconds--;
-                } else {
-                  if (minutes > 0) {
-                    minutes--;
-                    seconds = 59;
-                  } else {
-                    if (hours > 0) {
-                      hours--;
-                      minutes = 59;
-                      seconds = 59;
-                    }
-                  }
-                }
-
-                String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-                if(provider.fertilizerCentral[fIndex]['Fertilizer'][i]['FertMethod']=='3')
-                {
-                  double onTime = double.parse(provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OnTime']);
-                  double offTime = double.parse(provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OffTime']);
-
-                  if (provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalOnTime'] == null) {
-                    provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalOnTime'] = provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OnTime'];
-                  }
-                  if (provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalOffTime'] == null) {
-                    provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalOffTime'] = provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OffTime'];
-                  }
-                  if (provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalStatus'] == null) {
-                    provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalStatus'] = provider.fertilizerCentral[fIndex]['Fertilizer'][i]['Status'];
-                  }
-
-                  if(onTime.toInt()>0){
-                    int updatedOnTime = onTime.toInt() - 1;
-                    provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OnTime'] = updatedOnTime.toString();
-                    setState(() {
-                      provider.fertilizerCentral[fIndex]['Fertilizer'][i]['DurationLeft'] = updatedDurationQtyLeft;
-                      provider.fertilizerCentral[fIndex]['Fertilizer'][i]['Status'] = provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalStatus'];
-                    });
-                  }else if(offTime.toInt()>0){
-                    int updatedOffTime = offTime.toInt() - 1;
-                    provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OffTime'] = updatedOffTime.toString();
-                    setState(() {
-                      provider.fertilizerCentral[fIndex]['Fertilizer'][i]['Status'] = 4;
-                    });
-                    if(updatedOffTime==0){
-                      provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OnTime'] = provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalOnTime'];
-                      provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OffTime'] = provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalOffTime'];
-                    }
-                  }
-                }
-                else
-                {
-                  if(provider.fertilizerCentral[fIndex]['Fertilizer'][i]['DurationLeft']!='00:00:00'){
-                    setState(() {
-                      provider.fertilizerCentral[fIndex]['Fertilizer'][i]['DurationLeft'] = updatedDurationQtyLeft;
-                    });
-                  }
-                }
+              if (fertilizer['OriginalOnTime'] == null) {
+                fertilizer['OriginalOnTime'] = fertilizer['OnTime'];
               }
-              else
-              {
-                double qtyDouble = double.parse(provider.fertilizerCentral[fIndex]['Fertilizer'][i]['Qty']);
-                int roundedQty = qtyDouble.round();
-                double qtyLeftDouble = provider.fertilizerCentral[fIndex]['Fertilizer'][i]['QtyLeft'];
-                int roundedQtyLeft = qtyLeftDouble.round();
+              if (fertilizer['OriginalOffTime'] == null) {
+                fertilizer['OriginalOffTime'] = fertilizer['OffTime'];
+              }
+              if (fertilizer['OriginalStatus'] == null) {
+                fertilizer['OriginalStatus'] = fertilizer['Status'];
+              }
 
-                if(roundedQty >= roundedQtyLeft) {
-                  setState(() {
-                    if(provider.fertilizerCentral[fIndex]['Fertilizer'][i]['FertMethod']=='4' ||
-                        provider.fertilizerCentral[fIndex]['Fertilizer'][i]['FertMethod']=='5') {
-                      double onTime = double.parse(provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OnTime']);
-                      double offTime = double.parse(provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OffTime']);
+              if(fcOnTimeRd>0){
+                List<String> parts = fertilizer['DurationLeft'].split(':');
+                String updatedDurationQtyLeft = formatDuration(parts);
+                fcOnTimeRd--;
+                setState(() {
+                  fertilizer['OnTime'] = '$fcOnTimeRd';
+                  fertilizer['Status'] = fertilizer['OriginalStatus'];
+                  fertilizer['DurationLeft'] = updatedDurationQtyLeft;
+                });
+              }else if(fcOffTimeRd>0){
+                fcOffTimeRd--;
+                setState(() {
+                  fertilizer['OffTime'] = '$fcOffTimeRd';
+                  fertilizer['Status'] = 4;
+                });
 
-                      if (provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalOnTime'] == null) {
-                        provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalOnTime'] = provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OnTime'];
-                      }
-                      if (provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalOffTime'] == null) {
-                        provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalOffTime'] = provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OffTime'];
-                      }
-                      if (provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalStatus'] == null) {
-                        provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalStatus'] = provider.fertilizerCentral[fIndex]['Fertilizer'][i]['Status'];
-                      }
-
-                      if(onTime.round()>0){
-                        int updatedOnTime = onTime.round() - 1;
-                        provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OnTime'] = updatedOnTime.toString();
-                        setState(() {
-                          double remainQty = provider.fertilizerCentral[fIndex]['Fertilizer'][i]['QtyLeft'];
-                          double flowRate = double.parse(provider.fertilizerCentral[fIndex]['Fertilizer'][i]['FlowRate']);
-                          remainQty = remainQty - flowRate;
-                          provider.fertilizerCentral[fIndex]['Fertilizer'][i]['QtyLeft'] = remainQty > 0 ? remainQty : 0;
-                          provider.fertilizerCentral[fIndex]['Fertilizer'][i]['Status'] = provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalStatus'];
-                          if(offTime.round() <=0){
-                            provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OnTime'] = provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalOnTime'];
-                            provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OffTime'] = provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalOffTime'];
-                          }
-                        });
-                      }else if(offTime.round()>0){
-                        int updatedOffTime = offTime.round() - 1;
-                        provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OffTime'] = updatedOffTime.toString();
-                        setState(() {
-                          provider.fertilizerCentral[fIndex]['Fertilizer'][i]['Status'] = 4;
-                        });
-                        if(updatedOffTime==0){
-                          provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OnTime'] = provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalOnTime'];
-                          provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OffTime'] = provider.fertilizerCentral[fIndex]['Fertilizer'][i]['OriginalOffTime'];
-                        }
-                      }
-
-                    }
-                    else{
-                      double remainQty = provider.fertilizerCentral[fIndex]['Fertilizer'][i]['QtyLeft'];
-                      double flowRate = double.parse(provider.fertilizerCentral[fIndex]['Fertilizer'][i]['FlowRate']);
-                      remainQty = remainQty - flowRate;
-                      provider.fertilizerCentral[fIndex]['Fertilizer'][i]['QtyLeft'] = remainQty > 0 ? remainQty : 0;
-                    }
-
-                  });
-                }else{
-                  setState(() {
-                    provider.fertilizerCentral[fIndex]['Fertilizer'][i]['QtyLeft'] = provider.fertilizerCentral[fIndex]['Fertilizer'][i]['Qty'];
-                  });
+                if(fcOffTimeRd==0){
+                  fertilizer['OnTime'] = fertilizer['OriginalOnTime'];
+                  fertilizer['OffTime'] = fertilizer['OriginalOffTime'];
                 }
               }
             }
-          }
-        }
+            else if (fertilizer['Status'] != 0 && ferMethod == 4){
+              //fertilizer proposal qty base
+              double fcOnTime = convertQtyLeftToDouble(fertilizer['OnTime']);
+              double fcOffTime = convertQtyLeftToDouble(fertilizer['OffTime']);
+              int fcOnTimeRd = fcOnTime.round();
+              int fcOffTimeRd = fcOffTime.round();
 
+              if (fertilizer['OriginalOnTime'] == null) {
+                fertilizer['OriginalOnTime'] = fertilizer['OnTime'];
+              }
+              if (fertilizer['OriginalOffTime'] == null) {
+                fertilizer['OriginalOffTime'] = fertilizer['OffTime'];
+              }
+              if (fertilizer['OriginalStatus'] == null) {
+                fertilizer['OriginalStatus'] = fertilizer['Status'];
+              }
+
+              if(fcOnTimeRd>0){
+                fcOnTimeRd--;
+                double qtyLeftDouble = convertQtyLeftToDouble(fertilizer['QtyLeft']);
+                double flowRate = convertFlowValueToDouble(fertilizer['FlowRate']);
+                qtyLeftDouble -= flowRate;
+                qtyLeftDouble = qtyLeftDouble < 0 ? 0 : qtyLeftDouble;
+                setState(() {
+                  fertilizer['OnTime'] = '$fcOnTimeRd';
+                  fertilizer['Status'] = fertilizer['OriginalStatus'];
+                  fertilizer['QtyLeft'] = qtyLeftDouble;
+                });
+              }else if(fcOffTimeRd>0){
+                fcOffTimeRd--;
+                setState(() {
+                  fertilizer['OffTime'] = '$fcOffTimeRd';
+                  fertilizer['Status'] = 4;
+                });
+
+                if(fcOffTimeRd==0){
+                  fertilizer['OnTime'] = fertilizer['OriginalOnTime'];
+                  fertilizer['OffTime'] = fertilizer['OriginalOffTime'];
+                }
+              }
+            }
+            else if (fertilizer['Status'] != 0 && ferMethod == 5){
+              //fertilizer pro qty per 1000 Lit
+              double fcOnTime = convertQtyLeftToDouble(fertilizer['OnTime']);
+              double fcOffTime = convertQtyLeftToDouble(fertilizer['OffTime']);
+              int fcOnTimeRd = fcOnTime.round();
+              int fcOffTimeRd = fcOffTime.round();
+
+              if (fertilizer['OriginalOnTime'] == null) {
+                fertilizer['OriginalOnTime'] = fertilizer['OnTime'];
+              }
+              if (fertilizer['OriginalOffTime'] == null) {
+                fertilizer['OriginalOffTime'] = fertilizer['OffTime'];
+              }
+              if (fertilizer['OriginalStatus'] == null) {
+                fertilizer['OriginalStatus'] = fertilizer['Status'];
+              }
+
+              if(fcOnTimeRd>0){
+                fcOnTimeRd--;
+                double qtyLeftDouble = convertQtyLeftToDouble(fertilizer['QtyLeft']);
+                double flowRate = convertFlowValueToDouble(fertilizer['FlowRate']);
+                qtyLeftDouble -= flowRate;
+                qtyLeftDouble = qtyLeftDouble < 0 ? 0 : qtyLeftDouble;
+                setState(() {
+                  fertilizer['OnTime'] = '$fcOnTimeRd';
+                  fertilizer['Status'] = fertilizer['OriginalStatus'];
+                  fertilizer['QtyLeft'] = qtyLeftDouble;
+                });
+              }else if(fcOffTimeRd>0){
+                fcOffTimeRd--;
+                setState(() {
+                  fertilizer['OffTime'] = '$fcOffTimeRd';
+                  fertilizer['Status'] = 4;
+                });
+
+                if(fcOffTimeRd==0){
+                  fertilizer['OnTime'] = fertilizer['OriginalOnTime'];
+                  fertilizer['OffTime'] = fertilizer['OriginalOffTime'];
+                }
+              }
+            }
+            else{
+              print('ferMethod 6');
+            }
+          });
+        }
       }
       catch(e){
         print(e);
       }
 
     });
+  }
+
+  String formatDuration(List<String> parts) {
+    int hours = int.parse(parts[0]);
+    int minutes = int.parse(parts[1]);
+    int seconds = int.parse(parts[2]);
+
+    if (seconds > 0) {
+      seconds--;
+    } else {
+      if (minutes > 0) {
+        minutes--;
+        seconds = 59;
+      } else {
+        if (hours > 0) {
+          hours--;
+          minutes = 59;
+          seconds = 59;
+        }
+      }
+    }
+    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
+  double convertQtyLeftToDouble(dynamic qtyLeftValue) {
+    double qtyLeftDouble = 0.00;
+    if (qtyLeftValue is int) {
+      qtyLeftDouble = qtyLeftValue.toDouble();
+    } else if (qtyLeftValue is String) {
+      qtyLeftDouble = double.tryParse(qtyLeftValue) ?? 0.00;
+    } else if (qtyLeftValue is double) {
+      qtyLeftDouble = qtyLeftValue;
+    } else {
+      qtyLeftDouble = 0.00;
+    }
+    return qtyLeftDouble;
+  }
+
+  double convertFlowValueToDouble(dynamic flowValue) {
+    double flowRate = 0.00;
+    if (flowValue is int) {
+      flowRate = flowValue.toDouble();
+    } else if (flowValue is String) {
+      flowRate = double.tryParse(flowValue) ?? 0.00;
+    } else if (flowValue is double) {
+      flowRate = flowValue;
+    } else {
+      flowRate = 0.00; // Default value in case the type is unknown
+    }
+    return flowRate;
   }
 
 }

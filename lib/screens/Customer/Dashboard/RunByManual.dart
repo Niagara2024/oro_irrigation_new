@@ -106,7 +106,7 @@ class _RunByManualState extends State<RunByManual> {
     final response = await HttpService().postRequest("getCustomerDashboardByManual", body);
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
-      //print(response.body);
+      print(response.body);
       indicatorViewHide();
       if (jsonResponse['data'] != null) {
         dynamic data = jsonResponse['data'];
@@ -139,25 +139,24 @@ class _RunByManualState extends State<RunByManual> {
               onPressed: () {
                 standaloneSelection.clear();
 
-                if(ddSelection==0){
-                  List<String> allRelaySrlNo = [];
-                  String strSldValveOrLineSrlNo = '';
-                  String strSldSourcePumpSrlNo ='',strSldIrrigationPumpSrlNo ='',strSldMainValveSrlNo ='',strSldCtrlFilterSrlNo ='',strSldLocFilterSrlNo =''
-                  ,strSldCrlFetFilterSrlNo ='',strSldLocFetFilterSrlNo ='', strSldAgitatorSrlNo ='', strSldFanSrlNo ='', strSldFoggerSrlNo =''
-                  , strSldBoosterPumpSrlNo ='', strSldSelectorSrlNo ='';
+                List<String> allRelaySrlNo = [];
+                String strSldValveOrLineSrlNo = '';
+                String strSldSourcePumpSrlNo ='',strSldIrrigationPumpSrlNo ='',strSldMainValveSrlNo ='',strSldCtrlFilterSrlNo ='',strSldLocFilterSrlNo =''
+                ,strSldCrlFetFilterSrlNo ='',strSldLocFetFilterSrlNo ='', strSldAgitatorSrlNo ='', strSldFanSrlNo ='', strSldFoggerSrlNo =''
+                , strSldBoosterPumpSrlNo ='', strSldSelectorSrlNo ='';
 
-                  if(dashBoardData[0].sourcePump.isNotEmpty){
-                    strSldSourcePumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].sourcePump);
-                  }
-                  if(dashBoardData[0].irrigationPump.isNotEmpty){
-                    strSldIrrigationPumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].irrigationPump);
-                  }
-                  if(dashBoardData[0].mainValve.isNotEmpty){
-                    strSldMainValveSrlNo = getSelectedRelaySrlNo(dashBoardData[0].mainValve);
-                  }
-                  if(dashBoardData[0].centralFilterSite.isNotEmpty){
+                if(dashBoardData[0].sourcePump.isNotEmpty){
+                  strSldSourcePumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].sourcePump);
+                }
+                if(dashBoardData[0].irrigationPump.isNotEmpty){
+                  strSldIrrigationPumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].irrigationPump);
+                }
+                if(dashBoardData[0].mainValve.isNotEmpty){
+                  strSldMainValveSrlNo = getSelectedRelaySrlNo(dashBoardData[0].mainValve);
+                }
+                if(dashBoardData[0].centralFilterSite.isNotEmpty){
 
-                    /*List<String> filterRelaySrlNos = [];
+                  /*List<String> filterRelaySrlNos = [];
                     for (var site in dashBoardData[0].centralFilterSite) {
                       String relaySrlNo = getSelectedRelaySrlNo(site.filter);
                       if (relaySrlNo.isNotEmpty) {
@@ -169,54 +168,54 @@ class _RunByManualState extends State<RunByManual> {
                       print(strSldCtrlFilterSrlNo);
                     }*/
 
-                    for(int i=0; i<dashBoardData[0].centralFilterSite.length; i++){
-                      String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[i].filter);
-                      if(concatenatedString.isNotEmpty){
-                        strSldCtrlFilterSrlNo += '${concatenatedString}_';
-                      }
-                    }
-                    if (strSldCtrlFilterSrlNo.isNotEmpty && strSldCtrlFilterSrlNo.endsWith('_')) {
-                      strSldCtrlFilterSrlNo = strSldCtrlFilterSrlNo.replaceRange(strSldCtrlFilterSrlNo.length - 1, strSldCtrlFilterSrlNo.length, '');
-                    }
-
-                    //strSldCtrlFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[0].filter);
-                  }
-                  if(dashBoardData[0].localFilterSite.isNotEmpty){
-                    strSldLocFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].localFilterSite[0].filter);
-                  }
-                  if(dashBoardData[0].centralFertilizerSite.isNotEmpty){
-                    for(int i=0; i<dashBoardData[0].centralFertilizerSite.length; i++){
-                      String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFertilizerSite[i].fertilizer);
-                      if(concatenatedString.isNotEmpty){
-                        strSldCrlFetFilterSrlNo += '${concatenatedString}_';
-                      }
-                    }
-                    if (strSldCrlFetFilterSrlNo.isNotEmpty && strSldCrlFetFilterSrlNo.endsWith('_')) {
-                      strSldCrlFetFilterSrlNo = strSldCrlFetFilterSrlNo.replaceRange(strSldCrlFetFilterSrlNo.length - 1, strSldCrlFetFilterSrlNo.length, '');
+                  for(int i=0; i<dashBoardData[0].centralFilterSite.length; i++){
+                    String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[i].filter);
+                    if(concatenatedString.isNotEmpty){
+                      strSldCtrlFilterSrlNo += '${concatenatedString}_';
                     }
                   }
-                  if(dashBoardData[0].localFertilizerSite.isNotEmpty){
-                    strSldLocFetFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].localFertilizerSite[0].fertilizer);
-                  }
-                  if(dashBoardData[0].agitator.isNotEmpty){
-                    strSldAgitatorSrlNo = getSelectedRelaySrlNo(dashBoardData[0].agitator);
-                  }
-                  if(dashBoardData[0].fan.isNotEmpty){
-                    strSldFanSrlNo = getSelectedRelaySrlNo(dashBoardData[0].fan);
-                  }
-                  if(dashBoardData[0].fogger.isNotEmpty){
-                    strSldFoggerSrlNo = getSelectedRelaySrlNo(dashBoardData[0].fogger);
-                  }
-                  if(dashBoardData[0].boosterPump.isNotEmpty){
-                    strSldBoosterPumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].boosterPump);
-                  }
-                  if(dashBoardData[0].selector.isNotEmpty){
-                    strSldSelectorSrlNo = getSelectedRelaySrlNo(dashBoardData[0].selector);
+                  if (strSldCtrlFilterSrlNo.isNotEmpty && strSldCtrlFilterSrlNo.endsWith('_')) {
+                    strSldCtrlFilterSrlNo = strSldCtrlFilterSrlNo.replaceRange(strSldCtrlFilterSrlNo.length - 1, strSldCtrlFilterSrlNo.length, '');
                   }
 
+                  //strSldCtrlFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[0].filter);
+                }
+                if(dashBoardData[0].localFilterSite.isNotEmpty){
+                  strSldLocFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].localFilterSite[0].filter);
+                }
+                if(dashBoardData[0].centralFertilizerSite.isNotEmpty){
+                  for(int i=0; i<dashBoardData[0].centralFertilizerSite.length; i++){
+                    String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFertilizerSite[i].fertilizer);
+                    if(concatenatedString.isNotEmpty){
+                      strSldCrlFetFilterSrlNo += '${concatenatedString}_';
+                    }
+                  }
+                  if (strSldCrlFetFilterSrlNo.isNotEmpty && strSldCrlFetFilterSrlNo.endsWith('_')) {
+                    strSldCrlFetFilterSrlNo = strSldCrlFetFilterSrlNo.replaceRange(strSldCrlFetFilterSrlNo.length - 1, strSldCrlFetFilterSrlNo.length, '');
+                  }
+                }
+                if(dashBoardData[0].localFertilizerSite.isNotEmpty){
+                  strSldLocFetFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].localFertilizerSite[0].fertilizer);
+                }
+                if(dashBoardData[0].agitator.isNotEmpty){
+                  strSldAgitatorSrlNo = getSelectedRelaySrlNo(dashBoardData[0].agitator);
+                }
+                if(dashBoardData[0].fan.isNotEmpty){
+                  strSldFanSrlNo = getSelectedRelaySrlNo(dashBoardData[0].fan);
+                }
+                if(dashBoardData[0].fogger.isNotEmpty){
+                  strSldFoggerSrlNo = getSelectedRelaySrlNo(dashBoardData[0].fogger);
+                }
+                if(dashBoardData[0].boosterPump.isNotEmpty){
+                  strSldBoosterPumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].boosterPump);
+                }
+                if(dashBoardData[0].selector.isNotEmpty){
+                  strSldSelectorSrlNo = getSelectedRelaySrlNo(dashBoardData[0].selector);
+                }
+
+                if(ddSelection==0){
                   Map<String, List<DashBoardValve>> groupedValves = {};
-                  for (int i = 0; i < dashBoardData[0].lineOrSequence.length; i++) {
-                    LineOrSequence line = dashBoardData[0].lineOrSequence[i];
+                  for (var line in dashBoardData[0].lineOrSequence) {
                     groupedValves = groupValvesByLocation(line.valves);
                     groupedValves.forEach((location, valves) {
                       for (int j = 0; j < valves.length; j++) {
@@ -250,10 +249,6 @@ class _RunByManualState extends State<RunByManual> {
                     strSldBoosterPumpSrlNo,
                     strSldSelectorSrlNo,
                   ];
-                  //print(strSldIrrigationPumpSrlNo);
-                  //print(strSldValveOrLineSrlNo);
-                  //print(strSldCrlFetFilterSrlNo);
-                  //print(allRelaySrlNo);
 
                   if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
                     showDialog<String>(
@@ -279,30 +274,20 @@ class _RunByManualState extends State<RunByManual> {
                   }else{
                     startByStandaloneDefault(allRelaySrlNo);
                   }
-
                 }
                 else{
+                  Map<String, List<DashBoardValve>> groupedValves = {};
+                  String strProgramCategory = '';
 
-                  /*Map<String, List<DashBoardValve>> groupedValves = {};
-                  for (int i = 0; i < dashBoardData[0].lineOrSequence.length; i++) {
-                    LineOrSequence line = dashBoardData[0].lineOrSequence[i];
-                    groupedValves = groupValvesByLocation(line.valves);
-                    groupedValves.forEach((location, valves) {
-                      for (int j = 0; j < valves.length; j++) {
-                        if (valves[j].isOn) {
-                          strSldValveOrLineSrlNo += '${valves[j].sNo}_';
-                          strProgramCategory += '${valves[j].location}_';
-
-                          standaloneSelection.add({
-                            'id': valves[j].id,
-                            'sNo': valves[j].sNo,
-                            'name': valves[j].name,
-                            'location': valves[j].location,
-                            'selected': valves[j].isOn,
-                          });
-                        }
-                      }
-                    });
+                  for (var line in dashBoardData[0].lineOrSequence) {
+                    if(line.selected){
+                      strSldValveOrLineSrlNo += '${line.sNo}_';
+                      groupedValves = groupValvesByLocation(line.valves);
+                      groupedValves.forEach((location, valves) {
+                        strProgramCategory += '${location}_';
+                      });
+                      strProgramCategory = strProgramCategory.isNotEmpty ? strProgramCategory.substring(0, strProgramCategory.length - 1) : '';
+                    }
                   }
 
                   strSldValveOrLineSrlNo = strSldValveOrLineSrlNo.isNotEmpty ? strSldValveOrLineSrlNo.substring(0, strSldValveOrLineSrlNo.length - 1) : '';
@@ -311,7 +296,6 @@ class _RunByManualState extends State<RunByManual> {
                     strSldIrrigationPumpSrlNo,
                     strSldMainValveSrlNo,
                     strSldCtrlFilterSrlNo,
-                    strSldValveOrLineSrlNo,
                     strSldLocFilterSrlNo,
                     strSldCrlFetFilterSrlNo,
                     strSldLocFetFilterSrlNo,
@@ -322,32 +306,10 @@ class _RunByManualState extends State<RunByManual> {
                     strSldSelectorSrlNo,
                   ];
 
-                  strProgramCategory = strProgramCategory.isNotEmpty ? strProgramCategory.substring(0, strProgramCategory.length - 1) : '';*/
-                }
+                  //strProgramCategory = strProgramCategory.isNotEmpty ? strProgramCategory.substring(0, strProgramCategory.length - 1) : '';
+                  //print(strProgramCategory);
 
-                /*if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
-                  if(ddSelection==0){
-                    showDialog<String>(
-                        context: context,
-                        builder: (BuildContext dgContext) => AlertDialog(
-                          title: const Text('StandAlone'),
-                          content: const Text('Valve is not open! Are you sure! You want to Start the Selected Pump?'),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () => Navigator.pop(dgContext, 'Cancel'),
-                              child: const Text('No'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                sendCommandToControllerAndMqtt(allRelaySrlNo, strProgramCategory);
-                                Navigator.pop(dgContext, 'OK');
-                              },
-                              child: const Text('Yes'),
-                            ),
-                          ],
-                        )
-                    );
-                  }else{
+                  if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
                     showDialog<String>(
                         context: context,
                         builder: (BuildContext dgContext) => AlertDialog(
@@ -363,11 +325,14 @@ class _RunByManualState extends State<RunByManual> {
                           ],
                         )
                     );
+
+                  }else{
+                    sendCommandToControllerAndMqttProgram(allRelaySrlNo, strSldValveOrLineSrlNo);
                   }
 
-                }else{
-                  sendCommandToControllerAndMqtt(allRelaySrlNo, strProgramCategory);
-                }*/
+                }
+
+
               },
               icon: const Icon(
                 Icons.not_started_outlined,
@@ -1190,7 +1155,7 @@ class _RunByManualState extends State<RunByManual> {
         "800": [{"801": payload}]
       });
 
-      //print(payLoadFinal);
+      print(payLoadFinal);
 
       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
       Map<String, dynamic> manualOperation = {
@@ -1204,7 +1169,7 @@ class _RunByManualState extends State<RunByManual> {
 
   }
 
-  void sendCommandToControllerAndMqttProgram(List<String> allRelaySrlNo){
+  void sendCommandToControllerAndMqttProgram(List<String> allRelaySrlNo, String zoneSrlNo){
     String finalResult = allRelaySrlNo.where((s) => s.isNotEmpty).join('_');
     String payload = '';
     String payLoadFinal = '';
@@ -1223,17 +1188,10 @@ class _RunByManualState extends State<RunByManual> {
         ),
       );
     }else{
-      if(ddSelection==0){
-        payload = '${finalResult==''?0:1},${finalResult==''?0:finalResult},${segmentIndex==0?3:1},${segmentIndex==0?'0':segmentIndex==1?strDuration:strFlow}';
-        payLoadFinal = jsonEncode({
-          "800": [{"801": payload}]
-        });
-      }else{
-        payload = '${finalResult.isEmpty?0:1},${2},${widget.programList[ddSelection].programCategory},${widget.programList[ddSelection].serialNumber},${finalResult==''?0:finalResult},0,${segmentIndex==0?3:1},${segmentIndex==0?'0':segmentIndex==1?strDuration:strFlow}';
-        payLoadFinal = jsonEncode({
-          "3900": [{"3901": payload}]
-        });
-      }
+      payload = '${finalResult.isEmpty?0:1},${widget.programList[ddSelection].programCategory},${widget.programList[ddSelection].serialNumber},$zoneSrlNo,$finalResult,${segmentIndex==0?3:1},${segmentIndex==0?'0':segmentIndex==1?strDuration:strFlow}';
+      payLoadFinal = jsonEncode({
+        "3900": [{"3901": payload}]
+      });
 
       print(payLoadFinal);
 
@@ -1244,7 +1202,8 @@ class _RunByManualState extends State<RunByManual> {
         "flow": strFlow,
         "selected": standaloneSelection,
       };
-      sentManualModeToServer(manualOperation);
+      widget.callbackFunction('Successfully sent comment');
+      //sentManualModeToServer(manualOperation);
     }
 
   }
@@ -1331,6 +1290,10 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
   String durationValue = '00:00';
   String selectedIrLine = '0';
   int _selectedSeconds = 0;
+
+  TextEditingController _hoursController = TextEditingController();
+  TextEditingController _minutesController = TextEditingController();
+  TextEditingController _secondsController = TextEditingController();
 
   @override
   void initState() {
@@ -1435,7 +1398,20 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
           width: MediaQuery.of(context).size.width,
           child: ListTile(
             title: const Text('Set Duration(HH:MM:SS)'),
-            trailing: Row(
+            trailing: SizedBox(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: () {
+                      _showDurationInputDialog(context);
+                    },
+                    child: Text('Enter Duration'),
+                  )
+                ],
+              ),
+            ),
+            /*trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 InkWell(
@@ -1465,7 +1441,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                   }).toList(),
                 ),
               ],
-            ),
+            ),*/
           ),
         ) :
         Container(),
@@ -1515,6 +1491,9 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                                       value: line.selected,
                                       onChanged: (value) {
                                         setState(() {
+                                          for (var line in widget.lineOrSequence) {
+                                            line.selected = false;
+                                          }
                                           line.selected = value;
                                         });
                                       },
@@ -1641,6 +1620,105 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
       ],
     );
   }
+
+  void _showDurationInputDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Enter Duration'),
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 75,
+                child: TextField(
+                  controller: _hoursController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Hours',
+                    border: const OutlineInputBorder(),
+                    errorText: _validateTime(_hoursController.text, 'hours')
+                        ? null
+                        : 'Invalid Hours',
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              SizedBox(
+                width: 90,
+                child: TextField(
+                  controller: _minutesController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Minutes',
+                    border: const OutlineInputBorder(),
+                    errorText: _validateTime(_minutesController.text, 'minutes')
+                        ? null
+                        : 'Invalid Minutes',
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              SizedBox(
+                width: 95,
+                child: TextField(
+                  controller: _secondsController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Seconds',
+                    border: const OutlineInputBorder(),
+                    errorText: _validateTime(_secondsController.text, 'seconds')
+                        ? null
+                        : 'Invalid seconds',
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                int hours = int.parse(_hoursController.text);
+                int minutes = int.parse(_minutesController.text);
+                int seconds = int.parse(_secondsController.text);
+
+                if (_validateTime(_hoursController.text, 'hours') &&
+                    _validateTime(_minutesController.text, 'minutes') &&
+                    _validateTime(_secondsController.text, 'seconds')) {
+                  Duration duration = Duration(
+                    hours: hours,
+                    minutes: minutes,
+                    seconds: seconds,
+                  );
+
+                  print('Duration: $duration');
+                  Navigator.of(context).pop();
+                }
+
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  bool _validateTime(String value, String field) {
+    int? parsedValue = int.tryParse(value);
+    if (parsedValue == null || parsedValue < 0 || (field != 'hours' && parsedValue >= 60)) {
+      return false;
+    }
+    return true;
+  }
+
 
   Map<String, List<DashBoardValve>> groupValvesByLocation(List<DashBoardValve> valves) {
     Map<String, List<DashBoardValve>> groupedValves = {};

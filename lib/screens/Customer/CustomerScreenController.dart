@@ -31,15 +31,12 @@ class CustomerScreenController extends StatefulWidget {
   _CustomerScreenControllerState createState() => _CustomerScreenControllerState();
 }
 
-class _CustomerScreenControllerState extends State<CustomerScreenController> with SingleTickerProviderStateMixin
+class _CustomerScreenControllerState extends State<CustomerScreenController>
 {
   List<DashboardModel> siteListFinal = [];
   int siteIndex = 0;
   bool visibleLoading = false;
   int _selectedIndex = 0;
-
-  late AnimationController animationController;
-  late Animation<double> rotationAnimation;
   List<ProgramList> programList = [];
 
   int wifiStrength = 0;
@@ -53,11 +50,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   void initState() {
     super.initState();
     indicatorViewShow();
-    initRotationAnimation();
     clearMQTTPayload();
     getLanguage();
     getCustomerSite(widget.customerId);
-
   }
 
   void callbackFunction(message)
@@ -68,26 +63,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     });
   }
 
-  void initRotationAnimation(){
-    animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-    rotationAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: animationController,
-        curve: Curves.linear,
-      ),
-    );
-  }
-
   void onRefreshClicked() {
-    animationController.repeat();
     Future.delayed(const Duration(milliseconds: 1000), () {
-      animationController.stop();
       String payLoadFinal = jsonEncode({"3000": [{"3001": ""}]});
       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteListFinal[siteIndex].deviceId}');
     });
@@ -216,7 +193,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
                 tileMode: TileMode.clamp,
-                colors: [myTheme.primaryColorDark, myTheme.primaryColor], // Define your gradient colors
+                colors: [myTheme.primaryColorDark, myTheme.primaryColor],
               ),
             ),
           ),
@@ -243,6 +220,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                   clearMQTTPayload();
                                   siteIndex = index;
                                   subscribeAndUpdateSite();
+                                  getProgramList();
                                 }
                                 Navigator.pop(context);
                               },
@@ -299,13 +277,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     ),
                     width: 45,
                     height: 45,
-                    child: RotationTransition(
-                      turns: rotationAnimation,
-                      child: IconButton(
-                        tooltip: 'refresh',
-                        icon: Icon(Icons.refresh, color: Colors.white,),
-                        onPressed: onRefreshClicked,
-                      ),
+                    child: IconButton(
+                      tooltip: 'refresh',
+                      icon: Icon(Icons.refresh, color: Colors.white,),
+                      onPressed: onRefreshClicked,
                     ),
                   ),
                   const SizedBox(height: 15),
@@ -489,13 +464,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                 Navigator.pop(context);
                               },
                             ),
-                            ListTile(
-                              leading: const Icon(Icons.update),
-                              title: const Text('Updates'),
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                            ),
                             const Divider(height: 0),
                             ListTile(
                               leading: const Icon(Icons.feedback_outlined),
@@ -667,6 +635,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                   clearMQTTPayload();
                                   siteIndex = index;
                                   subscribeAndUpdateSite();
+                                  getProgramList();
                                 }
                                 Navigator.pop(context);
                               },
@@ -750,7 +719,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 child: Container(
                   decoration: const BoxDecoration(
                     color: Color(0xffefefef),
-                    borderRadius: BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)), // Adjust the radius as needed
+                    borderRadius: BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -780,7 +749,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                         width: 45,
                         child: IconButton(tooltip:'Show node list', onPressed: (){
                           sideSheet();
-
                         }, icon: const Icon(Icons.menu, color: Colors.white)),
                       ),
                     ),
@@ -792,13 +760,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                       ),
                       width: 45,
                       height: 45,
-                      child: RotationTransition(
-                        turns: rotationAnimation,
-                        child: IconButton(
-                          tooltip: 'refresh',
-                          icon: Icon(Icons.refresh, color: Colors.white,),
-                          onPressed: onRefreshClicked,
-                        ),
+                      child: IconButton(
+                        tooltip: 'refresh',
+                        icon: Icon(Icons.refresh, color: Colors.white,),
+                        onPressed: onRefreshClicked,
                       ),
                     ),
                     const SizedBox(height: 15),

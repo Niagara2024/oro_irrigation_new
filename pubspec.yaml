@@ -126,7 +126,13 @@ flutter:
      - assets/images/filter.png
      - assets/images/downstream_valve.png
      - assets/images/fan.png
+     - assets/images/fan_green.png
+     - assets/images/fan_orange.png
+     - assets/images/fan_red.png
      - assets/images/fogger.png
+     - assets/images/fogger_green.png
+     - assets/images/fogger_orange.png
+     - assets/images/fogger_red.png
      - assets/images/selector.png
      - assets/images/water_meter.png
      - assets/images/fertilizer_meter.png

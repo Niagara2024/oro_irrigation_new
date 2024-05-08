@@ -149,9 +149,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
           myMasterControllerList.add(ProductStockModel.fromJson(cntList[i]));
         }
       }
-
       indicatorViewHide();
-
     }
     else{
       indicatorViewHide();
@@ -161,14 +159,11 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   Future<void> getCustomerSite() async
   {
     Map<String, Object> body = {"userId" : widget.customerID};
-    print(body);
     final response = await HttpService().postRequest("getUserDeviceListNew", body);
     if (response.statusCode == 200)
     {
       customerSiteList.clear();
       var data = jsonDecode(response.body);
-      print(response.body);
-
       if(data["code"]==200)
       {
         final cntList = data["data"] as List;
@@ -193,13 +188,11 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   Future<void> getNodeStockList(int catId) async
   {
     Map<String, Object> body = {"userId" : widget.customerID, "categoryId": catId};
-    print(body);
     final response = await HttpService().postRequest("getNodeDeviceStock", body);
     if (response.statusCode == 200)
     {
       nodeStockList.clear();
       nodeStockSelection.clear();
-      //print(response.body);
       var data = jsonDecode(response.body);
       if(data["code"]==200)
       {
@@ -809,61 +802,6 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                       ),
                     );
                   },);
-                  /*return List.generate(nodeStockList.length+1 ,(nodeIndex) {
-                    if(nodeStockList.isEmpty){
-                      return const PopupMenuItem(
-                        child: Text('No node available to add in this site'),
-                      );
-                    }
-                    else if(nodeStockList.length == nodeIndex){
-                      return PopupMenuItem(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            MaterialButton(
-                              color: Colors.red,
-                              textColor: Colors.white,
-                              child: const Text('CANCEL'),
-                              onPressed: () {
-                                setState(() {
-                                  checkboxValueNode = false;
-                                  Navigator.pop(context);
-                                });
-                              },
-                            ),
-                            MaterialButton(
-                              color: Colors.green,
-                              textColor: Colors.white,
-                              child: const Text('ADD'),
-                              onPressed: () async
-                              {
-                                generateRFNumber();
-                              },
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                    return PopupMenuItem(
-                      child: StatefulBuilder(
-                        builder: (BuildContext context, void Function(void Function()) setState) {
-                          return CheckboxListTile(
-                            title: Text(nodeStockList[nodeIndex].categoryName),
-                            subtitle: Text(nodeStockList[nodeIndex].imeiNo),
-                            value: checkboxValueNode,
-                            onChanged:(bool? value) { setState(() {
-                              checkboxValueNode = value!;
-                              if(value){
-                                nodeStockSelection[nodeIndex] = 1;
-                              }else{
-                                nodeStockSelection[nodeIndex] = 0;
-                              }
-                            });},
-                          );
-                        },
-                      ),
-                    );
-                  });*/
                 },
               ),
               const SizedBox(width: 10,),
@@ -887,7 +825,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                 leading: Image.asset('assets/images/oro_gem.png'),
                                 title: Text(customerSiteList[siteIndex].master[mstIndex].categoryName),
                                 subtitle: SelectableText(customerSiteList[siteIndex].master[mstIndex].deviceId.toString()),
-                                trailing: customerSiteList[siteIndex].master[mstIndex].nodeList.isNotEmpty? Row(
+                                trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     IconButton(
@@ -999,234 +937,236 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                       },
                                     ),
                                   ],
-                                ) : null,
+                                ),
                               ),
                               Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    children: [
-                                      SizedBox(
-                                        height: (customerSiteList[siteIndex].master[mstIndex].nodeList.length *40)+35,
-                                        width: MediaQuery.sizeOf(context).width,
-                                        child: DataTable2(
-                                          columnSpacing: 12,
-                                          horizontalMargin: 12,
-                                          minWidth: 1000,
-                                          dataRowHeight: 40.0,
-                                          headingRowHeight: 35,
-                                          headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
-                                          columns: const [
-                                            DataColumn2(
-                                                label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
-                                                fixedWidth: 70
-                                            ),
-                                            DataColumn2(
-                                                label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
-                                                size: ColumnSize.M
-                                            ),
-                                            DataColumn2(
-                                                label: Text('Model Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
-                                                size: ColumnSize.M
-                                            ),
-                                            DataColumn2(
-                                                label: Text('Device Id', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
-                                                size: ColumnSize.M
-                                            ),
-                                            DataColumn2(
-                                              label: Center(child: Text('Interface', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
-                                              fixedWidth: 120,
-                                            ),
-                                            DataColumn2(
-                                              label: Center(child: Text('Interval', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
-                                              fixedWidth: 120,
-                                            ),
-                                            DataColumn2(
-                                              label: Center(child: Text('Action', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
-                                              fixedWidth: 70,
-                                            ),
-                                          ],
-                                          rows: customerSiteList[siteIndex].master[mstIndex].nodeList.map((data) {
-                                            return DataRow(cells: [
-                                              DataCell(Center(child: Text('${data.serialNumber}'))),
-                                              DataCell(Text(data.categoryName)),
-                                              DataCell(Text(data.modelName)),
-                                              DataCell(Text(data.deviceId)),
-                                              DataCell(Center(child: DropdownButton(
-                                                value: data.interface,
-                                                style: const TextStyle(fontSize: 12),
-                                                onChanged: (newValue) {
-                                                  setState(() {
-                                                    data.interface = newValue!;
-                                                    int infIndex = interfaceType.indexWhere((model) =>  model.interface == newValue);
-                                                    data.interfaceTypeId = interfaceType[infIndex].interfaceTypeId;
-                                                  });
-                                                },
-                                                items: interfaceType.map((interface) {
-                                                  return DropdownMenuItem(
-                                                    value: interface.interface,
-                                                    child: Text(interface.interface, style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                  );
-                                                }).toList(),
-                                              )
-                                              )),
-                                              DataCell(Center(
-                                                child: DropdownButton(
-                                                  value: data.interfaceInterval ?? '0 sec',
-                                                  style: const TextStyle(fontSize: 12), onChanged: (newValue) {
-                                                  setState(() {
-                                                    data.interfaceInterval = newValue!;
-                                                  });
-                                                },
-                                                  items: _interfaceInterval.map((interface) {
-                                                    return DropdownMenuItem(value: interface,
-                                                      child: Text(interface, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                child: SingleChildScrollView(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      children: [
+                                        SizedBox(
+                                          height: (customerSiteList[siteIndex].master[mstIndex].nodeList.length *40)+35,
+                                          width: MediaQuery.sizeOf(context).width,
+                                          child: DataTable2(
+                                            columnSpacing: 12,
+                                            horizontalMargin: 12,
+                                            minWidth: 1000,
+                                            dataRowHeight: 40.0,
+                                            headingRowHeight: 35,
+                                            headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.2)),
+                                            columns: const [
+                                              DataColumn2(
+                                                  label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+                                                  fixedWidth: 70
+                                              ),
+                                              DataColumn2(
+                                                  label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+                                                  size: ColumnSize.M
+                                              ),
+                                              DataColumn2(
+                                                  label: Text('Model Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+                                                  size: ColumnSize.M
+                                              ),
+                                              DataColumn2(
+                                                  label: Text('Device Id', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+                                                  size: ColumnSize.M
+                                              ),
+                                              DataColumn2(
+                                                label: Center(child: Text('Interface', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+                                                fixedWidth: 120,
+                                              ),
+                                              DataColumn2(
+                                                label: Center(child: Text('Interval', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+                                                fixedWidth: 120,
+                                              ),
+                                              DataColumn2(
+                                                label: Center(child: Text('Action', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),)),
+                                                fixedWidth: 70,
+                                              ),
+                                            ],
+                                            rows: customerSiteList[siteIndex].master[mstIndex].nodeList.map((data) {
+                                              return DataRow(cells: [
+                                                DataCell(Center(child: Text('${data.serialNumber}'))),
+                                                DataCell(Text(data.categoryName)),
+                                                DataCell(Text(data.modelName)),
+                                                DataCell(Text(data.deviceId)),
+                                                DataCell(Center(child: DropdownButton(
+                                                  value: data.interface,
+                                                  style: const TextStyle(fontSize: 12),
+                                                  onChanged: (newValue) {
+                                                    setState(() {
+                                                      data.interface = newValue!;
+                                                      int infIndex = interfaceType.indexWhere((model) =>  model.interface == newValue);
+                                                      data.interfaceTypeId = interfaceType[infIndex].interfaceTypeId;
+                                                    });
+                                                  },
+                                                  items: interfaceType.map((interface) {
+                                                    return DropdownMenuItem(
+                                                      value: interface.interface,
+                                                      child: Text(interface.interface, style: const TextStyle(fontWeight: FontWeight.normal),),
                                                     );
                                                   }).toList(),
-                                                ),
-                                              )),
-                                              DataCell(Center(
-                                                child: IconButton(
-                                                    onPressed: () async {
-                                                      if(data.usedInConfig==false){
-                                                        Map<String, dynamic> body = {
-                                                          "userId": widget.customerID,
-                                                          "controllerId": data.userDeviceListId,
-                                                          "modifyUser": widget.userID,
-                                                          "productId": data.productId,
-                                                        };
-                                                        final response = await HttpService().putRequest("removeNodeInMaster", body);
-                                                        if (response.statusCode == 200) {
-                                                          var data = jsonDecode(response.body);
-                                                          if (data["code"] == 200) {
-                                                            _showSnackBar(data["message"]);
-                                                            getCustomerSite();
-                                                            //getNodeStockList();
+                                                )
+                                                )),
+                                                DataCell(Center(
+                                                  child: DropdownButton(
+                                                    value: data.interfaceInterval ?? '0 sec',
+                                                    style: const TextStyle(fontSize: 12), onChanged: (newValue) {
+                                                    setState(() {
+                                                      data.interfaceInterval = newValue!;
+                                                    });
+                                                  },
+                                                    items: _interfaceInterval.map((interface) {
+                                                      return DropdownMenuItem(value: interface,
+                                                        child: Text(interface, style: const TextStyle(fontWeight: FontWeight.normal),),
+                                                      );
+                                                    }).toList(),
+                                                  ),
+                                                )),
+                                                DataCell(Center(
+                                                  child: IconButton(
+                                                      onPressed: () async {
+                                                        if(data.usedInConfig==false){
+                                                          Map<String, dynamic> body = {
+                                                            "userId": widget.customerID,
+                                                            "controllerId": data.userDeviceListId,
+                                                            "modifyUser": widget.userID,
+                                                            "productId": data.productId,
+                                                          };
+                                                          final response = await HttpService().putRequest("removeNodeInMaster", body);
+                                                          if (response.statusCode == 200) {
+                                                            var data = jsonDecode(response.body);
+                                                            if (data["code"] == 200) {
+                                                              _showSnackBar(data["message"]);
+                                                              getCustomerSite();
+                                                              //getNodeStockList();
+                                                            }
+                                                            else {
+                                                              _showSnackBar(data["message"]);
+                                                            }
                                                           }
-                                                          else {
-                                                            _showSnackBar(data["message"]);
-                                                          }
+                                                        }else{
+                                                          _showSnackBar('You can not delete the device, Because the device is used in config maker');
                                                         }
-                                                      }else{
-                                                        _showSnackBar('You can not delete the device, Because the device is used in config maker');
-                                                      }
-                                                    },
-                                                    icon: const Icon(Icons.delete_outline, color: Colors.red,)),
-                                              )),
-                                            ]);
-                                          }).toList(),
+                                                      },
+                                                      icon: const Icon(Icons.delete_outline, color: Colors.red,)),
+                                                )),
+                                              ]);
+                                            }).toList(),
+                                          ),
                                         ),
-                                      ),
-                                      SizedBox(
-                                        height: 45,
-                                        width: MediaQuery.sizeOf(context).width,
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.end,
-                                          children: [
-                                            MaterialButton(
-                                              onPressed:() async {
-                                                List<dynamic> updatedInterface = [];
-                                                for(int i=0; i<customerSiteList[siteIndex].master[mstIndex].nodeList.length; i++){
-                                                  Map<String, dynamic> myMap = {"serialNumber": customerSiteList[siteIndex].master[mstIndex].nodeList[i].serialNumber, "productId": customerSiteList[siteIndex].master[0].nodeList[i].productId,
-                                                    'interfaceTypeId': customerSiteList[siteIndex].master[mstIndex].nodeList[i].interfaceTypeId, 'interfaceInterval': customerSiteList[siteIndex].master[0].nodeList[i].interfaceInterval};
-                                                  updatedInterface.add(myMap);
-                                                }
-                                                Map<String, dynamic> body = {
-                                                  "userId": widget.customerID,
-                                                  "products": updatedInterface,
-                                                  "createUser": widget.userID,
-                                                  "controllerId": customerSiteList[siteIndex].master[mstIndex].controllerId,
-                                                };
-
-                                                List<dynamic> payLoad = [];
-                                                payLoad.add('${0},${customerSiteList[siteIndex].master[mstIndex].categoryName},${'1'}, ${'1'}, ${customerSiteList[siteIndex].master[mstIndex].deviceId.toString()},'
-                                                    '${'0'},${"00:00:30"};');
-
-                                                for(int i=0; i<customerSiteList[siteIndex].master[mstIndex].nodeList.length; i++){
-                                                  //String paddedNumber = widget.customerSiteList[siteIndex].master[0].nodeList[i].deviceId.toString().padLeft(20, '0');
-                                                  String formattedTime = convertToHHmmss(customerSiteList[siteIndex].master[mstIndex].nodeList[i].interfaceInterval);
-                                                  payLoad.add('${customerSiteList[siteIndex].master[mstIndex].nodeList[i].serialNumber},${customerSiteList[siteIndex].master[mstIndex].nodeList[i].categoryName},${customerSiteList[siteIndex].master[mstIndex].nodeList[i].categoryId},'
-                                                      '${customerSiteList[siteIndex].master[mstIndex].nodeList[i].referenceNumber},${customerSiteList[siteIndex].master[mstIndex].nodeList[i].deviceId},'
-                                                      '${customerSiteList[siteIndex].master[mstIndex].nodeList[i].interfaceTypeId},$formattedTime;');
-                                                }
-
-                                                String inputString = payLoad.toString();
-                                                List<String> parts = inputString.split(';');
-                                                String resultString = parts.map((part) {return part.replaceFirst(',', '');
-                                                }).join(';');
-
-                                                String resultStringFinal = resultString.replaceAll('[', '').replaceAll(']', '');
-                                                String modifiedString = resultStringFinal.replaceAll(', ', ',');
-                                                String modifiedStringFinal = '${modifiedString.substring(0, 1)},${modifiedString.substring(1)}';
-                                                String stringWithoutSpace = modifiedStringFinal.replaceAll('; ', ';');
-                                                //print(stringWithoutSpace);
-
-                                                String payLoadFinal = jsonEncode({
-                                                  "100": [
-                                                    {"101": stringWithoutSpace},
-                                                  ]
-                                                });
-
-                                                //print(payLoadFinal);
-
-                                                //publish payload to mqtt
-                                                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${customerSiteList[siteIndex].master[mstIndex].deviceId}');
-
-                                                final response = await HttpService().putRequest("updateUserDeviceNodeList", body);
-                                                //print(body);
-                                                if(response.statusCode == 200)
-                                                {
-                                                  var data = jsonDecode(response.body);
-                                                  if(data["code"]==200)
+                                        SizedBox(
+                                          height: 45,
+                                          width: MediaQuery.sizeOf(context).width,
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            children: [
+                                              MaterialButton(
+                                                onPressed:() async {
+                                                  List<dynamic> updatedInterface = [];
+                                                  for(int i=0; i<customerSiteList[siteIndex].master[mstIndex].nodeList.length; i++){
+                                                    Map<String, dynamic> myMap = {"serialNumber": customerSiteList[siteIndex].master[mstIndex].nodeList[i].serialNumber, "productId": customerSiteList[siteIndex].master[0].nodeList[i].productId,
+                                                      'interfaceTypeId': customerSiteList[siteIndex].master[mstIndex].nodeList[i].interfaceTypeId, 'interfaceInterval': customerSiteList[siteIndex].master[0].nodeList[i].interfaceInterval};
+                                                    updatedInterface.add(myMap);
+                                                  }
+                                                  Map<String, dynamic> body = {
+                                                    "userId": widget.customerID,
+                                                    "products": updatedInterface,
+                                                    "createUser": widget.userID,
+                                                    "controllerId": customerSiteList[siteIndex].master[mstIndex].controllerId,
+                                                  };
+                                  
+                                                  List<dynamic> payLoad = [];
+                                                  payLoad.add('${0},${customerSiteList[siteIndex].master[mstIndex].categoryName},${'1'}, ${'1'}, ${customerSiteList[siteIndex].master[mstIndex].deviceId.toString()},'
+                                                      '${'0'},${"00:00:30"};');
+                                  
+                                                  for(int i=0; i<customerSiteList[siteIndex].master[mstIndex].nodeList.length; i++){
+                                                    //String paddedNumber = widget.customerSiteList[siteIndex].master[0].nodeList[i].deviceId.toString().padLeft(20, '0');
+                                                    String formattedTime = convertToHHmmss(customerSiteList[siteIndex].master[mstIndex].nodeList[i].interfaceInterval);
+                                                    payLoad.add('${customerSiteList[siteIndex].master[mstIndex].nodeList[i].serialNumber},${customerSiteList[siteIndex].master[mstIndex].nodeList[i].categoryName},${customerSiteList[siteIndex].master[mstIndex].nodeList[i].categoryId},'
+                                                        '${customerSiteList[siteIndex].master[mstIndex].nodeList[i].referenceNumber},${customerSiteList[siteIndex].master[mstIndex].nodeList[i].deviceId},'
+                                                        '${customerSiteList[siteIndex].master[mstIndex].nodeList[i].interfaceTypeId},$formattedTime;');
+                                                  }
+                                  
+                                                  String inputString = payLoad.toString();
+                                                  List<String> parts = inputString.split(';');
+                                                  String resultString = parts.map((part) {return part.replaceFirst(',', '');
+                                                  }).join(';');
+                                  
+                                                  String resultStringFinal = resultString.replaceAll('[', '').replaceAll(']', '');
+                                                  String modifiedString = resultStringFinal.replaceAll(', ', ',');
+                                                  String modifiedStringFinal = '${modifiedString.substring(0, 1)},${modifiedString.substring(1)}';
+                                                  String stringWithoutSpace = modifiedStringFinal.replaceAll('; ', ';');
+                                                  //print(stringWithoutSpace);
+                                  
+                                                  String payLoadFinal = jsonEncode({
+                                                    "100": [
+                                                      {"101": stringWithoutSpace},
+                                                    ]
+                                                  });
+                                  
+                                                  //print(payLoadFinal);
+                                  
+                                                  //publish payload to mqtt
+                                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${customerSiteList[siteIndex].master[mstIndex].deviceId}');
+                                  
+                                                  final response = await HttpService().putRequest("updateUserDeviceNodeList", body);
+                                                  //print(body);
+                                                  if(response.statusCode == 200)
                                                   {
-                                                    updatedInterface.clear();
-                                                    _showSnackBar(data["message"]);
+                                                    var data = jsonDecode(response.body);
+                                                    if(data["code"]==200)
+                                                    {
+                                                      updatedInterface.clear();
+                                                      _showSnackBar(data["message"]);
+                                                    }
+                                                    else{
+                                                      _showSnackBar(data["message"]);
+                                                    }
                                                   }
-                                                  else{
-                                                    _showSnackBar(data["message"]);
+                                                },
+                                                textColor: Colors.white,
+                                                color: myTheme.primaryColor,
+                                                child: const Row(
+                                                  children: [
+                                                    Icon(Icons.developer_board, color: Colors.white),
+                                                    SizedBox(width: 5,),
+                                                    Text('Send to Target',style: TextStyle(color: Colors.white)),
+                                                  ],
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              MaterialButton(
+                                                onPressed:() async {
+                                                  List<int> catId = [];
+                                                  int outputCnt = customerSiteList[siteIndex].master[mstIndex].outputCount;
+                                                  int inputCnt = customerSiteList[siteIndex].master[mstIndex].inputCount;
+                                                  catId.add(customerSiteList[siteIndex].master[mstIndex].categoryId);
+                                  
+                                                  for(int i=0; i<customerSiteList[siteIndex].master[mstIndex].nodeList.length; i++){
+                                                    outputCnt = outputCnt + customerSiteList[siteIndex].master[mstIndex].nodeList[i].outputCount;
+                                                    inputCnt = inputCnt + customerSiteList[siteIndex].master[mstIndex].nodeList[i].inputCount;
+                                                    catId.add(customerSiteList[siteIndex].master[mstIndex].nodeList[i].categoryId);
                                                   }
-                                                }
-                                              },
-                                              textColor: Colors.white,
-                                              color: myTheme.primaryColor,
-                                              child: const Row(
-                                                children: [
-                                                  Icon(Icons.developer_board, color: Colors.white),
-                                                  SizedBox(width: 5,),
-                                                  Text('Send to Target',style: TextStyle(color: Colors.white)),
-                                                ],
+                                                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  ProductLimits(userID: widget.userID, customerID: widget.customerID, userType: 2, outputCount: outputCnt, siteName: customerSiteList[siteIndex].groupName, controllerId: customerSiteList[siteIndex].master[mstIndex].controllerId, deviceId: customerSiteList[siteIndex].master[mstIndex].deviceId, inputCount: inputCnt, myCatIds: catId)),);
+                                                },
+                                                textColor: Colors.white,
+                                                color: myTheme.primaryColor,
+                                                child: const Row(
+                                                  children: [
+                                                    Icon(Icons.confirmation_number_outlined, color: Colors.white),
+                                                    SizedBox(width: 5,),
+                                                    Text('Site Config',style: TextStyle(color: Colors.white)),
+                                                  ],
+                                                ),
                                               ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            MaterialButton(
-                                              onPressed:() async {
-                                                List<int> catId = [];
-                                                int outputCnt = customerSiteList[siteIndex].master[mstIndex].outputCount;
-                                                int inputCnt = customerSiteList[siteIndex].master[mstIndex].inputCount;
-                                                catId.add(customerSiteList[siteIndex].master[mstIndex].categoryId);
-
-                                                for(int i=0; i<customerSiteList[siteIndex].master[mstIndex].nodeList.length; i++){
-                                                  outputCnt = outputCnt + customerSiteList[siteIndex].master[mstIndex].nodeList[i].outputCount;
-                                                  inputCnt = inputCnt + customerSiteList[siteIndex].master[mstIndex].nodeList[i].inputCount;
-                                                  catId.add(customerSiteList[siteIndex].master[mstIndex].nodeList[i].categoryId);
-                                                }
-                                                Navigator.push(context, MaterialPageRoute(builder: (context) =>  ProductLimits(userID: widget.userID, customerID: widget.customerID, userType: 2, outputCount: outputCnt, siteName: customerSiteList[siteIndex].groupName, controllerId: customerSiteList[siteIndex].master[mstIndex].controllerId, deviceId: customerSiteList[siteIndex].master[mstIndex].deviceId, inputCount: inputCnt, myCatIds: catId)),);
-                                              },
-                                              textColor: Colors.white,
-                                              color: myTheme.primaryColor,
-                                              child: const Row(
-                                                children: [
-                                                  Icon(Icons.confirmation_number_outlined, color: Colors.white),
-                                                  SizedBox(width: 5,),
-                                                  Text('Site Config',style: TextStyle(color: Colors.white)),
-                                                ],
-                                              ),
-                                            ),
-                                            const SizedBox(width: 10),
-                                          ],
-                                        ),
-                                      )
-                                    ],
+                                              const SizedBox(width: 10),
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),

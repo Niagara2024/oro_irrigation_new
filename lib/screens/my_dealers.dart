@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:data_table_2/data_table_2.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 
@@ -33,6 +32,13 @@ class MyDealersState extends State<MyDealers> {
     indicatorViewShow();
     getDealerProductStock();
     getDealerCustomerList();
+  }
+
+  void callbackFunction(String message)
+  {
+    Future.delayed(const Duration(milliseconds: 500), () {
+      getDealerCustomerList();
+    });
   }
 
   Future<void> getDealerProductStock() async
@@ -203,8 +209,8 @@ class MyDealersState extends State<MyDealers> {
                         {
                           await showDialog<void>(
                               context: context,
-                              builder: (context) => const AlertDialog(
-                                content: CreateAccount(),
+                              builder: (context) => AlertDialog(
+                                content: CreateAccount(callback: callbackFunction),
                               ));
                   
                         }), // Customize the leading icon

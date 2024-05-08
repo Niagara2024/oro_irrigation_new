@@ -23,11 +23,13 @@ class MQTTManager {
 
     String uniqueId = const Uuid().v4();
 
-    /*String baseURL = 'ws://192.168.68.141';
-    int port = 9001;*/
+    //development
+    String baseURL = 'ws://192.168.68.141';
+    int port = 9001;
 
-     String baseURL = 'ws://13.235.254.21:8083/mqtt';
-     int port = 8083;
+    //cloud
+    /* String baseURL = 'ws://13.235.254.21:8083/mqtt';
+     int port = 8083;*/
 
     if (_client == null) {
        providerState = state;

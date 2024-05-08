@@ -279,7 +279,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController>
                     height: 45,
                     child: IconButton(
                       tooltip: 'refresh',
-                      icon: Icon(Icons.refresh, color: Colors.white,),
+                      icon: const Icon(Icons.refresh, color: Colors.white,),
                       onPressed: onRefreshClicked,
                     ),
                   ),
@@ -762,7 +762,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController>
                       height: 45,
                       child: IconButton(
                         tooltip: 'refresh',
-                        icon: Icon(Icons.refresh, color: Colors.white,),
+                        icon: const Icon(Icons.refresh, color: Colors.white,),
                         onPressed: onRefreshClicked,
                       ),
                     ),

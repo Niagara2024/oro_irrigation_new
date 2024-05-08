@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import 'package:oro_irrigation_new/constants/snack_bar.dart';
 
 import '../../../Models/Customer/Dashboard/DashBoardValve.dart';
 import '../../../Models/Customer/Dashboard/DashboardDataProvider.dart';
@@ -34,7 +33,7 @@ class _RunByManualState extends State<RunByManual> {
   int ddSelectionId = 0;
   int segmentIndex = 0;
   String strFlow = '0';
-  String strDuration = '00:00';
+  String strDuration = '00:00:00';
   String strSelectedLineOfProgram = '0';
 
   late List<Map<String,dynamic>> standaloneSelection  = [];
@@ -77,6 +76,7 @@ class _RunByManualState extends State<RunByManual> {
 
   Future<void> payloadCallbackFunction(segIndex, value, sldIrLine) async
   {
+    print(value);
     segmentIndex = segIndex;
     if (value.contains(':')) {
       strDuration = value;
@@ -1135,12 +1135,6 @@ class _RunByManualState extends State<RunByManual> {
     String finalResult = allRelaySrlNo.where((s) => s.isNotEmpty).join('_');
     String payload = '';
     String payLoadFinal = '';
-    if(segmentIndex==1){
-      int count = strDuration.split(':').length - 1;
-      if(count==1){
-        strDuration = '$strDuration:00';
-      }
-    }
 
     if(segmentIndex==1 && strDuration=='00:00:00'){
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1173,13 +1167,8 @@ class _RunByManualState extends State<RunByManual> {
     String finalResult = allRelaySrlNo.where((s) => s.isNotEmpty).join('_');
     String payload = '';
     String payLoadFinal = '';
-    if(segmentIndex==1){
-      int count = strDuration.split(':').length - 1;
-      if(count==1){
-        strDuration = '$strDuration:00';
-      }
-    }
 
+    print(strDuration);
     if(segmentIndex==1 && strDuration=='00:00:00'){
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -1287,40 +1276,26 @@ class DisplayLineOrSequence extends StatefulWidget {
 class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
 
   ManualBaseSegment segmentViewManual = ManualBaseSegment.manual;
-  String durationValue = '00:00';
+  String durationValue = '00:00:00';
   String selectedIrLine = '0';
-  int _selectedSeconds = 0;
 
-  TextEditingController _hoursController = TextEditingController();
-  TextEditingController _minutesController = TextEditingController();
-  TextEditingController _secondsController = TextEditingController();
+  final TextEditingController _hoursController = TextEditingController();
+  final TextEditingController _minutesController = TextEditingController();
+  final TextEditingController _secondsController = TextEditingController();
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-   // String jsonString = jsonEncode(widget.lineOrSequenc);
-
-    print(widget.programList.length);
-
     if(widget.method == 1){
       segmentViewManual = ManualBaseSegment.manual;
     }else{
       segmentViewManual = ManualBaseSegment.duration;
     }
-
     int count = widget.duration.split(':').length - 1;
     if(count>1){
-      String ss = widget.duration.substring(widget.duration.length - 2);
-      _selectedSeconds = int.parse(ss);
-      int lastIndex = widget.duration.lastIndexOf(':');
-      if (lastIndex != -1) {
-        durationValue = widget.duration.substring(0, lastIndex);
-      } else {
-        print("Character not found in the string");
-      }
-    }else{
       durationValue = widget.duration;
+    }else{
+      durationValue = '${widget.duration}:00';
     }
 
   }
@@ -1402,46 +1377,21 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  ElevatedButton(
+                  TextButton(
                     onPressed: () {
                       _showDurationInputDialog(context);
                     },
-                    child: Text('Enter Duration'),
-                  )
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(myTheme.primaryColor.withOpacity(0.2)),
+                      shape: MaterialStateProperty.all<OutlinedBorder>(
+                        RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                      ),
+                    ),
+                    child: Text(durationValue, style: const TextStyle(color: Colors.black, fontSize: 17)),
+                  ),
                 ],
               ),
             ),
-            /*trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                InkWell(
-                  onTap: () => _selectTimeDuration(context, TimeOfDay(hour: int.parse(durationValue.split(":")[0]), minute: int.parse(durationValue.split(":")[1]))),
-                  child: Text(durationValue, style: const TextStyle(fontSize: 15),),
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(left: 5, right: 5),
-                  child: Text(':',style: TextStyle(fontSize: 15),),
-                ),
-                DropdownButton<int>(
-                  value: _selectedSeconds,
-                  focusColor: Colors.transparent, // Removes focus color
-                  onChanged: (newValue) {
-                    setState(() {
-                      _selectedSeconds = newValue!;
-                      String second = _selectedSeconds.toString().padLeft(2, '0');
-                      widget.callbackFunctionForPayload(segmentViewManual.index, '$durationValue:$second' , selectedIrLine);
-                    });
-                  },
-                  items: List.generate(60, (index) => index)
-                      .map<DropdownMenuItem<int>>((int value) {
-                    return DropdownMenuItem<int>(
-                      value: value,
-                      child: Text(value.toString().padLeft(2, '0')), // Padded with leading zero if single digit
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),*/
           ),
         ) :
         Container(),
@@ -1622,55 +1572,58 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
   }
 
   void _showDurationInputDialog(BuildContext context) {
+
+    List<String> timeParts = durationValue.split(':');
+    _hoursController.text = timeParts[0];
+    _minutesController.text = timeParts[1];
+    _secondsController.text = timeParts[2];
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Enter Duration'),
+          title: const Text('Set Duration'),
           content: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(
-                width: 75,
+                width: 80,
                 child: TextField(
                   controller: _hoursController,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 23),
+                  decoration: const InputDecoration(
                     labelText: 'Hours',
-                    border: const OutlineInputBorder(),
-                    errorText: _validateTime(_hoursController.text, 'hours')
-                        ? null
-                        : 'Invalid Hours',
+                    border: OutlineInputBorder(),
                   ),
                 ),
               ),
               const SizedBox(width: 10),
               SizedBox(
-                width: 90,
+                width: 80,
                 child: TextField(
                   controller: _minutesController,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 23),
+                  decoration: const InputDecoration(
                     labelText: 'Minutes',
-                    border: const OutlineInputBorder(),
-                    errorText: _validateTime(_minutesController.text, 'minutes')
-                        ? null
-                        : 'Invalid Minutes',
+                    border: OutlineInputBorder(),
                   ),
                 ),
               ),
               const SizedBox(width: 10),
               SizedBox(
-                width: 95,
+                width: 80,
                 child: TextField(
                   controller: _secondsController,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 23),
+                  decoration: const InputDecoration(
                     labelText: 'Seconds',
-                    border: const OutlineInputBorder(),
-                    errorText: _validateTime(_secondsController.text, 'seconds')
-                        ? null
-                        : 'Invalid seconds',
+                    border: OutlineInputBorder(),
                   ),
                 ),
               ),
@@ -1685,23 +1638,35 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
             ),
             ElevatedButton(
               onPressed: () {
-                int hours = int.parse(_hoursController.text);
-                int minutes = int.parse(_minutesController.text);
-                int seconds = int.parse(_secondsController.text);
 
                 if (_validateTime(_hoursController.text, 'hours') &&
                     _validateTime(_minutesController.text, 'minutes') &&
                     _validateTime(_secondsController.text, 'seconds')) {
-                  Duration duration = Duration(
-                    hours: hours,
-                    minutes: minutes,
-                    seconds: seconds,
-                  );
-
-                  print('Duration: $duration');
+                  setState(() {
+                    durationValue = '${_hoursController.text}:${_minutesController.text}:${_secondsController.text}';
+                  });
+                  widget.callbackFunctionForPayload(segmentViewManual.index, durationValue , selectedIrLine);
                   Navigator.of(context).pop();
                 }
-
+                else{
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Invalid time formed'),
+                        content: const Text('Please fill correct time format and try again.'),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Close the dialog
+                            },
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
               },
               child: const Text('OK'),
             ),
@@ -1711,12 +1676,23 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
     );
   }
 
-  bool _validateTime(String value, String field) {
-    int? parsedValue = int.tryParse(value);
-    if (parsedValue == null || parsedValue < 0 || (field != 'hours' && parsedValue >= 60)) {
+  bool _validateTime(String value, String fieldType) {
+    if (value.isEmpty) {
       return false;
     }
-    return true;
+    int intValue = int.tryParse(value) ?? -1;
+    if (intValue < 0) {
+      return false;
+    }
+    switch (fieldType) {
+      case 'hours':
+        return intValue >= 0 && intValue <= 23;
+      case 'minutes':
+      case 'seconds':
+        return intValue >= 0 && intValue <= 59;
+      default:
+        return false;
+    }
   }
 
 
@@ -1731,35 +1707,4 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
     return groupedValves;
   }
 
-  Future<void> _selectTimeDuration(BuildContext context, TimeOfDay time) async {
-    TimeOfDay? selectedTime = await showTimePicker(
-      context: context,
-      initialTime: time,
-      helpText: 'Set Duration(HH:MM:SS)',
-      builder: (BuildContext context, Widget? child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-          child: child!,
-        );
-      },
-    );
-
-    if (selectedTime != null) {
-      String hour = selectedTime.hour.toString().padLeft(2, '0');
-      String minute = selectedTime.minute.toString().padLeft(2, '0');
-      String second = _selectedSeconds.toString().padLeft(2, '0');
-      setState(() {
-        durationValue = '$hour:$minute:$second';
-        widget.callbackFunctionForPayload(segmentViewManual.index, durationValue , selectedIrLine);
-
-        int lastIndex = durationValue.lastIndexOf(':');
-        if (lastIndex != -1) {
-          durationValue = durationValue.substring(0, lastIndex);
-        } else {
-          print("Character not found in the string");
-        }
-
-      });
-    }
-  }
 }

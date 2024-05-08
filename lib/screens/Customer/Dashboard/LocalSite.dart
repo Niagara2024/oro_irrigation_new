@@ -688,7 +688,9 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
         final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
         for (var local in provider.fertilizerLocal) {
           local['Fertilizer'].forEach((fertilizer) {
-            int ferMethod = int.parse(fertilizer['FertMethod']);
+            int ferMethod = fertilizer['FertMethod'] is int
+                ? fertilizer['FertMethod']
+                : int.parse(fertilizer['FertMethod']);
             if (fertilizer['Status'] != 0 && ferMethod == 1) {
               //fertilizer time base
               List<String> parts = fertilizer['DurationLeft'].split(':');

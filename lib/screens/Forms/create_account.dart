@@ -12,7 +12,8 @@ import '../../constants/http_service.dart';
 import '../../constants/theme.dart';
 
 class CreateAccount extends StatefulWidget {
-  const CreateAccount({Key? key}) : super(key: key);
+  const CreateAccount({Key? key, required this.callback}) : super(key: key);
+  final void Function(String) callback;
 
   @override
   State<CreateAccount> createState() => _CreateAccountState();
@@ -121,7 +122,6 @@ class _CreateAccountState extends State<CreateAccount> {
       for (final StateListMDL index in stateList) {
         selectedState.add(DropdownMenuEntry<StateListMDL>(value: index, label: index.stateName));
       }
-
       setState(() {
       });
     }
@@ -130,322 +130,350 @@ class _CreateAccountState extends State<CreateAccount> {
     }
   }
 
-
   @override
   Widget build(BuildContext context)
   {
-    return SingleChildScrollView(
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: <Widget>[
-          Form(
-            key: _formKey,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  ListTile(
-                    title: Text(userType=='1'? "Create Dealer account      " : "Create customer account", style: myTheme.textTheme.titleLarge),
-                    subtitle: Text("Please fill out all details correctly.", style: myTheme.textTheme.titleSmall),
-                  ),
-                  const SizedBox(height: 15,),
-                  TextFormField(
-                    controller: _cusNameController,
-                    validator: (value){
-                      if(value==null ||value.isEmpty){
-                        return 'Please fill out this field';
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                      border: const OutlineInputBorder(),
-                      labelText: userType=='1'? 'Dealer Name':'Customer Name',
-                      icon: const Icon(Icons.person_outline),
-                    ),
-                    inputFormatters: [
-                      CapitalizeFirstLetterFormatter(),
-                    ],
-                  ),
-                  const SizedBox(height: 13,),
-                  InternationalPhoneNumberInput(
-                    validator: (value){
-                      if(value==null ||value.isEmpty){
-                        return 'Please fill out this field';
-                      }
-                      return null;
-                    },
-                    inputDecoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                      border: const OutlineInputBorder(),
-                      icon: const Icon(Icons.phone_outlined),
-                      labelText: 'Phone Number',
-                      suffixIcon: IconButton(icon: Icon(Icons.clear, color: myTheme.primaryColor,),
-                          onPressed: () {
-                            _cusMobileNoController.clear();
-                          }),
-                    ),
-                    onInputChanged: (PhoneNumber number) {
-                    },
+    return Column(
+      children: [
+        _buildHeader(),
+        const Divider(height: 0),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildFormContent(),
+              ],
+            ),
+          ),
+        ),
+        _buildFooter(),
+      ],
+    );
+  }
 
-                    selectorConfig: const SelectorConfig(
-                      selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
-                      setSelectorButtonAsPrefixIcon: true,
-                      leadingPadding: 10,
-                      useEmoji: true,
-                    ),
-                    ignoreBlank: false,
-                    autoValidateMode: AutovalidateMode.disabled,
-                    selectorTextStyle: myTheme.textTheme.titleMedium,
-                    initialValue: PhoneNumber(isoCode: 'IN'),
-                    textFieldController: _cusMobileNoController,
-                    formatInput: false,
-                    keyboardType:
-                    const TextInputType.numberWithOptions(signed: true, decimal: true),
-                    onSaved: (PhoneNumber number) {
-                      dialCode = number.dialCode.toString();
-                    },
+  Widget _buildHeader() {
+    return ListTile(
+      title: Text(userType=='1'? "Create Dealer account      " : "Create customer account", style: myTheme.textTheme.titleLarge),
+      subtitle: Text("Please fill out all details correctly.", style: myTheme.textTheme.titleSmall),
+    );
+  }
+
+  Widget _buildFormContent() {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: <Widget>[
+        Form(
+          key: _formKey,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                TextFormField(
+                  controller: _cusNameController,
+                  validator: (value){
+                    if(value==null ||value.isEmpty){
+                      return 'Please fill out this field';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                    border: const OutlineInputBorder(),
+                    labelText: userType=='1'? 'Dealer Name':'Customer Name',
+                    icon: Icon(Icons.person_outline, color: myTheme.primaryColor,),
                   ),
-                  const SizedBox(height: 13,),
-                  TextFormField(
-                    controller: _cusEmailController,
-                    validator: (value){
-                      if(value==null ||value.isEmpty){
-                        return 'Please fill out this field';
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                      border: const OutlineInputBorder(),
-                      labelText: userType=='1'? 'Dealer Email':'Customer Email',
-                      icon: const Icon(Icons.email_outlined),
-                    ),
+                  inputFormatters: [
+                    CapitalizeFirstLetterFormatter(),
+                  ],
+                ),
+                const SizedBox(height: 13,),
+                InternationalPhoneNumberInput(
+                  validator: (value){
+                    if(value==null ||value.isEmpty){
+                      return 'Please fill out this field';
+                    }
+                    return null;
+                  },
+                  inputDecoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                    border: const OutlineInputBorder(),
+                    icon:  Icon(Icons.phone_outlined, color: myTheme.primaryColor,),
+                    labelText: 'Phone Number',
+                    suffixIcon: IconButton(icon: const Icon(Icons.clear, color: Colors.redAccent),
+                        onPressed: () {
+                          _cusMobileNoController.clear();
+                        }),
                   ),
-                  const SizedBox(height: 13,),
-                  Row(
-                    children: [
-                      const Icon(Icons.map_outlined),
-                      const SizedBox(width: 15,),
-                      DropdownMenu<CountryListMDL>(
-                        controller: ddCountryList,
-                        errorText: showConError ? 'Select Country' : null,
-                        hintText: 'Country',
-                        width: 296,
-                        //label: const Text('Category'),
-                        dropdownMenuEntries: selectedCountry,
-                        inputDecorationTheme: const InputDecorationTheme(
-                          filled: false,
-                          contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                          border: OutlineInputBorder(),
-                        ),
-                        onSelected: (CountryListMDL? icon) {
-                          setState(() {
-                            sldCountryID = icon!.countryId;
-                            showConError = false;
-                            getStateList(sldCountryID.toString());
-                          });
-                        },
+                  onInputChanged: (PhoneNumber number) {
+                  },
+
+                  selectorConfig: const SelectorConfig(
+                    selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+                    setSelectorButtonAsPrefixIcon: true,
+                    leadingPadding: 10,
+                    useEmoji: true,
+                  ),
+                  ignoreBlank: false,
+                  autoValidateMode: AutovalidateMode.disabled,
+                  selectorTextStyle: myTheme.textTheme.titleMedium,
+                  initialValue: PhoneNumber(isoCode: 'IN'),
+                  textFieldController: _cusMobileNoController,
+                  formatInput: false,
+                  keyboardType:
+                  const TextInputType.numberWithOptions(signed: true, decimal: true),
+                  onSaved: (PhoneNumber number) {
+                    dialCode = number.dialCode.toString();
+                  },
+                ),
+                const SizedBox(height: 13,),
+                TextFormField(
+                  controller: _cusEmailController,
+                  validator: (value){
+                    if(value==null ||value.isEmpty){
+                      return 'Please fill out this field';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                    border: const OutlineInputBorder(),
+                    labelText: userType=='1'? 'Dealer Email':'Customer Email',
+                    icon: Icon(Icons.email_outlined, color: myTheme.primaryColor,),
+                  ),
+                ),
+                const SizedBox(height: 13,),
+                Row(
+                  children: [
+                    Icon(Icons.map_outlined, color: myTheme.primaryColor,),
+                    const SizedBox(width: 15,),
+                    DropdownMenu<CountryListMDL>(
+                      controller: ddCountryList,
+                      errorText: showConError ? 'Select Country' : null,
+                      hintText: 'Country',
+                      width: 280,
+                      dropdownMenuEntries: selectedCountry,
+                      inputDecorationTheme: const InputDecorationTheme(
+                        filled: false,
+                        contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                        border: OutlineInputBorder(),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 13,),
-                  Row(
-                    children: [
-                      const Icon(Icons.pin_drop_outlined),
-                      const SizedBox(width: 15,),
-                      DropdownMenu<StateListMDL>(
-                        controller: ddStateList,
-                        errorText: showConError ? 'Select State' : null,
-                        hintText: 'State',
-                        width: 296,
-                        //label: const Text('Category'),
-                        dropdownMenuEntries: selectedState,
-                        inputDecorationTheme: const InputDecorationTheme(
-                          filled: false,
-                          contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                          border: OutlineInputBorder(),
-                        ),
-                        onSelected: (StateListMDL? icon) {
-                          setState(() {
-                            sldStateID = icon!.stateId;
-                            showStateError = false;
-                          });
-                        },
+                      onSelected: (CountryListMDL? icon) {
+                        setState(() {
+                          sldCountryID = icon!.countryId;
+                          showConError = false;
+                          getStateList(sldCountryID.toString());
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 13,),
+                Row(
+                  children: [
+                    Icon(Icons.pin_drop_outlined, color: myTheme.primaryColor,),
+                    const SizedBox(width: 15,),
+                    DropdownMenu<StateListMDL>(
+                      controller: ddStateList,
+                      errorText: showConError ? 'Select State' : null,
+                      hintText: 'State',
+                      width: 280,
+                      //label: const Text('Category'),
+                      dropdownMenuEntries: selectedState,
+                      inputDecorationTheme: const InputDecorationTheme(
+                        filled: false,
+                        contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                        border: OutlineInputBorder(),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 13,),
-                  TextFormField(
-                    controller: _cusCityController,
-                    validator: (value){
-                      if(value==null ||value.isEmpty){
-                        return 'Please fill out this field';
-                      }
-                    },
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                      border: const OutlineInputBorder(),
-                      labelText: userType=='1'? 'Dealer City':'Customer City',
-                      icon: const Icon(Icons.location_city),
+                      onSelected: (StateListMDL? icon) {
+                        setState(() {
+                          sldStateID = icon!.stateId;
+                          showStateError = false;
+                        });
+                      },
                     ),
-                    inputFormatters: [
-                      CapitalizeFirstLetterFormatter(),
-                    ],
+                  ],
+                ),
+                const SizedBox(height: 13,),
+                TextFormField(
+                  controller: _cusCityController,
+                  validator: (value){
+                    if(value==null ||value.isEmpty){
+                      return 'Please fill out this field';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                    border: const OutlineInputBorder(),
+                    labelText: userType=='1'? 'Dealer City':'Customer City',
+                    icon: Icon(Icons.location_city, color: myTheme.primaryColor,),
                   ),
-                  const SizedBox(height: 13,),
-                  TextFormField(
-                    controller: _cusAdd1Controller,
-                    validator: (value){
-                      if(value==null ||value.isEmpty){
-                        return 'Please fill out this field';
-                      }
-                    },
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                      border: OutlineInputBorder(),
-                      labelText: 'Address line 1',
-                      icon: Icon(Icons.linear_scale_rounded),
-                    ),
-                    inputFormatters: [
-                      CapitalizeFirstLetterFormatter(),
-                    ],
+                  inputFormatters: [
+                    CapitalizeFirstLetterFormatter(),
+                  ],
+                ),
+                const SizedBox(height: 13,),
+                TextFormField(
+                  controller: _cusAdd1Controller,
+                  validator: (value){
+                    if(value==null ||value.isEmpty){
+                      return 'Please fill out this field';
+                    }
+                    return null;
+                  },
+                  decoration:  InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                    border: const OutlineInputBorder(),
+                    labelText: 'Address line 1',
+                    icon: Icon(Icons.linear_scale_rounded, color: myTheme.primaryColor,),
                   ),
-                  const SizedBox(height: 13,),
-                  TextFormField(
-                    controller: _cusAdd2Controller,
-                    validator: (value){
-                      if(value==null ||value.isEmpty){
-                        return 'Please fill out this field';
-                      }
-                    },
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                      border: OutlineInputBorder(),
-                      labelText: 'Address line 2',
-                      icon: Icon(Icons.linear_scale_rounded),
-                    ),
-                    inputFormatters: [
-                      CapitalizeFirstLetterFormatter(),
-                    ],
+                  inputFormatters: [
+                    CapitalizeFirstLetterFormatter(),
+                  ],
+                ),
+                const SizedBox(height: 13,),
+                TextFormField(
+                  controller: _cusAdd2Controller,
+                  validator: (value){
+                    if(value==null ||value.isEmpty){
+                      return 'Please fill out this field';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                    border: const OutlineInputBorder(),
+                    labelText: 'Address line 2',
+                    icon: Icon(Icons.linear_scale_rounded, color: myTheme.primaryColor,),
                   ),
-                  const SizedBox(height: 13,),
-                  TextFormField(
-                    controller: _cusAdd3Controller,
-                    validator: (value){
-                      if(value==null ||value.isEmpty){
-                        return 'Please fill out this field';
-                      }
-                    },
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                      border: OutlineInputBorder(),
-                      labelText: 'Address line 3',
-                      icon: Icon(Icons.linear_scale_rounded),
-                    ),
-                    inputFormatters: [
-                      CapitalizeFirstLetterFormatter(),
-                    ],
+                  inputFormatters: [
+                    CapitalizeFirstLetterFormatter(),
+                  ],
+                ),
+                const SizedBox(height: 13,),
+                TextFormField(
+                  controller: _cusAdd3Controller,
+                  validator: (value){
+                    if(value==null ||value.isEmpty){
+                      return 'Please fill out this field';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                    border: const OutlineInputBorder(),
+                    labelText: 'Address line 3',
+                    icon: Icon(Icons.linear_scale_rounded, color: myTheme.primaryColor,),
                   ),
-                  const SizedBox(height: 13,),
-                  TextFormField(
-                    controller: _cusPinCodeController,
-                    validator: (value){
-                      if(value==null ||value.isEmpty){
-                        return 'Please fill out this field';
-                      }
-                    },
-                    decoration: const InputDecoration(
-                      counterText: '',
-                      contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                      border: OutlineInputBorder(),
-                      labelText: 'Postal code',
-                      icon: Icon(Icons.local_post_office_outlined),
-                    ),
-                    keyboardType: TextInputType.number,
-                    maxLength: 10,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                    ],
+                  inputFormatters: [
+                    CapitalizeFirstLetterFormatter(),
+                  ],
+                ),
+                const SizedBox(height: 13,),
+                TextFormField(
+                  controller: _cusPinCodeController,
+                  validator: (value){
+                    if(value==null ||value.isEmpty){
+                      return 'Please fill out this field';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    counterText: '',
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                    border: const OutlineInputBorder(),
+                    labelText: 'Postal code',
+                    icon: Icon(Icons.local_post_office_outlined, color: myTheme.primaryColor,),
                   ),
-                  const SizedBox(height: 20,),
-                  SizedBox(
-                    height:65,
-                    child: Column(
-                      children: [
-                        ListTile(
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ElevatedButton(
-                                child: const Text('Cancel', style: TextStyle(color: Colors.red),),
-                                onPressed: () async {
-                                  Navigator.pop(context);
-                                },
-                              ),
-                              const SizedBox(width: 10,),
-                              ElevatedButton(
-                                child: const Text('Create'),
-                                onPressed: () async {
+                  keyboardType: TextInputType.number,
+                  maxLength: 10,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                  ],
+                ),
+                const SizedBox(height: 5),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
-                                  if (_formKey.currentState!.validate()) {
-                                    String cusType = '';
-                                    if(userType=='1'){
-                                      cusType = '2';
-                                    }else if(userType=='2'){
-                                      cusType = '3';
-                                    }else{
-                                      cusType = '4';
-                                    }
-
-                                    Map<String, Object> body = {
-                                      'userName': _cusNameController.text,
-                                      'countryCode': dialCode,
-                                      'mobileNumber': _cusMobileNoController.text,
-                                      'userType': cusType,
-                                      'macAddress': '123456',
-                                      'deviceToken': '12346789abcdefghijklmnopqrstuvwxyz987654321',
-                                      'mobCctv': '987654321zyxwvutsrqponmlkjihgfedcba123456789',
-                                      'createUser': userID,
-                                      'address1': _cusAdd1Controller.text,
-                                      'address2': _cusAdd2Controller.text,
-                                      'address3': _cusAdd3Controller.text,
-                                      'city': _cusCityController.text,
-                                      'postalCode': _cusPinCodeController.text,
-                                      'country': sldCountryID.toString(),
-                                      'state': sldStateID.toString(),
-                                      'email': _cusEmailController.text,
-                                    };
-                                    //print(body);
-                                    final response = await HttpService().postRequest("createUser", body);
-                                    print(response.body);
-                                    if(response.statusCode == 200)
-                                    {
-                                      var data = jsonDecode(response.body);
-                                      if(data["code"]==200)
-                                      {
-                                        //MqttWebClient().publishMessage('tweet/$userMobileNo', 'updateCustomerAccount');
-                                        if(mounted){
-                                          Navigator.pop(context);
-                                        }
-                                      }
-                                      else{
-                                        //_showSnackBar(data["message"]);
-                                        _showAlertDialog('Warning', data["message"]);
-                                      }
-                                    }
-                                  }
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+  Widget _buildFooter() {
+    return SizedBox(
+      height: 48,
+      child: Column(
+        children: [
+          ListTile(
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                MaterialButton(
+                  onPressed:() {
+                    Navigator.pop(context);
+                  },
+                  textColor: Colors.white,
+                  color: Colors.redAccent,
+                  child: const Text('Cancel',style: TextStyle(color: Colors.white)),
+                ),
+                const SizedBox(width: 10),
+                MaterialButton(
+                  onPressed:() async {
+                    if (_formKey.currentState!.validate()) {
+                      String cusType = '';
+                      if(userType=='1'){
+                        cusType = '2';
+                      }else if(userType=='2'){
+                        cusType = '3';
+                      }else{
+                        cusType = '4';
+                      }
+                      Map<String, Object> body = {
+                        'userName': _cusNameController.text,
+                        'countryCode': dialCode,
+                        'mobileNumber': _cusMobileNoController.text,
+                        'userType': cusType,
+                        'macAddress': '123456',
+                        'deviceToken': '12346789abcdefghijklmnopqrstuvwxyz987654321',
+                        'mobCctv': '987654321zyxwvutsrqponmlkjihgfedcba123456789',
+                        'createUser': userID,
+                        'address1': _cusAdd1Controller.text,
+                        'address2': _cusAdd2Controller.text,
+                        'address3': _cusAdd3Controller.text,
+                        'city': _cusCityController.text,
+                        'postalCode': _cusPinCodeController.text,
+                        'country': sldCountryID.toString(),
+                        'state': sldStateID.toString(),
+                        'email': _cusEmailController.text,
+                      };
+                      //print(body);
+                      final response = await HttpService().postRequest("createUser", body);
+                      print(response.body);
+                      if(response.statusCode == 200)
+                      {
+                        var data = jsonDecode(response.body);
+                        if(data["code"]==200)
+                        {
+                          //MqttWebClient().publishMessage('tweet/$userMobileNo', 'updateCustomerAccount');
+                          widget.callback('reloadCustomer');
+                          if(mounted){
+                            Navigator.pop(context);
+                          }
+                        }
+                        else{
+                          //_showSnackBar(data["message"]);
+                          _showAlertDialog('Warning', data["message"]);
+                        }
+                      }
+                    }
+                  },
+                  textColor: Colors.white,
+                  color: myTheme.primaryColor,
+                  child: const Text('Create',style: TextStyle(color: Colors.white)),
+                ),
+              ],
             ),
           ),
         ],

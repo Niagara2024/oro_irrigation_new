@@ -5,6 +5,7 @@ import 'package:chat_bubbles/bubbles/bubble_special_two.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:oro_irrigation_new/Models/Customer/Dashboard/SentAndReceivedModel.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
 
 import '../../../constants/http_service.dart';
 
@@ -43,19 +44,20 @@ class _SentAndReceivedState extends State<SentAndReceived> {
         crossAxisAlignment: CrossAxisAlignment.center,
        children: [
          SizedBox(
-           width: MediaQuery.sizeOf(context).width,
+           width: 150,
            child: TextButton(
              onPressed: () {
                _selectDate(context);
              },
              style: ButtonStyle(
-               backgroundColor: MaterialStateProperty.all<Color>(Colors.grey.shade300),
+               backgroundColor: MaterialStateProperty.all<Color>(myTheme.primaryColor.withOpacity(0.2)),
                shape: MaterialStateProperty.all<OutlinedBorder>(
                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
                ),
              ),
              child: Row(
                mainAxisSize: MainAxisSize.min,
+               mainAxisAlignment: MainAxisAlignment.end,
                children: [
                  const Icon(Icons.calendar_month_outlined, color: Colors.black),
                  const SizedBox(width: 10),
@@ -78,10 +80,16 @@ class _SentAndReceivedState extends State<SentAndReceived> {
                  {
                    return Padding(
                      padding: const EdgeInsets.all(5.0),
-                     child: BubbleSpecialOne(
-                       textStyle: const TextStyle(fontSize: 12),
-                       text: '${sentAndReceivedList[index].message}\n\n${sentAndReceivedList[index].time},',
-                       color: Colors.green.shade50,
+                     child: Row(
+                       mainAxisAlignment: MainAxisAlignment.end,
+                       children: [
+                         Text('${convertToAMPM(sentAndReceivedList[index].time)} - ', style: const TextStyle(fontSize: 11),),
+                         BubbleSpecialOne(
+                           textStyle: const TextStyle(fontSize: 12),
+                           text: sentAndReceivedList[index].message,
+                           color: Colors.green.shade100,
+                         ),
+                       ],
                      ),
                    );
                  }
@@ -89,15 +97,20 @@ class _SentAndReceivedState extends State<SentAndReceived> {
                  {
                    return Padding(
                      padding: const EdgeInsets.all(5.0),
-                     child: BubbleSpecialTwo(
-                       text: '${sentAndReceivedList[index].message}\n${sentAndReceivedList[index].time}',
-                       isSender: false,
-                       color: Colors.blue.shade50,
-                       textStyle: const TextStyle(fontSize: 12,),
+                     child: Row(
+                       mainAxisAlignment: MainAxisAlignment.start,
+                       children: [
+                         BubbleSpecialTwo(
+                           text: sentAndReceivedList[index].message,
+                           isSender: false,
+                           color: Colors.blue.shade100,
+                           textStyle: const TextStyle(fontSize: 12),
+                         ),
+                         Text(' - ${convertToAMPM(sentAndReceivedList[index].time)}', style: const TextStyle(fontSize: 11),)
+                       ],
                      ),
                    );
                  }
-
                },
              ),
            ),
@@ -106,6 +119,13 @@ class _SentAndReceivedState extends State<SentAndReceived> {
       ),
     );
   }
+
+  String convertToAMPM(String timeString) {
+    DateTime dateTime = DateFormat("HH:mm:ss").parse(timeString);
+    String formattedTime = DateFormat("h:mm a").format(dateTime);
+    return formattedTime;
+  }
+
 
   Future<void> getLogs(int controllerId, String date) async {
     try {

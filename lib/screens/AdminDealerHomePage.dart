@@ -1,10 +1,8 @@
 import 'dart:convert';
 
 import 'package:data_table_2/data_table_2.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../Models/DataResponse.dart';
@@ -12,7 +10,6 @@ import '../Models/customer_list.dart';
 import '../Models/product_stock.dart';
 import '../constants/http_service.dart';
 import '../constants/theme.dart';
-import '../state_management/mqtt_message_provider.dart';
 import 'Customer/CustomerScreenController.dart';
 import 'Forms/add_product.dart';
 import 'Forms/create_account.dart';
@@ -59,10 +56,13 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
   void callbackFunction(String message)
   {
     if(message=='reloadStock'){
-      print('reloadStock');
       Navigator.pop(context);
       Future.delayed(const Duration(milliseconds: 500), () {
         getProductStock();
+      });
+    }else{
+      Future.delayed(const Duration(milliseconds: 500), () {
+        getCustomerList();
       });
     }
   }
@@ -130,28 +130,27 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
     }
   }
 
-  Future<void> getCustomerList() async
-  {
+  Future<void> getCustomerList() async {
     Map<String, Object> body = {"userType" : userType, "userId" : userId};
     final response = await HttpService().postRequest("getUserList", body);
-    if (response.statusCode == 200)
-    {
+    if (response.statusCode == 200) {
       myCustomerList.clear();
       var data = jsonDecode(response.body);
-      if(data["code"]==200)
-      {
+      if (data["code"] == 200) {
         final cntList = data["data"] as List;
-        for (int i=0; i < cntList.length; i++) {
-          myCustomerList.add(CustomerListMDL.fromJson(cntList[i]));
+        List<CustomerListMDL> tempList = []; // Temporary list to avoid multiple setState calls
+        for (int i = 0; i < cntList.length; i++) {
+          tempList.add(CustomerListMDL.fromJson(cntList[i]));
         }
+        setState(() {
+          myCustomerList.addAll(tempList);
+          tempList=[];
+        });
       }
-    }
-    else{
+    } else {
       //_showSnackBar(response.body);
     }
-
   }
-
 
   @override
   Widget build(BuildContext context)
@@ -413,36 +412,52 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                       {
                         await showDialog<void>(
                             context: context,
-                            builder: (context) => const AlertDialog(
-                              content: CreateAccount(),
+                            builder: (context) => AlertDialog(
+                              content: CreateAccount(callback: callbackFunction),
                             ));
                       }),
                     ),
-                    const Divider(height: 0), // Optional: Add a divider between sections
-                    Expanded(child : ListView.builder(
-                      itemCount: myCustomerList.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return ListTile(
-                          leading: const CircleAvatar(
-                            backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
-                            backgroundColor: Colors.transparent,
-                          ),
-                          trailing: IconButton(tooltip: userType==1? 'View Dealer Dashboard' : 'View Customer Dashboard', icon: const Icon(Icons.view_quilt_outlined), color: myTheme.primaryColor, onPressed: () async
-                          {
-                            if(userType==1){
-                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyDealers(dealerId: myCustomerList[index].userId, dealerName: myCustomerList[index].userName)),);
-                            }else{
-                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerScreenController(customerId: myCustomerList[index].userId, comingFrom: 'AdminORDealer', customerName: myCustomerList[index].userName, mobileNo: '+${myCustomerList[index].countryCode}-${myCustomerList[index].mobileNumber}', emailId: myCustomerList[index].emailId,)));
-                            }
-                          }),
-                          title: Text(myCustomerList[index].userName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
-                          subtitle: Text('+${myCustomerList[index].countryCode} ${myCustomerList[index].mobileNumber}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal)),
-                          onTap:() {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: myCustomerList[index].userId, userName: myCustomerList[index].userName, userID: userId, userType: userType, productStockList: productStockList, callback: callbackFunction,)),);
+                    const Divider(height: 0),
+                    Expanded(
+                      child : myCustomerList.isNotEmpty? ListView.builder(
+                          itemCount: myCustomerList.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return ListTile(
+                              leading: const CircleAvatar(
+                                backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
+                                backgroundColor: Colors.transparent,
+                              ),
+                              trailing: IconButton(tooltip: userType==1? 'View Dealer Dashboard' : 'View Customer Dashboard', icon: const Icon(Icons.view_quilt_outlined), color: myTheme.primaryColor, onPressed: () async
+                              {
+                                if(userType==1){
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyDealers(dealerId: myCustomerList[index].userId, dealerName: myCustomerList[index].userName)),);
+                                }else{
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerScreenController(customerId: myCustomerList[index].userId, comingFrom: 'AdminORDealer', customerName: myCustomerList[index].userName, mobileNo: '+${myCustomerList[index].countryCode}-${myCustomerList[index].mobileNumber}', emailId: myCustomerList[index].emailId,)));
+                                }
+                              }),
+                              title: Text(myCustomerList[index].userName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
+                              subtitle: Text('+${myCustomerList[index].countryCode} ${myCustomerList[index].mobileNumber}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal)),
+                              onTap:() {
+                                Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: myCustomerList[index].userId, userName: myCustomerList[index].userName, userID: userId, userType: userType, productStockList: productStockList, callback: callbackFunction,)),);
+                              },
+                            );
                           },
-                        );
-                      },
-                    )),
+                        ):
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(25.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('No customers found.', style: TextStyle(fontSize: 17, fontWeight: FontWeight.normal)),
+                              SizedBox(height: 5),
+                              Text('Add your customer using top of the customer adding button.', style: TextStyle(fontWeight: FontWeight.normal)),
+                              Icon(Icons.person_add_outlined),
+                            ],
+                          ),
+                        ),
+                      )
+                    ),
                   ],
                 ),
               ),

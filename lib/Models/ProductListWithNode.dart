@@ -117,9 +117,9 @@ class Node {
   final int communicationMode;
   final int referenceNumber;
   final int serialNumber;
-  late final int? interfaceTypeId;
-  late final String? interface;
-  late final String interfaceInterval;
+  late int? interfaceTypeId;
+  late String? interface;
+  late String interfaceInterval;
   final int inputCount;
   final int outputCount;
   final String active;

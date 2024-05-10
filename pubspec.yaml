@@ -134,6 +134,9 @@ flutter:
      - assets/images/fogger_orange.png
      - assets/images/fogger_red.png
      - assets/images/selector.png
+     - assets/images/selector_g.png
+     - assets/images/selector_y.png
+     - assets/images/selector_r.png
      - assets/images/water_meter.png
      - assets/images/fertilizer_meter.png
      - assets/images/pressure_switch.png

@@ -41,7 +41,6 @@ class _RunByManualState extends State<RunByManual> {
   @override
   void initState() {
     super.initState();
-    print( widget.programList);
     ProgramList defaultProgram = ProgramList(
       programId: 0,
       serialNumber: 0,
@@ -76,7 +75,6 @@ class _RunByManualState extends State<RunByManual> {
 
   Future<void> payloadCallbackFunction(segIndex, value, sldIrLine) async
   {
-    print(value);
     segmentIndex = segIndex;
     if (value.contains(':')) {
       strDuration = value;
@@ -93,6 +91,7 @@ class _RunByManualState extends State<RunByManual> {
     await Future.delayed(const Duration(milliseconds: 500));
     try {
       dashBoardData = await fetchControllerData(programId);
+      segmentIndex = dashBoardData[0].method;
       setState(() {
       });
     } catch (e) {
@@ -139,81 +138,66 @@ class _RunByManualState extends State<RunByManual> {
               onPressed: () {
                 standaloneSelection.clear();
 
-                List<String> allRelaySrlNo = [];
-                String strSldValveOrLineSrlNo = '';
-                String strSldSourcePumpSrlNo ='',strSldIrrigationPumpSrlNo ='',strSldMainValveSrlNo ='',strSldCtrlFilterSrlNo ='',strSldLocFilterSrlNo =''
-                ,strSldCrlFetFilterSrlNo ='',strSldLocFetFilterSrlNo ='', strSldAgitatorSrlNo ='', strSldFanSrlNo ='', strSldFoggerSrlNo =''
-                , strSldBoosterPumpSrlNo ='', strSldSelectorSrlNo ='';
+                if(ddSelection==0){
+                  List<String> allRelaySrlNo = [];
+                  String strSldValveOrLineSrlNo = '';
+                  String strSldSourcePumpSrlNo ='',strSldIrrigationPumpSrlNo ='',strSldMainValveSrlNo ='',strSldCtrlFilterSrlNo ='',strSldLocFilterSrlNo =''
+                  ,strSldCrlFetFilterSrlNo ='',strSldLocFetFilterSrlNo ='', strSldAgitatorSrlNo ='', strSldFanSrlNo ='', strSldFoggerSrlNo =''
+                  , strSldBoosterPumpSrlNo ='', strSldSelectorSrlNo ='';
 
-                if(dashBoardData[0].sourcePump.isNotEmpty){
-                  strSldSourcePumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].sourcePump);
-                }
-                if(dashBoardData[0].irrigationPump.isNotEmpty){
-                  strSldIrrigationPumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].irrigationPump);
-                }
-                if(dashBoardData[0].mainValve.isNotEmpty){
-                  strSldMainValveSrlNo = getSelectedRelaySrlNo(dashBoardData[0].mainValve);
-                }
-                if(dashBoardData[0].centralFilterSite.isNotEmpty){
-
-                  /*List<String> filterRelaySrlNos = [];
-                    for (var site in dashBoardData[0].centralFilterSite) {
-                      String relaySrlNo = getSelectedRelaySrlNo(site.filter);
-                      if (relaySrlNo.isNotEmpty) {
-                        filterRelaySrlNos.add(relaySrlNo);
+                  if(dashBoardData[0].sourcePump.isNotEmpty){
+                    strSldSourcePumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].sourcePump);
+                  }
+                  if(dashBoardData[0].irrigationPump.isNotEmpty){
+                    strSldIrrigationPumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].irrigationPump);
+                  }
+                  if(dashBoardData[0].mainValve.isNotEmpty){
+                    strSldMainValveSrlNo = getSelectedRelaySrlNo(dashBoardData[0].mainValve);
+                  }
+                  if(dashBoardData[0].centralFilterSite.isNotEmpty){
+                    for(int i=0; i<dashBoardData[0].centralFilterSite.length; i++){
+                      String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[i].filter);
+                      if(concatenatedString.isNotEmpty){
+                        strSldCtrlFilterSrlNo += '${concatenatedString}_';
                       }
                     }
-                    if (filterRelaySrlNos.isNotEmpty) {
-                      String strSldCtrlFilterSrlNo = filterRelaySrlNos.join('_');
-                      print(strSldCtrlFilterSrlNo);
-                    }*/
-
-                  for(int i=0; i<dashBoardData[0].centralFilterSite.length; i++){
-                    String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[i].filter);
-                    if(concatenatedString.isNotEmpty){
-                      strSldCtrlFilterSrlNo += '${concatenatedString}_';
+                    if (strSldCtrlFilterSrlNo.isNotEmpty && strSldCtrlFilterSrlNo.endsWith('_')) {
+                      strSldCtrlFilterSrlNo = strSldCtrlFilterSrlNo.replaceRange(strSldCtrlFilterSrlNo.length - 1, strSldCtrlFilterSrlNo.length, '');
                     }
                   }
-                  if (strSldCtrlFilterSrlNo.isNotEmpty && strSldCtrlFilterSrlNo.endsWith('_')) {
-                    strSldCtrlFilterSrlNo = strSldCtrlFilterSrlNo.replaceRange(strSldCtrlFilterSrlNo.length - 1, strSldCtrlFilterSrlNo.length, '');
+                  if(dashBoardData[0].localFilterSite.isNotEmpty){
+                    strSldLocFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].localFilterSite[0].filter);
                   }
-
-                  //strSldCtrlFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[0].filter);
-                }
-                if(dashBoardData[0].localFilterSite.isNotEmpty){
-                  strSldLocFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].localFilterSite[0].filter);
-                }
-                if(dashBoardData[0].centralFertilizerSite.isNotEmpty){
-                  for(int i=0; i<dashBoardData[0].centralFertilizerSite.length; i++){
-                    String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFertilizerSite[i].fertilizer);
-                    if(concatenatedString.isNotEmpty){
-                      strSldCrlFetFilterSrlNo += '${concatenatedString}_';
+                  if(dashBoardData[0].centralFertilizerSite.isNotEmpty){
+                    for(int i=0; i<dashBoardData[0].centralFertilizerSite.length; i++){
+                      String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFertilizerSite[i].fertilizer);
+                      if(concatenatedString.isNotEmpty){
+                        strSldCrlFetFilterSrlNo += '${concatenatedString}_';
+                      }
+                    }
+                    if (strSldCrlFetFilterSrlNo.isNotEmpty && strSldCrlFetFilterSrlNo.endsWith('_')) {
+                      strSldCrlFetFilterSrlNo = strSldCrlFetFilterSrlNo.replaceRange(strSldCrlFetFilterSrlNo.length - 1, strSldCrlFetFilterSrlNo.length, '');
                     }
                   }
-                  if (strSldCrlFetFilterSrlNo.isNotEmpty && strSldCrlFetFilterSrlNo.endsWith('_')) {
-                    strSldCrlFetFilterSrlNo = strSldCrlFetFilterSrlNo.replaceRange(strSldCrlFetFilterSrlNo.length - 1, strSldCrlFetFilterSrlNo.length, '');
+                  if(dashBoardData[0].localFertilizerSite.isNotEmpty){
+                    strSldLocFetFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].localFertilizerSite[0].fertilizer);
                   }
-                }
-                if(dashBoardData[0].localFertilizerSite.isNotEmpty){
-                  strSldLocFetFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].localFertilizerSite[0].fertilizer);
-                }
-                if(dashBoardData[0].agitator.isNotEmpty){
-                  strSldAgitatorSrlNo = getSelectedRelaySrlNo(dashBoardData[0].agitator);
-                }
-                if(dashBoardData[0].fan.isNotEmpty){
-                  strSldFanSrlNo = getSelectedRelaySrlNo(dashBoardData[0].fan);
-                }
-                if(dashBoardData[0].fogger.isNotEmpty){
-                  strSldFoggerSrlNo = getSelectedRelaySrlNo(dashBoardData[0].fogger);
-                }
-                if(dashBoardData[0].boosterPump.isNotEmpty){
-                  strSldBoosterPumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].boosterPump);
-                }
-                if(dashBoardData[0].selector.isNotEmpty){
-                  strSldSelectorSrlNo = getSelectedRelaySrlNo(dashBoardData[0].selector);
-                }
+                  if(dashBoardData[0].agitator.isNotEmpty){
+                    strSldAgitatorSrlNo = getSelectedRelaySrlNo(dashBoardData[0].agitator);
+                  }
+                  if(dashBoardData[0].fan.isNotEmpty){
+                    strSldFanSrlNo = getSelectedRelaySrlNo(dashBoardData[0].fan);
+                  }
+                  if(dashBoardData[0].fogger.isNotEmpty){
+                    strSldFoggerSrlNo = getSelectedRelaySrlNo(dashBoardData[0].fogger);
+                  }
+                  if(dashBoardData[0].boosterPump.isNotEmpty){
+                    strSldBoosterPumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].boosterPump);
+                  }
+                  if(dashBoardData[0].selector.isNotEmpty){
+                    strSldSelectorSrlNo = getSelectedRelaySrlNo(dashBoardData[0].selector);
+                  }
 
-                if(ddSelection==0){
                   Map<String, List<DashBoardValve>> groupedValves = {};
                   for (var line in dashBoardData[0].lineOrSequence) {
                     groupedValves = groupValvesByLocation(line.valves);
@@ -277,62 +261,87 @@ class _RunByManualState extends State<RunByManual> {
                 }
                 else{
                   Map<String, List<DashBoardValve>> groupedValves = {};
-                  String strProgramCategory = '';
+                  String strSldSqnNo = '';
+                  String strSldSqnLocation = '';
 
                   for (var line in dashBoardData[0].lineOrSequence) {
                     if(line.selected){
-                      strSldValveOrLineSrlNo += '${line.sNo}_';
+                      strSldSqnNo = line.sNo;
                       groupedValves = groupValvesByLocation(line.valves);
                       groupedValves.forEach((location, valves) {
-                        strProgramCategory += '${location}_';
+                        strSldSqnLocation += '${location}_';
                       });
-                      strProgramCategory = strProgramCategory.isNotEmpty ? strProgramCategory.substring(0, strProgramCategory.length - 1) : '';
+                      strSldSqnLocation = strSldSqnLocation.isNotEmpty ? strSldSqnLocation.substring(0, strSldSqnLocation.length - 1) : '';
+                      break;
                     }
                   }
 
-                  strSldValveOrLineSrlNo = strSldValveOrLineSrlNo.isNotEmpty ? strSldValveOrLineSrlNo.substring(0, strSldValveOrLineSrlNo.length - 1) : '';
-                  allRelaySrlNo = [
-                    strSldSourcePumpSrlNo,
-                    strSldIrrigationPumpSrlNo,
-                    strSldMainValveSrlNo,
-                    strSldCtrlFilterSrlNo,
-                    strSldLocFilterSrlNo,
-                    strSldCrlFetFilterSrlNo,
-                    strSldLocFetFilterSrlNo,
-                    strSldAgitatorSrlNo,
-                    strSldFanSrlNo,
-                    strSldFoggerSrlNo,
-                    strSldBoosterPumpSrlNo,
-                    strSldSelectorSrlNo,
-                  ];
-
-                  //strProgramCategory = strProgramCategory.isNotEmpty ? strProgramCategory.substring(0, strProgramCategory.length - 1) : '';
-                  //print(strProgramCategory);
-
-                  if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
-                    showDialog<String>(
-                        context: context,
-                        builder: (BuildContext dgContext) => AlertDialog(
-                          title: const Text('Standalone Program base'),
-                          content: const Text('Zone is not selected, Please select your zone and try again'),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(dgContext, 'OK');
-                              },
-                              child: const Text('Ok'),
-                            ),
-                          ],
-                        )
-                    );
-
-                  }else{
-                    sendCommandToControllerAndMqttProgram(allRelaySrlNo, strSldValveOrLineSrlNo);
+                  String strSldIrrigationPumpId = '';
+                  if(dashBoardData[0].irrigationPump.isNotEmpty){
+                    strSldIrrigationPumpId = getSelectedRelayId(dashBoardData[0].irrigationPump);
                   }
 
+                  String strSldMainValveId = '';
+                  if(dashBoardData[0].mainValve.isNotEmpty){
+                    strSldMainValveId = getSelectedRelayId(dashBoardData[0].mainValve);
+                  }
+
+                  String strSldCtrlFilterId = '';
+                  String sldCtrlFilterRelayOnOffStatus = '';
+                  if(dashBoardData[0].centralFilterSite.isNotEmpty){
+                    for(int i=0; i<dashBoardData[0].centralFilterSite.length; i++){
+                      String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[i].filter);
+                      if(concatenatedString.isNotEmpty){
+                        strSldCtrlFilterId += '${dashBoardData[0].centralFilterSite[i].id};';
+                        sldCtrlFilterRelayOnOffStatus += '${getRelayOnOffStatus(dashBoardData[0].centralFilterSite[i].filter)};';
+                      }
+                    }
+                    if (strSldCtrlFilterId.isNotEmpty && strSldCtrlFilterId.endsWith(';')) {
+                      strSldCtrlFilterId = strSldCtrlFilterId.replaceRange(strSldCtrlFilterId.length - 1, strSldCtrlFilterId.length, '');
+                    }
+                    if (sldCtrlFilterRelayOnOffStatus.isNotEmpty && sldCtrlFilterRelayOnOffStatus.endsWith(';')) {
+                      sldCtrlFilterRelayOnOffStatus = sldCtrlFilterRelayOnOffStatus.replaceRange(sldCtrlFilterRelayOnOffStatus.length - 1, sldCtrlFilterRelayOnOffStatus.length, '');
+                    }
+                  }
+
+                  String strSldLocFilterId = '';
+                  String sldLocFilterRelayOnOffStatus = '';
+                  if(dashBoardData[0].localFilterSite.isNotEmpty){
+                    for(int i=0; i<dashBoardData[0].localFilterSite.length; i++){
+                      String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].localFilterSite[i].filter);
+                      if(concatenatedString.isNotEmpty){
+                        strSldLocFilterId += '${dashBoardData[0].localFilterSite[i].id};';
+                        sldLocFilterRelayOnOffStatus += '${getRelayOnOffStatus(dashBoardData[0].localFilterSite[i].filter)};';
+                      }
+                    }
+                    if (strSldLocFilterId.isNotEmpty && strSldLocFilterId.endsWith(';')) {
+                      strSldLocFilterId = strSldLocFilterId.replaceRange(strSldLocFilterId.length - 1, strSldLocFilterId.length, '');
+                    }
+                    if (sldLocFilterRelayOnOffStatus.isNotEmpty && sldLocFilterRelayOnOffStatus.endsWith(';')) {
+                      sldLocFilterRelayOnOffStatus = sldLocFilterRelayOnOffStatus.replaceRange(sldLocFilterRelayOnOffStatus.length - 1, sldCtrlFilterRelayOnOffStatus.length, '');
+                    }
+                  }
+
+                  String  strSldFanId = '';
+                  if(dashBoardData[0].fan.isNotEmpty){
+                    strSldFanId = getSelectedRelayId(dashBoardData[0].fan);
+                  }
+
+                  String  strSldFgrId = '';
+                  if(dashBoardData[0].fogger.isNotEmpty){
+                    strSldFgrId = getSelectedRelayId(dashBoardData[0].fogger);
+                  }
+
+                  if (strSldSqnNo.isEmpty) {
+                    displayAlert(context, 'You must select an zone.');
+                  }if (strSldIrrigationPumpId.isEmpty) {
+                    displayAlert(context, 'You must select an irrigation pump.');
+                  }else{
+                    sendCommandToControllerAndMqttProgram(strSldSqnLocation,strSldSqnNo,strSldIrrigationPumpId,strSldMainValveId,strSldCtrlFilterId,
+                        sldCtrlFilterRelayOnOffStatus,strSldLocFilterId,sldLocFilterRelayOnOffStatus,strSldFanId,strSldFgrId);
+
+                  }
                 }
-
-
               },
               icon: const Icon(
                 Icons.not_started_outlined,
@@ -357,7 +366,7 @@ class _RunByManualState extends State<RunByManual> {
             child: Row(
               children: [
                 SizedBox(
-                  width: 350,
+                  width: 380,
                   height: double.infinity,
                   child: SingleChildScrollView(
                     child: Column(
@@ -374,7 +383,7 @@ class _RunByManualState extends State<RunByManual> {
                                   child: Text('Source Pump'),
                                 ),
                                 SizedBox(
-                                  height: dashBoardData[0].sourcePump.length * 50,
+                                  height: dashBoardData[0].sourcePump.length * 65,
                                   child : ListView.builder(
                                     itemCount: dashBoardData[0].sourcePump.length,
                                     itemBuilder: (context, index) {
@@ -382,6 +391,7 @@ class _RunByManualState extends State<RunByManual> {
                                         children: [
                                           CheckboxListTile(
                                             title: Text(dashBoardData[0].sourcePump[index].name),
+                                            subtitle: Text('Location : ${dashBoardData[0].sourcePump[index].location}',style: const TextStyle(fontWeight: FontWeight.normal),),
                                             secondary: Image.asset('assets/images/source_pump.png'),
                                             value: dashBoardData[0].sourcePump[index].selected,
                                             onChanged: (bool? newValue) {
@@ -410,7 +420,7 @@ class _RunByManualState extends State<RunByManual> {
                                   child: Text('Irrigation Pump'),
                                 ),
                                 SizedBox(
-                                  height: dashBoardData[0].irrigationPump.length * 50,
+                                  height: dashBoardData[0].irrigationPump.length * 65,
                                   child: ListView.builder(
                                     itemCount: dashBoardData[0].irrigationPump.length,
                                     itemBuilder: (context, index) {
@@ -418,6 +428,7 @@ class _RunByManualState extends State<RunByManual> {
                                         children: [
                                           CheckboxListTile(
                                             title: Text(dashBoardData[0].irrigationPump[index].name),
+                                            subtitle: Text('Location : ${dashBoardData[0].irrigationPump[index].location}',style: const TextStyle(fontWeight: FontWeight.normal),),
                                             secondary: Image.asset('assets/images/irrigation_pump.png'),
                                             value: dashBoardData[0].irrigationPump[index].selected,
                                             onChanged: (bool? newValue) {
@@ -446,7 +457,7 @@ class _RunByManualState extends State<RunByManual> {
                                   child: Text('Main Valve'),
                                 ),
                                 SizedBox(
-                                  height: dashBoardData[0].mainValve.length  * 50,
+                                  height: dashBoardData[0].mainValve.length  * 65,
                                   child: ListView.builder(
                                     itemCount: dashBoardData[0].mainValve.length,
                                     itemBuilder: (context, index) {
@@ -454,6 +465,7 @@ class _RunByManualState extends State<RunByManual> {
                                         children: [
                                           CheckboxListTile(
                                             title: Text(dashBoardData[0].mainValve[index].name),
+                                            subtitle: Text('Location : ${dashBoardData[0].mainValve[index].location}',style: const TextStyle(fontWeight: FontWeight.normal),),
                                             secondary: Image.asset('assets/images/dp_main_valve.png'),
                                             value: dashBoardData[0].mainValve[index].selected,
                                             onChanged: (bool? newValue) {
@@ -942,7 +954,7 @@ class _RunByManualState extends State<RunByManual> {
                                   child: Text('Agitator'),
                                 ),
                                 SizedBox(
-                                  height: dashBoardData[0].agitator.length  * 50,
+                                  height: dashBoardData[0].agitator.length  * 65,
                                   child: ListView.builder(
                                     itemCount: dashBoardData[0].agitator.length,
                                     itemBuilder: (context, index) {
@@ -950,6 +962,7 @@ class _RunByManualState extends State<RunByManual> {
                                         children: [
                                           CheckboxListTile(
                                             title: Text(dashBoardData[0].agitator[index].name),
+                                            subtitle: Text('Location : ${dashBoardData[0].agitator[index].location}',style: const TextStyle(fontWeight: FontWeight.normal),),
                                             secondary: Image.asset('assets/images/agitator.png'),
                                             value: dashBoardData[0].agitator[index].selected,
                                             onChanged: (bool? newValue) {
@@ -978,7 +991,7 @@ class _RunByManualState extends State<RunByManual> {
                                   child: Text('Fan'),
                                 ),
                                 SizedBox(
-                                  height: dashBoardData[0].fan.length  * 50,
+                                  height: dashBoardData[0].fan.length  * 65,
                                   child: ListView.builder(
                                     itemCount: dashBoardData[0].fan.length,
                                     itemBuilder: (context, index) {
@@ -986,6 +999,7 @@ class _RunByManualState extends State<RunByManual> {
                                         children: [
                                           CheckboxListTile(
                                             title: Text(dashBoardData[0].fan[index].name),
+                                            subtitle: Text('Location : ${dashBoardData[0].fan[index].location}',style: const TextStyle(fontWeight: FontWeight.normal),),
                                             secondary: Image.asset('assets/images/fan.png'),
                                             value: dashBoardData[0].fan[index].selected,
                                             onChanged: (bool? newValue) {
@@ -1014,7 +1028,7 @@ class _RunByManualState extends State<RunByManual> {
                                   child: Text('Fogger'),
                                 ),
                                 SizedBox(
-                                  height: dashBoardData[0].fogger.length  * 50,
+                                  height: dashBoardData[0].fogger.length  * 65,
                                   child: ListView.builder(
                                     itemCount: dashBoardData[0].fogger.length,
                                     itemBuilder: (context, index) {
@@ -1022,6 +1036,7 @@ class _RunByManualState extends State<RunByManual> {
                                         children: [
                                           CheckboxListTile(
                                             title: Text(dashBoardData[0].fogger[index].name),
+                                            subtitle: Text('Location : ${dashBoardData[0].fogger[index].location}',style: const TextStyle(fontWeight: FontWeight.normal),),
                                             secondary: Image.asset('assets/images/fogger.png'),
                                             value: dashBoardData[0].fogger[index].selected,
                                             onChanged: (bool? newValue) {
@@ -1050,7 +1065,7 @@ class _RunByManualState extends State<RunByManual> {
                                   child: Text('Booster Pump'),
                                 ),
                                 SizedBox(
-                                  height: dashBoardData[0].boosterPump.length  * 50,
+                                  height: dashBoardData[0].boosterPump.length  * 65,
                                   child: ListView.builder(
                                     itemCount: dashBoardData[0].boosterPump.length,
                                     itemBuilder: (context, index) {
@@ -1058,6 +1073,7 @@ class _RunByManualState extends State<RunByManual> {
                                         children: [
                                           CheckboxListTile(
                                             title: Text(dashBoardData[0].boosterPump[index].name),
+                                            subtitle: Text('Location : ${dashBoardData[0].boosterPump[index].location}',style: const TextStyle(fontWeight: FontWeight.normal),),
                                             secondary: Image.asset('assets/images/booster_pump.png'),
                                             value: dashBoardData[0].boosterPump[index].selected,
                                             onChanged: (bool? newValue) {
@@ -1086,7 +1102,7 @@ class _RunByManualState extends State<RunByManual> {
                                   child: Text('Selector'),
                                 ),
                                 SizedBox(
-                                  height: dashBoardData[0].selector.length  * 50,
+                                  height: dashBoardData[0].selector.length  * 65,
                                   child: ListView.builder(
                                     itemCount: dashBoardData[0].selector.length,
                                     itemBuilder: (context, index) {
@@ -1094,6 +1110,7 @@ class _RunByManualState extends State<RunByManual> {
                                         children: [
                                           CheckboxListTile(
                                             title: Text(dashBoardData[0].selector[index].name),
+                                            subtitle: Text('Location : ${dashBoardData[0].selector[index].location}',style: const TextStyle(fontWeight: FontWeight.normal),),
                                             secondary: Image.asset('assets/images/selector.png'),
                                             value: dashBoardData[0].selector[index].selected,
                                             onChanged: (bool? newValue) {
@@ -1117,7 +1134,6 @@ class _RunByManualState extends State<RunByManual> {
                 ),
                 const VerticalDivider(width: 5),
                 Expanded(
-                  flex: 6,
                   child: Padding(
                     padding: const EdgeInsets.only(right: 5),
                     child: DisplayLineOrSequence(lineOrSequence: dashBoardData.isNotEmpty ? dashBoardData[0].lineOrSequence : [], programList: widget.programList, programSelectionCallback: getControllerDashboardDetails, ddSelectedVal: ddSelection, duration: dashBoardData[0].time, flow: dashBoardData[0].flow, callbackFunctionForPayload: payloadCallbackFunction, method: dashBoardData[0].method,),
@@ -1131,12 +1147,30 @@ class _RunByManualState extends State<RunByManual> {
     );
   }
 
+  void displayAlert(BuildContext context, String msg){
+    showDialog<String>(
+        context: context,
+        builder: (BuildContext dgContext) => AlertDialog(
+          title: const Text('Standalone Program base'),
+          content: Text(msg), // Removed '${}' around msg
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dgContext, 'OK');
+              },
+              child: const Text('Ok'),
+            ),
+          ],
+        )
+    );
+  }
+
   void startByStandaloneDefault(List<String> allRelaySrlNo){
     String finalResult = allRelaySrlNo.where((s) => s.isNotEmpty).join('_');
     String payload = '';
     String payLoadFinal = '';
 
-    if(segmentIndex==1 && strDuration=='00:00:00'){
+    if(segmentIndex==2 && strDuration=='00:00:00'){
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Invalid Duration input'),
@@ -1144,7 +1178,7 @@ class _RunByManualState extends State<RunByManual> {
         ),
       );
     }else{
-      payload = '${finalResult==''?0:1},${finalResult==''?0:finalResult},${segmentIndex==0?3:1},${segmentIndex==0?'0':segmentIndex==1?strDuration:strFlow}';
+      payload = '${finalResult==''?0:1},${finalResult==''?0:finalResult},${segmentIndex==1?3:1},${segmentIndex==1?'0':segmentIndex==2?strDuration:strFlow}';
       payLoadFinal = jsonEncode({
         "800": [{"801": payload}]
       });
@@ -1153,7 +1187,9 @@ class _RunByManualState extends State<RunByManual> {
 
       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
       Map<String, dynamic> manualOperation = {
-        "method": segmentIndex+1,
+        "program": 'Default',
+        "programId": 0,
+        "method": segmentIndex,
         "time": strDuration,
         "flow": strFlow,
         "selected": standaloneSelection,
@@ -1163,13 +1199,14 @@ class _RunByManualState extends State<RunByManual> {
 
   }
 
-  void sendCommandToControllerAndMqttProgram(List<String> allRelaySrlNo, String zoneSrlNo){
-    String finalResult = allRelaySrlNo.where((s) => s.isNotEmpty).join('_');
+  void sendCommandToControllerAndMqttProgram(String strSldSqnLocation,String strSldSqnNo,String strSldIrrigationPumpId,String strSldMainValveId
+      ,String strSldCtrlFilterId,String sldCtrlFilterRelayOnOffStatus,String strSldLocFilterId,String sldLocFilterRelayOnOffStatus,
+      String strSldFanId,String strSldFgrId){
+
     String payload = '';
     String payLoadFinal = '';
-
     print(strDuration);
-    if(segmentIndex==1 && strDuration=='00:00:00'){
+    if(segmentIndex==2 && strDuration=='00:00:00'){
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Invalid Duration input'),
@@ -1177,22 +1214,27 @@ class _RunByManualState extends State<RunByManual> {
         ),
       );
     }else{
-      payload = '${finalResult.isEmpty?0:1},${widget.programList[ddSelection].programCategory},${widget.programList[ddSelection].serialNumber},$zoneSrlNo,$finalResult,${segmentIndex==0?3:1},${segmentIndex==0?'0':segmentIndex==1?strDuration:strFlow}';
+      payload = '${1},$strSldSqnLocation,${widget.programList[ddSelection].serialNumber},'
+          '$strSldSqnNo,$strSldIrrigationPumpId,$strSldMainValveId,$strSldCtrlFilterId,'
+          '$sldCtrlFilterRelayOnOffStatus,$strSldLocFilterId,$sldLocFilterRelayOnOffStatus,'
+          '$strSldFanId,$strSldFgrId,${segmentIndex==1?3:1},${segmentIndex==1?'0':segmentIndex==2?strDuration:strFlow};';
       payLoadFinal = jsonEncode({
         "3900": [{"3901": payload}]
       });
-
       print(payLoadFinal);
-
       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
+      //widget.callbackFunction('Successfully sent comment');
+
       Map<String, dynamic> manualOperation = {
-        "method": segmentIndex+1,
+        "program": widget.programList[ddSelection].programName,
+        "programId": widget.programList[ddSelection].programId,
+        "method": segmentIndex,
         "time": strDuration,
         "flow": strFlow,
         "selected": standaloneSelection,
       };
-      widget.callbackFunction('Successfully sent comment');
-      //sentManualModeToServer(manualOperation);
+      sentManualModeToServer(manualOperation);
+
     }
 
   }
@@ -1246,6 +1288,28 @@ class _RunByManualState extends State<RunByManual> {
           'location': itemList[i].location,
           'selected': itemList[i].selected,
         });
+      }
+    }
+    return result.isNotEmpty ? result.substring(0, result.length - 1) : '';
+  }
+
+  String getSelectedRelayId(itemList) {
+    String result = '';
+    for (int i = 0; i < itemList.length; i++) {
+      if (itemList[i].selected) {
+        result += '${itemList[i].id}_';
+      }
+    }
+    return result.isNotEmpty ? result.substring(0, result.length - 1) : '';
+  }
+
+  String getRelayOnOffStatus(itemList) {
+    String result = '';
+    for (int i = 0; i < itemList.length; i++) {
+      if (itemList[i].selected) {
+        result += '1_';
+      }else{
+        result += '0_';
       }
     }
     return result.isNotEmpty ? result.substring(0, result.length - 1) : '';
@@ -1412,7 +1476,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        width: MediaQuery.of(context).size.width-380,
+                        width: MediaQuery.of(context).size.width-400,
                         height: 50,
                         decoration: BoxDecoration(
                           color: myTheme.primaryColor.withOpacity(0.1),
@@ -1467,16 +1531,20 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                             headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
                             columns: const [
                               DataColumn2(
+                                  label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
+                                  fixedWidth: 30
+                              ),
+                              DataColumn2(
                                   label: Center(child: Text('S.No', style: TextStyle(fontSize: 14),)),
                                   fixedWidth: 50
                               ),
                               DataColumn2(
-                                  label: Center(child: Text('Valve Id', style: TextStyle(fontSize: 14),)),
+                                  label: Center(child: Text('Rf.No', style: TextStyle(fontSize: 14),)),
                                   size: ColumnSize.M
                               ),
                               DataColumn2(
-                                label: Center(child: Text('Location', style: TextStyle(fontSize: 14),)),
-                                fixedWidth: 100,
+                                  label: Center(child: Text('Valve Id', style: TextStyle(fontSize: 14),)),
+                                  size: ColumnSize.M
                               ),
                               DataColumn2(
                                   label: Center(
@@ -1500,10 +1568,11 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                               ),
                             ],
                             rows: List<DataRow>.generate(groupedValves[valveLocation]!.length, (index) => DataRow(cells: [
+                              DataCell(Center(child: Image.asset('assets/images/valve_gray.png',width: 25, height: 25,))),
                               DataCell(Center(child: Text('${index + 1}', style: const TextStyle(fontWeight: FontWeight.normal)))),
-                              DataCell(Center(child: Text(groupedValves[valveLocation]![index].id, style: TextStyle(fontWeight: FontWeight.normal)))),
-                              DataCell(Center(child: Text(groupedValves[valveLocation]![index].location, style: TextStyle(fontWeight: FontWeight.normal)))),
-                              DataCell(Center(child: Text(groupedValves[valveLocation]![index].name, style: TextStyle(fontWeight: FontWeight.normal)))),
+                              DataCell(Center(child: Text('${groupedValves[valveLocation]![index].sNo}', style: const TextStyle(fontWeight: FontWeight.normal)))),
+                              DataCell(Center(child: Text(groupedValves[valveLocation]![index].id, style: const TextStyle(fontWeight: FontWeight.normal)))),
+                              DataCell(Center(child: Text(groupedValves[valveLocation]![index].name, style: const TextStyle(fontWeight: FontWeight.normal)))),
                               DataCell(Center(child: Transform.scale(
                                 scale: 0.7,
                                 child: Tooltip(
@@ -1530,8 +1599,16 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                             headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
                             columns: const [
                               DataColumn2(
+                                  label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
+                                  fixedWidth: 30
+                              ),
+                              DataColumn2(
                                   label: Center(child: Text('S.No', style: TextStyle(fontSize: 14),)),
                                   fixedWidth: 50
+                              ),
+                              DataColumn2(
+                                  label: Center(child: Text('Rf.No', style: TextStyle(fontSize: 14),)),
+                                  size: ColumnSize.M
                               ),
                               DataColumn2(
                                   label: Center(child: Text('Valve Id', style: TextStyle(fontSize: 14),)),
@@ -1553,7 +1630,9 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                               ),
                             ],
                             rows: List<DataRow>.generate(groupedValves[valveLocation]!.length, (index) => DataRow(cells: [
+                              DataCell(Center(child: Image.asset('assets/images/valve_gray.png',width: 25, height: 25,))),
                               DataCell(Center(child: Text('${index + 1}', style: const TextStyle(fontWeight: FontWeight.normal)))),
+                              DataCell(Center(child: Text('${groupedValves[valveLocation]![index].sNo}', style: const TextStyle(fontWeight: FontWeight.normal)))),
                               DataCell(Center(child: Text(groupedValves[valveLocation]![index].id, style: TextStyle(fontWeight: FontWeight.normal)))),
                               DataCell(Center(child: Text(groupedValves[valveLocation]![index].location, style: TextStyle(fontWeight: FontWeight.normal)))),
                               DataCell(Center(child: Text(groupedValves[valveLocation]![index].name, style: TextStyle(fontWeight: FontWeight.normal)))),

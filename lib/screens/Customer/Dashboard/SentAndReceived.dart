@@ -131,18 +131,15 @@ class _SentAndReceivedState extends State<SentAndReceived> {
     try {
       sentAndReceivedList.clear();
       Map<String, Object> body = {"userId": widget.customerID, "controllerId": controllerId, "fromDate":date, "toDate":date};
-      final response = await HttpService().postRequest("getUserSentAndReceivedMessage", body);
+      final response = await HttpService().postRequest("getUserSentAndReceivedMessageStatus", body);
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         if(jsonResponse['code']==200){
           sentAndReceivedList = [
             ...jsonResponse['data'].map((programJson) => SentAndReceivedModel.fromJson(programJson)).toList(),
           ];
-
           setState(() {});
-
         }else{
-
         }
       }
     } catch (e) {

@@ -512,11 +512,11 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
       if (status == 0) {
         imagePath = 'assets/images/selector.png';
       } else if (status == 1) {
-        imagePath = 'assets/images/selector.png';
+        imagePath = 'assets/images/selector_g.png';
       } else if (status == 2) {
-        imagePath = 'assets/images/selector.png';
+        imagePath = 'assets/images/selector_y.png';
       } else {
-        imagePath = 'assets/images/selector.png';
+        imagePath = 'assets/images/selector_r.png';
       }
     }else if(type=='FN'){
       if (status == 0) {

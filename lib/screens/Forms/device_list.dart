@@ -62,7 +62,8 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   final List<String> _interfaceInterval = ['0 sec', '5 sec', '10 sec', '20 sec', '30 sec', '45 sec','1 min','5 min','10 min','30 min','1 hr']; // Option 2
   List<CustomerListMDL> myCustomerChildList = <CustomerListMDL>[];
   List<int> nodeStockSelection = [];
-  int currentSite = 0;
+  int currentSiteInx = 0;
+  int currentMstInx = 0;
   bool visibleLoading = false;
 
 
@@ -170,7 +171,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
         for (int i=0; i < cntList.length; i++) {
           customerSiteList.add(ProductListWithNode.fromJson(cntList[i]));
           try {
-            MQTTManager().subscribeToTopic('FirmwareToApp/${customerSiteList[i].master[0].deviceId}');
+            MQTTManager().subscribeToTopic('FirmwareToApp/${customerSiteList[i].master[currentMstInx].deviceId}');
           } catch (e, stackTrace) {
             print('Error: $e');
             print('Stack Trace: $stackTrace');
@@ -700,8 +701,8 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                       Tab(text: customerSiteList[i].groupName,),
                   ],
                   onTap: (index) {
-                    currentSite = index;
-                    print(customerSiteList[index].master[0].controllerId);
+                    currentSiteInx = index;
+                    print(customerSiteList[index].master[currentMstInx].controllerId);
                   },
                 ),
               ),
@@ -758,8 +759,8 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                   "productId": myMasterControllerList[selectedRadioTile].productId,
                                   "categoryName": myMasterControllerList[selectedRadioTile].categoryName,
                                   "createUser": widget.userID,
-                                  "groupName": customerSiteList[currentSite].groupName,
-                                  "groupId": customerSiteList[currentSite].userGroupId,
+                                  "groupName": customerSiteList[currentSiteInx].groupName,
+                                  "groupId": customerSiteList[currentSiteInx].userGroupId,
                                 };
                                 final response = await HttpService().postRequest("createUserDeviceListWithGroup", body);
                                 if(response.statusCode == 200)
@@ -1066,8 +1067,8 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                                 onPressed:() async {
                                                   List<dynamic> updatedInterface = [];
                                                   for(int i=0; i<customerSiteList[siteIndex].master[mstIndex].nodeList.length; i++){
-                                                    Map<String, dynamic> myMap = {"serialNumber": customerSiteList[siteIndex].master[mstIndex].nodeList[i].serialNumber, "productId": customerSiteList[siteIndex].master[0].nodeList[i].productId,
-                                                      'interfaceTypeId': customerSiteList[siteIndex].master[mstIndex].nodeList[i].interfaceTypeId, 'interfaceInterval': customerSiteList[siteIndex].master[0].nodeList[i].interfaceInterval};
+                                                    Map<String, dynamic> myMap = {"serialNumber": customerSiteList[siteIndex].master[mstIndex].nodeList[i].serialNumber, "productId": customerSiteList[siteIndex].master[currentMstInx].nodeList[i].productId,
+                                                      'interfaceTypeId': customerSiteList[siteIndex].master[mstIndex].nodeList[i].interfaceTypeId, 'interfaceInterval': customerSiteList[siteIndex].master[currentMstInx].nodeList[i].interfaceInterval};
                                                     updatedInterface.add(myMap);
                                                   }
                                                   Map<String, dynamic> body = {
@@ -1082,7 +1083,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                                       '${'0'},${"00:00:30"};');
                                   
                                                   for(int i=0; i<customerSiteList[siteIndex].master[mstIndex].nodeList.length; i++){
-                                                    //String paddedNumber = widget.customerSiteList[siteIndex].master[0].nodeList[i].deviceId.toString().padLeft(20, '0');
+                                                    //String paddedNumber = widget.customerSiteList[siteIndex].master[currentMstInx].nodeList[i].deviceId.toString().padLeft(20, '0');
                                                     String formattedTime = convertToHHmmss(customerSiteList[siteIndex].master[mstIndex].nodeList[i].interfaceInterval);
                                                     payLoad.add('${customerSiteList[siteIndex].master[mstIndex].nodeList[i].serialNumber},${customerSiteList[siteIndex].master[mstIndex].nodeList[i].categoryName},${customerSiteList[siteIndex].master[mstIndex].nodeList[i].categoryId},'
                                                         '${customerSiteList[siteIndex].master[mstIndex].nodeList[i].referenceNumber},${customerSiteList[siteIndex].master[mstIndex].nodeList[i].deviceId},'
@@ -1221,6 +1222,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                     ),
                                   ),
                                   onOpened: (){
+                                    currentMstInx = mstIndex;
                                     getNodeStockList(customerSiteList[siteIndex].master[mstIndex].categoryId);
                                   },
                                   onCanceled: () {
@@ -1289,8 +1291,8 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                   onPressed:() async {
                                     List<dynamic> updatedInterface = [];
                                     for(int i=0; i<customerSiteList[siteIndex].master[mstIndex].nodeList.length; i++){
-                                      Map<String, dynamic> myMap = {"serialNumber": customerSiteList[siteIndex].master[mstIndex].nodeList[i].serialNumber, "productId": customerSiteList[siteIndex].master[0].nodeList[i].productId,
-                                        'interfaceTypeId': customerSiteList[siteIndex].master[mstIndex].nodeList[i].interfaceTypeId, 'interfaceInterval': customerSiteList[siteIndex].master[0].nodeList[i].interfaceInterval};
+                                      Map<String, dynamic> myMap = {"serialNumber": customerSiteList[siteIndex].master[mstIndex].nodeList[i].serialNumber, "productId": customerSiteList[siteIndex].master[currentMstInx].nodeList[i].productId,
+                                        'interfaceTypeId': customerSiteList[siteIndex].master[mstIndex].nodeList[i].interfaceTypeId, 'interfaceInterval': customerSiteList[siteIndex].master[currentMstInx].nodeList[i].interfaceInterval};
                                       updatedInterface.add(myMap);
                                     }
                                     Map<String, dynamic> body = {
@@ -1305,7 +1307,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                         '${'0'},${"00:00:30"};');
 
                                     for(int i=0; i<customerSiteList[siteIndex].master[mstIndex].nodeList.length; i++){
-                                      //String paddedNumber = widget.customerSiteList[siteIndex].master[0].nodeList[i].deviceId.toString().padLeft(20, '0');
+                                      //String paddedNumber = widget.customerSiteList[siteIndex].master[currentMstInx].nodeList[i].deviceId.toString().padLeft(20, '0');
                                       String formattedTime = convertToHHmmss(customerSiteList[siteIndex].master[mstIndex].nodeList[i].interfaceInterval);
                                       payLoad.add('${customerSiteList[siteIndex].master[mstIndex].nodeList[i].serialNumber},${customerSiteList[siteIndex].master[mstIndex].nodeList[i].categoryName},${customerSiteList[siteIndex].master[mstIndex].nodeList[i].categoryId},'
                                           '${customerSiteList[siteIndex].master[mstIndex].nodeList[i].referenceNumber},${customerSiteList[siteIndex].master[mstIndex].nodeList[i].deviceId},'
@@ -1442,6 +1444,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                         ),
                                       ),
                                       onOpened: (){
+                                        currentMstInx = mstIndex;
                                         getNodeStockList(customerSiteList[siteIndex].master[mstIndex].categoryId);
                                       },
                                       onCanceled: () {
@@ -1510,8 +1513,8 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                       onPressed:() async {
                                         List<dynamic> updatedInterface = [];
                                         for(int i=0; i<customerSiteList[siteIndex].master[mstIndex].nodeList.length; i++){
-                                          Map<String, dynamic> myMap = {"serialNumber": customerSiteList[siteIndex].master[mstIndex].nodeList[i].serialNumber, "productId": customerSiteList[siteIndex].master[0].nodeList[i].productId,
-                                            'interfaceTypeId': customerSiteList[siteIndex].master[mstIndex].nodeList[i].interfaceTypeId, 'interfaceInterval': customerSiteList[siteIndex].master[0].nodeList[i].interfaceInterval};
+                                          Map<String, dynamic> myMap = {"serialNumber": customerSiteList[siteIndex].master[mstIndex].nodeList[i].serialNumber, "productId": customerSiteList[siteIndex].master[currentMstInx].nodeList[i].productId,
+                                            'interfaceTypeId': customerSiteList[siteIndex].master[mstIndex].nodeList[i].interfaceTypeId, 'interfaceInterval': customerSiteList[siteIndex].master[currentMstInx].nodeList[i].interfaceInterval};
                                           updatedInterface.add(myMap);
                                         }
                                         Map<String, dynamic> body = {
@@ -1526,7 +1529,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                             '${'0'},${"00:00:30"};');
 
                                         for(int i=0; i<customerSiteList[siteIndex].master[mstIndex].nodeList.length; i++){
-                                          //String paddedNumber = widget.customerSiteList[siteIndex].master[0].nodeList[i].deviceId.toString().padLeft(20, '0');
+                                          //String paddedNumber = widget.customerSiteList[siteIndex].master[currentMstInx].nodeList[i].deviceId.toString().padLeft(20, '0');
                                           String formattedTime = convertToHHmmss(customerSiteList[siteIndex].master[mstIndex].nodeList[i].interfaceInterval);
                                           payLoad.add('${customerSiteList[siteIndex].master[mstIndex].nodeList[i].serialNumber},${customerSiteList[siteIndex].master[mstIndex].nodeList[i].categoryName},${customerSiteList[siteIndex].master[mstIndex].nodeList[i].categoryId},'
                                               '${customerSiteList[siteIndex].master[mstIndex].nodeList[i].referenceNumber},${customerSiteList[siteIndex].master[mstIndex].nodeList[i].deviceId},'
@@ -1744,8 +1747,8 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
     List<dynamic> selectedNodeList = [];
 
     List<int> oldNodeListSrlNo = [];
-    for(int i=0; i<customerSiteList[currentSite].master[0].nodeList.length; i++){
-      oldNodeListSrlNo.add(customerSiteList[currentSite].master[0].nodeList[i].serialNumber);
+    for(int i=0; i<customerSiteList[currentSiteInx].master[currentMstInx].nodeList.length; i++){
+      oldNodeListSrlNo.add(customerSiteList[currentSiteInx].master[currentMstInx].nodeList[i].serialNumber);
     }
 
     List missingSrlNumber = missingArray(oldNodeListSrlNo);
@@ -1758,7 +1761,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
           myMap = {"productId": nodeStockList[i].productId.toString(), 'categoryName': nodeStockList[i].categoryName, 'referenceNumber': 0, 'serialNumber': missingSrlNumber[0]};
           missingSrlNumber.removeAt(0);
         }else{
-          int serialNumber = (customerSiteList[currentSite].master[0].nodeList.length + selectedNodeList.length) + 1;
+          int serialNumber = (customerSiteList[currentSiteInx].master[currentMstInx].nodeList.length + selectedNodeList.length) + 1;
           myMap = {
             "productId": nodeStockList[i].productId.toString(),
             'categoryName': nodeStockList[i].categoryName,
@@ -1778,14 +1781,14 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
           if(refNoUpdatingNode != selectedNodeList[i]['categoryName'])
           {
             refNoUpdatingNode = selectedNodeList[i]['categoryName'];
-            var contain = customerSiteList[currentSite].master[0].nodeList.where((element) => element.categoryName == refNoUpdatingNode);
+            var contain = customerSiteList[currentSiteInx].master[currentMstInx].nodeList.where((element) => element.categoryName == refNoUpdatingNode);
             if (contain.isNotEmpty)
             {
-              for(int j = 0; j < customerSiteList[currentSite].master[0].nodeList.length; j++)
+              for(int j = 0; j < customerSiteList[currentSiteInx].master[currentMstInx].nodeList.length; j++)
               {
-                if(customerSiteList[currentSite].master[0].nodeList[j].categoryName == refNoUpdatingNode)
+                if(customerSiteList[currentSiteInx].master[currentMstInx].nodeList[j].categoryName == refNoUpdatingNode)
                 {
-                  oldNodeListRfNo.add(customerSiteList[currentSite].master[0].nodeList[j].referenceNumber);
+                  oldNodeListRfNo.add(customerSiteList[currentSiteInx].master[currentMstInx].nodeList[j].referenceNumber);
                 }
               }
               List missingRN = missingArray(oldNodeListRfNo);
@@ -1847,8 +1850,8 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
         Map<String, dynamic> body = {
           "userId": widget.customerID,
           "dealerId": widget.userID,
-          "masterId": customerSiteList[currentSite].master[0].controllerId,
-          "groupId": customerSiteList[currentSite].userGroupId,
+          "masterId": customerSiteList[currentSiteInx].master[currentMstInx].controllerId,
+          "groupId": customerSiteList[currentSiteInx].userGroupId,
           "products": selectedNodeList,
           "createUser": widget.userID,
         };

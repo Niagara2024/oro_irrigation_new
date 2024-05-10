@@ -192,6 +192,11 @@ class _DashboardWideState extends State<DashboardWide> {
                       await prefs.remove('countryCode');
                       await prefs.remove('mobileNumber');
                       await prefs.remove('subscribeTopic');
+                      await prefs.remove('password');
+                      await prefs.remove('email');
+
+                      MQTTManager().disconnect();
+
                       if (mounted){
                         Navigator.pushReplacementNamed(context, '/login');
                       }

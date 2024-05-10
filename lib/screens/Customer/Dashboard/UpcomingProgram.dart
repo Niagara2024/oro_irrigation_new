@@ -140,9 +140,9 @@ class UpcomingProgram extends StatelessWidget {
                                 color: Colors.orange,
                                 textColor: Colors.white,
                                 onPressed:() {
-                                  String payload = '${provider.upcomingProgram[index]['SNo']},3';
+                                  String payload = '${provider.upcomingProgram[index]['SNo']},2';
                                   String payLoadFinal = jsonEncode({
-                                    "4900": [{"4901": payload}]
+                                    "2900": [{"2901": payload}]
                                   });
                                   MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
                                   sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Paused by Manual', payLoadFinal);
@@ -155,7 +155,7 @@ class UpcomingProgram extends StatelessWidget {
                                 onPressed:() {
                                   String localFilePath = 'assets/audios/audio_off.mp3';
                                   audioPlayer.play(UrlSource(localFilePath));
-                                  String payload = '${provider.upcomingProgram[index]['SNo']},4';
+                                  String payload = '${provider.upcomingProgram[index]['SNo']},3';
                                   String payLoadFinal = jsonEncode({
                                     "2900": [{"2901": payload}]
                                   });
@@ -194,7 +194,6 @@ class UpcomingProgram extends StatelessWidget {
                 ),
               ),
             ],
-
           ),
         ],
       ),

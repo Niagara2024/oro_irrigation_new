@@ -148,7 +148,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController>
       final response = await HttpService().postRequest("getUserProgramNameList", body);
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
-        //print(response.body);
         List<dynamic> programsJson = jsonResponse['data'];
         setState(() {
           programList = [...programsJson.map((programJson) => ProgramList.fromJson(programJson)).toList(),
@@ -597,6 +596,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController>
                                     await prefs.remove('countryCode');
                                     await prefs.remove('mobileNumber');
                                     await prefs.remove('subscribeTopic');
+                                    await prefs.remove('password');
+                                    await prefs.remove('email');
+                                    MQTTManager().disconnect();
+
                                     if (context.mounted){
                                       clearMQTTPayload();
                                       Navigator.pushReplacementNamed(context, '/login');

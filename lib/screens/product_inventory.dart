@@ -123,12 +123,11 @@ class ProductInventoryState extends State<ProductInventory> {
     {
       if(jsonDecode(response.body)["code"]==200)
       {
-        //print(jsonDecode(response.body)["data"]);
         setState(()
         {
           totalProduct = jsonDecode(response.body)["data"]["totalProduct"];
-
           if(userType != 3){
+            productInventoryList.clear();
             List<dynamic> productList = jsonDecode(response.body)["data"]["product"];
             for (int i = 0; i < productList.length; i++) {
               productInventoryList.add(ProductListModel.fromJson(productList[i]));
@@ -140,11 +139,8 @@ class ProductInventoryState extends State<ProductInventory> {
           isLoading = false;
           indicatorViewHide();
         });
-
       }
-
       indicatorViewHide();
-
     }
     else {
       //_showSnackBar(response.body);
@@ -779,7 +775,6 @@ class ProductInventoryState extends State<ProductInventory> {
                   {
                     final body = {"productId": productId, "modelId": mdlId, "deviceId": ctrlIMI.text, "warrantyMonths": ctrlWrM.text, 'modifyUser': userID};
                     final response = await HttpService().putRequest("updateProduct", body);
-                    print(response.body);
                     if (response.statusCode == 200)
                     {
                       if(jsonDecode(response.body)["code"]==200)

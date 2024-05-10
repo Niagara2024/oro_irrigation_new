@@ -831,7 +831,7 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
               }
             }
             else{
-              print('ferMethod 6');
+              //print('ferMethod 6');
             }
           });
         }

@@ -29,11 +29,13 @@ class _RunByManualState extends State<RunByManual> {
 
   late List<DashboardDataProvider> dashBoardData = [];
   bool visibleLoading = false;
-  int ddSelection = 0;
-  int ddSelectionId = 0;
-  int segmentIndex = 0;
+  int ddSedPosition = 0;
+  int programId = 0;
+  int method = 0;
+  int startFlag = 0;
   String strFlow = '0';
   String strDuration = '00:00:00';
+  String strProgramName = '';
   String strSelectedLineOfProgram = '0';
 
   late List<Map<String,dynamic>> standaloneSelection  = [];
@@ -70,12 +72,13 @@ class _RunByManualState extends State<RunByManual> {
     } else {
       print('Program with name \'Default\' already exists in widget.programList.');
     }
-    getControllerDashboardDetails(ddSelectionId, ddSelection);
+    //getControllerDashboardDetails(ddSelectionId, ddSedPosition);
+    getExitManualOperation();
   }
 
   Future<void> payloadCallbackFunction(segIndex, value, sldIrLine) async
   {
-    segmentIndex = segIndex;
+    method = segIndex+1;
     if (value.contains(':')) {
       strDuration = value;
     } else {
@@ -86,17 +89,60 @@ class _RunByManualState extends State<RunByManual> {
 
   Future<void> getControllerDashboardDetails(programId, selection) async
   {
-    ddSelection = selection;
-    indicatorViewShow();
-    await Future.delayed(const Duration(milliseconds: 500));
+    ddSedPosition = selection;
     try {
       dashBoardData = await fetchControllerData(programId);
-      segmentIndex = dashBoardData[0].method;
-      setState(() {
-      });
+      indicatorViewHide();
     } catch (e) {
       print('Error: $e');
     }
+  }
+
+  Future<void> getExitManualOperation() async
+  {
+    indicatorViewShow();
+    Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.controllerID};
+    final response = await HttpService().postRequest("getUserManualOperation", body);
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      if (jsonResponse['data'] != null){
+        try{
+          dynamic data = jsonResponse['data'];
+          startFlag = data['startFlag'];
+          programId = data['programId'];
+          strProgramName = data['programName'];
+          method = data['method'];
+          strFlow = data['flow'];
+          strDuration = data['time'];
+
+          int position = findPositionByName(strProgramName, widget.programList);
+          if (position != -1) {
+            ddSedPosition = position;
+          } else {
+            print("'$strProgramName' not found in the list.");
+          }
+
+          await Future.delayed(const Duration(milliseconds: 500));
+          getControllerDashboardDetails(programId, ddSedPosition);
+        }catch(e){
+          print(e);
+        }
+      } else {
+        throw Exception('Invalid response format: "data" is null');
+        indicatorViewHide();
+      }
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
+
+  int findPositionByName(String name, List<ProgramList> programList) {
+    for (int i = 0; i < programList.length; i++) {
+      if (programList[i].programName == name) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   Future<List<DashboardDataProvider>>fetchControllerData(id) async
@@ -105,8 +151,7 @@ class _RunByManualState extends State<RunByManual> {
     final response = await HttpService().postRequest("getCustomerDashboardByManual", body);
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
-      print(response.body);
-      indicatorViewHide();
+      //print(response.body);
       if (jsonResponse['data'] != null) {
         dynamic data = jsonResponse['data'];
         if (data is Map<String, dynamic>) {
@@ -131,14 +176,14 @@ class _RunByManualState extends State<RunByManual> {
         title: Text(widget.siteName),
         actions: [
           IconButton(tooltip: 'Refresh', icon: const Icon(Icons.refresh), onPressed: () async {
-            getControllerDashboardDetails(ddSelectionId, ddSelection);
+            getControllerDashboardDetails(programId, ddSedPosition);
           }),
           IconButton(
               tooltip: 'Start',
               onPressed: () {
                 standaloneSelection.clear();
 
-                if(ddSelection==0){
+                if(ddSedPosition==0){
                   List<String> allRelaySrlNo = [];
                   String strSldValveOrLineSrlNo = '';
                   String strSldSourcePumpSrlNo ='',strSldIrrigationPumpSrlNo ='',strSldMainValveSrlNo ='',strSldCtrlFilterSrlNo ='',strSldLocFilterSrlNo =''
@@ -166,7 +211,15 @@ class _RunByManualState extends State<RunByManual> {
                     }
                   }
                   if(dashBoardData[0].localFilterSite.isNotEmpty){
-                    strSldLocFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].localFilterSite[0].filter);
+                    for(int i=0; i<dashBoardData[0].localFilterSite.length; i++){
+                      String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].localFilterSite[i].filter);
+                      if(concatenatedString.isNotEmpty){
+                        strSldLocFilterSrlNo += '${concatenatedString}_';
+                      }
+                    }
+                    if (strSldLocFilterSrlNo.isNotEmpty && strSldLocFilterSrlNo.endsWith('_')) {
+                      strSldLocFilterSrlNo = strSldLocFilterSrlNo.replaceRange(strSldLocFilterSrlNo.length - 1, strSldLocFilterSrlNo.length, '');
+                    }
                   }
                   if(dashBoardData[0].centralFertilizerSite.isNotEmpty){
                     for(int i=0; i<dashBoardData[0].centralFertilizerSite.length; i++){
@@ -180,7 +233,15 @@ class _RunByManualState extends State<RunByManual> {
                     }
                   }
                   if(dashBoardData[0].localFertilizerSite.isNotEmpty){
-                    strSldLocFetFilterSrlNo = getSelectedRelaySrlNo(dashBoardData[0].localFertilizerSite[0].fertilizer);
+                    for(int i=0; i<dashBoardData[0].localFertilizerSite.length; i++){
+                      String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].localFertilizerSite[i].fertilizer);
+                      if(concatenatedString.isNotEmpty){
+                        strSldLocFetFilterSrlNo += '${concatenatedString}_';
+                      }
+                    }
+                    if (strSldLocFetFilterSrlNo.isNotEmpty && strSldLocFetFilterSrlNo.endsWith('_')) {
+                      strSldLocFetFilterSrlNo = strSldLocFetFilterSrlNo.replaceRange(strSldLocFetFilterSrlNo.length - 1, strSldLocFetFilterSrlNo.length, '');
+                    }
                   }
                   if(dashBoardData[0].agitator.isNotEmpty){
                     strSldAgitatorSrlNo = getSelectedRelaySrlNo(dashBoardData[0].agitator);
@@ -234,47 +295,40 @@ class _RunByManualState extends State<RunByManual> {
                     strSldSelectorSrlNo,
                   ];
 
-                  if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
-                    showDialog<String>(
-                        context: context,
-                        builder: (BuildContext dgContext) => AlertDialog(
-                          title: const Text('StandAlone'),
-                          content: const Text('Valve is not open! Are you sure! You want to Start the Selected Pump?'),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () => Navigator.pop(dgContext, 'Cancel'),
-                              child: const Text('No'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                startByStandaloneDefault(allRelaySrlNo);
-                                Navigator.pop(dgContext, 'OK');
-                              },
-                              child: const Text('Yes'),
-                            ),
-                          ],
-                        )
-                    );
+                  if(strSldValveOrLineSrlNo.isNotEmpty){
+                    if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
+                      showDialog<String>(
+                          context: context,
+                          builder: (BuildContext dgContext) => AlertDialog(
+                            title: const Text('StandAlone'),
+                            content: const Text('Valve is not open! Are you sure! You want to Start the Selected Pump?'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () => Navigator.pop(dgContext, 'Cancel'),
+                                child: const Text('No'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  startByStandaloneDefault(allRelaySrlNo);
+                                  Navigator.pop(dgContext, 'OK');
+                                },
+                                child: const Text('Yes'),
+                              ),
+                            ],
+                          )
+                      );
+                    }else{
+                      startByStandaloneDefault(allRelaySrlNo);
+                    }
                   }else{
-                    startByStandaloneDefault(allRelaySrlNo);
+                    displaySnackBar(context, 'Empty selection Not allowed');
                   }
+
                 }
                 else{
                   Map<String, List<DashBoardValve>> groupedValves = {};
                   String strSldSqnNo = '';
                   String strSldSqnLocation = '';
-
-                  for (var line in dashBoardData[0].lineOrSequence) {
-                    if(line.selected){
-                      strSldSqnNo = line.sNo;
-                      groupedValves = groupValvesByLocation(line.valves);
-                      groupedValves.forEach((location, valves) {
-                        strSldSqnLocation += '${location}_';
-                      });
-                      strSldSqnLocation = strSldSqnLocation.isNotEmpty ? strSldSqnLocation.substring(0, strSldSqnLocation.length - 1) : '';
-                      break;
-                    }
-                  }
 
                   String strSldIrrigationPumpId = '';
                   if(dashBoardData[0].irrigationPump.isNotEmpty){
@@ -332,14 +386,33 @@ class _RunByManualState extends State<RunByManual> {
                     strSldFgrId = getSelectedRelayId(dashBoardData[0].fogger);
                   }
 
+                  for (var line in dashBoardData[0].lineOrSequence) {
+                    if(line.selected){
+                      strSldSqnNo = line.sNo;
+                      standaloneSelection.add({
+                        'id': line.id,
+                        'sNo': line.sNo,
+                        'name': line.name,
+                        'location': line.location,
+                        'selected': line.selected,
+                      });
+
+                      groupedValves = groupValvesByLocation(line.valves);
+                      groupedValves.forEach((location, valves) {
+                        strSldSqnLocation += '${location}_';
+                      });
+                      strSldSqnLocation = strSldSqnLocation.isNotEmpty ? strSldSqnLocation.substring(0, strSldSqnLocation.length - 1) : '';
+                      break;
+                    }
+                  }
+
                   if (strSldSqnNo.isEmpty) {
                     displayAlert(context, 'You must select an zone.');
-                  }if (strSldIrrigationPumpId.isEmpty) {
+                  }else if (strSldIrrigationPumpId.isEmpty) {
                     displayAlert(context, 'You must select an irrigation pump.');
                   }else{
                     sendCommandToControllerAndMqttProgram(strSldSqnLocation,strSldSqnNo,strSldIrrigationPumpId,strSldMainValveId,strSldCtrlFilterId,
                         sldCtrlFilterRelayOnOffStatus,strSldLocFilterId,sldLocFilterRelayOnOffStatus,strSldFanId,strSldFgrId);
-
                   }
                 }
               },
@@ -1127,7 +1200,6 @@ class _RunByManualState extends State<RunByManual> {
                               ],
                             ),
                           ): Container(),
-
                       ],
                     ),
                   ),
@@ -1136,7 +1208,7 @@ class _RunByManualState extends State<RunByManual> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(right: 5),
-                    child: DisplayLineOrSequence(lineOrSequence: dashBoardData.isNotEmpty ? dashBoardData[0].lineOrSequence : [], programList: widget.programList, programSelectionCallback: getControllerDashboardDetails, ddSelectedVal: ddSelection, duration: dashBoardData[0].time, flow: dashBoardData[0].flow, callbackFunctionForPayload: payloadCallbackFunction, method: dashBoardData[0].method,),
+                    child: DisplayLineOrSequence(lineOrSequence: dashBoardData.isNotEmpty ? dashBoardData[0].lineOrSequence : [], programList: widget.programList, programSelectionCallback: getControllerDashboardDetails, ddSelectedVal: ddSedPosition, duration: dashBoardData[0].time, flow: dashBoardData[0].flow, callbackFunctionForPayload: payloadCallbackFunction, method: dashBoardData[0].method,),
                   ),
                 ),
               ],
@@ -1151,7 +1223,7 @@ class _RunByManualState extends State<RunByManual> {
     showDialog<String>(
         context: context,
         builder: (BuildContext dgContext) => AlertDialog(
-          title: const Text('Standalone Program base'),
+          title: const Text('Stand Alone'),
           content: Text(msg), // Removed '${}' around msg
           actions: <Widget>[
             TextButton(
@@ -1165,12 +1237,21 @@ class _RunByManualState extends State<RunByManual> {
     );
   }
 
+  void displaySnackBar(BuildContext context, String msg){
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Invalid Duration input'),
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
+
   void startByStandaloneDefault(List<String> allRelaySrlNo){
     String finalResult = allRelaySrlNo.where((s) => s.isNotEmpty).join('_');
     String payload = '';
     String payLoadFinal = '';
 
-    if(segmentIndex==2 && strDuration=='00:00:00'){
+    if(method==2 && strDuration=='00:00:00'){
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Invalid Duration input'),
@@ -1178,7 +1259,7 @@ class _RunByManualState extends State<RunByManual> {
         ),
       );
     }else{
-      payload = '${finalResult==''?0:1},${finalResult==''?0:finalResult},${segmentIndex==1?3:1},${segmentIndex==1?'0':segmentIndex==2?strDuration:strFlow}';
+      payload = '${finalResult==''?0:1},${finalResult==''?0:finalResult},${method==1?3:1},${method==1?'0':method==2?strDuration:strFlow}';
       payLoadFinal = jsonEncode({
         "800": [{"801": payload}]
       });
@@ -1187,9 +1268,9 @@ class _RunByManualState extends State<RunByManual> {
 
       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
       Map<String, dynamic> manualOperation = {
-        "program": 'Default',
+        "programName": 'Default',
         "programId": 0,
-        "method": segmentIndex,
+        "method": method,
         "time": strDuration,
         "flow": strFlow,
         "selected": standaloneSelection,
@@ -1205,8 +1286,7 @@ class _RunByManualState extends State<RunByManual> {
 
     String payload = '';
     String payLoadFinal = '';
-    print(strDuration);
-    if(segmentIndex==2 && strDuration=='00:00:00'){
+    if(method==2 && strDuration=='00:00:00'){
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Invalid Duration input'),
@@ -1214,27 +1294,26 @@ class _RunByManualState extends State<RunByManual> {
         ),
       );
     }else{
-      payload = '${1},$strSldSqnLocation,${widget.programList[ddSelection].serialNumber},'
+      payload = '${1},$strSldSqnLocation,${widget.programList[ddSedPosition].serialNumber},'
           '$strSldSqnNo,$strSldIrrigationPumpId,$strSldMainValveId,$strSldCtrlFilterId,'
           '$sldCtrlFilterRelayOnOffStatus,$strSldLocFilterId,$sldLocFilterRelayOnOffStatus,'
-          '$strSldFanId,$strSldFgrId,${segmentIndex==1?3:1},${segmentIndex==1?'0':segmentIndex==2?strDuration:strFlow};';
+          '$strSldFanId,$strSldFgrId,${method==1?3:1},${method==1?'0':method==2?strDuration:strFlow};';
       payLoadFinal = jsonEncode({
         "3900": [{"3901": payload}]
       });
-      print(payLoadFinal);
-      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
-      //widget.callbackFunction('Successfully sent comment');
 
+      print(payLoadFinal);
+
+      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
       Map<String, dynamic> manualOperation = {
-        "program": widget.programList[ddSelection].programName,
-        "programId": widget.programList[ddSelection].programId,
-        "method": segmentIndex,
+        "programName": widget.programList[ddSedPosition].programName,
+        "programId": widget.programList[ddSedPosition].programId,
+        "method": method,
         "time": strDuration,
         "flow": strFlow,
         "selected": standaloneSelection,
       };
       sentManualModeToServer(manualOperation);
-
     }
 
   }
@@ -1297,7 +1376,20 @@ class _RunByManualState extends State<RunByManual> {
     String result = '';
     for (int i = 0; i < itemList.length; i++) {
       if (itemList[i].selected) {
-        result += '${itemList[i].id}_';
+        if (itemList[i].id.contains('MVL')) {
+          result += '${itemList[i].hid}_';
+        }else{
+          result += '${itemList[i].id}_';
+        }
+
+        standaloneSelection.add({
+          'id': itemList[i].id,
+          'sNo': itemList[i].sNo,
+          'name': itemList[i].name,
+          'location': itemList[i].location,
+          'selected': itemList[i].selected,
+        });
+
       }
     }
     return result.isNotEmpty ? result.substring(0, result.length - 1) : '';
@@ -1315,13 +1407,7 @@ class _RunByManualState extends State<RunByManual> {
     return result.isNotEmpty ? result.substring(0, result.length - 1) : '';
   }
 
-  void functionSendPayloadToMqtt(sgmType, val, relayList) {
-    String payload = '${relayList.isEmpty ? 0:1},${ddSelection==0?1:2},${1},${0},${relayList.isNotEmpty ? relayList:0},${0},$sgmType,$val';
-    String payLoadFinal = jsonEncode({
-      "800": [{"801": payload}]
-    });
-    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
-  }
+
 }
 
 class DisplayLineOrSequence extends StatefulWidget {

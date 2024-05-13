@@ -161,16 +161,18 @@ class IrrigationPump {
 class MainValve {
   int sNo;
   String id;
+  String hid;
   String name;
   String location;
   bool selected;
 
-  MainValve({required this.sNo, required this.id, required this.name, required this.location, required this.selected});
+  MainValve({required this.sNo, required this.id, required this.hid, required this.name, required this.location, required this.selected});
 
   factory MainValve.fromJson(Map<String, dynamic> json) {
     return MainValve(
       sNo: json['sNo'],
       id: json['id'],
+      hid: json['hid'],
       name: json['name'],
       location: json['location'],
       selected: json['selected'],

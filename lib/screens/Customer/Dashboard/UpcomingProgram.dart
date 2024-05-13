@@ -19,8 +19,6 @@ class UpcomingProgram extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<MqttPayloadProvider>(context);
-
-    print('upcomingProgram:${provider.upcomingProgram}');
     return Padding(
       padding: const EdgeInsets.all(3.0),
       child: Column(
@@ -57,7 +55,6 @@ class UpcomingProgram extends StatelessWidget {
                         const DataColumn2(
                             label: Text('Method', style: TextStyle(fontSize: 13)),
                             size: ColumnSize.M
-
                         ),
                         const DataColumn2(
                             label: Text('Line', style: TextStyle(fontSize: 13),),
@@ -80,30 +77,46 @@ class UpcomingProgram extends StatelessWidget {
                             size: ColumnSize.M
                         ),
                         DataColumn2(
-                            label: Center(child: IconButton(
-                                tooltip: 'Schedule details',
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ScheduleViewScreen(deviceId: siteData.deviceId, userId: customerId, controllerId: siteData.controllerId, customerId: customerId),
-                                    ),
-                                  );
-                                },
-                                icon: const Icon(Icons.view_list_outlined))),
-                            fixedWidth: 175,
+                            label: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                    tooltip: 'Scheduled details',
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ScheduleViewScreen(deviceId: siteData.deviceId, userId: customerId, controllerId: siteData.controllerId, customerId: customerId),
+                                        ),
+                                      );
+                                    },
+                                    icon: const Icon(Icons.view_list_outlined)),
+                                IconButton(
+                                    tooltip: 'Create new Schedule',
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ScheduleViewScreen(deviceId: siteData.deviceId, userId: customerId, controllerId: siteData.controllerId, customerId: customerId),
+                                        ),
+                                      );
+                                    },
+                                    icon: const Icon(Icons.add_box_outlined))
+                              ],
+                            ),
+                            fixedWidth: 220,
                         ),
                       ],
                       rows: List<DataRow>.generate(provider.upcomingProgram.length, (index) => DataRow(cells: [
                         DataCell(Text(provider.upcomingProgram[index]['ProgName'])),
-                        DataCell(Text(provider.upcomingProgram[index]['SchedulingMethod']==1?'No Schedule':provider.upcomingProgram[index]['SchedulingMethod']==2?'Schedule by days':'Schedule as run list')),
+                        DataCell(Text(provider.upcomingProgram[index]['SchedulingMethod']==1?'No Schedule':provider.upcomingProgram[index]['SchedulingMethod']==2?'Schedule by days':
+                        provider.upcomingProgram[index]['SchedulingMethod']==3?'Schedule as run list':'Day count schedule')),
                         DataCell(Text(provider.upcomingProgram[index]['ProgCategory'])),
                         DataCell(Center(child: Text('${provider.upcomingProgram[index]['TotalZone']}'))),
                         DataCell(Center(child: Text('${provider.upcomingProgram[index]['StartDate']}'))),
                         DataCell(Center(child: Text('${provider.upcomingProgram[index]['StartTime']}'))),
                         DataCell(Center(child: Text('${provider.upcomingProgram[index]['EndDate']}'))),
-                        DataCell(
-                          Row(
+                        DataCell(Row(
                             children: [
                               provider.upcomingProgram[index]['ProgOnOff'] == 0 ? MaterialButton(
                                 color: Colors.green,
@@ -118,7 +131,7 @@ class UpcomingProgram extends StatelessWidget {
                                   MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
                                   sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Started by Manual', payLoadFinal);
                                 },
-                                child: const Text('Start'),
+                                child: const Text('Start by Manual'),
                               ) :
                               MaterialButton(
                                 color: Colors.redAccent,
@@ -165,8 +178,7 @@ class UpcomingProgram extends StatelessWidget {
                                 child: const Text('Resume'),
                               ),
                             ],
-                          ),
-                        ),
+                          ),),
                       ])),
                     ),
                   ) :

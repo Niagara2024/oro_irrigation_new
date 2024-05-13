@@ -18,6 +18,7 @@ import '../../state_management/MqttPayloadProvider.dart';
 import '../product_inventory.dart';
 import 'AccountManagement.dart';
 import 'CustomerDashboard.dart';
+import 'Dashboard/ControllerSettings.dart';
 import 'Dashboard/RunByManual.dart';
 import 'ProgramSchedule.dart';
 
@@ -42,8 +43,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController>
   int wifiStrength = 0;
   String lastSyncData = '';
 
-  final List<LanguageList> languageList = <LanguageList>[];
-  String _mySelection = 'English';
+
 
 
   @override
@@ -51,7 +51,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController>
     super.initState();
     indicatorViewShow();
     clearMQTTPayload();
-    getLanguage();
     getCustomerSite(widget.customerId);
   }
 
@@ -87,24 +86,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController>
     payloadProvider.wifiStrength = 0;
     payloadProvider.alarmList = [];
     payloadProvider.payload2408 = [];
-
-  }
-
-  Future<void> getLanguage() async
-  {
-    final response = await HttpService().postRequest("getLanguageByActive", {"active": '1'});
-    if (response.statusCode == 200)
-    {
-      languageList.clear();
-      var data = jsonDecode(response.body);
-      if(data["code"]==200)
-      {
-        final cntList = data["data"] as List;
-        for (int i=0; i < cntList.length; i++) {
-          languageList.add(LanguageList.fromJson(cntList[i]));
-        }
-      }
-    }
 
   }
 
@@ -481,53 +462,39 @@ class _CustomerScreenControllerState extends State<CustomerScreenController>
                   backgroundColor: Colors.white,
                   child: Icon(Icons.live_help_outlined),
                 )),
-                IconButton(tooltip : 'App Settings', onPressed: (){
+                IconButton(tooltip : 'Site List', onPressed: (){
                   showMenu(
                     context: context,
-                    position: const RelativeRect.fromLTRB(100, 0, 70, 0),
+                    color: Colors.white,
+                    position: const RelativeRect.fromLTRB(100, 0, 30, 0),
                     items: <PopupMenuEntry>[
                       PopupMenuItem(
                         child: Column(
-                          children: [
-                            ListTile(
-                              title: const Text('Language'),
-                              leading: Icon(Icons.language, color: myTheme.primaryColor,),
-                              trailing: DropdownButton(
-                                items: languageList.map((item) {
-                                  return DropdownMenuItem(
-                                    value: item.languageName,
-                                    child: Text(item.languageName),
-                                  );
-                                }).toList(),
-                                onChanged: (newVal) {
-                                  setState(() {
-                                    _mySelection = newVal!;
-                                  });
-                                },
-                                value: _mySelection,
-                              ),
-                            ),
-                            ListTile(
-                              title: const Text('Theme(Light/Dark)'),
-                              leading: Icon(Icons.color_lens_outlined,  color: myTheme.primaryColor,),
-                              onTap: (){
+                          children: (siteListFinal ?? []).map((site) {
+                            int index = siteListFinal.indexOf(site);
+                            return ListTile(
+                              leading: Image.asset('assets/images/oro_gem.png', width: 30, height: 30,),
+                              title: Text(site.siteName),
+                              subtitle: Text('Controller : ${site.deviceName}\nModel : ${site.modelName}\nController ID : ${site.deviceId}'),
+                              onTap: () {
+                                if(siteListFinal.length>1){
+                                  clearMQTTPayload();
+                                  siteIndex = index;
+                                  subscribeAndUpdateSite();
+                                  getProgramList();
+                                }
                                 Navigator.pop(context);
-                                ThemeData initialTheme = Theme.of(context);
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => ThemeChangeDialog(initialTheme: initialTheme),
-                                );
                               },
-                            ),
-                          ],
+                            );
+                          }).toList(),
                         ),
                       ),
                     ],
                   );
-                }, icon: const CircleAvatar(
-                  radius: 17,
+                }, icon: CircleAvatar(
+                  radius: 17.5,
                   backgroundColor: Colors.white,
-                  child: Icon(Icons.settings_outlined),
+                  child: Image.asset('assets/images/oro_gem.png', width: 25, height: 25,),
                 )),
                 IconButton(tooltip : 'Niagara Account\n${widget.customerName}\n ${widget.mobileNo}', onPressed: (){
                   showMenu(
@@ -619,40 +586,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController>
                   backgroundColor: Colors.white,
                   child: Text(widget.customerName.substring(0, 1).toUpperCase()),
                 )),
-                IconButton(tooltip : 'Site List', onPressed: (){
-                  showMenu(
-                    context: context,
-                    color: Colors.white,
-                    position: const RelativeRect.fromLTRB(100, 0, 30, 0),
-                    items: <PopupMenuEntry>[
-                      PopupMenuItem(
-                        child: Column(
-                          children: (siteListFinal ?? []).map((site) {
-                            int index = siteListFinal.indexOf(site);
-                            return ListTile(
-                              leading: Image.asset('assets/images/oro_gem.png', width: 30, height: 30,),
-                              title: Text(site.siteName),
-                              subtitle: Text('Controller : ${site.deviceName}\nModel : ${site.modelName}\nController ID : ${site.deviceId}'),
-                              onTap: () {
-                                if(siteListFinal.length>1){
-                                  clearMQTTPayload();
-                                  siteIndex = index;
-                                  subscribeAndUpdateSite();
-                                  getProgramList();
-                                }
-                                Navigator.pop(context);
-                              },
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ],
-                  );
-                }, icon: CircleAvatar(
-                  radius: 17.5,
-                  backgroundColor: Colors.white,
-                  child: Image.asset('assets/images/oro_gem.png', width: 25, height: 25,),
-                )),
               ],),
             const SizedBox(width: 05),
           ],
@@ -731,7 +664,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController>
                     _selectedIndex == 2 ? ProductInventory(userName: widget.customerName):
                     _selectedIndex == 3 ?  ProductInventory(userName: widget.customerName):
                     _selectedIndex == 4 ?  SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].controllerId):
-                    ProductInventory(userName: widget.customerName),
+                    ControllerSettings(customerID: widget.customerId, siteData: siteListFinal[siteIndex]),
                   ),
                 ),
               ),
@@ -1274,126 +1207,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController>
 
 }
 
-class ThemeChangeDialog extends StatefulWidget {
-  final ThemeData initialTheme;
-  ThemeChangeDialog({super.key, required this.initialTheme});
 
-  @override
-  _ThemeChangeDialogState createState() => _ThemeChangeDialogState();
-}
-
-class _ThemeChangeDialogState extends State<ThemeChangeDialog> {
-  late ThemeData _selectedTheme;
-
-  @override
-  void initState() {
-    _selectedTheme = widget.initialTheme;
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Select Theme'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          RadioListTile(
-            title: Container(
-              color: Colors.cyan,
-              width: 150,
-              height: 75,
-              child: const Center(child: Text('Theme cyan')),
-            ),
-            value: ThemeData.light(),
-            groupValue: _selectedTheme,
-            onChanged: (value) {
-              setState(() {
-                _selectedTheme = value!;
-              });
-            },
-          ),
-          RadioListTile(
-            title: Container(
-              color: Colors.yellow,
-              width: 150,
-              height: 75,
-              child: Center(child: const Text('Theme yellow')),
-            ),
-            value: ThemeData.light(),
-            groupValue: _selectedTheme,
-            onChanged: (value) {
-              setState(() {
-                _selectedTheme = value!;
-              });
-            },
-          ),
-          RadioListTile(
-            title: Container(
-              color: Colors.green,
-              width: 150,
-              height: 75,
-              child: Center(child: const Text('Theme green')),
-            ),
-            value: ThemeData.light(),
-            groupValue: _selectedTheme,
-            onChanged: (value) {
-              setState(() {
-                _selectedTheme = value!;
-              });
-            },
-          ),
-          RadioListTile(
-            title: Container(
-              color: Colors.pink,
-              width: 150,
-              height: 75,
-              child: Center(child: const Text('Theme pink')),
-            ),
-            value: ThemeData.light(),
-            groupValue: _selectedTheme,
-            onChanged: (value) {
-              setState(() {
-                _selectedTheme = value!;
-              });
-            },
-          ),
-          RadioListTile(
-            title: Container(
-              color: Colors.purple,
-              width: 150,
-              height: 75,
-              child: Center(child: const Text('Theme purple')),
-            ),
-            value: ThemeData.light(),
-            groupValue: _selectedTheme,
-            onChanged: (value) {
-              setState(() {
-                _selectedTheme = value!;
-              });
-            },
-          ),
-        ],
-      ),
-      actions: <Widget>[
-        MaterialButton(
-          onPressed: () {
-            Navigator.pop(context); // Close the dialog
-          },
-          child: const Text('Cancel'),
-        ),
-        MaterialButton(
-          onPressed: () {
-            // Update the theme and close the dialog
-            //ThemeController().updateTheme(_selectedTheme);
-            Navigator.pop(context);
-          },
-          child: Text('OK'),
-        ),
-      ],
-    );
-  }
-}
 
 class BadgeButton extends StatelessWidget {
   final VoidCallback onPressed;

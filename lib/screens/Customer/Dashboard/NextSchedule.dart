@@ -82,7 +82,8 @@ class _NextScheduleState extends State<NextSchedule> {
                       ],
                       rows: List<DataRow>.generate(provider.nextSchedule.length, (index) => DataRow(cells: [
                         DataCell(Text(provider.nextSchedule[index]['ProgName'])),
-                        DataCell(Text(provider.nextSchedule[index]['SchedulingMethod']==1?'No Schedule':provider.nextSchedule[index]['SchedulingMethod']==2?'Schedule by days':'Schedule as run list')),
+                        DataCell(Text(provider.nextSchedule[index]['SchedulingMethod']==1?'No Schedule':provider.nextSchedule[index]['SchedulingMethod']==2?'Schedule by days':
+                        provider.nextSchedule[index]['SchedulingMethod']==3?'Schedule as run list':'Day count schedule')),
                         DataCell(Text(provider.nextSchedule[index]['ProgCategory'])),
                         DataCell(Center(child: Text('${provider.nextSchedule[index]['CurrentZone']}'))),
                         DataCell(Center(child: Center(child: Text(provider.nextSchedule[index]['ZoneName'])))),

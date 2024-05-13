@@ -63,7 +63,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                       return Column(
                         children: [
                           SizedBox(
-                            width: MediaQuery.sizeOf(context).width-159,
+                            width: MediaQuery.sizeOf(context).width-160,
                             height: 85,
                             child: DataTable2(
                               columnSpacing: 12,
@@ -80,7 +80,6 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                 const DataColumn2(
                                     label: Text('Line', style: TextStyle(fontSize: 13)),
                                     size: ColumnSize.S
-
                                 ),
                                 const DataColumn2(
                                     label: Text('Zone', style: TextStyle(fontSize: 13),),
@@ -89,7 +88,6 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                 const DataColumn2(
                                     label: Text('Zone Name', style: TextStyle(fontSize: 13)),
                                     size: ColumnSize.M
-
                                 ),
                                 const DataColumn2(
                                     label: Center(child: Text('RTC', style: TextStyle(fontSize: 13),)),
@@ -141,7 +139,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                       sentManualModeToServer(manualOperation);
                                     } : null,
                                     child: const Text('Stop'),
-                                  ) :
+                                  ):
                                   MaterialButton(
                                     color: Colors.green,
                                     textColor: Colors.white,
@@ -159,7 +157,6 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                             ),
                           ),
                           const Divider(height: 0),
-
                           SizedBox(
                             width: MediaQuery.sizeOf(context).width,
                             height: 60,
@@ -223,220 +220,6 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                     ),
                                   ],
                                 )
-                                /*(provider.currentSchedule[csIndex].containsKey('MV') && provider.currentSchedule[csIndex]['MV'].length > 0)
-                                    && (provider.currentSchedule[csIndex].containsKey('VL') && provider.currentSchedule[csIndex]['VL'].length > 0) ?
-                                Row(
-                                  children: [
-                                    for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['MV'].length; mvIndex++)
-                                      Expanded(
-                                        flex: 1,
-                                        child: buildWidget('MV', provider.currentSchedule[csIndex]['MV'][mvIndex]['Status'],
-                                            provider.currentSchedule[csIndex]['MV'][mvIndex]['Name']),
-                                      ),
-                                    for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['VL'].length; mvIndex++)
-                                      Expanded(
-                                        flex: 1,
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(right: 8),
-                                          child: buildWidget('VL', provider.currentSchedule[csIndex]['VL'][mvIndex]['Status'],
-                                              provider.currentSchedule[csIndex]['VL'][mvIndex]['Name']),
-                                        ),
-                                      ),
-                                    for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['AG'].length; mvIndex++)
-                                      Expanded(
-                                        flex: 1,
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(right: 8),
-                                          child: buildWidget('AG', provider.currentSchedule[csIndex]['AG'][mvIndex]['Status'],
-                                              provider.currentSchedule[csIndex]['AG'][mvIndex]['Name']),
-                                        ),
-                                      ),
-
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Container(width: 1, height: 40, color: Colors.grey,),
-                                    ),
-                                    SizedBox(
-                                      width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 200 : 215,
-                                      child: Row(
-                                        children: [
-                                          const Text('Remaining : '),
-                                          provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
-                                          Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ):
-                                provider.currentSchedule[csIndex].containsKey('VL') && provider.currentSchedule[csIndex]['VL'].length > 0 ? Row(
-                                  children: [
-                                    for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['VL'].length; mvIndex++)
-                                      Expanded(
-                                        flex: 1,
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(right: 8),
-                                          child: Column(
-                                            children: [
-                                              const SizedBox(height: 3),
-                                              Image.asset(
-                                                width: 40,
-                                                height: 40,
-                                                provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==0 ?
-                                                'assets/images/valve_gray.png':
-                                                provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==1 ?
-                                                'assets/images/valve_green.png':
-                                                provider.currentSchedule[csIndex]['VL'][mvIndex]['Status']==2 ?
-                                                'assets/images/valve_orange.png': 'assets/images/valve_red.png',
-                                              ),
-                                              const SizedBox(height: 3),
-                                              Text('${provider.currentSchedule[csIndex]['VL'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Container(width: 1, height: 40, color: Colors.grey,),
-                                    ),
-                                    SizedBox(
-                                      width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 200 : 215,
-                                      child: Row(
-                                        children: [
-                                          const Text('Remaining : '),
-                                          provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
-                                          Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
-                                        ],
-                                      ),
-                                    )
-                                  ],
-                                ) :
-                                provider.currentSchedule[csIndex].containsKey('MV') && provider.currentSchedule[csIndex]['MV'].length > 0 ? Row(
-                                  children: [
-                                    for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['MV'].length; mvIndex++)
-                                      Expanded(
-                                        flex: 1,
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(right: 8),
-                                          child: Column(
-                                            children: [
-                                              const SizedBox(height: 3),
-                                              Image.asset(
-                                                width: 40,
-                                                height: 40,
-                                                provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==0 ?
-                                                'assets/images/dp_main_valve_not_open.png':
-                                                provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==1 ?
-                                                'assets/images/dp_main_valve_open.png':
-                                                provider.currentSchedule[csIndex]['MV'][mvIndex]['Status']==2 ?
-                                                'assets/images/dp_main_valve_wait.png': 'assets/images/dp_main_valve_closed.png',
-                                              ),
-                                              const SizedBox(height: 3),
-                                              Text('${provider.currentSchedule[csIndex]['MV'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Container(width: 1, height: 40, color: Colors.grey,),
-                                    ),
-                                    SizedBox(
-                                      width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 200 : 215,
-                                      child: Row(
-                                        children: [
-                                          const Text('Remaining : '),
-                                          provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
-                                          Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
-                                        ],
-                                      ),
-                                    )
-                                  ],
-                                ) :
-                                provider.currentSchedule[csIndex].containsKey('AG') && provider.currentSchedule[csIndex]['AG'].length > 0 ? Row(
-                                  children: [
-                                    for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['AG'].length; mvIndex++)
-                                      Expanded(
-                                        flex: 1,
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(right: 8),
-                                          child: Column(
-                                            children: [
-                                              const SizedBox(height: 3),
-                                              Image.asset(
-                                                width: 40,
-                                                height: 40,
-                                                provider.currentSchedule[csIndex]['AG'][mvIndex]['Status']==0 ?
-                                                'assets/images/dp_agitator_gray.png':
-                                                provider.currentSchedule[csIndex]['AG'][mvIndex]['Status']==1 ?
-                                                'assets/images/dp_agitator_green.png':
-                                                provider.currentSchedule[csIndex]['AG'][mvIndex]['Status']==2 ?
-                                                'assets/images/dp_agitator_yellow.png': 'assets/images/dp_agitator_red.png',
-                                              ),
-                                              const SizedBox(height: 3),
-                                              Text('${provider.currentSchedule[csIndex]['AG'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Container(width: 1, height: 40, color: Colors.grey,),
-                                    ),
-                                    SizedBox(
-                                      width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 200 : 215,
-                                      child: Row(
-                                        children: [
-                                          const Text('Remaining : '),
-                                          provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
-                                          Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
-                                        ],
-                                      ),
-                                    )
-                                  ],
-                                ) :
-                                provider.currentSchedule[csIndex].containsKey('FG') && provider.currentSchedule[csIndex]['FG'].length > 0 ? Row(
-                                  children: [
-                                    for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['FG'].length; mvIndex++)
-                                      Expanded(
-                                        flex: 1,
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(right: 8),
-                                          child: Column(
-                                            children: [
-                                              const SizedBox(height: 3),
-                                              Image.asset(
-                                                width: 40,
-                                                height: 40,
-                                                provider.currentSchedule[csIndex]['FG'][mvIndex]['Status']==0 ?
-                                                'assets/images/fogger.png':
-                                                provider.currentSchedule[csIndex]['FG'][mvIndex]['Status']==1 ?
-                                                'assets/images/fogger.png':
-                                                provider.currentSchedule[csIndex]['FG'][mvIndex]['Status']==2 ?
-                                                'assets/images/fogger.png': 'assets/images/fogger.png',
-                                              ),
-                                              const SizedBox(height: 3),
-                                              Text('${provider.currentSchedule[csIndex]['FG'][mvIndex]['Name']}', style: const TextStyle(fontSize: 10),),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Container(width: 1, height: 40, color: Colors.grey,),
-                                    ),
-                                    SizedBox(
-                                      width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 200 : 215,
-                                      child: Row(
-                                        children: [
-                                          const Text('Remaining : '),
-                                          provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
-                                          Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
-                                        ],
-                                      ),
-                                    )
-                                  ],
-                                ) :
-                                const SizedBox(),*/
                               ],
                             ),
                           )

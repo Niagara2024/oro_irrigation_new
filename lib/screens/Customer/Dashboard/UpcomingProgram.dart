@@ -50,31 +50,35 @@ class UpcomingProgram extends StatelessWidget {
                       columns:  [
                         const DataColumn2(
                             label: Text('Name', style: TextStyle(fontSize: 13),),
-                            size: ColumnSize.L
+                            size: ColumnSize.L,
+                        ),
+                        const DataColumn2(
+                          label: Center(child: Text('R-Code', style: TextStyle(fontSize: 13),)),
+                          fixedWidth: 70,
                         ),
                         const DataColumn2(
                             label: Text('Method', style: TextStyle(fontSize: 13)),
-                            size: ColumnSize.M
+                            size: ColumnSize.M,
                         ),
                         const DataColumn2(
                             label: Text('Line', style: TextStyle(fontSize: 13),),
-                            size: ColumnSize.M
+                            size: ColumnSize.M,
                         ),
                         const DataColumn2(
                             label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
-                            fixedWidth: 50
+                            fixedWidth: 50,
                         ),
                         const DataColumn2(
                             label: Center(child: Text('Start Date', style: TextStyle(fontSize: 13),)),
-                            size: ColumnSize.M
+                            size: ColumnSize.M,
                         ),
                         const DataColumn2(
                             label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
-                            size: ColumnSize.M
+                            size: ColumnSize.M,
                         ),
                         const DataColumn2(
                             label: Center(child: Text('End Date', style: TextStyle(fontSize: 13),)),
-                            size: ColumnSize.M
+                            size: ColumnSize.M,
                         ),
                         DataColumn2(
                             label: Row(
@@ -104,11 +108,12 @@ class UpcomingProgram extends StatelessWidget {
                                     icon: const Icon(Icons.add_box_outlined))
                               ],
                             ),
-                            fixedWidth: 220,
+                            fixedWidth: 265,
                         ),
                       ],
                       rows: List<DataRow>.generate(provider.upcomingProgram.length, (index) => DataRow(cells: [
                         DataCell(Text(provider.upcomingProgram[index]['ProgName'])),
+                        DataCell(Center(child: Text('${provider.upcomingProgram[index]['StartStopReason']}'))),
                         DataCell(Text(provider.upcomingProgram[index]['SchedulingMethod']==1?'No Schedule':provider.upcomingProgram[index]['SchedulingMethod']==2?'Schedule by days':
                         provider.upcomingProgram[index]['SchedulingMethod']==3?'Schedule as run list':'Day count schedule')),
                         DataCell(Text(provider.upcomingProgram[index]['ProgCategory'])),
@@ -177,6 +182,29 @@ class UpcomingProgram extends StatelessWidget {
                                 },
                                 child: const Text('Resume'),
                               ),
+                              const SizedBox(width: 5),
+                              IconButton(tooltip: 'View details', icon: const Icon(Icons.more_vert), onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text(provider.upcomingProgram[index]['ProgName']),
+                                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                                      content: Text('Start or Stop Reason Code = ${provider.upcomingProgram[index]['StartStopReason']}'),
+                                      actions: <Widget>[
+                                        MaterialButton(
+                                          color: Colors.green,
+                                          textColor: Colors.white,
+                                          onPressed:() {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: const Text('OK'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },)
                             ],
                           ),),
                       ])),
@@ -212,6 +240,7 @@ class UpcomingProgram extends StatelessWidget {
     );
   }
 
+
   void sentUserOperationToServer(String msg, String data) async
   {
     Map<String, Object> body = {"userId": customerId, "controllerId": siteData.controllerId, "messageStatus": msg, "data": data, "createUser": customerId};
@@ -224,3 +253,4 @@ class UpcomingProgram extends StatelessWidget {
   }
 
 }
+

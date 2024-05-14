@@ -55,6 +55,7 @@ class MqttPayloadProvider with ChangeNotifier {
         if (data['2400'][0].containsKey('2404')) {
           upcomingProgram = data['2400'][0]['2404'];
         }
+        //print('upcomingProgram:${upcomingProgram}');
         if (data['2400'][0].containsKey('2405')) {
           List<dynamic> filtersJson = data['2400'][0]['2405'];
           filtersCentral = [];

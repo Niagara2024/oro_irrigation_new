@@ -146,10 +146,8 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                     color: Colors.redAccent,
                                     textColor: Colors.white,
                                     onPressed: () async {
-
                                       final prefs = await SharedPreferences.getInstance();
                                       String? prgOffPayload = prefs.getString('StandAloneProgramOff');
-
                                       String payLoadFinal = jsonEncode({
                                         "3900": [{"3901": prgOffPayload}]
                                       });

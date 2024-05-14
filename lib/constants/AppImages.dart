@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 
 class AppImages {
-  static const String imagesPath = "assets/images/";
+  static const String pngPath = "assets/images/";
+  static const String gifPath = "assets/GifFile/";
 
   static const String irrigationPumpOFF = "dp_irr_pump.png";
-  static const String irrigationPumpON = "dp_irr_pump_g.png";
+  static const String irrigationPumpON = "dp_irr_pump_g.gif";
   static const String irrigationPumpNotON = "dp_irr_pump_y.png";
   static const String irrigationPumpNotOFF = "dp_irr_pump_r.png";
 
@@ -24,7 +25,6 @@ class AppImages {
 
   static Widget getAsset(String imageKey, int status, String type) {
     String imagePathFinal;
-
     switch (imageKey) {
       case 'sourcePump' || 'irrigationPump':
         imagePathFinal = _getIrrigationPumpImagePath(status);
@@ -42,7 +42,10 @@ class AppImages {
         imagePathFinal = '';
     }
 
-    return Image.asset('$imagesPath$imagePathFinal');
+    if(imagePathFinal.contains('.gif')){
+      return Image.asset('$gifPath$imagePathFinal');
+    }
+    return Image.asset('$pngPath$imagePathFinal');
   }
 
   static String _getIrrigationPumpImagePath(int status) {

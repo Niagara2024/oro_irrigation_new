@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Models/Customer/Dashboard/DashBoardValve.dart';
 import '../../../Models/Customer/Dashboard/DashboardDataProvider.dart';
@@ -178,248 +179,258 @@ class _RunByManualState extends State<RunByManual> {
           IconButton(tooltip: 'Refresh', icon: const Icon(Icons.refresh), onPressed: () async {
             getControllerDashboardDetails(programId, ddSedPosition);
           }),
-          IconButton(
-              tooltip: 'Start',
-              onPressed: () {
-                standaloneSelection.clear();
+          const SizedBox(width: 10),
+          MaterialButton(
+            color: Colors.green,
+            textColor: Colors.white,
+            onPressed:() {
+              standaloneSelection.clear();
+              if(ddSedPosition==0){
+                List<String> allRelaySrlNo = [];
+                String strSldValveOrLineSrlNo = '';
+                String strSldSourcePumpSrlNo ='',strSldIrrigationPumpSrlNo ='',strSldMainValveSrlNo ='',strSldCtrlFilterSrlNo ='',strSldLocFilterSrlNo =''
+                ,strSldCrlFetFilterSrlNo ='',strSldLocFetFilterSrlNo ='', strSldAgitatorSrlNo ='', strSldFanSrlNo ='', strSldFoggerSrlNo =''
+                , strSldBoosterPumpSrlNo ='', strSldSelectorSrlNo ='';
 
-                if(ddSedPosition==0){
-                  List<String> allRelaySrlNo = [];
-                  String strSldValveOrLineSrlNo = '';
-                  String strSldSourcePumpSrlNo ='',strSldIrrigationPumpSrlNo ='',strSldMainValveSrlNo ='',strSldCtrlFilterSrlNo ='',strSldLocFilterSrlNo =''
-                  ,strSldCrlFetFilterSrlNo ='',strSldLocFetFilterSrlNo ='', strSldAgitatorSrlNo ='', strSldFanSrlNo ='', strSldFoggerSrlNo =''
-                  , strSldBoosterPumpSrlNo ='', strSldSelectorSrlNo ='';
+                if(dashBoardData[0].sourcePump.isNotEmpty){
+                  strSldSourcePumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].sourcePump);
+                }
+                if(dashBoardData[0].irrigationPump.isNotEmpty){
+                  strSldIrrigationPumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].irrigationPump);
+                }
+                if(dashBoardData[0].mainValve.isNotEmpty){
+                  strSldMainValveSrlNo = getSelectedRelaySrlNo(dashBoardData[0].mainValve);
+                }
+                if(dashBoardData[0].centralFilterSite.isNotEmpty){
+                  for(int i=0; i<dashBoardData[0].centralFilterSite.length; i++){
+                    String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[i].filter);
+                    if(concatenatedString.isNotEmpty){
+                      strSldCtrlFilterSrlNo += '${concatenatedString}_';
+                    }
+                  }
+                  if (strSldCtrlFilterSrlNo.isNotEmpty && strSldCtrlFilterSrlNo.endsWith('_')) {
+                    strSldCtrlFilterSrlNo = strSldCtrlFilterSrlNo.replaceRange(strSldCtrlFilterSrlNo.length - 1, strSldCtrlFilterSrlNo.length, '');
+                  }
+                }
+                if(dashBoardData[0].localFilterSite.isNotEmpty){
+                  for(int i=0; i<dashBoardData[0].localFilterSite.length; i++){
+                    String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].localFilterSite[i].filter);
+                    if(concatenatedString.isNotEmpty){
+                      strSldLocFilterSrlNo += '${concatenatedString}_';
+                    }
+                  }
+                  if (strSldLocFilterSrlNo.isNotEmpty && strSldLocFilterSrlNo.endsWith('_')) {
+                    strSldLocFilterSrlNo = strSldLocFilterSrlNo.replaceRange(strSldLocFilterSrlNo.length - 1, strSldLocFilterSrlNo.length, '');
+                  }
+                }
+                if(dashBoardData[0].centralFertilizerSite.isNotEmpty){
+                  for(int i=0; i<dashBoardData[0].centralFertilizerSite.length; i++){
+                    String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFertilizerSite[i].fertilizer);
+                    if(concatenatedString.isNotEmpty){
+                      strSldCrlFetFilterSrlNo += '${concatenatedString}_';
+                    }
+                  }
+                  if (strSldCrlFetFilterSrlNo.isNotEmpty && strSldCrlFetFilterSrlNo.endsWith('_')) {
+                    strSldCrlFetFilterSrlNo = strSldCrlFetFilterSrlNo.replaceRange(strSldCrlFetFilterSrlNo.length - 1, strSldCrlFetFilterSrlNo.length, '');
+                  }
+                }
+                if(dashBoardData[0].localFertilizerSite.isNotEmpty){
+                  for(int i=0; i<dashBoardData[0].localFertilizerSite.length; i++){
+                    String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].localFertilizerSite[i].fertilizer);
+                    if(concatenatedString.isNotEmpty){
+                      strSldLocFetFilterSrlNo += '${concatenatedString}_';
+                    }
+                  }
+                  if (strSldLocFetFilterSrlNo.isNotEmpty && strSldLocFetFilterSrlNo.endsWith('_')) {
+                    strSldLocFetFilterSrlNo = strSldLocFetFilterSrlNo.replaceRange(strSldLocFetFilterSrlNo.length - 1, strSldLocFetFilterSrlNo.length, '');
+                  }
+                }
+                if(dashBoardData[0].agitator.isNotEmpty){
+                  strSldAgitatorSrlNo = getSelectedRelaySrlNo(dashBoardData[0].agitator);
+                }
+                if(dashBoardData[0].fan.isNotEmpty){
+                  strSldFanSrlNo = getSelectedRelaySrlNo(dashBoardData[0].fan);
+                }
+                if(dashBoardData[0].fogger.isNotEmpty){
+                  strSldFoggerSrlNo = getSelectedRelaySrlNo(dashBoardData[0].fogger);
+                }
+                if(dashBoardData[0].boosterPump.isNotEmpty){
+                  strSldBoosterPumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].boosterPump);
+                }
+                if(dashBoardData[0].selector.isNotEmpty){
+                  strSldSelectorSrlNo = getSelectedRelaySrlNo(dashBoardData[0].selector);
+                }
 
-                  if(dashBoardData[0].sourcePump.isNotEmpty){
-                    strSldSourcePumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].sourcePump);
-                  }
-                  if(dashBoardData[0].irrigationPump.isNotEmpty){
-                    strSldIrrigationPumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].irrigationPump);
-                  }
-                  if(dashBoardData[0].mainValve.isNotEmpty){
-                    strSldMainValveSrlNo = getSelectedRelaySrlNo(dashBoardData[0].mainValve);
-                  }
-                  if(dashBoardData[0].centralFilterSite.isNotEmpty){
-                    for(int i=0; i<dashBoardData[0].centralFilterSite.length; i++){
-                      String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[i].filter);
-                      if(concatenatedString.isNotEmpty){
-                        strSldCtrlFilterSrlNo += '${concatenatedString}_';
+                Map<String, List<DashBoardValve>> groupedValves = {};
+                for (var line in dashBoardData[0].lineOrSequence) {
+                  groupedValves = groupValvesByLocation(line.valves);
+                  groupedValves.forEach((location, valves) {
+                    for (int j = 0; j < valves.length; j++) {
+                      if (valves[j].isOn) {
+                        strSldValveOrLineSrlNo += '${valves[j].sNo}_';
+                        standaloneSelection.add({
+                          'id': valves[j].id,
+                          'sNo': valves[j].sNo,
+                          'name': valves[j].name,
+                          'location': valves[j].location,
+                          'selected': valves[j].isOn,
+                        });
                       }
                     }
-                    if (strSldCtrlFilterSrlNo.isNotEmpty && strSldCtrlFilterSrlNo.endsWith('_')) {
-                      strSldCtrlFilterSrlNo = strSldCtrlFilterSrlNo.replaceRange(strSldCtrlFilterSrlNo.length - 1, strSldCtrlFilterSrlNo.length, '');
-                    }
-                  }
-                  if(dashBoardData[0].localFilterSite.isNotEmpty){
-                    for(int i=0; i<dashBoardData[0].localFilterSite.length; i++){
-                      String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].localFilterSite[i].filter);
-                      if(concatenatedString.isNotEmpty){
-                        strSldLocFilterSrlNo += '${concatenatedString}_';
-                      }
-                    }
-                    if (strSldLocFilterSrlNo.isNotEmpty && strSldLocFilterSrlNo.endsWith('_')) {
-                      strSldLocFilterSrlNo = strSldLocFilterSrlNo.replaceRange(strSldLocFilterSrlNo.length - 1, strSldLocFilterSrlNo.length, '');
-                    }
-                  }
-                  if(dashBoardData[0].centralFertilizerSite.isNotEmpty){
-                    for(int i=0; i<dashBoardData[0].centralFertilizerSite.length; i++){
-                      String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFertilizerSite[i].fertilizer);
-                      if(concatenatedString.isNotEmpty){
-                        strSldCrlFetFilterSrlNo += '${concatenatedString}_';
-                      }
-                    }
-                    if (strSldCrlFetFilterSrlNo.isNotEmpty && strSldCrlFetFilterSrlNo.endsWith('_')) {
-                      strSldCrlFetFilterSrlNo = strSldCrlFetFilterSrlNo.replaceRange(strSldCrlFetFilterSrlNo.length - 1, strSldCrlFetFilterSrlNo.length, '');
-                    }
-                  }
-                  if(dashBoardData[0].localFertilizerSite.isNotEmpty){
-                    for(int i=0; i<dashBoardData[0].localFertilizerSite.length; i++){
-                      String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].localFertilizerSite[i].fertilizer);
-                      if(concatenatedString.isNotEmpty){
-                        strSldLocFetFilterSrlNo += '${concatenatedString}_';
-                      }
-                    }
-                    if (strSldLocFetFilterSrlNo.isNotEmpty && strSldLocFetFilterSrlNo.endsWith('_')) {
-                      strSldLocFetFilterSrlNo = strSldLocFetFilterSrlNo.replaceRange(strSldLocFetFilterSrlNo.length - 1, strSldLocFetFilterSrlNo.length, '');
-                    }
-                  }
-                  if(dashBoardData[0].agitator.isNotEmpty){
-                    strSldAgitatorSrlNo = getSelectedRelaySrlNo(dashBoardData[0].agitator);
-                  }
-                  if(dashBoardData[0].fan.isNotEmpty){
-                    strSldFanSrlNo = getSelectedRelaySrlNo(dashBoardData[0].fan);
-                  }
-                  if(dashBoardData[0].fogger.isNotEmpty){
-                    strSldFoggerSrlNo = getSelectedRelaySrlNo(dashBoardData[0].fogger);
-                  }
-                  if(dashBoardData[0].boosterPump.isNotEmpty){
-                    strSldBoosterPumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].boosterPump);
-                  }
-                  if(dashBoardData[0].selector.isNotEmpty){
-                    strSldSelectorSrlNo = getSelectedRelaySrlNo(dashBoardData[0].selector);
-                  }
+                  });
+                }
 
-                  Map<String, List<DashBoardValve>> groupedValves = {};
-                  for (var line in dashBoardData[0].lineOrSequence) {
+                strSldValveOrLineSrlNo = strSldValveOrLineSrlNo.isNotEmpty ? strSldValveOrLineSrlNo.substring(0, strSldValveOrLineSrlNo.length - 1) : '';
+                allRelaySrlNo = [
+                  strSldSourcePumpSrlNo,
+                  strSldIrrigationPumpSrlNo,
+                  strSldMainValveSrlNo,
+                  strSldCtrlFilterSrlNo,
+                  strSldValveOrLineSrlNo,
+                  strSldLocFilterSrlNo,
+                  strSldCrlFetFilterSrlNo,
+                  strSldLocFetFilterSrlNo,
+                  strSldAgitatorSrlNo,
+                  strSldFanSrlNo,
+                  strSldFoggerSrlNo,
+                  strSldBoosterPumpSrlNo,
+                  strSldSelectorSrlNo,
+                ];
+
+                if(strSldValveOrLineSrlNo.isNotEmpty){
+                  if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
+                    showDialog<String>(
+                        context: context,
+                        builder: (BuildContext dgContext) => AlertDialog(
+                          title: const Text('StandAlone'),
+                          content: const Text('Valve is not open! Are you sure! You want to Start the Selected Pump?'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.pop(dgContext, 'Cancel'),
+                              child: const Text('No'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                startByStandaloneDefault(allRelaySrlNo);
+                                Navigator.pop(dgContext, 'OK');
+                              },
+                              child: const Text('Yes'),
+                            ),
+                          ],
+                        )
+                    );
+                  }else{
+                    startByStandaloneDefault(allRelaySrlNo);
+                  }
+                }else{
+                  displaySnackBar(context, 'Empty selection Not allowed');
+                }
+
+              }
+              else{
+                Map<String, List<DashBoardValve>> groupedValves = {};
+                String strSldSqnNo = '';
+                String strSldSqnLocation = '';
+
+                String strSldIrrigationPumpId = '';
+                if(dashBoardData[0].irrigationPump.isNotEmpty){
+                  strSldIrrigationPumpId = getSelectedRelayId(dashBoardData[0].irrigationPump);
+                }
+
+                String strSldMainValveId = '';
+                if(dashBoardData[0].mainValve.isNotEmpty){
+                  strSldMainValveId = getSelectedRelayId(dashBoardData[0].mainValve);
+                }
+
+                String strSldCtrlFilterId = '';
+                String sldCtrlFilterRelayOnOffStatus = '';
+                if(dashBoardData[0].centralFilterSite.isNotEmpty){
+                  for(int i=0; i<dashBoardData[0].centralFilterSite.length; i++){
+                    String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[i].filter);
+                    if(concatenatedString.isNotEmpty){
+                      strSldCtrlFilterId += '${dashBoardData[0].centralFilterSite[i].id};';
+                      sldCtrlFilterRelayOnOffStatus += '${getRelayOnOffStatus(dashBoardData[0].centralFilterSite[i].filter)};';
+                    }
+                  }
+                  if (strSldCtrlFilterId.isNotEmpty && strSldCtrlFilterId.endsWith(';')) {
+                    strSldCtrlFilterId = strSldCtrlFilterId.replaceRange(strSldCtrlFilterId.length - 1, strSldCtrlFilterId.length, '');
+                  }
+                  if (sldCtrlFilterRelayOnOffStatus.isNotEmpty && sldCtrlFilterRelayOnOffStatus.endsWith(';')) {
+                    sldCtrlFilterRelayOnOffStatus = sldCtrlFilterRelayOnOffStatus.replaceRange(sldCtrlFilterRelayOnOffStatus.length - 1, sldCtrlFilterRelayOnOffStatus.length, '');
+                  }
+                }
+
+                String strSldLocFilterId = '';
+                String sldLocFilterRelayOnOffStatus = '';
+                if(dashBoardData[0].localFilterSite.isNotEmpty){
+                  for(int i=0; i<dashBoardData[0].localFilterSite.length; i++){
+                    String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].localFilterSite[i].filter);
+                    if(concatenatedString.isNotEmpty){
+                      strSldLocFilterId += '${dashBoardData[0].localFilterSite[i].id};';
+                      sldLocFilterRelayOnOffStatus += '${getRelayOnOffStatus(dashBoardData[0].localFilterSite[i].filter)};';
+                    }
+                  }
+                  if (strSldLocFilterId.isNotEmpty && strSldLocFilterId.endsWith(';')) {
+                    strSldLocFilterId = strSldLocFilterId.replaceRange(strSldLocFilterId.length - 1, strSldLocFilterId.length, '');
+                  }
+                  if (sldLocFilterRelayOnOffStatus.isNotEmpty && sldLocFilterRelayOnOffStatus.endsWith(';')) {
+                    sldLocFilterRelayOnOffStatus = sldLocFilterRelayOnOffStatus.replaceRange(sldLocFilterRelayOnOffStatus.length - 1, sldCtrlFilterRelayOnOffStatus.length, '');
+                  }
+                }
+
+                String  strSldFanId = '';
+                if(dashBoardData[0].fan.isNotEmpty){
+                  strSldFanId = getSelectedRelayId(dashBoardData[0].fan);
+                }
+
+                String  strSldFgrId = '';
+                if(dashBoardData[0].fogger.isNotEmpty){
+                  strSldFgrId = getSelectedRelayId(dashBoardData[0].fogger);
+                }
+
+                for (var line in dashBoardData[0].lineOrSequence) {
+                  if(line.selected){
+                    strSldSqnNo = line.sNo;
+                    standaloneSelection.add({
+                      'id': line.id,
+                      'sNo': line.sNo,
+                      'name': line.name,
+                      'location': line.location,
+                      'selected': line.selected,
+                    });
+
                     groupedValves = groupValvesByLocation(line.valves);
                     groupedValves.forEach((location, valves) {
-                      for (int j = 0; j < valves.length; j++) {
-                        if (valves[j].isOn) {
-                          strSldValveOrLineSrlNo += '${valves[j].sNo}_';
-                          standaloneSelection.add({
-                            'id': valves[j].id,
-                            'sNo': valves[j].sNo,
-                            'name': valves[j].name,
-                            'location': valves[j].location,
-                            'selected': valves[j].isOn,
-                          });
-                        }
-                      }
+                      strSldSqnLocation += '${location}_';
                     });
-                  }
-
-                  strSldValveOrLineSrlNo = strSldValveOrLineSrlNo.isNotEmpty ? strSldValveOrLineSrlNo.substring(0, strSldValveOrLineSrlNo.length - 1) : '';
-                  allRelaySrlNo = [
-                    strSldSourcePumpSrlNo,
-                    strSldIrrigationPumpSrlNo,
-                    strSldMainValveSrlNo,
-                    strSldCtrlFilterSrlNo,
-                    strSldValveOrLineSrlNo,
-                    strSldLocFilterSrlNo,
-                    strSldCrlFetFilterSrlNo,
-                    strSldLocFetFilterSrlNo,
-                    strSldAgitatorSrlNo,
-                    strSldFanSrlNo,
-                    strSldFoggerSrlNo,
-                    strSldBoosterPumpSrlNo,
-                    strSldSelectorSrlNo,
-                  ];
-
-                  if(strSldValveOrLineSrlNo.isNotEmpty){
-                    if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
-                      showDialog<String>(
-                          context: context,
-                          builder: (BuildContext dgContext) => AlertDialog(
-                            title: const Text('StandAlone'),
-                            content: const Text('Valve is not open! Are you sure! You want to Start the Selected Pump?'),
-                            actions: <Widget>[
-                              TextButton(
-                                onPressed: () => Navigator.pop(dgContext, 'Cancel'),
-                                child: const Text('No'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  startByStandaloneDefault(allRelaySrlNo);
-                                  Navigator.pop(dgContext, 'OK');
-                                },
-                                child: const Text('Yes'),
-                              ),
-                            ],
-                          )
-                      );
-                    }else{
-                      startByStandaloneDefault(allRelaySrlNo);
-                    }
-                  }else{
-                    displaySnackBar(context, 'Empty selection Not allowed');
-                  }
-
-                }
-                else{
-                  Map<String, List<DashBoardValve>> groupedValves = {};
-                  String strSldSqnNo = '';
-                  String strSldSqnLocation = '';
-
-                  String strSldIrrigationPumpId = '';
-                  if(dashBoardData[0].irrigationPump.isNotEmpty){
-                    strSldIrrigationPumpId = getSelectedRelayId(dashBoardData[0].irrigationPump);
-                  }
-
-                  String strSldMainValveId = '';
-                  if(dashBoardData[0].mainValve.isNotEmpty){
-                    strSldMainValveId = getSelectedRelayId(dashBoardData[0].mainValve);
-                  }
-
-                  String strSldCtrlFilterId = '';
-                  String sldCtrlFilterRelayOnOffStatus = '';
-                  if(dashBoardData[0].centralFilterSite.isNotEmpty){
-                    for(int i=0; i<dashBoardData[0].centralFilterSite.length; i++){
-                      String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[i].filter);
-                      if(concatenatedString.isNotEmpty){
-                        strSldCtrlFilterId += '${dashBoardData[0].centralFilterSite[i].id};';
-                        sldCtrlFilterRelayOnOffStatus += '${getRelayOnOffStatus(dashBoardData[0].centralFilterSite[i].filter)};';
-                      }
-                    }
-                    if (strSldCtrlFilterId.isNotEmpty && strSldCtrlFilterId.endsWith(';')) {
-                      strSldCtrlFilterId = strSldCtrlFilterId.replaceRange(strSldCtrlFilterId.length - 1, strSldCtrlFilterId.length, '');
-                    }
-                    if (sldCtrlFilterRelayOnOffStatus.isNotEmpty && sldCtrlFilterRelayOnOffStatus.endsWith(';')) {
-                      sldCtrlFilterRelayOnOffStatus = sldCtrlFilterRelayOnOffStatus.replaceRange(sldCtrlFilterRelayOnOffStatus.length - 1, sldCtrlFilterRelayOnOffStatus.length, '');
-                    }
-                  }
-
-                  String strSldLocFilterId = '';
-                  String sldLocFilterRelayOnOffStatus = '';
-                  if(dashBoardData[0].localFilterSite.isNotEmpty){
-                    for(int i=0; i<dashBoardData[0].localFilterSite.length; i++){
-                      String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].localFilterSite[i].filter);
-                      if(concatenatedString.isNotEmpty){
-                        strSldLocFilterId += '${dashBoardData[0].localFilterSite[i].id};';
-                        sldLocFilterRelayOnOffStatus += '${getRelayOnOffStatus(dashBoardData[0].localFilterSite[i].filter)};';
-                      }
-                    }
-                    if (strSldLocFilterId.isNotEmpty && strSldLocFilterId.endsWith(';')) {
-                      strSldLocFilterId = strSldLocFilterId.replaceRange(strSldLocFilterId.length - 1, strSldLocFilterId.length, '');
-                    }
-                    if (sldLocFilterRelayOnOffStatus.isNotEmpty && sldLocFilterRelayOnOffStatus.endsWith(';')) {
-                      sldLocFilterRelayOnOffStatus = sldLocFilterRelayOnOffStatus.replaceRange(sldLocFilterRelayOnOffStatus.length - 1, sldCtrlFilterRelayOnOffStatus.length, '');
-                    }
-                  }
-
-                  String  strSldFanId = '';
-                  if(dashBoardData[0].fan.isNotEmpty){
-                    strSldFanId = getSelectedRelayId(dashBoardData[0].fan);
-                  }
-
-                  String  strSldFgrId = '';
-                  if(dashBoardData[0].fogger.isNotEmpty){
-                    strSldFgrId = getSelectedRelayId(dashBoardData[0].fogger);
-                  }
-
-                  for (var line in dashBoardData[0].lineOrSequence) {
-                    if(line.selected){
-                      strSldSqnNo = line.sNo;
-                      standaloneSelection.add({
-                        'id': line.id,
-                        'sNo': line.sNo,
-                        'name': line.name,
-                        'location': line.location,
-                        'selected': line.selected,
-                      });
-
-                      groupedValves = groupValvesByLocation(line.valves);
-                      groupedValves.forEach((location, valves) {
-                        strSldSqnLocation += '${location}_';
-                      });
-                      strSldSqnLocation = strSldSqnLocation.isNotEmpty ? strSldSqnLocation.substring(0, strSldSqnLocation.length - 1) : '';
-                      break;
-                    }
-                  }
-
-                  if (strSldSqnNo.isEmpty) {
-                    displayAlert(context, 'You must select an zone.');
-                  }else if (strSldIrrigationPumpId.isEmpty) {
-                    displayAlert(context, 'You must select an irrigation pump.');
-                  }else{
-                    sendCommandToControllerAndMqttProgram(strSldSqnLocation,strSldSqnNo,strSldIrrigationPumpId,strSldMainValveId,strSldCtrlFilterId,
-                        sldCtrlFilterRelayOnOffStatus,strSldLocFilterId,sldLocFilterRelayOnOffStatus,strSldFanId,strSldFgrId);
+                    strSldSqnLocation = strSldSqnLocation.isNotEmpty ? strSldSqnLocation.substring(0, strSldSqnLocation.length - 1) : '';
+                    break;
                   }
                 }
-              },
-              icon: const Icon(
-                Icons.not_started_outlined,
-              )),
-          const SizedBox(width: 10,),
+
+                if (strSldSqnNo.isEmpty) {
+                  displayAlert(context, 'You must select an zone.');
+                }else if (strSldIrrigationPumpId.isEmpty) {
+                  displayAlert(context, 'You must select an irrigation pump.');
+                }else{
+                  sendCommandToControllerAndMqttProgram(strSldSqnLocation,strSldSqnNo,strSldIrrigationPumpId,strSldMainValveId,strSldCtrlFilterId,
+                      sldCtrlFilterRelayOnOffStatus,strSldLocFilterId,sldLocFilterRelayOnOffStatus,strSldFanId,strSldFgrId);
+                }
+              }
+            },
+            child: const Text('Start by Manual'),
+          ),
+          startFlag!=0?const SizedBox(width: 10):
+          const SizedBox(),
+          startFlag!=0?MaterialButton(
+            color: Colors.redAccent,
+            textColor: Colors.white,
+            onPressed:() {
+            },
+            child: const Text('Stop by Manual'),
+          ):
+          const SizedBox(),
+          const SizedBox(width: 15),
         ],
       ),
       body: visibleLoading? Center(
@@ -1239,9 +1250,9 @@ class _RunByManualState extends State<RunByManual> {
 
   void displaySnackBar(BuildContext context, String msg){
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Invalid Duration input'),
-        duration: Duration(seconds: 3),
+      SnackBar(
+        content: Text(msg),
+        duration: const Duration(seconds: 3), // Not const
       ),
     );
   }
@@ -1280,9 +1291,9 @@ class _RunByManualState extends State<RunByManual> {
 
   }
 
-  void sendCommandToControllerAndMqttProgram(String strSldSqnLocation,String strSldSqnNo,String strSldIrrigationPumpId,String strSldMainValveId
+  Future<void> sendCommandToControllerAndMqttProgram(String strSldSqnLocation,String strSldSqnNo,String strSldIrrigationPumpId,String strSldMainValveId
       ,String strSldCtrlFilterId,String sldCtrlFilterRelayOnOffStatus,String strSldLocFilterId,String sldLocFilterRelayOnOffStatus,
-      String strSldFanId,String strSldFgrId){
+      String strSldFanId,String strSldFgrId) async {
 
     String payload = '';
     String payLoadFinal = '';
@@ -1298,11 +1309,20 @@ class _RunByManualState extends State<RunByManual> {
           '$strSldSqnNo,$strSldIrrigationPumpId,$strSldMainValveId,$strSldCtrlFilterId,'
           '$sldCtrlFilterRelayOnOffStatus,$strSldLocFilterId,$sldLocFilterRelayOnOffStatus,'
           '$strSldFanId,$strSldFgrId,${method==1?3:1},${method==1?'0':method==2?strDuration:strFlow};';
+
       payLoadFinal = jsonEncode({
         "3900": [{"3901": payload}]
       });
 
       print(payLoadFinal);
+
+      String offPayload = '${0},$strSldSqnLocation,${widget.programList[ddSedPosition].serialNumber},'
+          '$strSldSqnNo,$strSldIrrigationPumpId,$strSldMainValveId,$strSldCtrlFilterId,'
+          '$sldCtrlFilterRelayOnOffStatus,$strSldLocFilterId,$sldLocFilterRelayOnOffStatus,'
+          '$strSldFanId,$strSldFgrId,${0},${0};';
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('StandAloneProgramOff', offPayload);
 
       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
       Map<String, dynamic> manualOperation = {

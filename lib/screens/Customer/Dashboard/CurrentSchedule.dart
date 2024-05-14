@@ -5,6 +5,7 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../constants/MQTTManager.dart';
@@ -138,6 +139,22 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                       };
                                       sentManualModeToServer(manualOperation);
                                     } : null,
+                                    child: const Text('Stop'),
+                                  ):
+                                  '${provider.currentSchedule[csIndex]['ProgName']}'.contains('StandAlone') ?
+                                  MaterialButton(
+                                    color: Colors.redAccent,
+                                    textColor: Colors.white,
+                                    onPressed: () async {
+
+                                      final prefs = await SharedPreferences.getInstance();
+                                      String? prgOffPayload = prefs.getString('StandAloneProgramOff');
+
+                                      String payLoadFinal = jsonEncode({
+                                        "3900": [{"3901": prgOffPayload}]
+                                      });
+                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                    },
                                     child: const Text('Stop'),
                                   ):
                                   MaterialButton(

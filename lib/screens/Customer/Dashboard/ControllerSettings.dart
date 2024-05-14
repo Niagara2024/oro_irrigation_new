@@ -149,165 +149,149 @@ class _ControllerSettingsState extends State<ControllerSettings> {
   Widget buildGeneralContent() {
     return Container(
       color: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Flexible(
-                  flex: 1,
-                  child: ListTile(
-                    title: const Text('Controller Name'),
-                    leading: Icon(Icons.developer_board, color: myTheme.primaryColor,),
-                    trailing: SizedBox(
-                      width: 200,
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Enter Controller name',
-                          suffixIcon: Icon(Icons.edit, color: myTheme.primaryColor,), // This adds a search icon as the trailing icon
+      child: Column(
+        children: [
+          Expanded(
+            child: Row(
+                children: [
+                  Flexible(
+                    flex: 1,
+                    child: Column(
+                      children: [
+                        ListTile(
+                          title: const Text('Form Name'),
+                          leading: Icon(Icons.area_chart_outlined, color: myTheme.primaryColor,),
+                          trailing: SizedBox(
+                            width: 300,
+                            child: TextField(
+                              decoration: InputDecoration(
+                                hintText: 'Enter your form name',
+                                suffixIcon: Icon(Icons.edit, color: myTheme.primaryColor,), // This adds a search icon as the trailing icon
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 20,),
-                Flexible(
-                  flex: 1,
-                  child: ListTile(
-                    title: const Text('Model'),
-                    leading: Icon(Icons.model_training, color: myTheme.primaryColor,),
-                    trailing: const Text('wireless controller'),
-                  ),
-                ),
-                const SizedBox(width: 20,),
-                Flexible(
-                  flex: 1,
-                  child: ListTile(
-                    title: const Text('Controller ID'),
-                    leading: Icon(Icons.numbers_outlined, color: myTheme.primaryColor,),
-                    trailing: const Text('A524C2124556'),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 25),
-            Row(
-              children: [
-                Flexible(
-                  flex: 1,
-                  child: ListTile(
-                    title: const Text('Form Name'),
-                    leading: Icon(Icons.area_chart_outlined, color: myTheme.primaryColor,),
-                    trailing: SizedBox(
-                      width: 200,
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Enter your form name',
-                          suffixIcon: Icon(Icons.edit, color: myTheme.primaryColor,), // This adds a search icon as the trailing icon
+                        const Divider(),
+                        ListTile(
+                          title: const Text('Controller Name'),
+                          leading: Icon(Icons.developer_board, color: myTheme.primaryColor,),
+                          trailing: SizedBox(
+                            width: 300,
+                            child: TextField(
+                              decoration: InputDecoration(
+                                hintText: 'Enter Controller name',
+                                suffixIcon: Icon(Icons.edit, color: myTheme.primaryColor,), // This adds a search icon as the trailing icon
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                        const Divider(),
+                        ListTile(
+                          title: const Text('Model'),
+                          leading: Icon(Icons.model_training, color: myTheme.primaryColor,),
+                          trailing: const Text('wireless controller'),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          title: const Text('ID'),
+                          leading: Icon(Icons.numbers_outlined, color: myTheme.primaryColor,),
+                          trailing: const Text('A524C2124556'),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          title: const Text('Language'),
+                          leading: Icon(Icons.language, color: myTheme.primaryColor,),
+                          trailing: DropdownButton(
+                            items: languageList.map((item) {
+                              return DropdownMenuItem(
+                                value: item.languageName,
+                                child: Text(item.languageName),
+                              );
+                            }).toList(),
+                            onChanged: (newVal) {
+                              setState(() {
+                                _mySelection = newVal!;
+                              });
+                            },
+                            value: _mySelection,
+                          ),
+                        ),
+                        const Divider(),
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(width: 20,),
-                Flexible(
-                  flex: 1,
-                  child: ListTile(
-                    title: const Text('Language'),
-                    leading: Icon(Icons.language, color: myTheme.primaryColor,),
-                    trailing: DropdownButton(
-                      items: languageList.map((item) {
-                        return DropdownMenuItem(
-                          value: item.languageName,
-                          child: Text(item.languageName),
-                        );
-                      }).toList(),
-                      onChanged: (newVal) {
-                        setState(() {
-                          _mySelection = newVal!;
-                        });
-                      },
-                      value: _mySelection,
+                  const VerticalDivider(),
+                  Flexible(
+                    flex: 1,
+                    child: Column(
+                      children: [
+                        ListTile(
+                          title: const Text('Week first day'),
+                          leading: Icon(Icons.calendar_view_week, color: myTheme.primaryColor,),
+                          trailing: DropdownButton<String>(
+                            value: selectedWeekday,
+                            hint: const Text('Select a weekday'),
+                            onChanged: (String? newValue) { // Change the type to String?
+                              if (newValue != null) { // Check if newValue is not null
+                                setState(() {
+                                  selectedWeekday = newValue;
+                                });
+                              }
+                            },
+                            items: weekdays.map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          title: const Text('Current UTC Time'),
+                          leading: Icon(Icons.date_range, color: myTheme.primaryColor,),
+                          trailing: const Text('15:10:00'),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          title: const Text('Current Date'),
+                          leading: Icon(Icons.date_range, color: myTheme.primaryColor,),
+                          trailing: Text('13-05-2024'),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          title: const Text('UTC'),
+                          leading: Icon(Icons.timer_outlined, color: myTheme.primaryColor,),
+                          trailing: DropdownButton<String>(
+                            value: selectedTime,
+                            hint: const Text('UTC time'),
+                            onChanged: (String? newValue) { // Change the type to String?
+                              if (newValue != null) { // Check if newValue is not null
+                                setState(() {
+                                  selectedTime = newValue;
+                                });
+                              }
+                            },
+                            items: utcTimes.map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(width: 20,),
-                Flexible(
-                  flex: 1,
-                  child: ListTile(
-                    title: const Text('Week first day'),
-                    leading: Icon(Icons.calendar_view_week, color: myTheme.primaryColor,),
-                    trailing: DropdownButton<String>(
-                      value: selectedWeekday,
-                      hint: const Text('Select a weekday'),
-                      onChanged: (String? newValue) { // Change the type to String?
-                        if (newValue != null) { // Check if newValue is not null
-                          setState(() {
-                            selectedWeekday = newValue;
-                          });
-                        }
-                      },
-                      items: weekdays.map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 25),
-            Row(
-              children: [
-                Flexible(
-                  flex: 1,
-                  child: ListTile(
-                    title: const Text('Current UTC Time'),
-                    leading: Icon(Icons.date_range, color: myTheme.primaryColor,),
-                    trailing: const Text('15:10:00'),
-                  ),
-                ),
-                const SizedBox(width: 20,),
-                Flexible(
-                  flex: 1,
-                  child: ListTile(
-                    title: const Text('Current Date'),
-                    leading: Icon(Icons.date_range, color: myTheme.primaryColor,),
-                    trailing: Text('13-05-2024'),
-                  ),
-                ),
-                const SizedBox(width: 20,),
-                Flexible(
-                  flex: 1,
-                  child: ListTile(
-                    title: const Text('UTC'),
-                    leading: Icon(Icons.timer_outlined, color: myTheme.primaryColor,),
-                    trailing: DropdownButton<String>(
-                      value: selectedTime,
-                      hint: const Text('UTC time'),
-                      onChanged: (String? newValue) { // Change the type to String?
-                        if (newValue != null) { // Check if newValue is not null
-                          setState(() {
-                            selectedTime = newValue;
-                          });
-                        }
-                      },
-                      items: utcTimes.map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+                ],
+              ),
+          ),
+          SizedBox(
+            height: 50,
+            width: MediaQuery.sizeOf(context).width,
+            child: Text('dfdfdff'),
+          )
+        ],
       ),
     );
   }

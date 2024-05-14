@@ -81,7 +81,7 @@ class UpcomingProgram extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 IconButton(
-                                    tooltip: 'Scheduled details',
+                                    tooltip: 'Scheduled Program details',
                                     onPressed: () {
                                       Navigator.push(
                                         context,
@@ -146,7 +146,7 @@ class UpcomingProgram extends StatelessWidget {
                                   MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
                                   sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Stopped by Manual', payLoadFinal);
                                 },
-                                child: const Text('Stop'),
+                                child: const Text('Stop by Manual'),
                               ),
                               const SizedBox(width: 5),
                               provider.upcomingProgram[index]['ProgPauseResume'] == 1 ? MaterialButton(

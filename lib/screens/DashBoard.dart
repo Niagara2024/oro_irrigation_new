@@ -158,7 +158,7 @@ class _DashboardWideState extends State<DashboardWide> {
   @override
   Widget build(BuildContext context)  {
     print('userName:${widget.userName}');
-    print('userId:${widget.userType}');
+    print('userId:${widget.userId}');
     print('userType:${widget.userType}');
     return  Scaffold(
       body: widget.userType==3?

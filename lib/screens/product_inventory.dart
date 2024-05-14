@@ -736,6 +736,7 @@ class ProductInventoryState extends State<ProductInventory> {
                             if(value==null || value.isEmpty){
                               return 'Please fill out this field';
                             }
+                            return null;
                           },
                           maxLength: 2,
                           inputFormatters: <TextInputFormatter>[
@@ -745,7 +746,7 @@ class ProductInventoryState extends State<ProductInventory> {
                             counterText: '',
                             filled: true,
                             fillColor: Colors.grey.shade100,
-                            labelText: 'warranty months',
+                            labelText: 'Warranty(Month)',
                             suffixIcon: const Icon(Icons.close),
                             border: const OutlineInputBorder(),
                             contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
@@ -769,7 +770,7 @@ class ProductInventoryState extends State<ProductInventory> {
               MaterialButton(
                 color: Colors.green,
                 textColor: Colors.white,
-                child: const Text('OK'),
+                child: const Text('Update'),
                 onPressed: () async {
                   if (formKey.currentState!.validate())
                   {
@@ -792,8 +793,7 @@ class ProductInventoryState extends State<ProductInventory> {
                       if(mounted){
                         Navigator.pop(context);
                       }
-
-                    } else {
+                    }else {
                       throw Exception('Failed to load data');
                     }
                   }

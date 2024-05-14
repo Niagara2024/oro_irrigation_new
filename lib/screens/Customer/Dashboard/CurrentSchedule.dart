@@ -112,7 +112,16 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                 ),
                               ],
                               rows: List<DataRow>.generate(1, (lsIndex) => DataRow(cells: [
-                                DataCell(Text(provider.currentSchedule[csIndex]['ProgName'])),
+                                DataCell(
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(provider.currentSchedule[csIndex]['ProgName']),
+                                        Text('${getContentByCode(provider.currentSchedule[csIndex]['ProgramStartStopReason'])} - ${provider.currentSchedule[csIndex]['ProgramStartStopReason']}', style: const TextStyle(fontSize: 11, color: Colors.black),),
+                                      ],
+                                    )
+                                ),
                                 DataCell(Text(provider.currentSchedule[csIndex]['ProgCategory'])),
                                 DataCell(Text('${provider.currentSchedule[csIndex]['CurrentZone']}/${provider.currentSchedule[csIndex]['TotalZone']}')),
                                 DataCell(Text(provider.currentSchedule[csIndex]['ZoneName'])),
@@ -147,11 +156,12 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                     textColor: Colors.white,
                                     onPressed: () async {
                                       final prefs = await SharedPreferences.getInstance();
-                                      String? prgOffPayload = prefs.getString('StandAloneProgramOff');
+                                      String? prgOffPayload = prefs.getString(provider.currentSchedule[csIndex]['ProgName']);
                                       String payLoadFinal = jsonEncode({
                                         "3900": [{"3901": prgOffPayload}]
                                       });
                                       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                      prefs.remove(provider.currentSchedule[csIndex]['ProgName']);
                                     },
                                     child: const Text('Stop'),
                                   ):
@@ -442,6 +452,57 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
       }
 
     });
+  }
+
+  String getContentByCode(int code) {
+    switch (code) {
+      case 1:
+        return 'Running As Per Schedule';
+      case 2:
+        return 'Turned On Manually';
+      case 3:
+        return 'Started By Condition';
+      case 4:
+        return 'Turned Off Manually';
+      case 5:
+        return 'Program Turned Off';
+      case 6:
+        return 'Zone Turned Off';
+      case 7:
+        return 'Stopped By Condition';
+      case 8:
+        return 'Disabled By Condition';
+      case 9:
+        return 'StandAlone Program Started';
+      case 10:
+        return 'StandAlone Program Stopped';
+      case 11:
+        return 'StandAlone Program Stopped After Set Value';
+      case 12:
+        return 'StandAlone Manual Started';
+      case 13:
+        return 'StandAlone Manual Stopped';
+      case 14:
+        return 'StandAlone Manual Stopped After Set Value';
+      case 15:
+        return 'Started By Day Count Rtc';
+      case 16:
+        return 'Paused By User';
+      case 17:
+        return 'Manually Started Paused By User';
+      case 18:
+        return 'Program Deleted';
+      case 19:
+        return 'Program Ready';
+      case 20:
+        return 'Program Completed';
+      case 21:
+        return 'Resumed By User';
+      case 23:
+        return 'Paused By Condition';
+      default:
+        return 'Unknown content';
+    }
   }
 
   Future<void>sentManualModeToServer(manualOperation) async {

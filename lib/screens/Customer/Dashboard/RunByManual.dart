@@ -1322,7 +1322,7 @@ class _RunByManualState extends State<RunByManual> {
           '$strSldFanId,$strSldFgrId,${0},${0};';
 
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('StandAloneProgramOff', offPayload);
+      await prefs.setString('StandAlone - ${widget.programList[ddSedPosition].programName}', offPayload);
 
       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
       Map<String, dynamic> manualOperation = {

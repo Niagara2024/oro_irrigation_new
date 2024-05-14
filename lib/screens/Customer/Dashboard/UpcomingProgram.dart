@@ -53,10 +53,6 @@ class UpcomingProgram extends StatelessWidget {
                             size: ColumnSize.L,
                         ),
                         const DataColumn2(
-                          label: Center(child: Text('R-Code', style: TextStyle(fontSize: 13),)),
-                          fixedWidth: 70,
-                        ),
-                        const DataColumn2(
                             label: Text('Method', style: TextStyle(fontSize: 13)),
                             size: ColumnSize.M,
                         ),
@@ -112,8 +108,16 @@ class UpcomingProgram extends StatelessWidget {
                         ),
                       ],
                       rows: List<DataRow>.generate(provider.upcomingProgram.length, (index) => DataRow(cells: [
-                        DataCell(Text(provider.upcomingProgram[index]['ProgName'])),
-                        DataCell(Center(child: Text('${provider.upcomingProgram[index]['StartStopReason']}'))),
+                        DataCell(
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(provider.upcomingProgram[index]['ProgName']),
+                              Text('${getContentByCode(provider.upcomingProgram[index]['StartStopReason'])} - ${provider.upcomingProgram[index]['StartStopReason']}', style: const TextStyle(fontSize: 11, color: Colors.black),),
+                            ],
+                          )
+                        ),
                         DataCell(Text(provider.upcomingProgram[index]['SchedulingMethod']==1?'No Schedule':provider.upcomingProgram[index]['SchedulingMethod']==2?'Schedule by days':
                         provider.upcomingProgram[index]['SchedulingMethod']==3?'Schedule as run list':'Day count schedule')),
                         DataCell(Text(provider.upcomingProgram[index]['ProgCategory'])),
@@ -240,6 +244,56 @@ class UpcomingProgram extends StatelessWidget {
     );
   }
 
+  String getContentByCode(int code) {
+    switch (code) {
+      case 1:
+        return 'Running As Per Schedule';
+      case 2:
+        return 'Turned On Manually';
+      case 3:
+        return 'Started By Condition';
+      case 4:
+        return 'Turned Off Manually';
+      case 5:
+        return 'Program Turned Off';
+      case 6:
+        return 'Zone Turned Off';
+      case 7:
+        return 'Stopped By Condition';
+      case 8:
+        return 'Disabled By Condition';
+      case 9:
+        return 'StandAlone Program Started';
+      case 10:
+        return 'StandAlone Program Stopped';
+      case 11:
+        return 'StandAlone Program Stopped After Set Value';
+      case 12:
+        return 'StandAlone Manual Started';
+      case 13:
+        return 'StandAlone Manual Stopped';
+      case 14:
+        return 'StandAlone Manual Stopped After Set Value';
+      case 15:
+        return 'Started By Day Count Rtc';
+      case 16:
+        return 'Paused By User';
+      case 17:
+        return 'Manually Started Paused By User';
+      case 18:
+        return 'Program Deleted';
+      case 19:
+        return 'Program Ready';
+      case 20:
+        return 'Program Completed';
+      case 21:
+        return 'Resumed By User';
+      case 23:
+        return 'Paused By Condition';
+      default:
+        return 'Unknown content';
+    }
+  }
 
   void sentUserOperationToServer(String msg, String data) async
   {

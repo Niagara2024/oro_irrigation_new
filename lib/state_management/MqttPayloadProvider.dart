@@ -49,6 +49,7 @@ class MqttPayloadProvider with ChangeNotifier {
             PrsOut = currentSchedule[0]['PrsOut'];
           }
         }
+        print('currentSchedule:${currentSchedule}');
         if (data['2400'][0].containsKey('2403')) {
           nextSchedule = data['2400'][0]['2403'];
         }

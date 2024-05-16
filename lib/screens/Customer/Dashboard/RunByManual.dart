@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,7 +14,7 @@ import '../../../constants/MQTTManager.dart';
 import '../../../constants/http_service.dart';
 import '../../../constants/theme.dart';
 
-enum ManualBaseSegment {manual, duration}
+enum SegmentWithFlow {manual, duration, flow}
 
 class RunByManual extends StatefulWidget {
   const RunByManual({Key? key, required this.customerID, required this.siteID, required this.controllerID, required this.siteName, required this.imeiNo, required this.programList, required this.callbackFunction}) : super(key: key);
@@ -30,7 +31,7 @@ class _RunByManualState extends State<RunByManual> {
 
   late List<DashboardDataProvider> dashBoardData = [];
   bool visibleLoading = false;
-  int ddSedPosition = 0;
+  int ddCurrentPosition = 0;
   int programId = 0;
   int method = 0;
   int startFlag = 0;
@@ -73,24 +74,26 @@ class _RunByManualState extends State<RunByManual> {
     } else {
       print('Program with name \'Default\' already exists in widget.programList.');
     }
-    //getControllerDashboardDetails(ddSelectionId, ddSedPosition);
+    //getControllerDashboardDetails(ddSelectionId, ddCurrentPosition);
     getExitManualOperation();
   }
 
-  Future<void> payloadCallbackFunction(segIndex, value, sldIrLine) async
+  Future<void> segmentSelectionCallbackFunction(segIndex, value, sldIrLine) async
   {
-    method = segIndex+1;
     if (value.contains(':')) {
       strDuration = value;
     } else {
       strFlow = value;
     }
     strSelectedLineOfProgram = sldIrLine;
+    setState(() {
+      method = segIndex+1;
+    });
   }
 
-  Future<void> getControllerDashboardDetails(programId, selection) async
+  Future<void> scheduleSectionCallbackMethod(programId, selection) async
   {
-    ddSedPosition = selection;
+    ddCurrentPosition = selection;
     try {
       dashBoardData = await fetchControllerData(programId);
       indicatorViewHide();
@@ -118,13 +121,13 @@ class _RunByManualState extends State<RunByManual> {
 
           int position = findPositionByName(strProgramName, widget.programList);
           if (position != -1) {
-            ddSedPosition = position;
+            ddCurrentPosition = position;
           } else {
             print("'$strProgramName' not found in the list.");
           }
 
           await Future.delayed(const Duration(milliseconds: 500));
-          getControllerDashboardDetails(programId, ddSedPosition);
+          scheduleSectionCallbackMethod(programId, ddCurrentPosition);
         }catch(e){
           print(e);
         }
@@ -174,10 +177,17 @@ class _RunByManualState extends State<RunByManual> {
     return Scaffold(
       backgroundColor: const Color(0xffefefef),
       appBar: AppBar(
-        title: Text(widget.siteName),
+        title: Row(
+          children: [
+            Text(widget.siteName),
+            const Spacer(),
+            const Text('Stand Alone by'),
+            const Spacer(),
+          ],
+        ),
         actions: [
           IconButton(tooltip: 'Refresh', icon: const Icon(Icons.refresh), onPressed: () async {
-            getControllerDashboardDetails(programId, ddSedPosition);
+            scheduleSectionCallbackMethod(programId, ddCurrentPosition);
           }),
           const SizedBox(width: 10),
           MaterialButton(
@@ -185,7 +195,7 @@ class _RunByManualState extends State<RunByManual> {
             textColor: Colors.white,
             onPressed:() {
               standaloneSelection.clear();
-              if(ddSedPosition==0){
+              if(ddCurrentPosition==0){
                 List<String> allRelaySrlNo = [];
                 String strSldValveOrLineSrlNo = '';
                 String strSldSourcePumpSrlNo ='',strSldIrrigationPumpSrlNo ='',strSldMainValveSrlNo ='',strSldCtrlFilterSrlNo ='',strSldLocFilterSrlNo =''
@@ -325,7 +335,6 @@ class _RunByManualState extends State<RunByManual> {
                 }else{
                   displaySnackBar(context, 'Empty selection Not allowed');
                 }
-
               }
               else{
                 Map<String, List<DashBoardValve>> groupedValves = {};
@@ -418,16 +427,42 @@ class _RunByManualState extends State<RunByManual> {
                 }
               }
             },
-            child: const Text('Start by Manual'),
+            child: const Text('Start'),
           ),
           startFlag!=0?const SizedBox(width: 10):
           const SizedBox(),
           startFlag!=0?MaterialButton(
             color: Colors.redAccent,
             textColor: Colors.white,
-            onPressed:() {
+            onPressed:() async {
+              final prefs = await SharedPreferences.getInstance();
+              String? prgOffPayload = prefs.getString('StandAlone - ${widget.programList[ddCurrentPosition].programName}');
+              String payLoadFinal;
+              if(prgOffPayload != null){
+                payLoadFinal = jsonEncode({
+                  "3900": [{"3901": prgOffPayload}]
+                });
+              }else{
+                String payload = '0,0,0,0';
+                payLoadFinal = jsonEncode({
+                  "800": [{"801": payload}]
+                });
+              }
+              MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
+              Map<String, dynamic> manualOperation = {
+                "programName": prgOffPayload != null ? widget.programList[ddCurrentPosition].programName:'Default',
+                "programId": prgOffPayload != null ? widget.programList[ddCurrentPosition].programId:0,
+                "startFlag":0,
+                "method": method,
+                "time": '00:00:00',
+                "flow": '0',
+                "selected": [],
+              };
+              sentManualModeToServer(manualOperation);
+              prgOffPayload != null ? prefs.remove('StandAlone - ${widget.programList[ddCurrentPosition].programName}'): null;
+
             },
-            child: const Text('Stop by Manual'),
+            child: const Text('Stop'),
           ):
           const SizedBox(),
           const SizedBox(width: 15),
@@ -649,7 +684,7 @@ class _RunByManualState extends State<RunByManual> {
                                                                           InkWell(
                                                                             child: CircleAvatar(
                                                                               radius: 15,
-                                                                              backgroundColor: fertilizers[index].selected? Colors.green : Colors.grey,
+                                                                              backgroundColor: fertilizers[index].selected ? Colors.green : Colors.grey,
                                                                               child: Text('${index+1}', style: const TextStyle(fontSize: 13, color: Colors.white),),
                                                                             ),
                                                                             onTap: (){
@@ -1219,7 +1254,7 @@ class _RunByManualState extends State<RunByManual> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(right: 5),
-                    child: DisplayLineOrSequence(lineOrSequence: dashBoardData.isNotEmpty ? dashBoardData[0].lineOrSequence : [], programList: widget.programList, programSelectionCallback: getControllerDashboardDetails, ddSelectedVal: ddSedPosition, duration: dashBoardData[0].time, flow: dashBoardData[0].flow, callbackFunctionForPayload: payloadCallbackFunction, method: dashBoardData[0].method,),
+                    child: DisplayLineOrSequence(lineOrSequence: dashBoardData.isNotEmpty ? dashBoardData[0].lineOrSequence : [], programList: widget.programList, programSelectionCallback: scheduleSectionCallbackMethod, ddCurrentPosition: ddCurrentPosition, duration: dashBoardData[0].time, flow: dashBoardData[0].flow, segmentSelectionCallbackFunction: segmentSelectionCallbackFunction, method: dashBoardData[0].method,),
                   ),
                 ),
               ],
@@ -1270,7 +1305,7 @@ class _RunByManualState extends State<RunByManual> {
         ),
       );
     }else{
-      payload = '${finalResult==''?0:1},${finalResult==''?0:finalResult},${method==1?3:1},${method==1?'0':method==2?strDuration:strFlow}';
+      payload = '${finalResult==''?0:1},${finalResult==''?0:finalResult},${method==1?3:method==2?1:2},${method==1?'0':method==2?strDuration:strFlow}';
       payLoadFinal = jsonEncode({
         "800": [{"801": payload}]
       });
@@ -1280,6 +1315,7 @@ class _RunByManualState extends State<RunByManual> {
       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
       Map<String, dynamic> manualOperation = {
         "programName": 'Default',
+        "startFlag":1,
         "programId": 0,
         "method": method,
         "time": strDuration,
@@ -1305,10 +1341,10 @@ class _RunByManualState extends State<RunByManual> {
         ),
       );
     }else{
-      payload = '${1},$strSldSqnLocation,${widget.programList[ddSedPosition].serialNumber},'
+      payload = '${1},$strSldSqnLocation,${widget.programList[ddCurrentPosition].serialNumber},'
           '$strSldSqnNo,$strSldIrrigationPumpId,$strSldMainValveId,$strSldCtrlFilterId,'
           '$sldCtrlFilterRelayOnOffStatus,$strSldLocFilterId,$sldLocFilterRelayOnOffStatus,'
-          '$strSldFanId,$strSldFgrId,${method==1?3:1},${method==1?'0':method==2?strDuration:strFlow};';
+          '$strSldFanId,$strSldFgrId,${method==1?3:method==2?1:2},${method==1?'0':method==2?strDuration:strFlow};';
 
       payLoadFinal = jsonEncode({
         "3900": [{"3901": payload}]
@@ -1316,18 +1352,19 @@ class _RunByManualState extends State<RunByManual> {
 
       print(payLoadFinal);
 
-      String offPayload = '${0},$strSldSqnLocation,${widget.programList[ddSedPosition].serialNumber},'
+      String offPayload = '${0},$strSldSqnLocation,${widget.programList[ddCurrentPosition].serialNumber},'
           '$strSldSqnNo,$strSldIrrigationPumpId,$strSldMainValveId,$strSldCtrlFilterId,'
           '$sldCtrlFilterRelayOnOffStatus,$strSldLocFilterId,$sldLocFilterRelayOnOffStatus,'
           '$strSldFanId,$strSldFgrId,${0},${0};';
 
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('StandAlone - ${widget.programList[ddSedPosition].programName}', offPayload);
+      await prefs.setString('StandAlone - ${widget.programList[ddCurrentPosition].programName}', offPayload);
 
       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
       Map<String, dynamic> manualOperation = {
-        "programName": widget.programList[ddSedPosition].programName,
-        "programId": widget.programList[ddSedPosition].programId,
+        "programName": widget.programList[ddCurrentPosition].programName,
+        "programId": widget.programList[ddCurrentPosition].programId,
+        "startFlag":1,
         "method": method,
         "time": strDuration,
         "flow": strFlow,
@@ -1431,13 +1468,13 @@ class _RunByManualState extends State<RunByManual> {
 }
 
 class DisplayLineOrSequence extends StatefulWidget {
-  const DisplayLineOrSequence({super.key, required this.lineOrSequence, required this.programList, required this.programSelectionCallback, required this.ddSelectedVal, required this.duration, required this.flow, required this.callbackFunctionForPayload, required this.method});
+  const DisplayLineOrSequence({super.key, required this.lineOrSequence, required this.programList, required this.programSelectionCallback, required this.ddCurrentPosition, required this.duration, required this.flow, required this.segmentSelectionCallbackFunction, required this.method});
   final List<LineOrSequence> lineOrSequence;
   final List<ProgramList> programList;
-  final int ddSelectedVal, method;
+  final int ddCurrentPosition, method;
   final String duration, flow;
   final void Function(int, int) programSelectionCallback;
-  final void Function(int, String, String) callbackFunctionForPayload;
+  final void Function(int, String, String) segmentSelectionCallbackFunction;
 
   @override
   State<DisplayLineOrSequence> createState() => _DisplayLineOrSequenceState();
@@ -1445,7 +1482,7 @@ class DisplayLineOrSequence extends StatefulWidget {
 
 class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
 
-  ManualBaseSegment segmentViewManual = ManualBaseSegment.manual;
+  SegmentWithFlow _segmentWithFlow = SegmentWithFlow.manual;
   String durationValue = '00:00:00';
   String selectedIrLine = '0';
 
@@ -1457,10 +1494,13 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
   void initState() {
     super.initState();
     if(widget.method == 1){
-      segmentViewManual = ManualBaseSegment.manual;
+      _segmentWithFlow = SegmentWithFlow.manual;
+    }else if(widget.method == 2){
+      _segmentWithFlow = SegmentWithFlow.duration;
     }else{
-      segmentViewManual = ManualBaseSegment.duration;
+      _segmentWithFlow = SegmentWithFlow.flow;
     }
+
     int count = widget.duration.split(':').length - 1;
     if(count>1){
       durationValue = widget.duration;
@@ -1484,26 +1524,53 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
               children: [
                 Expanded(
                   flex: 1,
-                  child: SegmentedButton<ManualBaseSegment>(
+                  child: widget.ddCurrentPosition!=0? SegmentedButton<SegmentWithFlow>(
                     style: ButtonStyle(
                       backgroundColor: MaterialStatePropertyAll(myTheme.primaryColor.withOpacity(0.05)),
                       iconColor: MaterialStateProperty.all(myTheme.primaryColor),
                     ),
-                    segments: const <ButtonSegment<ManualBaseSegment>>[
-                      ButtonSegment<ManualBaseSegment>(
-                          value: ManualBaseSegment.manual,
+                    segments: const <ButtonSegment<SegmentWithFlow>>[
+                      ButtonSegment<SegmentWithFlow>(
+                          value: SegmentWithFlow.manual,
                           label: Text('Manual'),
                           icon: Icon(Icons.pan_tool_alt_outlined)),
-                      ButtonSegment<ManualBaseSegment>(
-                          value: ManualBaseSegment.duration,
+                      ButtonSegment<SegmentWithFlow>(
+                          value: SegmentWithFlow.duration,
+                          label: Text('Duration'),
+                          icon: Icon(Icons.timer_outlined)),
+                      ButtonSegment<SegmentWithFlow>(
+                          value: SegmentWithFlow.flow,
+                          label: Text('Flow-Liters'),
+                          icon: Icon(Icons.water_drop_outlined)),
+                    ],
+                    selected: <SegmentWithFlow>{_segmentWithFlow},
+                    onSelectionChanged: (Set<SegmentWithFlow> newSelection) {
+                      setState(() {
+                        _segmentWithFlow = newSelection.first;
+                        widget.segmentSelectionCallbackFunction(_segmentWithFlow.index, durationValue, selectedIrLine);
+                      });
+                    },
+                  ) :
+                  SegmentedButton<SegmentWithFlow>(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStatePropertyAll(myTheme.primaryColor.withOpacity(0.05)),
+                      iconColor: MaterialStateProperty.all(myTheme.primaryColor),
+                    ),
+                    segments: const <ButtonSegment<SegmentWithFlow>>[
+                      ButtonSegment<SegmentWithFlow>(
+                          value: SegmentWithFlow.manual,
+                          label: Text('Manual'),
+                          icon: Icon(Icons.pan_tool_alt_outlined)),
+                      ButtonSegment<SegmentWithFlow>(
+                          value: SegmentWithFlow.duration,
                           label: Text('Duration'),
                           icon: Icon(Icons.timer_outlined)),
                     ],
-                    selected: <ManualBaseSegment>{segmentViewManual},
-                    onSelectionChanged: (Set<ManualBaseSegment> newSelection) {
+                    selected: <SegmentWithFlow>{_segmentWithFlow},
+                    onSelectionChanged: (Set<SegmentWithFlow> newSelection) {
                       setState(() {
-                        segmentViewManual = newSelection.first;
-                        widget.callbackFunctionForPayload(segmentViewManual.index, durationValue, selectedIrLine);
+                        _segmentWithFlow = newSelection.first;
+                        widget.segmentSelectionCallbackFunction(_segmentWithFlow.index, durationValue, selectedIrLine);
                       });
                     },
                   ),
@@ -1518,7 +1585,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                   width: 200,
                   height: 50,
                   child: DropdownButtonFormField(
-                    value: widget.programList.isNotEmpty ? widget.programList[widget.ddSelectedVal] : null,
+                    value: widget.programList.isNotEmpty ? widget.programList[widget.ddCurrentPosition] : null,
                     decoration: const InputDecoration(
                       contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
                     ),
@@ -1539,7 +1606,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
             ),
           ),
         ),
-        segmentViewManual.index == 1? SizedBox(
+        _segmentWithFlow.index == 1 ? SizedBox(
           width: MediaQuery.of(context).size.width,
           child: ListTile(
             title: const Text('Set Duration(HH:MM:SS)'),
@@ -1559,6 +1626,34 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                     ),
                     child: Text(durationValue, style: const TextStyle(color: Colors.black, fontSize: 17)),
                   ),
+                ],
+              ),
+            ),
+          ),
+        ) :
+        Container(),
+        _segmentWithFlow.index == 2 ? SizedBox(
+          width: MediaQuery.of(context).size.width,
+          child: ListTile(
+            title: const Text('Set Flow(Liters)'),
+            trailing: SizedBox(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  SizedBox(
+                      width: 100,
+                      child: TextField(
+                        maxLength: 7,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        inputFormatters: <TextInputFormatter>[
+                          FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                        ],
+                        decoration: const InputDecoration(
+                          labelText: 'Liters',
+                          counterText: '',
+                        ),
+                      ),
+                  )
                 ],
               ),
             ),
@@ -1598,10 +1693,10 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                               ),
                             ),
 
-                            if (widget.ddSelectedVal!=0)
+                            if (widget.ddCurrentPosition!=0)
                               VerticalDivider(color: myTheme.primaryColor.withOpacity(0.1)),
 
-                            if(widget.ddSelectedVal!=0)
+                            if(widget.ddCurrentPosition!=0)
                               Center(
                                 child: SizedBox(
                                   width: 60,
@@ -1628,7 +1723,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                         SizedBox(
                           height: (groupedValves[valveLocation]!.length * 40)+40,
                           width: MediaQuery.sizeOf(context).width-380,
-                          child: widget.ddSelectedVal==0? DataTable2(
+                          child: widget.ddCurrentPosition==0? DataTable2(
                             columnSpacing: 12,
                             horizontalMargin: 12,
                             minWidth: 600,
@@ -1823,14 +1918,13 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
             ),
             ElevatedButton(
               onPressed: () {
-
                 if (_validateTime(_hoursController.text, 'hours') &&
                     _validateTime(_minutesController.text, 'minutes') &&
                     _validateTime(_secondsController.text, 'seconds')) {
                   setState(() {
                     durationValue = '${_hoursController.text}:${_minutesController.text}:${_secondsController.text}';
                   });
-                  widget.callbackFunctionForPayload(segmentViewManual.index, durationValue , selectedIrLine);
+                  widget.segmentSelectionCallbackFunction(_segmentWithFlow.index, durationValue , selectedIrLine);
                   Navigator.of(context).pop();
                 }
                 else{

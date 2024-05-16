@@ -141,8 +141,11 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                       });
                                       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
                                       Map<String, dynamic> manualOperation = {
+                                        "programName": 'Default',
+                                        "programId": 0,
+                                        "startFlag":0,
                                         "method": 1,
-                                        "time": '00:00',
+                                        "time": '00:00:00',
                                         "flow": '0',
                                         "selected": [],
                                       };
@@ -161,6 +164,16 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                         "3900": [{"3901": prgOffPayload}]
                                       });
                                       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                      Map<String, dynamic> manualOperation = {
+                                        "programName": provider.currentSchedule[csIndex]['ProgName'],
+                                        "programId": provider.currentSchedule[csIndex]['SNo'],
+                                        "startFlag":0,
+                                        "method": 1,
+                                        "time": '00:00:00',
+                                        "flow": '0',
+                                        "selected": [],
+                                      };
+                                      sentManualModeToServer(manualOperation);
                                       prefs.remove(provider.currentSchedule[csIndex]['ProgName']);
                                     },
                                     child: const Text('Stop'),

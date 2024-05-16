@@ -104,10 +104,6 @@ class _ControllerSettingsState extends State<ControllerSettings> {
         length: 3, // Number of tabs
         child: Column(
           children: [
-            const ListTile(
-              title: Text('Settings', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              subtitle: Text('Manage your controller settings and preference', style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
             const TabBar(
               indicatorColor: Colors.pinkAccent,
               labelColor: Colors.black,
@@ -121,7 +117,10 @@ class _ControllerSettingsState extends State<ControllerSettings> {
             Expanded(
               child: TabBarView(
                 children: [
-                  buildGeneralContent(),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: buildGeneralContent(),
+                  ),
                   const Center(child: Text('Tab 3 Content')),
                   Center(child: Names(userID: widget.customerID,  customerID: widget.customerID, controllerId: widget.siteData.controllerId)),
                 ],
@@ -160,13 +159,18 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                       children: [
                         ListTile(
                           title: const Text('Form Name'),
-                          leading: Icon(Icons.area_chart_outlined, color: myTheme.primaryColor,),
+                          leading: Icon(Icons.area_chart_outlined),
                           trailing: SizedBox(
                             width: 300,
                             child: TextField(
                               decoration: InputDecoration(
-                                hintText: 'Enter your form name',
-                                suffixIcon: Icon(Icons.edit, color: myTheme.primaryColor,), // This adds a search icon as the trailing icon
+                                filled: true,
+                                border: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Colors.blue, width: 2.0),
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                labelText: 'Enter your form name',
+                                suffixIcon: Icon(Icons.edit),
                               ),
                             ),
                           ),
@@ -174,13 +178,18 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                         const Divider(),
                         ListTile(
                           title: const Text('Controller Name'),
-                          leading: Icon(Icons.developer_board, color: myTheme.primaryColor,),
+                          leading: Icon(Icons.developer_board),
                           trailing: SizedBox(
                             width: 300,
                             child: TextField(
                               decoration: InputDecoration(
-                                hintText: 'Enter Controller name',
-                                suffixIcon: Icon(Icons.edit, color: myTheme.primaryColor,), // This adds a search icon as the trailing icon
+                                filled: true,
+                                border: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: Colors.blue, width: 2.0),
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                labelText: 'Enter Controller name',
+                                suffixIcon: Icon(Icons.edit),
                               ),
                             ),
                           ),
@@ -188,20 +197,21 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                         const Divider(),
                         ListTile(
                           title: const Text('Model'),
-                          leading: Icon(Icons.model_training, color: myTheme.primaryColor,),
+                          leading: Icon(Icons.model_training),
                           trailing: const Text('wireless controller'),
                         ),
                         const Divider(),
                         ListTile(
                           title: const Text('ID'),
-                          leading: Icon(Icons.numbers_outlined, color: myTheme.primaryColor,),
+                          leading: Icon(Icons.numbers_outlined),
                           trailing: const Text('A524C2124556'),
                         ),
                         const Divider(),
                         ListTile(
                           title: const Text('Language'),
-                          leading: Icon(Icons.language, color: myTheme.primaryColor,),
+                          leading: Icon(Icons.language),
                           trailing: DropdownButton(
+                            underline: Container(),
                             items: languageList.map((item) {
                               return DropdownMenuItem(
                                 value: item.languageName,
@@ -220,19 +230,23 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                       ],
                     ),
                   ),
-                  const VerticalDivider(),
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 225),
+                    child: VerticalDivider(width: 0),
+                  ),
                   Flexible(
                     flex: 1,
                     child: Column(
                       children: [
                         ListTile(
                           title: const Text('Week first day'),
-                          leading: Icon(Icons.calendar_view_week, color: myTheme.primaryColor,),
+                          leading: const Icon(Icons.calendar_view_week),
                           trailing: DropdownButton<String>(
+                            underline: Container(),
                             value: selectedWeekday,
                             hint: const Text('Select a weekday'),
-                            onChanged: (String? newValue) { // Change the type to String?
-                              if (newValue != null) { // Check if newValue is not null
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
                                 setState(() {
                                   selectedWeekday = newValue;
                                 });
@@ -247,22 +261,29 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                           ),
                         ),
                         const Divider(),
+                        const ListTile(
+                          title: Text('Current UTC Time'),
+                          leading: Icon(Icons.date_range),
+                          trailing: Text('15:10:00'),
+                        ),
+                        const Divider(),
                         ListTile(
-                          title: const Text('Current UTC Time'),
-                          leading: Icon(Icons.date_range, color: myTheme.primaryColor,),
-                          trailing: const Text('15:10:00'),
+                          title: const Text('Time Format'),
+                          leading: Icon(Icons.date_range),
+                          trailing: const Text('24 Hrs'),
                         ),
                         const Divider(),
                         ListTile(
                           title: const Text('Current Date'),
-                          leading: Icon(Icons.date_range, color: myTheme.primaryColor,),
+                          leading: Icon(Icons.date_range),
                           trailing: Text('13-05-2024'),
                         ),
                         const Divider(),
                         ListTile(
                           title: const Text('UTC'),
-                          leading: Icon(Icons.timer_outlined, color: myTheme.primaryColor,),
+                          leading: Icon(Icons.timer_outlined),
                           trailing: DropdownButton<String>(
+                            underline: Container(),
                             value: selectedTime,
                             hint: const Text('UTC time'),
                             onChanged: (String? newValue) { // Change the type to String?
@@ -280,6 +301,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                             }).toList(),
                           ),
                         ),
+                        const Divider(),
                       ],
                     ),
                   ),
@@ -289,7 +311,14 @@ class _ControllerSettingsState extends State<ControllerSettings> {
           SizedBox(
             height: 50,
             width: MediaQuery.sizeOf(context).width,
-            child: Text('dfdfdff'),
+            child: ListTile(trailing: MaterialButton(
+              color: Colors.green,
+              textColor: Colors.white,
+              onPressed:() {
+
+              },
+              child: const Text('Restore'),
+            ),),
           )
         ],
       ),

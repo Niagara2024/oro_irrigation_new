@@ -1293,9 +1293,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                   widget.siteData.nodeList[position].rlyStatus = [];
                   if (item['RlyStatus'] != null) {
                     List<dynamic> rlyStatusJsonList = item['RlyStatus'];
-                    print('rlyStatusJsonList:${rlyStatusJsonList}');
                     List<RelayStatus> rlyStatusList = rlyStatusJsonList.map((rs) => RelayStatus.fromJson(rs)).toList();
-                    print(rlyStatusList);
                     widget.siteData.nodeList[position].rlyStatus = rlyStatusList;
                   }
                 } else {

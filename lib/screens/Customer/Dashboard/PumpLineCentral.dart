@@ -79,16 +79,15 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
   List<Widget> _buildTabBarViews() {
     final provider = Provider.of<MqttPayloadProvider>(context);
     return widget.currentSiteData.master[0].irrigationLine.map((line){
-      return ScrollConfiguration(
-        behavior: const ScrollBehavior(),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 5, left: 5, right: 5),
-            child: provider.irrigationPump.isNotEmpty? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+      return Column(
+        children: [
+          ScrollConfiguration(
+            behavior: const ScrollBehavior(),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 5, left: 5, right: 5),
+                child: provider.irrigationPump.isNotEmpty? Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -113,7 +112,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                     const SizedBox(),
                     provider.irrigationPump.isNotEmpty? Padding(
                       padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty?38.4:0),
-                      child: DisplayIrrigationPump(currentLineId: line.id, pumpList: widget.currentSiteData.master[0].liveData[0].irrigationPumps,),
+                      child: DisplayIrrigationPump(currentLineId: line.id, pumpList: widget.currentSiteData.master[0].liveData[0].pumpList,),
                     ):
                     const SizedBox(),
                     provider.filtersCentral.isNotEmpty? Padding(
@@ -148,18 +147,18 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                       const SizedBox(height: 20),
                     )
                   ],
-                ),
-                Container(
-                  color: Colors.grey.shade100,
-                  width: MediaQuery.sizeOf(context).width-173,
-                  height: 60,
-                  child: Center(child: IrrigationLineView(line: line,)),
-                ),
-              ],
-            ):
-            const SizedBox(height: 20),
+                ):
+                const SizedBox(height: 20),
+              ),
+            ),
           ),
-        ),
+          Container(
+            color: Colors.grey.shade100,
+            width: MediaQuery.sizeOf(context).width-173,
+            height: 60,
+            child: Center(child: IrrigationLineView(line: line,)),
+          ),
+        ],
       );
     },
     ).toList();
@@ -271,7 +270,8 @@ class _IrrigationLineViewState extends State<IrrigationLineView> {
     return Row(
       children: [
         Expanded(
-          child: Center(
+          child: ScrollConfiguration(
+            behavior: const ScrollBehavior(),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -285,14 +285,18 @@ class _IrrigationLineViewState extends State<IrrigationLineView> {
             ),
           ),
         ),
-        const Padding(
-          padding: EdgeInsets.all(5.0),
-          child: VerticalDivider(),
-        ),
-        SizedBox(
+
+        Container(
           width: 200,
           height: 50,
+          decoration: BoxDecoration(
+            color:Colors.yellow.shade100,
+            borderRadius: const BorderRadius.all(Radius.circular(2)),
+            border: Border.all(color: Colors.grey, width: .50,),
+          ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text('Remaining : '),
               ValueListenableBuilder<String>(
@@ -304,6 +308,7 @@ class _IrrigationLineViewState extends State<IrrigationLineView> {
             ],
           ),
         ),
+        const SizedBox(width: 5),
       ],
     );
   }

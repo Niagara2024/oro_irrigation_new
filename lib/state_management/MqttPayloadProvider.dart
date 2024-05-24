@@ -107,6 +107,36 @@ class MqttPayloadProvider with ChangeNotifier {
     //notifyListeners();
   }
 
+  void updatePumpPayload(String payload) {
+    try {
+      Map<String, dynamic> data = jsonDecode(payload);
+      if (data.containsKey('2400') && data['2400'] != null && data['2400'].isNotEmpty) {
+        if (data['2400'][0].containsKey('2407')) {
+          List<dynamic> pumps = data['2400'][0]['2407'];
+          sourcePump = pumps.where((item) => item['Type'] == 1).toList();
+          irrigationPump = pumps.where((item) => item['Type'] == 2).toList();
+        }
+      }
+      notifyListeners();
+    } catch (e) {
+      print('Error parsing JSON: $e');
+    }
+  }
+
+  void updateProgramPayload(String payload) {
+    try {
+      Map<String, dynamic> data = jsonDecode(payload);
+      if (data.containsKey('2400') && data['2400'] != null && data['2400'].isNotEmpty) {
+        if (data['2400'][0].containsKey('2404')) {
+          upcomingProgram = data['2400'][0]['2404'];
+        }
+      }
+      notifyListeners();
+    } catch (e) {
+      print('Error parsing JSON: $e');
+    }
+  }
+
   void setAppConnectionState(MQTTConnectionState state) {
     _appConnectionState = state;
     notifyListeners();

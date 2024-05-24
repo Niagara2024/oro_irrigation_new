@@ -55,7 +55,8 @@ class MasterData {
 
   factory MasterData.fromJson(Map<String, dynamic> json) {
 
-    if(json['categoryId']==1){
+    print(json['categoryId']);
+    if(json['categoryId']==1 || json['categoryId']==2){
       //drip irrigation controller
       var liveData = json['2400'] as List;
       List<LiveData> liveList = liveData.isNotEmpty? liveData.map((live) => LiveData.fromJson(live)).toList() : [];
@@ -98,41 +99,45 @@ class MasterData {
 
 class LiveData {
   List<NodeData> nodeList;
-  List<PumpData> sourcePumps;  // For Type 1 pumps
-  List<PumpData> irrigationPumps;  // For Type 2 pumps
+  List<PumpData> pumpList;
+  List<Program> programList;
+ // List<SensorData> sensorList;
 
   LiveData({
     required this.nodeList,
-    required this.sourcePumps,
-    required this.irrigationPumps,
+    required this.pumpList,
+    required this.programList,
+    //required this.sensorList,
   });
 
   factory LiveData.fromJson(Map<String, dynamic> json) {
+
     var nodeData = json['2401'] as List;
-    List<NodeData> nodeList = nodeData.isNotEmpty? nodeData.map((node) => NodeData.fromJson(node)).toList(): [];
+    List<NodeData> nodeList = nodeData.isNotEmpty? nodeData.map((node) => NodeData.fromJson(node)).toList() : [];
+
+    var programData = json['2404'] as List;
+    List<Program> programList = programData.isNotEmpty? programData.map((prg) => Program.fromJson(prg)).toList() : [];
 
     var pumpData = json['2407'] as List;
-    List<PumpData> pumpList = pumpData.isNotEmpty? pumpData.map((pmp) => PumpData.fromJson(pmp)).toList(): [];
-
-    List<PumpData> sourcePumps = [];
-    List<PumpData> irrigationPumps = [];
-
-    for (var pump in pumpList) {
-      if (pump.Type == 1) {
-        sourcePumps.add(pump);
-      } else if (pump.Type == 2) {
-        irrigationPumps.add(pump);
-      }
-    }
+    List<PumpData> pumpList = pumpData.isNotEmpty? pumpData.map((pmp) => PumpData.fromJson(pmp)).toList() : [];
 
     return LiveData(
       nodeList: nodeList,
-      sourcePumps: sourcePumps,
-      irrigationPumps: irrigationPumps,
+      pumpList: pumpList,
+      programList: programList,
+      //sensorList: (json['2408'] as List).map((i) => SensorData.fromJson(i)).toList(),
     );
   }
-}
 
+  Map<String, dynamic> toJson() {
+    return {
+      '2401': nodeList.map((e) => e.toJson()).toList(),
+      '2404': programList.map((e) => e.toJson()).toList(),
+      '2407': pumpList.map((e) => e.toJson()).toList(),
+      //'2408': sensorList.map((e) => e.toJson()).toList(),
+    };
+  }
+}
 
 class NodeData {
   int controllerId;
@@ -279,6 +284,67 @@ class PumpData {
       'Program': Program,
     };
   }
+}
+
+class Program {
+  final int sNo;
+  final String progCategory;
+  final String progName;
+  final int totalZone;
+  final String startDate;
+  final String endDate;
+  final String startTime;
+  final int schedulingMethod;
+  final int progOnOff;
+  final int progPauseResume;
+  final int startStopReason;
+
+  Program({
+    required this.sNo,
+    required this.progCategory,
+    required this.progName,
+    required this.totalZone,
+    required this.startDate,
+    required this.endDate,
+    required this.startTime,
+    required this.schedulingMethod,
+    required this.progOnOff,
+    required this.progPauseResume,
+    required this.startStopReason,
+  });
+
+  factory Program.fromJson(Map<String, dynamic> json) {
+    return Program(
+      sNo: json['SNo'],
+      progCategory: json['ProgCategory'],
+      progName: json['ProgName'],
+      totalZone: json['TotalZone'],
+      startDate: json['StartDate'],
+      endDate: json['EndDate'],
+      startTime: json['StartTime'],
+      schedulingMethod: json['SchedulingMethod'],
+      progOnOff: json['ProgOnOff'],
+      progPauseResume: json['ProgPauseResume'],
+      startStopReason: json['StartStopReason'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'SNo': sNo,
+      'ProgCategory': progCategory,
+      'ProgName': progName,
+      'TotalZone': totalZone,
+      'StartDate': startDate,
+      'EndDate': endDate,
+      'StartTime': startTime,
+      'SchedulingMethod': schedulingMethod,
+      'ProgOnOff': progOnOff,
+      'ProgPauseResume': progPauseResume,
+      'StartStopReason': startStopReason,
+    };
+  }
+
 }
 
 class SensorData {

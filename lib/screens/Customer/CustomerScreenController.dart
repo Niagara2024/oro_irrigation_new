@@ -119,9 +119,22 @@ class _CustomerScreenControllerState extends State<CustomerScreenController>
   }
 
   void loadServerData(){
-    print(siteListFinal[siteIndex].master[masterIndex].liveData[0].irrigationPumps);
     MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
-    payloadProvider.updateReceivedPayload(siteListFinal[siteIndex].master[masterIndex].toString());
+    String pumpList= jsonEncode(siteListFinal[siteIndex].master[masterIndex].liveData[0].pumpList.map((pump) => pump.toJson()).toList());
+    List<dynamic> jsonPumpList = jsonDecode(pumpList);
+    String pumpPayloadFinal = jsonEncode({
+      "2400": [{"2407": jsonPumpList.toList()}]
+    });
+    payloadProvider.updatePumpPayload(pumpPayloadFinal);
+
+    String programList = jsonEncode(siteListFinal[siteIndex].master[masterIndex].liveData[0].programList.map((pump) => pump.toJson()).toList());
+    List<dynamic> jsonDataList = jsonDecode(programList);
+    String programPayloadFinal = jsonEncode({
+      "2400": [{"2404": jsonDataList.toList()}]
+    });
+
+    payloadProvider.updateProgramPayload(programPayloadFinal);
+
   }
 
   Future<void> getProgramList() async

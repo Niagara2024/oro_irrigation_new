@@ -60,7 +60,7 @@ class _NextScheduleState extends State<NextSchedule> {
 
                         ),
                         DataColumn2(
-                            label: Text('Line', style: TextStyle(fontSize: 13),),
+                            label: Text('Location', style: TextStyle(fontSize: 13),),
                             size: ColumnSize.M
                         ),
                         DataColumn2(

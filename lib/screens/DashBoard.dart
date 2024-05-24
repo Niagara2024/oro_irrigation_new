@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/MQTTManager.dart';
 import '../constants/MqttServer.dart';
+import '../state_management/CustomerDataProvider.dart';
 import '../state_management/MqttPayloadProvider.dart';
 import 'Customer/CustomerScreenController.dart';
 import 'my_preference.dart';
@@ -160,6 +161,7 @@ class _DashboardWideState extends State<DashboardWide> {
     print('userName:${widget.userName}');
     print('userId:${widget.userId}');
     print('userType:${widget.userType}');
+
     return  Scaffold(
       body: widget.userType==3?
       CustomerScreenController(customerId: widget.userId, customerName: widget.userName, mobileNo: '+${widget.countryCode}-${widget.mobileNo}', comingFrom: 'Customer', emailId: widget.emailId,):

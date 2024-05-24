@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
@@ -180,6 +178,7 @@ class _LoginFormState extends State<LoginForm> {
 
                                             /*List<dynamic> siteData = data['data']['site'];
                                             List<String> siteList = siteData.map((site) => json.encode(site)).toList();*/
+
 
                                             final prefs = await SharedPreferences.getInstance();
                                             await prefs.setString('userType', customerInfo["userType"].toString());

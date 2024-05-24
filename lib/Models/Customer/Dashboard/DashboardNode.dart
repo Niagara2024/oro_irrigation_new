@@ -1,4 +1,552 @@
+
 class DashboardModel {
+  final int userGroupId;
+  final String groupName;
+  final String active;
+  List<MasterData> master;
+
+  DashboardModel({
+    required this.userGroupId,
+    required this.groupName,
+    required this.active,
+    required this.master,
+  });
+
+  factory DashboardModel.fromJson(Map<String, dynamic> json) {
+
+    var masterList = json['master'] as List;
+    List<MasterData> master = masterList.isNotEmpty? masterList.map((master) => MasterData.fromJson(master)).toList() : [];
+
+    return DashboardModel(
+      userGroupId: json['userGroupId'],
+      groupName: json['groupName'],
+      active: json['active'],
+      master: master,
+    );
+  }
+}
+
+class MasterData {
+  List<LiveData> liveData;
+  List<IrrigationLine> irrigationLine;
+  int controllerId;
+  String deviceId;
+  String deviceName;
+  int categoryId;
+  String categoryName;
+  int modelId;
+  String modelName;
+  String liveSyncDate;
+  String liveSyncTime;
+
+  MasterData({
+    required this.liveData,
+    required this.controllerId,
+    required this.deviceId,
+    required this.deviceName,
+    required this.categoryId,
+    required this.categoryName,
+    required this.modelId,
+    required this.modelName,
+    required this.liveSyncDate,
+    required this.liveSyncTime,
+    required this.irrigationLine,
+  });
+
+  factory MasterData.fromJson(Map<String, dynamic> json) {
+
+    if(json['categoryId']==1){
+      //drip irrigation controller
+      var liveData = json['2400'] as List;
+      List<LiveData> liveList = liveData.isNotEmpty? liveData.map((live) => LiveData.fromJson(live)).toList() : [];
+
+      var irrigationLine = json['irrigationLine'] as List;
+      List<IrrigationLine> irgLine = irrigationLine.isNotEmpty? irrigationLine.map((irl) => IrrigationLine.fromJson(irl)).toList() : [];
+
+      return MasterData(
+        controllerId: json['controllerId'],
+        deviceId: json['deviceId'],
+        deviceName: json['deviceName'],
+        categoryId: json['categoryId'],
+        categoryName: json['categoryName'],
+        modelId: json['modelId'],
+        modelName: json['modelName'],
+        liveSyncDate: json['liveSyncDate'] ?? '',
+        liveSyncTime: json['liveSyncTime'] ?? '',
+        liveData: liveList,
+        irrigationLine: irgLine,
+      );
+    }else{
+      //pump controller
+      return MasterData(
+        controllerId: json['controllerId'],
+        deviceId: json['deviceId'],
+        deviceName: json['deviceName'],
+        categoryId: json['categoryId'],
+        categoryName: json['categoryName'],
+        modelId: json['modelId'],
+        modelName: json['modelName'],
+        liveSyncDate: json['liveSyncDate'] ?? '',
+        liveSyncTime: json['liveSyncTime'] ?? '',
+        liveData: [],
+        irrigationLine: [],
+      );
+    }
+  }
+
+}
+
+class LiveData {
+  List<NodeData> nodeList;
+  List<PumpData> sourcePumps;  // For Type 1 pumps
+  List<PumpData> irrigationPumps;  // For Type 2 pumps
+
+  LiveData({
+    required this.nodeList,
+    required this.sourcePumps,
+    required this.irrigationPumps,
+  });
+
+  factory LiveData.fromJson(Map<String, dynamic> json) {
+    var nodeData = json['2401'] as List;
+    List<NodeData> nodeList = nodeData.isNotEmpty? nodeData.map((node) => NodeData.fromJson(node)).toList(): [];
+
+    var pumpData = json['2407'] as List;
+    List<PumpData> pumpList = pumpData.isNotEmpty? pumpData.map((pmp) => PumpData.fromJson(pmp)).toList(): [];
+
+    List<PumpData> sourcePumps = [];
+    List<PumpData> irrigationPumps = [];
+
+    for (var pump in pumpList) {
+      if (pump.Type == 1) {
+        sourcePumps.add(pump);
+      } else if (pump.Type == 2) {
+        irrigationPumps.add(pump);
+      }
+    }
+
+    return LiveData(
+      nodeList: nodeList,
+      sourcePumps: sourcePumps,
+      irrigationPumps: irrigationPumps,
+    );
+  }
+}
+
+
+class NodeData {
+  int controllerId;
+  String deviceId;
+  String deviceName;
+  int categoryId;
+  String categoryName;
+  int modelId;
+  String modelName;
+  int serialNumber;
+  int referenceNumber;
+  double SVolt;
+  double BatVolt;
+  List<RelayStatus> RlyStatus;
+  List<SensorStatus> Sensor;
+  int Status;
+
+  NodeData({
+    required this.controllerId,
+    required this.deviceId,
+    required this.deviceName,
+    required this.categoryId,
+    required this.categoryName,
+    required this.modelId,
+    required this.modelName,
+    required this.serialNumber,
+    required this.referenceNumber,
+    required this.SVolt,
+    required this.BatVolt,
+    required this.RlyStatus,
+    required this.Sensor,
+    required this.Status,
+  });
+
+  factory NodeData.fromJson(Map<String, dynamic> json) {
+
+    var rlyStatusList = json['RlyStatus'] as List;
+    List<RelayStatus> rlyStatus = rlyStatusList.map((rlyStatus) => RelayStatus.fromJson(rlyStatus)).toList();
+
+    var sensorList = json['Sensor'] as List;
+    List<SensorStatus> sensor = sensorList.map((sensor) => SensorStatus.fromJson(sensor)).toList();
+
+    return NodeData(
+      controllerId: json['controllerId'],
+      deviceId: json['deviceId'],
+      deviceName: json['deviceName'],
+      categoryId: json['categoryId'],
+      categoryName: json['categoryName'],
+      modelId: json['modelId'],
+      modelName: json['modelName'],
+      serialNumber: json['serialNumber'],
+      referenceNumber: json['referenceNumber'],
+      SVolt: json['SVolt'],
+      BatVolt: json['BatVolt'],
+      RlyStatus: rlyStatus,
+      Sensor: sensor,
+      Status: json['Status'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'controllerId': controllerId,
+      'deviceId': deviceId,
+      'deviceName': deviceName,
+      'categoryId': categoryId,
+      'categoryName': categoryName,
+      'modelId': modelId,
+      'modelName': modelName,
+      'serialNumber': serialNumber,
+      'referenceNumber': referenceNumber,
+      'SVolt': SVolt,
+      'BatVolt': BatVolt,
+      'RlyStatus': RlyStatus,
+      'Sensor': Sensor,
+      'Status': Status,
+    };
+  }
+}
+
+class PumpData {
+  int Type;
+  String Name;
+  String Location;
+  int Status;
+  int Reason;
+  List<dynamic> Watermeter;
+  List<dynamic> Pressure;
+  List<dynamic> Level;
+  List<dynamic> Float;
+  String OnDelay;
+  String OnDelayCompleted;
+  String OnDelayLeft;
+  String Program;
+
+  PumpData({
+    required this.Type,
+    required this.Name,
+    required this.Location,
+    required this.Status,
+    required this.Reason,
+    required this.Watermeter,
+    required this.Pressure,
+    required this.Level,
+    required this.Float,
+    required this.OnDelay,
+    required this.OnDelayCompleted,
+    required this.OnDelayLeft,
+    required this.Program,
+  });
+
+  factory PumpData.fromJson(Map<String, dynamic> json) {
+    return PumpData(
+      Type: json['Type'],
+      Name: json['Name'],
+      Location: json['Location'],
+      Status: json['Status'],
+      Reason: json['Reason'],
+      Watermeter: json['Watermeter'],
+      Pressure: json['Pressure'],
+      Level: json['Level'],
+      Float: json['Float'],
+      OnDelay: json['OnDelay'],
+      OnDelayCompleted: json['OnDelayCompleted'],
+      OnDelayLeft: json['OnDelayLeft'],
+      Program: json['Program'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'Type': Type,
+      'Name': Name,
+      'Location': Location,
+      'Status': Status,
+      'Reason': Reason,
+      'Watermeter': Watermeter,
+      'Pressure': Pressure,
+      'Level': Level,
+      'Float': Float,
+      'OnDelay': OnDelay,
+      'OnDelayCompleted': OnDelayCompleted,
+      'OnDelayLeft': OnDelayLeft,
+      'Program': Program,
+    };
+  }
+}
+
+class SensorData {
+  int S_No;
+  String Line;
+  String PrsIn;
+  String PrsOut;
+  String DpValue;
+  String Watermeter;
+  int IrrigationPauseFlag;
+  int DosingPauseFlag;
+
+  SensorData({
+    required this.S_No,
+    required this.Line,
+    required this.PrsIn,
+    required this.PrsOut,
+    required this.DpValue,
+    required this.Watermeter,
+    required this.IrrigationPauseFlag,
+    required this.DosingPauseFlag,
+  });
+
+  factory SensorData.fromJson(Map<String, dynamic> json) {
+    return SensorData(
+      S_No: json['S_No'],
+      Line: json['Line'],
+      PrsIn: json['PrsIn'],
+      PrsOut: json['PrsOut'],
+      DpValue: json['DpValue'],
+      Watermeter: json['Watermeter'],
+      IrrigationPauseFlag: json['IrrigationPauseFlag'],
+      DosingPauseFlag: json['DosingPauseFlag'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'S_No': S_No,
+      'Line': Line,
+      'PrsIn': PrsIn,
+      'PrsOut': PrsOut,
+      'DpValue': DpValue,
+      'Watermeter': Watermeter,
+      'IrrigationPauseFlag': IrrigationPauseFlag,
+      'DosingPauseFlag': DosingPauseFlag,
+    };
+  }
+}
+
+class IrrigationLine {
+  int sNo;
+  String id;
+  String hid;
+  String name;
+  String location;
+  String type;
+  List<MainValve> mainValve;
+  List<Valve> valve;
+  //List<PressureSensor> pressureSensor;
+
+  IrrigationLine({
+    required this.sNo,
+    required this.id,
+    required this.hid,
+    required this.name,
+    required this.location,
+    required this.type,
+    required this.mainValve,
+    required this.valve,
+    //required this.pressureSensor,
+  });
+
+  factory IrrigationLine.fromJson(Map<String, dynamic> json) {
+
+    var mainValve = json['mainValve'] as List;
+    List<MainValve> mainValveList = mainValve.isNotEmpty? mainValve.map((mv) => MainValve.fromJson(mv)).toList() : [];
+
+    var valveData = json['valve'] as List;
+    List<Valve> valveDataList = valveData.isNotEmpty? valveData.map((vl) => Valve.fromJson(vl)).toList() : [];
+
+    return IrrigationLine(
+      sNo: json['sNo'],
+      id: json['id'],
+      hid: json['hid'],
+      name: json['name'],
+      location: json['location'],
+      type: json['type'],
+      mainValve: mainValveList,
+      valve: valveDataList,
+      //pressureSensor: (json['pressureSensor'] as List).map((i) => PressureSensor.fromJson(i)).toList(),
+    );
+  }
+
+}
+
+class MainValve {
+  int sNo;
+  String id;
+  String hid;
+  String name;
+  String location;
+  String type;
+  int status;
+
+  MainValve({
+    required this.sNo,
+    required this.id,
+    required this.hid,
+    required this.name,
+    required this.location,
+    required this.type,
+    required this.status,
+  });
+
+  factory MainValve.fromJson(Map<String, dynamic> json) {
+    return MainValve(
+      sNo: json['sNo'],
+      id: json['id'],
+      hid: json['hid'],
+      name: json['name'],
+      location: json['location'],
+      type: json['type'],
+      status: json['status'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'sNo': sNo,
+      'id': id,
+      'hid': hid,
+      'name': name,
+      'location': location,
+      'type': type,
+      'status': status,
+    };
+  }
+}
+
+class Valve {
+  int sNo;
+  String id;
+  String hid;
+  String name;
+  String location;
+  String type;
+  int status;
+
+  Valve({
+    required this.sNo,
+    required this.id,
+    required this.hid,
+    required this.name,
+    required this.location,
+    required this.type,
+    required this.status,
+  });
+
+  factory Valve.fromJson(Map<String, dynamic> json) {
+    return Valve(
+      sNo: json['sNo'],
+      id: json['id'],
+      hid: json['hid'],
+      name: json['name'],
+      location: json['location'],
+      type: json['type'],
+      status: json['status'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'sNo': sNo,
+      'id': id,
+      'hid': hid,
+      'name': name,
+      'location': location,
+      'type': type,
+      'status': status,
+    };
+  }
+}
+
+class PressureSensor {
+  int sNo;
+  String id;
+  String hid;
+  String name;
+  String location;
+  String type;
+  int status;
+
+  PressureSensor({
+    required this.sNo,
+    required this.id,
+    required this.hid,
+    required this.name,
+    required this.location,
+    required this.type,
+    required this.status,
+  });
+
+  factory PressureSensor.fromJson(Map<String, dynamic> json) {
+    return PressureSensor(
+      sNo: json['sNo'],
+      id: json['id'],
+      hid: json['hid'],
+      name: json['name'],
+      location: json['location'],
+      type: json['type'],
+      status: json['status'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'sNo': sNo,
+      'id': id,
+      'hid': hid,
+      'name': name,
+      'location': location,
+      'type': type,
+      'status': status,
+    };
+  }
+}
+
+class RelayStatus {
+  final String? Name;
+  final int? RlyNo;
+  final int? Status;
+
+  RelayStatus({
+    required this.Name,
+    required this.RlyNo,
+    required this.Status,
+  });
+
+  factory RelayStatus.fromJson(Map<String, dynamic> json) {
+    return RelayStatus(
+      Name: json['Name'],
+      RlyNo: json['RlyNo'],
+      Status: json['Status'],
+    );
+  }
+}
+
+class SensorStatus {
+  final String? Name;
+  final String? Value;
+
+  SensorStatus({
+    required this.Name,
+    required this.Value,
+  });
+
+  factory SensorStatus.fromJson(Map<String, dynamic> json) {
+    return SensorStatus(
+      Name: json['Name'],
+      Value: json['Value'],
+    );
+  }
+}
+
+
+/*class DashboardModel {
+
   final int controllerId;
   final String deviceId;
   final String deviceName;
@@ -490,4 +1038,4 @@ class PressureSensor {
       status: json['status'],
     );
   }
-}
+}*/

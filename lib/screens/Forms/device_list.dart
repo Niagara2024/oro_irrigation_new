@@ -702,13 +702,13 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                   ],
                   onTap: (index) {
                     currentSiteInx = index;
-                    print(customerSiteList[index].master[currentMstInx].controllerId);
+                    //print(customerSiteList[index].master[currentMstInx].controllerId);
                   },
                 ),
               ),
               PopupMenuButton(
                 elevation: 10,
-                tooltip: 'Add New device',
+                tooltip: 'Add New Master controller',
                 child: Center(
                     child: MaterialButton(
                       onPressed:null,
@@ -717,7 +717,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                         children: [
                           Icon(Icons.add, color: myTheme.primaryColor),
                           const SizedBox(width: 3),
-                          Text('New Device',style: TextStyle(color: myTheme.primaryColor)),
+                          Text('New Master Device',style: TextStyle(color: myTheme.primaryColor)),
                         ],
                       ),
                     ),

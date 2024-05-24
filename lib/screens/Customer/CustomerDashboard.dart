@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:oro_irrigation_new/screens/Customer/Dashboard/LocalSite.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/NextSchedule.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/UpcomingProgram.dart';
 import 'package:provider/provider.dart';
@@ -26,7 +25,6 @@ class CustomerDashboard extends StatefulWidget {
 class _CustomerDashboardState extends State<CustomerDashboard> {
 
   int wifiStrength = 0, siteIndex = 0;
-  String lastSyncData = '';
 
   @override
   void initState() {
@@ -37,7 +35,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   void liveSync(){
     Future.delayed(const Duration(seconds: 2), () {
       String payLoadFinal = jsonEncode({"3000": [{"3001": ""}]});
-      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
     });
   }
 
@@ -51,7 +49,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
       setState(() {
         if (data['2400'][0].containsKey('WifiStrength')) {
           wifiStrength = data['2400'][0]['WifiStrength'];
-          lastSyncData = getCurrentDateAndTime();
         }
 
       });
@@ -64,8 +61,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
       scrollDirection: Axis.vertical,
       child: Column(
         children: [
-          PumpLineCentral(siteData: widget.siteData),
-          LocalSite(siteData: widget.siteData),
+          PumpLineCentral(currentSiteData: widget.siteData),
           //DisplayIrrigationLine(siteData: widget.siteData),
           CurrentSchedule(siteData: widget.siteData, customerID: widget.customerID),
           provider.nextSchedule.isNotEmpty?
@@ -88,12 +84,12 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
   int getNodePositionInNodeList(int siteIndex, int srlNo)
   {
-    List<NodeModel> nodeList = widget.siteData.nodeList;
+    /*List<NodeModel> nodeList = widget.siteData.nodeList;
     for (int i = 0; i < nodeList.length; i++) {
       if (nodeList[i].serialNumber == srlNo) {
         return i;
       }
-    }
+    }*/
     return -1;
   }
 
@@ -126,9 +122,9 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
   {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
-      height: widget.siteData.irrigationLine.length * 107,
+      height: widget.siteData.master[0].irrigationLine.length * 107,
       child: ListView.builder(
-        itemCount: widget.siteData.irrigationLine.length,
+        itemCount: widget.siteData.master[0].irrigationLine.length,
         itemBuilder: (BuildContext context, int index) {
           return Padding(
             padding: const EdgeInsets.all(3.0),
@@ -156,11 +152,11 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
                         child: Row(
                           children: [
                             SizedBox(
-                              width: widget.siteData.irrigationLine[index].mainValve.length * 116,
+                              width: widget.siteData.master[0].irrigationLine[index].mainValve.length * 116,
                               height: 80,
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
-                                itemCount: widget.siteData.irrigationLine[index].mainValve.length,
+                                itemCount: widget.siteData.master[0].irrigationLine[index].mainValve.length,
                                 itemBuilder: (BuildContext context, int vlIndex) {
                                   return Padding(
                                     padding: const EdgeInsets.only(left: 8, right: 8, top: 12, bottom: 3),
@@ -171,7 +167,7 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
                                         children: [
                                           Image.asset('assets/images/dp_main_valve_not_open.png', width: 40, height: 40,),
                                           const SizedBox(height: 5),
-                                          Text(widget.siteData.irrigationLine[index].mainValve[vlIndex].name, style: const TextStyle(fontSize: 11),)
+                                          Text(widget.siteData.master[0].irrigationLine[index].mainValve[vlIndex].name, style: const TextStyle(fontSize: 11),)
                                         ],
                                       ),
                                     ),
@@ -184,7 +180,7 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
                               height: 80,
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
-                                itemCount: widget.siteData.irrigationLine[index].valve.length,
+                                itemCount: widget.siteData.master[0].irrigationLine[index].valve.length,
                                 itemBuilder: (BuildContext context, int vlIndex) {
                                   return Padding(
                                     padding: const EdgeInsets.only(left: 8, right: 8, top: 12, bottom: 3),
@@ -195,7 +191,7 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
                                         children: [
                                           Image.asset('assets/images/valve_gray.png', width: 40, height: 40,),
                                           const SizedBox(height: 5),
-                                          Text(widget.siteData.irrigationLine[index].valve[vlIndex].name, style: const TextStyle(fontSize: 11),)
+                                          Text(widget.siteData.master[0].irrigationLine[index].valve[vlIndex].name, style: const TextStyle(fontSize: 11),)
                                         ],
                                       ),
                                     ),
@@ -217,7 +213,7 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
                           color: Colors.cyan.shade200,
                           borderRadius: const BorderRadius.all(Radius.circular(3)),
                         ),
-                        child: Text(widget.siteData.irrigationLine[index].name.toUpperCase(),  style: const TextStyle(color: Colors.black)),
+                        child: Text(widget.siteData.master[0].irrigationLine[index].name.toUpperCase(),  style: const TextStyle(color: Colors.black)),
                       ),
                     ),
                   ],

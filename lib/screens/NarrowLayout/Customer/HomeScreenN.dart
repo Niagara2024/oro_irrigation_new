@@ -147,7 +147,7 @@ class _HomeScreenNState extends State<HomeScreenN> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(left: 8, right: 8),
-                child: MasterController(name: siteListFinal[siteIndex].deviceName, category: siteListFinal[siteIndex].categoryName, refreshOnPress: () {
+                child: MasterController(name: siteListFinal[siteIndex].groupName, category: siteListFinal[siteIndex].groupName, refreshOnPress: () {
                   print('ControllerWidget clicked');
                 }),
               )

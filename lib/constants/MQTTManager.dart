@@ -28,7 +28,7 @@ class MQTTManager {
     int port = 9001;
 
     //cloud
-    /* String baseURL = 'ws://13.235.254.21:8083/mqtt';
+     /*String baseURL = 'ws://13.235.254.21:8083/mqtt';
      int port = 8083;*/
 
     if (_client == null) {

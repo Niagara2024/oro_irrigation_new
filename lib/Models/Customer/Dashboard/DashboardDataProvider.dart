@@ -5,6 +5,7 @@ class DashboardDataProvider
   bool startTogether;
   String time, flow;
   int method;
+  String headUnits;
   List<SourcePump> sourcePump;
   List<IrrigationPump> irrigationPump;
   List<MainValve> mainValve;
@@ -19,13 +20,12 @@ class DashboardDataProvider
   List<BoosterPump> boosterPump;
   List<Selector> selector;
 
-
-
   DashboardDataProvider({
     required this.startTogether,
     required this.time,
     required this.flow,
     required this.method,
+    required this.headUnits,
     required this.sourcePump,
     required this.irrigationPump,
     required this.mainValve,
@@ -46,6 +46,7 @@ class DashboardDataProvider
     String timeVal = json['time'];
     String flowVal = json['flow'];
     int method = json['method'];
+    String headUnits = json['headUnits'];
     List<SourcePump> sourcePumpList = (json['sourcePump'] as List)
         .map((sourcePump) => SourcePump.fromJson(sourcePump))
         .toList();
@@ -103,6 +104,7 @@ class DashboardDataProvider
       time: timeVal,
       flow: flowVal,
       method: method,
+      headUnits: headUnits,
       sourcePump: sourcePumpList,
       mainValve: mainValve,
       lineOrSequence: lineOrSequence,

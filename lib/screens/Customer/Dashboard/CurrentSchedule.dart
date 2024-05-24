@@ -27,7 +27,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
   @override
   void initState() {
     super.initState();
-    durationUpdatingFunction();
+    //durationUpdatingFunction();
   }
 
   @override
@@ -38,8 +38,180 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<MqttPayloadProvider>(context);
-    return provider.currentSchedule.isNotEmpty? Column(
+    final currentSchedule = Provider.of<MqttPayloadProvider>(context).currentSchedule;
+    return currentSchedule.isNotEmpty? Padding(
+      padding: const EdgeInsets.all(3.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(
+                      color: Colors.grey,
+                      width: 0.5,
+                    ),
+                    borderRadius: const BorderRadius.all(Radius.circular(5)),
+                  ),
+                  height: currentSchedule.isNotEmpty? (currentSchedule.length * 45) + 45 : 50,
+                  child: DataTable2(
+                    columnSpacing: 12,
+                    horizontalMargin: 12,
+                    minWidth: 600,
+                    dataRowHeight: 45.0,
+                    headingRowHeight: 40.0,
+                    headingRowColor: MaterialStateProperty.all<Color>(Colors.green.shade50),
+                    columns: const [
+                      DataColumn2(
+                          label: Text('Name', style: TextStyle(fontSize: 13),),
+                          size: ColumnSize.L
+                      ),
+                      DataColumn2(
+                          label: Text('Location', style: TextStyle(fontSize: 13)),
+                          size: ColumnSize.S
+                      ),
+                      DataColumn2(
+                          label: Text('Zone', style: TextStyle(fontSize: 13),),
+                          size: ColumnSize.S
+                      ),
+                      DataColumn2(
+                          label: Text('Zone Name', style: TextStyle(fontSize: 13)),
+                          size: ColumnSize.M
+                      ),
+                      DataColumn2(
+                        label: Center(child: Text('RTC', style: TextStyle(fontSize: 13),)),
+                        fixedWidth: 75,
+                      ),
+                      DataColumn2(
+                        label: Center(child: Text('Cyclic', style: TextStyle(fontSize: 13),)),
+                        fixedWidth: 75,
+                      ),
+                      DataColumn2(
+                          label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
+                          size: ColumnSize.M
+                      ),
+                      DataColumn2(
+                          label: Center(child: Text('Total (Duration/Flow)', style: TextStyle(fontSize: 13),)),
+                          size: ColumnSize.L
+                      ),
+                      DataColumn2(
+                          label: Center(child: Text('')),
+                          fixedWidth: 90
+                      ),
+                    ],
+                    rows: List<DataRow>.generate(currentSchedule.length, (index) => DataRow(cells: [
+                      DataCell(
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(currentSchedule[index]['ProgName']),
+                              Text('${getContentByCode(currentSchedule[index]['ProgramStartStopReason'])} - ${currentSchedule[index]['ProgramStartStopReason']}', style: const TextStyle(fontSize: 11, color: Colors.black),),
+                            ],
+                          )
+                      ),
+                      DataCell(Text(currentSchedule[index]['ProgCategory'])),
+                      DataCell(Text('${currentSchedule[index]['CurrentZone']}/${currentSchedule[index]['TotalZone']}')),
+                      DataCell(Text(currentSchedule[index]['ZoneName'])),
+                      DataCell(Center(child: Text(formatRtcValues(currentSchedule[index]['CurrentRtc'],currentSchedule[index]['TotalRtc'])))),
+                      DataCell(Center(child: Text(formatRtcValues(currentSchedule[index]['CurrentCycle'],currentSchedule[index]['TotalCycle'])))),
+                      DataCell(Center(child: Text(_convertTime(currentSchedule[index]['StartTime'])))),
+                      DataCell(Center(child: Text('${currentSchedule[index]['Duration_Qty']}'))),
+                      DataCell(Center(
+                        child: currentSchedule[index]['ProgName']=='StandAlone - Manual'?
+                        MaterialButton(
+                          color: Colors.redAccent,
+                          textColor: Colors.white,
+                          onPressed: currentSchedule[index]['Message']=='Running.'? (){
+                            String payload = '0,0,0,0';
+                            String payLoadFinal = jsonEncode({
+                              "800": [{"801": payload}]
+                            });
+                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
+                            Map<String, dynamic> manualOperation = {
+                              "programName": 'Default',
+                              "programId": 0,
+                              "startFlag":0,
+                              "method": 1,
+                              "time": '00:00:00',
+                              "flow": '0',
+                              "selected": [],
+                            };
+                            sentManualModeToServer(manualOperation);
+                          } : null,
+                          child: const Text('Stop'),
+                        ):
+                        '${currentSchedule[index]['ProgName']}'.contains('StandAlone') ?
+                        MaterialButton(
+                          color: Colors.redAccent,
+                          textColor: Colors.white,
+                          onPressed: () async {
+                            final prefs = await SharedPreferences.getInstance();
+                            String? prgOffPayload = prefs.getString(currentSchedule[index]['ProgName']);
+                            String payLoadFinal = jsonEncode({
+                              "3900": [{"3901": prgOffPayload}]
+                            });
+                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
+                            Map<String, dynamic> manualOperation = {
+                              "programName": currentSchedule[index]['ProgName'],
+                              "programId": currentSchedule[index]['SNo'],
+                              "startFlag":0,
+                              "method": 1,
+                              "time": '00:00:00',
+                              "flow": '0',
+                              "selected": [],
+                            };
+                            sentManualModeToServer(manualOperation);
+                            prefs.remove(currentSchedule[index]['ProgName']);
+                          },
+                          child: const Text('Stop'),
+                        ):
+                        MaterialButton(
+                          color: Colors.green,
+                          textColor: Colors.white,
+                          onPressed: currentSchedule[index]['Message']=='Running.'? (){
+                            String payload = '${currentSchedule[index]['ScheduleS_No']},0';
+                            String payLoadFinal = jsonEncode({
+                              "3700": [{"3701": payload}]
+                            });
+                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
+                          } : null,
+                          child: const Text('Skip'),
+                        ),
+                      )),
+                    ])),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 5,
+                left: 0,
+                child: Container(
+                  width: 200,
+                  padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 2),
+                  decoration: BoxDecoration(
+                      color: Colors.green.shade200,
+                      borderRadius: const BorderRadius.all(Radius.circular(2)),
+                      border: Border.all(width: 0.5, color: Colors.grey)
+                  ),
+                  child: const Text('CURRENT SCHEDULE',  style: TextStyle(color: Colors.black)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ) : const SizedBox();
+  }
+
+  /*@override
+  Widget build(BuildContext context) {
+    final currentSchedule = Provider.of<MqttPayloadProvider>(context).currentSchedule;
+    return currentSchedule.isNotEmpty? Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Stack(
@@ -55,11 +227,11 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                   ),
                   borderRadius: const BorderRadius.all(Radius.circular(5)),
                 ),
-                height: provider.currentSchedule.isNotEmpty ? (provider.currentSchedule.length * 148) : 45,
-                child: provider.currentSchedule.isNotEmpty ? Padding(
+                height: currentSchedule.isNotEmpty ? (currentSchedule.length * 148) : 45,
+                child: currentSchedule.isNotEmpty ? Padding(
                   padding: const EdgeInsets.all(1.0),
                   child: ListView.builder(
-                    itemCount: provider.currentSchedule.length,
+                    itemCount: currentSchedule.length,
                     itemBuilder: (BuildContext context, int csIndex) {
                       return Column(
                         children: [
@@ -79,7 +251,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                     size: ColumnSize.L
                                 ),
                                 const DataColumn2(
-                                    label: Text('Line', style: TextStyle(fontSize: 13)),
+                                    label: Text('Location', style: TextStyle(fontSize: 13)),
                                     size: ColumnSize.S
                                 ),
                                 const DataColumn2(
@@ -92,18 +264,18 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                 ),
                                 const DataColumn2(
                                     label: Center(child: Text('RTC', style: TextStyle(fontSize: 13),)),
-                                    size: ColumnSize.M
+                                    fixedWidth: 75,
                                 ),
                                 const DataColumn2(
                                     label: Center(child: Text('Cyclic', style: TextStyle(fontSize: 13),)),
-                                    size: ColumnSize.M
+                                    fixedWidth: 75,
                                 ),
                                 const DataColumn2(
                                     label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
                                     size: ColumnSize.M
                                 ),
                                 DataColumn2(
-                                    label: Center(child: Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Total Duration(hh:mm:ss)' : 'Total Flow(Liters)', style: const TextStyle(fontSize: 13),)),
+                                    label: Center(child: Text('${currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 'Total Duration(hh:mm:ss)' : 'Total Flow(Liters)', style: const TextStyle(fontSize: 13),)),
                                     size: ColumnSize.L
                                 ),
                                 const DataColumn2(
@@ -117,29 +289,29 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        Text(provider.currentSchedule[csIndex]['ProgName']),
-                                        Text('${getContentByCode(provider.currentSchedule[csIndex]['ProgramStartStopReason'])} - ${provider.currentSchedule[csIndex]['ProgramStartStopReason']}', style: const TextStyle(fontSize: 11, color: Colors.black),),
+                                        Text(currentSchedule[csIndex]['ProgName']),
+                                        Text('${getContentByCode(currentSchedule[csIndex]['ProgramStartStopReason'])} - ${currentSchedule[csIndex]['ProgramStartStopReason']}', style: const TextStyle(fontSize: 11, color: Colors.black),),
                                       ],
                                     )
                                 ),
-                                DataCell(Text(provider.currentSchedule[csIndex]['ProgCategory'])),
-                                DataCell(Text('${provider.currentSchedule[csIndex]['CurrentZone']}/${provider.currentSchedule[csIndex]['TotalZone']}')),
-                                DataCell(Text(provider.currentSchedule[csIndex]['ZoneName'])),
-                                DataCell(Center(child: Text('${provider.currentSchedule[csIndex]['CurrentRtc']}/${provider.currentSchedule[csIndex]['TotalRtc']}'))),
-                                DataCell(Center(child: Center(child: Text('${provider.currentSchedule[csIndex]['CurrentCycle']}/${provider.currentSchedule[csIndex]['TotalCycle']}')))),
-                                DataCell(Center(child: Text(_convertTime(provider.currentSchedule[csIndex]['StartTime'])))),
-                                DataCell(Center(child: Text('${provider.currentSchedule[csIndex]['Duration_Qty']}'))),
+                                DataCell(Text(currentSchedule[csIndex]['ProgCategory'])),
+                                DataCell(Text('${currentSchedule[csIndex]['CurrentZone']}/${currentSchedule[csIndex]['TotalZone']}')),
+                                DataCell(Text(currentSchedule[csIndex]['ZoneName'])),
+                                DataCell(Center(child: Text(formatRtcValues(currentSchedule[csIndex]['CurrentRtc'],currentSchedule[csIndex]['TotalRtc'])))),
+                                DataCell(Center(child: Text(formatRtcValues(currentSchedule[csIndex]['CurrentCycle'],currentSchedule[csIndex]['TotalCycle'])))),
+                                DataCell(Center(child: Text(_convertTime(currentSchedule[csIndex]['StartTime'])))),
+                                DataCell(Center(child: Text('${currentSchedule[csIndex]['Duration_Qty']}'))),
                                 DataCell(Center(
-                                  child: provider.currentSchedule[csIndex]['ProgName']=='StandAlone - Manual'?
+                                  child: currentSchedule[csIndex]['ProgName']=='StandAlone - Manual'?
                                   MaterialButton(
                                     color: Colors.redAccent,
                                     textColor: Colors.white,
-                                    onPressed: provider.currentSchedule[csIndex]['Message']=='Running.'? (){
+                                    onPressed: currentSchedule[csIndex]['Message']=='Running.'? (){
                                       String payload = '0,0,0,0';
                                       String payLoadFinal = jsonEncode({
                                         "800": [{"801": payload}]
                                       });
-                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
                                       Map<String, dynamic> manualOperation = {
                                         "programName": 'Default',
                                         "programId": 0,
@@ -153,20 +325,20 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                     } : null,
                                     child: const Text('Stop'),
                                   ):
-                                  '${provider.currentSchedule[csIndex]['ProgName']}'.contains('StandAlone') ?
+                                  '${currentSchedule[csIndex]['ProgName']}'.contains('StandAlone') ?
                                   MaterialButton(
                                     color: Colors.redAccent,
                                     textColor: Colors.white,
                                     onPressed: () async {
                                       final prefs = await SharedPreferences.getInstance();
-                                      String? prgOffPayload = prefs.getString(provider.currentSchedule[csIndex]['ProgName']);
+                                      String? prgOffPayload = prefs.getString(currentSchedule[csIndex]['ProgName']);
                                       String payLoadFinal = jsonEncode({
                                         "3900": [{"3901": prgOffPayload}]
                                       });
-                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
                                       Map<String, dynamic> manualOperation = {
-                                        "programName": provider.currentSchedule[csIndex]['ProgName'],
-                                        "programId": provider.currentSchedule[csIndex]['SNo'],
+                                        "programName": currentSchedule[csIndex]['ProgName'],
+                                        "programId": currentSchedule[csIndex]['SNo'],
                                         "startFlag":0,
                                         "method": 1,
                                         "time": '00:00:00',
@@ -174,19 +346,19 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                         "selected": [],
                                       };
                                       sentManualModeToServer(manualOperation);
-                                      prefs.remove(provider.currentSchedule[csIndex]['ProgName']);
+                                      prefs.remove(currentSchedule[csIndex]['ProgName']);
                                     },
                                     child: const Text('Stop'),
                                   ):
                                   MaterialButton(
                                     color: Colors.green,
                                     textColor: Colors.white,
-                                    onPressed: provider.currentSchedule[csIndex]['Message']=='Running.'? (){
-                                      String payload = '${provider.currentSchedule[csIndex]['ScheduleS_No']},0';
+                                    onPressed: currentSchedule[csIndex]['Message']=='Running.'? (){
+                                      String payload = '${currentSchedule[csIndex]['ScheduleS_No']},0';
                                       String payLoadFinal = jsonEncode({
                                         "3700": [{"3701": payload}]
                                       });
-                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');
+                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
                                     } : null,
                                     child: const Text('Skip'),
                                   ),
@@ -202,44 +374,44 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                               children: [
                                 Row(
                                   children: [
-                                    if((provider.currentSchedule[csIndex].containsKey('MV') && provider.currentSchedule[csIndex]['MV'].length > 0))
-                                      for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['MV'].length; mvIndex++)
+                                    if((currentSchedule[csIndex].containsKey('MV') && currentSchedule[csIndex]['MV'].length > 0))
+                                      for(int mvIndex=0; mvIndex<currentSchedule[csIndex]['MV'].length; mvIndex++)
                                         Expanded(
                                           flex: 1,
-                                          child: buildWidget('MV', provider.currentSchedule[csIndex]['MV'][mvIndex]['Status'],
-                                              provider.currentSchedule[csIndex]['MV'][mvIndex]['Name']),
+                                          child: buildWidget('MV', currentSchedule[csIndex]['MV'][mvIndex]['Status'],
+                                              currentSchedule[csIndex]['MV'][mvIndex]['Name']),
                                         ),
 
-                                    if((provider.currentSchedule[csIndex].containsKey('VL') && provider.currentSchedule[csIndex]['VL'].length > 0))
-                                      for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['VL'].length; mvIndex++)
+                                    if((currentSchedule[csIndex].containsKey('VL') && currentSchedule[csIndex]['VL'].length > 0))
+                                      for(int mvIndex=0; mvIndex<currentSchedule[csIndex]['VL'].length; mvIndex++)
                                         Expanded(
                                           flex: 1,
-                                          child: buildWidget('VL', provider.currentSchedule[csIndex]['VL'][mvIndex]['Status'],
-                                              provider.currentSchedule[csIndex]['VL'][mvIndex]['Name']),
+                                          child: buildWidget('VL', currentSchedule[csIndex]['VL'][mvIndex]['Status'],
+                                              currentSchedule[csIndex]['VL'][mvIndex]['Name']),
                                         ),
 
-                                    if((provider.currentSchedule[csIndex].containsKey('FG') && provider.currentSchedule[csIndex]['FG'].length > 0))
-                                      for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['FG'].length; mvIndex++)
+                                    if((currentSchedule[csIndex].containsKey('FG') && currentSchedule[csIndex]['FG'].length > 0))
+                                      for(int mvIndex=0; mvIndex<currentSchedule[csIndex]['FG'].length; mvIndex++)
                                         Expanded(
                                           flex: 1,
-                                          child: buildWidget('FG', provider.currentSchedule[csIndex]['FG'][mvIndex]['Status'],
-                                              provider.currentSchedule[csIndex]['FG'][mvIndex]['Name']),
+                                          child: buildWidget('FG', currentSchedule[csIndex]['FG'][mvIndex]['Status'],
+                                              currentSchedule[csIndex]['FG'][mvIndex]['Name']),
                                         ),
 
-                                    if((provider.currentSchedule[csIndex].containsKey('SL') && provider.currentSchedule[csIndex]['SL'].length > 0))
-                                      for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['SL'].length; mvIndex++)
+                                    if((currentSchedule[csIndex].containsKey('SL') && currentSchedule[csIndex]['SL'].length > 0))
+                                      for(int mvIndex=0; mvIndex<currentSchedule[csIndex]['SL'].length; mvIndex++)
                                         Expanded(
                                           flex: 1,
-                                          child: buildWidget('SL', provider.currentSchedule[csIndex]['SL'][mvIndex]['Status'],
-                                              provider.currentSchedule[csIndex]['SL'][mvIndex]['Name']),
+                                          child: buildWidget('SL', currentSchedule[csIndex]['SL'][mvIndex]['Status'],
+                                              currentSchedule[csIndex]['SL'][mvIndex]['Name']),
                                         ),
 
-                                    if((provider.currentSchedule[csIndex].containsKey('FN') && provider.currentSchedule[csIndex]['FN'].length > 0))
-                                      for(int mvIndex=0; mvIndex<provider.currentSchedule[csIndex]['FN'].length; mvIndex++)
+                                    if((currentSchedule[csIndex].containsKey('FN') && currentSchedule[csIndex]['FN'].length > 0))
+                                      for(int mvIndex=0; mvIndex<currentSchedule[csIndex]['FN'].length; mvIndex++)
                                         Expanded(
                                           flex: 1,
-                                          child: buildWidget('FN', provider.currentSchedule[csIndex]['FN'][mvIndex]['Status'],
-                                              provider.currentSchedule[csIndex]['FN'][mvIndex]['Name']),
+                                          child: buildWidget('FN', currentSchedule[csIndex]['FN'][mvIndex]['Status'],
+                                              currentSchedule[csIndex]['FN'][mvIndex]['Name']),
                                         ),
 
                                     Padding(
@@ -247,12 +419,12 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                       child: Container(width: 1, height: 40, color: Colors.grey,),
                                     ),
                                     SizedBox(
-                                      width: '${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 200 : 215,
+                                      width: '${currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? 200 : 215,
                                       child: Row(
                                         children: [
                                           const Text('Remaining : '),
-                                          provider.currentSchedule[csIndex]['Message']=='Running.'? Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
-                                          Text('${provider.currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
+                                          currentSchedule[csIndex]['Message']=='Running.'? Text('${currentSchedule[csIndex]['Duration_QtyLeft']}', style: const TextStyle(fontSize: 18, color:Colors.black)):
+                                          Text('${currentSchedule[csIndex]['Duration_QtyLeft']}'.contains(':') ? '--:--:--':'00000', style: const TextStyle(fontSize: 18, color: Colors.black))
                                         ],
                                       ),
                                     ),
@@ -293,6 +465,14 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
         ),
       ],
     ) : const SizedBox();
+  }*/
+
+  String formatRtcValues(dynamic value1, dynamic value2) {
+    if (value1 == 0 && value2 == 0) {
+      return '--';
+    } else {
+      return '${value1.toString()}/${value2.toString()}';
+    }
   }
 
   Widget buildWidget(String type, int status, String name) {
@@ -520,7 +700,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
 
   Future<void>sentManualModeToServer(manualOperation) async {
     try {
-      final body = {"userId": widget.customerID, "controllerId": widget.siteData.controllerId, "manualOperation": manualOperation, "createUser": widget.customerID};
+      final body = {"userId": widget.customerID, "controllerId": widget.siteData.master[0].controllerId, "manualOperation": manualOperation, "createUser": widget.customerID};
       final response = await HttpService().postRequest("createUserManualOperation", body);
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);

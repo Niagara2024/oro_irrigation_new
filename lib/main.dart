@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/screens/DashBoard.dart';
 import 'package:oro_irrigation_new/screens/login_form.dart';
+import 'package:oro_irrigation_new/state_management/CustomerDataProvider.dart';
+import 'package:oro_irrigation_new/state_management/DurationNotifier.dart';
 import 'package:oro_irrigation_new/state_management/FertilizerSetProvider.dart';
 import 'package:oro_irrigation_new/state_management/GlobalFertLimitProvider.dart';
 import 'package:oro_irrigation_new/state_management/MqttPayloadProvider.dart';
@@ -40,6 +42,8 @@ void main() {
           ChangeNotifierProvider(create: (context) => SystemDefinitionProvider()),
           ChangeNotifierProvider(create: (context) => ProgramQueueProvider()),
           ChangeNotifierProvider(create: (context) => mySchedule),
+          ChangeNotifierProvider(create: (_) => CustomerDataProvider()),
+          ChangeNotifierProvider(create: (_) => DurationNotifier()),
         ],
         child: const MyApp(),
       )

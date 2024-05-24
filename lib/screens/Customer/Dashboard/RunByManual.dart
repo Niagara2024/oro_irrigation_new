@@ -115,7 +115,17 @@ class _RunByManualState extends State<RunByManual> {
           startFlag = data['startFlag'];
           programId = data['programId'];
           strProgramName = data['programName'];
-          method = data['method'];
+          try {
+            //print(data['method'].runtimeType);
+            method = data['method'];
+            if (method == 0){
+              method += 1;
+            }
+          } catch (e) {
+            print('Error: $e');
+          }
+          //print(programId);
+          //print(widget.controllerID);
           strFlow = data['flow'];
           strDuration = data['time'];
 
@@ -181,7 +191,7 @@ class _RunByManualState extends State<RunByManual> {
           children: [
             Text(widget.siteName),
             const Spacer(),
-            const Text('Stand Alone by'),
+            const Text('Manual Operation'),
             const Spacer(),
           ],
         ),
@@ -339,7 +349,7 @@ class _RunByManualState extends State<RunByManual> {
               else{
                 Map<String, List<DashBoardValve>> groupedValves = {};
                 String strSldSqnNo = '';
-                String strSldSqnLocation = '';
+                //String strSldSqnLocation = '';
 
                 String strSldIrrigationPumpId = '';
                 if(dashBoardData[0].irrigationPump.isNotEmpty){
@@ -383,7 +393,7 @@ class _RunByManualState extends State<RunByManual> {
                     strSldLocFilterId = strSldLocFilterId.replaceRange(strSldLocFilterId.length - 1, strSldLocFilterId.length, '');
                   }
                   if (sldLocFilterRelayOnOffStatus.isNotEmpty && sldLocFilterRelayOnOffStatus.endsWith(';')) {
-                    sldLocFilterRelayOnOffStatus = sldLocFilterRelayOnOffStatus.replaceRange(sldLocFilterRelayOnOffStatus.length - 1, sldCtrlFilterRelayOnOffStatus.length, '');
+                    sldLocFilterRelayOnOffStatus = sldLocFilterRelayOnOffStatus.replaceRange(sldLocFilterRelayOnOffStatus.length - 1, sldLocFilterRelayOnOffStatus.length, '');
                   }
                 }
 
@@ -397,22 +407,23 @@ class _RunByManualState extends State<RunByManual> {
                   strSldFgrId = getSelectedRelayId(dashBoardData[0].fogger);
                 }
 
-                for (var line in dashBoardData[0].lineOrSequence) {
-                  if(line.selected){
-                    strSldSqnNo = line.sNo;
+                for (var lineOrSq in dashBoardData[0].lineOrSequence) {
+                  if(lineOrSq.selected){
+                    strSldSqnNo = lineOrSq.sNo;
                     standaloneSelection.add({
-                      'id': line.id,
-                      'sNo': line.sNo,
-                      'name': line.name,
-                      'location': line.location,
-                      'selected': line.selected,
+                      'id': lineOrSq.id,
+                      'sNo': lineOrSq.sNo,
+                      'name': lineOrSq.name,
+                      'location': lineOrSq.location,
+                      'selected': lineOrSq.selected,
                     });
 
-                    groupedValves = groupValvesByLocation(line.valves);
+                    //strSldSqnLocation = lineOrSq.location;
+                    /*groupedValves = groupValvesByLocation(line.valves);
                     groupedValves.forEach((location, valves) {
                       strSldSqnLocation += '${location}_';
                     });
-                    strSldSqnLocation = strSldSqnLocation.isNotEmpty ? strSldSqnLocation.substring(0, strSldSqnLocation.length - 1) : '';
+                    strSldSqnLocation = strSldSqnLocation.isNotEmpty ? strSldSqnLocation.substring(0, strSldSqnLocation.length - 1) : '';*/
                     break;
                   }
                 }
@@ -422,7 +433,7 @@ class _RunByManualState extends State<RunByManual> {
                 }else if (strSldIrrigationPumpId.isEmpty) {
                   displayAlert(context, 'You must select an irrigation pump.');
                 }else{
-                  sendCommandToControllerAndMqttProgram(strSldSqnLocation,strSldSqnNo,strSldIrrigationPumpId,strSldMainValveId,strSldCtrlFilterId,
+                  sendCommandToControllerAndMqttProgram(dashBoardData[0].headUnits,strSldSqnNo,strSldIrrigationPumpId,strSldMainValveId,strSldCtrlFilterId,
                       sldCtrlFilterRelayOnOffStatus,strSldLocFilterId,sldLocFilterRelayOnOffStatus,strSldFanId,strSldFgrId);
                 }
               }
@@ -1340,6 +1351,13 @@ class _RunByManualState extends State<RunByManual> {
           duration: Duration(seconds: 3),
         ),
       );
+    }else if(method==3 && (strFlow.isEmpty || strFlow=='0')){
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invalid Liter'),
+          duration: Duration(seconds: 3),
+        ),
+      );
     }else{
       payload = '${1},$strSldSqnLocation,${widget.programList[ddCurrentPosition].serialNumber},'
           '$strSldSqnNo,$strSldIrrigationPumpId,$strSldMainValveId,$strSldCtrlFilterId,'
@@ -1490,6 +1508,8 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
   final TextEditingController _minutesController = TextEditingController();
   final TextEditingController _secondsController = TextEditingController();
 
+  final TextEditingController _flowLiter = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -1507,6 +1527,8 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
     }else{
       durationValue = '${widget.duration}:00';
     }
+
+    _flowLiter.text = widget.flow;
 
   }
 
@@ -1644,6 +1666,12 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                       width: 100,
                       child: TextField(
                         maxLength: 7,
+                        controller: _flowLiter,
+                        onChanged: (value) {
+                          setState(() {
+                            widget.segmentSelectionCallbackFunction(_segmentWithFlow.index, value, selectedIrLine);
+                          });
+                        },
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         inputFormatters: <TextInputFormatter>[
                           FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),

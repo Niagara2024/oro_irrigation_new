@@ -57,7 +57,7 @@ class UpcomingProgram extends StatelessWidget {
                             size: ColumnSize.M,
                         ),
                         const DataColumn2(
-                            label: Text('Line', style: TextStyle(fontSize: 13),),
+                            label: Text('Location', style: TextStyle(fontSize: 13),),
                             size: ColumnSize.M,
                         ),
                         const DataColumn2(
@@ -86,7 +86,7 @@ class UpcomingProgram extends StatelessWidget {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => ScheduleViewScreen(deviceId: siteData.deviceId, userId: customerId, controllerId: siteData.controllerId, customerId: customerId),
+                                          builder: (context) => ScheduleViewScreen(deviceId: siteData.master[0].deviceId, userId: customerId, controllerId: siteData.master[0].controllerId, customerId: customerId),
                                         ),
                                       );
                                     },
@@ -97,7 +97,7 @@ class UpcomingProgram extends StatelessWidget {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => ScheduleViewScreen(deviceId: siteData.deviceId, userId: customerId, controllerId: siteData.controllerId, customerId: customerId),
+                                          builder: (context) => ScheduleViewScreen(deviceId: siteData.master[0].deviceId, userId: customerId, controllerId: siteData.master[0].controllerId, customerId: customerId),
                                         ),
                                       );
                                     },
@@ -137,7 +137,7 @@ class UpcomingProgram extends StatelessWidget {
                                   String payLoadFinal = jsonEncode({
                                     "2900": [{"2901": payload}]
                                   });
-                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
+                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
                                   sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Started by Manual', payLoadFinal);
                                 },
                                 child: const Text('Start by Manual'),
@@ -152,7 +152,7 @@ class UpcomingProgram extends StatelessWidget {
                                   String payLoadFinal = jsonEncode({
                                     "2900": [{"2901": payload}]
                                   });
-                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
+                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
                                   sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Stopped by Manual', payLoadFinal);
                                 },
                                 child: const Text('Stop by Manual'),
@@ -166,14 +166,14 @@ class UpcomingProgram extends StatelessWidget {
                                   String payLoadFinal = jsonEncode({
                                     "2900": [{"2901": payload}]
                                   });
-                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
+                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
                                   sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Paused by Manual', payLoadFinal);
                                 },
                                 child: const Text('Pause'),
                               ) :
                               MaterialButton(
                                 color: Colors.yellow,
-                                textColor: Colors.white,
+                                textColor: Colors.black,
                                 onPressed:() {
                                   String localFilePath = 'assets/audios/audio_off.mp3';
                                   audioPlayer.play(UrlSource(localFilePath));
@@ -181,7 +181,7 @@ class UpcomingProgram extends StatelessWidget {
                                   String payLoadFinal = jsonEncode({
                                     "2900": [{"2901": payload}]
                                   });
-                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.deviceId}');
+                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
                                   sentUserOperationToServer('${provider.upcomingProgram[index]['ProgName']} Resume by Manual', payLoadFinal);
                                 },
                                 child: const Text('Resume'),
@@ -297,7 +297,7 @@ class UpcomingProgram extends StatelessWidget {
 
   void sentUserOperationToServer(String msg, String data) async
   {
-    Map<String, Object> body = {"userId": customerId, "controllerId": siteData.controllerId, "messageStatus": msg, "data": data, "createUser": customerId};
+    Map<String, Object> body = {"userId": customerId, "controllerId": siteData.master[0].controllerId, "messageStatus": msg, "data": data, "createUser": customerId};
     final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
     if (response.statusCode == 200) {
       print(response.body);

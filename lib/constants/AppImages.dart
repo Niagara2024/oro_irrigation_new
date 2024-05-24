@@ -15,13 +15,19 @@ class AppImages {
   static const String filterNotOFF = "dp_filter_r.png";
 
   static const String boosterPumpOFF = "dp_fert_booster_pump.png";
-  static const String boosterPumpON = "dp_fert_booster_pump_g.png";
+  static const String boosterPumpON = "dp_fert_booster_pump_g.gif";
   static const String boosterPumpNotON = "dp_fert_booster_pump_y.png";
   static const String boosterPumpNotOFF = "dp_fert_booster_pump_r.png";
 
   static const String soilMoistureSensor = "moisture_sensor.png";
   static const String pressureSensor = "pressure_sensor.png";
   static const String levelSensor = "level_sensor.png";
+
+  static const String agitatorOFF = "dp_agitator_right.png";
+  static const String agitatorON = "dp_agitator_right_g.gif";
+  static const String agitatorNotON = "dp_agitator_right_y.png";
+  static const String agitatorNotOFF = "dp_agitator_right_r.png";
+
 
   static Widget getAsset(String imageKey, int status, String type) {
     String imagePathFinal;
@@ -37,6 +43,9 @@ class AppImages {
         break;
       case 'sensor':
         imagePathFinal = _getSensorImagePath(type);
+        break;
+      case 'agitator':
+        imagePathFinal = _getAgitatorImagePath(status);
         break;
       default:
         imagePathFinal = '';
@@ -100,6 +109,21 @@ class AppImages {
       return levelSensor;
     }else{
       return pressureSensor;
+    }
+  }
+
+  static String _getAgitatorImagePath(int status) {
+    switch (status) {
+      case 0:
+        return agitatorOFF;
+      case 1:
+        return agitatorNotON;
+      case 2:
+        return agitatorNotON;
+      case 3:
+        return agitatorNotOFF;
+      default:
+        return '';
     }
   }
 }

@@ -45,6 +45,7 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
   List<String> dropdownItems = ['All', 'Last year', 'Last month', 'Last Week'];
   bool visibleLoading = false;
 
+
   @override
   void initState() {
     super.initState();
@@ -427,14 +428,62 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                                 backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
                                 backgroundColor: Colors.transparent,
                               ),
-                              trailing: IconButton(tooltip: userType==1? 'View Dealer Dashboard' : 'View Customer Dashboard', icon: const Icon(Icons.view_quilt_outlined), color: myTheme.primaryColor, onPressed: () async
-                              {
-                                if(userType==1){
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyDealers(dealerId: myCustomerList[index].userId, dealerName: myCustomerList[index].userName)),);
-                                }else{
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerScreenController(customerId: myCustomerList[index].userId, comingFrom: 'AdminORDealer', customerName: myCustomerList[index].userName, mobileNo: '+${myCustomerList[index].countryCode}-${myCustomerList[index].mobileNumber}', emailId: myCustomerList[index].emailId,)));
-                                }
-                              }),
+                              trailing: PopupMenuButton<String>(
+                                onSelected: (String value) {
+                                  setState(() {
+                                    print(value);
+                                  });
+                                },
+                                icon: const Icon(Icons.more_vert),
+                                itemBuilder: (BuildContext context) {
+                                  return [
+                                    PopupMenuItem<String>(
+                                      value: 'View',
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.view_quilt_outlined, color: Colors.black),
+                                          SizedBox(width: 8),
+                                          Text(userType==1? 'View Dealer Dashboard': 'View Customer Dashboard'),
+                                        ],
+                                      ),
+                                    ),
+                                    const PopupMenuItem<String>(
+                                      value: 'Edit',
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.edit_outlined, color: Colors.blue),
+                                          SizedBox(width: 8),
+                                          Text('Edit Account'),
+                                        ],
+                                      ),
+                                    ),
+                                    const PopupMenuItem<String>(
+                                      value: 'Delete',
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.delete, color: Colors.redAccent),
+                                          SizedBox(width: 8),
+                                          Text('Delete Account'),
+                                        ],
+                                      ),
+                                    ),
+                                  ];
+                                },
+                              ),
+
+                              /*trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(tooltip: userType==1? 'View Dealer Dashboard' : 'View Customer Dashboard', icon: const Icon(Icons.view_quilt_outlined), color: myTheme.primaryColor, onPressed: () async
+                                  {
+                                    if(userType==1){
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyDealers(dealerId: myCustomerList[index].userId, dealerName: myCustomerList[index].userName)),);
+                                    }else{
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerScreenController(customerId: myCustomerList[index].userId, comingFrom: 'AdminORDealer', customerName: myCustomerList[index].userName, mobileNo: '+${myCustomerList[index].countryCode}-${myCustomerList[index].mobileNumber}', emailId: myCustomerList[index].emailId,)));
+                                    }
+                                  }),
+                                ],
+                              ),*/
                               title: Text(myCustomerList[index].userName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
                               subtitle: Text('+${myCustomerList[index].countryCode} ${myCustomerList[index].mobileNumber}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal)),
                               onTap:() {
@@ -588,5 +637,3 @@ class MyCustomWidget extends StatelessWidget {
     );
   }
 }
-
-

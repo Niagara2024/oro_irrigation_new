@@ -122,7 +122,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                     child: buildGeneralContent(),
                   ),
                   const Center(child: Text('Tab 3 Content')),
-                  Center(child: Names(userID: widget.customerID,  customerID: widget.customerID, controllerId: widget.siteData.controllerId)),
+                  Center(child: Names(userID: widget.customerID,  customerID: widget.customerID, controllerId: widget.siteData.master[0].controllerId)),
                 ],
               ),
             ),

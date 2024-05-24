@@ -31,7 +31,7 @@ class _CustomerNodeListState extends State<CustomerNodeList>{
     var provider = Provider.of<MqttPayloadProvider>(context, listen: true);
     try{
       Map<String, dynamic> data = jsonDecode(provider.receivedDashboardPayload);
-      setState(() {
+      /*setState(() {
         if (data['2400'][0].containsKey('2401')) {
           for (var item in data['2400'][0]['2401']) {
             if (item is Map<String, dynamic>) {
@@ -57,7 +57,7 @@ class _CustomerNodeListState extends State<CustomerNodeList>{
             }
           }
         }
-      });
+      });*/
     }
     catch(e){
       print(e);
@@ -76,7 +76,7 @@ class _CustomerNodeListState extends State<CustomerNodeList>{
       ),
       child: Column(
         children: [
-          SizedBox(
+          /*SizedBox(
             height: 50,
             child: Row(
               children: [
@@ -148,12 +148,12 @@ class _CustomerNodeListState extends State<CustomerNodeList>{
                     tooltip: 'Test Communication',
                     icon: const Icon(Icons.network_check, color: Colors.white),
                     onPressed: () async {
-                      /*String payLoadFinal = jsonEncode({
+                      *//*String payLoadFinal = jsonEncode({
                         "2300": [
                           {"2301": ""},
                         ]
                       });
-                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');*/
+                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.deviceId}');*//*
                     },
                   ),
                 ),
@@ -321,7 +321,7 @@ class _CustomerNodeListState extends State<CustomerNodeList>{
                 ))),
               ])),
             ),
-          )
+          )*/
         ],
       ),
     );
@@ -329,12 +329,12 @@ class _CustomerNodeListState extends State<CustomerNodeList>{
 
   int getNodePositionInNodeList(int siteIndex, int srlNo)
   {
-    List<NodeModel> nodeList = widget.siteData.nodeList;
+    /*List<NodeModel> nodeList = widget.siteData.nodeList;
     for (int i = 0; i < nodeList.length; i++) {
       if (nodeList[i].serialNumber == srlNo) {
         return i;
       }
-    }
+    }*/
     return -1;
   }
 

@@ -1,8 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
 
@@ -80,6 +78,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
     final provider = Provider.of<MqttPayloadProvider>(context);
     return widget.currentSiteData.master[0].irrigationLine.map((line){
       return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ScrollConfiguration(
             behavior: const ScrollBehavior(),
@@ -92,12 +91,12 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     provider.sourcePump.isNotEmpty? Padding(
-                      padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty?38.4:0),
+                      padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
                       child: const DisplaySourcePump(),
                     ):
                     const SizedBox(),
                     provider.irrigationPump.isNotEmpty? Padding(
-                      padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty?38.4:0),
+                      padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
                       child: SizedBox(
                         width: 52.50,
                         height: 70,
@@ -111,23 +110,23 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                     ):
                     const SizedBox(),
                     provider.irrigationPump.isNotEmpty? Padding(
-                      padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty?38.4:0),
+                      padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
                       child: DisplayIrrigationPump(currentLineId: line.id, pumpList: widget.currentSiteData.master[0].liveData[0].pumpList,),
                     ):
                     const SizedBox(),
                     provider.filtersCentral.isNotEmpty? Padding(
-                      padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty?38.4:0),
+                      padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
                       child: DisplayFilter(currentLineId: line.id,),
                     ): const SizedBox(),
                     for(int i=0; i<provider.payload2408.length; i++)
                       provider.payload2408.isNotEmpty?  Padding(
-                        padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty?38.4:0),
+                        padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
                         child: provider.payload2408[i]['Line'].contains(line.id)? DisplaySensor(crInx: i):null,
                       ) : const SizedBox(),
-                    provider.fertilizerCentral.isNotEmpty? const DisplayFertilizer(): const SizedBox(),
+                    provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? const DisplayFertilizer(): const SizedBox(),
                     //local
                     Padding(
-                      padding: const EdgeInsets.only(left: 10),
+                      padding: const EdgeInsets.only(left: 0),
                       child: provider.irrigationPump.isNotEmpty? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -156,7 +155,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
             color: Colors.grey.shade100,
             width: MediaQuery.sizeOf(context).width-173,
             height: 60,
-            child: Center(child: IrrigationLineView(line: line,)),
+            child: IrrigationLineView(line: line,),
           ),
         ],
       );
@@ -175,141 +174,25 @@ class IrrigationLineView extends StatefulWidget {
 }
 
 class _IrrigationLineViewState extends State<IrrigationLineView> {
-  Timer? _timer;
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  void _startTimer() {
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
-      _updateDurationQtyLeft();
-    });
-  }
-
-  void _updateDurationQtyLeft() {
-    final currentSchedule = Provider.of<MqttPayloadProvider>(context, listen: false).currentSchedule;
-    final durationNotifier = Provider.of<DurationNotifier>(context, listen: false);
-    if(currentSchedule.isNotEmpty){
-      for (int i = 0; i < currentSchedule.length; i++) {
-        if (currentSchedule[i]['Duration_QtyLeft'] != null) {
-          if ('${currentSchedule[i]['Duration_QtyLeft']}'.contains(':')) {
-            List<String> parts = currentSchedule[i]['Duration_QtyLeft'].split(':');
-            int hours = int.parse(parts[0]);
-            int minutes = int.parse(parts[1]);
-            int seconds = int.parse(parts[2]);
-
-            if (seconds > 0) {
-              seconds--;
-            } else {
-              if (minutes > 0) {
-                minutes--;
-                seconds = 59;
-              } else {
-                if (hours > 0) {
-                  hours--;
-                  minutes = 59;
-                  seconds = 59;
-                }
-              }
-            }
-
-            String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-            if (currentSchedule[i]['Duration_QtyLeft'] != '00:00:00') {
-              durationNotifier.updateDuration(updatedDurationQtyLeft);
-              currentSchedule[i]['Duration_QtyLeft'] = updatedDurationQtyLeft;
-            } else {
-              _timer?.cancel();
-              durationNotifier.updateDuration('00:00:00');
-              currentSchedule[i]['Duration_QtyLeft'] = '00:00:00';
-            }
-          } else {
-            double remainFlow = 0.0;
-            if (currentSchedule[i]['Duration_QtyLeft'] is int) {
-              remainFlow = currentSchedule[i]['Duration_QtyLeft'].toDouble();
-            } else if (currentSchedule[i]['Duration_QtyLeft'] is String) {
-              remainFlow = double.parse(currentSchedule[i]['Duration_QtyLeft']);
-            } else {
-              remainFlow = currentSchedule[i]['Duration_QtyLeft'];
-            }
-
-            if (remainFlow > 0) {
-              double flowRate = currentSchedule[i]['AverageFlowRate'] is String
-                  ? double.parse(currentSchedule[i]['AverageFlowRate'])
-                  : currentSchedule[i]['AverageFlowRate'];
-              remainFlow -= flowRate;
-              String formattedFlow = remainFlow.toStringAsFixed(2);
-              durationNotifier.updateDuration(formattedFlow);
-              currentSchedule[i]['Duration_QtyLeft'] = formattedFlow;
-            } else {
-              durationNotifier.updateDuration('0.00');
-              currentSchedule[i]['Duration_QtyLeft'] = '0.00';
-              _timer?.cancel();
-            }
-          }
-        }
-        else{
-          durationNotifier.updateDuration('00000');
-          currentSchedule[i]['Duration_QtyLeft'] = '00000';
-          _timer?.cancel();
-        }
-      }
-    }else{
-      durationNotifier.updateDuration('00000');
-      _timer?.cancel();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     final currentSchedule = Provider.of<MqttPayloadProvider>(context).currentSchedule;
-    _startTimer();
-    return Row(
-      children: [
-        Expanded(
-          child: ScrollConfiguration(
-            behavior: const ScrollBehavior(),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  ...widget.line.mainValve.map((mv) => MainValveWidget(mv: mv,  status: getStatusForMainValve(mv.hid, currentSchedule)),).toList(),
-                  ...widget.line.valve.map((vl) => ValveWidget(vl: vl, status: getStatusForValve(vl.id, currentSchedule),)).toList(),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-        Container(
-          width: 200,
-          height: 50,
-          decoration: BoxDecoration(
-            color:Colors.yellow.shade100,
-            borderRadius: const BorderRadius.all(Radius.circular(2)),
-            border: Border.all(color: Colors.grey, width: .50,),
-          ),
+    return Center(
+      child: ScrollConfiguration(
+        behavior: const ScrollBehavior(),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text('Remaining : '),
-              ValueListenableBuilder<String>(
-                valueListenable: Provider.of<DurationNotifier>(context).leftDurationOrFlow,
-                builder: (context, value, child) {
-                  return Text(value, style: const TextStyle(fontSize: 20));
-                },
-              ),
+              ...widget.line.mainValve.map((mv) => MainValveWidget(mv: mv,  status: getStatusForMainValve(mv.hid, currentSchedule)),).toList(),
+              ...widget.line.valve.map((vl) => ValveWidget(vl: vl, status: getStatusForValve(vl.id, currentSchedule),)).toList(),
             ],
           ),
         ),
-        const SizedBox(width: 5),
-      ],
+      ),
     );
   }
 
@@ -639,8 +522,6 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
     final irrigationPump = Provider.of<MqttPayloadProvider>(context).irrigationPump;
     _startTimer();
 
-    print(widget.pumpList);
-
     final List<Map<String, dynamic>> filteredPumps = irrigationPump
         .where((pump) => pump['Location'].contains(widget.currentLineId))
         .toList()
@@ -705,50 +586,6 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
     );
   }
 
-
-  /*void durationUpdatingFunction() {
-
-    timer?.cancel();
-    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-      try{
-        final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
-        for (int i = 0; i < provider.irrigationPump.length; i++) {
-          if(provider.irrigationPump[i]['OnDelayLeft']!=null){
-            List<String> parts = provider.irrigationPump[i]['OnDelayLeft'].split(':');
-            int hours = int.parse(parts[0]);
-            int minutes = int.parse(parts[1]);
-            int seconds = int.parse(parts[2]);
-
-            if (seconds > 0) {
-              seconds--;
-            } else {
-              if (minutes > 0) {
-                minutes--;
-                seconds = 59;
-              } else {
-                if (hours > 0) {
-                  hours--;
-                  minutes = 59;
-                  seconds = 59;
-                }
-              }
-            }
-
-            String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-            if(provider.irrigationPump[i]['OnDelayLeft']!='00:00:00'){
-              setState(() {
-                provider.irrigationPump[i]['OnDelayLeft'] = updatedDurationQtyLeft;
-              });
-            }
-          }
-        }
-      }
-      catch(e){
-        print(e);
-      }
-
-    });
-  }*/
 }
 
 
@@ -802,21 +639,6 @@ class DisplaySensor extends StatelessWidget {
                       ),
                       child: Center(
                         child: Text('$value', style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 57,
-                    left: 0,
-                    child: SizedBox(
-                      width: 70,
-                      child: Center(
-                        child: Text(jsonData['Line'], style: const TextStyle(
                           color: Colors.black,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,

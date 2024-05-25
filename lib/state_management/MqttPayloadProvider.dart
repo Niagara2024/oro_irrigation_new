@@ -71,9 +71,9 @@ class MqttPayloadProvider with ChangeNotifier {
         }
 
         if (data['2400'][0].containsKey('2406')) {
-          List<dynamic> filters = data['2400'][0]['2406'];
-          fertilizerCentral = filters.where((item) => item['Type'] == 1).toList();
-          fertilizerLocal = filters.where((item) => item['Type'] == 2).toList();
+          List<dynamic> fertilizer = data['2400'][0]['2406'];
+          fertilizerCentral = fertilizer.where((item) => item['Type'] == 1).toList();
+          fertilizerLocal = fertilizer.where((item) => item['Type'] == 2).toList();
         }
 
         if (data['2400'][0].containsKey('2407')) {
@@ -130,6 +130,42 @@ class MqttPayloadProvider with ChangeNotifier {
         if (data['2400'][0].containsKey('2404')) {
           upcomingProgram = data['2400'][0]['2404'];
         }
+      }
+      notifyListeners();
+    } catch (e) {
+      print('Error parsing JSON: $e');
+    }
+  }
+
+  void updateFilterPayload(String payload) {
+    try {
+      Map<String, dynamic> data = jsonDecode(payload);
+      if (data['2400'][0].containsKey('2405')) {
+        List<dynamic> filtersJson = data['2400'][0]['2405'];
+        filtersCentral = [];
+        filtersLocal = [];
+
+        for (var filter in filtersJson) {
+          if (filter['Type'] == 1) {
+            filtersCentral.add(filter);
+          } else if (filter['Type'] == 2) {
+            filtersLocal.add(filter);
+          }
+        }
+      }
+      notifyListeners();
+    } catch (e) {
+      print('Error parsing JSON: $e');
+    }
+  }
+
+  void updateFertilizerPayload(String payload) {
+    try {
+      Map<String, dynamic> data = jsonDecode(payload);
+      if (data['2400'][0].containsKey('2406')) {
+        List<dynamic> fertilizer = data['2400'][0]['2406'];
+        fertilizerCentral = fertilizer.where((item) => item['Type'] == 1).toList();
+        fertilizerLocal = fertilizer.where((item) => item['Type'] == 2).toList();
       }
       notifyListeners();
     } catch (e) {

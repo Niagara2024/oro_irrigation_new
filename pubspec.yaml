@@ -248,7 +248,6 @@ flutter:
      - assets/images/dp_source_pump.png
      - assets/images/no_signal.jpg
      - assets/images/dp_agitator.png
-     - assets/images/dp_agitator_line1.png
      - assets/images/dp_fert_first_tank.png
      - assets/images/dp_fert_center_tank.png
      - assets/images/dp_fert_channel_center.png
@@ -260,7 +259,7 @@ flutter:
      - assets/images/dp_fert_channel_center_aj_y.png
      - assets/images/dp_fert_channel_center_aj_r.png
      - assets/images/dp_agitator_right.png
-     - assets/images/dp_agitator_right_g.png
+     - assets/GifFile/dp_agitator_right_g.gif
      - assets/images/dp_agitator_right_r.png
      - assets/images/dp_agitator_right_y.png
      - assets/images/dp_fert_channel_first_aj.png

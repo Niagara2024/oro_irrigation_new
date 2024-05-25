@@ -100,12 +100,16 @@ class MasterData {
 class LiveData {
   List<NodeData> nodeList;
   List<PumpData> pumpList;
+  List<Filter> filterList;
+  List<FertilizerSite> fertilizerSiteList;
   List<Program> programList;
  // List<SensorData> sensorList;
 
   LiveData({
     required this.nodeList,
     required this.pumpList,
+    required this.filterList,
+    required this.fertilizerSiteList,
     required this.programList,
     //required this.sensorList,
   });
@@ -118,12 +122,20 @@ class LiveData {
     var programData = json['2404'] as List;
     List<Program> programList = programData.isNotEmpty? programData.map((prg) => Program.fromJson(prg)).toList() : [];
 
+    var filterData = json['2405'] as List;
+    List<Filter> filterList = filterData.isNotEmpty? filterData.map((filter) => Filter.fromJson(filter)).toList() : [];
+
+    var fertilizerData = json['2406'] as List;
+    List<FertilizerSite> fertilizerSiteList = fertilizerData.isNotEmpty? fertilizerData.map((fertilizer) => FertilizerSite.fromJson(fertilizer)).toList() : [];
+
     var pumpData = json['2407'] as List;
     List<PumpData> pumpList = pumpData.isNotEmpty? pumpData.map((pmp) => PumpData.fromJson(pmp)).toList() : [];
 
     return LiveData(
       nodeList: nodeList,
       pumpList: pumpList,
+      filterList: filterList,
+      fertilizerSiteList: fertilizerSiteList,
       programList: programList,
       //sensorList: (json['2408'] as List).map((i) => SensorData.fromJson(i)).toList(),
     );
@@ -133,6 +145,8 @@ class LiveData {
     return {
       '2401': nodeList.map((e) => e.toJson()).toList(),
       '2404': programList.map((e) => e.toJson()).toList(),
+      '2405': filterList.map((e) => e.toJson()).toList(),
+      '2406': fertilizerSiteList.map((e) => e.toJson()).toList(),
       '2407': pumpList.map((e) => e.toJson()).toList(),
       //'2408': sensorList.map((e) => e.toJson()).toList(),
     };
@@ -314,6 +328,7 @@ class Program {
   });
 
   factory Program.fromJson(Map<String, dynamic> json) {
+   // bool hasNameKey = json.containsKey('StartStopReason');
     return Program(
       sNo: json['SNo'],
       progCategory: json['ProgCategory'],
@@ -607,6 +622,324 @@ class SensorStatus {
       Name: json['Name'],
       Value: json['Value'],
     );
+  }
+}
+
+class Filter {
+  final int type;
+  final String filterSite;
+  final String location;
+  final String program;
+  final int status;
+  final List<FilterStatus> filterStatus;
+  final int method;
+  final String duration;
+  final String durationCompleted;
+  final String durationLeft;
+  final String prsIn;
+  final String prsOut;
+  final String dpValue;
+
+  Filter({
+    required this.type,
+    required this.filterSite,
+    required this.location,
+    required this.program,
+    required this.status,
+    required this.filterStatus,
+    required this.method,
+    required this.duration,
+    required this.durationCompleted,
+    required this.durationLeft,
+    required this.prsIn,
+    required this.prsOut,
+    required String dpValue,
+  }) : dpValue = dpValue.toString();
+
+  factory Filter.fromJson(Map<String, dynamic> json) {
+    var filterStatusList = json['FilterStatus'] as List;
+    List<FilterStatus> filterStatus = filterStatusList.isNotEmpty? filterStatusList.map((status) => FilterStatus.fromJson(status)).toList(): [];
+
+    return Filter(
+      type: json['Type'],
+      filterSite: json['FilterSite'],
+      location: json['Location'],
+      program: json['Program'],
+      status: json['Status'],
+      filterStatus: filterStatus,
+      method: json['Method'],
+      duration: json['Duration'],
+      durationCompleted: json['DurationCompleted'],
+      durationLeft: json['DurationLeft'],
+      prsIn: json['PrsIn'],
+      prsOut: json['PrsOut'],
+      dpValue: json['DpValue'].toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'Type': type,
+      'FilterSite': filterSite,
+      'Location': location,
+      'Program': program,
+      'Status': status,
+      'FilterStatus': filterStatus.map((status) => status.toJson()).toList(),
+      'Method': method,
+      'Duration': duration,
+      'DurationCompleted': durationCompleted,
+      'DurationLeft': durationLeft,
+      'PrsIn': prsIn,
+      'PrsOut': prsOut,
+      'DpValue': dpValue,
+    };
+  }
+}
+
+class FilterStatus {
+  final int position;
+  final String name;
+  final int status;
+
+  FilterStatus({
+    required this.position,
+    required this.name,
+    required this.status,
+  });
+
+  factory FilterStatus.fromJson(Map<String, dynamic> json) {
+    return FilterStatus(
+      position: json['Position'],
+      name: json['Name'],
+      status: json['Status'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'Position': position,
+      'Name': name,
+      'Status': status,
+    };
+  }
+}
+
+class FertilizerSite {
+  final int type;
+  final String fertilizerSite;
+  final String location;
+  final List<Agitator> agitator;
+  final List<Booster> booster;
+  final List<dynamic> ec;
+  final List<dynamic> ph;
+  final String program;
+  final List<Fertilizer> fertilizer;
+  final List<dynamic> fertilizerTankSelector;
+  final String ecSet;
+  final String phSet;
+
+  FertilizerSite({
+    required this.type,
+    required this.fertilizerSite,
+    required this.location,
+    required this.agitator,
+    required this.booster,
+    required this.ec,
+    required this.ph,
+    required this.program,
+    required this.fertilizer,
+    required this.fertilizerTankSelector,
+    required this.ecSet,
+    required this.phSet,
+  });
+
+  factory FertilizerSite.fromJson(Map<String, dynamic> json) {
+    var agitatorList = json['Agitator'] as List;
+    var boosterList = json['Booster'] as List;
+    var fertilizerList = json['Fertilizer'] as List;
+
+    List<Agitator> agitator = agitatorList.isNotEmpty? agitatorList.map((a) => Agitator.fromJson(a)).toList(): [];
+    List<Booster> booster = boosterList.isNotEmpty? boosterList.map((b) => Booster.fromJson(b)).toList(): [];
+    List<Fertilizer> fertilizer = fertilizerList.isNotEmpty? fertilizerList.map((f) => Fertilizer.fromJson(f)).toList(): [];
+
+    return FertilizerSite(
+      type: json['Type'],
+      fertilizerSite: json['FertilizerSite'],
+      location: json['Location'],
+      agitator: agitator,
+      booster: booster,
+      ec: json['Ec'],
+      ph: json['Ph'],
+      program: json['Program'],
+      fertilizer: fertilizer,
+      fertilizerTankSelector: json['FertilizerTankSelector'],
+      ecSet: json['EcSet'],
+      phSet: json['PhSet'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'Type': type,
+      'FertilizerSite': fertilizerSite,
+      'Location': location,
+      'Agitator': agitator.map((a) => a.toJson()).toList(),
+      'Booster': booster.map((b) => b.toJson()).toList(),
+      'Ec': ec,
+      'Ph': ph,
+      'Program': program,
+      'Fertilizer': fertilizer.map((f) => f.toJson()).toList(),
+      'FertilizerTankSelector': fertilizerTankSelector,
+      'EcSet': ecSet,
+      'PhSet': phSet,
+    };
+  }
+}
+
+class Fertilizer {
+  final int fertNumber;
+  final String name;
+  final double flowRate;
+  final int flowRateLpH;
+  final int status;
+  final int fertMethod;
+  final int fertSelection;
+  final String duration;
+  final String durationCompleted;
+  final String durationLeft;
+  final String qty;
+  final String qtyCompleted;
+  final String qtyLeft;
+  final String onTime;
+  final String offTime;
+  final List<dynamic> flowMeter;
+  final List<dynamic> level;
+
+  Fertilizer({
+    required this.fertNumber,
+    required this.name,
+    required this.flowRate,
+    required this.flowRateLpH,
+    required this.status,
+    required this.fertMethod,
+    required this.fertSelection,
+    required this.duration,
+    required this.durationCompleted,
+    required this.durationLeft,
+    required this.qty,
+    required this.qtyCompleted,
+    required this.qtyLeft,
+    required this.onTime,
+    required this.offTime,
+    required this.flowMeter,
+    required this.level,
+  });
+
+  factory Fertilizer.fromJson(Map<String, dynamic> json) {
+    String qty = '0',qtyCompleted = '0', qtyLeft = '0';
+
+    if(json['Qty'].runtimeType==int) {
+      qty = json['Qty'].toString();
+    }
+    if(json['QtyCompleted'].runtimeType==int) {
+      qtyCompleted = json['QtyCompleted'].toString();
+    }
+    if(json['QtyLeft'].runtimeType==int) {
+      qtyLeft = json['QtyLeft'].toString();
+    }
+
+    bool hasOnTimeKey = json.containsKey('OnTime');
+    bool hasOffTimeKey = json.containsKey('OffTime');
+
+    return Fertilizer(
+      fertNumber: json['FertNumber'],
+      name: json['Name'],
+      flowRate: json['FlowRate'],
+      flowRateLpH: json['FlowRate_LpH'],
+      status: json['Status'],
+      fertMethod: json['FertMethod'],
+      fertSelection: json['FertSelection'],
+      duration: json['Duration'],
+      durationCompleted: json['DurationCompleted'],
+      durationLeft: json['DurationLeft'],
+      qty: qty,
+      qtyCompleted: qtyCompleted,
+      qtyLeft: qtyLeft,
+      onTime: hasOnTimeKey? json['OnTime']:'0',
+      offTime: hasOffTimeKey? json['OffTime']:'0',
+      flowMeter: json['FlowMeter'],
+      level: json['Level'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'FertNumber': fertNumber,
+      'Name': name,
+      'FlowRate': flowRate,
+      'FlowRate_LpH': flowRateLpH,
+      'Status': status,
+      'FertMethod': fertMethod,
+      'FertSelection': fertSelection,
+      'Duration': duration,
+      'DurationCompleted': durationCompleted,
+      'DurationLeft': durationLeft,
+      'Qty': qty,
+      'QtyCompleted': qtyCompleted,
+      'QtyLeft': qtyLeft,
+      'OnTime': onTime,
+      'OffTime': offTime,
+      'FlowMeter': flowMeter,
+      'Level': level,
+    };
+  }
+}
+
+class Agitator {
+  final String name;
+  final int status;
+
+  Agitator({
+    required this.name,
+    required this.status,
+  });
+
+  factory Agitator.fromJson(Map<String, dynamic> json) {
+    return Agitator(
+      name: json['Name'],
+      status: json['Status'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'Name': name,
+      'Status': status,
+    };
+  }
+}
+
+class Booster {
+  final String name;
+  final int status;
+
+  Booster({
+    required this.name,
+    required this.status,
+  });
+
+  factory Booster.fromJson(Map<String, dynamic> json) {
+    return Booster(
+      name: json['Name'],
+      status: json['Status'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'Name': name,
+      'Status': status,
+    };
   }
 }
 

@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../constants/MQTTManager.dart';
 import '../../../constants/http_service.dart';
+import '../../../state_management/DurationNotifier.dart';
 import '../../../state_management/MqttPayloadProvider.dart';
 
 class CurrentSchedule extends StatefulWidget {
@@ -22,23 +23,99 @@ class CurrentSchedule extends StatefulWidget {
 }
 
 class _CurrentScheduleState extends State<CurrentSchedule> {
-  Timer? timer;
 
-  @override
-  void initState() {
-    super.initState();
-    //durationUpdatingFunction();
-  }
+  Timer? _timer;
 
   @override
   void dispose() {
-    timer?.cancel();
+    _timer?.cancel();
     super.dispose();
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+      _updateDurationQtyLeft();
+    });
+  }
+
+  void _updateDurationQtyLeft() {
+    final currentSchedule = Provider.of<MqttPayloadProvider>(context, listen: false).currentSchedule;
+    final durationNotifier = Provider.of<DurationNotifier>(context, listen: false);
+    if(currentSchedule.isNotEmpty){
+      for (int i = 0; i < currentSchedule.length; i++) {
+        if (currentSchedule[i]['Duration_QtyLeft'] != null) {
+          if ('${currentSchedule[i]['Duration_QtyLeft']}'.contains(':')) {
+            List<String> parts = currentSchedule[i]['Duration_QtyLeft'].split(':');
+            int hours = int.parse(parts[0]);
+            int minutes = int.parse(parts[1]);
+            int seconds = int.parse(parts[2]);
+
+            if (seconds > 0) {
+              seconds--;
+            } else {
+              if (minutes > 0) {
+                minutes--;
+                seconds = 59;
+              } else {
+                if (hours > 0) {
+                  hours--;
+                  minutes = 59;
+                  seconds = 59;
+                }
+              }
+            }
+
+            String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+            if (currentSchedule[i]['Duration_QtyLeft'] != '00:00:00') {
+              durationNotifier.updateDuration(updatedDurationQtyLeft);
+              currentSchedule[i]['Duration_QtyLeft'] = updatedDurationQtyLeft;
+            } else {
+              _timer?.cancel();
+              durationNotifier.updateDuration('00:00:00');
+              currentSchedule[i]['Duration_QtyLeft'] = '00:00:00';
+            }
+          } else {
+            double remainFlow = 0.0;
+            if (currentSchedule[i]['Duration_QtyLeft'] is int) {
+              remainFlow = currentSchedule[i]['Duration_QtyLeft'].toDouble();
+            } else if (currentSchedule[i]['Duration_QtyLeft'] is String) {
+              remainFlow = double.parse(currentSchedule[i]['Duration_QtyLeft']);
+            } else {
+              remainFlow = currentSchedule[i]['Duration_QtyLeft'];
+            }
+
+            if (remainFlow > 0) {
+              double flowRate = currentSchedule[i]['AverageFlowRate'] is String
+                  ? double.parse(currentSchedule[i]['AverageFlowRate'])
+                  : currentSchedule[i]['AverageFlowRate'];
+              remainFlow -= flowRate;
+              String formattedFlow = remainFlow.toStringAsFixed(2);
+              durationNotifier.updateDuration(formattedFlow);
+              currentSchedule[i]['Duration_QtyLeft'] = formattedFlow;
+            } else {
+              durationNotifier.updateDuration('0.00');
+              currentSchedule[i]['Duration_QtyLeft'] = '0.00';
+              _timer?.cancel();
+            }
+          }
+        }
+        else{
+          durationNotifier.updateDuration('00000');
+          currentSchedule[i]['Duration_QtyLeft'] = '00000';
+          _timer?.cancel();
+        }
+      }
+    }else{
+      durationNotifier.updateDuration('00000');
+      _timer?.cancel();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final currentSchedule = Provider.of<MqttPayloadProvider>(context).currentSchedule;
+    _startTimer();
     return currentSchedule.isNotEmpty? Padding(
       padding: const EdgeInsets.all(3.0),
       child: Column(
@@ -91,16 +168,20 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                         fixedWidth: 75,
                       ),
                       DataColumn2(
-                          label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
-                          size: ColumnSize.M
+                        label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
+                          size: ColumnSize.S,
                       ),
                       DataColumn2(
-                          label: Center(child: Text('Total (Duration/Flow)', style: TextStyle(fontSize: 13),)),
-                          size: ColumnSize.L
+                        label: Center(child: Text('Total (D/F)', style: TextStyle(fontSize: 13),)),
+                        fixedWidth: 90,
+                      ),
+                      DataColumn2(
+                        label: Center(child: Text('Remaining', style: TextStyle(fontSize: 13),)),
+                        size: ColumnSize.S,
                       ),
                       DataColumn2(
                           label: Center(child: Text('')),
-                          fixedWidth: 90
+                          fixedWidth: 90,
                       ),
                     ],
                     rows: List<DataRow>.generate(currentSchedule.length, (index) => DataRow(cells: [
@@ -121,6 +202,12 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                       DataCell(Center(child: Text(formatRtcValues(currentSchedule[index]['CurrentCycle'],currentSchedule[index]['TotalCycle'])))),
                       DataCell(Center(child: Text(_convertTime(currentSchedule[index]['StartTime'])))),
                       DataCell(Center(child: Text('${currentSchedule[index]['Duration_Qty']}'))),
+                      DataCell(Center(child: ValueListenableBuilder<String>(
+                        valueListenable: Provider.of<DurationNotifier>(context).leftDurationOrFlow,
+                        builder: (context, value, child) {
+                          return Text(value, style: const TextStyle(fontSize: 20));
+                        },
+                      ),)),
                       DataCell(Center(
                         child: currentSchedule[index]['ProgName']=='StandAlone - Manual'?
                         MaterialButton(
@@ -582,7 +669,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
     return formattedTime;
   }
 
-  void durationUpdatingFunction() {
+ /* void durationUpdatingFunction() {
     timer?.cancel();
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       try{
@@ -645,7 +732,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
       }
 
     });
-  }
+  }*/
 
   String getContentByCode(int code) {
     switch (code) {

@@ -132,8 +132,21 @@ class _CustomerScreenControllerState extends State<CustomerScreenController>
     String programPayloadFinal = jsonEncode({
       "2400": [{"2404": jsonDataList.toList()}]
     });
-
     payloadProvider.updateProgramPayload(programPayloadFinal);
+
+    String filterList = jsonEncode(siteListFinal[siteIndex].master[masterIndex].liveData[0].filterList.map((filter) => filter.toJson()).toList());
+    List<dynamic> jsonFilterList = jsonDecode(filterList);
+    String filterPayloadFinal = jsonEncode({
+      "2400": [{"2405": jsonFilterList.toList()}]
+    });
+    payloadProvider.updateFilterPayload(filterPayloadFinal);
+
+    String fertilizerSiteList = jsonEncode(siteListFinal[siteIndex].master[masterIndex].liveData[0].fertilizerSiteList.map((pump) => pump.toJson()).toList());
+    List<dynamic> jsonFertilizerList = jsonDecode(fertilizerSiteList);
+    String fertilizerPayloadFinal = jsonEncode({
+      "2400": [{"2406": jsonFertilizerList.toList()}]
+    });
+    payloadProvider.updateFertilizerPayload(fertilizerPayloadFinal);
 
   }
 

@@ -446,7 +446,6 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
   }
 }
 
-
 class DisplayIrrigationPump extends StatefulWidget {
   const DisplayIrrigationPump({Key? key, required this.currentLineId, required this.pumpList}) : super(key: key);
   final String currentLineId;

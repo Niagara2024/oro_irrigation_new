@@ -44,66 +44,70 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
     final durationNotifier = Provider.of<DurationNotifier>(context, listen: false);
     if(currentSchedule.isNotEmpty){
       for (int i = 0; i < currentSchedule.length; i++) {
-        if (currentSchedule[i]['Duration_QtyLeft'] != null) {
-          if ('${currentSchedule[i]['Duration_QtyLeft']}'.contains(':')) {
-            List<String> parts = currentSchedule[i]['Duration_QtyLeft'].split(':');
-            int hours = int.parse(parts[0]);
-            int minutes = int.parse(parts[1]);
-            int seconds = int.parse(parts[2]);
+        if(currentSchedule[i]['Message']=='Running.'){
+          if (currentSchedule[i]['Duration_QtyLeft'] != null) {
+            if ('${currentSchedule[i]['Duration_QtyLeft']}'.contains(':')) {
+              List<String> parts = currentSchedule[i]['Duration_QtyLeft'].split(':');
+              int hours = int.parse(parts[0]);
+              int minutes = int.parse(parts[1]);
+              int seconds = int.parse(parts[2]);
 
-            if (seconds > 0) {
-              seconds--;
-            } else {
-              if (minutes > 0) {
-                minutes--;
-                seconds = 59;
+              if (seconds > 0) {
+                seconds--;
               } else {
-                if (hours > 0) {
-                  hours--;
-                  minutes = 59;
+                if (minutes > 0) {
+                  minutes--;
                   seconds = 59;
+                } else {
+                  if (hours > 0) {
+                    hours--;
+                    minutes = 59;
+                    seconds = 59;
+                  }
                 }
               }
-            }
 
-            String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-            if (currentSchedule[i]['Duration_QtyLeft'] != '00:00:00') {
-              durationNotifier.updateDuration(updatedDurationQtyLeft);
-              currentSchedule[i]['Duration_QtyLeft'] = updatedDurationQtyLeft;
+              String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+              if (currentSchedule[i]['Duration_QtyLeft'] != '00:00:00') {
+                durationNotifier.updateDuration(updatedDurationQtyLeft);
+                currentSchedule[i]['Duration_QtyLeft'] = updatedDurationQtyLeft;
+              } else {
+                _timer?.cancel();
+                durationNotifier.updateDuration('00:00:00');
+                currentSchedule[i]['Duration_QtyLeft'] = '00:00:00';
+              }
             } else {
-              _timer?.cancel();
-              durationNotifier.updateDuration('00:00:00');
-              currentSchedule[i]['Duration_QtyLeft'] = '00:00:00';
-            }
-          } else {
-            double remainFlow = 0.0;
-            if (currentSchedule[i]['Duration_QtyLeft'] is int) {
-              remainFlow = currentSchedule[i]['Duration_QtyLeft'].toDouble();
-            } else if (currentSchedule[i]['Duration_QtyLeft'] is String) {
-              remainFlow = double.parse(currentSchedule[i]['Duration_QtyLeft']);
-            } else {
-              remainFlow = currentSchedule[i]['Duration_QtyLeft'];
-            }
+              double remainFlow = 0.0;
+              if (currentSchedule[i]['Duration_QtyLeft'] is int) {
+                remainFlow = currentSchedule[i]['Duration_QtyLeft'].toDouble();
+              } else if (currentSchedule[i]['Duration_QtyLeft'] is String) {
+                remainFlow = double.parse(currentSchedule[i]['Duration_QtyLeft']);
+              } else {
+                remainFlow = currentSchedule[i]['Duration_QtyLeft'];
+              }
 
-            if (remainFlow > 0) {
-              double flowRate = currentSchedule[i]['AverageFlowRate'] is String
-                  ? double.parse(currentSchedule[i]['AverageFlowRate'])
-                  : currentSchedule[i]['AverageFlowRate'];
-              remainFlow -= flowRate;
-              String formattedFlow = remainFlow.toStringAsFixed(2);
-              durationNotifier.updateDuration(formattedFlow);
-              currentSchedule[i]['Duration_QtyLeft'] = formattedFlow;
-            } else {
-              durationNotifier.updateDuration('0.00');
-              currentSchedule[i]['Duration_QtyLeft'] = '0.00';
-              _timer?.cancel();
+              if (remainFlow > 0) {
+                double flowRate = currentSchedule[i]['AverageFlowRate'] is String
+                    ? double.parse(currentSchedule[i]['AverageFlowRate'])
+                    : currentSchedule[i]['AverageFlowRate'];
+                remainFlow -= flowRate;
+                String formattedFlow = remainFlow.toStringAsFixed(2);
+                durationNotifier.updateDuration(formattedFlow);
+                currentSchedule[i]['Duration_QtyLeft'] = formattedFlow;
+              } else {
+                durationNotifier.updateDuration('0.00');
+                currentSchedule[i]['Duration_QtyLeft'] = '0.00';
+                _timer?.cancel();
+              }
             }
           }
-        }
-        else{
-          durationNotifier.updateDuration('00000');
-          currentSchedule[i]['Duration_QtyLeft'] = '00000';
-          _timer?.cancel();
+          else{
+            durationNotifier.updateDuration('00000');
+            currentSchedule[i]['Duration_QtyLeft'] = '00000';
+            _timer?.cancel();
+          }
+        }else{
+          //pump on delay or filter running
         }
       }
     }else{

@@ -1,21 +1,15 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/screens/NarrowLayout/Customer/HomeScreenN.dart';
-import 'package:oro_irrigation_new/screens/product_inventory.dart';
-import 'package:oro_irrigation_new/screens/web_view.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/MQTTManager.dart';
 import '../constants/MqttServer.dart';
-import '../state_management/CustomerDataProvider.dart';
 import '../state_management/MqttPayloadProvider.dart';
+import 'Admin/AdminScreenController.dart';
 import 'Customer/CustomerScreenController.dart';
-import 'my_preference.dart';
-import 'product_entry.dart';
-import 'AdminDealerHomePage.dart';
+import 'Dealer/DealerScreenController.dart';
 import 'login_form.dart';
 
 
@@ -163,154 +157,38 @@ class _DashboardWideState extends State<DashboardWide> {
     print('userType:${widget.userType}');
 
     return  Scaffold(
-      body: widget.userType==3?
-      CustomerScreenController(customerId: widget.userId, customerName: widget.userName, mobileNo: '+${widget.countryCode}-${widget.mobileNo}', comingFrom: 'Customer', emailId: widget.emailId,):
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          NavigationRail(
-            selectedIndex: _selectedIndex,
-            backgroundColor: myTheme.primaryColorDark,
-            labelType: NavigationRailLabelType.all,
-            indicatorColor: myTheme.primaryColorLight,
-            elevation: 5,
-            leading: const Column(
-              children: [
-                Image(image: AssetImage("assets/images/oro_logo_white.png"), height: 40, width: 60,),
-                SizedBox(height: 20),
-              ],
-            ),
-            trailing: Expanded(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: IconButton(tooltip: 'Logout', icon: const Icon(Icons.logout, color: Colors.redAccent,),
-                    onPressed: () async {
-                      final prefs = await SharedPreferences.getInstance();
-                      await prefs.remove('userId');
-                      await prefs.remove('userName');
-                      await prefs.remove('userType');
-                      await prefs.remove('countryCode');
-                      await prefs.remove('mobileNumber');
-                      await prefs.remove('subscribeTopic');
-                      await prefs.remove('password');
-                      await prefs.remove('email');
-
-                      MQTTManager().disconnect();
-
-                      if (mounted){
-                        Navigator.pushReplacementNamed(context, '/login');
-                      }
-                    },
-                  ),
-                ),
-              ),
-            ),
-            onDestinationSelected: (int index) {
-              setState(() {
-                _selectedIndex = index;
-                if(_selectedIndex==0){
-                  appBarTitle = 'Home';
-                }else if(_selectedIndex==1){
-                  appBarTitle = 'Product';
-                }else{
-                  appBarTitle = 'My Preference';
-                }
-              });
-            },
-            destinations: widget.userType == 1? <NavigationRailDestination>[
-              const NavigationRailDestination(
-                padding: EdgeInsets.only(top: 5),
-                icon: Icon(Icons.dashboard_outlined),
-                selectedIcon: Icon(Icons.dashboard_outlined, color: Colors.white,),
-                label: Text(''),
-              ),
-              const NavigationRailDestination(
-                icon: Icon(Icons.list),
-                selectedIcon: Icon(Icons.list, color: Colors.white,),
-                label: Text(''),
-              ),
-              const NavigationRailDestination(
-                icon: Icon(Icons.topic_outlined),
-                selectedIcon: Icon(Icons.topic_outlined, color: Colors.white,),
-                label: Text(''),
-              ),
-              const NavigationRailDestination(
-                icon: Icon(Icons.settings_outlined),
-                selectedIcon: Icon(Icons.settings_outlined, color: Colors.white,),
-                label: Text(''),
-              ),
-              const NavigationRailDestination(
-                icon: Icon(Icons.info_outline),
-                selectedIcon: Icon(Icons.info_outline, color: Colors.white,),
-                label: Text(''),
-              ),
-              const NavigationRailDestination(
-                icon: Icon(Icons.help_outline),
-                selectedIcon: Icon(Icons.help_outline, color: Colors.white,),
-                label: Text(''),
-              ),
-            ]:
-            <NavigationRailDestination>[
-              const NavigationRailDestination(
-                padding: EdgeInsets.only(top: 5),
-                icon: Icon(Icons.dashboard_outlined),
-                selectedIcon: Icon(Icons.dashboard_outlined, color: Colors.white,),
-                label: Text(''),
-              ),
-              const NavigationRailDestination(
-                icon: Icon(Icons.list),
-                selectedIcon: Icon(Icons.list, color: Colors.white),
-                label: Text(''),
-              ),
-              const NavigationRailDestination(
-                icon: Icon(Icons.settings_outlined),
-                selectedIcon: Icon(Icons.settings_outlined, color: Colors.white,),
-                label: Text(''),
-              ),
-              const NavigationRailDestination(
-                icon: Icon(Icons.info_outline),
-                selectedIcon: Icon(Icons.info_outline, color: Colors.white,),
-                label: Text(''),
-              ),
-              const NavigationRailDestination(
-                icon: Icon(Icons.help_outline),
-                selectedIcon: Icon(Icons.help_outline, color: Colors.white,),
-                label: Text(''),
-              ),
-            ],
-          ),
-          Expanded(
-            child: mainMenu(_selectedIndex),
-          ),
-        ],
-      ),
+      body: mainScreen(widget.userType),
     );
 
   }
 
-  Widget mainMenu(int index) {
-    switch (index) {
-      case 0:
-        return AdminDealerHomePage(
+  Widget mainScreen(int userType) {
+    switch (userType) {
+      case 1:
+        return AdminScreenController(
+          userName: widget.userName,
+          countryCode: widget.countryCode,
+          mobileNo: widget.mobileNo,
+          fromLogin: true,
+          userId: widget.userId,);
+      case 2:
+        return DealerScreenController(
           userName: widget.userName,
           countryCode: widget.countryCode,
           mobileNo: widget.mobileNo,
           fromLogin: true,
           userId: widget.userId,
-          userType: widget.userType,
-        );
-      case 1:
-        return ProductInventory(
-          userName: widget.userName,
-        );
-      case 2:
-        return widget.userType == 1 ? const AllEntry() : MyPreference(userID: widget.userId);
+          emailId: widget.emailId,);
       case 3:
-        return widget.userType == 1 ? MyPreference(userID: widget.userId) : const MyWebView();
+        return CustomerScreenController(
+          customerId: widget.userId,
+          customerName: widget.userName,
+          mobileNo: '+${widget.countryCode}-${widget.mobileNo}',
+          comingFrom: 'Customer',
+          emailId: widget.emailId,);
       default:
         return const SizedBox();
     }
   }
+
 }

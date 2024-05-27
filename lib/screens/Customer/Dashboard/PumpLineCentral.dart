@@ -36,10 +36,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
           ),
           borderRadius: const BorderRadius.all(Radius.circular(5)),
         ),
-        child: Padding(
-          padding: const EdgeInsets.only(top: 3, bottom: 3),
-          child: buildScaffoldWithTabs(),
-        ),
+        child: buildScaffoldWithTabs(),
       ),
       //child: SizedBox(width:500, height:500, child: buildScaffoldWithTabs()),
     );
@@ -151,11 +148,14 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
               ),
             ),
           ),
-          Container(
-            color: Colors.grey.shade100,
-            width: MediaQuery.sizeOf(context).width-173,
-            height: 60,
-            child: IrrigationLineView(line: line,),
+          Padding(
+            padding: const EdgeInsets.only(left: 3, right: 3),
+            child: Container(
+              color: Colors.grey.shade100,
+              width: MediaQuery.sizeOf(context).width-170,
+              height: 63,
+              child: IrrigationLineView(line: line,),
+            ),
           ),
         ],
       );
@@ -304,7 +304,7 @@ class SensorWidget extends StatelessWidget {
           children: [
             Text(
               sensor.name,
-              style: TextStyle(fontSize: 16, color: Colors.white),
+              style: const TextStyle(fontSize: 16, color: Colors.white),
               textAlign: TextAlign.center,
             ),
             Text(
@@ -918,7 +918,7 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
       children: [
         for(int fIndex=0; fIndex<provider.fertilizerCentral.length; fIndex++)
           SizedBox(
-            height: 150,
+            height: 140,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
@@ -968,6 +968,11 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                                 ),
                               ) :
                               const SizedBox(),
+                            ),
+                            Positioned(
+                              top: 117,
+                              left: 11,
+                              child: Container(width: 5, height: 50, color: Colors.grey.shade200,),
                             ),
                           ],
                         )
@@ -1021,8 +1026,8 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                                     children: [
                                       buildFertCheImage(index, fertilizer['Status'], provider.fertilizerCentral[fIndex]['Fertilizer'].length, provider.fertilizerCentral[fIndex]['Agitator']),
                                       Positioned(
-                                        top: 34,
-                                        left: 5,
+                                        top: 52,
+                                        left: 6,
                                         child: CircleAvatar(
                                           radius: 8,
                                           backgroundColor: Colors.lightBlueAccent,
@@ -1621,154 +1626,6 @@ class _LocalFilterState extends State<LocalFilter> {
       ],
     );
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for(int i=0; i<provider.filtersLocal.length; i++)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              provider.filtersLocal[i]['PrsIn']!='-'?
-              SizedBox(
-                width: 70,
-                height: 70,
-                child : Stack(
-                  children: [
-                    Image.asset('assets/images/dp_prs_sensor.png',),
-                    Positioned(
-                      top: 42,
-                      left: 5,
-                      child: Container(
-                        width: 60,
-                        height: 17,
-                        decoration: BoxDecoration(
-                          color:Colors.yellow,
-                          borderRadius: const BorderRadius.all(Radius.circular(2)),
-                          border: Border.all(color: Colors.grey, width: .50,),
-                        ),
-                        child: Center(
-                          child: Text('${double.parse(provider.filtersLocal[i]['PrsIn']).toStringAsFixed(2)} bar', style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ) :
-              const SizedBox(),
-              SizedBox(
-                height: 90,
-                width: provider.filtersLocal[i]['FilterStatus'].length * 70,
-                child: ListView.builder(
-                  itemCount: provider.filtersLocal[i]['FilterStatus'].length,
-                  scrollDirection: Axis.horizontal,
-                  //reverse: true,
-                  itemBuilder: (BuildContext context, int flIndex) {
-                    return Column(
-                      children: [
-                        Stack(
-                          children: [
-                            SizedBox(
-                              width: 70,
-                              height: 70,
-                              child: buildFilterImage(flIndex, provider.filtersLocal[i]['FilterStatus'][flIndex]['Status']),
-                            ),
-                            Positioned(
-                              top: 40,
-                              left: 10,
-                              child: provider.filtersLocal[i]['DurationLeft']!='00:00:00'? provider.filtersLocal[i]['Status'] == (flIndex+1) ? Container(
-                                color: Colors.greenAccent,
-                                width: 50,
-                                child: Center(
-                                  child: Text(provider.filtersLocal[i]['DurationLeft'], style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  ),
-                                ),
-                              ) :
-                              const SizedBox(): const SizedBox(),
-                            ),
-                            Positioned(
-                              top: 0,
-                              left: 45,
-                              child: provider.filtersLocal[i]['PrsIn']!='-' && provider.filtersLocal[i]['FilterStatus'].length-1==flIndex? Container(
-                                width:25,
-                                decoration: BoxDecoration(
-                                  color:Colors.yellow,
-                                  borderRadius: const BorderRadius.all(Radius.circular(2)),
-                                  border: Border.all(color: Colors.grey, width: .50,),
-                                ),
-                                child: Center(
-                                  child: Text('${provider.filtersLocal[i]['DpValue']}', style: const TextStyle(fontSize: 10),),
-                                ),
-
-                              ) :
-                              const SizedBox(),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          width: 70,
-                          height: 20,
-                          child: Center(
-                            child: Text(provider.filtersLocal[i]['FilterStatus'][flIndex]['Name'], style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
-              provider.filtersLocal[i]['PrsOut'] != '-'?
-              SizedBox(
-                width: 70,
-                height: 70,
-                child : Stack(
-                  children: [
-                    Image.asset('assets/images/dp_prs_sensor.png',),
-                    Positioned(
-                      top: 42,
-                      left: 5,
-                      child: Container(
-                        width: 60,
-                        height: 17,
-                        decoration: BoxDecoration(
-                          color:Colors.yellow,
-                          borderRadius: const BorderRadius.all(Radius.circular(2)),
-                          border: Border.all(color: Colors.grey, width: .50,),
-                        ),
-                        child: Center(
-                          child: Text('${double.parse(provider.filtersLocal[i]['PrsOut']).toStringAsFixed(2)} bar', style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ) :
-              const SizedBox(),
-            ],
-          ),
-      ],
-    );
-
   }
 
   Widget buildFilterImage(int cIndex, int status) {
@@ -1961,8 +1818,8 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                                     children: [
                                       buildFertCheImage(index, fertilizer['Status'], fertilizerLocal[fIndex]['Fertilizer'].length, fertilizerLocal[fIndex]['Agitator']),
                                       Positioned(
-                                        top: 34,
-                                        left: 5,
+                                        top: 52,
+                                        left: 6,
                                         child: CircleAvatar(
                                           radius: 8,
                                           backgroundColor: Colors.lightBlueAccent,

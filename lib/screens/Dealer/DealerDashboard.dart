@@ -3,55 +3,53 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import '../Models/DataResponse.dart';
-import '../Models/customer_list.dart';
-import '../Models/product_stock.dart';
-import '../constants/http_service.dart';
-import '../constants/theme.dart';
-import 'Customer/CustomerScreenController.dart';
-import 'Forms/add_product.dart';
-import 'Forms/create_account.dart';
-import 'Forms/device_list.dart';
-import 'my_dealers.dart';
 
-enum Calendar { day, week, month, year }
+import '../../Models/DataResponse.dart';
+import '../../Models/customer_list.dart';
+import '../../Models/product_stock.dart';
+import '../../constants/http_service.dart';
+import '../../constants/theme.dart';
+import '../Customer/CustomerScreenController.dart';
+import '../Forms/add_product.dart';
+import '../Forms/create_account.dart';
+import '../Forms/device_list.dart';
+
+enum Calendar {day, week, month, year}
 typedef CallbackFunction = void Function(String result);
 
-class AdminDealerHomePage extends StatefulWidget {
-  const AdminDealerHomePage({Key? key, required this.userName, required this.countryCode, required this.mobileNo, required this.fromLogin, required this.userId, required this.userType}) : super(key: key);
-  final String userName, countryCode, mobileNo;
-  final bool fromLogin;
-  final int userId, userType;
+class DealerDashboard extends StatefulWidget {
+  const DealerDashboard({Key? key, required this.userName, required this.countryCode, required this.mobileNo, required this.userId, required this.emailId}) : super(key: key);
+
+  final String userName, countryCode, mobileNo, emailId;
+  final int userId;
 
   @override
-  State<AdminDealerHomePage> createState() => AdminDealerHomePageHomePageState();
-
+  State<DealerDashboard> createState() => _DealerDashboardState();
 }
 
-class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
-{
+class _DealerDashboardState extends State<DealerDashboard> {
+
   Calendar calendarView = Calendar.day;
   List<ProductStockModel> productStockList = <ProductStockModel>[];
   List<CustomerListMDL> myCustomerList = <CustomerListMDL>[];
   late DataResponse dataResponse;
 
-  int userType = 0;
-  int userId = 0;
-  bool isHovering = false;
-
   String selectedValue = 'All';
   List<String> dropdownItems = ['All', 'Last year', 'Last month', 'Last Week'];
   bool visibleLoading = false;
-
 
   @override
   void initState() {
     super.initState();
     dataResponse = DataResponse(graph: {}, total: []);
     indicatorViewShow();
-    getUserInfo();
+    Future.delayed(const Duration(seconds: 2), () {
+      getProductSalesReport();
+      getProductStock();
+      getCustomerList();
+    });
+
   }
 
   void callbackFunction(String message)
@@ -68,24 +66,24 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
     }
   }
 
-  Future<void> getUserInfo() async
-  {
-    final prefs = await SharedPreferences.getInstance();
-    if(widget.fromLogin){
-      userType = int.parse(prefs.getString('userType') ?? "0");
-      userId = int.parse(prefs.getString('userId') ?? "0");
-    }else{
-      userType = widget.userType;
-      userId = widget.userId;
+  void indicatorViewShow() {
+    if(mounted){
+      setState(() {
+        visibleLoading = true;
+      });
     }
+  }
 
-    getProductSalesReport();
-    getProductStock();
-    getCustomerList();
+  void indicatorViewHide() {
+    if(mounted){
+      setState(() {
+        visibleLoading = false;
+      });
+    }
   }
 
   Future<void> getProductSalesReport() async {
-    Map<String, Object> body = {"userId": userId, "userType": userType, "type": "All"};
+    Map<String, Object> body = {"userId": widget.userId, "userType": 2, "type": "All"};
     final response = await HttpService().postRequest("getProductSalesReport", body);
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
@@ -104,13 +102,7 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
 
   Future<void> getProductStock() async
   {
-    Map<String, dynamic> body = {};
-    if(userType==1){
-      body = {"fromUserId" : null, "toUserId" : null};
-    }else{
-      body = {"fromUserId" : null, "toUserId" : userId};
-    }
-
+    Map<String, dynamic> body = {"fromUserId" : null, "toUserId" : widget.userId};
     final response = await HttpService().postRequest("getProductStock", body);
     if (response.statusCode == 200)
     {
@@ -132,14 +124,14 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
   }
 
   Future<void> getCustomerList() async {
-    Map<String, Object> body = {"userType" : userType, "userId" : userId};
+    Map<String, Object> body = {"userType" : 2, "userId" : widget.userId};
     final response = await HttpService().postRequest("getUserList", body);
     if (response.statusCode == 200) {
       myCustomerList.clear();
       var data = jsonDecode(response.body);
       if (data["code"] == 200) {
         final cntList = data["data"] as List;
-        List<CustomerListMDL> tempList = []; // Temporary list to avoid multiple setState calls
+        List<CustomerListMDL> tempList = [];
         for (int i = 0; i < cntList.length; i++) {
           tempList.add(CustomerListMDL.fromJson(cntList[i]));
         }
@@ -258,7 +250,7 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                               ],
                             ),
                           ),
-                          Expanded(
+                          const Expanded(
                             child: MySalesChart(),
                           ),
                           Padding(
@@ -309,7 +301,7 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                             ),
                             child: ListTile(
                               title: Text('Product Stock(${productStockList.length})', style: const TextStyle(fontSize: 20, color: Colors.black),),
-                              trailing : userType ==1? IconButton(tooltip: 'Add new stock', icon: const Icon(Icons.add_box_outlined), color: myTheme.primaryColor, onPressed: () async
+                              trailing : IconButton(tooltip: 'Add new stock', icon: const Icon(Icons.add_box_outlined), color: myTheme.primaryColor, onPressed: () async
                               {
                                 showModalBottomSheet(
                                   context: context,
@@ -324,7 +316,7 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                                   },
                                 );
                                 //Navigator.push(context, MaterialPageRoute(builder: (context) =>  AddProduct(callback: (String ) {},)),);
-                              }) : null,
+                              }),
                             ),
                           ),
                           Expanded(
@@ -374,15 +366,15 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                                       DataCell(Row(children: [CircleAvatar(radius: 17,
                                         backgroundImage: productStockList[index].categoryName == 'ORO SWITCH'
                                             || productStockList[index].categoryName == 'ORO SENSE'?
-                                        AssetImage('assets/images/oro_switch.png'):
+                                        const AssetImage('assets/images/oro_switch.png'):
                                         productStockList[index].categoryName == 'ORO LEVEL'?
-                                        AssetImage('assets/images/oro_sense.png'):
+                                        const AssetImage('assets/images/oro_sense.png'):
                                         productStockList[index].categoryName == 'OROGEM'?
-                                        AssetImage('assets/images/oro_gem.png'):AssetImage('assets/images/oro_rtu.png'),
+                                        const AssetImage('assets/images/oro_gem.png'): const AssetImage('assets/images/oro_rtu.png'),
                                         backgroundColor: Colors.transparent,
-                                      ), SizedBox(width: 10,), Text(productStockList[index].categoryName)],)),
+                                      ), const SizedBox(width: 10,), Text(productStockList[index].categoryName)],)),
                                       DataCell(Text(productStockList[index].model)),
-                                      DataCell(Text('${productStockList[index].imeiNo}')),
+                                      DataCell(Text(productStockList[index].imeiNo)),
                                       DataCell(Text(productStockList[index].dtOfMnf)),
                                       DataCell(Center(child: Text('${productStockList[index].warranty}'))),
                                     ]))),
@@ -408,8 +400,8 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                 child: Column(
                   children: [
                     ListTile(
-                      title: Text(userType==1? 'My Dealer':'My Customer', style: const TextStyle(fontSize: 17)),
-                      trailing: IconButton(tooltip: userType==1? 'Add Dealer account' : 'Add Customer account', icon: const Icon(Icons.person_add_outlined), color: myTheme.primaryColor, onPressed: () async
+                      title: const Text('My Customer', style: TextStyle(fontSize: 17)),
+                      trailing: IconButton(tooltip: 'Create Customer account', icon: const Icon(Icons.person_add_outlined), color: myTheme.primaryColor, onPressed: () async
                       {
                         await showDialog<void>(
                             context: context,
@@ -420,7 +412,7 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                     ),
                     const Divider(height: 0),
                     Expanded(
-                      child : myCustomerList.isNotEmpty? ListView.builder(
+                        child : myCustomerList.isNotEmpty? ListView.builder(
                           itemCount: myCustomerList.length,
                           itemBuilder: (BuildContext context, int index) {
                             return ListTile(
@@ -431,19 +423,31 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                               trailing: PopupMenuButton<String>(
                                 onSelected: (String value) {
                                   setState(() {
-                                    print(value);
+                                    if(value=='View'){
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => CustomerScreenController(
+                                            customerId: myCustomerList[index].userId,
+                                            customerName: myCustomerList[index].userName,
+                                            mobileNo: '+${myCustomerList[index].countryCode}-${myCustomerList[index].mobileNumber}',
+                                            comingFrom: 'AdminORDealer',
+                                            emailId: myCustomerList[index].emailId,),
+                                        ),
+                                      );
+                                    }
                                   });
                                 },
                                 icon: const Icon(Icons.more_vert),
                                 itemBuilder: (BuildContext context) {
                                   return [
-                                    PopupMenuItem<String>(
+                                    const PopupMenuItem<String>(
                                       value: 'View',
                                       child: Row(
                                         children: [
-                                          const Icon(Icons.view_quilt_outlined, color: Colors.black),
+                                          Icon(Icons.view_quilt_outlined, color: Colors.black),
                                           SizedBox(width: 8),
-                                          Text(userType==1? 'View Dealer Dashboard': 'View Customer Dashboard'),
+                                          Text('View Customer Dashboard'),
                                         ],
                                       ),
                                     ),
@@ -470,42 +474,28 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
                                   ];
                                 },
                               ),
-
-                              /*trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(tooltip: userType==1? 'View Dealer Dashboard' : 'View Customer Dashboard', icon: const Icon(Icons.view_quilt_outlined), color: myTheme.primaryColor, onPressed: () async
-                                  {
-                                    if(userType==1){
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyDealers(dealerId: myCustomerList[index].userId, dealerName: myCustomerList[index].userName)),);
-                                    }else{
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerScreenController(customerId: myCustomerList[index].userId, comingFrom: 'AdminORDealer', customerName: myCustomerList[index].userName, mobileNo: '+${myCustomerList[index].countryCode}-${myCustomerList[index].mobileNumber}', emailId: myCustomerList[index].emailId,)));
-                                    }
-                                  }),
-                                ],
-                              ),*/
                               title: Text(myCustomerList[index].userName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
                               subtitle: Text('+${myCustomerList[index].countryCode} ${myCustomerList[index].mobileNumber}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal)),
                               onTap:() {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: myCustomerList[index].userId, userName: myCustomerList[index].userName, userID: userId, userType: userType, productStockList: productStockList, callback: callbackFunction,)),);
+                                Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: myCustomerList[index].userId, userName: myCustomerList[index].userName, userID: widget.userId, userType: 2, productStockList: productStockList, callback: callbackFunction,)),);
                               },
                             );
                           },
                         ):
-                      const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(25.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('No customers found.', style: TextStyle(fontSize: 17, fontWeight: FontWeight.normal)),
-                              SizedBox(height: 5),
-                              Text('Add your customer using top of the customer adding button.', style: TextStyle(fontWeight: FontWeight.normal)),
-                              Icon(Icons.person_add_outlined),
-                            ],
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(25.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('Customers not found.', style: TextStyle(fontSize: 17, fontWeight: FontWeight.normal)),
+                                SizedBox(height: 5),
+                                Text('Add your customer using top of the customer adding button.', style: TextStyle(fontWeight: FontWeight.normal)),
+                                Icon(Icons.person_add_outlined),
+                              ],
+                            ),
                           ),
-                        ),
-                      )
+                        )
                     ),
                   ],
                 ),
@@ -515,32 +505,8 @@ class AdminDealerHomePageHomePageState extends State<AdminDealerHomePage>
         ),
       ),
     );
-
-  }
-
-  void indicatorViewShow() {
-    if(mounted){
-      setState(() {
-        visibleLoading = true;
-      });
-    }
-  }
-
-  void indicatorViewHide() {
-    if(mounted){
-      setState(() {
-        visibleLoading = false;
-      });
-    }
   }
 }
-
-class SalesData {
-  SalesData(this.year, this.sales);
-  final DateTime year;
-  final double sales;
-}
-
 
 class MySalesChart extends StatefulWidget {
   const MySalesChart({Key? key}) : super(key: key);
@@ -615,25 +581,4 @@ class _ChartData {
   final int rtu;
   final int oSwitch;
   final int oSpot;
-}
-
-class MyCustomWidget extends StatelessWidget {
-  final String text;
-
-  const MyCustomWidget({super.key, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      color: Colors.blue,
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 18.0,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
 }

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:oro_irrigation_new/state_management/scheule_view_provider.dart';
 
-
 enum MQTTConnectionState { connected, disconnected, connecting }
 
 class MqttPayloadProvider with ChangeNotifier {

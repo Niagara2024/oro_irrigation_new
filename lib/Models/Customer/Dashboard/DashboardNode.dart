@@ -837,6 +837,7 @@ class Fertilizer {
 
   factory Fertilizer.fromJson(Map<String, dynamic> json) {
     String qty = '0',qtyCompleted = '0', qtyLeft = '0';
+    int frtMethod = 0, frtSelection = 0;
 
     if(json['Qty'].runtimeType==int) {
       qty = json['Qty'].toString();
@@ -848,6 +849,13 @@ class Fertilizer {
       qtyLeft = json['QtyLeft'].toString();
     }
 
+    if(json['FertMethod'].runtimeType==String) {
+      frtMethod = int.parse(json['FertMethod']);
+    }
+    if(json['FertSelection'].runtimeType==String) {
+      frtSelection = int.parse(json['FertSelection']);
+    }
+
     bool hasOnTimeKey = json.containsKey('OnTime');
     bool hasOffTimeKey = json.containsKey('OffTime');
 
@@ -857,8 +865,8 @@ class Fertilizer {
       flowRate: json['FlowRate'],
       flowRateLpH: json['FlowRate_LpH'],
       status: json['Status'],
-      fertMethod: json['FertMethod'],
-      fertSelection: json['FertSelection'],
+      fertMethod: frtMethod,
+      fertSelection: frtSelection,
       duration: json['Duration'],
       durationCompleted: json['DurationCompleted'],
       durationLeft: json['DurationLeft'],

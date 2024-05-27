@@ -190,6 +190,449 @@ class _CustomerScreenControllerState extends State<CustomerScreenController>
     final screenWidth = MediaQuery.of(context).size.width;
     final provider = Provider.of<MqttPayloadProvider>(context);
 
+    return visibleLoading? buildLoadingIndicator(visibleLoading, screenWidth):
+    Scaffold(
+      appBar: AppBar(
+        leading: const Padding(
+          padding: EdgeInsets.only(left: 10),
+          child: Image(image: AssetImage("assets/images/oro_logo_white.png")),
+        ),
+        title:  Center(child: Text(siteListFinal[siteIndex].groupName, style: const TextStyle(fontSize: 20),)),
+        leadingWidth: 75,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              tileMode: TileMode.clamp,
+              colors: [myTheme.primaryColorDark, myTheme.primaryColor], // Define your gradient colors
+            ),
+          ),
+        ),
+        actions: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () {
+                },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(Colors.white24),
+                  shape: MaterialStateProperty.all<OutlinedBorder>(
+                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(5),),
+                  ),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.pause, color: Colors.orange),
+                    SizedBox(width:5),
+                    Text('PAUSE ALL', style: TextStyle(color: Colors.white)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              IconButton(tooltip : 'Help & Support', onPressed: (){
+                showMenu(
+                  context: context,
+                  color: Colors.white,
+                  position: const RelativeRect.fromLTRB(100, 0, 95, 0),
+                  items: <PopupMenuEntry>[
+                    PopupMenuItem(
+                      child: Column(
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.info_outline),
+                            title: const Text('App info'),
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.help_outline),
+                            title: const Text('Help'),
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.model_training),
+                            title: const Text('Training'),
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          const Divider(height: 0),
+                          ListTile(
+                            leading: const Icon(Icons.feedback_outlined),
+                            title: const Text('Send feedback'),
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              }, icon: const CircleAvatar(
+                radius: 17,
+                backgroundColor: Colors.white,
+                child: Icon(Icons.live_help_outlined),
+              )),
+              IconButton(tooltip : 'Site List', onPressed: (){
+                showMenu(
+                  context: context,
+                  color: Colors.white,
+                  position: const RelativeRect.fromLTRB(100, 0, 30, 0),
+                  items: <PopupMenuEntry>[
+                    PopupMenuItem(
+                      child: Column(
+                        children: (siteListFinal ?? []).map((site) {
+                          int index = siteListFinal.indexOf(site);
+                          return ListTile(
+                            leading: Image.asset('assets/images/oro_gem.png', width: 30, height: 30,),
+                            title: Text(site.groupName),
+                            //subtitle: Text('Controller : ${site.deviceName}\nModel : ${site.modelName}\nController ID : ${site.master[masterIndex].deviceId}'),
+                            onTap: () {
+                              if(siteListFinal.length>1){
+                                clearMQTTPayload();
+                                siteIndex = index;
+                                subscribeAndUpdateSite();
+                                getProgramList();
+                              }
+                              Navigator.pop(context);
+                            },
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
+                );
+              }, icon: CircleAvatar(
+                radius: 17.5,
+                backgroundColor: Colors.white,
+                child: Image.asset('assets/images/oro_gem.png', width: 25, height: 25,),
+              )),
+              IconButton(tooltip : 'Niagara Account\n${widget.customerName}\n ${widget.mobileNo}', onPressed: (){
+                showMenu(
+                  context: context,
+                  position: const RelativeRect.fromLTRB(100, 0, 10, 0),
+                  surfaceTintColor: myTheme.primaryColor,
+                  items: <PopupMenuEntry>[
+                    PopupMenuItem(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Stack(
+                            children: [
+                              Center(
+                                child: CircleAvatar(radius: 35, backgroundColor: myTheme.primaryColor.withOpacity(0.1), child: Text(widget.customerName.substring(0, 1).toUpperCase(), style: const TextStyle(fontSize: 25)),),
+                              ),
+                              Positioned(
+                                bottom: 0.0,
+                                right: 70.0,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: myTheme.primaryColor,
+                                  ),
+                                  child: IconButton(
+                                    tooltip:'Edit',
+                                    icon: const Icon(Icons.edit_outlined, color: Colors.white),
+                                    onPressed: () {},
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text('Hi, ${widget.customerName}!',style: const TextStyle(fontSize: 20)),
+                          Text(widget.emailId, style: const TextStyle(fontSize: 13)),
+                          Text(widget.mobileNo, style: const TextStyle(fontSize: 13)),
+                          const SizedBox(height: 15),
+                          MaterialButton(
+                            color: myTheme.primaryColor,
+                            textColor: Colors.white,
+                            child: const Text('Manage Your Niagara Account'),
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AccountManagement(userID: widget.customerId, callback: callbackFunction);
+                                },
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(
+                                tooltip:'Logout',
+                                icon: const Icon(Icons.exit_to_app, color: Colors.red),
+                                onPressed: () async {
+                                  final prefs = await SharedPreferences.getInstance();
+                                  await prefs.remove('userId');
+                                  await prefs.remove('userName');
+                                  await prefs.remove('userType');
+                                  await prefs.remove('countryCode');
+                                  await prefs.remove('mobileNumber');
+                                  await prefs.remove('subscribeTopic');
+                                  await prefs.remove('password');
+                                  await prefs.remove('email');
+                                  MQTTManager().disconnect();
+
+                                  if (context.mounted){
+                                    clearMQTTPayload();
+                                    Navigator.pushReplacementNamed(context, '/login');
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Add more menu items as needed
+                  ],
+                );
+              }, icon: CircleAvatar(
+                radius: 17,
+                backgroundColor: Colors.white,
+                child: Text(widget.customerName.substring(0, 1).toUpperCase()),
+              )),
+            ],),
+          const SizedBox(width: 05),
+        ],
+      ),
+      backgroundColor: Colors.white,
+      extendBody: true,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: myTheme.primaryColorLight.withOpacity(0.1),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            NavigationRail(
+              selectedIndex: _selectedIndex,
+              labelType: NavigationRailLabelType.all,
+              onDestinationSelected: (int index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+              destinations: const [
+                NavigationRailDestination(
+                  padding: EdgeInsets.only(top: 5),
+                  icon: Icon(Icons.dashboard_outlined),
+                  selectedIcon: Icon(Icons.dashboard_outlined, color: Colors.white,),
+                  label: Text(''),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.devices_other),
+                  selectedIcon: Icon(Icons.devices_other, color: Colors.white),
+                  label: Text(''),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.question_answer_outlined),
+                  selectedIcon: Icon(Icons.question_answer_outlined, color: Colors.white,),
+                  label: Text(''),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.message_outlined),
+                  selectedIcon: Icon(Icons.message_outlined, color: Colors.white,),
+                  label: Text(''),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.stacked_bar_chart),
+                  selectedIcon: Icon(Icons.stacked_bar_chart, color: Colors.white,),
+                  label: Text(''),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.settings_outlined),
+                  selectedIcon: Icon(Icons.settings_outlined, color: Colors.white,),
+                  label: Text(''),
+                ),
+              ],
+            ),
+            Container(
+              width: MediaQuery.sizeOf(context).width-140,
+              height: MediaQuery.sizeOf(context).height,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  tileMode: TileMode.clamp,
+                  colors: [myTheme.primaryColorDark, myTheme.primaryColor],
+                ),
+              ),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Color(0xffefefef),
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: _selectedIndex == 0 ? CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: siteListFinal[siteIndex]) :
+                  _selectedIndex == 1 ? ProductInventory(userName: widget.customerName):
+                  _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
+                  _selectedIndex == 3 ?  ControllerLogs(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId,):
+                  _selectedIndex == 4 ?  SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
+                  ControllerSettings(customerID: widget.customerId, siteData: siteListFinal[siteIndex]),
+                ),
+              ),
+            ),
+            Container(
+              width: 60,
+              height: MediaQuery.sizeOf(context).height,
+              color: myTheme.primaryColor,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 10),
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: myTheme.primaryColorDark,
+                    child: SizedBox(
+                      height: 45,
+                      width: 45,
+                      child: IconButton(tooltip:'Show node list', onPressed: (){
+                        sideSheet();
+                      }, icon: const Icon(Icons.menu, color: Colors.white)),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.transparent
+                    ),
+                    width: 45,
+                    height: 45,
+                    child: IconButton(
+                      tooltip: 'refresh',
+                      icon: const Icon(Icons.refresh, color: Colors.white,),
+                      onPressed: onRefreshClicked,
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.transparent
+                    ),
+                    width: 45,
+                    height: 45,
+                    child: IconButton(
+                      tooltip: '$wifiStrength %',
+                      icon: Icon(wifiStrength == 0? Icons.wifi_off:
+                      wifiStrength >= 1 && wifiStrength <= 20 ? Icons.network_wifi_1_bar_outlined:
+                      wifiStrength >= 21 && wifiStrength <= 40 ? Icons.network_wifi_2_bar_outlined:
+                      wifiStrength >= 41 && wifiStrength <= 60 ? Icons.network_wifi_3_bar_outlined:
+                      wifiStrength >= 61 && wifiStrength <= 80 ? Icons.network_wifi_outlined:
+                      Icons.wifi, color: Colors.white,),
+                      onPressed: null,
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.transparent
+                    ),
+                    width: 45,
+                    height: 45,
+                    child: IconButton(
+                      tooltip: 'Manual Mode',
+                      icon: const Icon(Icons.touch_app_outlined, color: Colors.white),
+                      onPressed: () async {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RunByManual(siteID: siteListFinal[siteIndex].userGroupId,
+                                siteName: siteListFinal[siteIndex].groupName,
+                                controllerID: siteListFinal[siteIndex].master[masterIndex].controllerId,
+                                customerID: widget.customerId,
+                                imeiNo: siteListFinal[siteIndex].master[masterIndex].deviceId,
+                                programList: programList, callbackFunction: callbackFunction),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.transparent
+                    ),
+                    width: 45,
+                    height: 45,
+                    child: IconButton(
+                      tooltip: 'Planning',
+                      icon: const Icon(Icons.list_alt, color: Colors.white),
+                      onPressed: () async {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProgramSchedule(
+                              customerID: widget.customerId,
+                              controllerID: siteListFinal[siteIndex].master[masterIndex].controllerId,
+                              siteName: siteListFinal[siteIndex].groupName,
+                              imeiNumber: siteListFinal[siteIndex].master[masterIndex].deviceId,
+                              userId: widget.customerId,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.transparent
+                    ),
+                    width: 45,
+                    height: 45,
+                    child: IconButton(tooltip:'View all Node details', onPressed: (){
+                      showNodeDetailsBottomSheet(context);
+                    }, icon: const Icon(Icons.grid_view, color: Colors.white)),
+                  ),
+                  const SizedBox(height: 15),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.transparent
+                    ),
+                    width: 45,
+                    height: 45,
+                    child: BadgeButton(
+                      onPressed: () {
+                        if(provider.alarmList.isNotEmpty){
+                          showAlarmBottomSheet(context, provider);
+                        }else{
+                          GlobalSnackBar.show(context, 'Alarm is Empty', 200);
+                        }
+                      },
+                      icon: Icons.alarm,
+                      badgeNumber: provider.alarmList.length,
+
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+
     if(widget.comingFrom == 'AdminORDealer'){
       return visibleLoading? buildLoadingIndicator(visibleLoading, screenWidth):
       Scaffold(

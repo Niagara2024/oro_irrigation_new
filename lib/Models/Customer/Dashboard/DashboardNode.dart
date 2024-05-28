@@ -54,8 +54,7 @@ class MasterData {
   });
 
   factory MasterData.fromJson(Map<String, dynamic> json) {
-
-    print(json['categoryId']);
+    //print(json['categoryId']);
     if(json['categoryId']==1 || json['categoryId']==2){
       //drip irrigation controller
       var liveData = json['2400'] as List;
@@ -264,6 +263,7 @@ class PumpData {
   });
 
   factory PumpData.fromJson(Map<String, dynamic> json) {
+    String onDelay = json['OnDelay'] ?? '00:00:00';
     return PumpData(
       Type: json['Type'],
       Name: json['Name'],
@@ -274,7 +274,7 @@ class PumpData {
       Pressure: json['Pressure'],
       Level: json['Level'],
       Float: json['Float'],
-      OnDelay: json['OnDelay'],
+      OnDelay: onDelay,
       OnDelayCompleted: json['OnDelayCompleted'],
       OnDelayLeft: json['OnDelayLeft'],
       Program: json['Program'],

@@ -10,7 +10,7 @@ class MqttPayloadProvider with ChangeNotifier {
   late ScheduleViewProvider mySchedule;
 
   int wifiStrength = 0;
-  //List<dynamic> mainLine = [];
+  List<dynamic> nodeList = [];
   List<dynamic> currentSchedule = [];
   List<dynamic> PrsIn = [];
   List<dynamic> PrsOut = [];
@@ -33,15 +33,16 @@ class MqttPayloadProvider with ChangeNotifier {
   }
 
   void updateReceivedPayload(String payload) {
+    print('Received Payload :${payload}');
     try {
       Map<String, dynamic> data = jsonDecode(payload);
       if (data.containsKey('2400') && data['2400'] != null && data['2400'].isNotEmpty) {
         dashBoardPayload = payload;
 
-        if (data['2400'][0].containsKey('2405')) {
-          //mainLine = data['2400'][0]['2405'];
+        if (data['2400'][0].containsKey('2401')) {
+          nodeList = data['2400'][0]['2401'];
         }
-        if (data['2400'][0].containsKey('2402')) {
+        if(data['2400'][0].containsKey('2402')) {
           currentSchedule = data['2400'][0]['2402'];
           if(currentSchedule.isNotEmpty && currentSchedule[0].containsKey('PrsIn')){
             PrsIn = currentSchedule[0]['PrsIn'];

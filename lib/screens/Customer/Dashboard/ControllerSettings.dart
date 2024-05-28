@@ -1,25 +1,22 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../Models/language.dart';
 import '../../../constants/http_service.dart';
-import '../../../constants/theme.dart';
+import '../../../constants/snack_bar.dart';
 import '../../Config/names_form.dart';
 
 class ControllerSettings extends StatefulWidget {
-  const ControllerSettings({Key? key, required this.customerID, required this.siteData}) : super(key: key);
-  final int customerID;
+  const ControllerSettings({Key? key, required this.customerID, required this.siteData, required this.masterIndex}) : super(key: key);
+  final int customerID, masterIndex;
   final DashboardModel siteData;
 
   @override
   State<ControllerSettings> createState() => _ControllerSettingsState();
 }
-
-
 
 class _ControllerSettingsState extends State<ControllerSettings> {
 
@@ -69,14 +66,19 @@ class _ControllerSettingsState extends State<ControllerSettings> {
     "-1",
   ];
 
+  final TextEditingController txtEcSiteName = TextEditingController();
+  final TextEditingController txtEcGroupName = TextEditingController();
+  String modelName= '', deviceId= '', categoryName= '';
+  int groupId=0;
+
   @override
   void initState() {
     super.initState();
     getLanguage();
+    getControllerInfo();
   }
 
-  Future<void> getLanguage() async
-  {
+  Future<void> getLanguage() async {
     final response = await HttpService().postRequest("getLanguageByActive", {"active": '1'});
     if (response.statusCode == 200)
     {
@@ -90,6 +92,26 @@ class _ControllerSettingsState extends State<ControllerSettings> {
         }
         setState(() {
           languageList;
+        });
+      }
+    }
+  }
+
+  Future<void> getControllerInfo() async{
+    final response = await HttpService().postRequest("getUserMasterDetails", {"userId": widget.customerID,"controllerId": widget.siteData.master[widget.masterIndex].controllerId});
+    if (response.statusCode == 200)
+    {
+      print(response.body);
+      var data = jsonDecode(response.body);
+      if(data["code"]==200)
+      {
+        txtEcSiteName.text = data["data"][0]['groupName'];
+        txtEcGroupName.text = data["data"][0]['deviceName'];
+        setState(() {
+          deviceId = data["data"][0]['deviceId'];
+          modelName = data["data"][0]['modelName'];
+          categoryName = data["data"][0]['categoryName'];
+          groupId = data["data"][0]['groupId'];
         });
       }
     }
@@ -159,10 +181,11 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                       children: [
                         ListTile(
                           title: const Text('Form Name'),
-                          leading: Icon(Icons.area_chart_outlined),
+                          leading: const Icon(Icons.area_chart_outlined),
                           trailing: SizedBox(
                             width: 300,
                             child: TextField(
+                              controller: txtEcSiteName,
                               decoration: InputDecoration(
                                 filled: true,
                                 border: OutlineInputBorder(
@@ -178,10 +201,11 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                         const Divider(),
                         ListTile(
                           title: const Text('Controller Name'),
-                          leading: Icon(Icons.developer_board),
+                          leading: const Icon(Icons.developer_board),
                           trailing: SizedBox(
                             width: 300,
                             child: TextField(
+                              controller: txtEcGroupName,
                               decoration: InputDecoration(
                                 filled: true,
                                 border: OutlineInputBorder(
@@ -196,20 +220,26 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                         ),
                         const Divider(),
                         ListTile(
-                          title: const Text('Model'),
-                          leading: Icon(Icons.model_training),
-                          trailing: const Text('wireless controller'),
+                          title: const Text('Device Category'),
+                          leading: const Icon(Icons.category_outlined),
+                          trailing: Text(categoryName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
                         ),
                         const Divider(),
                         ListTile(
-                          title: const Text('ID'),
-                          leading: Icon(Icons.numbers_outlined),
-                          trailing: const Text('A524C2124556'),
+                          title: const Text('Model'),
+                          leading: const Icon(Icons.model_training),
+                          trailing: Text(modelName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          title: const Text('Device ID'),
+                          leading: const Icon(Icons.numbers_outlined),
+                          trailing: Text(deviceId, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
                         ),
                         const Divider(),
                         ListTile(
                           title: const Text('Language'),
-                          leading: Icon(Icons.language),
+                          leading: const Icon(Icons.language),
                           trailing: DropdownButton(
                             underline: Container(),
                             items: languageList.map((item) {
@@ -231,7 +261,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                     ),
                   ),
                   const Padding(
-                    padding: EdgeInsets.only(bottom: 225),
+                    padding: EdgeInsets.only(bottom: 162),
                     child: VerticalDivider(width: 0),
                   ),
                   Flexible(
@@ -264,24 +294,24 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                         const ListTile(
                           title: Text('Current UTC Time'),
                           leading: Icon(Icons.date_range),
-                          trailing: Text('15:10:00'),
+                          trailing: Text('15:10:00', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
                         ),
                         const Divider(),
-                        ListTile(
-                          title: const Text('Time Format'),
+                        const ListTile(
+                          title: Text('Time Format'),
                           leading: Icon(Icons.date_range),
-                          trailing: const Text('24 Hrs'),
+                          trailing: Text('24 Hrs', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
                         ),
                         const Divider(),
-                        ListTile(
-                          title: const Text('Current Date'),
+                        const ListTile(
+                          title: Text('Current Date'),
                           leading: Icon(Icons.date_range),
-                          trailing: Text('13-05-2024'),
+                          trailing: Text('13-05-2024', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
                         ),
                         const Divider(),
                         ListTile(
                           title: const Text('UTC'),
-                          leading: Icon(Icons.timer_outlined),
+                          leading: const Icon(Icons.timer_outlined),
                           trailing: DropdownButton<String>(
                             underline: Container(),
                             value: selectedTime,
@@ -302,6 +332,12 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                           ),
                         ),
                         const Divider(),
+                        const ListTile(
+                          title: Text('Unit'),
+                          leading: Icon(Icons.ac_unit_rounded),
+                          trailing: Text('m3', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
+                        ),
+                        const Divider(),
                       ],
                     ),
                   ),
@@ -314,8 +350,27 @@ class _ControllerSettingsState extends State<ControllerSettings> {
             child: ListTile(trailing: MaterialButton(
               color: Colors.green,
               textColor: Colors.white,
-              onPressed:() {
+              onPressed:() async {
 
+                Map<String, Object> body = {
+                  'userId': widget.customerID,
+                  'controllerId': widget.siteData.master[0].controllerId,
+                  'deviceName': txtEcGroupName.text,
+                  'groupId': groupId,
+                  'groupName': txtEcSiteName.text,
+                  'modifyUser': widget.customerID,
+                };
+                final Response response = await HttpService().putRequest("updateUserMasterDetails", body);
+                if(response.statusCode == 200)
+                {
+                  var data = jsonDecode(response.body);
+                  if(data["code"]==200)
+                  {
+                    if (context.mounted){
+                      GlobalSnackBar.show(context, data["message"], response.statusCode);
+                    }
+                  }
+                }
               },
               child: const Text('Restore'),
             ),),

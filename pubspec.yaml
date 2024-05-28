@@ -234,9 +234,6 @@ flutter:
      - assets/GifFile/dp_irr_pump_1_g.gif
      - assets/GifFile/dp_irr_pump_3_g.gif
      - assets/images/dp_irr_pump.png
-     - assets/images/dp_irr_pump_1.png
-     - assets/images/dp_irr_pump_2.png
-     - assets/images/dp_irr_pump_3.png
      - assets/GifFile/valve_on.gif
      - assets/images/valve_off.png
      - assets/GifFile/valve_not_on.gif
@@ -301,6 +298,9 @@ flutter:
      - assets/images/dp_agitator_red.png
      - assets/images/dp_agitator_yellow.png
      - assets/images/dp_sump_src.png
+     - assets/GifFile/motor_off_new.gif
+     - assets/GifFile/motor_on_new.gif
+     - assets/GifFile/motor_ondelay_new.gif
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

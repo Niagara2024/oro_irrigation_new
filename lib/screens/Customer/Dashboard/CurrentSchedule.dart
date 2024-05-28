@@ -39,7 +39,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
     });
   }
 
-  void _updateDurationQtyLeft() {
+/*  void _updateDurationQtyLeft() {
     final currentSchedule = Provider.of<MqttPayloadProvider>(context, listen: false).currentSchedule;
     final durationNotifier = Provider.of<DurationNotifier>(context, listen: false);
     if(currentSchedule.isNotEmpty){
@@ -112,6 +112,85 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
       }
     }else{
       durationNotifier.updateDuration('00000');
+      _timer?.cancel();
+    }
+  }*/
+
+  void _updateDurationQtyLeft() {
+    final currentSchedule = Provider.of<MqttPayloadProvider>(context, listen: false).currentSchedule;
+    bool allOnDelayLeftZero = true;
+    try {
+      if(currentSchedule.isNotEmpty){
+        for (int i = 0; i < currentSchedule.length; i++) {
+          if(currentSchedule[i]['Message']=='Running.'){
+            if (currentSchedule[i]['Duration_QtyLeft'] != null) {
+              if ('${currentSchedule[i]['Duration_QtyLeft']}'.contains(':')) {
+                List<String> parts = currentSchedule[i]['Duration_QtyLeft'].split(':');
+                int hours = int.parse(parts[0]);
+                int minutes = int.parse(parts[1]);
+                int seconds = int.parse(parts[2]);
+
+                if (seconds > 0) {
+                  seconds--;
+                } else {
+                  if (minutes > 0) {
+                    minutes--;
+                    seconds = 59;
+                  } else {
+                    if (hours > 0) {
+                      hours--;
+                      minutes = 59;
+                      seconds = 59;
+                    }
+                  }
+                }
+
+                String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+                if (currentSchedule[i]['Duration_QtyLeft'] != '00:00:00') {
+                  setState(() {
+                    currentSchedule[i]['Duration_QtyLeft'] = updatedDurationQtyLeft;
+                  });
+                }
+              } else {
+                double remainFlow = 0.0;
+                if (currentSchedule[i]['Duration_QtyLeft'] is int) {
+                  remainFlow = currentSchedule[i]['Duration_QtyLeft'].toDouble();
+                } else if (currentSchedule[i]['Duration_QtyLeft'] is String) {
+                  remainFlow = double.parse(currentSchedule[i]['Duration_QtyLeft']);
+                } else {
+                  remainFlow = currentSchedule[i]['Duration_QtyLeft'];
+                }
+
+                if (remainFlow > 0) {
+                  double flowRate = currentSchedule[i]['AverageFlowRate'] is String
+                      ? double.parse(currentSchedule[i]['AverageFlowRate'])
+                      : currentSchedule[i]['AverageFlowRate'];
+                  remainFlow -= flowRate;
+                  String formattedFlow = remainFlow.toStringAsFixed(2);
+                  setState(() {
+                    currentSchedule[i]['Duration_QtyLeft'] = formattedFlow;
+                  });
+                } else {
+                  currentSchedule[i]['Duration_QtyLeft'] = '0.00';
+                }
+              }
+            }
+            else{
+              currentSchedule[i]['Duration_QtyLeft'] = '00000';
+              _timer?.cancel();
+            }
+          }else{
+            //pump on delay or filter running
+          }
+        }
+      }else{
+        _timer?.cancel();
+      }
+    } catch (e) {
+      print(e);
+    }
+
+    if (allOnDelayLeftZero) {
       _timer?.cancel();
     }
   }
@@ -206,12 +285,13 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                       DataCell(Center(child: Text(formatRtcValues(currentSchedule[index]['CurrentCycle'],currentSchedule[index]['TotalCycle'])))),
                       DataCell(Center(child: Text(_convertTime(currentSchedule[index]['StartTime'])))),
                       DataCell(Center(child: Text('${currentSchedule[index]['Duration_Qty']}'))),
-                      DataCell(Center(child: ValueListenableBuilder<String>(
+                      DataCell(Center(child: Text('${currentSchedule[index]['Duration_QtyLeft']}',style: const TextStyle(fontSize: 20)))),
+                      /*DataCell(Center(child: ValueListenableBuilder<String>(
                         valueListenable: Provider.of<DurationNotifier>(context).leftDurationOrFlow,
                         builder: (context, value, child) {
                           return Text(value, style: const TextStyle(fontSize: 20));
                         },
-                      ),)),
+                      ),)),*/
                       DataCell(Center(
                         child: currentSchedule[index]['ProgName']=='StandAlone - Manual'?
                         MaterialButton(

@@ -4,6 +4,7 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/SentAndReceived.dart';
+import 'package:oro_irrigation_new/screens/Customer/WeatherScreen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
@@ -46,6 +47,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   int wifiStrength = 0;
   String lastSyncData = '';
+
+  late String _myCurrentSite;
+  late String _myCurrentMasterC;
+  late String _myCurrentIrrLine;
+
 
   @override
   void initState() {
@@ -119,6 +125,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           siteListFinal = jsonData.map((json) => DashboardModel.fromJson(json)).toList();
           indicatorViewHide();
           if(siteListFinal.isNotEmpty){
+            _myCurrentSite = siteListFinal[siteIndex].groupName;
+            _myCurrentMasterC = siteListFinal[siteIndex].master[masterIndex].categoryName;
+            _myCurrentIrrLine = siteListFinal[siteIndex].master[masterIndex].irrigationLine[0].name;
             intTabController();
             subscribeAndUpdateSite();
             getProgramList();
@@ -174,7 +183,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       "2400": [{"2406": jsonFertilizerList.toList()}]
     });
     payloadProvider.updateFertilizerPayload(fertilizerPayloadFinal);
-
   }
 
   Future<void> getProgramList() async
@@ -223,7 +231,100 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           padding: EdgeInsets.only(left: 10),
           child: Image(image: AssetImage("assets/images/oro_logo_white.png")),
         ),
-        title:  Center(child: Text(siteListFinal[siteIndex].groupName, style: const TextStyle(fontSize: 20),)),
+        title:  Row(
+          children: [
+            const SizedBox(width: 10,),
+            Container(width: 1, height: 20, color: Colors.yellow,),
+            const SizedBox(width: 5,),
+            DropdownButton(
+              underline: Container(),
+              items: (siteListFinal ?? []).map((site) {
+                return DropdownMenuItem(
+                  value: site.groupName,
+                  child: Text(site.groupName, style: const TextStyle(color: Colors.white, fontSize: 17),),
+                );
+              }).toList(),
+              onChanged: (newSiteName) {
+                int newIndex = siteListFinal.indexWhere((site) => site.groupName == newSiteName);
+                if (newIndex != -1 && siteListFinal.length > 1) {
+                  setState(() {
+                    _myCurrentSite = newSiteName!;
+                    siteIndex = newIndex;
+                  });
+                  clearMQTTPayload();
+                  subscribeAndUpdateSite();
+                  getProgramList();
+                }
+              },
+              value: _myCurrentSite,
+              dropdownColor: Colors.teal,
+              iconEnabledColor: Colors.white,
+              iconDisabledColor: Colors.white,
+              focusColor: Colors.transparent,
+            ),
+
+            const SizedBox(width: 15,),
+            Container(width: 1,height: 20, color: Colors.yellow,),
+            const SizedBox(width: 5,),
+            DropdownButton(
+              underline: Container(),
+              items: (siteListFinal[siteIndex].master ?? []).map((master) {
+                return DropdownMenuItem(
+                  value: master.categoryName,
+                  child: Text(master.categoryName, style: const TextStyle(color: Colors.white, fontSize: 17),),
+                );
+              }).toList(),
+              onChanged: (newMaterName) {
+                int newIndex = siteListFinal[siteIndex].master.indexWhere((master)
+                => master.categoryName == newMaterName);
+                if (newIndex != -1 && siteListFinal[siteIndex].master.length > 1) {
+                  setState(() {
+                    _myCurrentMasterC = newMaterName!;
+                    //siteIndex = newIndex;
+                  });
+                }
+              },
+              value: _myCurrentMasterC,
+              dropdownColor: Colors.teal,
+              iconEnabledColor: Colors.white,
+              iconDisabledColor: Colors.white,
+              focusColor: Colors.transparent,
+            ),
+
+            const SizedBox(width: 15,),
+            Container(width: 1,height: 20, color: Colors.yellow,),
+            const SizedBox(width: 5,),
+            DropdownButton(
+              underline: Container(),
+              items: (siteListFinal[siteIndex].master[masterIndex].irrigationLine ?? []).map((line) {
+                return DropdownMenuItem(
+                  value: line.name,
+                  child: Text(line.name, style: const TextStyle(color: Colors.white, fontSize: 17),),
+                );
+              }).toList(),
+              onChanged: (newLineName) {
+                int newIndex = siteListFinal[siteIndex].master[masterIndex].irrigationLine.indexWhere((line)
+                => line.name == newLineName);
+                if (newIndex != -1 && siteListFinal[siteIndex].master[masterIndex].irrigationLine.length > 1) {
+                  setState(() {
+                    _myCurrentIrrLine = newLineName!;
+                    //siteIndex = newIndex;
+                  });
+                }
+              },
+              value: _myCurrentIrrLine,
+              dropdownColor: Colors.teal,
+              iconEnabledColor: Colors.white,
+              iconDisabledColor: Colors.white,
+              focusColor: Colors.transparent,
+            ),
+
+            const SizedBox(width: 15,),
+            Container(width: 1, height: 20, color: Colors.white,),
+            const SizedBox(width: 5,),
+            Text('Last sync : ${'${siteListFinal[siteIndex].master[masterIndex].liveSyncDate} - ${siteListFinal[siteIndex].master[masterIndex].liveSyncTime}'}', style: const TextStyle(fontSize: 15),),
+          ],
+        ),
         leadingWidth: 75,
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -305,40 +406,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 radius: 17,
                 backgroundColor: Colors.white,
                 child: Icon(Icons.live_help_outlined),
-              )),
-              IconButton(tooltip : 'Site List', onPressed: (){
-                showMenu(
-                  context: context,
-                  color: Colors.white,
-                  position: const RelativeRect.fromLTRB(100, 0, 30, 0),
-                  items: <PopupMenuEntry>[
-                    PopupMenuItem(
-                      child: Column(
-                        children: (siteListFinal ?? []).map((site) {
-                          int index = siteListFinal.indexOf(site);
-                          return ListTile(
-                            leading: Image.asset('assets/images/oro_gem.png', width: 30, height: 30,),
-                            title: Text(site.groupName),
-                            //subtitle: Text('Controller : ${site.deviceName}\nModel : ${site.modelName}\nController ID : ${site.master[masterIndex].deviceId}'),
-                            onTap: () {
-                              if(siteListFinal.length>1){
-                                clearMQTTPayload();
-                                siteIndex = index;
-                                subscribeAndUpdateSite();
-                                getProgramList();
-                              }
-                              Navigator.pop(context);
-                            },
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ],
-                );
-              }, icon: CircleAvatar(
-                radius: 17.5,
-                backgroundColor: Colors.white,
-                child: Image.asset('assets/images/oro_gem.png', width: 25, height: 25,),
               )),
               IconButton(tooltip : 'Niagara Account\n${widget.customerName}\n ${widget.mobileNo}', onPressed: (){
                 showMenu(
@@ -494,6 +561,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   label: Text(''),
                 ),
                 NavigationRailDestination(
+                  icon: Icon(Icons.wb_cloudy_outlined),
+                  selectedIcon: Icon(Icons.wb_cloudy_outlined, color: Colors.white,),
+                  label: Text(''),
+                ),
+                NavigationRailDestination(
                   icon: Icon(Icons.settings_outlined),
                   selectedIcon: Icon(Icons.settings_outlined, color: Colors.white,),
                   label: Text(''),
@@ -521,12 +593,14 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: _selectedIndex == 0 ? SizedBox(child: tab.modelId==1 || tab.modelId==2 ? CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: siteListFinal[siteIndex]):
+                      child: _selectedIndex == 0 ? SizedBox(child: tab.categoryId==1 || tab.categoryId==2 ?
+                      CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: siteListFinal[siteIndex]):
                       PumpDashboard(siteData: siteListFinal[siteIndex], masterIndex: masterIndex,)):
                       _selectedIndex == 1 ? ProductInventory(userName: widget.customerName):
                       _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
                       _selectedIndex == 3 ?  ControllerLogs(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId,):
                       _selectedIndex == 4 ?  SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
+                      _selectedIndex == 5 ?  WeatherScreen(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
                       ControllerSettings(customerID: widget.customerId, siteData: siteListFinal[siteIndex], masterIndex: masterIndex,),
                     ),
                   );
@@ -1000,7 +1074,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   String getAlarmMessage(int alarmType) {
     String msg = '';
-
     switch (alarmType) {
       case 1:
         msg ='Low Flow';
@@ -1032,10 +1105,12 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       case 10:
         msg ='No Communication';
         break;
+      case 11:
+        msg ='Wrong Feedback';
+        break;
       default:
         msg ='alarmType default';
     }
-
     return msg;
   }
 

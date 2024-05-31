@@ -14,7 +14,6 @@ class HttpService
       "action": action
     };
     var body = json.encode(data);
-
     return await http.post(Uri.parse(baseURL),
         headers : headers,
         body: body
@@ -28,7 +27,6 @@ class HttpService
       "action": action
     };
     var body = json.encode(data);
-
     return await http.put(Uri.parse(baseURL),
         headers : headers,
         body: body

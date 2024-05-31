@@ -54,7 +54,7 @@ class MasterData {
   });
 
   factory MasterData.fromJson(Map<String, dynamic> json) {
-    //print(json['categoryId']);
+    print(json['categoryId']);
     if(json['categoryId']==1 || json['categoryId']==2){
       //drip irrigation controller
       var liveData = json['2400'] as List;
@@ -264,10 +264,12 @@ class PumpData {
 
   factory PumpData.fromJson(Map<String, dynamic> json) {
     String onDelay = json['OnDelay'] ?? '00:00:00';
+    int type = json['Type'] ?? 0;
+    String location = json['Location'] ?? '-';
     return PumpData(
-      Type: json['Type'],
+      Type: type,
       Name: json['Name'],
-      Location: json['Location'],
+      Location: location,
       Status: json['Status'],
       Reason: json['Reason'],
       Watermeter: json['Watermeter'],
@@ -841,16 +843,24 @@ class Fertilizer {
 
     if(json['Qty'].runtimeType==int) {
       qty = json['Qty'].toString();
+    }else{
+      qty = json['Qty'];
     }
     if(json['QtyCompleted'].runtimeType==int) {
       qtyCompleted = json['QtyCompleted'].toString();
+    }else{
+      qtyCompleted = json['QtyCompleted'];
     }
     if(json['QtyLeft'].runtimeType==int) {
       qtyLeft = json['QtyLeft'].toString();
+    }else{
+      qtyLeft = json['QtyLeft'];
     }
 
     if(json['FertMethod'].runtimeType==String) {
       frtMethod = int.parse(json['FertMethod']);
+    }else{
+      frtMethod = json['FertMethod'];
     }
     if(json['FertSelection'].runtimeType==String) {
       frtSelection = int.parse(json['FertSelection']);

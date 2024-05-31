@@ -306,7 +306,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                             Map<String, dynamic> manualOperation = {
                               "programName": 'Default',
                               "programId": 0,
-                              "startFlag":0,
+                              "startFlag": 0,
                               "method": 1,
                               "time": '00:00:00',
                               "flow": '0',

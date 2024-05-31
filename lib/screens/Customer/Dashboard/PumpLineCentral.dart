@@ -684,9 +684,7 @@ class _DisplayFilterState extends State<DisplayFilter> {
   @override
   Widget build(BuildContext context) {
 
-    MqttPayloadProvider provider = Provider.of<MqttPayloadProvider>(context,listen: false);
-
-    final List<Map<String, dynamic>> filteredCentralFilter = provider.filtersCentral
+    final List<Map<String, dynamic>> filteredCentralFilter = Provider.of<MqttPayloadProvider>(context,listen: false).filtersCentral
         .where((pump) => pump['Location'].contains(widget.currentLineId))
         .toList()
         .cast<Map<String, dynamic>>();
@@ -719,7 +717,7 @@ class _DisplayFilterState extends State<DisplayFilter> {
                           border: Border.all(color: Colors.grey, width: .50,),
                         ),
                         child: Center(
-                          child: Text('${double.parse(provider.filtersCentral[i]['PrsIn']).toStringAsFixed(2)} bar', style: const TextStyle(
+                          child: Text('${double.parse(filteredCentralFilter[i]['PrsIn']).toStringAsFixed(2)} bar', style: const TextStyle(
                             color: Colors.black,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
@@ -1472,9 +1470,8 @@ class _LocalFilterState extends State<LocalFilter> {
 
   @override
   Widget build(BuildContext context) {
-    MqttPayloadProvider provider = Provider.of<MqttPayloadProvider>(context,listen: false);
 
-    final List<Map<String, dynamic>> filteredLocalFilter = provider.filtersLocal
+    final List<Map<String, dynamic>> filteredLocalFilter = Provider.of<MqttPayloadProvider>(context,listen: false).filtersLocal
         .where((pump) => pump['Location'].contains(widget.currentLineId)).toList()
         .cast<Map<String, dynamic>>();
 
@@ -1506,7 +1503,7 @@ class _LocalFilterState extends State<LocalFilter> {
                           border: Border.all(color: Colors.grey, width: .50,),
                         ),
                         child: Center(
-                          child: Text('${double.parse(provider.filtersCentral[i]['PrsIn']).toStringAsFixed(2)} bar', style: const TextStyle(
+                          child: Text('${double.parse(filteredLocalFilter[i]['PrsIn']).toStringAsFixed(2)} bar', style: const TextStyle(
                             color: Colors.black,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,

@@ -9,8 +9,8 @@ import '../../constants/theme.dart';
 
 class WeatherScreen extends StatefulWidget {
   const WeatherScreen(
-      {super.key, required this.userId, required this.controllerId});
-  final userId, controllerId;
+      {super.key, required this.userId, required this.controllerId, required this.deviceID});
+  final userId, controllerId, deviceID;
   @override
   _WeatherScreenState createState() => _WeatherScreenState();
 }

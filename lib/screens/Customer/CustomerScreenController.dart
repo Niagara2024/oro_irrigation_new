@@ -128,6 +128,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             _myCurrentSite = siteListFinal[siteIndex].groupName;
             _myCurrentMasterC = siteListFinal[siteIndex].master[masterIndex].categoryName;
             _myCurrentIrrLine = siteListFinal[siteIndex].master[masterIndex].irrigationLine[0].name;
+            print('Controller Id :${siteListFinal[siteIndex].master[masterIndex].controllerId}');
             intTabController();
             subscribeAndUpdateSite();
             getProgramList();
@@ -223,6 +224,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   {
     final screenWidth = MediaQuery.of(context).size.width;
     final provider = Provider.of<MqttPayloadProvider>(context);
+    //provider.last
 
     return visibleLoading? buildLoadingIndicator(visibleLoading, screenWidth):
     Scaffold(
@@ -234,9 +236,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
         title:  Row(
           children: [
             const SizedBox(width: 10,),
-            Container(width: 1, height: 20, color: Colors.yellow,),
+            Container(width: 1, height: 20, color: Colors.white54,),
             const SizedBox(width: 5,),
-            DropdownButton(
+            siteListFinal.length>1? DropdownButton(
               underline: Container(),
               items: (siteListFinal ?? []).map((site) {
                 return DropdownMenuItem(
@@ -261,12 +263,13 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               iconEnabledColor: Colors.white,
               iconDisabledColor: Colors.white,
               focusColor: Colors.transparent,
-            ),
+            ) :
+            Text(siteListFinal[siteIndex].groupName, style: const TextStyle(fontSize: 17),),
 
             const SizedBox(width: 15,),
-            Container(width: 1,height: 20, color: Colors.yellow,),
+            Container(width: 1,height: 20, color: Colors.white54,),
             const SizedBox(width: 5,),
-            DropdownButton(
+            siteListFinal[siteIndex].master.length>1? DropdownButton(
               underline: Container(),
               items: (siteListFinal[siteIndex].master ?? []).map((master) {
                 return DropdownMenuItem(
@@ -280,7 +283,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 if (newIndex != -1 && siteListFinal[siteIndex].master.length > 1) {
                   setState(() {
                     _myCurrentMasterC = newMaterName!;
-                    //siteIndex = newIndex;
+                    masterIndex = newIndex;
                   });
                 }
               },
@@ -289,12 +292,17 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               iconEnabledColor: Colors.white,
               iconDisabledColor: Colors.white,
               focusColor: Colors.transparent,
-            ),
+            ) :
+            Text(siteListFinal[siteIndex].master[masterIndex].categoryName, style: const TextStyle(fontSize: 17),),
 
-            const SizedBox(width: 15,),
-            Container(width: 1,height: 20, color: Colors.yellow,),
-            const SizedBox(width: 5,),
-            DropdownButton(
+            siteListFinal[siteIndex].master[masterIndex].categoryId == 1 ||
+                siteListFinal[siteIndex].master[masterIndex].categoryId == 2? const SizedBox(width: 15,): const SizedBox(),
+            siteListFinal[siteIndex].master[masterIndex].categoryId == 1 ||
+                siteListFinal[siteIndex].master[masterIndex].categoryId == 2? Container(width: 1,height: 20, color: Colors.white54,): const SizedBox(),
+            siteListFinal[siteIndex].master[masterIndex].categoryId == 1 ||
+                siteListFinal[siteIndex].master[masterIndex].categoryId == 2? const SizedBox(width: 5,): const SizedBox(),
+            siteListFinal[siteIndex].master[masterIndex].categoryId == 1 ||
+                siteListFinal[siteIndex].master[masterIndex].categoryId == 2? DropdownButton(
               underline: Container(),
               items: (siteListFinal[siteIndex].master[masterIndex].irrigationLine ?? []).map((line) {
                 return DropdownMenuItem(
@@ -317,10 +325,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               iconEnabledColor: Colors.white,
               iconDisabledColor: Colors.white,
               focusColor: Colors.transparent,
-            ),
+            ):
+            const SizedBox(),
 
             const SizedBox(width: 15,),
-            Container(width: 1, height: 20, color: Colors.white,),
+            Container(width: 1, height: 20, color: Colors.white54,),
             const SizedBox(width: 5,),
             Text('Last sync : ${'${siteListFinal[siteIndex].master[masterIndex].liveSyncDate} - ${siteListFinal[siteIndex].master[masterIndex].liveSyncTime}'}', style: const TextStyle(fontSize: 15),),
           ],
@@ -354,7 +363,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   children: [
                     Icon(Icons.pause, color: Colors.orange),
                     SizedBox(width:5),
-                    Text('PAUSE ALL', style: TextStyle(color: Colors.white)),
+                    Text('PAUSE ALL LINE', style: TextStyle(color: Colors.white)),
                   ],
                 ),
               ),
@@ -499,22 +508,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             ],),
           const SizedBox(width: 05),
         ],
-        bottom: siteListFinal[siteIndex].master.length>1?PreferredSize(
-          preferredSize: const Size.fromHeight(40.0),
-          child: TabBar(
-            controller: _tabController,
-            dividerColor: Colors.transparent,
-            indicatorColor: Colors.yellow,
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
-            tabs: siteListFinal[siteIndex].master.map<Widget>((tab) {
-              return Tab(text: tab.deviceName);
-            }).toList(),
-            indicatorWeight: 2.0,
-            labelPadding: const EdgeInsets.symmetric(horizontal: 8.0),
-          ),
-        ) :
-        null,
       ),
       backgroundColor: Colors.white,
       extendBody: true,
@@ -583,28 +576,24 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   colors: [myTheme.primaryColorDark, myTheme.primaryColor],
                 ),
               ),
-              child: TabBarView(
-                controller: _tabController,
-                children: siteListFinal[siteIndex].master.map<Widget>((tab) {
-                  return Container(
-                    decoration: const BoxDecoration(
-                      color: Color(0xffefefef),
-                      borderRadius: BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: _selectedIndex == 0 ? SizedBox(child: tab.categoryId==1 || tab.categoryId==2 ?
-                      CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: siteListFinal[siteIndex]):
-                      PumpDashboard(siteData: siteListFinal[siteIndex], masterIndex: masterIndex,)):
-                      _selectedIndex == 1 ? ProductInventory(userName: widget.customerName):
-                      _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
-                      _selectedIndex == 3 ?  ControllerLogs(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId,):
-                      _selectedIndex == 4 ?  SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
-                      _selectedIndex == 5 ?  WeatherScreen(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
-                      ControllerSettings(customerID: widget.customerId, siteData: siteListFinal[siteIndex], masterIndex: masterIndex,),
-                    ),
-                  );
-                }).toList(),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Color(0xffefefef),
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: _selectedIndex == 0 ? SizedBox(child: siteListFinal[siteIndex].master[masterIndex].categoryId==1 ||
+                      siteListFinal[siteIndex].master[masterIndex].categoryId==2 ?
+                  CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: siteListFinal[siteIndex]):
+                  PumpDashboard(siteData: siteListFinal[siteIndex], masterIndex: masterIndex,)):
+                  _selectedIndex == 1 ? ProductInventory(userName: widget.customerName):
+                  _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
+                  _selectedIndex == 3 ?  ControllerLogs(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId,):
+                  _selectedIndex == 4 ?  SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
+                  _selectedIndex == 5 ?  WeatherScreen(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId, deviceID: siteListFinal[siteIndex].master[masterIndex].deviceId,):
+                  ControllerSettings(customerID: widget.customerId, siteData: siteListFinal[siteIndex], masterIndex: masterIndex,),
+                ),
               ),
             ),
             Container(

@@ -93,7 +93,7 @@ class _ProgramScheduleState extends State<ProgramSchedule> with SingleTickerProv
           FilterBackwashUI(userId: widget.customerID, controllerId: widget.controllerID,deviceID: widget.imeiNumber,),
           FertilizerLibrary(userId: widget.userId, controllerId: widget.controllerID, customerID: widget.customerID),
           GlobalFertLimit(userId: widget.userId, controllerId: widget.controllerID, customerId: widget.customerID,),
-          WeatherScreen(userId: widget.userId, controllerId: widget.controllerID),
+          WeatherScreen(userId: widget.userId, controllerId: widget.controllerID, deviceID: widget.imeiNumber,),
           SystemDefinition(userId: widget.userId, controllerId: widget.controllerID),
           ProgramQueueScreen(userId: widget.userId, controllerId: widget.controllerID, cutomerId: widget.customerID,),
           ScheduleViewScreen(userId: widget.userId, controllerId: widget.controllerID, customerId: widget.customerID, deviceId: widget.imeiNumber,),

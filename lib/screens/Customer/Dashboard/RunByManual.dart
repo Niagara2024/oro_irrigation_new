@@ -471,7 +471,6 @@ class _RunByManualState extends State<RunByManual> {
               };
               sentManualModeToServer(manualOperation);
               prgOffPayload != null ? prefs.remove('StandAlone - ${widget.programList[ddCurrentPosition].programName}'): null;
-
             },
             child: const Text('Stop'),
           ):

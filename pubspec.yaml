@@ -301,6 +301,7 @@ flutter:
      - assets/GifFile/motor_off_new.gif
      - assets/GifFile/motor_on_new.gif
      - assets/GifFile/motor_ondelay_new.gif
+     - assets/images/dp_fert_vertical_pipe.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -11,8 +11,9 @@ import '../../../state_management/MqttPayloadProvider.dart';
 
 
 class PumpLineCentral extends StatefulWidget {
-  const PumpLineCentral({Key? key, required this.currentSiteData}) : super(key: key);
+  const PumpLineCentral({Key? key, required this.currentSiteData, required this.crrIrrLine}) : super(key: key);
   final DashboardModel currentSiteData;
+  final IrrigationLine crrIrrLine;
 
   @override
   State<PumpLineCentral> createState() => _PumpLineCentralState();
@@ -22,23 +23,101 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<MqttPayloadProvider>(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        ScrollConfiguration(
+          behavior: const ScrollBehavior(),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 9, left: 5, right: 5),
+              child: provider.irrigationPump.isNotEmpty? Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  provider.sourcePump.isNotEmpty? Padding(
+                    padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                    child: const DisplaySourcePump(),
+                  ):
+                  const SizedBox(),
+                  provider.irrigationPump.isNotEmpty? Padding(
+                    padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                    child: SizedBox(
+                      width: 52.50,
+                      height: 70,
+                      child : Stack(
+                        children: [
+                          provider.sourcePump.isNotEmpty? Image.asset('assets/images/dp_sump_src.png'):
+                          Image.asset('assets/images/dp_sump.png'),
+                        ],
+                      ),
+                    ),
+                  ):
+                  const SizedBox(),
+                  provider.irrigationPump.isNotEmpty? Padding(
+                    padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                    child: DisplayIrrigationPump(currentLineId: widget.crrIrrLine.id, pumpList: widget.currentSiteData.master[0].liveData[0].pumpList,),
+                  ):
+                  const SizedBox(),
+                  provider.filtersCentral.isNotEmpty? Padding(
+                    padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                    child: DisplayFilter(currentLineId: widget.crrIrrLine.id,),
+                  ): const SizedBox(),
+                  for(int i=0; i<provider.payload2408.length; i++)
+                    provider.payload2408.isNotEmpty?  Padding(
+                      padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                      child: provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(crInx: i):null,
+                    ) : const SizedBox(),
+                  provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? const DisplayFertilizer(): const SizedBox(),
 
-    return Padding(
-      padding: const EdgeInsets.all(3.0),
-      child: Container(
-        width: MediaQuery.sizeOf(context).width,
-        height: 270,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(
-            color: Colors.grey,
-            width: 0.5,
+                  //local
+                  provider.irrigationPump.isNotEmpty? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          provider.filtersLocal.isNotEmpty || provider.fertilizerLocal.isNotEmpty? SizedBox(
+                            width: 4.5,
+                            height: 150,
+                            child: Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 42),
+                                  child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
+                                ),
+                                const SizedBox(width: 4.5,),
+                                Padding(
+                                  padding: EdgeInsets.only(top: 45),
+                                  child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
+                                ),
+                              ],
+                            ),
+                          ):
+                          const SizedBox(),
+                          provider.filtersLocal.isNotEmpty? Padding(
+                            padding: EdgeInsets.only(top: provider.fertilizerLocal.isNotEmpty?38.4:0),
+                            child: LocalFilter(currentLineId: widget.crrIrrLine.id,),
+                          ):
+                          const SizedBox(),
+                          provider.fertilizerLocal.isNotEmpty? DisplayLocalFertilizer(currentLineId: widget.crrIrrLine.id,):
+                          const SizedBox(),
+                        ],
+                      ),
+                    ],
+                  ):
+                  const SizedBox(height: 20)
+                ],
+              ):
+              const SizedBox(height: 20),
+            ),
           ),
-          borderRadius: const BorderRadius.all(Radius.circular(5)),
         ),
-        child: buildScaffoldWithTabs(),
-      ),
-      //child: SizedBox(width:500, height:500, child: buildScaffoldWithTabs()),
+      ],
     );
   }
 
@@ -148,15 +227,6 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 3, right: 3),
-            child: Container(
-              color: Colors.grey.shade100,
-              width: MediaQuery.sizeOf(context).width-170,
-              height: 63,
-              child: IrrigationLineView(line: line,),
-            ),
-          ),
         ],
       );
     },
@@ -165,128 +235,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
 
 }
 
-class IrrigationLineView extends StatefulWidget {
-  final IrrigationLine line;
-  const IrrigationLineView({super.key, required this.line});
 
-  @override
-  State<IrrigationLineView> createState() => _IrrigationLineViewState();
-}
-
-class _IrrigationLineViewState extends State<IrrigationLineView> {
-
-  @override
-  Widget build(BuildContext context) {
-    final currentSchedule = Provider.of<MqttPayloadProvider>(context).currentSchedule;
-    return Center(
-      child: ScrollConfiguration(
-        behavior: const ScrollBehavior(),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ...widget.line.mainValve.map((mv) => MainValveWidget(mv: mv,  status: getStatusForMainValve(mv.hid, currentSchedule)),).toList(),
-              ...widget.line.valve.map((vl) => ValveWidget(vl: vl, status: getStatusForValve(vl.id, currentSchedule),)).toList(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  int getStatusForValve(String vlName, List<dynamic> currentSchedule) {
-    for (final scheduleItem in currentSchedule) {
-      if (scheduleItem['VL'] != null) {
-        final vlList = scheduleItem['VL'] as List<dynamic>;
-        final valve = vlList.firstWhere((v) => v['Name'] == vlName, orElse: () => null);
-        if (valve != null) {
-          return valve['Status'] ?? 0;
-        }
-      }
-    }
-    return 0;
-  }
-
-  int getStatusForMainValve(String mvlName, List<dynamic> currentSchedule) {
-    for (final scheduleItem in currentSchedule) {
-      if (scheduleItem['MV'] != null) {
-        final mvlList = scheduleItem['MV'] as List<dynamic>;
-        final mValve = mvlList.firstWhere((v) => v['Name'] == mvlName, orElse: () => null);
-        if (mValve != null) {
-          return mValve['Status'] ?? 0;
-        }
-      }
-    }
-    return 0;
-  }
-}
-
-
-class MainValveWidget extends StatelessWidget {
-  final MainValve mv;
-  final int status;
-  const MainValveWidget({super.key, required this.mv, required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 100,
-      margin: const EdgeInsets.only(left: 4, right: 4),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            width: 35,
-            height: 35,
-            status == 0
-                ? 'assets/images/dp_main_valve_not_open.png'
-                : status == 1
-                ? 'assets/images/dp_main_valve_open.png'
-                : status == 2
-                ? 'assets/images/dp_main_valve_wait.png'
-                : 'assets/images/dp_main_valve_closed.png',
-          ),
-          const SizedBox(height: 4),
-          Text(mv.name, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10),),
-        ],
-      ),
-    );
-  }
-}
-
-class ValveWidget extends StatelessWidget {
-  final Valve vl;
-  final int status;
-  const ValveWidget({super.key, required this.vl, required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 100,
-      margin: const EdgeInsets.only(left: 4, right: 4),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            width: 35,
-            height: 35,
-            status == 0
-                ? 'assets/images/valve_gray.png'
-                : status == 1
-                ? 'assets/images/valve_green.png'
-                : status == 2
-                ? 'assets/images/valve_orange.png'
-                : 'assets/images/valve_red.png',
-          ),
-          const SizedBox(height: 4),
-          Text(vl.name, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10),),
-        ],
-      ),
-    );
-  }
-}
 
 class SensorWidget extends StatelessWidget {
   final dynamic sensor;
@@ -685,7 +634,7 @@ class _DisplayFilterState extends State<DisplayFilter> {
   Widget build(BuildContext context) {
 
     final List<Map<String, dynamic>> filteredCentralFilter = Provider.of<MqttPayloadProvider>(context,listen: false).filtersCentral
-        .where((pump) => pump['Location'].contains(widget.currentLineId))
+        .where((filter) => filter['Location'].contains(widget.currentLineId))
         .toList()
         .cast<Map<String, dynamic>>();
 
@@ -916,16 +865,34 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
       children: [
         for(int fIndex=0; fIndex<provider.fertilizerCentral.length; fIndex++)
           SizedBox(
-            height: 140,
+            height: 150,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
+                if(fIndex!=0)
+                  SizedBox(
+                    width: 4.5,
+                    height: 150,
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 42),
+                          child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
+                        ),
+                        const SizedBox(width: 4.5,),
+                        Padding(
+                          padding: EdgeInsets.only(top: 45),
+                          child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
+                        ),
+                      ],
+                    ),
+                  ),
                 Column(
                   children: [
                     SizedBox(
                         width: 70,
-                        height: 140,
+                        height: 150,
                         child : Stack(
                           children: [
                             AppImages.getAsset('booster', provider.fertilizerCentral[fIndex]['Booster'][0]['Status'],''),
@@ -968,9 +935,9 @@ class _DisplayFertilizerState extends State<DisplayFertilizer> {
                               const SizedBox(),
                             ),
                             Positioned(
-                              top: 117,
-                              left: 11,
-                              child: Container(width: 5, height: 50, color: Colors.grey.shade200,),
+                              top: 115,
+                              left: 8.3,
+                              child: Image.asset('assets/images/dp_fert_vertical_pipe.png', width: 9.5, height: 37,),
                             ),
                           ],
                         )
@@ -1736,7 +1703,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                   children: [
                     SizedBox(
                         width: 70,
-                        height: 140,
+                        height: 150,
                         child : Stack(
                           children: [
                             AppImages.getAsset('booster', fertilizerLocal[fIndex]['Booster'][0]['Status'],''),
@@ -1776,6 +1743,11 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                                 ),
                               ) :
                               const SizedBox(),
+                            ),
+                            Positioned(
+                              top: 115,
+                              left: 8.3,
+                              child: Image.asset('assets/images/dp_fert_vertical_pipe.png', width: 9.5, height: 37,),
                             ),
                           ],
                         )

@@ -321,6 +321,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                           color: Colors.redAccent,
                           textColor: Colors.white,
                           onPressed: () async {
+                            print(currentSchedule[index]);
                             final prefs = await SharedPreferences.getInstance();
                             String? prgOffPayload = prefs.getString(currentSchedule[index]['ProgName']);
                             String payLoadFinal = jsonEncode({
@@ -329,7 +330,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                             MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
                             Map<String, dynamic> manualOperation = {
                               "programName": currentSchedule[index]['ProgName'],
-                              "programId": currentSchedule[index]['SNo'],
+                              "programId": currentSchedule[index]['ProgType'],
                               "startFlag":0,
                               "method": 1,
                               "time": '00:00:00',

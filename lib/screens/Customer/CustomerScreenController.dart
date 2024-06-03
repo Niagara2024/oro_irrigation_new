@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/SentAndReceived.dart';
@@ -41,6 +42,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   List<DashboardModel> siteListFinal = [];
   int siteIndex = 0;
   int masterIndex = 0;
+  int lineIndex = 0;
   bool visibleLoading = false;
   int _selectedIndex = 0;
   List<ProgramList> programList = [];
@@ -127,7 +129,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           if(siteListFinal.isNotEmpty){
             _myCurrentSite = siteListFinal[siteIndex].groupName;
             _myCurrentMasterC = siteListFinal[siteIndex].master[masterIndex].categoryName;
-            _myCurrentIrrLine = siteListFinal[siteIndex].master[masterIndex].irrigationLine[0].name;
+            _myCurrentIrrLine = siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex].name;
             print('Controller Id :${siteListFinal[siteIndex].master[masterIndex].controllerId}');
             intTabController();
             subscribeAndUpdateSite();
@@ -219,13 +221,13 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     });
   }
 
+
   @override
   Widget build(BuildContext context)
   {
     final screenWidth = MediaQuery.of(context).size.width;
     final provider = Provider.of<MqttPayloadProvider>(context);
     //provider.last
-
     return visibleLoading? buildLoadingIndicator(visibleLoading, screenWidth):
     Scaffold(
       appBar: AppBar(
@@ -316,7 +318,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 if (newIndex != -1 && siteListFinal[siteIndex].master[masterIndex].irrigationLine.length > 1) {
                   setState(() {
                     _myCurrentIrrLine = newLineName!;
-                    //siteIndex = newIndex;
+                    lineIndex = newIndex;
                   });
                 }
               },
@@ -349,6 +351,25 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              TextButton(
+                onPressed: () {
+                },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(Colors.white24),
+                  shape: MaterialStateProperty.all<OutlinedBorder>(
+                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(5),),
+                  ),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.pause, color: Colors.orange),
+                    SizedBox(width:5),
+                    Text('PAUSE CURRENT LINE', style: TextStyle(color: Colors.white)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
               TextButton(
                 onPressed: () {
                 },
@@ -585,7 +606,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   padding: const EdgeInsets.all(8.0),
                   child: _selectedIndex == 0 ? SizedBox(child: siteListFinal[siteIndex].master[masterIndex].categoryId==1 ||
                       siteListFinal[siteIndex].master[masterIndex].categoryId==2 ?
-                  CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: siteListFinal[siteIndex]):
+                  CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: siteListFinal[siteIndex], crrIrrLine: siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex],):
                   PumpDashboard(siteData: siteListFinal[siteIndex], masterIndex: masterIndex,)):
                   _selectedIndex == 1 ? ProductInventory(userName: widget.customerName):
                   _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
@@ -1206,33 +1227,29 @@ class _SideSheetClassState extends State<SideSheetClass> {
   @override
   Widget build(BuildContext context) {
 
-    final nodeList = Provider.of<MqttPayloadProvider>(context).nodeList;
-
-    print('nodeList:${nodeList}');
-    /*try{
-      Map<String, dynamic> data = jsonDecode(provider.receivedDashboardPayload);
+    try{
+      // Fetch the nodeList from the Provider
+      final nodeList = Provider.of<MqttPayloadProvider>(context, listen: false).nodeList;
       setState(() {
-        if (data['2400'][0].containsKey('2401')) {
-          for (var item in data['2400'][0]['2401']) {
-            if (item is Map<String, dynamic>) {
-              try {
-                int position = getNodePositionInNodeList(0, item['SNo']);
-                if (position != -1) {
-                  widget.nodeList[position].Status = item['Status'];
-                  widget.nodeList[position].BatVolt = item['BatVolt'];
-                  widget.nodeList[position].SVolt = item['SVolt'];
-                  widget.nodeList[position].RlyStatus = [];
-                 *//* if (item['RlyStatus'] != null) {
-                    List<dynamic> rlyStatusJsonList = item['RlyStatus'];
-                    List<RelayStatus> rlyStatusList = rlyStatusJsonList.map((rs) => RelayStatus.fromJson(rs)).toList();
-                    widget.siteData.nodeList[position].rlyStatus = rlyStatusList;
-                  }*//*
-                } else {
-                  print('${item['SNo']} The serial number not found');
+        for (var item in nodeList) {
+          if (item is Map<String, dynamic>) {
+            try {
+              int position = getNodePositionInNodeList(0, item['SNo']);
+              if (position != -1) {
+                widget.nodeList[position].Status = item['Status'];
+                widget.nodeList[position].BatVolt = item['BatVolt'];
+                widget.nodeList[position].SVolt = item['SVolt'];
+                widget.nodeList[position].RlyStatus = [];
+                if (item['RlyStatus'] != null) {
+                  List<dynamic> rlyStatusJsonList = item['RlyStatus'];
+                  List<RelayStatus> rlyStatusList = rlyStatusJsonList.map((rs) => RelayStatus.fromJson(rs)).toList();
+                  widget.nodeList[position].RlyStatus = rlyStatusList;
                 }
-              } catch (e) {
-                print('Error updating node properties: $e');
+              } else {
+                print('${item['SNo']} The serial number not found');
               }
+            } catch (e) {
+              print('Error updating node properties: $e');
             }
           }
         }
@@ -1240,7 +1257,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
     }
     catch(e){
       print(e);
-    }*/
+    }
 
     return Container(
       padding: const EdgeInsets.all(10),
@@ -1264,13 +1281,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                 ),
               ],
             ),
-            CircleAvatar(
-              radius: 30,
-              backgroundColor:myTheme.primaryColorDark.withOpacity(0.2),
-              child: Image.asset('assets/images/oro_gem.png', width: 40, height: 40,),
-            ),
-            Text(widget.deviceName, style: const TextStyle(color: Colors.black, fontSize: 13)),
-            Text('Last sync : ${widget.lastSyncDate}', style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 11, color: Colors.black,),),
+            const Text('NODE LIST', style: TextStyle(color: Colors.black, fontSize: 15)),
             const Divider(),
             SizedBox(
               height: 50,
@@ -1392,7 +1403,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
             ),
             SizedBox(
               width: 400,
-              height: MediaQuery.sizeOf(context).height-230,
+              height: MediaQuery.sizeOf(context).height-150,
               child: DataTable2(
                 columnSpacing: 12,
                 horizontalMargin: 12,

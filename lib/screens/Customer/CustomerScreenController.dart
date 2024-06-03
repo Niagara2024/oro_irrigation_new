@@ -1226,33 +1226,32 @@ class _SideSheetClassState extends State<SideSheetClass> {
 
   @override
   Widget build(BuildContext context) {
-
+    final nodeList = Provider.of<MqttPayloadProvider>(context).nodeList;
     try{
-      // Fetch the nodeList from the Provider
-      final nodeList = Provider.of<MqttPayloadProvider>(context, listen: false).nodeList;
-      setState(() {
-        for (var item in nodeList) {
-          if (item is Map<String, dynamic>) {
-            try {
-              int position = getNodePositionInNodeList(0, item['SNo']);
-              if (position != -1) {
-                widget.nodeList[position].Status = item['Status'];
-                widget.nodeList[position].BatVolt = item['BatVolt'];
-                widget.nodeList[position].SVolt = item['SVolt'];
-                widget.nodeList[position].RlyStatus = [];
-                if (item['RlyStatus'] != null) {
-                  List<dynamic> rlyStatusJsonList = item['RlyStatus'];
-                  List<RelayStatus> rlyStatusList = rlyStatusJsonList.map((rs) => RelayStatus.fromJson(rs)).toList();
-                  widget.nodeList[position].RlyStatus = rlyStatusList;
-                }
-              } else {
-                print('${item['SNo']} The serial number not found');
+      for (var item in nodeList) {
+        if (item is Map<String, dynamic>) {
+          try {
+            int position = getNodePositionInNodeList(0, item['SNo']);
+            if (position != -1) {
+              widget.nodeList[position].Status = item['Status'];
+              widget.nodeList[position].BatVolt = item['BatVolt'];
+              widget.nodeList[position].SVolt = item['SVolt'];
+              widget.nodeList[position].RlyStatus = [];
+              if (item['RlyStatus'] != null) {
+                List<dynamic> rlyStatusJsonList = item['RlyStatus'];
+                List<RelayStatus> rlyStatusList = rlyStatusJsonList.map((rs) => RelayStatus.fromJson(rs)).toList();
+                widget.nodeList[position].RlyStatus = rlyStatusList;
               }
-            } catch (e) {
-              print('Error updating node properties: $e');
+            } else {
+              print('${item['SNo']} The serial number not found');
             }
+          } catch (e) {
+            print('Error updating node properties: $e');
           }
         }
+      }
+      setState(() {
+        widget.nodeList;
       });
     }
     catch(e){
@@ -1437,10 +1436,10 @@ class _SideSheetClassState extends State<SideSheetClass> {
                 rows: List<DataRow>.generate(widget.nodeList.length, (index) => DataRow(cells: [
                   DataCell(Center(child: Text('${widget.nodeList[index].serialNumber}', style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black),))),
                   DataCell(Center(child: CircleAvatar(radius: 7, backgroundColor:
-                  widget.nodeList[index].Status == 1 ? Colors.green.shade400:
-                  widget.nodeList[index].Status == 2 ? Colors.grey :
-                  widget.nodeList[index].Status == 3 ? Colors.redAccent :
-                  widget.nodeList[index].Status == 4 ? Colors.yellow :
+                  widget.nodeList[index].Status == 1? Colors.green.shade400:
+                  widget.nodeList[index].Status == 2? Colors.grey:
+                  widget.nodeList[index].Status == 3? Colors.redAccent:
+                  widget.nodeList[index].Status == 4? Colors.yellow:
                   Colors.grey,
                   ))),
                   DataCell(Center(child: Text('${widget.nodeList[index].referenceNumber}', style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black)))),

@@ -13,7 +13,7 @@ class DashboardModel {
   });
 
   factory DashboardModel.fromJson(Map<String, dynamic> json) {
-
+    print('DashboardModel');
     var masterList = json['master'] as List;
     List<MasterData> master = masterList.isNotEmpty? masterList.map((master) => MasterData.fromJson(master)).toList() : [];
 
@@ -54,7 +54,8 @@ class MasterData {
   });
 
   factory MasterData.fromJson(Map<String, dynamic> json) {
-    print(json['categoryId']);
+    //print(json['categoryId']);
+    print('MasterData');
     if(json['categoryId']==1 || json['categoryId']==2){
       //drip irrigation controller
       var liveData = json['2400'] as List;
@@ -114,6 +115,7 @@ class LiveData {
   });
 
   factory LiveData.fromJson(Map<String, dynamic> json) {
+    print('LiveData');
 
     var nodeData = json['2401'] as List;
     List<NodeData> nodeList = nodeData.isNotEmpty? nodeData.map((node) => NodeData.fromJson(node)).toList() : [];
@@ -186,7 +188,7 @@ class NodeData {
   });
 
   factory NodeData.fromJson(Map<String, dynamic> json) {
-
+    print('NodeData');
     var rlyStatusList = json['RlyStatus'] as List;
     List<RelayStatus> rlyStatus = rlyStatusList.map((rlyStatus) => RelayStatus.fromJson(rlyStatus)).toList();
 
@@ -263,6 +265,7 @@ class PumpData {
   });
 
   factory PumpData.fromJson(Map<String, dynamic> json) {
+    print('PumpData');
     String onDelay = json['OnDelay'] ?? '00:00:00';
     int type = json['Type'] ?? 0;
     String location = json['Location'] ?? '-';
@@ -331,6 +334,7 @@ class Program {
 
   factory Program.fromJson(Map<String, dynamic> json) {
    // bool hasNameKey = json.containsKey('StartStopReason');
+    print('Program');
     return Program(
       sNo: json['SNo'],
       progCategory: json['ProgCategory'],
@@ -386,6 +390,7 @@ class SensorData {
   });
 
   factory SensorData.fromJson(Map<String, dynamic> json) {
+    print('SensorData');
     return SensorData(
       S_No: json['S_No'],
       Line: json['Line'],
@@ -436,7 +441,7 @@ class IrrigationLine {
   });
 
   factory IrrigationLine.fromJson(Map<String, dynamic> json) {
-
+    print('IrrigationLine');
     var mainValve = json['mainValve'] as List;
     List<MainValve> mainValveList = mainValve.isNotEmpty? mainValve.map((mv) => MainValve.fromJson(mv)).toList() : [];
 
@@ -478,6 +483,7 @@ class MainValve {
   });
 
   factory MainValve.fromJson(Map<String, dynamic> json) {
+    print('MainValve');
     return MainValve(
       sNo: json['sNo'],
       id: json['id'],
@@ -522,6 +528,7 @@ class Valve {
   });
 
   factory Valve.fromJson(Map<String, dynamic> json) {
+    print('Valve');
     return Valve(
       sNo: json['sNo'],
       id: json['id'],
@@ -566,6 +573,7 @@ class PressureSensor {
   });
 
   factory PressureSensor.fromJson(Map<String, dynamic> json) {
+    print('PressureSensor');
     return PressureSensor(
       sNo: json['sNo'],
       id: json['id'],
@@ -602,6 +610,7 @@ class RelayStatus {
   });
 
   factory RelayStatus.fromJson(Map<String, dynamic> json) {
+    print('RelayStatus');
     return RelayStatus(
       Name: json['Name'],
       RlyNo: json['RlyNo'],
@@ -620,6 +629,7 @@ class SensorStatus {
   });
 
   factory SensorStatus.fromJson(Map<String, dynamic> json) {
+    print('SensorStatus');
     return SensorStatus(
       Name: json['Name'],
       Value: json['Value'],
@@ -659,6 +669,7 @@ class Filter {
   }) : dpValue = dpValue.toString();
 
   factory Filter.fromJson(Map<String, dynamic> json) {
+    print('Filter');
     var filterStatusList = json['FilterStatus'] as List;
     List<FilterStatus> filterStatus = filterStatusList.isNotEmpty? filterStatusList.map((status) => FilterStatus.fromJson(status)).toList(): [];
 
@@ -710,6 +721,7 @@ class FilterStatus {
   });
 
   factory FilterStatus.fromJson(Map<String, dynamic> json) {
+    print('FilterStatus');
     return FilterStatus(
       position: json['Position'],
       name: json['Name'],
@@ -756,6 +768,7 @@ class FertilizerSite {
   });
 
   factory FertilizerSite.fromJson(Map<String, dynamic> json) {
+    print('FertilizerSite');
     var agitatorList = json['Agitator'] as List;
     var boosterList = json['Booster'] as List;
     var fertilizerList = json['Fertilizer'] as List;
@@ -838,6 +851,7 @@ class Fertilizer {
   });
 
   factory Fertilizer.fromJson(Map<String, dynamic> json) {
+    print('Fertilizer');
     String qty = '0',qtyCompleted = '0', qtyLeft = '0';
     int frtMethod = 0, frtSelection = 0;
 
@@ -846,11 +860,13 @@ class Fertilizer {
     }else{
       qty = json['Qty'];
     }
+
     if(json['QtyCompleted'].runtimeType==int) {
       qtyCompleted = json['QtyCompleted'].toString();
     }else{
       qtyCompleted = json['QtyCompleted'];
     }
+
     if(json['QtyLeft'].runtimeType==int) {
       qtyLeft = json['QtyLeft'].toString();
     }else{
@@ -862,9 +878,18 @@ class Fertilizer {
     }else{
       frtMethod = json['FertMethod'];
     }
+
     if(json['FertSelection'].runtimeType==String) {
       frtSelection = int.parse(json['FertSelection']);
+    }else{
+      frtSelection = json['FertSelection'];
     }
+
+    /*print(qty.runtimeType);
+    print(qtyCompleted.runtimeType);
+    print(qtyLeft.runtimeType);
+    print(frtMethod.runtimeType);
+    print(frtSelection.runtimeType);*/
 
     bool hasOnTimeKey = json.containsKey('OnTime');
     bool hasOffTimeKey = json.containsKey('OffTime');
@@ -923,6 +948,7 @@ class Agitator {
   });
 
   factory Agitator.fromJson(Map<String, dynamic> json) {
+    print('Agitator');
     return Agitator(
       name: json['Name'],
       status: json['Status'],
@@ -947,6 +973,7 @@ class Booster {
   });
 
   factory Booster.fromJson(Map<String, dynamic> json) {
+    print('Booster');
     return Booster(
       name: json['Name'],
       status: json['Status'],

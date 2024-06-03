@@ -141,7 +141,7 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
     final currentSchedule = Provider.of<MqttPayloadProvider>(context).currentSchedule;
     // Combine main valves and valves into a single list of widgets
     final List<Widget> valveWidgets = [
-      ...widget.irrigationLine.mainValve.map((mv) => MainValveWidget(mv: mv, status: getStatusForValve(mv.hid, currentSchedule),)).toList(),
+      ...widget.irrigationLine.mainValve.map((mv) => MainValveWidget(mv: mv, status: getStatusForMainValve(mv.hid, currentSchedule),)).toList(),
       ...widget.irrigationLine.valve.map((vl) => ValveWidget(vl: vl, status: getStatusForValve(vl.id, currentSchedule),)).toList(),
     ];
 
@@ -182,7 +182,15 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
             return valve['Status'] ?? 0;
           }
         }
-      } else if (scheduleItem.containsKey('MV')) {
+      }
+    }
+    return 0;
+  }
+
+  int getStatusForMainValve(String name, List<dynamic> currentSchedule) {
+    for (final scheduleItem in currentSchedule) {
+      //print(scheduleItem);
+      if (scheduleItem.containsKey('MV')) {
         if (scheduleItem['MV'] != null) {
           final mvlList = scheduleItem['MV'] as List<dynamic>;
           final mValve = mvlList.firstWhere((v) => v['Name'] == name, orElse: () => null);
@@ -286,5 +294,3 @@ class ValveWidget extends StatelessWidget {
     );
   }
 }
-
-

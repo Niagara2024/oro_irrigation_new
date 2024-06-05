@@ -1,17 +1,15 @@
 import 'package:data_table_2/data_table_2.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
-import '../../../constants/theme.dart';
 import '../../../state_management/MqttPayloadProvider.dart';
-import '../ScheduleView.dart';
 
 class NextSchedule extends StatefulWidget {
-  const NextSchedule({Key? key, required this.siteData, required this.userID, required this.customerID}) : super(key: key);
+  const NextSchedule({Key? key, required this.siteData, required this.userID, required this.customerID, required this.programQueue}) : super(key: key);
   final DashboardModel siteData;
   final int userID, customerID;
+  final List<ProgramQueue> programQueue;
 
   @override
   State<NextSchedule> createState() => _NextScheduleState();
@@ -20,7 +18,6 @@ class NextSchedule extends StatefulWidget {
 class _NextScheduleState extends State<NextSchedule> {
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<MqttPayloadProvider>(context);
     return Padding(
       padding: const EdgeInsets.all(3.0),
       child: Column(
@@ -39,8 +36,8 @@ class _NextScheduleState extends State<NextSchedule> {
                     ),
                     borderRadius: const BorderRadius.all(Radius.circular(5)),
                   ),
-                  height: provider.nextSchedule.isNotEmpty? (provider.nextSchedule.length * 40) + 55 : 25,
-                  child: provider.nextSchedule.isNotEmpty? Padding(
+                  height:(widget.programQueue.length * 40) + 55,
+                  child: Padding(
                     padding: const EdgeInsets.all(1.0),
                     child: DataTable2(
                       columnSpacing: 12,
@@ -80,23 +77,16 @@ class _NextScheduleState extends State<NextSchedule> {
                             size: ColumnSize.M
                         ),
                       ],
-                      rows: List<DataRow>.generate(provider.nextSchedule.length, (index) => DataRow(cells: [
-                        DataCell(Text(provider.nextSchedule[index]['ProgName'])),
-                        DataCell(Text(provider.nextSchedule[index]['SchedulingMethod']==1?'No Schedule':provider.nextSchedule[index]['SchedulingMethod']==2?'Schedule by days':
-                        provider.nextSchedule[index]['SchedulingMethod']==3?'Schedule as run list':'Day count schedule')),
-                        DataCell(Text(provider.nextSchedule[index]['ProgCategory'])),
-                        DataCell(Center(child: Text('${provider.nextSchedule[index]['CurrentZone']}'))),
-                        DataCell(Center(child: Center(child: Text(provider.nextSchedule[index]['ZoneName'])))),
-                        DataCell(Center(child: Text(_convertTime(provider.nextSchedule[index]['StartTime'])))),
-                        DataCell(Center(child: Text(provider.nextSchedule[index]['IrrigationDuration_Quantity']))),
+                      rows: List<DataRow>.generate(widget.programQueue.length, (index) => DataRow(cells: [
+                        DataCell(Text(widget.programQueue[index].programName)),
+                        DataCell(Text(widget.programQueue[index].irrMethod==1?'No Schedule':widget.programQueue[index].irrMethod==2?'Schedule by days':
+                        widget.programQueue[index].irrMethod==3?'Schedule as run list':'Day count schedule')),
+                        DataCell(Text(widget.programQueue[index].programCategory)),
+                        DataCell(Center(child: Text('${widget.programQueue[index].currentZone}'))),
+                        DataCell(Center(child: Center(child: Text(widget.programQueue[index].zoneName)))),
+                        DataCell(Center(child: Text(_convertTime(widget.programQueue[index].startTime)))),
+                        DataCell(Center(child: Text(widget.programQueue[index].totalDurORQty))),
                       ])),
-                    ),
-                  ) :
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: EdgeInsets.only(left: 15),
-                      child: Text('Next schedule not Available', style: TextStyle(fontWeight: FontWeight.normal), textAlign: TextAlign.left),
                     ),
                   ),
                 ),

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../constants/MQTTManager.dart';
@@ -11,14 +12,14 @@ import '../../../state_management/MqttPayloadProvider.dart';
 import '../ScheduleView.dart';
 
 class UpcomingProgram extends StatelessWidget {
-  UpcomingProgram({Key? key, required this.siteData, required this.customerId}) : super(key: key);
+  UpcomingProgram({Key? key, required this.siteData, required this.customerId, required this.scheduledPrograms}) : super(key: key);
   final DashboardModel siteData;
   final int customerId;
   final AudioPlayer audioPlayer = AudioPlayer();
+  final List<ScheduledProgram> scheduledPrograms;
 
   @override
   Widget build(BuildContext context) {
-    final upcomingProgram = Provider.of<MqttPayloadProvider>(context).upcomingProgram;
 
     return Padding(
       padding: const EdgeInsets.all(3.0),
@@ -38,8 +39,8 @@ class UpcomingProgram extends StatelessWidget {
                     ),
                     borderRadius: const BorderRadius.all(Radius.circular(5)),
                   ),
-                  height: upcomingProgram.isNotEmpty? (upcomingProgram.length * 45) + 45 : 50,
-                  child: upcomingProgram.isNotEmpty? Padding(
+                  height: (scheduledPrograms.length * 45) + 45,
+                  child: Padding(
                     padding: const EdgeInsets.all(1.0),
                     child: DataTable2(
                       columnSpacing: 12,
@@ -50,176 +51,160 @@ class UpcomingProgram extends StatelessWidget {
                       headingRowColor: MaterialStateProperty.all<Color>(Colors.yellow.shade50),
                       columns:  [
                         const DataColumn2(
-                            label: Text('Name', style: TextStyle(fontSize: 13),),
-                            size: ColumnSize.L,
+                          label: Text('Name', style: TextStyle(fontSize: 13),),
+                          size: ColumnSize.M,
                         ),
                         const DataColumn2(
-                            label: Text('Method', style: TextStyle(fontSize: 13)),
-                            size: ColumnSize.M,
+                          label: Text('Method', style: TextStyle(fontSize: 13)),
+                          size: ColumnSize.M,
                         ),
                         const DataColumn2(
-                            label: Text('Location', style: TextStyle(fontSize: 13),),
-                            size: ColumnSize.M,
+                          label: Text('Message', style: TextStyle(fontSize: 13)),
+                          size: ColumnSize.L,
                         ),
                         const DataColumn2(
-                            label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
-                            fixedWidth: 50,
+                          label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
+                          fixedWidth: 50,
                         ),
                         const DataColumn2(
-                            label: Center(child: Text('Start Date', style: TextStyle(fontSize: 13),)),
-                            size: ColumnSize.M,
+                          label: Center(child: Text('Start Date', style: TextStyle(fontSize: 13),)),
+                          size: ColumnSize.S,
                         ),
                         const DataColumn2(
-                            label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
-                            size: ColumnSize.M,
+                          label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
+                          size: ColumnSize.S,
                         ),
                         const DataColumn2(
-                            label: Center(child: Text('End Date', style: TextStyle(fontSize: 13),)),
-                            size: ColumnSize.M,
+                          label: Center(child: Text('End Date', style: TextStyle(fontSize: 13),)),
+                          size: ColumnSize.S,
                         ),
                         DataColumn2(
-                            label: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                IconButton(
-                                    tooltip: 'Scheduled Program details',
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => ScheduleViewScreen(deviceId: siteData.master[0].deviceId, userId: customerId, controllerId: siteData.master[0].controllerId, customerId: customerId),
-                                        ),
-                                      );
-                                    },
-                                    icon: const Icon(Icons.view_list_outlined)),
-                                IconButton(
-                                    tooltip: 'Create new Schedule',
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => ScheduleViewScreen(deviceId: siteData.master[0].deviceId, userId: customerId, controllerId: siteData.master[0].controllerId, customerId: customerId),
-                                        ),
-                                      );
-                                    },
-                                    icon: const Icon(Icons.add_box_outlined))
-                              ],
-                            ),
-                            fixedWidth: 265,
-                        ),
-                      ],
-                      rows: List<DataRow>.generate(upcomingProgram.length, (index) => DataRow(cells: [
-                        DataCell(
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          label: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Text(upcomingProgram[index]['ProgName']),
-                              Text('${getContentByCode(upcomingProgram[index]['StartStopReason'])} - ${upcomingProgram[index]['StartStopReason']}', style: const TextStyle(fontSize: 11, color: Colors.black),),
-                            ],
-                          )
-                        ),
-                        DataCell(Text(upcomingProgram[index]['SchedulingMethod']==1?'No Schedule':upcomingProgram[index]['SchedulingMethod']==2?'Schedule by days':
-                        upcomingProgram[index]['SchedulingMethod']==3?'Schedule as run list':'Day count schedule')),
-                        DataCell(Text(upcomingProgram[index]['ProgCategory'])),
-                        DataCell(Center(child: Text('${upcomingProgram[index]['TotalZone']}'))),
-                        DataCell(Center(child: Text('${upcomingProgram[index]['StartDate']}'))),
-                        DataCell(Center(child: Text('${upcomingProgram[index]['StartTime']}'))),
-                        DataCell(Center(child: Text('${upcomingProgram[index]['EndDate']}'))),
-                        DataCell(Row(
-                            children: [
-                              upcomingProgram[index]['ProgOnOff'] == 0 ? MaterialButton(
-                                color: Colors.green,
-                                textColor: Colors.white,
-                                onPressed:() {
-                                  String localFilePath = 'assets/audios/button_click_sound.mp3';
-                                  audioPlayer.play(UrlSource(localFilePath));
-                                  String payload = '${upcomingProgram[index]['SNo']},1';
-                                  String payLoadFinal = jsonEncode({
-                                    "2900": [{"2901": payload}]
-                                  });
-                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
-                                  sentUserOperationToServer('${upcomingProgram[index]['ProgName']} Started by Manual', payLoadFinal);
-                                },
-                                child: const Text('Start by Manual'),
-                              ) :
-                              MaterialButton(
-                                color: Colors.redAccent,
-                                textColor: Colors.white,
-                                onPressed:() {
-                                  String localFilePath = 'assets/audios/audio_off.mp3';
-                                  audioPlayer.play(UrlSource(localFilePath));
-                                  String payload = '${upcomingProgram[index]['SNo']},0';
-                                  String payLoadFinal = jsonEncode({
-                                    "2900": [{"2901": payload}]
-                                  });
-                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
-                                  sentUserOperationToServer('${upcomingProgram[index]['ProgName']} Stopped by Manual', payLoadFinal);
-                                },
-                                child: const Text('Stop by Manual'),
-                              ),
-                              const SizedBox(width: 5),
-                              upcomingProgram[index]['ProgPauseResume'] == 1 ? MaterialButton(
-                                color: Colors.orange,
-                                textColor: Colors.white,
-                                onPressed:() {
-                                  String payload = '${upcomingProgram[index]['SNo']},2';
-                                  String payLoadFinal = jsonEncode({
-                                    "2900": [{"2901": payload}]
-                                  });
-                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
-                                  sentUserOperationToServer('${upcomingProgram[index]['ProgName']} Paused by Manual', payLoadFinal);
-                                },
-                                child: const Text('Pause'),
-                              ) :
-                              MaterialButton(
-                                color: Colors.yellow,
-                                textColor: Colors.black,
-                                onPressed:() {
-                                  String localFilePath = 'assets/audios/audio_off.mp3';
-                                  audioPlayer.play(UrlSource(localFilePath));
-                                  String payload = '${upcomingProgram[index]['SNo']},3';
-                                  String payLoadFinal = jsonEncode({
-                                    "2900": [{"2901": payload}]
-                                  });
-                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
-                                  sentUserOperationToServer('${upcomingProgram[index]['ProgName']} Resume by Manual', payLoadFinal);
-                                },
-                                child: const Text('Resume'),
-                              ),
-                              const SizedBox(width: 5),
-                              IconButton(tooltip: 'View details', icon: const Icon(Icons.more_vert), onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: Text(upcomingProgram[index]['ProgName']),
-                                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0))),
-                                      content: Text('Start or Stop Reason Code = ${upcomingProgram[index]['StartStopReason']}'),
-                                      actions: <Widget>[
-                                        MaterialButton(
-                                          color: Colors.green,
-                                          textColor: Colors.white,
-                                          onPressed:() {
-                                            Navigator.of(context).pop();
-                                          },
-                                          child: const Text('OK'),
-                                        ),
-                                      ],
+                              IconButton(
+                                  tooltip: 'Scheduled Program details',
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ScheduleViewScreen(deviceId: siteData.master[0].deviceId, userId: customerId, controllerId: siteData.master[0].controllerId, customerId: customerId),
+                                      ),
                                     );
                                   },
-                                );
-                              },)
+                                  icon: const Icon(Icons.view_list_outlined)),
+                              /*IconButton(
+                                  tooltip: 'Create new Schedule',
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ScheduleViewScreen(deviceId: siteData.master[0].deviceId, userId: customerId, controllerId: siteData.master[0].controllerId, customerId: customerId),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.add_box_outlined))*/
                             ],
-                          ),),
+                          ),
+                          fixedWidth: 230,
+                        ),
+                      ],
+                      rows: List<DataRow>.generate(scheduledPrograms.length, (index) => DataRow(cells: [
+                        DataCell(Text(scheduledPrograms[index].progName)),
+                        DataCell(Text(scheduledPrograms[index].schedulingMethod==1?'No Schedule':scheduledPrograms[index].schedulingMethod==2?'Schedule by days':
+                        scheduledPrograms[index].schedulingMethod==3?'Schedule as run list':'Day count schedule')),
+                        DataCell(Text('${getContentByCode(scheduledPrograms[index].startStopReason)} - ${scheduledPrograms[index].startStopReason}')),
+                        DataCell(Center(child: Text('${scheduledPrograms[index].totalZone}'))),
+                        DataCell(Center(child: Text(scheduledPrograms[index].startDate))),
+                        DataCell(Center(child: Text(_convertTime(scheduledPrograms[index].startTime)))),
+                        DataCell(Center(child: Text(scheduledPrograms[index].endDate))),
+                        DataCell(Row(
+                          children: [
+                            scheduledPrograms[index].progOnOff == 0 ? MaterialButton(
+                              color: Colors.green,
+                              textColor: Colors.white,
+                              onPressed:() {
+                                String localFilePath = 'assets/audios/button_click_sound.mp3';
+                                audioPlayer.play(UrlSource(localFilePath));
+                                String payload = '${scheduledPrograms[index].sNo},1';
+                                String payLoadFinal = jsonEncode({
+                                  "2900": [{"2901": payload}]
+                                });
+                                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
+                                sentUserOperationToServer('${scheduledPrograms[index].progName} Started by Manual', payLoadFinal);
+                              },
+                              child: const Text('Start by Manual'),
+                            ) :
+                            MaterialButton(
+                              color: Colors.redAccent,
+                              textColor: Colors.white,
+                              onPressed:() {
+                                String localFilePath = 'assets/audios/audio_off.mp3';
+                                audioPlayer.play(UrlSource(localFilePath));
+                                String payload = '${scheduledPrograms[index].sNo},0';
+                                String payLoadFinal = jsonEncode({
+                                  "2900": [{"2901": payload}]
+                                });
+                                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
+                                sentUserOperationToServer('${scheduledPrograms[index].progName} Stopped by Manual', payLoadFinal);
+                              },
+                              child: const Text('Stop by Manual'),
+                            ),
+                            const SizedBox(width: 5),
+                            scheduledPrograms[index].progPauseResume == 1 ? MaterialButton(
+                              color: Colors.orange,
+                              textColor: Colors.white,
+                              onPressed:() {
+                                String payload = '${scheduledPrograms[index].sNo},2';
+                                String payLoadFinal = jsonEncode({
+                                  "2900": [{"2901": payload}]
+                                });
+                                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
+                                sentUserOperationToServer('${scheduledPrograms[index].progName} Paused by Manual', payLoadFinal);
+                              },
+                              child: const Text('Pause'),
+                            ) :
+                            MaterialButton(
+                              color: Colors.yellow,
+                              textColor: Colors.black,
+                              onPressed:() {
+                                String localFilePath = 'assets/audios/audio_off.mp3';
+                                audioPlayer.play(UrlSource(localFilePath));
+                                String payload = '${scheduledPrograms[index].sNo},3';
+                                String payLoadFinal = jsonEncode({
+                                  "2900": [{"2901": payload}]
+                                });
+                                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
+                                sentUserOperationToServer('${scheduledPrograms[index].progName} Resume by Manual', payLoadFinal);
+                              },
+                              child: const Text('Resume'),
+                            ),
+                            const SizedBox(width: 5),
+                            /*IconButton(tooltip: 'View details', icon: const Icon(Icons.more_vert), onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text(scheduledPrograms[index].progName),
+                                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                                    content: Text('Start or Stop Reason Code = ${scheduledPrograms[index].startStopReason}'),
+                                    actions: <Widget>[
+                                      MaterialButton(
+                                        color: Colors.green,
+                                        textColor: Colors.white,
+                                        onPressed:() {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('OK'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },),*/
+                          ],
+                        ),),
                       ])),
-                    ),
-                  ) :
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: EdgeInsets.only(left: 15),
-                      child: Text('Upcoming Program not Available', style: TextStyle(fontWeight: FontWeight.normal), textAlign: TextAlign.left),
                     ),
                   ),
                 ),
@@ -231,9 +216,9 @@ class UpcomingProgram extends StatelessWidget {
                   width: 200,
                   padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 2),
                   decoration: BoxDecoration(
-                    color: Colors.yellow.shade200,
-                    borderRadius: const BorderRadius.all(Radius.circular(2)),
-                    border: Border.all(width: 0.5, color: Colors.grey)
+                      color: Colors.yellow.shade200,
+                      borderRadius: const BorderRadius.all(Radius.circular(2)),
+                      border: Border.all(width: 0.5, color: Colors.grey)
                   ),
                   child: const Text('SCHEDULED PROGRAM',  style: TextStyle(color: Colors.black)),
                 ),
@@ -243,6 +228,16 @@ class UpcomingProgram extends StatelessWidget {
         ],
       ),
     );
+
+  }
+
+  String _convertTime(String timeString) {
+    if(timeString=='-'){
+      return '-';
+    }
+    final parsedTime = DateFormat('HH:mm:ss').parse(timeString);
+    final formattedTime = DateFormat('hh:mm a').format(parsedTime);
+    return formattedTime;
   }
 
   String getContentByCode(int code) {

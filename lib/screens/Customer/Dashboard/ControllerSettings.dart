@@ -187,13 +187,13 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                             child: TextField(
                               controller: txtEcSiteName,
                               decoration: InputDecoration(
-                                filled: true,
+                                filled: false,
                                 border: OutlineInputBorder(
                                   borderSide: const BorderSide(color: Colors.blue, width: 2.0),
                                   borderRadius: BorderRadius.circular(10.0),
                                 ),
-                                labelText: 'Enter your form name',
-                                suffixIcon: Icon(Icons.edit),
+                                labelText: 'Form name',
+                                suffixIcon: const Icon(Icons.edit),
                               ),
                             ),
                           ),
@@ -207,13 +207,13 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                             child: TextField(
                               controller: txtEcGroupName,
                               decoration: InputDecoration(
-                                filled: true,
+                                filled: false,
                                 border: OutlineInputBorder(
                                   borderSide: const BorderSide(color: Colors.blue, width: 2.0),
                                   borderRadius: BorderRadius.circular(10.0),
                                 ),
-                                labelText: 'Enter Controller name',
-                                suffixIcon: Icon(Icons.edit),
+                                labelText: 'Controller name',
+                                suffixIcon: const Icon(Icons.edit),
                               ),
                             ),
                           ),
@@ -351,7 +351,6 @@ class _ControllerSettingsState extends State<ControllerSettings> {
               color: Colors.green,
               textColor: Colors.white,
               onPressed:() async {
-
                 Map<String, Object> body = {
                   'userId': widget.customerID,
                   'controllerId': widget.siteData.master[0].controllerId,
@@ -374,7 +373,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
               },
               child: const Text('Restore'),
             ),),
-          )
+          ),
         ],
       ),
     );

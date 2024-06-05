@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:oro_irrigation_new/state_management/scheule_view_provider.dart';
 
+import '../Models/Customer/Dashboard/DashboardNode.dart';
+
 enum MQTTConnectionState { connected, disconnected, connecting }
 
 class MqttPayloadProvider with ChangeNotifier {
@@ -11,11 +13,10 @@ class MqttPayloadProvider with ChangeNotifier {
 
   int wifiStrength = 0;
   List<dynamic> nodeList = [];
-  List<dynamic> currentSchedule = [];
+  //List<dynamic> currentSchedule = [];
   List<dynamic> PrsIn = [];
   List<dynamic> PrsOut = [];
-  List<dynamic> nextSchedule = [];
-  List<dynamic> upcomingProgram = [];
+  //List<dynamic> nextSchedule = [];
   List<dynamic> filtersCentral = [];
   List<dynamic> filtersLocal = [];
   List<dynamic> sourcePump = [];
@@ -26,6 +27,15 @@ class MqttPayloadProvider with ChangeNotifier {
   List<dynamic> waterMeter = [];
   List<dynamic> alarmList = [];
   List<dynamic> payload2408 = [];
+
+  List<ScheduledProgram> _scheduledProgram = [];
+  List<ScheduledProgram> get scheduledProgram => _scheduledProgram;
+
+  List<ProgramQueue> _programQueue = [];
+  List<ProgramQueue> get programQueue => _programQueue;
+
+  List<CurrentScheduleModel> _currentSchedule = [];
+  List<CurrentScheduleModel> get currentSchedule => _currentSchedule;
 
   void editMySchedule(ScheduleViewProvider instance){
     mySchedule = instance;
@@ -42,18 +52,26 @@ class MqttPayloadProvider with ChangeNotifier {
         if (data['2400'][0].containsKey('2401')) {
           nodeList = data['2400'][0]['2401'];
         }
+
         if(data['2400'][0].containsKey('2402')) {
-          currentSchedule = data['2400'][0]['2402'];
-          if(currentSchedule.isNotEmpty && currentSchedule[0].containsKey('PrsIn')){
-            PrsIn = currentSchedule[0]['PrsIn'];
-            PrsOut = currentSchedule[0]['PrsOut'];
+          List<dynamic> csItems = data['2400'][0]['2402'];
+          List<CurrentScheduleModel> cs = csItems.map((cs) => CurrentScheduleModel.fromJson(cs)).toList();
+          updateCurrentScheduled(cs);
+
+          if(csItems.isNotEmpty && csItems[0].containsKey('PrsIn')){
+            PrsIn = csItems[0]['PrsIn'];
+            PrsOut = csItems[0]['PrsOut'];
           }
         }
         if (data['2400'][0].containsKey('2403')) {
-          nextSchedule = data['2400'][0]['2403'];
+          List<dynamic> programList = data['2400'][0]['2403'];
+          List<ProgramQueue> pq = programList.map((pq) => ProgramQueue.fromJson(pq)).toList();
+          updateProgramQueue(pq);
         }
         if (data['2400'][0].containsKey('2404')) {
-          upcomingProgram = data['2400'][0]['2404'];
+          List<dynamic> programList = data['2400'][0]['2404'];
+          List<ScheduledProgram> scp = programList.map((sp) => ScheduledProgram.fromJson(sp)).toList();
+          updateScheduledProgram(scp);
         }
         //print('upcomingProgram:${upcomingProgram}');
         if (data['2400'][0].containsKey('2405')) {
@@ -100,11 +118,25 @@ class MqttPayloadProvider with ChangeNotifier {
         schedulePayload = payload;
       }
       notifyListeners();
-      print('provider upcomingProgram:${upcomingProgram}');
     } catch (e) {
       print('Error parsing JSON: $e');
     }
     //notifyListeners();
+  }
+
+  void updateCurrentScheduled(List<CurrentScheduleModel> cs) {
+    _currentSchedule = cs;
+    notifyListeners();
+  }
+
+  void updateScheduledProgram(List<ScheduledProgram> schPrograms) {
+    _scheduledProgram = schPrograms;
+    notifyListeners();
+  }
+
+  void updateProgramQueue(List<ProgramQueue> programsQue) {
+    _programQueue = programsQue;
+    notifyListeners();
   }
 
   void updatePumpPayload(String payload) {
@@ -123,19 +155,6 @@ class MqttPayloadProvider with ChangeNotifier {
     }
   }
 
-  void updateProgramPayload(String payload) {
-    try {
-      Map<String, dynamic> data = jsonDecode(payload);
-      if (data.containsKey('2400') && data['2400'] != null && data['2400'].isNotEmpty) {
-        if (data['2400'][0].containsKey('2404')) {
-          upcomingProgram = data['2400'][0]['2404'];
-        }
-      }
-      notifyListeners();
-    } catch (e) {
-      print('Error parsing JSON: $e');
-    }
-  }
 
   void updateFilterPayload(String payload) {
     try {

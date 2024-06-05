@@ -44,7 +44,12 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    var provider = Provider.of<MqttPayloadProvider>(context, listen: true);
+
+    final filteredScheduledPrograms = filterProgramsByCategory(Provider.of<MqttPayloadProvider>(context).scheduledProgram, widget.crrIrrLine.id);
+    final filteredProgramsQueue = filterProgramsQueueByCategory(Provider.of<MqttPayloadProvider>(context).programQueue, widget.crrIrrLine.id);
+    final filteredCurrentSchedule = filterCurrentScheduleByCategory(Provider.of<MqttPayloadProvider>(context).currentSchedule, widget.crrIrrLine.id);
+
+    /*var provider = Provider.of<MqttPayloadProvider>(context, listen: true);
     try{
       print(provider.receivedDashboardPayload);
       Map<String, dynamic> data = jsonDecode(provider.receivedDashboardPayload);
@@ -57,7 +62,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     }
     catch(e){
       print(e);
-    }
+    }*/
 
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
@@ -85,19 +90,18 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                     padding: const EdgeInsets.only(left: 05, right: 00),
                     child: Divider(height: 0, color: Colors.grey.shade300),
                   ),
-                  DisplayIrrigationLine(irrigationLine: widget.crrIrrLine),
+                  DisplayIrrigationLine(irrigationLine: widget.crrIrrLine, currentSchedule: filteredCurrentSchedule,),
                 ],
               ),
             ),
           ),
-          CurrentSchedule(siteData: widget.siteData, customerID: widget.customerID),
-          provider.nextSchedule.isNotEmpty?
-          NextSchedule(siteData: widget.siteData, userID: widget.userID, customerID: widget.customerID):
+          filteredCurrentSchedule.isNotEmpty? CurrentSchedule(siteData: widget.siteData, customerID: widget.customerID, currentSchedule: filteredCurrentSchedule,):
           const SizedBox(),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: UpcomingProgram(siteData: widget.siteData, customerId: widget.customerID,),
-          ),
+          filteredProgramsQueue.isNotEmpty? NextSchedule(siteData: widget.siteData, userID: widget.userID, customerID: widget.customerID, programQueue: filteredProgramsQueue,):
+          const SizedBox(),
+          filteredScheduledPrograms.isNotEmpty? UpcomingProgram(siteData: widget.siteData, customerId: widget.customerID, scheduledPrograms: filteredScheduledPrograms,):
+          const SizedBox(),
+          const SizedBox(height: 8,),
         ],
       ),
     );
@@ -120,12 +124,25 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     return -1;
   }
 
+  List<ScheduledProgram> filterProgramsByCategory(List<ScheduledProgram> prg, String cat) {
+    return prg.where((prg) => prg.progCategory.contains(cat)).toList();
+  }
+
+  List<ProgramQueue> filterProgramsQueueByCategory(List<ProgramQueue> prQ, String cat) {
+    return prQ.where((prQ) => prQ.programCategory.contains(cat)).toList();
+  }
+
+  List<CurrentScheduleModel> filterCurrentScheduleByCategory(List<CurrentScheduleModel> cs, String category) {
+    return cs.where((cs) => cs.programCategory.contains(category)).toList();
+  }
+
 }
 
 
 class DisplayIrrigationLine extends StatefulWidget {
-  const DisplayIrrigationLine({Key? key, required this.irrigationLine}) : super(key: key);
+  const DisplayIrrigationLine({Key? key, required this.irrigationLine, required this.currentSchedule}) : super(key: key);
   final IrrigationLine irrigationLine;
+  final List<CurrentScheduleModel> currentSchedule;
 
   @override
   State<DisplayIrrigationLine> createState() => _DisplayIrrigationLineState();
@@ -133,16 +150,15 @@ class DisplayIrrigationLine extends StatefulWidget {
 
 class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
 
+
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final screenWidth = mediaQuery.size.width;
+    final screenWidth = MediaQuery.of(context).size.width;
 
-    final currentSchedule = Provider.of<MqttPayloadProvider>(context).currentSchedule;
     // Combine main valves and valves into a single list of widgets
     final List<Widget> valveWidgets = [
-      ...widget.irrigationLine.mainValve.map((mv) => MainValveWidget(mv: mv, status: getStatusForMainValve(mv.hid, currentSchedule),)).toList(),
-      ...widget.irrigationLine.valve.map((vl) => ValveWidget(vl: vl, status: getStatusForValve(vl.id, currentSchedule),)).toList(),
+      ...widget.irrigationLine.mainValve.map((mv) => MainValveWidget(mv: mv, status: getStatusForMainValve(mv.sNo, widget.currentSchedule),)).toList(),
+      ...widget.irrigationLine.valve.map((vl) => ValveWidget(vl: vl, status: getStatusForValve(vl.sNo, widget.currentSchedule),)).toList(),
     ];
 
     int crossAxisCount = (screenWidth / 95).floor().clamp(1, double.infinity).toInt();
@@ -171,33 +187,23 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
     );
   }
 
-  int getStatusForValve(String name, List<dynamic> currentSchedule) {
+  int getStatusForValve(int sno, List<CurrentScheduleModel> currentSchedule) {
     for (final scheduleItem in currentSchedule) {
-      //print(scheduleItem);
-      if (scheduleItem.containsKey('VL')) {
-        if (scheduleItem['VL'] != null) {
-          final vlList = scheduleItem['VL'] as List<dynamic>;
-          final valve = vlList.firstWhere((v) => v['Name'] == name, orElse: () => null);
-          if (valve != null) {
-            return valve['Status'] ?? 0;
-          }
-        }
+      final vlList = scheduleItem.valve;
+      final valve = vlList.firstWhere((v) => v['SNo'] == sno, orElse: () => null);
+      if (valve != null) {
+        return valve['Status'] ?? 0;
       }
     }
     return 0;
   }
 
-  int getStatusForMainValve(String name, List<dynamic> currentSchedule) {
+  int getStatusForMainValve(int sno, List<CurrentScheduleModel> currentSchedule) {
     for (final scheduleItem in currentSchedule) {
-      //print(scheduleItem);
-      if (scheduleItem.containsKey('MV')) {
-        if (scheduleItem['MV'] != null) {
-          final mvlList = scheduleItem['MV'] as List<dynamic>;
-          final mValve = mvlList.firstWhere((v) => v['Name'] == name, orElse: () => null);
-          if (mValve != null) {
-            return mValve['Status'] ?? 0;
-          }
-        }
+      final mvlList = scheduleItem.mainValve;
+      final mValve = mvlList.firstWhere((v) => v['SNo'] == sno, orElse: () => null);
+      if (mValve != null) {
+        return mValve['Status'] ?? 0;
       }
     }
     return 0;
@@ -234,13 +240,10 @@ class MainValveWidget extends StatelessWidget {
           Image.asset(
             width: 35,
             height: 35,
-            status == 0
-                ? 'assets/images/dp_main_valve_not_open.png'
-                : status == 1
-                ? 'assets/images/dp_main_valve_open.png'
-                : status == 2
-                ? 'assets/images/dp_main_valve_wait.png'
-                : 'assets/images/dp_main_valve_closed.png',
+            status == 0 ? 'assets/images/dp_main_valve_not_open.png':
+            status == 1? 'assets/images/dp_main_valve_open.png':
+            status == 2? 'assets/images/dp_main_valve_wait.png':
+            'assets/images/dp_main_valve_closed.png',
           ),
           const SizedBox(height: 5),
           Text(mv.name, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10),),
@@ -279,13 +282,10 @@ class ValveWidget extends StatelessWidget {
           Image.asset(
             width: 35,
             height: 35,
-            status == 0
-                ? 'assets/images/valve_gray.png'
-                : status == 1
-                ? 'assets/images/valve_green.png'
-                : status == 2
-                ? 'assets/images/valve_orange.png'
-                : 'assets/images/valve_red.png',
+            status == 0? 'assets/images/valve_gray.png':
+            status == 1? 'assets/images/valve_green.png':
+            status == 2? 'assets/images/valve_orange.png':
+            'assets/images/valve_red.png',
           ),
           const SizedBox(height: 4),
           Text(vl.name, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10),),

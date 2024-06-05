@@ -93,11 +93,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   void clearMQTTPayload(){
     MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context,listen: false);
-    payloadProvider.currentSchedule=[];
+    payloadProvider.currentSchedule.clear();
     payloadProvider.PrsIn=[];
     payloadProvider.PrsOut=[];
-    payloadProvider.nextSchedule=[];
-    payloadProvider.upcomingProgram=[];
+    payloadProvider.programQueue.clear();
+    payloadProvider.scheduledProgram.clear();
     payloadProvider.filtersCentral=[];
     payloadProvider.filtersLocal=[];
     payloadProvider.sourcePump=[];
@@ -159,19 +159,18 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   void loadServerData(){
     MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
-    String pumpList= jsonEncode(siteListFinal[siteIndex].master[masterIndex].liveData[0].pumpList.map((pump) => pump.toJson()).toList());
-    List<dynamic> jsonPumpList = jsonDecode(pumpList);
-    String pumpPayloadFinal = jsonEncode({
-      "2400": [{"2407": jsonPumpList.toList()}]
-    });
-    payloadProvider.updatePumpPayload(pumpPayloadFinal);
 
-    String programList = jsonEncode(siteListFinal[siteIndex].master[masterIndex].liveData[0].programList.map((pump) => pump.toJson()).toList());
-    List<dynamic> jsonDataList = jsonDecode(programList);
-    String programPayloadFinal = jsonEncode({
-      "2400": [{"2404": jsonDataList.toList()}]
-    });
-    payloadProvider.updateProgramPayload(programPayloadFinal);
+    List<dynamic> csLst = siteListFinal[siteIndex].master[masterIndex].liveData[0].currentSchedule.map((cs) => cs.toJson()).toList();
+    List<CurrentScheduleModel> cs = csLst.map((cs) => CurrentScheduleModel.fromJson(cs)).toList();
+    payloadProvider.updateCurrentScheduled(cs);
+
+    List<dynamic> pqLst = siteListFinal[siteIndex].master[masterIndex].liveData[0].queProgramList.map((pq) => pq.toJson()).toList();
+    List<ProgramQueue> pq = pqLst.map((pq) => ProgramQueue.fromJson(pq)).toList();
+    payloadProvider.updateProgramQueue(pq);
+
+    List<dynamic> spLst = siteListFinal[siteIndex].master[masterIndex].liveData[0].scheduledProgramList.map((sp) => sp.toJson()).toList();
+    List<ScheduledProgram> sp = spLst.map((sp) => ScheduledProgram.fromJson(sp)).toList();
+    payloadProvider.updateScheduledProgram(sp);
 
     String filterList = jsonEncode(siteListFinal[siteIndex].master[masterIndex].liveData[0].filterList.map((filter) => filter.toJson()).toList());
     List<dynamic> jsonFilterList = jsonDecode(filterList);
@@ -186,6 +185,17 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       "2400": [{"2406": jsonFertilizerList.toList()}]
     });
     payloadProvider.updateFertilizerPayload(fertilizerPayloadFinal);
+
+    String pumpList= jsonEncode(siteListFinal[siteIndex].master[masterIndex].liveData[0].pumpList.map((pump) => pump.toJson()).toList());
+    List<dynamic> jsonPumpList = jsonDecode(pumpList);
+    String pumpPayloadFinal = jsonEncode({
+      "2400": [{"2407": jsonPumpList.toList()}]
+    });
+    payloadProvider.updatePumpPayload(pumpPayloadFinal);
+
+
+
+
   }
 
   Future<void> getProgramList() async
@@ -353,6 +363,13 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             children: [
               TextButton(
                 onPressed: () {
+                  print(siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex]);
+                  String payLoadFinal = jsonEncode({
+                    "2300": [
+                      {"2301": "${siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex].sNo}", },
+                    ]
+                  });
+                  //MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteListFinal[siteIndex].master[masterIndex].deviceId}');
                 },
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all<Color>(Colors.white24),
@@ -369,8 +386,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
-              TextButton(
+              siteListFinal[siteIndex].master[masterIndex].irrigationLine.length>1? const SizedBox(width: 10):
+              const SizedBox(),
+              siteListFinal[siteIndex].master[masterIndex].irrigationLine.length>1? TextButton(
                 onPressed: () {
                 },
                 style: ButtonStyle(
@@ -387,13 +405,14 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     Text('PAUSE ALL LINE', style: TextStyle(color: Colors.white)),
                   ],
                 ),
-              ),
+              ):
+              const SizedBox(),
               const SizedBox(width: 10),
               IconButton(tooltip : 'Help & Support', onPressed: (){
                 showMenu(
                   context: context,
                   color: Colors.white,
-                  position: const RelativeRect.fromLTRB(100, 0, 95, 0),
+                  position: const RelativeRect.fromLTRB(100, 0, 50, 0),
                   items: <PopupMenuEntry>[
                     PopupMenuItem(
                       child: Column(

@@ -13,7 +13,6 @@ class DashboardModel {
   });
 
   factory DashboardModel.fromJson(Map<String, dynamic> json) {
-    print('DashboardModel');
     var masterList = json['master'] as List;
     List<MasterData> master = masterList.isNotEmpty? masterList.map((master) => MasterData.fromJson(master)).toList() : [];
 
@@ -54,8 +53,6 @@ class MasterData {
   });
 
   factory MasterData.fromJson(Map<String, dynamic> json) {
-    //print(json['categoryId']);
-    print('MasterData');
     if(json['categoryId']==1 || json['categoryId']==2){
       //drip irrigation controller
       var liveData = json['2400'] as List;
@@ -102,7 +99,9 @@ class LiveData {
   List<PumpData> pumpList;
   List<Filter> filterList;
   List<FertilizerSite> fertilizerSiteList;
-  List<Program> programList;
+  List<ScheduledProgram> scheduledProgramList;
+  List<ProgramQueue> queProgramList;
+  List<CurrentScheduleModel> currentSchedule;
  // List<SensorData> sensorList;
 
   LiveData({
@@ -110,18 +109,24 @@ class LiveData {
     required this.pumpList,
     required this.filterList,
     required this.fertilizerSiteList,
-    required this.programList,
-    //required this.sensorList,
+    required this.scheduledProgramList,
+    required this.queProgramList,
+    required this.currentSchedule,
   });
 
   factory LiveData.fromJson(Map<String, dynamic> json) {
-    print('LiveData');
 
     var nodeData = json['2401'] as List;
     List<NodeData> nodeList = nodeData.isNotEmpty? nodeData.map((node) => NodeData.fromJson(node)).toList() : [];
 
+    var currentScheduleData = json['2402'] as List;
+    List<CurrentScheduleModel> currentSchedule = currentScheduleData.isNotEmpty? currentScheduleData.map((cSch) => CurrentScheduleModel.fromJson(cSch)).toList() : [];
+
     var programData = json['2404'] as List;
-    List<Program> programList = programData.isNotEmpty? programData.map((prg) => Program.fromJson(prg)).toList() : [];
+    List<ScheduledProgram> programList = programData.isNotEmpty? programData.map((prg) => ScheduledProgram.fromJson(prg)).toList() : [];
+
+    var queProgramData = json['2403'] as List;
+    List<ProgramQueue> queProgramList = queProgramData.isNotEmpty? queProgramData.map((quePrg) => ProgramQueue.fromJson(quePrg)).toList() : [];
 
     var filterData = json['2405'] as List;
     List<Filter> filterList = filterData.isNotEmpty? filterData.map((filter) => Filter.fromJson(filter)).toList() : [];
@@ -137,15 +142,18 @@ class LiveData {
       pumpList: pumpList,
       filterList: filterList,
       fertilizerSiteList: fertilizerSiteList,
-      programList: programList,
-      //sensorList: (json['2408'] as List).map((i) => SensorData.fromJson(i)).toList(),
+      scheduledProgramList: programList,
+      queProgramList: queProgramList,
+      currentSchedule: currentSchedule,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       '2401': nodeList.map((e) => e.toJson()).toList(),
-      '2404': programList.map((e) => e.toJson()).toList(),
+      '2402': currentSchedule.map((e) => e.toJson()).toList(),
+      '2403': queProgramList.map((e) => e.toJson()).toList(),
+      '2404': scheduledProgramList.map((e) => e.toJson()).toList(),
       '2405': filterList.map((e) => e.toJson()).toList(),
       '2406': fertilizerSiteList.map((e) => e.toJson()).toList(),
       '2407': pumpList.map((e) => e.toJson()).toList(),
@@ -188,7 +196,6 @@ class NodeData {
   });
 
   factory NodeData.fromJson(Map<String, dynamic> json) {
-    print('NodeData');
     var rlyStatusList = json['RlyStatus'] as List;
     List<RelayStatus> rlyStatus = rlyStatusList.map((rlyStatus) => RelayStatus.fromJson(rlyStatus)).toList();
 
@@ -265,7 +272,6 @@ class PumpData {
   });
 
   factory PumpData.fromJson(Map<String, dynamic> json) {
-    print('PumpData');
     String onDelay = json['OnDelay'] ?? '00:00:00';
     int type = json['Type'] ?? 0;
     String location = json['Location'] ?? '-';
@@ -305,7 +311,7 @@ class PumpData {
   }
 }
 
-class Program {
+class ScheduledProgram {
   final int sNo;
   final String progCategory;
   final String progName;
@@ -318,7 +324,7 @@ class Program {
   final int progPauseResume;
   final int startStopReason;
 
-  Program({
+  ScheduledProgram({
     required this.sNo,
     required this.progCategory,
     required this.progName,
@@ -332,10 +338,8 @@ class Program {
     required this.startStopReason,
   });
 
-  factory Program.fromJson(Map<String, dynamic> json) {
-   // bool hasNameKey = json.containsKey('StartStopReason');
-    print('Program');
-    return Program(
+  factory ScheduledProgram.fromJson(Map<String, dynamic> json) {
+    return ScheduledProgram(
       sNo: json['SNo'],
       progCategory: json['ProgCategory'],
       progName: json['ProgName'],
@@ -368,6 +372,163 @@ class Program {
 
 }
 
+class ProgramQueue {
+  final String programName, programCategory,zoneName,startTime, totalDurORQty;
+  final int programType, totalRtc,currentRtc,totalCycle,currentCycle,totalZone,currentZone, irrMethod;
+
+  ProgramQueue({
+    required this.programName,
+    required this.programCategory,
+    required this.zoneName,
+    required this.programType,
+    required this.totalRtc,
+    required this.currentRtc,
+    required this.totalCycle,
+    required this.currentCycle,
+    required this.totalZone,
+    required this.currentZone,
+    required this.startTime,
+    required this.totalDurORQty,
+    required this.irrMethod,
+  });
+
+  factory ProgramQueue.fromJson(Map<String, dynamic> json) {
+    return ProgramQueue(
+      programName: json['ProgName'] ?? "",
+      programCategory: json['ProgCategory'] ?? "",
+      zoneName: json['ZoneName'] ?? "",
+      programType: json['ProgType'] ?? 0,
+      totalRtc: json['TotalRtc'] ?? 0,
+      currentRtc: json['CurrentRtc'] ?? 0,
+      totalCycle: json['TotalCycle'] ?? 0,
+      currentCycle: json['CurrentCycle'] ?? 0,
+      totalZone: json['TotalZone'] ?? 0,
+      currentZone: json['CurrentZone'] ?? 0,
+      startTime: json['StartTime'] ?? "",
+      totalDurORQty: json['IrrigationDuration_Quantity'] ?? "",
+      irrMethod: json['IrrigationMethod'] ?? "",
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'ProgName': programName,
+      'ProgCategory': programCategory,
+      'ZoneName': zoneName,
+      'ProgType': programType,
+      'TotalRtc': totalRtc,
+      'CurrentRtc': currentRtc,
+      'TotalCycle': totalCycle,
+      'CurrentCycle': currentCycle,
+      'TotalZone': totalZone,
+      'CurrentZone': currentZone,
+      'StartTime': startTime,
+      'IrrigationDuration_Quantity': totalDurORQty,
+      'IrrigationMethod': irrMethod,
+    };
+  }
+
+}
+
+class CurrentScheduleModel {
+  String programName, programCategory,zoneName,startTime, duration_Qty, duration_QtyLeft;
+  String message, avgFlwRt;
+  final int programId, programType, totalRtc,currentRtc,totalCycle,currentCycle,totalZone,currentZone, srlNo, reasonCode;
+  List<dynamic> mainValve;
+  List<dynamic> valve;
+
+  CurrentScheduleModel({
+    required this.programId,
+    required this.programName,
+    required this.programCategory,
+    required this.zoneName,
+    required this.programType,
+    required this.totalRtc,
+    required this.currentRtc,
+    required this.totalCycle,
+    required this.currentCycle,
+    required this.totalZone,
+    required this.currentZone,
+    required this.startTime,
+    required this.duration_Qty,
+    required this.duration_QtyLeft,
+    required this.valve,
+    required this.mainValve,
+    required this.message,
+    required this.srlNo,
+    required this.reasonCode,
+    required this.avgFlwRt,
+  });
+
+  factory CurrentScheduleModel.fromJson(Map<String, dynamic> json) {
+
+    bool hasOnTimeKey = json.containsKey('MV');
+
+    String durQty = '0', durQtyLeft = '0';
+
+    if(json['Duration_Qty'].runtimeType==int) {
+      durQty = json['Duration_Qty'].toString();
+    }else{
+      durQty = json['Duration_Qty'];
+    }
+
+    if(json['Duration_QtyLeft'].runtimeType==int) {
+      durQtyLeft = json['Duration_QtyLeft'].toString();
+    }else{
+      durQtyLeft = json['Duration_QtyLeft'];
+    }
+
+    return CurrentScheduleModel(
+      programId: 1,
+      programName: json['ProgName'] ?? '',
+      programCategory: json['ProgCategory'] ?? '',
+      zoneName: json['ZoneName'] ?? "",
+      programType: json['ProgType'] ?? 0,
+      totalRtc: json['TotalRtc'] ?? 0,
+      currentRtc: json['CurrentRtc'] ?? 0,
+      totalCycle: json['TotalCycle'] ?? 0,
+      currentCycle: json['CurrentCycle'] ?? 0,
+      totalZone: json['TotalZone'] ?? 0,
+      currentZone: json['CurrentZone'] ?? 0,
+      startTime: json['StartTime'] ?? '',
+      duration_Qty: durQty,
+      duration_QtyLeft: durQtyLeft,
+      valve: json['VL'] ?? [],
+      mainValve: hasOnTimeKey? json['MV'] ?? []:[],
+      message: json['Message'] ?? '',
+      srlNo: json['ScheduleS_No'] ?? 0,
+      reasonCode: json['ProgramStartStopReason'] ?? 0,
+      avgFlwRt: json['AverageFlowRate'] ?? '0',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'ProgName': programName,
+      'ProgCategory': programCategory,
+      'ZoneName': zoneName,
+      'ProgType': programType,
+      'TotalRtc': totalRtc,
+      'CurrentRtc': currentRtc,
+      'TotalCycle': totalCycle,
+      'CurrentCycle': currentCycle,
+      'TotalZone': totalZone,
+      'CurrentZone': currentZone,
+      'StartTime': startTime,
+      'Duration_Qty': duration_Qty,
+      'Duration_QtyLeft': duration_QtyLeft,
+      'Valve': valve,
+      'MainValve': mainValve,
+      'Message': message,
+      'ScheduleS_No': srlNo,
+      'ProgramStartStopReason': reasonCode,
+      'AverageFlowRate': avgFlwRt,
+    };
+  }
+
+
+}
+
 class SensorData {
   int S_No;
   String Line;
@@ -390,7 +551,6 @@ class SensorData {
   });
 
   factory SensorData.fromJson(Map<String, dynamic> json) {
-    print('SensorData');
     return SensorData(
       S_No: json['S_No'],
       Line: json['Line'],
@@ -441,7 +601,6 @@ class IrrigationLine {
   });
 
   factory IrrigationLine.fromJson(Map<String, dynamic> json) {
-    print('IrrigationLine');
     var mainValve = json['mainValve'] as List;
     List<MainValve> mainValveList = mainValve.isNotEmpty? mainValve.map((mv) => MainValve.fromJson(mv)).toList() : [];
 
@@ -483,7 +642,6 @@ class MainValve {
   });
 
   factory MainValve.fromJson(Map<String, dynamic> json) {
-    print('MainValve');
     return MainValve(
       sNo: json['sNo'],
       id: json['id'],
@@ -528,7 +686,6 @@ class Valve {
   });
 
   factory Valve.fromJson(Map<String, dynamic> json) {
-    print('Valve');
     return Valve(
       sNo: json['sNo'],
       id: json['id'],
@@ -573,7 +730,6 @@ class PressureSensor {
   });
 
   factory PressureSensor.fromJson(Map<String, dynamic> json) {
-    print('PressureSensor');
     return PressureSensor(
       sNo: json['sNo'],
       id: json['id'],
@@ -610,7 +766,6 @@ class RelayStatus {
   });
 
   factory RelayStatus.fromJson(Map<String, dynamic> json) {
-    print('RelayStatus');
     return RelayStatus(
       Name: json['Name'],
       RlyNo: json['RlyNo'],
@@ -629,7 +784,6 @@ class SensorStatus {
   });
 
   factory SensorStatus.fromJson(Map<String, dynamic> json) {
-    print('SensorStatus');
     return SensorStatus(
       Name: json['Name'],
       Value: json['Value'],
@@ -669,7 +823,6 @@ class Filter {
   }) : dpValue = dpValue.toString();
 
   factory Filter.fromJson(Map<String, dynamic> json) {
-    print('Filter');
     var filterStatusList = json['FilterStatus'] as List;
     List<FilterStatus> filterStatus = filterStatusList.isNotEmpty? filterStatusList.map((status) => FilterStatus.fromJson(status)).toList(): [];
 
@@ -721,7 +874,6 @@ class FilterStatus {
   });
 
   factory FilterStatus.fromJson(Map<String, dynamic> json) {
-    print('FilterStatus');
     return FilterStatus(
       position: json['Position'],
       name: json['Name'],
@@ -768,14 +920,27 @@ class FertilizerSite {
   });
 
   factory FertilizerSite.fromJson(Map<String, dynamic> json) {
-    print('FertilizerSite');
     var agitatorList = json['Agitator'] as List;
     var boosterList = json['Booster'] as List;
     var fertilizerList = json['Fertilizer'] as List;
 
     List<Agitator> agitator = agitatorList.isNotEmpty? agitatorList.map((a) => Agitator.fromJson(a)).toList(): [];
     List<Booster> booster = boosterList.isNotEmpty? boosterList.map((b) => Booster.fromJson(b)).toList(): [];
-    List<Fertilizer> fertilizer = fertilizerList.isNotEmpty? fertilizerList.map((f) => Fertilizer.fromJson(f)).toList(): [];
+    List<Fertilizer> fertilizer = fertilizerList.isNotEmpty? fertilizerList.map((frtLs) => Fertilizer.fromJson(frtLs)).toList(): [];
+
+    String ecSet = '0', phSet = '0';
+
+    if(json['EcSet'].runtimeType==int) {
+      ecSet = json['EcSet'].toString();
+    }else{
+      ecSet = json['EcSet'];
+    }
+
+    if(json['PhSet'].runtimeType==int) {
+      phSet = json['PhSet'].toString();
+    }else{
+      phSet = json['PhSet'];
+    }
 
     return FertilizerSite(
       type: json['Type'],
@@ -788,8 +953,8 @@ class FertilizerSite {
       program: json['Program'],
       fertilizer: fertilizer,
       fertilizerTankSelector: json['FertilizerTankSelector'],
-      ecSet: json['EcSet'],
-      phSet: json['PhSet'],
+      ecSet: ecSet,
+      phSet: phSet,
     );
   }
 
@@ -851,7 +1016,6 @@ class Fertilizer {
   });
 
   factory Fertilizer.fromJson(Map<String, dynamic> json) {
-    print('Fertilizer');
     String qty = '0',qtyCompleted = '0', qtyLeft = '0';
     int frtMethod = 0, frtSelection = 0;
 
@@ -884,12 +1048,6 @@ class Fertilizer {
     }else{
       frtSelection = json['FertSelection'];
     }
-
-    /*print(qty.runtimeType);
-    print(qtyCompleted.runtimeType);
-    print(qtyLeft.runtimeType);
-    print(frtMethod.runtimeType);
-    print(frtSelection.runtimeType);*/
 
     bool hasOnTimeKey = json.containsKey('OnTime');
     bool hasOffTimeKey = json.containsKey('OffTime');
@@ -948,7 +1106,6 @@ class Agitator {
   });
 
   factory Agitator.fromJson(Map<String, dynamic> json) {
-    print('Agitator');
     return Agitator(
       name: json['Name'],
       status: json['Status'],
@@ -973,7 +1130,6 @@ class Booster {
   });
 
   factory Booster.fromJson(Map<String, dynamic> json) {
-    print('Booster');
     return Booster(
       name: json['Name'],
       status: json['Status'],

@@ -10,13 +10,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../constants/MQTTManager.dart';
 import '../../../constants/http_service.dart';
-import '../../../state_management/DurationNotifier.dart';
 import '../../../state_management/MqttPayloadProvider.dart';
 
 class CurrentSchedule extends StatefulWidget {
-  const CurrentSchedule({Key? key, required this.siteData, required this.customerID}) : super(key: key);
+  const CurrentSchedule({Key? key, required this.siteData, required this.customerID, required this.currentSchedule}) : super(key: key);
   final DashboardModel siteData;
   final int customerID;
+  final List<CurrentScheduleModel> currentSchedule;
 
   @override
   State<CurrentSchedule> createState() => _CurrentScheduleState();
@@ -39,15 +39,14 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
     });
   }
 
-/*  void _updateDurationQtyLeft() {
-    final currentSchedule = Provider.of<MqttPayloadProvider>(context, listen: false).currentSchedule;
-    final durationNotifier = Provider.of<DurationNotifier>(context, listen: false);
-    if(currentSchedule.isNotEmpty){
-      for (int i = 0; i < currentSchedule.length; i++) {
-        if(currentSchedule[i]['Message']=='Running.'){
-          if (currentSchedule[i]['Duration_QtyLeft'] != null) {
-            if ('${currentSchedule[i]['Duration_QtyLeft']}'.contains(':')) {
-              List<String> parts = currentSchedule[i]['Duration_QtyLeft'].split(':');
+  void _updateDurationQtyLeft() {
+    bool allOnDelayLeftZero = true;
+    try {
+      if(widget.currentSchedule.isNotEmpty){
+        for (int i = 0; i < widget.currentSchedule.length; i++) {
+          if(widget.currentSchedule[i].message=='Running.'){
+            if (widget.currentSchedule[i].duration_QtyLeft.contains(':')) {
+              List<String> parts = widget.currentSchedule[i].duration_QtyLeft.split(':');
               int hours = int.parse(parts[0]);
               int minutes = int.parse(parts[1]);
               int seconds = int.parse(parts[2]);
@@ -68,123 +67,30 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
               }
 
               String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-              if (currentSchedule[i]['Duration_QtyLeft'] != '00:00:00') {
-                durationNotifier.updateDuration(updatedDurationQtyLeft);
-                currentSchedule[i]['Duration_QtyLeft'] = updatedDurationQtyLeft;
-              } else {
-                _timer?.cancel();
-                durationNotifier.updateDuration('00:00:00');
-                currentSchedule[i]['Duration_QtyLeft'] = '00:00:00';
+              if (widget.currentSchedule[i].duration_QtyLeft != '00:00:00') {
+                setState(() {
+                  widget.currentSchedule[i].duration_QtyLeft = updatedDurationQtyLeft;
+                });
               }
-            } else {
-              double remainFlow = 0.0;
-              if (currentSchedule[i]['Duration_QtyLeft'] is int) {
-                remainFlow = currentSchedule[i]['Duration_QtyLeft'].toDouble();
-              } else if (currentSchedule[i]['Duration_QtyLeft'] is String) {
-                remainFlow = double.parse(currentSchedule[i]['Duration_QtyLeft']);
-              } else {
-                remainFlow = currentSchedule[i]['Duration_QtyLeft'];
-              }
-
+            }
+            else {
+              double remainFlow = double.parse(widget.currentSchedule[i].duration_QtyLeft);
               if (remainFlow > 0) {
-                double flowRate = currentSchedule[i]['AverageFlowRate'] is String
-                    ? double.parse(currentSchedule[i]['AverageFlowRate'])
-                    : currentSchedule[i]['AverageFlowRate'];
+                double flowRate = double.parse(widget.currentSchedule[i].avgFlwRt);
                 remainFlow -= flowRate;
                 String formattedFlow = remainFlow.toStringAsFixed(2);
-                durationNotifier.updateDuration(formattedFlow);
-                currentSchedule[i]['Duration_QtyLeft'] = formattedFlow;
+                setState(() {
+                  widget.currentSchedule[i].duration_QtyLeft = formattedFlow;
+                });
               } else {
-                durationNotifier.updateDuration('0.00');
-                currentSchedule[i]['Duration_QtyLeft'] = '0.00';
-                _timer?.cancel();
+                widget.currentSchedule[i].duration_QtyLeft = '0.00';
               }
             }
-          }
-          else{
-            durationNotifier.updateDuration('00000');
-            currentSchedule[i]['Duration_QtyLeft'] = '00000';
-            _timer?.cancel();
-          }
-        }else{
-          //pump on delay or filter running
-        }
-      }
-    }else{
-      durationNotifier.updateDuration('00000');
-      _timer?.cancel();
-    }
-  }*/
-
-  void _updateDurationQtyLeft() {
-    final currentSchedule = Provider.of<MqttPayloadProvider>(context, listen: false).currentSchedule;
-    bool allOnDelayLeftZero = true;
-    try {
-      if(currentSchedule.isNotEmpty){
-        for (int i = 0; i < currentSchedule.length; i++) {
-          if(currentSchedule[i]['Message']=='Running.'){
-            if (currentSchedule[i]['Duration_QtyLeft'] != null) {
-              if ('${currentSchedule[i]['Duration_QtyLeft']}'.contains(':')) {
-                List<String> parts = currentSchedule[i]['Duration_QtyLeft'].split(':');
-                int hours = int.parse(parts[0]);
-                int minutes = int.parse(parts[1]);
-                int seconds = int.parse(parts[2]);
-
-                if (seconds > 0) {
-                  seconds--;
-                } else {
-                  if (minutes > 0) {
-                    minutes--;
-                    seconds = 59;
-                  } else {
-                    if (hours > 0) {
-                      hours--;
-                      minutes = 59;
-                      seconds = 59;
-                    }
-                  }
-                }
-
-                String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-                if (currentSchedule[i]['Duration_QtyLeft'] != '00:00:00') {
-                  setState(() {
-                    currentSchedule[i]['Duration_QtyLeft'] = updatedDurationQtyLeft;
-                  });
-                }
-              } else {
-                double remainFlow = 0.0;
-                if (currentSchedule[i]['Duration_QtyLeft'] is int) {
-                  remainFlow = currentSchedule[i]['Duration_QtyLeft'].toDouble();
-                } else if (currentSchedule[i]['Duration_QtyLeft'] is String) {
-                  remainFlow = double.parse(currentSchedule[i]['Duration_QtyLeft']);
-                } else {
-                  remainFlow = currentSchedule[i]['Duration_QtyLeft'];
-                }
-
-                if (remainFlow > 0) {
-                  double flowRate = currentSchedule[i]['AverageFlowRate'] is String
-                      ? double.parse(currentSchedule[i]['AverageFlowRate'])
-                      : currentSchedule[i]['AverageFlowRate'];
-                  remainFlow -= flowRate;
-                  String formattedFlow = remainFlow.toStringAsFixed(2);
-                  setState(() {
-                    currentSchedule[i]['Duration_QtyLeft'] = formattedFlow;
-                  });
-                } else {
-                  currentSchedule[i]['Duration_QtyLeft'] = '0.00';
-                }
-              }
-            }
-            else{
-              currentSchedule[i]['Duration_QtyLeft'] = '00000';
-              _timer?.cancel();
-            }
+            allOnDelayLeftZero = false;
           }else{
             //pump on delay or filter running
           }
         }
-      }else{
-        _timer?.cancel();
       }
     } catch (e) {
       print(e);
@@ -197,9 +103,9 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
 
   @override
   Widget build(BuildContext context) {
-    final currentSchedule = Provider.of<MqttPayloadProvider>(context).currentSchedule;
     _startTimer();
-    return currentSchedule.isNotEmpty? Padding(
+
+    return Padding(
       padding: const EdgeInsets.all(3.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,7 +123,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                     ),
                     borderRadius: const BorderRadius.all(Radius.circular(5)),
                   ),
-                  height: currentSchedule.isNotEmpty? (currentSchedule.length * 45) + 45 : 50,
+                  height: (widget.currentSchedule.length * 45) + 45,
                   child: DataTable2(
                     columnSpacing: 12,
                     horizontalMargin: 12,
@@ -252,7 +158,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                       ),
                       DataColumn2(
                         label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
-                          size: ColumnSize.S,
+                        size: ColumnSize.S,
                       ),
                       DataColumn2(
                         label: Center(child: Text('Total (D/F)', style: TextStyle(fontSize: 13),)),
@@ -263,41 +169,35 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                         size: ColumnSize.S,
                       ),
                       DataColumn2(
-                          label: Center(child: Text('')),
-                          fixedWidth: 90,
+                        label: Center(child: Text('')),
+                        fixedWidth: 90,
                       ),
                     ],
-                    rows: List<DataRow>.generate(currentSchedule.length, (index) => DataRow(cells: [
+                    rows: List<DataRow>.generate(widget.currentSchedule.length, (index) => DataRow(cells: [
                       DataCell(
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(currentSchedule[index]['ProgName']),
-                              Text('${getContentByCode(currentSchedule[index]['ProgramStartStopReason'])} - ${currentSchedule[index]['ProgramStartStopReason']}', style: const TextStyle(fontSize: 11, color: Colors.black),),
+                              Text(widget.currentSchedule[index].programName),
+                              Text('${getContentByCode(widget.currentSchedule[index].reasonCode)} - ${widget.currentSchedule[index].reasonCode}', style: const TextStyle(fontSize: 11, color: Colors.black),),
                             ],
                           )
                       ),
-                      DataCell(Text(currentSchedule[index]['ProgCategory'])),
-                      DataCell(Text('${currentSchedule[index]['CurrentZone']}/${currentSchedule[index]['TotalZone']}')),
-                      DataCell(Text(currentSchedule[index]['ZoneName'])),
-                      DataCell(Center(child: Text(formatRtcValues(currentSchedule[index]['CurrentRtc'],currentSchedule[index]['TotalRtc'])))),
-                      DataCell(Center(child: Text(formatRtcValues(currentSchedule[index]['CurrentCycle'],currentSchedule[index]['TotalCycle'])))),
-                      DataCell(Center(child: Text(_convertTime(currentSchedule[index]['StartTime'])))),
-                      DataCell(Center(child: Text('${currentSchedule[index]['Duration_Qty']}'))),
-                      DataCell(Center(child: Text('${currentSchedule[index]['Duration_QtyLeft']}',style: const TextStyle(fontSize: 20)))),
-                      /*DataCell(Center(child: ValueListenableBuilder<String>(
-                        valueListenable: Provider.of<DurationNotifier>(context).leftDurationOrFlow,
-                        builder: (context, value, child) {
-                          return Text(value, style: const TextStyle(fontSize: 20));
-                        },
-                      ),)),*/
+                      DataCell(Text(widget.currentSchedule[index].programCategory)),
+                      DataCell(Text('${widget.currentSchedule[index].currentZone}/${widget.currentSchedule[index].totalZone}')),
+                      DataCell(Text(widget.currentSchedule[index].zoneName)),
+                      DataCell(Center(child: Text(formatRtcValues(widget.currentSchedule[index].currentRtc, widget.currentSchedule[index].totalRtc)))),
+                      DataCell(Center(child: Text(formatRtcValues(widget.currentSchedule[index].currentCycle,widget.currentSchedule[index].totalCycle)))),
+                      DataCell(Center(child: Text(_convertTime(widget.currentSchedule[index].startTime)))),
+                      DataCell(Center(child: Text('${widget.currentSchedule[index].duration_Qty}'))),
+                      DataCell(Center(child: Text('${widget.currentSchedule[index].duration_QtyLeft}',style: const TextStyle(fontSize: 20)))),
                       DataCell(Center(
-                        child: currentSchedule[index]['ProgName']=='StandAlone - Manual'?
+                        child: widget.currentSchedule[index].programName=='StandAlone - Manual'?
                         MaterialButton(
                           color: Colors.redAccent,
                           textColor: Colors.white,
-                          onPressed: currentSchedule[index]['Message']=='Running.'? (){
+                          onPressed: widget.currentSchedule[index].message=='Running.'? (){
                             String payload = '0,0,0,0';
                             String payLoadFinal = jsonEncode({
                               "800": [{"801": payload}]
@@ -316,21 +216,21 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                           } : null,
                           child: const Text('Stop'),
                         ):
-                        '${currentSchedule[index]['ProgName']}'.contains('StandAlone') ?
+                        widget.currentSchedule[index].programName.contains('StandAlone') ?
                         MaterialButton(
                           color: Colors.redAccent,
                           textColor: Colors.white,
                           onPressed: () async {
-                            print(currentSchedule[index]);
+                            print(widget.currentSchedule[index]);
                             final prefs = await SharedPreferences.getInstance();
-                            String? prgOffPayload = prefs.getString(currentSchedule[index]['ProgName']);
+                            String? prgOffPayload = prefs.getString(widget.currentSchedule[index].programName);
                             String payLoadFinal = jsonEncode({
                               "3900": [{"3901": prgOffPayload}]
                             });
                             MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
                             Map<String, dynamic> manualOperation = {
-                              "programName": currentSchedule[index]['ProgName'],
-                              "programId": currentSchedule[index]['ProgType'],
+                              "programName": widget.currentSchedule[index].programName,
+                              "programId": widget.currentSchedule[index].programType,
                               "startFlag":0,
                               "method": 1,
                               "time": '00:00:00',
@@ -338,15 +238,15 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                               "selected": [],
                             };
                             sentManualModeToServer(manualOperation);
-                            prefs.remove(currentSchedule[index]['ProgName']);
+                            prefs.remove(widget.currentSchedule[index].programName);
                           },
                           child: const Text('Stop'),
                         ):
                         MaterialButton(
                           color: Colors.green,
                           textColor: Colors.white,
-                          onPressed: currentSchedule[index]['Message']=='Running.'? (){
-                            String payload = '${currentSchedule[index]['ScheduleS_No']},0';
+                          onPressed: widget.currentSchedule[index].message=='Running.'? (){
+                            String payload = '${widget.currentSchedule[index].srlNo},0';
                             String payLoadFinal = jsonEncode({
                               "3700": [{"3701": payload}]
                             });
@@ -377,7 +277,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
           ),
         ],
       ),
-    ) : const SizedBox();
+    );
   }
 
   /*@override

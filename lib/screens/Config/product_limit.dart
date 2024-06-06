@@ -200,7 +200,8 @@ class _ProductLimitsState extends State<ProductLimits> with SingleTickerProvider
                                             backgroundColor: Colors.transparent,
                                           ),
                                         ),
-                                      ),),
+                                      ),
+                                    ),
                                     Expanded(
                                       flex :3,
                                       child: Column(

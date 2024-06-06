@@ -390,6 +390,15 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               const SizedBox(),
               siteListFinal[siteIndex].master[masterIndex].irrigationLine.length>1? TextButton(
                 onPressed: () {
+                  String strPRPayload = '';
+                  for(int i=0; i<provider.payload2408.length; i++){
+                    if(provider.payload2408[i]['IrrigationPauseFlag']=='0'){
+                      strPRPayload += '${provider.payload2408[i]['S_No']},1;';
+                    }else{
+                      strPRPayload += '${provider.payload2408[i]['S_No']},0;';
+                    }
+                  }
+                  print(strPRPayload);
                 },
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all<Color>(Colors.white24),

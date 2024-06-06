@@ -24,8 +24,8 @@ import 'mapping_of_inputs.dart';
 import 'mapping_of_outputs.dart';
 
 class ConfigMakerScreen extends StatefulWidget {
-  const ConfigMakerScreen({super.key, required this.userID, required this.customerID, required this.siteID, required this.imeiNumber});
-  final int userID, customerID, siteID;
+  const ConfigMakerScreen({super.key, required this.userID, required this.customerID, required this.controllerId, required this.imeiNumber});
+  final int userID, customerID, controllerId;
   final String imeiNumber;
 
   @override
@@ -51,7 +51,7 @@ class _ConfigMakerScreenState extends State<ConfigMakerScreen> with SingleTicker
     HttpService service = HttpService();
     try{
       print('getting from config maker.......................................');
-      var response = await service.postRequest('getUserConfigMaker', {'userId' : widget.customerID, 'controllerId' : widget.siteID});
+      var response = await service.postRequest('getUserConfigMaker', {'userId' : widget.customerID, 'controllerId' : widget.controllerId});
       var jsonData = jsonDecode(response.body);
       configPvd.fetchAll(jsonData['data']);
     }catch(e){
@@ -133,7 +133,7 @@ class _ConfigMakerScreenState extends State<ConfigMakerScreen> with SingleTicker
           ),
         );
       }else{
-        return  ConfigMakerForWeb(userID: widget.userID, customerID: widget.customerID, siteId: widget.siteID, imeiNo: widget.imeiNumber,);
+        return  ConfigMakerForWeb(userID: widget.userID, customerID: widget.customerID, siteId: widget.controllerId, imeiNo: widget.imeiNumber,);
       }
     },);
   }

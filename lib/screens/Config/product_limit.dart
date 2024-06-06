@@ -188,106 +188,21 @@ class _ProductLimitsState extends State<ProductLimits> with SingleTickerProvider
                                       child : Container(
                                         constraints: const BoxConstraints.expand(),
                                         decoration: BoxDecoration(
-                                          color: myTheme.primaryColor.withOpacity(0.2),
+                                          color: Colors.yellow.shade50,
+                                          border: Border.all(width: 0.2, color: Colors.black54),
                                           borderRadius: const BorderRadius.only(topLeft: Radius.circular(5.0), bottomLeft: Radius.circular(5.0)),
                                         ),
                                         child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: CircleAvatar(radius: 17,
-                                            backgroundImage: productLimits[index].product == 'Valve'?
-                                            const AssetImage('assets/images/valve_gray.png'):
-                                            productLimits[index].product == 'Main Valve'?
-                                            const AssetImage('assets/images/main_valve.png'):
-                                            productLimits[index].product == 'Source Pump'?
-                                            const AssetImage('assets/images/source_pump.png'):
-                                            productLimits[index].product == 'Irrigation Pump'?
-                                            const AssetImage('assets/images/irrigation_pump.png'):
-                                            productLimits[index].product == 'Analog Sensor'?
-                                            const AssetImage('assets/images/analog_sensor.png'):
-                                            productLimits[index].product == 'Level Sensor'?
-                                            const AssetImage('assets/images/level_sensor.png'):
-                                            productLimits[index].product == 'Booster Pump'?
-                                            const AssetImage('assets/images/booster_pump.png'):
-                                            productLimits[index].product == 'Central Fertilizer Site'?
-                                            const AssetImage('assets/images/central_fertilizer_site.png'):
-                                            productLimits[index].product == 'Central Filter Site'?
-                                            const AssetImage('assets/images/central_filtration_site.png'):
-                                            productLimits[index].product == 'Agitator'?
-                                            const AssetImage('assets/images/agitator.png'):
-                                            productLimits[index].product == 'Injector'?
-                                            const AssetImage('assets/images/injector.png'):
-                                            productLimits[index].product == 'Filter'?
-                                            const AssetImage('assets/images/filter.png'):
-                                            productLimits[index].product == 'Downstream Valve'?
-                                            const AssetImage('assets/images/downstream_valve.png'):
-                                            productLimits[index].product == 'Fan'?
-                                            const AssetImage('assets/images/fan.png'):
-                                            productLimits[index].product == 'Fogger'?
-                                            const AssetImage('assets/images/fogger.png'):
-                                            productLimits[index].product == 'Selector'?
-                                            const AssetImage('assets/images/selector.png'):
-                                            productLimits[index].product == 'Water Meter'?
-                                            const AssetImage('assets/images/water_meter.png'):
-                                            productLimits[index].product == 'Fertilizer Meter'?
-                                            const AssetImage('assets/images/fertilizer_meter.png'):
-                                            productLimits[index].product == 'Co2 Sensor'?
-                                            const AssetImage('assets/images/co2.png'):
-                                            productLimits[index].product == 'Pressure Switch'?
-                                            const AssetImage('assets/images/pressure_switch.png'):
-                                            productLimits[index].product == 'Pressure Sensor'?
-                                            const AssetImage('assets/images/pressure_sensor.png'):
-                                            productLimits[index].product == 'Pressure Sensor'?
-                                            const AssetImage('assets/images/pressure_sensor.png'):
-                                            productLimits[index].product == 'Differential Pressure Sensor'?
-                                            const AssetImage('assets/images/differential_pressure_sensor.png'):
-                                            productLimits[index].product == 'EC Sensor'?
-                                            const AssetImage('assets/images/ec_sensor.png'):
-                                            productLimits[index].product == 'PH Sensor'?
-                                            const AssetImage('assets/images/ph_sensor.png'):
-                                            productLimits[index].product == 'Temperature Sensor'?
-                                            const AssetImage('assets/images/temperature_sensor.png'):
-                                            productLimits[index].product == 'Soil Temperature Sensor'?
-                                            const AssetImage('assets/images/soil_temperature_sensor.png'):
-                                            productLimits[index].product == 'Wind Direction Sensor'?
-                                            const AssetImage('assets/images/wind_direction_sensor.png'):
-                                            productLimits[index].product == 'Wind Speed Sensor'?
-                                            const AssetImage('assets/images/wind_speed_sensor.png'):
-                                            productLimits[index].product == 'LUX Sensor'?
-                                            const AssetImage('assets/images/lux_sensor.png'):
-                                            productLimits[index].product == 'LDR Sensor'?
-                                            const AssetImage('assets/images/ldr_sensor.png'):
-                                            productLimits[index].product == 'Humidity Sensor'?
-                                            const AssetImage('assets/images/humidity_sensor.png'):
-                                            productLimits[index].product == 'Leaf Wetness Sensor'?
-                                            const AssetImage('assets/images/leaf_wetness_sensor.png'):
-                                            productLimits[index].product == 'Rain Gauge Sensor'?
-                                            const AssetImage('assets/images/rain_gauge_sensor.png'):
-                                            productLimits[index].product == 'Contact'?
-                                            const AssetImage('assets/images/contact.png'):
-                                            productLimits[index].product == 'Weather Station'?
-                                            const AssetImage('assets/images/weather_station.png'):
-                                            productLimits[index].product == 'Condition'?
-                                            const AssetImage('assets/images/condition.png'):
-                                            productLimits[index].product == 'Valve Group'?
-                                            const AssetImage('assets/images/valve_group.png'):
-                                            productLimits[index].product == 'Virtual Water Meter'?
-                                            const AssetImage('assets/images/virtual_water_meter.png'):
-                                            productLimits[index].product == 'Program'?
-                                            const AssetImage('assets/images/programs.png'):
-                                            productLimits[index].product == 'Radiation Set'?
-                                            const AssetImage('assets/images/radiation_sets.png'):
-                                            productLimits[index].product == 'Fertilizer Set'?
-                                            const AssetImage('assets/images/fertilization_sets.png'):
-                                            productLimits[index].product == 'Filter Set'?
-                                            const AssetImage('assets/images/filter_sets.png'):
-                                            const AssetImage('assets/images/water_source.png'),
+                                          padding: const EdgeInsets.all(5.0),
+                                          child: CircleAvatar(
+                                            radius: 20,
+                                            backgroundImage: AssetImage(getImageForProduct(productLimits[index].product)),
                                             backgroundColor: Colors.transparent,
-
                                           ),
                                         ),
                                       ),),
                                     Expanded(
-                                      flex :2,
+                                      flex :3,
                                       child: Column(
                                         children: <Widget>[
                                           Padding(
@@ -384,7 +299,7 @@ class _ProductLimitsState extends State<ProductLimits> with SingleTickerProvider
                     ],
                   ),
                 ),
-                ConfigMakerScreen(userID: widget.userID, customerID: widget.customerID, siteID: widget.controllerId, imeiNumber: widget.deviceId,),
+                ConfigMakerScreen(userID: widget.userID, customerID: widget.customerID, controllerId: widget.controllerId, imeiNumber: widget.deviceId,),
                 ConfigScreen(userID: widget.userID, customerID: widget.customerID, siteName: widget.siteName, controllerId: widget.controllerId, imeiNumber: widget.deviceId,),
               ],
             ),
@@ -392,6 +307,118 @@ class _ProductLimitsState extends State<ProductLimits> with SingleTickerProvider
         ],
       ),
     );
+  }
+
+  static String getImageForProduct(String product) {
+    String baseImgPath = 'assets/images/';
+    switch (product) {
+      case 'Valve':
+        return '${baseImgPath}dl_valve.png';
+      case 'Main Valve':
+        return '${baseImgPath}dl_main_valve.png';
+      case 'Source Pump':
+        return '${baseImgPath}dl_source_pump.png';
+      case 'Irrigation Pump':
+        return '${baseImgPath}dl_irrigation_pump.png';
+      case 'Irrigation Line':
+        return '${baseImgPath}dl_irrigation_line.png';
+      case 'Analog Sensor':
+        return '${baseImgPath}dl_analog_sensor.png';
+      case 'Level Sensor':
+        return '${baseImgPath}dl_level_sensor.png';
+      case 'Booster Pump':
+        return '${baseImgPath}dl_booster_pump.png';
+      case 'Central Fertilizer Site':
+        return '${baseImgPath}dl_central_fertilizer_site.png';
+      case 'Central Filter Site':
+        return '${baseImgPath}dl_central_filtration_site.png';
+      case 'Agitator':
+        return '${baseImgPath}dl_agitator.png';
+      case 'Injector':
+        return '${baseImgPath}dl_injector.png';
+      case 'Filter':
+        return '${baseImgPath}dl_filter.png';
+      case 'Downstream Valve':
+        return '${baseImgPath}dl_downstream_valve.png';
+      case 'Fan':
+        return '${baseImgPath}dl_fan.png';
+      case 'Fogger':
+        return '${baseImgPath}dl_fogger.png';
+      case 'Selector':
+        return '${baseImgPath}dl_selector.png';
+      case 'Water Meter':
+        return '${baseImgPath}dl_water_meter.png';
+      case 'Fertilizer Meter':
+        return '${baseImgPath}dl_fertilizer_meter.png';
+      case 'Co2 Sensor':
+        return '${baseImgPath}dl_co2.png';
+      case 'Pressure Switch':
+        return '${baseImgPath}dl_pressure_switch.png';
+      case 'Pressure Sensor':
+        return '${baseImgPath}dl_pressure_sensor.png';
+      case 'Differential Pressure Sensor':
+        return '${baseImgPath}dl_differential_pressure_sensor.png';
+      case 'EC Sensor':
+        return '${baseImgPath}dl_ec_sensor.png';
+      case 'PH Sensor':
+        return '${baseImgPath}dl_ph_sensor.png';
+      case 'Temperature Sensor':
+        return '${baseImgPath}dl_temperature_sensor.png';
+      case 'Soil Temperature Sensor':
+        return '${baseImgPath}dl_soil_temperature_sensor.png';
+      case 'Wind Direction Sensor':
+        return '${baseImgPath}dl_wind_direction_sensor.png';
+      case 'Wind Speed Sensor':
+        return '${baseImgPath}dl_wind_speed_sensor.png';
+      case 'LUX Sensor':
+        return '${baseImgPath}dl_lux_sensor.png';
+      case 'LDR Sensor':
+        return '${baseImgPath}dl_ldr_sensor.png';
+      case 'Humidity Sensor':
+        return '${baseImgPath}dl_humidity_sensor.png';
+      case 'Leaf Wetness Sensor':
+        return '${baseImgPath}dl_leaf_wetness_sensor.png';
+      case 'Rain Gauge Sensor':
+        return '${baseImgPath}dl_rain_gauge_sensor.png';
+      case 'Contact':
+        return '${baseImgPath}dl_contact.png';
+      case 'Weather Station':
+        return '${baseImgPath}dl_weather_station.png';
+      case 'Condition':
+        return '${baseImgPath}dl_condition.png';
+      case 'Valve Group':
+        return '${baseImgPath}dl_valve_group.png';
+      case 'Virtual Water Meter':
+        return '${baseImgPath}dl_virtual_water_meter.png';
+      case 'Program':
+        return '${baseImgPath}dl_programs.png';
+      case 'Radiation Set':
+        return '${baseImgPath}dl_radiation_sets.png';
+      case 'Fertilizer Set':
+        return '${baseImgPath}dl_fertilization_sets.png';
+      case 'Filter Set':
+        return '${baseImgPath}dl_filter_sets.png';
+      case 'Moisture Sensor':
+        return '${baseImgPath}dl_moisture_sensor.png';
+      case 'Float':
+        return '${baseImgPath}dl_float.png';
+      case 'Moisture Condition':
+        return '${baseImgPath}dl_moisture_condition.png';
+      case 'Tank Float':
+        return '${baseImgPath}dl_tank_float.png';
+      case 'Power Supply':
+        return '${baseImgPath}dl_power_supply.png';
+      case 'Level Condition':
+        return '${baseImgPath}dl_level_condition.png';
+      case 'Common Pressure Sensor':
+        return '${baseImgPath}dl_common_pressure_sensor.png';
+      case 'Common Pressure Switch':
+        return '${baseImgPath}dl_common_pressure_switch.png';
+      case 'Water Source':
+        return '${baseImgPath}dl_water_source.png';
+      default:
+        return '${baseImgPath}dl_humidity_sensor.png';
+    }
   }
 
   void _showSnackBar(String message) {

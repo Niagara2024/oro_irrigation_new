@@ -287,6 +287,53 @@ flutter:
      - assets/GifFile/motor_on_new.gif
      - assets/GifFile/motor_ondelay_new.gif
      - assets/images/dp_fert_vertical_pipe.png
+     - assets/images/dl_valve.png
+     - assets/images/dl_main_valve.png
+     - assets/images/dl_source_pump.png
+     - assets/images/dl_irrigation_pump.png
+     - assets/images/dl_analog_sensor.png
+     - assets/images/dl_level_sensor.png
+     - assets/images/dl_booster_pump.png
+     - assets/images/dl_central_fertilizer_site.png
+     - assets/images/dl_central_filtration_site.png
+     - assets/images/dl_agitator.png
+     - assets/images/dl_filter.png
+     - assets/images/dl_co2.png
+     - assets/images/dl_condition.png
+     - assets/images/dl_contact.png
+     - assets/images/dl_differential_pressure_sensor.png
+     - assets/images/dl_downstream_valve.png
+     - assets/images/dl_ec_sensor.png
+     - assets/images/dl_fan.png
+     - assets/images/dl_fertilizer_meter.png
+     - assets/images/dl_filter_sets.png
+     - assets/images/dl_fogger.png
+     - assets/images/dl_injector.png
+     - assets/images/dl_irrigation_pump.png
+     - assets/images/dl_ph_sensor.png
+     - assets/images/dl_pressure_sensor.png
+     - assets/images/dl_pressure_switch.png
+     - assets/images/dl_programs.png
+     - assets/images/dl_rain_gauge_sensor.png
+     - assets/images/dl_selector.png
+     - assets/images/dl_soil_temperature_sensor.png
+     - assets/images/dl_valve_group.png
+     - assets/images/dl_virtual_water_meter.png
+     - assets/images/dl_water_meter.png
+     - assets/images/dl_water_source.png
+     - assets/images/dl_irrigation_line.png
+     - assets/images/dl_moisture_sensor.png
+     - assets/images/dl_temperature_sensor.png
+     - assets/images/dl_fertilization_sets.png
+     - assets/images/dl_float.png
+     - assets/images/dl_tank_float.png
+     - assets/images/dl_moisture_condition.png
+     - assets/images/dl_power_supply.png
+     - assets/images/dl_power_supply.png
+     - assets/images/dl_level_condition.png
+     - assets/images/dl_common_pressure_sensor.png
+     - assets/images/dl_common_pressure_switch.png
+     - assets/images/dl_humidity_sensor.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

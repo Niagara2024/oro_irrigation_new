@@ -132,10 +132,9 @@ class _RunByManualState extends State<RunByManual> {
           int position = findPositionByName(strProgramName, widget.programList);
           if (position != -1) {
             ddCurrentPosition = position;
-          } else {
+          }else {
             print("'$strProgramName' not found in the list.");
           }
-
           await Future.delayed(const Duration(milliseconds: 500));
           scheduleSectionCallbackMethod(programId, ddCurrentPosition);
         }catch(e){
@@ -1072,7 +1071,7 @@ class _RunByManualState extends State<RunByManual> {
                             ),
                           ): Container(),
 
-                        if (dashBoardData.isNotEmpty)
+                        if (ddCurrentPosition==0 && dashBoardData.isNotEmpty)
                           dashBoardData[0].agitator.isNotEmpty ? Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Column(
@@ -1109,7 +1108,7 @@ class _RunByManualState extends State<RunByManual> {
                             ),
                           ): Container(),
 
-                        if (dashBoardData.isNotEmpty)
+                        if (ddCurrentPosition==0 && dashBoardData.isNotEmpty)
                           dashBoardData[0].fan.isNotEmpty ? Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Column(
@@ -1146,7 +1145,7 @@ class _RunByManualState extends State<RunByManual> {
                             ),
                           ): Container(),
 
-                        if (dashBoardData.isNotEmpty)
+                        if (ddCurrentPosition==0 && dashBoardData.isNotEmpty)
                           dashBoardData[0].fogger.isNotEmpty ? Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Column(
@@ -1183,7 +1182,7 @@ class _RunByManualState extends State<RunByManual> {
                             ),
                           ): Container(),
 
-                        if (dashBoardData.isNotEmpty)
+                        if (ddCurrentPosition==0 && dashBoardData.isNotEmpty)
                           dashBoardData[0].boosterPump.isNotEmpty ? Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Column(
@@ -1220,7 +1219,7 @@ class _RunByManualState extends State<RunByManual> {
                             ),
                           ): Container(),
 
-                        if (dashBoardData.isNotEmpty)
+                        if (ddCurrentPosition==0 && dashBoardData.isNotEmpty)
                           dashBoardData[0].selector.isNotEmpty ? Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Column(

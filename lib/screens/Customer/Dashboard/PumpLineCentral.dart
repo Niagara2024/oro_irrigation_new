@@ -73,7 +73,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                       padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
                       child: provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(crInx: i):null,
                     ) : const SizedBox(),
-                  provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? const DisplayCentralFertilizer(): const SizedBox(),
+                  provider.fertilizerCentral.isNotEmpty? const DisplayCentralFertilizer(): const SizedBox(),
 
                   //local
                   provider.irrigationPump.isNotEmpty? Column(
@@ -203,26 +203,23 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                       ) : const SizedBox(),
                     provider.fertilizerCentral.isNotEmpty? const DisplayCentralFertilizer(): const SizedBox(),
                     //local
-                    Padding(
-                      padding: const EdgeInsets.only(left: 0),
-                      child: provider.irrigationPump.isNotEmpty? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              provider.filtersLocal.isNotEmpty? Padding(
-                                padding: EdgeInsets.only(top: provider.fertilizerLocal.isNotEmpty?38.4:0),
-                                child: LocalFilter(currentLineId: line.id,),
-                              ) : const SizedBox(),
-                              provider.fertilizerLocal.isNotEmpty? DisplayLocalFertilizer(currentLineId: line.id,) : const SizedBox(),
-                            ],
-                          ),
-                        ],
-                      ):
-                      const SizedBox(height: 20),
-                    )
+                    provider.irrigationPump.isNotEmpty? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            provider.filtersLocal.isNotEmpty? Padding(
+                              padding: EdgeInsets.only(top: provider.fertilizerLocal.isNotEmpty?38.4:0),
+                              child: LocalFilter(currentLineId: line.id,),
+                            ) : const SizedBox(),
+                            provider.fertilizerLocal.isNotEmpty? DisplayLocalFertilizer(currentLineId: line.id,) : const SizedBox(),
+                          ],
+                        ),
+                      ],
+                    ):
+                    const SizedBox(height: 20)
                   ],
                 ):
                 const SizedBox(height: 20),
@@ -248,7 +245,7 @@ class SensorWidget extends StatelessWidget {
     return Container(
       width: 100,
       margin: const EdgeInsets.all(8.0),
-      color: Colors.blue,
+      color: Colors.teal.shade100,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -989,7 +986,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                                     left: 6,
                                     child: CircleAvatar(
                                       radius: 8,
-                                      backgroundColor: Colors.lightBlueAccent,
+                                      backgroundColor: Colors.teal.shade100,
                                       child: Text('${index+1}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),),
                                     ),
                                   ),
@@ -1080,54 +1077,66 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                   width: 200,
                   child: Row(
                     children: [
-                      const SizedBox(width: 10.5,),
-                      VerticalDivider(width: 0,color: Colors.grey.shade300,),
-                      const SizedBox(width: 4.0,),
-                      VerticalDivider(width: 0,color: Colors.grey.shade300,),
-                      const SizedBox(width: 5.0,),
-                      SizedBox(
-                        width: 170,
-                        height: 30,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      if(fIndex!=0)
+                        Row(
                           children: [
-                            provider.fertilizerCentral[fIndex]['Ec'].isNotEmpty ? SizedBox(
-                              height: 15,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: provider.fertilizerCentral[fIndex]['Ec'].length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Center(child: Text('${provider.fertilizerCentral[fIndex]['Ec'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal))),
-                                      Center(child: Text(provider.fertilizerCentral[fIndex]['Ec'][index]['Status'], style: TextStyle(fontSize: 10))),
-                                      const SizedBox(width: 10,),
-                                    ],
-                                  );
-                                },
-                              ),
-                            ) :
-                            const SizedBox(),
-                            provider.fertilizerCentral[fIndex]['Ph'].isNotEmpty ? SizedBox(
-                              height: 15,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: provider.fertilizerCentral[fIndex]['Ph'].length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return Row(
-                                    children: [
-                                      Center(child: Text('${provider.fertilizerCentral[fIndex]['Ph'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),)),
-                                      Center(child: Text(provider.fertilizerCentral[fIndex]['Ph'][index]['Status'], style: const TextStyle(fontSize: 10))),
-                                      const SizedBox(width: 10,),
-                                    ],
-                                  );
-                                },
-                              ),
-                            ) :
-                            const SizedBox(),
+                            VerticalDivider(width: 0,color: Colors.grey.shade300,),
+                            const SizedBox(width: 4.0,),
+                            VerticalDivider(width: 0,color: Colors.grey.shade300,),
                           ],
                         ),
+                      Row(
+                        children: [
+                          const SizedBox(width: 10.5,),
+                          VerticalDivider(width: 0,color: Colors.grey.shade300,),
+                          const SizedBox(width: 4.0,),
+                          VerticalDivider(width: 0,color: Colors.grey.shade300,),
+                          const SizedBox(width: 5.0,),
+                          SizedBox(
+                            width: 170,
+                            height: 30,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                provider.fertilizerCentral[fIndex]['Ec'].isNotEmpty ? SizedBox(
+                                  height: 15,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: provider.fertilizerCentral[fIndex]['Ec'].length,
+                                    itemBuilder: (BuildContext context, int index) {
+                                      return Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Center(child: Text('${provider.fertilizerCentral[fIndex]['Ec'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal))),
+                                          Center(child: Text(provider.fertilizerCentral[fIndex]['Ec'][index]['Status'], style: TextStyle(fontSize: 10))),
+                                          const SizedBox(width: 10,),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ) :
+                                const SizedBox(),
+                                provider.fertilizerCentral[fIndex]['Ph'].isNotEmpty ? SizedBox(
+                                  height: 15,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: provider.fertilizerCentral[fIndex]['Ph'].length,
+                                    itemBuilder: (BuildContext context, int index) {
+                                      return Row(
+                                        children: [
+                                          Center(child: Text('${provider.fertilizerCentral[fIndex]['Ph'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),)),
+                                          Center(child: Text(provider.fertilizerCentral[fIndex]['Ph'][index]['Status'], style: const TextStyle(fontSize: 10))),
+                                          const SizedBox(width: 10,),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ) :
+                                const SizedBox(),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -1802,7 +1811,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                                     left: 6,
                                     child: CircleAvatar(
                                       radius: 8,
-                                      backgroundColor: Colors.lightBlueAccent,
+                                      backgroundColor: Colors.teal.shade100,
                                       child: Text('${index+1}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),),
                                     ),
                                   ),
@@ -1893,54 +1902,66 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                   width: 200,
                   child: Row(
                     children: [
-                      const SizedBox(width: 10.5,),
-                      VerticalDivider(width: 0,color: Colors.grey.shade300,),
-                      const SizedBox(width: 4.0,),
-                      VerticalDivider(width: 0,color: Colors.grey.shade300,),
-                      const SizedBox(width: 5.0,),
-                      SizedBox(
-                        width: 170,
-                        height: 30,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      if(fIndex!=0)
+                        Row(
                           children: [
-                            provider.fertilizerLocal[fIndex]['Ec'].isNotEmpty ? SizedBox(
-                              height: 15,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: provider.fertilizerLocal[fIndex]['Ec'].length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Center(child: Text('${provider.fertilizerLocal[fIndex]['Ec'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal))),
-                                      Center(child: Text(provider.fertilizerLocal[fIndex]['Ec'][index]['Status'], style: const TextStyle(fontSize: 10))),
-                                      const SizedBox(width: 10,),
-                                    ],
-                                  );
-                                },
-                              ),
-                            ) :
-                            const SizedBox(),
-                            provider.fertilizerLocal[fIndex]['Ph'].isNotEmpty ? SizedBox(
-                              height: 15,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: provider.fertilizerLocal[fIndex]['Ph'].length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return Row(
-                                    children: [
-                                      Center(child: Text('${provider.fertilizerLocal[fIndex]['Ph'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),)),
-                                      Center(child: Text(provider.fertilizerLocal[fIndex]['Ph'][index]['Status'], style: const TextStyle(fontSize: 10))),
-                                      const SizedBox(width: 10,),
-                                    ],
-                                  );
-                                },
-                              ),
-                            ) :
-                            const SizedBox(),
+                            VerticalDivider(width: 0,color: Colors.grey.shade300,),
+                            const SizedBox(width: 4.0,),
+                            VerticalDivider(width: 0,color: Colors.grey.shade300,),
                           ],
                         ),
+                      Row(
+                        children: [
+                          const SizedBox(width: 10.5,),
+                          VerticalDivider(width: 0,color: Colors.grey.shade300,),
+                          const SizedBox(width: 4.0,),
+                          VerticalDivider(width: 0,color: Colors.grey.shade300,),
+                          const SizedBox(width: 5.0,),
+                          SizedBox(
+                            width: 170,
+                            height: 30,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                provider.fertilizerLocal[fIndex]['Ec'].isNotEmpty ? SizedBox(
+                                  height: 15,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: provider.fertilizerLocal[fIndex]['Ec'].length,
+                                    itemBuilder: (BuildContext context, int index) {
+                                      return Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Center(child: Text('${provider.fertilizerLocal[fIndex]['Ec'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal))),
+                                          Center(child: Text(provider.fertilizerLocal[fIndex]['Ec'][index]['Status'], style: const TextStyle(fontSize: 10))),
+                                          const SizedBox(width: 10,),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ) :
+                                const SizedBox(),
+                                provider.fertilizerLocal[fIndex]['Ph'].isNotEmpty ? SizedBox(
+                                  height: 15,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: provider.fertilizerLocal[fIndex]['Ph'].length,
+                                    itemBuilder: (BuildContext context, int index) {
+                                      return Row(
+                                        children: [
+                                          Center(child: Text('${provider.fertilizerLocal[fIndex]['Ph'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),)),
+                                          Center(child: Text(provider.fertilizerLocal[fIndex]['Ph'][index]['Status'], style: const TextStyle(fontSize: 10))),
+                                          const SizedBox(width: 10,),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ) :
+                                const SizedBox(),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

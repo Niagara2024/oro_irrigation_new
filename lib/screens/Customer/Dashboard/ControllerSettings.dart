@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../Models/language.dart';
 import '../../../constants/http_service.dart';
@@ -26,16 +27,13 @@ class _ControllerSettingsState extends State<ControllerSettings> {
   final List<LanguageList> languageList = <LanguageList>[];
   String _mySelection = 'English';
 
-  String selectedWeekday = 'Monday';
-  List<String> weekdays = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday'
-  ];
+  String selectedTheme = '0xFF036673';
+  Map<String, Color> themeColors = {
+    '0xFF036673': const Color(0xFF036673),
+    'Blue': Colors.blue,
+    'Green': Colors.green,
+    'Yellow': Colors.yellow,
+  };
 
   String? selectedTime;
   List<String> utcTimes = [
@@ -269,23 +267,33 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                     child: Column(
                       children: [
                         ListTile(
-                          title: const Text('Week first day'),
-                          leading: const Icon(Icons.calendar_view_week),
+                          title: const Text('App Theme Color'),
+                          leading: const Icon(Icons.color_lens_outlined),
                           trailing: DropdownButton<String>(
                             underline: Container(),
-                            value: selectedWeekday,
-                            hint: const Text('Select a weekday'),
+                            value: selectedTheme,
+                            hint: const Text('Select your theme color'),
                             onChanged: (String? newValue) {
                               if (newValue != null) {
                                 setState(() {
-                                  selectedWeekday = newValue;
+                                  selectedTheme = newValue;
                                 });
                               }
                             },
-                            items: weekdays.map<DropdownMenuItem<String>>((String value) {
+                            items: themeColors.entries.map<DropdownMenuItem<String>>((entry) {
                               return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
+                                value: entry.key,
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 20,
+                                      height: 20,
+                                      color: entry.value,
+                                      margin: const EdgeInsets.only(right: 8),
+                                    ),
+                                    Text(entry.key),
+                                  ],
+                                ),
                               );
                             }).toList(),
                           ),

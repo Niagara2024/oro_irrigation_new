@@ -22,6 +22,7 @@ import 'CustomerDashboard.dart';
 import 'Dashboard/ControllerLogs.dart';
 import 'Dashboard/ControllerSettings.dart';
 import 'Dashboard/RunByManual.dart';
+import 'Dashboard/SubUsers.dart';
 import 'ProgramSchedule.dart';
 import 'PumpControllerScreen/PumpDashboard.dart';
 
@@ -47,12 +48,14 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   int _selectedIndex = 0;
   List<ProgramList> programList = [];
 
-  int wifiStrength = 0;
   String lastSyncData = '';
 
   late String _myCurrentSite;
   late String _myCurrentMasterC;
   late String _myCurrentIrrLine;
+
+  final GlobalKey<_PopupMenuContentState> _menuKey = GlobalKey<_PopupMenuContentState>();
+
 
 
   @override
@@ -193,9 +196,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     });
     payloadProvider.updatePumpPayload(pumpPayloadFinal);
 
-
-
-
   }
 
   Future<void> getProgramList() async
@@ -237,7 +237,17 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   {
     final screenWidth = MediaQuery.of(context).size.width;
     final provider = Provider.of<MqttPayloadProvider>(context);
-    //provider.last
+    final wifiStrength = Provider.of<MqttPayloadProvider>(context).wifiStrength;
+
+    List<dynamic> records = provider.payload2408;
+    bool isIrrigationPauseFlagZero = false;
+    int sNoToCheck = siteListFinal.isNotEmpty? siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex].sNo:0;
+    var record = records.firstWhere((record) => record['S_No'] == sNoToCheck, orElse: () => null,);
+    if (record != null) {
+      isIrrigationPauseFlagZero = record['IrrigationPauseFlag'] == 0;
+    }
+
+
     return visibleLoading? buildLoadingIndicator(visibleLoading, screenWidth):
     Scaffold(
       appBar: AppBar(
@@ -361,44 +371,18 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              TextButton(
-                onPressed: () {
-                  print(siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex]);
-                  String payLoadFinal = jsonEncode({
-                    "2300": [
-                      {"2301": "${siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex].sNo}", },
-                    ]
-                  });
-                  //MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteListFinal[siteIndex].master[masterIndex].deviceId}');
-                },
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(Colors.white24),
-                  shape: MaterialStateProperty.all<OutlinedBorder>(
-                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(5),),
-                  ),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.pause, color: Colors.orange),
-                    SizedBox(width:5),
-                    Text('PAUSE CURRENT LINE', style: TextStyle(color: Colors.white)),
-                  ],
-                ),
-              ),
-              siteListFinal[siteIndex].master[masterIndex].irrigationLine.length>1? const SizedBox(width: 10):
-              const SizedBox(),
               siteListFinal[siteIndex].master[masterIndex].irrigationLine.length>1? TextButton(
                 onPressed: () {
-                  String strPRPayload = '';
-                  for(int i=0; i<provider.payload2408.length; i++){
-                    if(provider.payload2408[i]['IrrigationPauseFlag']=='0'){
-                      strPRPayload += '${provider.payload2408[i]['S_No']},1;';
-                    }else{
-                      strPRPayload += '${provider.payload2408[i]['S_No']},0;';
-                    }
-                  }
-                  print(strPRPayload);
+                  showMenu(
+                    context: context,
+                    color: Colors.teal,
+                    position: const RelativeRect.fromLTRB(100, 0, 95, 0),
+                    items: <PopupMenuEntry>[
+                      PopupMenuItem(
+                        child: PopupMenuContent(key: _menuKey, deviceId: siteListFinal[siteIndex].master[masterIndex].deviceId,),
+                      ),
+                    ],
+                  );
                 },
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all<Color>(Colors.white24),
@@ -409,13 +393,50 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.pause, color: Colors.orange),
-                    SizedBox(width:5),
-                    Text('PAUSE ALL LINE', style: TextStyle(color: Colors.white)),
+                    Text('PAUSE OR RESUME', style: TextStyle(color: Colors.white)),
+                    SizedBox(width: 5),
+                    Icon(Icons.arrow_drop_down_sharp, color: Colors.white),
                   ],
                 ),
               ):
-              const SizedBox(),
+              TextButton(
+                onPressed: () {
+                  int prFlag = 0;
+                  List<dynamic> records = provider.payload2408;
+                  int sNoToCheck = siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex].sNo;
+                  var record = records.firstWhere((record) => record['S_No'] == sNoToCheck, orElse: () => null,);
+                  if (record != null) {
+                    bool isIrrigationPauseFlagZero = record['IrrigationPauseFlag'] == 0;
+                    if (isIrrigationPauseFlagZero) {
+                      prFlag=1;
+                    } else {
+                      prFlag=0;
+                    }
+                    String payLoadFinal = jsonEncode({
+                      "4900": [{"4901":
+                      "${siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex].sNo},$prFlag",},]
+                    });
+                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteListFinal[siteIndex].master[masterIndex].deviceId}');
+                  }else{
+                    const GlobalSnackBar(code: 200, message: 'Controller connection lost...');
+                  }
+                },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(Colors.white24),
+                  shape: MaterialStateProperty.all<OutlinedBorder>(
+                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(5),),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    isIrrigationPauseFlagZero? const Icon(Icons.pause, color: Colors.orange):
+                    const Icon(Icons.play_arrow_outlined, color: Colors.green),
+                    const SizedBox(width:5),
+                    Text(isIrrigationPauseFlagZero? 'PAUSE': 'RESUME', style: const TextStyle(color: Colors.white)),
+                  ],
+                ),
+              ),
               const SizedBox(width: 10),
               IconButton(tooltip : 'Help & Support', onPressed: (){
                 showMenu(
@@ -508,12 +529,20 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                             child: const Text('Manage Your Niagara Account'),
                             onPressed: () async {
                               Navigator.pop(context);
-                              showModalBottomSheet(
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AccountManagement(userID: widget.customerId, callback: callbackFunction),
+                                ),
+                              );
+
+                              /*showModalBottomSheet(
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AccountManagement(userID: widget.customerId, callback: callbackFunction);
                                 },
-                              );
+                              );*/
                             },
                           ),
                           const SizedBox(height: 10),
@@ -563,7 +592,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        color: myTheme.primaryColorLight.withOpacity(0.1),
+        //color: myTheme.primaryColorLight.withOpacity(0.1),
+        color: Colors.teal.shade50,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -593,13 +623,13 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   label: Text(''),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.message_outlined),
-                  selectedIcon: Icon(Icons.message_outlined, color: Colors.white,),
+                  icon: Icon(Icons.receipt_outlined),
+                  selectedIcon: Icon(Icons.receipt_outlined, color: Colors.white,),
                   label: Text(''),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.stacked_bar_chart),
-                  selectedIcon: Icon(Icons.stacked_bar_chart, color: Colors.white,),
+                  icon: Icon(Icons.supervisor_account_outlined),
+                  selectedIcon: Icon(Icons.supervisor_account_outlined, color: Colors.white,),
                   label: Text(''),
                 ),
                 NavigationRailDestination(
@@ -626,9 +656,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 ),
               ),
               child: Container(
-                decoration: const BoxDecoration(
-                  color: Color(0xffefefef),
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
+                decoration: BoxDecoration(
+                  //color: Color(0x64C4E9EE),
+                  color: Colors.teal.shade50,
+                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -639,7 +670,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   _selectedIndex == 1 ? ProductInventory(userName: widget.customerName):
                   _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
                   _selectedIndex == 3 ?  ControllerLogs(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId,):
-                  _selectedIndex == 4 ?  SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
+                  _selectedIndex == 4 ?  SubUsers(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
                   _selectedIndex == 5 ?  WeatherScreen(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId, deviceID: siteListFinal[siteIndex].master[masterIndex].deviceId,):
                   ControllerSettings(customerID: widget.customerId, siteData: siteListFinal[siteIndex], masterIndex: masterIndex,),
                 ),
@@ -654,7 +685,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const SizedBox(height: 10),
-                  CircleAvatar(
+                  siteListFinal[siteIndex].master[masterIndex].categoryId==1 ||
+                      siteListFinal[siteIndex].master[masterIndex].categoryId==2 ? CircleAvatar(
                     radius: 20,
                     backgroundColor: myTheme.primaryColorDark,
                     child: SizedBox(
@@ -664,7 +696,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                         sideSheet();
                       }, icon: const Icon(Icons.menu, color: Colors.white)),
                     ),
-                  ),
+                  ):
+                  const SizedBox(),
                   const SizedBox(height: 15),
                   Container(
                     decoration: BoxDecoration(
@@ -693,7 +726,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                       wifiStrength >= 1 && wifiStrength <= 20 ? Icons.network_wifi_1_bar_outlined:
                       wifiStrength >= 21 && wifiStrength <= 40 ? Icons.network_wifi_2_bar_outlined:
                       wifiStrength >= 41 && wifiStrength <= 60 ? Icons.network_wifi_3_bar_outlined:
-                      wifiStrength >= 61 && wifiStrength <= 80 ? Icons.network_wifi_outlined:
+                      wifiStrength >= 61 && wifiStrength <= 80 ? Icons.network_wifi_3_bar_outlined:
                       Icons.wifi, color: Colors.white,),
                       onPressed: null,
                     ),
@@ -1168,7 +1201,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     );
   }
 
-
   void indicatorViewShow() {
     setState((){
       visibleLoading = true;
@@ -1601,4 +1633,124 @@ class _SideSheetClassState extends State<SideSheetClass> {
     }
     return -1;
   }
+}
+
+class PopupMenuContent extends StatefulWidget {
+  const PopupMenuContent({Key? key, required this.deviceId}) : super(key: key);
+  final String deviceId;
+
+  @override
+  _PopupMenuContentState createState() => _PopupMenuContentState();
+}
+
+class _PopupMenuContentState extends State<PopupMenuContent> {
+  // Example data
+
+  bool allIrrigationResumeFlag = false;
+
+  @override
+  Widget build(BuildContext context) {
+
+    final provider = Provider.of<MqttPayloadProvider>(context).payload2408;
+    allIrrigationResumeFlag = provider.every((record) => record['IrrigationPauseFlag'] == 1);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TextButton(
+          onPressed: () {
+            String strPRPayload = '';
+            for (int i = 0; i < provider.length; i++) {
+              if (allIrrigationResumeFlag) {
+                strPRPayload += '${provider[i]['S_No']},0;';
+              } else {
+                strPRPayload += '${provider[i]['S_No']},1;';
+              }
+            }
+            String payloadFinal = jsonEncode({
+              "4900": [{"4901": strPRPayload}]
+            });
+            // Replace with your MQTT publish code
+            print('Publish: $payloadFinal');
+            MQTTManager().publish(payloadFinal, 'AppToFirmware/${widget.deviceId}');
+          },
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
+            shape: MaterialStateProperty.all<OutlinedBorder>(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+              ),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              allIrrigationResumeFlag
+                  ? const Icon(Icons.play_arrow_outlined, color: Colors.green)
+                  : const Icon(Icons.pause, color: Colors.orange),
+              const SizedBox(width: 5),
+              Text(allIrrigationResumeFlag ? 'RESUME ALL LINE' : 'PAUSE ALL LINE',
+                  style: const TextStyle(color: Colors.black)),
+            ],
+          ),
+        ),
+        const Divider(),
+        ...provider.map((item) {
+          return ListTile(
+            leading: const Icon(
+              CupertinoIcons.ellipsis_circle,
+              color: Colors.white,
+            ),
+            title: Text(
+              item['Line'],
+              style: const TextStyle(color: Colors.white),
+            ),
+            trailing: TextButton(
+              onPressed: () {
+                String payLoadFinal = jsonEncode({
+                  "4900": [{
+                      "4901": "${item['S_No']},${item['IrrigationPauseFlag'] == 0 ? '1' : '0'}",
+                    },
+                  ]
+                });
+                // Replace with your MQTT publish code
+                print('Publish: $payLoadFinal');
+                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+              },
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                shape: MaterialStateProperty.all<OutlinedBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    item['IrrigationPauseFlag'] == 0
+                        ? Icons.pause
+                        : Icons.play_arrow_outlined,
+                    color: item['IrrigationPauseFlag'] == 0
+                        ? Colors.orange
+                        : Colors.green,
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    item['IrrigationPauseFlag'] == 0 ? 'PAUSE' : 'RESUME',
+                    style: const TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          );
+        }).toList(),
+      ],
+    );
+  }
+
 }

@@ -155,11 +155,9 @@ class _DashboardWideState extends State<DashboardWide> {
     print('userName:${widget.userName}');
     print('userId:${widget.userId}');
     print('userType:${widget.userType}');
-
     return  Scaffold(
       body: mainScreen(widget.userType),
     );
-
   }
 
   Widget mainScreen(int userType) {

@@ -190,8 +190,8 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                       DataCell(Center(child: Text(formatRtcValues(widget.currentSchedule[index].currentRtc, widget.currentSchedule[index].totalRtc)))),
                       DataCell(Center(child: Text(formatRtcValues(widget.currentSchedule[index].currentCycle,widget.currentSchedule[index].totalCycle)))),
                       DataCell(Center(child: Text(_convertTime(widget.currentSchedule[index].startTime)))),
-                      DataCell(Center(child: Text('${widget.currentSchedule[index].duration_Qty}'))),
-                      DataCell(Center(child: Text('${widget.currentSchedule[index].duration_QtyLeft}',style: const TextStyle(fontSize: 20)))),
+                      DataCell(Center(child: Text(widget.currentSchedule[index].duration_Qty))),
+                      DataCell(Center(child: Text(widget.currentSchedule[index].duration_QtyLeft,style: const TextStyle(fontSize: 20)))),
                       DataCell(Center(
                         child: widget.currentSchedule[index].programName=='StandAlone - Manual'?
                         MaterialButton(

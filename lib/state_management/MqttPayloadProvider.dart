@@ -49,7 +49,11 @@ class MqttPayloadProvider with ChangeNotifier {
       if (data.containsKey('2400') && data['2400'] != null && data['2400'].isNotEmpty) {
         dashBoardPayload = payload;
 
-        if (data['2400'][0].containsKey('2401')) {
+        if(data['2400'][0].containsKey('WifiStrength')) {
+          wifiStrength = data['2400'][0]['WifiStrength'];
+        }
+
+        if(data['2400'][0].containsKey('2401')) {
           nodeList = data['2400'][0]['2401'];
         }
 
@@ -112,7 +116,6 @@ class MqttPayloadProvider with ChangeNotifier {
         if (data['2400'][0].containsKey('2410')) {
           waterMeter = data['2400'][0]['2410'];
         }
-
       }
       else if(data.containsKey('2900') && data['2900'] != null && data['2900'].isNotEmpty){
         schedulePayload = payload;

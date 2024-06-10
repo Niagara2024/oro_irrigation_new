@@ -12,7 +12,7 @@ class MqttPayloadProvider with ChangeNotifier {
   late ScheduleViewProvider mySchedule;
 
   int wifiStrength = 0;
-  List<dynamic> nodeList = [];
+  //List<dynamic> nodeList = [];
   //List<dynamic> currentSchedule = [];
   List<dynamic> PrsIn = [];
   List<dynamic> PrsOut = [];
@@ -27,6 +27,9 @@ class MqttPayloadProvider with ChangeNotifier {
   List<dynamic> waterMeter = [];
   List<dynamic> alarmList = [];
   List<dynamic> payload2408 = [];
+
+  List<dynamic> _nodeList = [];
+  List<dynamic> get nodeList => _nodeList;
 
   List<ScheduledProgram> _scheduledProgram = [];
   List<ScheduledProgram> get scheduledProgram => _scheduledProgram;
@@ -54,7 +57,8 @@ class MqttPayloadProvider with ChangeNotifier {
         }
 
         if(data['2400'][0].containsKey('2401')) {
-          nodeList = data['2400'][0]['2401'];
+          List<dynamic> nodes = data['2400'][0]['2401'];
+          updateNodeList(nodes);
         }
 
         if(data['2400'][0].containsKey('2402')) {
@@ -125,6 +129,11 @@ class MqttPayloadProvider with ChangeNotifier {
       print('Error parsing JSON: $e');
     }
     //notifyListeners();
+  }
+
+  void updateNodeList(List<dynamic> nds) {
+    _nodeList = nds;
+    notifyListeners();
   }
 
   void updateCurrentScheduled(List<CurrentScheduleModel> cs) {

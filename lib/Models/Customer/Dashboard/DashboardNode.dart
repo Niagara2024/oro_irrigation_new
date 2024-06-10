@@ -172,11 +172,11 @@ class NodeData {
   String modelName;
   int serialNumber;
   int referenceNumber;
-  double SVolt;
-  double BatVolt;
-  List<RelayStatus> RlyStatus;
-  List<SensorStatus> Sensor;
-  int Status;
+  double sVolt;
+  double batVolt;
+  List<RelayStatus> rlyStatus;
+  List<SensorStatus> sensor;
+  int status;
 
   NodeData({
     required this.controllerId,
@@ -188,16 +188,19 @@ class NodeData {
     required this.modelName,
     required this.serialNumber,
     required this.referenceNumber,
-    required this.SVolt,
-    required this.BatVolt,
-    required this.RlyStatus,
-    required this.Sensor,
-    required this.Status,
+    required this.sVolt,
+    required this.batVolt,
+    required this.rlyStatus,
+    required this.sensor,
+    required this.status,
   });
 
   factory NodeData.fromJson(Map<String, dynamic> json) {
+
     var rlyStatusList = json['RlyStatus'] as List;
-    List<RelayStatus> rlyStatus = rlyStatusList.map((rlyStatus) => RelayStatus.fromJson(rlyStatus)).toList();
+    List<RelayStatus> rlyStatus = rlyStatusList.isNotEmpty? rlyStatusList.map((node) => RelayStatus.fromJson(node)).toList() : [];
+
+    //List<RelayStatus> rlyStatus = rlyStatusList.map((rlyStatus) => RelayStatus.fromJson(rlyStatus)).toList();
 
     var sensorList = json['Sensor'] as List;
     List<SensorStatus> sensor = sensorList.map((sensor) => SensorStatus.fromJson(sensor)).toList();
@@ -212,18 +215,18 @@ class NodeData {
       modelName: json['modelName'],
       serialNumber: json['serialNumber'],
       referenceNumber: json['referenceNumber'],
-      SVolt: json['SVolt'],
-      BatVolt: json['BatVolt'],
-      RlyStatus: rlyStatus,
-      Sensor: sensor,
-      Status: json['Status'],
+      sVolt: json['SVolt'],
+      batVolt: json['BatVolt'],
+      rlyStatus: rlyStatus,
+      sensor: sensor,
+      status: json['Status'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'controllerId': controllerId,
-      'deviceId': deviceId,
+      'DeviceId': deviceId,
       'deviceName': deviceName,
       'categoryId': categoryId,
       'categoryName': categoryName,
@@ -231,11 +234,11 @@ class NodeData {
       'modelName': modelName,
       'serialNumber': serialNumber,
       'referenceNumber': referenceNumber,
-      'SVolt': SVolt,
-      'BatVolt': BatVolt,
-      'RlyStatus': RlyStatus,
-      'Sensor': Sensor,
-      'Status': Status,
+      'SVolt': sVolt,
+      'BatVolt': batVolt,
+      'RlyStatus': rlyStatus,
+      'Sensor': sensor,
+      'Status': status,
     };
   }
 }
@@ -755,23 +758,35 @@ class PressureSensor {
 }
 
 class RelayStatus {
-  final String? Name;
-  final int? RlyNo;
+  final int? S_No;
+  final String? name;
+  final int? rlyNo;
   final int? Status;
 
   RelayStatus({
-    required this.Name,
-    required this.RlyNo,
+    required this.S_No,
+    required this.name,
+    required this.rlyNo,
     required this.Status,
   });
 
   factory RelayStatus.fromJson(Map<String, dynamic> json) {
     return RelayStatus(
-      Name: json['Name'],
-      RlyNo: json['RlyNo'],
+      S_No: json['S_No'],
+      name: json['Name'],
+      rlyNo: json['RlyNo'],
       Status: json['Status'],
     );
   }
+
+  /*Map<String, dynamic> toJson() {
+    return {
+      'S_No': S_No,
+      'Name': name,
+      'RlyNo': rlyNo,
+      'Status': status,
+    };
+  }*/
 }
 
 class SensorStatus {

@@ -19,6 +19,7 @@ import '../../state_management/MqttPayloadProvider.dart';
 import '../product_inventory.dart';
 import 'AccountManagement.dart';
 import 'CustomerDashboard.dart';
+import 'Dashboard/AllNodeListAndDetails.dart';
 import 'Dashboard/ControllerLogs.dart';
 import 'Dashboard/ControllerSettings.dart';
 import 'Dashboard/RunByManual.dart';
@@ -55,8 +56,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   late String _myCurrentIrrLine;
 
   final GlobalKey<_PopupMenuContentState> _menuKey = GlobalKey<_PopupMenuContentState>();
-
-
 
   @override
   void initState() {
@@ -162,6 +161,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   void loadServerData(){
     MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
+
+    //List<dynamic> ndlLst = siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList.map((ndl) => ndl.toJson()).toList();
+    //payloadProvider.updateNodeList(ndlLst);
 
     List<dynamic> csLst = siteListFinal[siteIndex].master[masterIndex].liveData[0].currentSchedule.map((cs) => cs.toJson()).toList();
     List<CurrentScheduleModel> cs = csLst.map((cs) => CurrentScheduleModel.fromJson(cs)).toList();
@@ -385,7 +387,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   );
                 },
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(Colors.white24),
+                  backgroundColor: MaterialStateProperty.all<Color>(Colors.orange),
                   shape: MaterialStateProperty.all<OutlinedBorder>(
                     RoundedRectangleBorder(borderRadius: BorderRadius.circular(5),),
                   ),
@@ -393,7 +395,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('PAUSE OR RESUME', style: TextStyle(color: Colors.white)),
+                    Text('PAUSE or RESUME', style: TextStyle(color: Colors.white)),
                     SizedBox(width: 5),
                     Icon(Icons.arrow_drop_down_sharp, color: Colors.white),
                   ],
@@ -665,7 +667,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   padding: const EdgeInsets.all(8.0),
                   child: _selectedIndex == 0 ? SizedBox(child: siteListFinal[siteIndex].master[masterIndex].categoryId==1 ||
                       siteListFinal[siteIndex].master[masterIndex].categoryId==2 ?
-                  CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: siteListFinal[siteIndex], crrIrrLine: siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex],):
+                  CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: siteListFinal[siteIndex], crrIrrLine: siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex], masterInx: masterIndex,):
                   PumpDashboard(siteData: siteListFinal[siteIndex], masterIndex: masterIndex,)):
                   _selectedIndex == 1 ? ProductInventory(userName: widget.customerName):
                   _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
@@ -793,7 +795,12 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     width: 45,
                     height: 45,
                     child: IconButton(tooltip:'View all Node details', onPressed: (){
-                      showNodeDetailsBottomSheet(context);
+                      //showNodeDetailsBottomSheet(context);
+                      Navigator.push(context,
+                        MaterialPageRoute(
+                          builder: (context) => AllNodeListAndDetails(userID: widget.customerId, customerID: widget.customerId, masterInx: masterIndex, siteData: siteListFinal[siteIndex],),
+                        ),
+                      );
                     }, icon: const Icon(Icons.grid_view, color: Colors.white)),
                   ),
                   const SizedBox(height: 15),
@@ -926,10 +933,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                 children: [
                                   const Icon(Icons.solar_power_outlined),
                                   const SizedBox(width: 5,),
-                                  Text('${siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].SVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                  Text('${siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].sVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
                                   const SizedBox(width: 5,),
                                   const Icon(Icons.battery_3_bar_rounded),
-                                  Text('${siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].BatVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                  Text('${siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
                                   const SizedBox(width: 5,),
                                   IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
                                     String payLoadFinal = jsonEncode({
@@ -950,7 +957,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                 GridView.builder(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].RlyStatus.length,
+                                  itemCount: siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus.length,
                                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 8,
                                   ),
@@ -959,33 +966,33 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                       children: [
                                         CircleAvatar(
                                           backgroundColor: Colors.transparent,
-                                          backgroundImage: siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].RlyStatus[index].Name!.contains("SP") ?
+                                          backgroundImage: siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("SP") ?
                                           const AssetImage('assets/images/irrigation_pump.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].RlyStatus[index].Name!.contains("IP") ?
+                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("IP") ?
                                           const AssetImage('assets/images/irrigation_pump.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].RlyStatus[index].Name!.contains("VL") ?
+                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("VL") ?
                                           const AssetImage('assets/images/valve_gray.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].RlyStatus[index].Name!.contains("MV") ?
+                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("MV") ?
                                           const AssetImage('assets/images/dp_main_valve.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].RlyStatus[index].Name!.contains("FL") ?
+                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("FL") ?
                                           const AssetImage('assets/images/dp_filter.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].RlyStatus[index].Name!.contains("FC") ?
+                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("FC") ?
                                           const AssetImage('assets/images/fert_chanel.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].RlyStatus[index].Name!.contains("FG") ?
+                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("FG") ?
                                           const AssetImage('assets/images/fogger.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].RlyStatus[index].Name!.contains("FB") ?
+                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("FB") ?
                                           const AssetImage('assets/images/booster_pump.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].RlyStatus[index].Name!.contains("AG") ?
+                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("AG") ?
                                           const AssetImage('assets/images/dp_agitator_gray.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].RlyStatus[index].Name!.contains("DV") ?
+                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("DV") ?
                                           const AssetImage('assets/images/downstream_valve.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].RlyStatus[index].Name!.contains("SL") ?
+                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("SL") ?
                                           const AssetImage('assets/images/selector.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].RlyStatus[index].Name!.contains("FN") ?
+                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("FN") ?
                                           const AssetImage('assets/images/fan.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].RlyStatus[index].Name!.contains("LI") ?
+                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("LI") ?
                                           const AssetImage('assets/images/pressure_sensor.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].RlyStatus[index].Name!.contains("LO") ?
+                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("LO") ?
                                           const AssetImage('assets/images/pressure_sensor.png'):
                                           const AssetImage('assets/images/pressure_sensor.png'),
                                         ),
@@ -997,7 +1004,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                               backgroundColor: Colors.grey,
                                             ),
                                             const SizedBox(width: 3),
-                                            Text('${siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].RlyStatus[index].Name!}(${siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].RlyStatus[index].RlyNo})', style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                            Text('${siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!}(${siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].rlyNo})', style: const TextStyle(color: Colors.black, fontSize: 10)),
                                           ],
                                         ),
                                       ],
@@ -1007,7 +1014,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                 GridView.builder(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].Sensor.length,
+                                  itemCount: siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].sensor.length,
                                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 8,
                                   ),
@@ -1019,7 +1026,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                           height: 40,
                                           child: Stack(
                                             children: [
-                                              AppImages.getAsset('sensor',0, siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].Sensor[index].Name!),
+                                              AppImages.getAsset('sensor',0, siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].sensor[index].Name!),
                                               Positioned(
                                                 top: 25,
                                                 left: 0,
@@ -1028,7 +1035,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                                       borderRadius: BorderRadius.circular(3),
                                                       color: Colors.yellow,
                                                     ),
-                                                    child: Center(child: Text('${siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].Sensor[index].Value}', style: const TextStyle(color: Colors.black, fontSize: 10)))
+                                                    child: Center(child: Text('${siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].sensor[index].Value}', style: const TextStyle(color: Colors.black, fontSize: 10)))
                                                 ),
                                               ),
                                             ],
@@ -1037,7 +1044,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
-                                            Text(siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].Sensor[index].Name!, style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                            Text(siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].sensor[index].Name!, style: const TextStyle(color: Colors.black, fontSize: 10)),
                                           ],
                                         ),
                                       ],
@@ -1286,22 +1293,21 @@ class _SideSheetClassState extends State<SideSheetClass> {
 
   @override
   Widget build(BuildContext context) {
+
     final nodeList = Provider.of<MqttPayloadProvider>(context).nodeList;
     try{
       for (var item in nodeList) {
         if (item is Map<String, dynamic>) {
           try {
-            int position = getNodePositionInNodeList(0, item['SNo']);
+            int position = getNodeListPosition(item['SNo']);
             if (position != -1) {
-              widget.nodeList[position].Status = item['Status'];
-              widget.nodeList[position].BatVolt = item['BatVolt'];
-              widget.nodeList[position].SVolt = item['SVolt'];
-              widget.nodeList[position].RlyStatus = [];
-              if (item['RlyStatus'] != null) {
-                List<dynamic> rlyStatusJsonList = item['RlyStatus'];
-                List<RelayStatus> rlyStatusList = rlyStatusJsonList.map((rs) => RelayStatus.fromJson(rs)).toList();
-                widget.nodeList[position].RlyStatus = rlyStatusList;
-              }
+              widget.nodeList[position].status = item['Status'];
+              widget.nodeList[position].batVolt = item['BatVolt'];
+              widget.nodeList[position].sVolt = item['SVolt'];
+              widget.nodeList[position].rlyStatus = [];
+              List<dynamic> rlyList = item['RlyStatus'];
+              List<RelayStatus> rlyStatusList = rlyList.isNotEmpty? rlyList.map((rl) => RelayStatus.fromJson(rl)).toList() : [];
+              widget.nodeList[position].rlyStatus = rlyStatusList;
             } else {
               print('${item['SNo']} The serial number not found');
             }
@@ -1445,9 +1451,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                           icon: Icon(Icons.network_check, color: myTheme.primaryColorDark),
                           onPressed: () async {
                             String payLoadFinal = jsonEncode({
-                              "4500": [
-                                {"4501": ""},
-                              ]
+                              "4500": [{"4501": ""},]
                             });
                             MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
                             GlobalSnackBar.show(context, 'Sent your comment successfully', 200);
@@ -1496,10 +1500,10 @@ class _SideSheetClassState extends State<SideSheetClass> {
                 rows: List<DataRow>.generate(widget.nodeList.length, (index) => DataRow(cells: [
                   DataCell(Center(child: Text('${widget.nodeList[index].serialNumber}', style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black),))),
                   DataCell(Center(child: CircleAvatar(radius: 7, backgroundColor:
-                  widget.nodeList[index].Status == 1? Colors.green.shade400:
-                  widget.nodeList[index].Status == 2? Colors.grey:
-                  widget.nodeList[index].Status == 3? Colors.redAccent:
-                  widget.nodeList[index].Status == 4? Colors.yellow:
+                  widget.nodeList[index].status == 1? Colors.green.shade400:
+                  widget.nodeList[index].status == 2? Colors.grey:
+                  widget.nodeList[index].status == 3? Colors.redAccent:
+                  widget.nodeList[index].status == 4? Colors.yellow:
                   Colors.grey,
                   ))),
                   DataCell(Center(child: Text('${widget.nodeList[index].referenceNumber}', style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black)))),
@@ -1512,7 +1516,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                     ],
                   )),
                   DataCell(Center(child: IconButton(tooltip: 'View Relay status',
-                    icon: widget.nodeList[index].RlyStatus.any((rly) => rly.Status == 2 || rly.Status == 3)? const Icon(Icons.warning, color: Colors.orangeAccent):
+                    icon: widget.nodeList[index].rlyStatus.any((rly) => rly.Status == 2 || rly.Status == 3)? const Icon(Icons.warning, color: Colors.orangeAccent):
                     Icon(Icons.info_outline, color: myTheme.primaryColorDark), // Icon to display
                     onPressed: () {
                       showModalBottomSheet(
@@ -1534,11 +1538,11 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                     children: [
                                       const Icon(Icons.solar_power_outlined, color: Colors.white),
                                       const SizedBox(width: 5,),
-                                      Text('${widget.nodeList[index].SVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                      Text('${widget.nodeList[index].sVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
                                       const SizedBox(width: 5,),
                                       const Icon(Icons.battery_3_bar_rounded, color: Colors.white),
                                       const SizedBox(width: 5,),
-                                      Text('${widget.nodeList[index].BatVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                      Text('${widget.nodeList[index].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
                                       const SizedBox(width: 5,),
                                       IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
                                         String payLoadFinal = jsonEncode({
@@ -1580,26 +1584,26 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                     const SizedBox(height: 5),
                                     SizedBox(
                                       width: double.infinity,
-                                      height : widget.nodeList[index].RlyStatus.length > 8? 160 : 80,
+                                      height : widget.nodeList[index].rlyStatus.length > 8? 160 : 80,
                                       child: GridView.builder(
-                                        itemCount: widget.nodeList[index].RlyStatus.length, // Number of items in the grid
+                                        itemCount: widget.nodeList[index].rlyStatus.length, // Number of items in the grid
                                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                           crossAxisCount: 8,
                                           crossAxisSpacing: 05.0,
                                           mainAxisSpacing: 05.0,
                                         ),
                                         itemBuilder: (BuildContext context, int indexGv) {
-                                          print(widget.nodeList[index].RlyStatus[indexGv].Name);
+                                          print(widget.nodeList[index].rlyStatus[indexGv].name);
                                           return Column(
                                             children: [
                                               CircleAvatar(
-                                                backgroundColor: widget.nodeList[index].RlyStatus[indexGv].Status==0 ? Colors.grey :
-                                                widget.nodeList[index].RlyStatus[indexGv].Status==1 ? Colors.green :
-                                                widget.nodeList[index].RlyStatus[indexGv].Status==2 ? Colors.orange :
-                                                widget.nodeList[index].RlyStatus[indexGv].Status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
-                                                child: Text((widget.nodeList[index].RlyStatus[indexGv].RlyNo).toString(), style: const TextStyle(color: Colors.white)),
+                                                backgroundColor: widget.nodeList[index].rlyStatus[indexGv].Status==0 ? Colors.grey :
+                                                widget.nodeList[index].rlyStatus[indexGv].Status==1 ? Colors.green :
+                                                widget.nodeList[index].rlyStatus[indexGv].Status==2 ? Colors.orange :
+                                                widget.nodeList[index].rlyStatus[indexGv].Status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
+                                                child: Text((widget.nodeList[index].rlyStatus[indexGv].rlyNo).toString(), style: const TextStyle(color: Colors.white)),
                                               ),
-                                              Text((widget.nodeList[index].RlyStatus[indexGv].Name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                              Text((widget.nodeList[index].rlyStatus[indexGv].name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
                                             ],
                                           );
                                         },
@@ -1623,8 +1627,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
     );
   }
 
-  int getNodePositionInNodeList(int siteIndex, int srlNo)
-  {
+  int getNodeListPosition(int srlNo){
     List<NodeData> nodeList = widget.nodeList;
     for (int i = 0; i < nodeList.length; i++) {
       if (nodeList[i].serialNumber == srlNo) {

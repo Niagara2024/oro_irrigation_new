@@ -113,7 +113,7 @@ class UpcomingProgram extends StatelessWidget {
                         DataCell(Text(scheduledPrograms[index].progName)),
                         DataCell(Text(scheduledPrograms[index].schedulingMethod==1?'No Schedule':scheduledPrograms[index].schedulingMethod==2?'Schedule by days':
                         scheduledPrograms[index].schedulingMethod==3?'Schedule as run list':'Day count schedule')),
-                        DataCell(Text('${getContentByCode(scheduledPrograms[index].startStopReason)} - ${scheduledPrograms[index].startStopReason}')),
+                        DataCell(Text('${getContentByCode(scheduledPrograms[index].startStopReason)} - ${scheduledPrograms[index].startStopReason}', style: const TextStyle(fontSize: 12),)),
                         DataCell(Center(child: Text('${scheduledPrograms[index].totalZone}'))),
                         DataCell(Center(child: Text(scheduledPrograms[index].startDate))),
                         DataCell(Center(child: Text(_convertTime(scheduledPrograms[index].startTime)))),
@@ -134,7 +134,7 @@ class UpcomingProgram extends StatelessWidget {
                                 sentUserOperationToServer('${scheduledPrograms[index].progName} Started by Manual', payLoadFinal);
                               },
                               child: const Text('Start by Manual'),
-                            ) :
+                            ):
                             MaterialButton(
                               color: Colors.redAccent,
                               textColor: Colors.white,

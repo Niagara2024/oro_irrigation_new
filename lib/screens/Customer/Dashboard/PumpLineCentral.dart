@@ -94,7 +94,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                                 ),
                                 const SizedBox(width: 4.5,),
                                 Padding(
-                                  padding: EdgeInsets.only(top: 45),
+                                  padding: const EdgeInsets.only(top: 45),
                                   child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
                                 ),
                               ],
@@ -257,7 +257,7 @@ class SensorWidget extends StatelessWidget {
             ),
             Text(
               '(${sensor.type})',
-              style: TextStyle(fontSize: 12, color: Colors.white70),
+              style: const TextStyle(fontSize: 12, color: Colors.white70),
               textAlign: TextAlign.center,
             ),
           ],
@@ -1108,7 +1108,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Center(child: Text('${provider.fertilizerCentral[fIndex]['Ec'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal))),
-                                          Center(child: Text(provider.fertilizerCentral[fIndex]['Ec'][index]['Status'], style: TextStyle(fontSize: 10))),
+                                          Center(child: Text(provider.fertilizerCentral[fIndex]['Ec'][index]['Status'], style: const TextStyle(fontSize: 10))),
                                           const SizedBox(width: 10,),
                                         ],
                                       );

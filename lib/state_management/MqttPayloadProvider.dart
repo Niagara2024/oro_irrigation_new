@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 import 'package:oro_irrigation_new/state_management/scheule_view_provider.dart';
 
 import '../Models/Customer/Dashboard/DashboardNode.dart';
@@ -40,6 +41,8 @@ class MqttPayloadProvider with ChangeNotifier {
   List<CurrentScheduleModel> _currentSchedule = [];
   List<CurrentScheduleModel> get currentSchedule => _currentSchedule;
 
+  String currentDate = '', currentTime = '';
+
   void editMySchedule(ScheduleViewProvider instance){
     mySchedule = instance;
     notifyListeners();
@@ -51,6 +54,13 @@ class MqttPayloadProvider with ChangeNotifier {
       Map<String, dynamic> data = jsonDecode(payload);
       if (data.containsKey('2400') && data['2400'] != null && data['2400'].isNotEmpty) {
         dashBoardPayload = payload;
+
+        final DateTime now = DateTime.now();
+        final DateFormat dateFormatter = DateFormat('yyyy-MM-dd');
+        final DateFormat timeFormatter = DateFormat('HH:mm:ss');
+
+        currentDate = dateFormatter.format(now);
+        currentTime = timeFormatter.format(now);
 
         if(data['2400'][0].containsKey('WifiStrength')) {
           wifiStrength = data['2400'][0]['WifiStrength'];

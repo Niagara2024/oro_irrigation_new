@@ -406,7 +406,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
                         await showDialog<void>(
                             context: context,
                             builder: (context) => AlertDialog(
-                              content: CreateAccount(callback: callbackFunction),
+                              content: CreateAccount(callback: callbackFunction, subUsrAccount: false, customerId: 0,),
                             ));
                       }),
                     ),
@@ -432,7 +432,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                             customerName: myCustomerList[index].userName,
                                             mobileNo: '+${myCustomerList[index].countryCode}-${myCustomerList[index].mobileNumber}',
                                             comingFrom: 'AdminORDealer',
-                                            emailId: myCustomerList[index].emailId,),
+                                            emailId: myCustomerList[index].emailId, userId: widget.userId,),
                                         ),
                                       );
                                     }

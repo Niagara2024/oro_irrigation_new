@@ -9,11 +9,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/country_list.dart';
 import '../../Models/state_list.dart';
 import '../../constants/http_service.dart';
+import '../../constants/snack_bar.dart';
 import '../../constants/theme.dart';
 
 class CreateAccount extends StatefulWidget {
-  const CreateAccount({Key? key, required this.callback}) : super(key: key);
+  const CreateAccount({Key? key, required this.callback, required this.subUsrAccount, required this.customerId}) : super(key: key);
   final void Function(String) callback;
+  final bool subUsrAccount;
+  final int customerId;
 
   @override
   State<CreateAccount> createState() => _CreateAccountState();
@@ -72,6 +75,10 @@ class _CreateAccountState extends State<CreateAccount> {
     userID = (prefs.getString('userId') ?? "");
     userType = (prefs.getString('userType') ?? "");
     userMobileNo = (prefs.getString('mobileNumber') ?? "");
+
+    print(userID);
+    print(widget.customerId);
+
   }
 
   Future<void> getCountryList() async
@@ -434,8 +441,8 @@ class _CreateAccountState extends State<CreateAccount> {
                         'userName': _cusNameController.text,
                         'countryCode': dialCode,
                         'mobileNumber': _cusMobileNoController.text,
-                        'userType': cusType,
-                        'macAddress': '123456',
+                        'userType': widget.subUsrAccount? 3:cusType,
+                        'macAddress': '1234567890',
                         'deviceToken': '12346789abcdefghijklmnopqrstuvwxyz987654321',
                         'mobCctv': '987654321zyxwvutsrqponmlkjihgfedcba123456789',
                         'createUser': userID,
@@ -447,23 +454,23 @@ class _CreateAccountState extends State<CreateAccount> {
                         'country': sldCountryID.toString(),
                         'state': sldStateID.toString(),
                         'email': _cusEmailController.text,
+                        'mainUserId': widget.customerId,
                       };
                       //print(body);
-                      final response = await HttpService().postRequest("createUser", body);
+                      final response = widget.subUsrAccount? await HttpService().postRequest("createUserAccountWithMainUser", body):
+                      await HttpService().postRequest("createUser", body);
                       print(response.body);
                       if(response.statusCode == 200)
                       {
                         var data = jsonDecode(response.body);
                         if(data["code"]==200)
                         {
-                          //MqttWebClient().publishMessage('tweet/$userMobileNo', 'updateCustomerAccount');
                           widget.callback('reloadCustomer');
                           if(mounted){
                             Navigator.pop(context);
                           }
                         }
                         else{
-                          //_showSnackBar(data["message"]);
                           _showAlertDialog('Warning', data["message"]);
                         }
                       }

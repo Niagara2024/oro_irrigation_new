@@ -183,7 +183,7 @@ class _DashboardWideState extends State<DashboardWide> {
           customerName: widget.userName,
           mobileNo: '+${widget.countryCode}-${widget.mobileNo}',
           comingFrom: 'Customer',
-          emailId: widget.emailId,);
+          emailId: widget.emailId, userId: widget.userId,);
       default:
         return const SizedBox();
     }

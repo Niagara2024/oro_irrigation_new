@@ -377,7 +377,7 @@ class ScheduledProgram {
 
 class ProgramQueue {
   final String programName, programCategory,zoneName,startTime, totalDurORQty;
-  final int programType, totalRtc,currentRtc,totalCycle,currentCycle,totalZone,currentZone, irrMethod;
+  final int programType, totalRtc,currentRtc,totalCycle,currentCycle,totalZone,currentZone, schMethod;
 
   ProgramQueue({
     required this.programName,
@@ -392,7 +392,7 @@ class ProgramQueue {
     required this.currentZone,
     required this.startTime,
     required this.totalDurORQty,
-    required this.irrMethod,
+    required this.schMethod,
   });
 
   factory ProgramQueue.fromJson(Map<String, dynamic> json) {
@@ -409,7 +409,7 @@ class ProgramQueue {
       currentZone: json['CurrentZone'] ?? 0,
       startTime: json['StartTime'] ?? "",
       totalDurORQty: json['IrrigationDuration_Quantity'] ?? "",
-      irrMethod: json['IrrigationMethod'] ?? "",
+      schMethod: json['SchedulingMethod'] ?? "",
     );
   }
 
@@ -427,7 +427,7 @@ class ProgramQueue {
       'CurrentZone': currentZone,
       'StartTime': startTime,
       'IrrigationDuration_Quantity': totalDurORQty,
-      'IrrigationMethod': irrMethod,
+      'SchedulingMethod': schMethod,
     };
   }
 

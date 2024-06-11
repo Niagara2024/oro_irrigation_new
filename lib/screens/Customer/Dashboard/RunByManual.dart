@@ -500,7 +500,7 @@ class _RunByManualState extends State<RunByManual> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (dashBoardData.isNotEmpty)
+                        if (ddCurrentPosition==0 && dashBoardData.isNotEmpty)
                           dashBoardData[0].sourcePump.isNotEmpty ? Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Column(
@@ -535,7 +535,8 @@ class _RunByManualState extends State<RunByManual> {
                                 ),
                               ],
                             ),
-                          ):Container(),
+                          ):
+                          Container(),
 
                         if (dashBoardData.isNotEmpty)
                           dashBoardData[0].irrigationPump.isNotEmpty ? Padding(
@@ -724,7 +725,8 @@ class _RunByManualState extends State<RunByManual> {
                                 ),
                               ],
                             ),
-                          ): Container(),
+                          ):
+                          Container(),
 
                         if (dashBoardData.isNotEmpty)
                           dashBoardData[0].localFilterSite.isNotEmpty ? Padding(
@@ -839,7 +841,8 @@ class _RunByManualState extends State<RunByManual> {
                                 ),
                               ],
                             ),
-                          ): Container(),
+                          ):
+                          Container(),
 
                         if (dashBoardData.isNotEmpty)
                           dashBoardData[0].centralFertilizerSite.isNotEmpty ? Padding(
@@ -1596,13 +1599,13 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                   ),
                 ),
                 widget.programList.length>1 ? const SizedBox(
-                  width: 130,
+                  width: 110,
                   height: 50,
                   child: Center(child: Text('Schedule By')),
                 ):
                 Container(),
                 widget.programList.length>1 ? SizedBox(
-                  width: 200,
+                  width: 220,
                   height: 50,
                   child: DropdownButtonFormField(
                     value: widget.programList.isNotEmpty ? widget.programList[widget.ddCurrentPosition] : null,

@@ -79,8 +79,8 @@ class _NextScheduleState extends State<NextSchedule> {
                       ],
                       rows: List<DataRow>.generate(widget.programQueue.length, (index) => DataRow(cells: [
                         DataCell(Text(widget.programQueue[index].programName)),
-                        DataCell(Text(widget.programQueue[index].irrMethod==1?'No Schedule':widget.programQueue[index].irrMethod==2?'Schedule by days':
-                        widget.programQueue[index].irrMethod==3?'Schedule as run list':'Day count schedule')),
+                        DataCell(Text(widget.programQueue[index].schMethod==1?'No Schedule':widget.programQueue[index].schMethod==2?'Schedule by days':
+                        widget.programQueue[index].schMethod==3?'Schedule as run list':'Day count schedule')),
                         DataCell(Text(widget.programQueue[index].programCategory)),
                         DataCell(Center(child: Text('${widget.programQueue[index].currentZone}'))),
                         DataCell(Center(child: Center(child: Text(widget.programQueue[index].zoneName)))),

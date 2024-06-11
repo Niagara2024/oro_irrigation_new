@@ -210,7 +210,7 @@ class MyDealersState extends State<MyDealers> {
                           await showDialog<void>(
                               context: context,
                               builder: (context) => AlertDialog(
-                                content: CreateAccount(callback: callbackFunction),
+                                content: CreateAccount(callback: callbackFunction, subUsrAccount: false, customerId: 0,),
                               ));
                   
                         }), // Customize the leading icon
@@ -226,7 +226,7 @@ class MyDealersState extends State<MyDealers> {
                             ),
                             trailing: IconButton(tooltip: 'View Customer Dashboard', icon: const Icon(Icons.view_quilt_outlined), color: myTheme.primaryColor, onPressed: () async
                             {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerScreenController(customerId: customerOfDealer[index].userId, comingFrom: 'AdminORDealer', customerName: customerOfDealer[index].userName, mobileNo: '+${customerOfDealer[index].countryCode}-${customerOfDealer[index].mobileNumber}', emailId: customerOfDealer[index].emailId,)),);
+                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  CustomerScreenController(customerId: customerOfDealer[index].userId, comingFrom: 'AdminORDealer', customerName: customerOfDealer[index].userName, mobileNo: '+${customerOfDealer[index].countryCode}-${customerOfDealer[index].mobileNumber}', emailId: customerOfDealer[index].emailId, userId: widget.dealerId,)),);
                             }),
                             title: Text(customerOfDealer[index].userName),
                             subtitle: Text('+${customerOfDealer[index].countryCode} ${customerOfDealer[index].mobileNumber}'),

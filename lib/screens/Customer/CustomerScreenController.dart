@@ -22,6 +22,7 @@ import 'CustomerDashboard.dart';
 import 'Dashboard/AllNodeListAndDetails.dart';
 import 'Dashboard/ControllerLogs.dart';
 import 'Dashboard/ControllerSettings.dart';
+import 'Dashboard/CustomerHome.dart';
 import 'Dashboard/RunByManual.dart';
 import 'Dashboard/SubUsers.dart';
 import 'ProgramSchedule.dart';
@@ -29,8 +30,8 @@ import 'PumpControllerScreen/PumpDashboard.dart';
 
 
 class CustomerScreenController extends StatefulWidget {
-  const CustomerScreenController({Key? key, required this.customerId, required this.customerName, required this.mobileNo, required this.emailId, required this.comingFrom}) : super(key: key);
-  final int customerId;
+  const CustomerScreenController({Key? key, required this.customerId, required this.customerName, required this.mobileNo, required this.emailId, required this.comingFrom, required this.userId}) : super(key: key);
+  final int userId, customerId;
   final String customerName, mobileNo, emailId, comingFrom;
 
   @override
@@ -60,6 +61,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   @override
   void initState() {
     super.initState();
+    print('coming from: ${widget.comingFrom}');
+    print('coming userId: ${widget.userId}');
+    print('coming customerId: ${widget.customerId}');
     indicatorViewShow();
     clearMQTTPayload();
     getCustomerSite(widget.customerId);
@@ -129,10 +133,23 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           siteListFinal = jsonData.map((json) => DashboardModel.fromJson(json)).toList();
           indicatorViewHide();
           if(siteListFinal.isNotEmpty){
+            if(siteListFinal[siteIndex].master[masterIndex].irrigationLine.length>1){
+              IrrigationLine newLine = IrrigationLine(
+                sNo: 0,
+                id: '0',
+                hid: '0',
+                name: 'Line overview',
+                location: 'No location',
+                type: 'no type',
+                mainValve: [],
+                valve: [],
+              );
+              siteListFinal[siteIndex].master[masterIndex].irrigationLine.insert(0, newLine);
+            }
             _myCurrentSite = siteListFinal[siteIndex].groupName;
             _myCurrentMasterC = siteListFinal[siteIndex].master[masterIndex].categoryName;
             _myCurrentIrrLine = siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex].name;
-            print('Controller Id :${siteListFinal[siteIndex].master[masterIndex].controllerId}');
+
             intTabController();
             subscribeAndUpdateSite();
             getProgramList();
@@ -162,8 +179,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   void loadServerData(){
     MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
 
-    //List<dynamic> ndlLst = siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList.map((ndl) => ndl.toJson()).toList();
-    //payloadProvider.updateNodeList(ndlLst);
+    List<dynamic> ndlLst = siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList.map((ndl) => ndl.toJson()).toList();
+    payloadProvider.updateNodeList(ndlLst);
 
     List<dynamic> csLst = siteListFinal[siteIndex].master[masterIndex].liveData[0].currentSchedule.map((cs) => cs.toJson()).toList();
     List<CurrentScheduleModel> cs = csLst.map((cs) => CurrentScheduleModel.fromJson(cs)).toList();
@@ -240,6 +257,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     final screenWidth = MediaQuery.of(context).size.width;
     final provider = Provider.of<MqttPayloadProvider>(context);
     final wifiStrength = Provider.of<MqttPayloadProvider>(context).wifiStrength;
+    final currentDate = Provider.of<MqttPayloadProvider>(context).currentDate;
+    final currentTime = Provider.of<MqttPayloadProvider>(context).currentTime;
 
     List<dynamic> records = provider.payload2408;
     bool isIrrigationPauseFlagZero = false;
@@ -249,6 +268,12 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       isIrrigationPauseFlagZero = record['IrrigationPauseFlag'] == 0;
     }
 
+    if(siteListFinal.isNotEmpty){
+      if(currentDate.isNotEmpty){
+        siteListFinal[siteIndex].master[masterIndex].liveSyncDate = currentDate;
+        siteListFinal[siteIndex].master[masterIndex].liveSyncTime = currentTime;
+      }
+    }
 
     return visibleLoading? buildLoadingIndicator(visibleLoading, screenWidth):
     Scaffold(
@@ -665,16 +690,17 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: _selectedIndex == 0 ? SizedBox(child: siteListFinal[siteIndex].master[masterIndex].categoryId==1 ||
+                  child:
+                  _selectedIndex == 0 ? SizedBox(child: siteListFinal[siteIndex].master[masterIndex].categoryId==1 ||
                       siteListFinal[siteIndex].master[masterIndex].categoryId==2 ?
-                  CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: siteListFinal[siteIndex], crrIrrLine: siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex], masterInx: masterIndex,):
+                  CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: siteListFinal[siteIndex], crrIrrLine: siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex], masterInx: masterIndex, lineIdx: lineIndex,):
                   PumpDashboard(siteData: siteListFinal[siteIndex], masterIndex: masterIndex,)):
                   _selectedIndex == 1 ? ProductInventory(userName: widget.customerName):
                   _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
                   _selectedIndex == 3 ?  ControllerLogs(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId,):
                   _selectedIndex == 4 ?  SubUsers(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
                   _selectedIndex == 5 ?  WeatherScreen(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId, deviceID: siteListFinal[siteIndex].master[masterIndex].deviceId,):
-                  ControllerSettings(customerID: widget.customerId, siteData: siteListFinal[siteIndex], masterIndex: masterIndex,),
+                  ControllerSettings(customerID: widget.customerId, siteData: siteListFinal[siteIndex], masterIndex: masterIndex, adDrId: widget.comingFrom=='AdminORDealer'? widget.userId:0,),
                 ),
               ),
             ),

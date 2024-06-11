@@ -402,7 +402,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         await showDialog<void>(
                             context: context,
                             builder: (context) => AlertDialog(
-                              content: CreateAccount(callback: callbackFunction),
+                              content: CreateAccount(callback: callbackFunction, subUsrAccount: false, customerId: 0,),
                             ));
                       }),
                     ),

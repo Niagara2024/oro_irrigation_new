@@ -73,7 +73,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                       padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
                       child: provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(crInx: i):null,
                     ) : const SizedBox(),
-                  provider.fertilizerCentral.isNotEmpty? const DisplayCentralFertilizer(): const SizedBox(),
+                  provider.fertilizerCentral.isNotEmpty? DisplayCentralFertilizer(currentLineId: widget.crrIrrLine.id,): const SizedBox(),
 
                   //local
                   provider.irrigationPump.isNotEmpty? Column(
@@ -83,7 +83,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          provider.fertilizerCentral.isNotEmpty? SizedBox(
+                          provider.fertilizerLocal.isNotEmpty? SizedBox(
                             width: 4.5,
                             height: 150,
                             child: Row(
@@ -201,7 +201,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                         padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty? 38.4:0),
                         child: provider.payload2408[i]['Line'].contains(line.id)? DisplaySensor(crInx: i):null,
                       ) : const SizedBox(),
-                    provider.fertilizerCentral.isNotEmpty? const DisplayCentralFertilizer(): const SizedBox(),
+                    provider.fertilizerCentral.isNotEmpty? DisplayCentralFertilizer(currentLineId: line.id,): const SizedBox(),
                     //local
                     provider.irrigationPump.isNotEmpty? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -833,7 +833,8 @@ class _DisplayFilterState extends State<DisplayFilter> {
 }
 
 class DisplayCentralFertilizer extends StatefulWidget {
-  const DisplayCentralFertilizer({Key? key}) : super(key: key);
+  const DisplayCentralFertilizer({Key? key, required this.currentLineId}) : super(key: key);
+  final String currentLineId;
 
   @override
   State<DisplayCentralFertilizer> createState() => _DisplayCentralFertilizerState();
@@ -857,12 +858,19 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<MqttPayloadProvider>(context);
+    final overallFrtCentral = Provider.of<MqttPayloadProvider>(context).fertilizerCentral;
+
+   // MqttPayloadProvider provider = Provider.of<MqttPayloadProvider>(context,listen: false);
+
+    final List<Map<String, dynamic>> fertilizerCentral = overallFrtCentral
+        .where((cfr) => cfr['Location'].contains(widget.currentLineId)).toList()
+        .cast<Map<String, dynamic>>();
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for(int fIndex=0; fIndex<provider.fertilizerCentral.length; fIndex++)
+        for(int fIndex=0; fIndex<fertilizerCentral.length; fIndex++)
           SizedBox(
             height: 150,
             child: Column(
@@ -897,11 +905,11 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                           height: 120,
                           child : Stack(
                             children: [
-                              AppImages.getAsset('booster', provider.fertilizerCentral[fIndex]['Booster'][0]['Status'],''),
+                              AppImages.getAsset('booster', fertilizerCentral[fIndex]['Booster'][0]['Status'],''),
                               Positioned(
                                 top: 70,
                                 left: 15,
-                                child: provider.fertilizerCentral[fIndex]['FertilizerTankSelector'].isNotEmpty ? const SizedBox(
+                                child: fertilizerCentral[fIndex]['FertilizerTankSelector'].isNotEmpty ? const SizedBox(
                                   width: 50,
                                   child: Center(
                                     child: Text('Selector' , style: TextStyle(
@@ -917,16 +925,16 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                               Positioned(
                                 top: 85,
                                 left: 18,
-                                child: provider.fertilizerCentral[fIndex]['FertilizerTankSelector'].isNotEmpty ? Container(
+                                child: fertilizerCentral[fIndex]['FertilizerTankSelector'].isNotEmpty ? Container(
                                   decoration: BoxDecoration(
-                                    color: provider.fertilizerCentral[fIndex]['FertilizerTankSelector'][0]['Status']!=0? Colors.greenAccent : Colors.grey.shade300,
+                                    color: fertilizerCentral[fIndex]['FertilizerTankSelector'][0]['Status']!=0? Colors.greenAccent : Colors.grey.shade300,
                                     borderRadius: BorderRadius.circular(3),
                                   ),
                                   width: 45,
                                   height: 22,
                                   child: Center(
-                                    child: Text(provider.fertilizerCentral[fIndex]['FertilizerTankSelector'][0]['Status']!=0?
-                                    provider.fertilizerCentral[fIndex]['FertilizerTankSelector'][0]['Name'] : '--' , style: const TextStyle(
+                                    child: Text(fertilizerCentral[fIndex]['FertilizerTankSelector'][0]['Status']!=0?
+                                    fertilizerCentral[fIndex]['FertilizerTankSelector'][0]['Name'] : '--' , style: const TextStyle(
                                       color: Colors.black,
                                       fontSize: 13,
                                       fontWeight: FontWeight.bold,
@@ -945,13 +953,13 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                           )
                       ),
                       SizedBox(
-                        width: provider.fertilizerCentral[fIndex]['Fertilizer'].length * 70,
+                        width: fertilizerCentral[fIndex]['Fertilizer'].length * 70,
                         height: 120,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: provider.fertilizerCentral[fIndex]['Fertilizer'].length,
+                          itemCount: fertilizerCentral[fIndex]['Fertilizer'].length,
                           itemBuilder: (BuildContext context, int index) {
-                            var fertilizer = provider.fertilizerCentral[fIndex]['Fertilizer'][index];
+                            var fertilizer = fertilizerCentral[fIndex]['Fertilizer'][index];
                             double fertilizerQty = 0.0;
                             var qtyValue = fertilizer['Qty'];
                             if(qtyValue != null) {
@@ -980,7 +988,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                               height: 120,
                               child: Stack(
                                 children: [
-                                  buildFertCheImage(index, fertilizer['Status'], provider.fertilizerCentral[fIndex]['Fertilizer'].length, provider.fertilizerCentral[fIndex]['Agitator']),
+                                  buildFertCheImage(index, fertilizer['Status'], fertilizerCentral[fIndex]['Fertilizer'].length, fertilizerCentral[fIndex]['Agitator']),
                                   Positioned(
                                     top: 52,
                                     left: 6,
@@ -1063,10 +1071,10 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                           },
                         ),
                       ),
-                      provider.fertilizerCentral[fIndex]['Agitator'].isNotEmpty ? SizedBox(
+                      fertilizerCentral[fIndex]['Agitator'].isNotEmpty ? SizedBox(
                         width: 59,
                         height: 101,
-                        child: AppImages.getAsset('agitator', provider.fertilizerCentral[fIndex]['Agitator'][0]['Status'],''),
+                        child: AppImages.getAsset('agitator', fertilizerCentral[fIndex]['Agitator'][0]['Status'],''),
                       ) :
                       const SizedBox(),
                     ],
@@ -1098,17 +1106,17 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                provider.fertilizerCentral[fIndex]['Ec'].isNotEmpty ? SizedBox(
+                                fertilizerCentral[fIndex]['Ec'].isNotEmpty ? SizedBox(
                                   height: 15,
                                   child: ListView.builder(
                                     scrollDirection: Axis.horizontal,
-                                    itemCount: provider.fertilizerCentral[fIndex]['Ec'].length,
+                                    itemCount: fertilizerCentral[fIndex]['Ec'].length,
                                     itemBuilder: (BuildContext context, int index) {
                                       return Row(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Center(child: Text('${provider.fertilizerCentral[fIndex]['Ec'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal))),
-                                          Center(child: Text(provider.fertilizerCentral[fIndex]['Ec'][index]['Status'], style: const TextStyle(fontSize: 10))),
+                                          Center(child: Text('${fertilizerCentral[fIndex]['Ec'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal))),
+                                          Center(child: Text(fertilizerCentral[fIndex]['Ec'][index]['Status'], style: const TextStyle(fontSize: 10))),
                                           const SizedBox(width: 10,),
                                         ],
                                       );
@@ -1116,16 +1124,16 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                                   ),
                                 ) :
                                 const SizedBox(),
-                                provider.fertilizerCentral[fIndex]['Ph'].isNotEmpty ? SizedBox(
+                                fertilizerCentral[fIndex]['Ph'].isNotEmpty ? SizedBox(
                                   height: 15,
                                   child: ListView.builder(
                                     scrollDirection: Axis.horizontal,
-                                    itemCount: provider.fertilizerCentral[fIndex]['Ph'].length,
+                                    itemCount: fertilizerCentral[fIndex]['Ph'].length,
                                     itemBuilder: (BuildContext context, int index) {
                                       return Row(
                                         children: [
-                                          Center(child: Text('${provider.fertilizerCentral[fIndex]['Ph'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),)),
-                                          Center(child: Text(provider.fertilizerCentral[fIndex]['Ph'][index]['Status'], style: const TextStyle(fontSize: 10))),
+                                          Center(child: Text('${fertilizerCentral[fIndex]['Ph'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),)),
+                                          Center(child: Text(fertilizerCentral[fIndex]['Ph'][index]['Status'], style: const TextStyle(fontSize: 10))),
                                           const SizedBox(width: 10,),
                                         ],
                                       );
@@ -1680,7 +1688,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
     MqttPayloadProvider provider = Provider.of<MqttPayloadProvider>(context,listen: false);
 
     final List<Map<String, dynamic>> fertilizerLocal = provider.fertilizerLocal
-        .where((pump) => pump['Location'].contains(widget.currentLineId)).toList()
+        .where((fert) => fert['Location'].contains(widget.currentLineId)).toList()
         .cast<Map<String, dynamic>>();
 
     return Row(
@@ -1897,7 +1905,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                     ],
                   ),
                 ),
-                SizedBox(
+                /*SizedBox(
                   height: 30,
                   width: 200,
                   child: Row(
@@ -1965,14 +1973,13 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                       ),
                     ],
                   ),
-                ),
+                ),*/
               ],
             ),
           ),
       ],
     );
   }
-
 
   Widget buildFertCheImage(int cIndex, int status, int cheLength, List agitatorList) {
     String imageName;

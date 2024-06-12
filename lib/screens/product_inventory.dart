@@ -852,6 +852,7 @@ class ProductInventoryState extends State<ProductInventory> {
                           setState(() {
                             txtEdControllerMdlName.text = item!.categoryName;
                             txtEdControllerIMEi.text = item.model;
+                            rplImeiNo =  item.imeiNo;
                           });
                         },
                       ),
@@ -888,7 +889,7 @@ class ProductInventoryState extends State<ProductInventory> {
                 textColor: Colors.white,
                 child: const Text('Replace'),
                 onPressed: () async {
-                  final body = {"userId": customerId, "oldDeviceId": imeiNo, "newDeviceId": txtEdControllerIMEi.text, 'modifyUser': userID};
+                  final body = {"userId": customerId, "oldDeviceId": imeiNo, "newDeviceId": rplImeiNo, 'modifyUser': userID};
                   final response = await HttpService().postRequest("replaceProduct", body);
                   if (response.statusCode == 200)
                   {

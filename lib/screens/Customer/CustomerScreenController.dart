@@ -22,9 +22,7 @@ import 'CustomerDashboard.dart';
 import 'Dashboard/AllNodeListAndDetails.dart';
 import 'Dashboard/ControllerLogs.dart';
 import 'Dashboard/ControllerSettings.dart';
-import 'Dashboard/CustomerHome.dart';
 import 'Dashboard/RunByManual.dart';
-import 'Dashboard/SubUsers.dart';
 import 'ProgramSchedule.dart';
 import 'PumpControllerScreen/PumpDashboard.dart';
 
@@ -655,11 +653,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   label: Text(''),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.supervisor_account_outlined),
-                  selectedIcon: Icon(Icons.supervisor_account_outlined, color: Colors.white,),
-                  label: Text(''),
-                ),
-                NavigationRailDestination(
                   icon: Icon(Icons.wb_cloudy_outlined),
                   selectedIcon: Icon(Icons.wb_cloudy_outlined, color: Colors.white,),
                   label: Text(''),
@@ -697,9 +690,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   PumpDashboard(siteData: siteListFinal[siteIndex], masterIndex: masterIndex,)):
                   _selectedIndex == 1 ? ProductInventory(userName: widget.customerName):
                   _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
-                  _selectedIndex == 3 ?  ControllerLogs(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId,):
-                  _selectedIndex == 4 ?  SubUsers(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
-                  _selectedIndex == 5 ?  WeatherScreen(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId, deviceID: siteListFinal[siteIndex].master[masterIndex].deviceId,):
+                  _selectedIndex == 3 ? ListOfLogConfig(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId,):
+                  _selectedIndex == 4 ? WeatherScreen(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId, deviceID: siteListFinal[siteIndex].master[masterIndex].deviceId,):
                   ControllerSettings(customerID: widget.customerId, siteData: siteListFinal[siteIndex], masterIndex: masterIndex, adDrId: widget.comingFrom=='AdminORDealer'? widget.userId:0,),
                 ),
               ),

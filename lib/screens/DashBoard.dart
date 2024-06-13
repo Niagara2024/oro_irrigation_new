@@ -12,9 +12,6 @@ import 'Customer/CustomerScreenController.dart';
 import 'Dealer/DealerScreenController.dart';
 import 'login_form.dart';
 
-
-enum Calendar { day, week, month, year }
-
 class MainDashBoard extends StatefulWidget
 {
   const MainDashBoard({super.key});
@@ -53,7 +50,6 @@ class _MainDashBoardState extends State<MainDashBoard> {
     mqttServer.initializeMQTTServer(state: payloadProvider);
   }
 
-
   @override
   Widget build(BuildContext context)
   {
@@ -73,18 +69,7 @@ class _MainDashBoardState extends State<MainDashBoard> {
 
           if (userId.isNotEmpty) {
             return Scaffold(
-              body: LayoutBuilder(
-                builder: (context, constraints)
-                {
-                  if (constraints.maxWidth < 600) {
-                    return  DashboardNarrow(userId: int.parse(userId));
-                  } else if (constraints.maxWidth > 600 && constraints.maxWidth < 900) {
-                    return const DashboardMiddle();
-                  } else {
-                    return  DashboardWide(userId: int.parse(userId), userType: int.parse(userType), userName: userName, countryCode: countryCode, mobileNo: mobileNo, emailId: emailId,);
-                  }
-                },
-              ),
+              body: BuildDashboardScreen(userId: int.parse(userId), userType: int.parse(userType), userName: userName, countryCode: countryCode, mobileNo: mobileNo, emailId: emailId,),
             );
           } else {
             return const LoginForm();
@@ -96,94 +81,69 @@ class _MainDashBoardState extends State<MainDashBoard> {
 }
 
 
-//Narrow-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------------
-
-class DashboardNarrow extends StatefulWidget {
-  const DashboardNarrow({Key? key, required this.userId}) : super(key: key);
-  final int userId;
-  @override
-  State<DashboardNarrow> createState() => _DashboardNarrowState();
-}
-
-class _DashboardNarrowState extends State<DashboardNarrow> {
-  @override
-  Widget build(BuildContext context) {
-    return HomeScreenN(userId: widget.userId);
-  }
-}
-
-//Middle-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------------
-
-class DashboardMiddle extends StatefulWidget {
-  const DashboardMiddle({Key? key}) : super(key: key);
-  @override
-  State<DashboardMiddle> createState() => _DashboardMiddleState();
-}
-
-class _DashboardMiddleState extends State<DashboardMiddle> {
-  @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
-  }
-}
-
-//Wide-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------------
-
-class DashboardWide extends StatefulWidget
+class BuildDashboardScreen extends StatefulWidget
 {
-  const DashboardWide({Key? key, required this.userId, required this.userType, required this.userName, required this.countryCode, required this.mobileNo, required this.emailId}) : super(key: key);
+  const BuildDashboardScreen({Key? key, required this.userId, required this.userType, required this.userName, required this.countryCode, required this.mobileNo, required this.emailId}) : super(key: key);
   final int userId, userType;
   final String userName, countryCode, mobileNo, emailId;
 
   @override
-  State<DashboardWide> createState() => _DashboardWideState();
+  State<BuildDashboardScreen> createState() => _BuildDashboardScreenState();
 }
 
-class _DashboardWideState extends State<DashboardWide> {
-
-  String appBarTitle = 'Home';
-  NavigationRailLabelType labelType = NavigationRailLabelType.all;
-  int _selectedIndex = 0;
-  bool visibleLoading = false;
-
+class _BuildDashboardScreenState extends State<BuildDashboardScreen> {
 
   @override
   Widget build(BuildContext context)  {
     print('userName:${widget.userName}');
     print('userId:${widget.userId}');
     print('userType:${widget.userType}');
-    return  Scaffold(
-      body: mainScreen(widget.userType),
+
+    return Scaffold(
+      body: LayoutBuilder(
+        builder: (context, constraints)
+        {
+          print('constraints.maxWidth:${constraints.maxWidth}');
+          if(constraints.maxWidth < 600){
+            return  mainScreen(widget.userType, 'Narrow');
+          }else if (constraints.maxWidth > 600 && constraints.maxWidth < 900){
+            return mainScreen(widget.userType, 'Middle');
+          }else{
+            return  mainScreen(widget.userType, 'Wide');
+          }
+        },
+      ),
     );
+
   }
 
-  Widget mainScreen(int userType) {
+  Widget mainScreen(int userType, String screenType) {
     switch (userType) {
       case 1:
-        return AdminScreenController(
+        return screenType=='Wide'? AdminScreenController(
           userName: widget.userName,
           countryCode: widget.countryCode,
           mobileNo: widget.mobileNo,
           fromLogin: true,
-          userId: widget.userId,);
+          userId: widget.userId,):
+        const  SizedBox();
       case 2:
-        return DealerScreenController(
+        return screenType=='Wide'? DealerScreenController(
           userName: widget.userName,
           countryCode: widget.countryCode,
           mobileNo: widget.mobileNo,
           fromLogin: true,
           userId: widget.userId,
-          emailId: widget.emailId,);
+          emailId: widget.emailId,):
+        const SizedBox();
       case 3:
-        return CustomerScreenController(
+        return screenType=='Wide'? CustomerScreenController(
           customerId: widget.userId,
           customerName: widget.userName,
           mobileNo: '+${widget.countryCode}-${widget.mobileNo}',
           comingFrom: 'Customer',
-          emailId: widget.emailId, userId: widget.userId,);
+          emailId: widget.emailId, userId: widget.userId,):
+        HomeScreenN(userId: widget.userId);
       default:
         return const SizedBox();
     }

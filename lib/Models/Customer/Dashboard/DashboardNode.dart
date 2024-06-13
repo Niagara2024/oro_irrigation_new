@@ -177,6 +177,7 @@ class NodeData {
   List<RelayStatus> rlyStatus;
   List<SensorStatus> sensor;
   int status;
+  String? lastFeedbackReceivedTime;
 
   NodeData({
     required this.controllerId,
@@ -193,6 +194,7 @@ class NodeData {
     required this.rlyStatus,
     required this.sensor,
     required this.status,
+    required this.lastFeedbackReceivedTime,
   });
 
   factory NodeData.fromJson(Map<String, dynamic> json) {
@@ -200,10 +202,9 @@ class NodeData {
     var rlyStatusList = json['RlyStatus'] as List;
     List<RelayStatus> rlyStatus = rlyStatusList.isNotEmpty? rlyStatusList.map((node) => RelayStatus.fromJson(node)).toList() : [];
 
-    //List<RelayStatus> rlyStatus = rlyStatusList.map((rlyStatus) => RelayStatus.fromJson(rlyStatus)).toList();
-
     var sensorList = json['Sensor'] as List;
     List<SensorStatus> sensor = sensorList.map((sensor) => SensorStatus.fromJson(sensor)).toList();
+
 
     return NodeData(
       controllerId: json['controllerId'],
@@ -220,6 +221,7 @@ class NodeData {
       rlyStatus: rlyStatus,
       sensor: sensor,
       status: json['Status'],
+      lastFeedbackReceivedTime: json['LastFeedbackReceivedTime'],
     );
   }
 
@@ -239,6 +241,7 @@ class NodeData {
       'RlyStatus': rlyStatus,
       'Sensor': sensor,
       'Status': status,
+      'lastFeedbackReceivedTime': lastFeedbackReceivedTime,
     };
   }
 }
@@ -466,7 +469,6 @@ class CurrentScheduleModel {
   factory CurrentScheduleModel.fromJson(Map<String, dynamic> json) {
 
     bool hasOnTimeKey = json.containsKey('MV');
-
     String durQty = '0', durQtyLeft = '0';
 
     if(json['Duration_Qty'].runtimeType==int) {

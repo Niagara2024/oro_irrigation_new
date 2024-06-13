@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/SentAndReceived.dart';
 import 'package:oro_irrigation_new/screens/Customer/WeatherScreen.dart';
@@ -54,7 +55,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   late String _myCurrentMasterC;
   late String _myCurrentIrrLine;
 
-  final GlobalKey<_PopupMenuContentState> _menuKey = GlobalKey<_PopupMenuContentState>();
 
   @override
   void initState() {
@@ -131,7 +131,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           siteListFinal = jsonData.map((json) => DashboardModel.fromJson(json)).toList();
           indicatorViewHide();
           if(siteListFinal.isNotEmpty){
-            if(siteListFinal[siteIndex].master[masterIndex].irrigationLine.length>1){
+            /*if(siteListFinal[siteIndex].master[masterIndex].irrigationLine.length>1){
               IrrigationLine newLine = IrrigationLine(
                 sNo: 0,
                 id: '0',
@@ -143,7 +143,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 valve: [],
               );
               siteListFinal[siteIndex].master[masterIndex].irrigationLine.insert(0, newLine);
-            }
+            }*/
             _myCurrentSite = siteListFinal[siteIndex].groupName;
             _myCurrentMasterC = siteListFinal[siteIndex].master[masterIndex].categoryName;
             _myCurrentIrrLine = siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex].name;
@@ -258,13 +258,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     final currentDate = Provider.of<MqttPayloadProvider>(context).currentDate;
     final currentTime = Provider.of<MqttPayloadProvider>(context).currentTime;
 
-    List<dynamic> records = provider.payload2408;
-    bool isIrrigationPauseFlagZero = false;
-    int sNoToCheck = siteListFinal.isNotEmpty? siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex].sNo:0;
-    var record = records.firstWhere((record) => record['S_No'] == sNoToCheck, orElse: () => null,);
-    if (record != null) {
-      isIrrigationPauseFlagZero = record['IrrigationPauseFlag'] == 0;
-    }
+    final payload2408 = Provider.of<MqttPayloadProvider>(context).payload2408;
+    bool allIrrigationResumeFlag = payload2408.every((record) => record['IrrigationPauseFlag'] == 1);
 
     if(siteListFinal.isNotEmpty){
       if(currentDate.isNotEmpty){
@@ -396,58 +391,32 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              siteListFinal[siteIndex].master[masterIndex].irrigationLine.length>1 && Provider.of<MqttPayloadProvider>(context).currentSchedule.isNotEmpty?
+              CircleAvatar(
+                radius: 15,
+                backgroundImage: const AssetImage('assets/GifFile/water_drop_ani.gif'),
+                backgroundColor: Colors.blue.shade100,
+              ):
+              const SizedBox(),
+              const SizedBox(width: 10,),
+              
               siteListFinal[siteIndex].master[masterIndex].irrigationLine.length>1? TextButton(
                 onPressed: () {
-                  showMenu(
-                    context: context,
-                    color: Colors.teal,
-                    position: const RelativeRect.fromLTRB(100, 0, 95, 0),
-                    items: <PopupMenuEntry>[
-                      PopupMenuItem(
-                        child: PopupMenuContent(key: _menuKey, deviceId: siteListFinal[siteIndex].master[masterIndex].deviceId,),
-                      ),
-                    ],
-                  );
-                },
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(Colors.orange),
-                  shape: MaterialStateProperty.all<OutlinedBorder>(
-                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(5),),
-                  ),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('PAUSE or RESUME', style: TextStyle(color: Colors.white)),
-                    SizedBox(width: 5),
-                    Icon(Icons.arrow_drop_down_sharp, color: Colors.white),
-                  ],
-                ),
-              ):
-              TextButton(
-                onPressed: () {
-                  int prFlag = 0;
-                  List<dynamic> records = provider.payload2408;
-                  int sNoToCheck = siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex].sNo;
-                  var record = records.firstWhere((record) => record['S_No'] == sNoToCheck, orElse: () => null,);
-                  if (record != null) {
-                    bool isIrrigationPauseFlagZero = record['IrrigationPauseFlag'] == 0;
-                    if (isIrrigationPauseFlagZero) {
-                      prFlag=1;
+                  String strPRPayload = '';
+                  for (int i = 0; i < payload2408.length; i++) {
+                    if (allIrrigationResumeFlag) {
+                      strPRPayload += '${payload2408[i]['S_No']},0;';
                     } else {
-                      prFlag=0;
+                      strPRPayload += '${payload2408[i]['S_No']},1;';
                     }
-                    String payLoadFinal = jsonEncode({
-                      "4900": [{"4901":
-                      "${siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex].sNo},$prFlag",},]
-                    });
-                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteListFinal[siteIndex].master[masterIndex].deviceId}');
-                  }else{
-                    const GlobalSnackBar(code: 200, message: 'Controller connection lost...');
                   }
+                  String payloadFinal = jsonEncode({
+                    "4900": [{"4901": strPRPayload}]
+                  });
+                  MQTTManager().publish(payloadFinal, 'AppToFirmware/${siteListFinal[siteIndex].master[masterIndex].deviceId}');
                 },
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(Colors.white24),
+                  backgroundColor: MaterialStateProperty.all<Color>(allIrrigationResumeFlag?Colors.green: Colors.orange),
                   shape: MaterialStateProperty.all<OutlinedBorder>(
                     RoundedRectangleBorder(borderRadius: BorderRadius.circular(5),),
                   ),
@@ -455,13 +424,16 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    isIrrigationPauseFlagZero? const Icon(Icons.pause, color: Colors.orange):
-                    const Icon(Icons.play_arrow_outlined, color: Colors.green),
-                    const SizedBox(width:5),
-                    Text(isIrrigationPauseFlagZero? 'PAUSE': 'RESUME', style: const TextStyle(color: Colors.white)),
+                    allIrrigationResumeFlag
+                        ? const Icon(Icons.play_arrow_outlined, color: Colors.white)
+                        : const Icon(Icons.pause, color: Colors.white),
+                    const SizedBox(width: 5),
+                    Text(allIrrigationResumeFlag ? 'RESUME ALL LINE' : 'PAUSE ALL LINE',
+                        style: const TextStyle(color: Colors.white)),
                   ],
                 ),
-              ),
+              ):
+              const SizedBox(),
               const SizedBox(width: 10),
               IconButton(tooltip : 'Help & Support', onPressed: (){
                 showMenu(
@@ -1322,6 +1294,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
               widget.nodeList[position].status = item['Status'];
               widget.nodeList[position].batVolt = item['BatVolt'];
               widget.nodeList[position].sVolt = item['SVolt'];
+              widget.nodeList[position].lastFeedbackReceivedTime = item['LastFeedbackReceivedTime'];
               widget.nodeList[position].rlyStatus = [];
               List<dynamic> rlyList = item['RlyStatus'];
               List<RelayStatus> rlyStatusList = rlyList.isNotEmpty? rlyList.map((rl) => RelayStatus.fromJson(rl)).toList() : [];
@@ -1542,7 +1515,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                         builder: (BuildContext context) {
                           return SizedBox(
                             width: double.infinity,
-                            height: 260,
+                            height: 270,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: <Widget>[
@@ -1551,6 +1524,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                   textColor: Colors.white,
                                   leading: const Icon(Icons.developer_board_rounded, color: Colors.white),
                                   title: Text('${widget.nodeList[index].categoryName} - ${widget.nodeList[index].deviceId}'),
+                                  subtitle: Text(formatDateTime(widget.nodeList[index].lastFeedbackReceivedTime)),
                                   trailing: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -1654,124 +1628,18 @@ class _SideSheetClassState extends State<SideSheetClass> {
     }
     return -1;
   }
-}
 
-class PopupMenuContent extends StatefulWidget {
-  const PopupMenuContent({Key? key, required this.deviceId}) : super(key: key);
-  final String deviceId;
-
-  @override
-  _PopupMenuContentState createState() => _PopupMenuContentState();
-}
-
-class _PopupMenuContentState extends State<PopupMenuContent> {
-  // Example data
-
-  bool allIrrigationResumeFlag = false;
-
-  @override
-  Widget build(BuildContext context) {
-
-    final provider = Provider.of<MqttPayloadProvider>(context).payload2408;
-    allIrrigationResumeFlag = provider.every((record) => record['IrrigationPauseFlag'] == 1);
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        TextButton(
-          onPressed: () {
-            String strPRPayload = '';
-            for (int i = 0; i < provider.length; i++) {
-              if (allIrrigationResumeFlag) {
-                strPRPayload += '${provider[i]['S_No']},0;';
-              } else {
-                strPRPayload += '${provider[i]['S_No']},1;';
-              }
-            }
-            String payloadFinal = jsonEncode({
-              "4900": [{"4901": strPRPayload}]
-            });
-            // Replace with your MQTT publish code
-            print('Publish: $payloadFinal');
-            MQTTManager().publish(payloadFinal, 'AppToFirmware/${widget.deviceId}');
-          },
-          style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
-            shape: MaterialStateProperty.all<OutlinedBorder>(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
-              ),
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              allIrrigationResumeFlag
-                  ? const Icon(Icons.play_arrow_outlined, color: Colors.green)
-                  : const Icon(Icons.pause, color: Colors.orange),
-              const SizedBox(width: 5),
-              Text(allIrrigationResumeFlag ? 'RESUME ALL LINE' : 'PAUSE ALL LINE',
-                  style: const TextStyle(color: Colors.black)),
-            ],
-          ),
-        ),
-        const Divider(),
-        ...provider.map((item) {
-          return ListTile(
-            leading: const Icon(
-              CupertinoIcons.ellipsis_circle,
-              color: Colors.white,
-            ),
-            title: Text(
-              item['Line'],
-              style: const TextStyle(color: Colors.white),
-            ),
-            trailing: TextButton(
-              onPressed: () {
-                String payLoadFinal = jsonEncode({
-                  "4900": [{
-                      "4901": "${item['S_No']},${item['IrrigationPauseFlag'] == 0 ? '1' : '0'}",
-                    },
-                  ]
-                });
-                // Replace with your MQTT publish code
-                print('Publish: $payLoadFinal');
-                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-              },
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
-                shape: MaterialStateProperty.all<OutlinedBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    item['IrrigationPauseFlag'] == 0
-                        ? Icons.pause
-                        : Icons.play_arrow_outlined,
-                    color: item['IrrigationPauseFlag'] == 0
-                        ? Colors.orange
-                        : Colors.green,
-                  ),
-                  const SizedBox(width: 5),
-                  Text(
-                    item['IrrigationPauseFlag'] == 0 ? 'PAUSE' : 'RESUME',
-                    style: const TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-            ),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          );
-        }).toList(),
-      ],
-    );
+  String formatDateTime(String? dateTimeString) {
+    print('dateTimeString:$dateTimeString');
+    if (dateTimeString == null) {
+      return "No feedback received";
+    }
+    try {
+      DateTime dateTime = DateTime.parse(dateTimeString);
+      DateFormat formatter = DateFormat('yyyy-MM-dd hh:mm a');
+      return formatter.format(dateTime);
+    } catch (e) {
+      return "Invalid date format";
+    }
   }
-
 }

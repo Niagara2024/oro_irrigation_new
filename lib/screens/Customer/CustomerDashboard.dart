@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/NextSchedule.dart';
@@ -45,6 +46,14 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     });
   }
 
+  int? getIrrigationPauseFlag(String line, List<dynamic> payload2408) {
+    for (var data in payload2408) {
+      if (data["Line"] == line) {
+        return data["IrrigationPauseFlag"];
+      }
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +64,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
       final filteredScheduledPrograms = filterProgramsByCategory(Provider.of<MqttPayloadProvider>(context).scheduledProgram, widget.crrIrrLine.id);
       final filteredProgramsQueue = filterProgramsQueueByCategory(Provider.of<MqttPayloadProvider>(context).programQueue, widget.crrIrrLine.id);
       final filteredCurrentSchedule = filterCurrentScheduleByCategory(Provider.of<MqttPayloadProvider>(context).currentSchedule, widget.crrIrrLine.id);
+      filteredCurrentSchedule.insertAll(0, filterCurrentScheduleByProgramName(Provider.of<MqttPayloadProvider>(context).currentSchedule, 'StandAlone'));
+
       final nodeList = Provider.of<MqttPayloadProvider>(context).nodeList;
 
       try{
@@ -101,46 +112,66 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
         print(e);
       }
 
-      return SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(3.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(
-                    color: Colors.grey,
-                    width: 0.5,
-                  ),
-                  borderRadius: const BorderRadius.all(Radius.circular(5)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    PumpLineCentral(currentSiteData: widget.siteData, crrIrrLine:  widget.crrIrrLine,),
-                    Divider(height: 0, color: Colors.grey.shade300),
-                    Container(height: 4, color: Colors.white24),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 05, right: 00),
-                      child: Divider(height: 0, color: Colors.grey.shade300),
+      int? irrigationPauseFlag = getIrrigationPauseFlag(widget.crrIrrLine.id, Provider.of<MqttPayloadProvider>(context).payload2408);
+
+      return Column(
+        children: [
+          irrigationPauseFlag!=0 && irrigationPauseFlag!=null? Container(
+            width: MediaQuery.sizeOf(context).width,
+            decoration: BoxDecoration(
+              color: irrigationPauseFlag==1?Colors.orangeAccent:Colors.redAccent,
+              borderRadius: BorderRadius.circular(02),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: Center(child: Text(irrigationPauseFlag==1? 'The line paused by manual':'The line paused by condition')),
+            ),
+          ):
+          const SizedBox(),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(3.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(
+                          color: Colors.grey,
+                          width: 0.5,
+                        ),
+                        borderRadius: const BorderRadius.all(Radius.circular(5)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          PumpLineCentral(currentSiteData: widget.siteData, crrIrrLine:  widget.crrIrrLine, masterIdx: widget.masterInx,),
+                          Divider(height: 0, color: Colors.grey.shade300),
+                          Container(height: 4, color: Colors.white24),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 05, right: 00),
+                            child: Divider(height: 0, color: Colors.grey.shade300),
+                          ),
+                          DisplayIrrigationLine(irrigationLine: widget.crrIrrLine, currentSchedule: filteredCurrentSchedule,),
+                        ],
+                      ),
                     ),
-                    DisplayIrrigationLine(irrigationLine: widget.crrIrrLine, currentSchedule: filteredCurrentSchedule,),
-                  ],
-                ),
+                  ),
+                  filteredCurrentSchedule.isNotEmpty? CurrentSchedule(siteData: widget.siteData, customerID: widget.customerID, currentSchedule: filteredCurrentSchedule,):
+                  const SizedBox(),
+                  filteredProgramsQueue.isNotEmpty? NextSchedule(siteData: widget.siteData, userID: widget.userID, customerID: widget.customerID, programQueue: filteredProgramsQueue,):
+                  const SizedBox(),
+                  filteredScheduledPrograms.isNotEmpty? UpcomingProgram(siteData: widget.siteData, customerId: widget.customerID, scheduledPrograms: filteredScheduledPrograms,):
+                  const SizedBox(),
+                  const SizedBox(height: 8,),
+                ],
               ),
             ),
-            filteredCurrentSchedule.isNotEmpty? CurrentSchedule(siteData: widget.siteData, customerID: widget.customerID, currentSchedule: filteredCurrentSchedule,):
-            const SizedBox(),
-            filteredProgramsQueue.isNotEmpty? NextSchedule(siteData: widget.siteData, userID: widget.userID, customerID: widget.customerID, programQueue: filteredProgramsQueue,):
-            const SizedBox(),
-            filteredScheduledPrograms.isNotEmpty? UpcomingProgram(siteData: widget.siteData, customerId: widget.customerID, scheduledPrograms: filteredScheduledPrograms,):
-            const SizedBox(),
-            const SizedBox(height: 8,),
-          ],
-        ),
+          ),
+        ],
       );
     }
 
@@ -172,6 +203,10 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     return cs.where((cs) => cs.programCategory.contains(category)).toList();
   }
 
+  List<CurrentScheduleModel> filterCurrentScheduleByProgramName(List<CurrentScheduleModel> cs, String category) {
+    return cs.where((cs) => cs.programName.contains(category)).toList();
+  }
+
 }
 
 
@@ -197,10 +232,10 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
       ...widget.irrigationLine.valve.map((vl) => ValveWidget(vl: vl, status: vl.status,)).toList(),
     ];
 
-    int crossAxisCount = (screenWidth / 95).floor().clamp(1, double.infinity).toInt();
+    int crossAxisCount = (screenWidth / 140).floor().clamp(1, double.infinity).toInt();
     int rowCount = (valveWidgets.length / crossAxisCount).ceil();
     double itemHeight = 70;
-    double gridHeight = rowCount * (itemHeight + 2);
+    double gridHeight = rowCount * (itemHeight + 5);
 
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
@@ -210,7 +245,7 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
         child: GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
-            childAspectRatio: 1.25,
+            childAspectRatio: 1.87,
             mainAxisSpacing: 1.0,
             crossAxisSpacing: 1.0,
           ),
@@ -233,13 +268,13 @@ class MainValveWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 100,
+      width: 150,
       margin: const EdgeInsets.only(left: 4, right: 4),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(
-            width: 100,
+            width: 150,
             height: 13.5,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -275,13 +310,13 @@ class ValveWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 100,
-      margin: const EdgeInsets.only(left: 4, right: 4),
+      width: 150,
+      margin: const EdgeInsets.only(left: 2, right: 2),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(
-            width: 100,
+            width: 150,
             height: 15,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,

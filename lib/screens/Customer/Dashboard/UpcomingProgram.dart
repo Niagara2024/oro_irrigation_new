@@ -67,7 +67,7 @@ class UpcomingProgram extends StatelessWidget {
                           fixedWidth: 50,
                         ),
                         const DataColumn2(
-                          label: Center(child: Text('Start Date | Time', style: TextStyle(fontSize: 13),)),
+                          label: Center(child: Text('Start Date & Time', style: TextStyle(fontSize: 13),)),
                           size: ColumnSize.M,
                         ),
                         const DataColumn2(
@@ -111,7 +111,7 @@ class UpcomingProgram extends StatelessWidget {
                         scheduledPrograms[index].schedulingMethod==3?'Schedule as run list':'Day count schedule')),
                         DataCell(Text('${getContentByCode(scheduledPrograms[index].startStopReason)} - ${scheduledPrograms[index].startStopReason}', style: const TextStyle(fontSize: 12),)),
                         DataCell(Center(child: Text('${scheduledPrograms[index].totalZone}'))),
-                        DataCell(Center(child: Text('${scheduledPrograms[index].startDate} | ${_convertTime(scheduledPrograms[index].startTime)}'))),
+                        DataCell(Center(child: Text('${scheduledPrograms[index].startDate} : ${_convertTime(scheduledPrograms[index].startTime)}'))),
                         DataCell(Center(child: Text(scheduledPrograms[index].endDate))),
                         DataCell(Row(
                           children: [

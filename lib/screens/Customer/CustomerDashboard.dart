@@ -116,15 +116,19 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
       return Column(
         children: [
-          irrigationPauseFlag!=0 && irrigationPauseFlag!=null? Container(
-            width: MediaQuery.sizeOf(context).width,
-            decoration: BoxDecoration(
-              color: irrigationPauseFlag==1?Colors.orangeAccent:Colors.redAccent,
-              borderRadius: BorderRadius.circular(02),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(5.0),
-              child: Center(child: Text(irrigationPauseFlag==1? 'The line paused by manual':'The line paused by condition')),
+          irrigationPauseFlag!=0 && irrigationPauseFlag!=null? Padding(
+            padding: const EdgeInsets.only(left: 4, right: 4),
+            child: Container(
+              width: MediaQuery.sizeOf(context).width,
+              decoration: BoxDecoration(
+                color: irrigationPauseFlag==1?Colors.orange.shade100:Colors.red.shade100,
+                borderRadius: BorderRadius.circular(02),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(2.0),
+                child: Center(child: Text(irrigationPauseFlag==1? 'The line paused by manually'.toUpperCase():'The line paused by condition'.toUpperCase(),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.normal),)),
+              ),
             ),
           ):
           const SizedBox(),
@@ -174,7 +178,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
         ],
       );
     }
-
   }
 
   String getCurrentDateAndTime() {

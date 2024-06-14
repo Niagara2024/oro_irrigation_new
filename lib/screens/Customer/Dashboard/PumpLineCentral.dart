@@ -2092,7 +2092,6 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
 
   }
 
-
   void durationUpdatingFunction() {
     timer?.cancel();
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
@@ -2102,7 +2101,6 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
             .where((pump) => pump['Location'].contains(widget.currentLineId))
             .toList()
             .cast<Map<String, dynamic>>();
-
 
         for (var local in fertilizerLocal) {
           local['Fertilizer'].forEach((fertilizer) {

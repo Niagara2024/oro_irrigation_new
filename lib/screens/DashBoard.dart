@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:oro_irrigation_new/screens/NarrowLayout/Customer/HomeScreenN.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/MQTTManager.dart';
@@ -57,7 +56,7 @@ class _MainDashBoardState extends State<MainDashBoard> {
       future: SharedPreferences.getInstance(),
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return Container();
+          return const Center(child: Text('Loading... Please waite.'));
         }else{
           final sharedPreferences = snapshot.data!;
           final userId = sharedPreferences.getString('userId') ?? '';
@@ -68,9 +67,7 @@ class _MainDashBoardState extends State<MainDashBoard> {
           final emailId = sharedPreferences.getString('emailId') ?? '';
 
           if (userId.isNotEmpty) {
-            return Scaffold(
-              body: BuildDashboardScreen(userId: int.parse(userId), userType: int.parse(userType), userName: userName, countryCode: countryCode, mobileNo: mobileNo, emailId: emailId,),
-            );
+            return BuildDashboardScreen(userId: int.parse(userId), userType: int.parse(userType), userName: userName, countryCode: countryCode, mobileNo: mobileNo, emailId: emailId,);
           } else {
             return const LoginForm();
           }
@@ -100,50 +97,35 @@ class _BuildDashboardScreenState extends State<BuildDashboardScreen> {
     print('userType:${widget.userType}');
 
     return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints)
-        {
-          print('constraints.maxWidth:${constraints.maxWidth}');
-          if(constraints.maxWidth < 600){
-            return  mainScreen(widget.userType, 'Narrow');
-          }else if (constraints.maxWidth > 600 && constraints.maxWidth < 900){
-            return mainScreen(widget.userType, 'Middle');
-          }else{
-            return  mainScreen(widget.userType, 'Wide');
-          }
-        },
-      ),
+      body: mainScreen(widget.userType),
     );
 
   }
 
-  Widget mainScreen(int userType, String screenType) {
+  Widget mainScreen(int userType) {
     switch (userType) {
       case 1:
-        return screenType=='Wide'? AdminScreenController(
+        return AdminScreenController(
           userName: widget.userName,
           countryCode: widget.countryCode,
           mobileNo: widget.mobileNo,
           fromLogin: true,
-          userId: widget.userId,):
-        const  SizedBox();
+          userId: widget.userId,);
       case 2:
-        return screenType=='Wide'? DealerScreenController(
+        return DealerScreenController(
           userName: widget.userName,
           countryCode: widget.countryCode,
           mobileNo: widget.mobileNo,
           fromLogin: true,
           userId: widget.userId,
-          emailId: widget.emailId,):
-        const SizedBox();
+          emailId: widget.emailId,);
       case 3:
-        return screenType=='Wide'? CustomerScreenController(
+        return CustomerScreenController(
           customerId: widget.userId,
           customerName: widget.userName,
           mobileNo: '+${widget.countryCode}-${widget.mobileNo}',
           comingFrom: 'Customer',
-          emailId: widget.emailId, userId: widget.userId,):
-        HomeScreenN(userId: widget.userId);
+          emailId: widget.emailId, userId: widget.userId,);
       default:
         return const SizedBox();
     }

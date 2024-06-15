@@ -471,7 +471,61 @@ class _CreateAccountState extends State<CreateAccount> {
                           }
                         }
                         else{
-                          _showAlertDialog('Warning', data["message"]);
+                          if(data["code"]==409){
+                            showDialog(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                title: const Text('Sub user'),
+                                content: const Text('The mobile number already registered. Are you sure! You want add this customer?'),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () async {
+                                      Map<String, Object> body = {
+                                        'countryCode': dialCode,
+                                        'mobileNumber': _cusMobileNoController.text,
+                                        'modifyUser': userID,
+                                        'mainUserId': widget.customerId,
+                                      };
+                                      final response = await HttpService().putRequest("updateMainUserDetail", body);
+                                      if(response.statusCode == 200)
+                                      {
+                                        var data = jsonDecode(response.body);
+                                        if(data["code"]==200)
+                                        {
+                                          widget.callback('reloadCustomer');
+                                          if(mounted){
+                                            Navigator.of(ctx).pop();
+                                            Navigator.pop(context);
+                                          }
+                                        }
+                                        else{
+                                          Navigator.of(ctx).pop();
+                                          _showAlertDialog('Warning', data["message"]);
+                                        }
+                                      }
+
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      child: const Text("Add"),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(ctx).pop();
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      child: const Text("Cancel"),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+
+                          }else{
+                            _showAlertDialog('Warning', data["message"]);
+                          }
                         }
                       }
                     }

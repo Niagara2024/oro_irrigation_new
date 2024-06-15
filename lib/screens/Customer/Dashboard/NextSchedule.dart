@@ -18,6 +18,7 @@ class NextSchedule extends StatefulWidget {
 class _NextScheduleState extends State<NextSchedule> {
   @override
   Widget build(BuildContext context) {
+    var screenWidth = MediaQuery.of(context).size.width;
     return Padding(
       padding: const EdgeInsets.all(3.0),
       child: Column(
@@ -27,69 +28,8 @@ class _NextScheduleState extends State<NextSchedule> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 20),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(
-                      color: Colors.grey,
-                      width: 0.5,
-                    ),
-                    borderRadius: const BorderRadius.all(Radius.circular(5)),
-                  ),
-                  height:(widget.programQueue.length * 40) + 55,
-                  child: Padding(
-                    padding: const EdgeInsets.all(1.0),
-                    child: DataTable2(
-                      columnSpacing: 12,
-                      horizontalMargin: 12,
-                      minWidth: 600,
-                      dataRowHeight: 45.0,
-                      headingRowHeight: 40.0,
-                      headingRowColor: MaterialStateProperty.all<Color>(Colors.orange.shade50),
-                      columns: const [
-                        DataColumn2(
-                            label: Text('Name', style: TextStyle(fontSize: 13),),
-                            size: ColumnSize.L
-                        ),
-                        DataColumn2(
-                            label: Text('Method', style: TextStyle(fontSize: 13)),
-                            size: ColumnSize.M
-
-                        ),
-                        DataColumn2(
-                            label: Text('Location', style: TextStyle(fontSize: 13),),
-                            size: ColumnSize.M
-                        ),
-                        DataColumn2(
-                            label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
-                            size: ColumnSize.S
-                        ),
-                        DataColumn2(
-                            label: Center(child: Text('Zone Name', style: TextStyle(fontSize: 13),)),
-                            size: ColumnSize.M
-                        ),
-                        DataColumn2(
-                            label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
-                            size: ColumnSize.M
-                        ),
-                        DataColumn2(
-                            label: Center(child: Text('Total(Duration/Flow)', style: TextStyle(fontSize: 13),)),
-                            size: ColumnSize.M
-                        ),
-                      ],
-                      rows: List<DataRow>.generate(widget.programQueue.length, (index) => DataRow(cells: [
-                        DataCell(Text(widget.programQueue[index].programName)),
-                        DataCell(Text(widget.programQueue[index].schMethod==1?'No Schedule':widget.programQueue[index].schMethod==2?'Schedule by days':
-                        widget.programQueue[index].schMethod==3?'Schedule as run list':'Day count schedule')),
-                        DataCell(Text(widget.programQueue[index].programCategory)),
-                        DataCell(Center(child: Text('${widget.programQueue[index].currentZone}'))),
-                        DataCell(Center(child: Center(child: Text(widget.programQueue[index].zoneName)))),
-                        DataCell(Center(child: Text(_convertTime(widget.programQueue[index].startTime)))),
-                        DataCell(Center(child: Text(widget.programQueue[index].totalDurORQty))),
-                      ])),
-                    ),
-                  ),
-                ),
+                child: screenWidth > 600 ? buildWideLayout():
+                buildNarrowLayout(),
               ),
               Positioned(
                 top: 5,
@@ -108,6 +48,118 @@ class _NextScheduleState extends State<NextSchedule> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget buildNarrowLayout() {
+    return SizedBox(
+      height: widget.programQueue.length * 85,
+      child: ListView.builder(
+        itemCount: widget.programQueue.length,
+        itemBuilder: (context, index) {
+          return Card(
+            surfaceTintColor: Colors.white,
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(3))),
+            elevation: 5,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10, top: 8, bottom: 8),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text('Next program & Zone', style: TextStyle(fontWeight: FontWeight.normal),),
+                          Text('Start time & Duration', style: TextStyle(fontWeight: FontWeight.normal),),
+                          Text('Location & Zone Name', style: TextStyle(fontWeight: FontWeight.normal),),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text('${widget.programQueue[index].programName} & ${widget.programQueue[index].currentZone}/${widget.programQueue[index].totalZone}'),
+                          Text('${_convertTime(widget.programQueue[index].startTime)} & ${widget.programQueue[index].totalDurORQty}'),
+                          Text('${widget.programQueue[index].programCategory} & ${widget.programQueue[index].zoneName}'),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget buildWideLayout() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(
+          color: Colors.grey,
+          width: 0.5,
+        ),
+        borderRadius: const BorderRadius.all(Radius.circular(5)),
+      ),
+      height:(widget.programQueue.length * 40) + 55,
+      child: Padding(
+        padding: const EdgeInsets.all(1.0),
+        child: DataTable2(
+          columnSpacing: 12,
+          horizontalMargin: 12,
+          minWidth: 1000,
+          dataRowHeight: 45.0,
+          headingRowHeight: 40.0,
+          headingRowColor: MaterialStateProperty.all<Color>(Colors.orange.shade50),
+          columns: const [
+            DataColumn2(
+                label: Text('Name', style: TextStyle(fontSize: 13),),
+                size: ColumnSize.L
+            ),
+            DataColumn2(
+                label: Text('Method', style: TextStyle(fontSize: 13)),
+                size: ColumnSize.M
+
+            ),
+            DataColumn2(
+                label: Text('Location', style: TextStyle(fontSize: 13),),
+                size: ColumnSize.M
+            ),
+            DataColumn2(
+                label: Center(child: Text('Zone', style: TextStyle(fontSize: 13),)),
+                size: ColumnSize.S
+            ),
+            DataColumn2(
+                label: Center(child: Text('Zone Name', style: TextStyle(fontSize: 13),)),
+                size: ColumnSize.M
+            ),
+            DataColumn2(
+                label: Center(child: Text('Start Time', style: TextStyle(fontSize: 13),)),
+                size: ColumnSize.M
+            ),
+            DataColumn2(
+                label: Center(child: Text('Total(Duration/Flow)', style: TextStyle(fontSize: 13),)),
+                size: ColumnSize.M
+            ),
+          ],
+          rows: List<DataRow>.generate(widget.programQueue.length, (index) => DataRow(cells: [
+            DataCell(Text(widget.programQueue[index].programName)),
+            DataCell(Text(widget.programQueue[index].schMethod==1?'No Schedule':widget.programQueue[index].schMethod==2?'Schedule by days':
+            widget.programQueue[index].schMethod==3?'Schedule as run list':'Day count schedule')),
+            DataCell(Text(widget.programQueue[index].programCategory)),
+            DataCell(Center(child: Text('${widget.programQueue[index].currentZone}'))),
+            DataCell(Center(child: Center(child: Text(widget.programQueue[index].zoneName)))),
+            DataCell(Center(child: Text(_convertTime(widget.programQueue[index].startTime)))),
+            DataCell(Center(child: Text(widget.programQueue[index].totalDurORQty))),
+          ])),
+        ),
       ),
     );
   }

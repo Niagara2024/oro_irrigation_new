@@ -13,6 +13,7 @@ import '../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../Models/Customer/Dashboard/ProgramList.dart';
 import '../../constants/AppImages.dart';
 import '../../constants/MQTTManager.dart';
+import '../../constants/MyFunction.dart';
 import '../../constants/http_service.dart';
 import '../../constants/snack_bar.dart';
 import '../../constants/theme.dart';
@@ -63,7 +64,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     print('coming userId: ${widget.userId}');
     print('coming customerId: ${widget.customerId}');
     indicatorViewShow();
-    clearMQTTPayload();
+    MyFunction().clearMQTTPayload(context);
     getCustomerSite(widget.customerId);
   }
 
@@ -95,24 +96,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     });
   }
 
-  void clearMQTTPayload(){
-    MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context,listen: false);
-    payloadProvider.currentSchedule.clear();
-    payloadProvider.PrsIn=[];
-    payloadProvider.PrsOut=[];
-    payloadProvider.programQueue.clear();
-    payloadProvider.scheduledProgram.clear();
-    payloadProvider.filtersCentral=[];
-    payloadProvider.filtersLocal=[];
-    payloadProvider.sourcePump=[];
-    payloadProvider.irrigationPump=[];
-    payloadProvider.fertilizerCentral=[];
-    payloadProvider.fertilizerLocal=[];
-    payloadProvider.waterMeter=[];
-    payloadProvider.wifiStrength = 0;
-    payloadProvider.alarmList = [];
-    payloadProvider.payload2408 = [];
-  }
 
   Future<void> getCustomerSite(userId) async
   {
@@ -269,7 +252,12 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     }
 
     return visibleLoading? buildLoadingIndicator(visibleLoading, screenWidth):
-    Scaffold(
+    screenWidth > 600 ? buildWideLayout(screenWidth, payload2408, allIrrigationResumeFlag, wifiStrength, provider):
+    buildNarrowLayout(screenWidth, payload2408, allIrrigationResumeFlag, wifiStrength, provider);
+  }
+
+  Widget buildWideLayout(screenWidth, payload2408, allIrrigationResumeFlag, wifiStrength, provider) {
+    return Scaffold(
       appBar: AppBar(
         leading: const Padding(
           padding: EdgeInsets.only(left: 10),
@@ -295,7 +283,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     _myCurrentSite = newSiteName!;
                     siteIndex = newIndex;
                   });
-                  clearMQTTPayload();
+                  MyFunction().clearMQTTPayload(context);
                   subscribeAndUpdateSite();
                   getProgramList();
                 }
@@ -399,7 +387,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               ):
               const SizedBox(),
               const SizedBox(width: 10,),
-              
+
               siteListFinal[siteIndex].master[masterIndex].irrigationLine.length>1? TextButton(
                 onPressed: () {
                   String strPRPayload = '';
@@ -562,7 +550,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                   await prefs.remove('email');
                                   MQTTManager().disconnect();
                                   if (context.mounted){
-                                    clearMQTTPayload();
+                                    MyFunction().clearMQTTPayload(context);
                                     Navigator.pushReplacementNamed(context, '/login');
                                   }
                                 },
@@ -653,19 +641,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   color: Colors.teal.shade50,
                   borderRadius: const BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child:
-                  _selectedIndex == 0 ? SizedBox(child: siteListFinal[siteIndex].master[masterIndex].categoryId==1 ||
-                      siteListFinal[siteIndex].master[masterIndex].categoryId==2 ?
-                  CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: siteListFinal[siteIndex], crrIrrLine: siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex], masterInx: masterIndex, lineIdx: lineIndex,):
-                  PumpDashboard(siteData: siteListFinal[siteIndex], masterIndex: masterIndex,)):
-                  _selectedIndex == 1 ? ProductInventory(userName: widget.customerName):
-                  _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
-                  _selectedIndex == 3 ? ListOfLogConfig(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId,):
-                  _selectedIndex == 4 ? WeatherScreen(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId, deviceID: siteListFinal[siteIndex].master[masterIndex].deviceId,):
-                  ControllerSettings(customerID: widget.customerId, siteData: siteListFinal[siteIndex], masterIndex: masterIndex, adDrId: widget.comingFrom=='AdminORDealer'? widget.userId:0,),
-                ),
+                child: buildScreen(),
               ),
             ),
             Container(
@@ -820,6 +796,188 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           ],
         ),
       ),
+    );
+  }
+
+  Widget buildNarrowLayout(screenWidth, payload2408, allIrrigationResumeFlag, wifiStrength, provider) {
+    return Scaffold(
+      backgroundColor: myTheme.primaryColorLight.withOpacity(0.1),
+      appBar: AppBar(
+        title: const Text('Dashboard'),
+      ),
+      drawer: Drawer(
+        shape: const RoundedRectangleBorder(),
+        backgroundColor: myTheme.primaryColor,
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: <Widget>[
+                  Container(
+                    width: screenWidth,
+                    height: 155,
+                    color: myTheme.primaryColorDark,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 15, right: 8,top: 8, bottom: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          const SizedBox(
+                            width: 50,
+                            height: 50,
+                            child: CircleAvatar(),
+                          ),
+                          const SizedBox(height: 5,),
+                          Text('Hello !, ${widget.customerName}',style: const TextStyle(fontSize: 17, color: Colors.white)),
+                          Text(widget.mobileNo, style: const TextStyle(fontSize: 13, color: Colors.white)),
+                          const SizedBox(height: 5),
+                          MaterialButton(
+                            color: myTheme.primaryColor,
+                            textColor: Colors.white,
+                            child: const Text('Manage Your Niagara Account'),
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AccountManagement(userID: widget.customerId, callback: callbackFunction),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    title: const Text('Dashboard', style: TextStyle(color: Colors.white),),
+                    leading: const Icon(Icons.dashboard_outlined, color: Colors.white,),
+                    onTap: () {
+                      Navigator.pop(context);
+                      setState(() {
+                        _selectedIndex=0;
+                      });
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('My Device', style: TextStyle(color: Colors.white)),
+                    leading: const Icon(Icons.devices_other, color: Colors.white,),
+                    onTap: () {
+                      Navigator.pop(context);
+                      setState(() {
+                        _selectedIndex=1;
+                      });
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('Sent & Received', style: TextStyle(color: Colors.white)),
+                    leading: const Icon(Icons.question_answer_outlined, color: Colors.white,),
+                    onTap: () {
+                      Navigator.pop(context);
+                      setState(() {
+                        _selectedIndex=2;
+                      });
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('Logs & Report', style: TextStyle(color: Colors.white)),
+                    leading: const Icon(Icons.receipt_outlined, color: Colors.white,),
+                    onTap: () {
+                      Navigator.pop(context);
+                      setState(() {
+                        _selectedIndex=3;
+                      });
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('Weather', style: TextStyle(color: Colors.white)),
+                    leading: const Icon(Icons.wb_cloudy_outlined, color: Colors.white,),
+                    onTap: () {
+                      Navigator.pop(context);
+                      setState(() {
+                        _selectedIndex=4;
+                      });
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('Controller setting', style: TextStyle(color: Colors.white)),
+                    leading: const Icon(Icons.settings_outlined, color: Colors.white,),
+                    onTap: () {
+                      Navigator.pop(context);
+                      setState(() {
+                        _selectedIndex=5;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: MediaQuery.sizeOf(context).width,
+              height: 50,
+              color: Colors.teal,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: () async {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.remove('userId');
+                      await prefs.remove('userName');
+                      await prefs.remove('userType');
+                      await prefs.remove('countryCode');
+                      await prefs.remove('mobileNumber');
+                      await prefs.remove('subscribeTopic');
+                      await prefs.remove('password');
+                      await prefs.remove('email');
+                      MQTTManager().disconnect();
+                      if (context.mounted){
+                        MyFunction().clearMQTTPayload(context);
+                        Navigator.pushReplacementNamed(context, '/login');
+                      }
+                    },
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
+                      shape: MaterialStateProperty.all<OutlinedBorder>(
+                        RoundedRectangleBorder(borderRadius: BorderRadius.circular(5),),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.exit_to_app, color: Colors.white),
+                        const SizedBox(width: 5),
+                        Text('Logout', style: const TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: buildScreen(),
+    );
+  }
+
+  Widget buildScreen()
+  {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child:
+      _selectedIndex == 0 ? SizedBox(child: siteListFinal[siteIndex].master[masterIndex].categoryId==1 ||
+          siteListFinal[siteIndex].master[masterIndex].categoryId==2 ?
+      CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: siteListFinal[siteIndex], crrIrrLine: siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex], masterInx: masterIndex, lineIdx: lineIndex,):
+      PumpDashboard(siteData: siteListFinal[siteIndex], masterIndex: masterIndex,)):
+      _selectedIndex == 1 ? ProductInventory(userName: widget.customerName):
+      _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
+      _selectedIndex == 3 ? ListOfLogConfig(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId,):
+      _selectedIndex == 4 ? WeatherScreen(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId, deviceID: siteListFinal[siteIndex].master[masterIndex].deviceId,):
+      ControllerSettings(customerID: widget.customerId, siteData: siteListFinal[siteIndex], masterIndex: masterIndex, adDrId: widget.comingFrom=='AdminORDealer'? widget.userId:0,),
     );
   }
 
@@ -1213,7 +1371,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   }
 
 }
-
 
 class BadgeButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -1642,4 +1799,5 @@ class _SideSheetClassState extends State<SideSheetClass> {
       return "Invalid date format";
     }
   }
+
 }

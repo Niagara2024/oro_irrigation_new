@@ -141,13 +141,14 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
 
   Widget buildNarrowLayout() {
     return SizedBox(
-      height: widget.currentSchedule.length * 172,
+      height: widget.currentSchedule.length * 190,
       child: Card(
         surfaceTintColor: Colors.white,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(3))),
         elevation: 5,
         child: ListView.builder(
           itemCount: widget.currentSchedule.length,
+          physics: const ClampingScrollPhysics(),
           itemBuilder: (context, index) {
             return Column(
               children: [
@@ -157,21 +158,32 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                     children: [
                       SizedBox(
                         width: MediaQuery.sizeOf(context).width,
-                        height: 25,
+                        height: 38,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
                               flex: 1,
-                              child: Row(
+                              child: Column(
                                 children: [
-                                  const Text('Start(T&D)', style: TextStyle(fontWeight: FontWeight.normal),),
-                                  const SizedBox(width: 5,),
-                                  Text('${_convertTime(widget.currentSchedule[index].startTime)} & ${widget.currentSchedule[index].duration_Qty}'),
+                                  Row(
+                                    children: [
+                                      const Text('Start at', style: TextStyle(fontWeight: FontWeight.normal),),
+                                      const SizedBox(width: 5,),
+                                      Text(_convertTime(widget.currentSchedule[index].startTime)),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      const Text('Duration', style: TextStyle(fontWeight: FontWeight.normal),),
+                                      const SizedBox(width: 5,),
+                                      Text(widget.currentSchedule[index].duration_Qty),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),
-                            const VerticalDivider(),
+                            const VerticalDivider(width: 0,),
                             Expanded(
                               flex: 1,
                               child: Row(
@@ -184,7 +196,6 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                 ],
                               ),
                             ),
-
                           ],
                         ),
                       ),
@@ -221,7 +232,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(getContentByCode(widget.currentSchedule[index].reasonCode), style: const TextStyle(fontSize: 10, color: Colors.black),),
+                          Text(getContentByCode(widget.currentSchedule[index].reasonCode), style: const TextStyle(fontSize: 12, color: Colors.black),),
                           widget.currentSchedule[index].programName=='StandAlone - Manual'?
                           MaterialButton(
                             color: Colors.redAccent,

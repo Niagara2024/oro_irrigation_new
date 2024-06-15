@@ -801,7 +801,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   Widget buildNarrowLayout(screenWidth, payload2408, allIrrigationResumeFlag, wifiStrength, provider) {
     return Scaffold(
-      backgroundColor: myTheme.primaryColorLight.withOpacity(0.1),
+      backgroundColor: Colors.teal.shade50,
       appBar: AppBar(
         title: const Text('Dashboard'),
       ),
@@ -816,7 +816,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 children: <Widget>[
                   Container(
                     width: screenWidth,
-                    height: 155,
+                    height: 170,
                     color: myTheme.primaryColorDark,
                     child: Padding(
                       padding: const EdgeInsets.only(left: 15, right: 8,top: 8, bottom: 8),
@@ -832,7 +832,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                           const SizedBox(height: 5,),
                           Text('Hello !, ${widget.customerName}',style: const TextStyle(fontSize: 17, color: Colors.white)),
                           Text(widget.mobileNo, style: const TextStyle(fontSize: 13, color: Colors.white)),
-                          const SizedBox(height: 5),
+                          const SizedBox(height: 8),
                           MaterialButton(
                             color: myTheme.primaryColor,
                             textColor: Colors.white,

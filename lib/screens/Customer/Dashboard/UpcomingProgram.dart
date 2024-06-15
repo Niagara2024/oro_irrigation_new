@@ -56,13 +56,14 @@ class UpcomingProgram extends StatelessWidget {
   Widget buildNarrowLayout(context) {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
-      height: scheduledPrograms.length * 198,
+      height: scheduledPrograms.length * 200,
       child: Card(
         surfaceTintColor: Colors.white,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(3))),
         elevation: 5,
         child: ListView.builder(
           itemCount: scheduledPrograms.length,
+          physics: const ClampingScrollPhysics(),
           itemBuilder: (context, index) {
             return Column(
               children: [
@@ -207,8 +208,6 @@ class UpcomingProgram extends StatelessWidget {
                     child: Divider(color: Colors.teal, thickness: 0.3,),
                   ),
                 const SizedBox(height: 5,),
-
-
               ],
             );
           },

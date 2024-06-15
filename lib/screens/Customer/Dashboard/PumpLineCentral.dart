@@ -1,10 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
@@ -91,7 +88,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                         child: provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(crInx: i):null,
                       ) : const SizedBox(),
                     provider.fertilizerCentral.isNotEmpty? DisplayCentralFertilizer(currentLineId: widget.crrIrrLine.id,): const SizedBox(),
-          
+
                     //local
                     provider.irrigationPump.isNotEmpty? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,7 +145,6 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
             ),
             child:TextButton(
               onPressed: () {
-
                 int prFlag = 0;
                 List<dynamic> records = provider.payload2408;
                 int sNoToCheck = widget.crrIrrLine.sNo;
@@ -191,148 +187,6 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
     );
   }
 
-  Widget buildScaffoldWithTabs() {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: DefaultTabController(
-        length: widget.currentSiteData.master[widget.masterIdx].irrigationLine.length,
-        child: Column(
-          children: [
-            TabBar(
-              indicatorColor: myTheme.primaryColor,
-              labelColor: Colors.black,
-              unselectedLabelColor: Colors.grey,
-              labelStyle: TextStyle(color: myTheme.primaryColor),
-              tabs: _buildTabs(),
-            ),
-            Expanded(
-              child: TabBarView(
-                children: _buildTabBarViews(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  List<Widget> _buildTabs() {
-    return widget.currentSiteData.master[widget.masterIdx].irrigationLine.map((line) => Tab(text: line.name)).toList();
-  }
-
-  List<Widget> _buildTabBarViews() {
-    final provider = Provider.of<MqttPayloadProvider>(context);
-    return widget.currentSiteData.master[widget.masterIdx].irrigationLine.map((line){
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ScrollConfiguration(
-            behavior: const ScrollBehavior(),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 5, left: 5, right: 5),
-                child: provider.irrigationPump.isNotEmpty? Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    provider.sourcePump.isNotEmpty? Padding(
-                      padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                      child: const DisplaySourcePump(),
-                    ):
-                    const SizedBox(),
-                    provider.irrigationPump.isNotEmpty? Padding(
-                      padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                      child: SizedBox(
-                        width: 52.50,
-                        height: 70,
-                        child : Stack(
-                          children: [
-                            provider.sourcePump.isNotEmpty? Image.asset('assets/images/dp_sump_src.png'):
-                            Image.asset('assets/images/dp_sump.png'),
-                          ],
-                        ),
-                      ),
-                    ):
-                    const SizedBox(),
-                    provider.irrigationPump.isNotEmpty? Padding(
-                      padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                      child: DisplayIrrigationPump(currentLineId: line.id, pumpList: widget.currentSiteData.master[widget.masterIdx].liveData[0].pumpList,),
-                    ):
-                    const SizedBox(),
-                    provider.filtersCentral.isNotEmpty? Padding(
-                      padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                      child: DisplayFilter(currentLineId: line.id,),
-                    ): const SizedBox(),
-                    for(int i=0; i<provider.payload2408.length; i++)
-                      provider.payload2408.isNotEmpty?  Padding(
-                        padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty? 38.4:0),
-                        child: provider.payload2408[i]['Line'].contains(line.id)? DisplaySensor(crInx: i):null,
-                      ) : const SizedBox(),
-                    provider.fertilizerCentral.isNotEmpty? DisplayCentralFertilizer(currentLineId: line.id,): const SizedBox(),
-                    //local
-                    provider.irrigationPump.isNotEmpty? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            provider.filtersLocal.isNotEmpty? Padding(
-                              padding: EdgeInsets.only(top: provider.fertilizerLocal.isNotEmpty?38.4:0),
-                              child: LocalFilter(currentLineId: line.id,),
-                            ) : const SizedBox(),
-                            provider.fertilizerLocal.isNotEmpty? DisplayLocalFertilizer(currentLineId: line.id,) : const SizedBox(),
-                          ],
-                        ),
-                      ],
-                    ):
-                    const SizedBox(height: 20)
-                  ],
-                ):
-                const SizedBox(height: 20),
-              ),
-            ),
-          ),
-        ],
-      );
-    },
-    ).toList();
-  }
-
-}
-
-
-
-class SensorWidget extends StatelessWidget {
-  final dynamic sensor;
-  const SensorWidget({super.key, required this.sensor});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 100,
-      margin: const EdgeInsets.all(8.0),
-      color: Colors.teal.shade100,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              sensor.name,
-              style: const TextStyle(fontSize: 16, color: Colors.white),
-              textAlign: TextAlign.center,
-            ),
-            Text(
-              '(${sensor.type})',
-              style: const TextStyle(fontSize: 12, color: Colors.white70),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 

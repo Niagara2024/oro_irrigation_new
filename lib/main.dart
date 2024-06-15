@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/screens/DashBoard.dart';
 import 'package:oro_irrigation_new/screens/login_form.dart';
@@ -57,6 +58,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: myTheme.primaryColorDark,
+      statusBarIconBrightness: Brightness.light,
+    ));
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: myTheme,

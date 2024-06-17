@@ -141,14 +141,14 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
 
   Widget buildNarrowLayout() {
     return SizedBox(
-      height: widget.currentSchedule.length * 190,
+      height: widget.currentSchedule.length * 200,
       child: Card(
         surfaceTintColor: Colors.white,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(3))),
         elevation: 5,
         child: ListView.builder(
           itemCount: widget.currentSchedule.length,
-          physics: const ClampingScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           itemBuilder: (context, index) {
             return Column(
               children: [

@@ -54,7 +54,7 @@ class _NextScheduleState extends State<NextSchedule> {
 
   Widget buildNarrowLayout() {
     return SizedBox(
-      height: widget.programQueue.length * 85,
+      height: widget.programQueue.length * 90,
       child: ListView.builder(
         itemCount: widget.programQueue.length,
         itemBuilder: (context, index) {

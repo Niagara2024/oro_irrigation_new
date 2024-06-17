@@ -56,14 +56,14 @@ class UpcomingProgram extends StatelessWidget {
   Widget buildNarrowLayout(context) {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
-      height: scheduledPrograms.length * 200,
+      height: scheduledPrograms.length * 210,
       child: Card(
         surfaceTintColor: Colors.white,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(3))),
         elevation: 5,
         child: ListView.builder(
           itemCount: scheduledPrograms.length,
-          physics: const ClampingScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           itemBuilder: (context, index) {
             return Column(
               children: [

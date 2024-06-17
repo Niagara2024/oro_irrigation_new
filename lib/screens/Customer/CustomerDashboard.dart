@@ -171,9 +171,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 elevation: 5,
                 child: Padding(
                   padding: const EdgeInsets.only(right: 3, top: 3, bottom: 3),
-                  child: Container(
+                  child: SizedBox(
                     width: MediaQuery.sizeOf(context).width,
-                    color: Colors.white,
                     child: ScrollConfiguration(
                       behavior: const ScrollBehavior(),
                       child: SingleChildScrollView(
@@ -275,14 +274,14 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 top: 5,
                 left: 0,
                 child: Container(
-                  width: 200,
+                  width: 220,
                   padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 2),
                   decoration: BoxDecoration(
-                      color: Colors.teal.shade200,
+                      color: Colors.teal.shade100,
                       borderRadius: const BorderRadius.all(Radius.circular(2)),
                       border: Border.all(width: 0.5, color: Colors.grey)
                   ),
-                  child: const Text('PUMP AND FILTER STATION',  style: TextStyle(color: Colors.black)),
+                  child: const Text('PUMP & FILTER STATION',  style: TextStyle(color: Colors.black)),
                 ),
               ),
             ],
@@ -297,9 +296,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                   elevation: 5,
                   child: Padding(
                     padding: const EdgeInsets.only(right: 3,top: 3, bottom: 3),
-                    child: Container(
+                    child: SizedBox(
                       width: MediaQuery.sizeOf(context).width,
-                      color: Colors.white,
                       child: ScrollConfiguration(
                         behavior: const ScrollBehavior(),
                         child: SingleChildScrollView(
@@ -368,7 +366,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                   width: 200,
                   padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 2),
                   decoration: BoxDecoration(
-                      color: Colors.teal.shade200,
+                      color: Colors.teal.shade100,
                       borderRadius: const BorderRadius.all(Radius.circular(2)),
                       border: Border.all(width: 0.5, color: Colors.grey)
                   ),
@@ -395,7 +393,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                   width: 200,
                   padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 2),
                   decoration: BoxDecoration(
-                      color: Colors.teal.shade200,
+                      color: Colors.teal.shade100,
                       borderRadius: const BorderRadius.all(Radius.circular(2)),
                       border: Border.all(width: 0.5, color: Colors.grey)
                   ),
@@ -520,19 +518,21 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
     ):
     SizedBox(
       width: MediaQuery.sizeOf(context).width,
-      height: (3 ~/ 5)+1 * 70,
+      height: (valveWidgets.length ~/ 5 +1) * 70,
       child: Padding(
         padding: const EdgeInsets.only(left: 3, right: 3),
         child: GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 5,
-            childAspectRatio: 1.32,
+            childAspectRatio: 1.0,
             mainAxisSpacing: 1.0,
             crossAxisSpacing: 1.0,
           ),
           itemCount: valveWidgets.length,
           itemBuilder: (context, index) {
-            return Container(color: Colors.white, child: valveWidgets[index]);
+            return Container(child: valveWidgets[index]);
           },
         ),
       ),
@@ -548,13 +548,14 @@ class MainValveWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
     return Container(
       width: 150,
       margin: const EdgeInsets.only(left: 4, right: 4),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(
+          screenWidth>600? const SizedBox(
             width: 150,
             height: 13.5,
             child: Row(
@@ -566,7 +567,8 @@ class MainValveWidget extends StatelessWidget {
                 VerticalDivider(width: 0,),
               ],
             ),
-          ),
+          ):
+          const SizedBox(),
           Image.asset(
             width: 35,
             height: 35,
@@ -590,13 +592,14 @@ class ValveWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
     return Container(
       width: 150,
       margin: const EdgeInsets.only(left: 2, right: 2),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(
+          screenWidth>600? const SizedBox(
             width: 150,
             height: 15,
             child: Row(
@@ -608,7 +611,8 @@ class ValveWidget extends StatelessWidget {
                 VerticalDivider(width: 0,),
               ],
             ),
-          ),
+          ):
+          const SizedBox(),
           Image.asset(
             width: 35,
             height: 35,

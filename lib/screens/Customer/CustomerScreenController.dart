@@ -544,7 +544,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
         ),
       ),
       endDrawer: Drawer(
-        width: 400,
+        //width: 400,
         shape: const RoundedRectangleBorder(),
         child: SideSheetClass(customerID: widget.customerId, nodeList: siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList,
           deviceId: siteListFinal[siteIndex].master[masterIndex].deviceId,
@@ -1102,7 +1102,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   Widget buildScreen(screenWidth, provider, wifiStrength)
   {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: screenWidth>600? const EdgeInsets.all(8.0):
+      const EdgeInsets.all(0),
       child:
       _selectedIndex == 0 ? SizedBox(child: siteListFinal[siteIndex].master[masterIndex].categoryId==1 ||
           siteListFinal[siteIndex].master[masterIndex].categoryId==2 ?
@@ -1110,11 +1111,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
         children: [
           Expanded(child: CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: siteListFinal[siteIndex], crrIrrLine: siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex], masterInx: masterIndex, lineIdx: lineIndex,)),
           screenWidth<600? Container(
-            height: 50,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(3),
-                color: Colors.teal.shade500,
-            ),
+            height: 60,
+            color: Colors.teal.shade500,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -2069,16 +2067,78 @@ class _SideSheetClassState extends State<SideSheetClass> {
                 ),
               ],
             ),
-            const Text('NODE LIST', style: TextStyle(color: Colors.black, fontSize: 15)),
+            Row(
+              children: [
+                Expanded(child: const Text('NODE LIST', style: TextStyle(color: Colors.black, fontSize: 15))),
+                SizedBox(
+                  width: 40,
+                  child: IconButton(
+                    tooltip: 'Set serial for all Nodes',
+                    icon: Icon(Icons.format_list_numbered, color: myTheme.primaryColorDark),
+                    onPressed: () async {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Confirmation'),
+                            content: const Text('Are you sure! you want to proceed to reset all node ids?'),
+                            actions: <Widget>[
+                              MaterialButton(
+                                color: Colors.redAccent,
+                                textColor: Colors.white,
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                              MaterialButton(
+                                color: myTheme.primaryColor,
+                                textColor: Colors.white,
+                                onPressed: () {
+                                  String payLoadFinal = jsonEncode({
+                                    "2300": [
+                                      {"2301": ""},
+                                    ]
+                                  });
+                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                  GlobalSnackBar.show(context, 'Sent your comment successfully', 200);
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Yes'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: 40,
+                  child: IconButton(
+                    tooltip: 'Test Communication',
+                    icon: Icon(Icons.network_check, color: myTheme.primaryColorDark),
+                    onPressed: () async {
+                      String payLoadFinal = jsonEncode({
+                        "4500": [{"4501": ""},]
+                      });
+                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                      GlobalSnackBar.show(context, 'Sent your comment successfully', 200);
+                      //Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+              ],
+            ),
             const Divider(),
-            SizedBox(
+            const SizedBox(
               height: 50,
               child: Row(
                 children: [
                   Row(
                     children: [
-                      const SizedBox(width: 5),
-                      const Column(
+                      SizedBox(width: 5),
+                      Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -2100,8 +2160,8 @@ class _SideSheetClassState extends State<SideSheetClass> {
                           ),
                         ],
                       ),
-                      const SizedBox(width: 10),
-                      const Column(
+                      SizedBox(width: 05),
+                      Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -2122,65 +2182,6 @@ class _SideSheetClassState extends State<SideSheetClass> {
                             ],
                           ),
                         ],
-                      ),
-                      const SizedBox(width: 20),
-                      SizedBox(
-                        width: 40,
-                        child: IconButton(
-                          tooltip: 'Set serial for all Nodes',
-                          icon: Icon(Icons.format_list_numbered, color: myTheme.primaryColorDark),
-                          onPressed: () async {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text('Confirmation'),
-                                  content: const Text('Are you sure! you want to proceed to reset all node ids?'),
-                                  actions: <Widget>[
-                                    MaterialButton(
-                                      color: Colors.redAccent,
-                                      textColor: Colors.white,
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text('Cancel'),
-                                    ),
-                                    MaterialButton(
-                                      color: myTheme.primaryColor,
-                                      textColor: Colors.white,
-                                      onPressed: () {
-                                        String payLoadFinal = jsonEncode({
-                                          "2300": [
-                                            {"2301": ""},
-                                          ]
-                                        });
-                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                        GlobalSnackBar.show(context, 'Sent your comment successfully', 200);
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text('Yes'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        width: 40,
-                        child: IconButton(
-                          tooltip: 'Test Communication',
-                          icon: Icon(Icons.network_check, color: myTheme.primaryColorDark),
-                          onPressed: () async {
-                            String payLoadFinal = jsonEncode({
-                              "4500": [{"4501": ""},]
-                            });
-                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                            GlobalSnackBar.show(context, 'Sent your comment successfully', 200);
-                            //Navigator.of(context).pop();
-                          },
-                        ),
                       ),
                     ],
                   ),

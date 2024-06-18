@@ -239,14 +239,14 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 top: 5,
                 left: 0,
                 child: Container(
-                  width: 220,
+                  width: 200,
                   padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 2),
                   decoration: BoxDecoration(
                       color: Colors.teal.shade100,
                       borderRadius: const BorderRadius.all(Radius.circular(2)),
                       border: Border.all(width: 0.5, color: Colors.grey)
                   ),
-                  child: const Text('MAIN LINE',  style: TextStyle(color: Colors.black)),
+                  child: const Text('PUMP STATION',  style: TextStyle(color: Colors.black)),
                 ),
               ),
             ],

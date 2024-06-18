@@ -7,6 +7,7 @@ import 'Forms/add_language.dart';
 import 'Forms/add_name_type.dart';
 import 'Forms/add_product_type.dart';
 import 'Forms/add_setting_category.dart';
+import 'Forms/add_unit_type.dart';
 import 'Forms/add_widget_type.dart';
 import 'Forms/dd_category.dart';
 import 'Forms/dealer_definitions.dart';
@@ -34,6 +35,7 @@ class _AllEntryState extends State<AllEntry> with SingleTickerProviderStateMixin
     'Languages',
     'Name type',
     'Widget Type',
+    'Unit Type',
   ];
 
   final Map<String, Widget> tabWidgets = {
@@ -49,6 +51,7 @@ class _AllEntryState extends State<AllEntry> with SingleTickerProviderStateMixin
     'Settings category': const AddSettingCategory(),
     'Languages': const AddLanguage(),
     'Widget Type': const AddWidgetType(),
+    'Unit Type': const AddUnitType(),
   };
 
   late final TabController _tabCont;

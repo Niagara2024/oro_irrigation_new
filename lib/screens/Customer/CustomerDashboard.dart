@@ -165,106 +165,71 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
         children: [
           Stack(
             children: [
-              Card(
-                surfaceTintColor: Colors.white,
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(3))),
-                elevation: 5,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 3, top: 3, bottom: 3),
-                  child: SizedBox(
-                    width: MediaQuery.sizeOf(context).width,
-                    child: ScrollConfiguration(
-                      behavior: const ScrollBehavior(),
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: provider.irrigationPump.isNotEmpty? Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            //filter
-                            provider.filtersCentral.isNotEmpty? Padding(
-                              padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                              child: DisplayFilter(currentLineId: widget.crrIrrLine.id,),
-                            ): const SizedBox(),
-                            for(int i=0; i<provider.payload2408.length; i++)
-                              provider.payload2408.isNotEmpty?  Padding(
-                                padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                                child: provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(crInx: i):null,
-                              ) : const SizedBox(),
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Card(
+                  surfaceTintColor: Colors.white,
+                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(3))),
+                  elevation: 5,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 3,top: 3, bottom: 3),
+                    child: SizedBox(
+                      width: MediaQuery.sizeOf(context).width,
+                      child: ScrollConfiguration(
+                        behavior: const ScrollBehavior(),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: provider.irrigationPump.isNotEmpty? Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              //src pump
+                              provider.sourcePump.isNotEmpty? const Padding(
+                                padding: EdgeInsets.only(top: 15),
+                                child: DisplaySourcePump(),
+                              ):
+                              const SizedBox(),
 
-                            //i pump
-                            provider.irrigationPump.isNotEmpty? Padding(
-                              padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                              child: DisplayIrrigationPump(currentLineId: widget.crrIrrLine.id, pumpList: widget.siteData.master[widget.masterInx].liveData[0].pumpList,),
-                            ):
-                            const SizedBox(),
-                            //sump
-                            provider.irrigationPump.isNotEmpty? Padding(
-                              padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                              child: SizedBox(
-                                width: 52.50,
-                                height: 70,
-                                child : Stack(
-                                  children: [
-                                    provider.sourcePump.isNotEmpty? Image.asset('assets/images/dp_sump_src.png'):
-                                    Image.asset('assets/images/dp_sump.png'),
-                                  ],
-                                ),
-                              ),
-                            ):
-                            const SizedBox(),
-                            //src pump
-                            provider.sourcePump.isNotEmpty? Padding(
-                              padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                              child: const DisplaySourcePump(),
-                            ):
-                            const SizedBox(),
-
-
-
-                            /*provider.fertilizerCentral.isNotEmpty? DisplayCentralFertilizer(currentLineId: widget.crrIrrLine.id,): const SizedBox(),
-
-                              //local
-                              provider.irrigationPump.isNotEmpty? Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                              //sump
+                              provider.irrigationPump.isNotEmpty? Padding(
+                                padding: const EdgeInsets.only(top: 15),
+                                child: SizedBox(
+                                  width: 52.50,
+                                  height: 70,
+                                  child : Stack(
                                     children: [
-                                      (provider.fertilizerCentral.isNotEmpty || provider.filtersCentral.isNotEmpty) && provider.fertilizerLocal.isNotEmpty? SizedBox(
-                                        width: 4.5,
-                                        height: 150,
-                                        child: Row(
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(top: 42),
-                                              child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
-                                            ),
-                                            const SizedBox(width: 4.5,),
-                                            Padding(
-                                              padding: const EdgeInsets.only(top: 45),
-                                              child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
-                                            ),
-                                          ],
-                                        ),
-                                      ):
-                                      const SizedBox(),
-                                      provider.filtersLocal.isNotEmpty? Padding(
-                                        padding: EdgeInsets.only(top: provider.fertilizerLocal.isNotEmpty?38.4:0),
-                                        child: LocalFilter(currentLineId: widget.crrIrrLine.id,),
-                                      ):
-                                      const SizedBox(),
-                                      provider.fertilizerLocal.isNotEmpty? DisplayLocalFertilizer(currentLineId: widget.crrIrrLine.id,):
-                                      const SizedBox(),
+                                      provider.sourcePump.isNotEmpty? Image.asset('assets/images/dp_sump_src.png'):
+                                      Image.asset('assets/images/dp_sump.png'),
                                     ],
                                   ),
-                                ],
+                                ),
                               ):
-                              const SizedBox(height: 20)*/
-                          ],
-                        ):
-                        const SizedBox(height: 20),
+                              const SizedBox(),
+
+                              //i pump
+                              provider.irrigationPump.isNotEmpty? Padding(
+                                padding: const EdgeInsets.only(top: 15),
+                                child: DisplayIrrigationPump(currentLineId: widget.crrIrrLine.id, pumpList: widget.siteData.master[widget.masterInx].liveData[0].pumpList,),
+                              ):
+                              const SizedBox(),
+
+                              //sensor
+                              for(int i=0; i<provider.payload2408.length; i++)
+                                provider.payload2408.isNotEmpty?  Padding(
+                                  padding: const EdgeInsets.only(top: 15),
+                                  child: provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(crInx: i):null,
+                                ) : const SizedBox(),
+
+                              //filter
+                              provider.filtersCentral.isNotEmpty? Padding(
+                                padding: const EdgeInsets.only(top: 15),
+                                child: DisplayFilter(currentLineId: widget.crrIrrLine.id,),
+                              ): const SizedBox(),
+
+                            ],
+                          ):
+                          const SizedBox(height: 20),
+                        ),
                       ),
                     ),
                   ),
@@ -281,11 +246,12 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                       borderRadius: const BorderRadius.all(Radius.circular(2)),
                       border: Border.all(width: 0.5, color: Colors.grey)
                   ),
-                  child: const Text('PUMP & FILTER STATION',  style: TextStyle(color: Colors.black)),
+                  child: const Text('MAIN LINE',  style: TextStyle(color: Colors.black)),
                 ),
               ),
             ],
           ),
+          const SizedBox(height: 7,),
           Stack(
             children: [
               Padding(
@@ -375,6 +341,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
               ),
             ],
           ),
+          const SizedBox(height: 7,),
           Stack(
             children: [
               Padding(
@@ -496,7 +463,6 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
     double itemHeight = 70;
     double gridHeight = rowCount * (itemHeight + 5);
 
-
     return screenWidth>600? SizedBox(
       width: MediaQuery.sizeOf(context).width,
       height: gridHeight,
@@ -518,7 +484,7 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
     ):
     SizedBox(
       width: MediaQuery.sizeOf(context).width,
-      height: (valveWidgets.length ~/ 5 +1) * 70,
+      height: (valveWidgets.length / 5).ceil() * 70.0,
       child: Padding(
         padding: const EdgeInsets.only(left: 3, right: 3),
         child: GridView.builder(

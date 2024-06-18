@@ -251,44 +251,47 @@ class _LoginFormState extends State<LoginForm> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                const SizedBox(height: 16,),
+                SizedBox(
+                  height: 50,
+                  width: screenWidth,
+                  child: SvgPicture.asset('assets/SVGPicture/oro_logo.svg', fit: BoxFit.fitHeight),
+                ),
                 Expanded(
                   child: Column(
-                      children: [
-                        Flexible(
-                          flex: 1,
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: SvgPicture.asset('assets/SVGPicture/oro_logo.svg', fit: BoxFit.fitHeight),
-                          ),
+                    children: [
+                      Flexible(
+                        flex: 3,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 10, right: 10),
+                          child: SvgPicture.asset('assets/SVGPicture/login_left_picture.svg', fit: BoxFit.fitWidth, width: 500,),
                         ),
-                        Flexible(
-                          flex: 3,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 10, right: 10),
-                            child: SvgPicture.asset('assets/SVGPicture/login_left_picture.svg', fit: BoxFit.fitHeight),
-                          ),
-                        ),
-                        Flexible(
-                          flex: 1,
+                      ),
+                      Flexible(
+                        flex: 1,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 16, right: 16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Center(child: Text(strTitle, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white,))),
+                              Center(child: Text(strTitle, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 20, color: Colors.white,))),
                               const SizedBox(height: 5,),
                               Text(strSubTitle,
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 15.0,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.normal,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
                             ],
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(height: 16,),
                 SizedBox(
                   height: 55,
                   width: screenWidth,
@@ -346,8 +349,8 @@ class _LoginFormState extends State<LoginForm> {
                                 child: Text(strLoginRequiredText,
                                   style: const TextStyle(
                                     color: Colors.black87,
-                                    fontSize: 15.0,
-                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.normal,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),

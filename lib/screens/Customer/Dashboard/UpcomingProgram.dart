@@ -62,8 +62,9 @@ class UpcomingProgram extends StatelessWidget {
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(3))),
         elevation: 5,
         child: ListView.builder(
-          itemCount: scheduledPrograms.length,
+          shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
+          itemCount: scheduledPrograms.length,
           itemBuilder: (context, index) {
             return Column(
               children: [

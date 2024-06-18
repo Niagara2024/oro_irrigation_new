@@ -35,7 +35,7 @@ class _NextScheduleState extends State<NextSchedule> {
                 top: 5,
                 left: 0,
                 child: Container(
-                  width: 200,
+                  width: 220,
                   padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 2),
                   decoration: BoxDecoration(
                       color: Colors.orange.shade200,
@@ -56,6 +56,8 @@ class _NextScheduleState extends State<NextSchedule> {
     return SizedBox(
       height: widget.programQueue.length * 90,
       child: ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
         itemCount: widget.programQueue.length,
         itemBuilder: (context, index) {
           return Card(

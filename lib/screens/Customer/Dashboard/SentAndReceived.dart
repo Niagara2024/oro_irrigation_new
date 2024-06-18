@@ -29,6 +29,10 @@ class _SentAndReceivedState extends State<SentAndReceived> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
+  //weekly calendar
+  CalendarFormat _calendarFormat = CalendarFormat.week;
+
+
   @override
   void initState() {
     super.initState();
@@ -39,7 +43,8 @@ class _SentAndReceivedState extends State<SentAndReceived> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    final screenWidth = MediaQuery.of(context).size.width;
+    return screenWidth>600? SizedBox(
       width: MediaQuery.sizeOf(context).width,
       height:  MediaQuery.sizeOf(context).height,
       child: Column(
@@ -90,59 +95,118 @@ class _SentAndReceivedState extends State<SentAndReceived> {
              ),
              const SizedBox(width: 5,),
              Container(width: 0.5, height: MediaQuery.sizeOf(context).height-77, color: Colors.teal.shade200,),
-
-             SizedBox(
-               width: MediaQuery.sizeOf(context).width-512,
-               height: MediaQuery.sizeOf(context).height-77,
-               child: sentAndReceivedList.isNotEmpty? ListView.builder(
-                 padding: const EdgeInsets.only(top: 10),
-                 itemCount: sentAndReceivedList.length,
-                 itemBuilder: (context, index)
-                 {
-                   if(sentAndReceivedList[index].messageType == 'RECEIVED')
-                   {
-                     return Padding(
-                       padding: const EdgeInsets.all(5.0),
-                       child: Row(
-                         mainAxisAlignment: MainAxisAlignment.end,
-                         children: [
-                           Text('${convertTo12hrs(sentAndReceivedList[index].time)} - ', style: const TextStyle(fontSize: 11),),
-                           BubbleSpecialOne(
-                             textStyle: const TextStyle(fontSize: 12),
-                             text: sentAndReceivedList[index].message,
-                             color: Colors.green.shade100,
-                           ),
-                         ],
-                       ),
-                     );
-                   }
-                   else
-                   {
-                     return Padding(
-                       padding: const EdgeInsets.all(5.0),
-                       child: Row(
-                         mainAxisAlignment: MainAxisAlignment.start,
-                         children: [
-                           BubbleSpecialTwo(
-                             text: sentAndReceivedList[index].message,
-                             isSender: false,
-                             color: Colors.blue.shade100,
-                             textStyle: const TextStyle(fontSize: 12),
-                           ),
-                           Text(' - ${convertTo12hrs(sentAndReceivedList[index].time)}', style: const TextStyle(fontSize: 11),)
-                         ],
-                       ),
-                     );
-                   }
-                 },
-               ):
-               const Center(child: Text('There have been no updates or messages from the controller today',
-                 style: TextStyle(fontSize: 17,fontWeight: FontWeight.normal),),),
-             ),
+             msgListBox(screenWidth),
            ],
          )
        ],
       ),
+    ):
+    SizedBox(
+      width: screenWidth,
+      child: Column(
+        children: [
+          TableCalendar(
+            firstDay: DateTime.utc(2010, 10, 16),
+            lastDay: DateTime.utc(2030, 3, 14),
+            focusedDay: _focusedDay,
+            calendarFormat: _calendarFormat,
+            selectedDayPredicate: (day) {
+              return isSameDay(_selectedDay, day);
+            },
+            onDaySelected: (selectedDay, focusedDay) {
+              setState(() {
+                _selectedDay = selectedDay;
+                _focusedDay = focusedDay;
+                print(selectedDay);
+                print(focusedDay);
+                getLogs(widget.controllerId, DateFormat('yyyy-MM-dd').format(_focusedDay));
+
+              });
+            },
+            enabledDayPredicate: (day) {
+              return day.isBefore(DateTime.now()) || isSameDay(day, DateTime.now());
+            },
+            onFormatChanged: (format) {
+              if (_calendarFormat != format) {
+                setState(() {
+                  _calendarFormat = format;
+                });
+              }
+            },
+            onPageChanged: (focusedDay) {
+              _focusedDay = focusedDay;
+            },
+            calendarStyle: const CalendarStyle(
+              todayDecoration: BoxDecoration(
+                color: Colors.blueAccent,
+                shape: BoxShape.circle,
+              ),
+              selectedDecoration: BoxDecoration(
+                color: Colors.deepOrange,
+                shape: BoxShape.circle,
+              ),
+              disabledTextStyle: TextStyle(color: Colors.grey),  // To make the disabled dates greyed out
+            ),
+            headerStyle: const HeaderStyle(
+              formatButtonVisible: false,
+            ),
+          ),
+          const SizedBox(height: 5,),
+          Container(width: screenWidth-50, height: 0.5, color: Colors.teal.shade200,),
+          msgListBox(screenWidth),
+        ],
+      ),
+    );
+  }
+
+  SizedBox msgListBox(screenWidth) {
+    return SizedBox(
+      width: screenWidth>600? MediaQuery.sizeOf(context).width-512 : MediaQuery.sizeOf(context).width,
+      height: screenWidth>600? MediaQuery.sizeOf(context).height-77: MediaQuery.sizeOf(context).height-230,
+      child: sentAndReceivedList.isNotEmpty? ListView.builder(
+        padding: const EdgeInsets.only(top: 10),
+        itemCount: sentAndReceivedList.length,
+        itemBuilder: (context, index)
+        {
+          if(sentAndReceivedList[index].messageType == 'RECEIVED')
+          {
+            return Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text('${convertTo12hrs(sentAndReceivedList[index].time)} - ', style: const TextStyle(fontSize: 11),),
+                  BubbleSpecialOne(
+                    textStyle: const TextStyle(fontSize: 12),
+                    text: sentAndReceivedList[index].message,
+                    color: Colors.green.shade100,
+                  ),
+                ],
+              ),
+            );
+          }
+          else
+          {
+            return Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  BubbleSpecialTwo(
+                    text: sentAndReceivedList[index].message,
+                    isSender: false,
+                    color: Colors.blue.shade100,
+                    textStyle: const TextStyle(fontSize: 12),
+                  ),
+                  Text(' - ${convertTo12hrs(sentAndReceivedList[index].time)}', style: const TextStyle(fontSize: 11),)
+                ],
+              ),
+            );
+          }
+        },
+      ):
+      const Center(child: Text('There have been no updates or messages from the controller today',
+        style: TextStyle(fontSize: 17,fontWeight: FontWeight.normal),),),
     );
   }
 

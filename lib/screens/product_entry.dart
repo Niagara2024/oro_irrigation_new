@@ -106,8 +106,7 @@ class _AllEntryState extends State<AllEntry> with SingleTickerProviderStateMixin
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white.withOpacity(0.4),
           tabs: [
-            ...myObjectList.map(
-                  (label) => Tab(
+            ...myObjectList.map((label) => Tab(
                 child: Text(label.toString()),
               ),
             ),
@@ -117,8 +116,7 @@ class _AllEntryState extends State<AllEntry> with SingleTickerProviderStateMixin
       body: TabBarView(
         controller: _tabCont,
         children: [
-          ...myObjectList.map(
-                (label) => tabWidgets[label] ?? Center(child: Text('Page of $label')),
+          ...myObjectList.map((label) => tabWidgets[label] ?? Center(child: Text('Page of $label')),
           ),
         ],
       ),

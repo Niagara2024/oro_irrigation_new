@@ -302,7 +302,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           ),
         ),
         bottom: appbarBottomOpen? Tab(
-          height: 80,
+          height: 90,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -316,7 +316,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     items: (siteListFinal ?? []).map((site) {
                       return DropdownMenuItem(
                         value: site.groupName,
-                        child: Text(site.groupName, style: const TextStyle(color: Colors.white, fontSize: 17),),
+                        child: Text(site.groupName, style: const TextStyle(color: Colors.white, fontSize: 16),),
                       );
                     }).toList(),
                     onChanged: (newSiteName) {
@@ -337,17 +337,17 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     iconDisabledColor: Colors.white,
                     focusColor: Colors.transparent,
                   ) :
-                  Text(siteListFinal[siteIndex].groupName, style: const TextStyle(fontSize: 17, color: Colors.white, fontWeight: FontWeight.normal),),
+                  Text(siteListFinal[siteIndex].groupName, style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.normal),),
 
                   const SizedBox(width: 05,),
-                  Container(width: 1,height: 20, color: Colors.white54,),
+                  Container(width: 1, height: 20, color: Colors.white54,),
                   const SizedBox(width: 5,),
                   siteListFinal[siteIndex].master.length>1? DropdownButton(
                     underline: Container(),
                     items: (siteListFinal[siteIndex].master ?? []).map((master) {
                       return DropdownMenuItem(
                         value: master.categoryName,
-                        child: Text(master.categoryName, style: const TextStyle(color: Colors.white, fontSize: 17),),
+                        child: Text(master.categoryName, style: const TextStyle(color: Colors.white, fontSize: 16),),
                       );
                     }).toList(),
                     onChanged: (newMaterName) {
@@ -367,7 +367,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     iconDisabledColor: Colors.white,
                     focusColor: Colors.transparent,
                   ):
-                  Text(siteListFinal[siteIndex].master[masterIndex].categoryName, style: const TextStyle(fontSize: 17, color: Colors.white, fontWeight: FontWeight.normal),),
+                  Text(siteListFinal[siteIndex].master[masterIndex].categoryName, style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.normal),),
                   const SizedBox(width: 5,),
                 ],
               ),
@@ -381,7 +381,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     items: (siteListFinal[siteIndex].master[masterIndex].irrigationLine ?? []).map((line) {
                       return DropdownMenuItem(
                         value: line.name,
-                        child: Text(line.name, style: const TextStyle(color: Colors.white, fontSize: 17),),
+                        child: Text(line.name, style: const TextStyle(color: Colors.white, fontSize: 16),),
                       );
                     }).toList(),
                     onChanged: (newLineName) {
@@ -2067,8 +2067,8 @@ class _SideSheetClassState extends State<SideSheetClass> {
     ):
     Container(
       padding: const EdgeInsets.all(10),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: Colors.teal.shade50,
         borderRadius: BorderRadius.zero,
       ),
       height: screenHeight,
@@ -2089,7 +2089,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
             ),
             Row(
               children: [
-                Expanded(child: const Text('NODE LIST', style: TextStyle(color: Colors.black, fontSize: 15))),
+                const Expanded(child: Text('NODE LIST', style: TextStyle(color: Colors.black, fontSize: 15))),
                 SizedBox(
                   width: 40,
                   child: IconButton(

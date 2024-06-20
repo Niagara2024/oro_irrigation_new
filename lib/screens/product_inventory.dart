@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:http/src/response.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:search_page/search_page.dart';
@@ -218,7 +219,8 @@ class ProductInventoryState extends State<ProductInventory> {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: myTheme.primaryColor.withOpacity(0.02),
       appBar: userType != 3 ? AppBar(
@@ -337,15 +339,15 @@ class ProductInventoryState extends State<ProductInventory> {
       body: visibleLoading? Visibility(
         visible: visibleLoading,
         child: Container(
-          height: mediaQuery.size.height,
+          height: screenHeight,
           color: Colors.transparent,
-          padding: EdgeInsets.fromLTRB(mediaQuery.size.width/2 - 60, 0, mediaQuery.size.width/2 - 60, 0),
+          padding: EdgeInsets.fromLTRB(screenWidth/2 - 60, 0, screenWidth/2 - 60, 0),
           child: const LoadingIndicator(
             indicatorType: Indicator.ballPulse,
           ),
         ),
       ):
-      userType == 3? buildCustomerDataTable() :
+      userType == 3? buildCustomerDataTable(screenWidth) :
       Padding(
         padding: const EdgeInsets.only(left: 2),
         child: Column(
@@ -357,7 +359,7 @@ class ProductInventoryState extends State<ProductInventory> {
                   color: Colors.white,
                   borderRadius: BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
                 ),
-                child: buildAdminOrDealerDataTable(mediaQuery.size.width),
+                child: buildAdminOrDealerDataTable(screenWidth),
               ),
             ),
           ],
@@ -592,12 +594,12 @@ class ProductInventoryState extends State<ProductInventory> {
     );
   }
 
-  Widget buildCustomerDataTable()
+  Widget buildCustomerDataTable(screenWidth)
   {
     return Column(
       children: [
         Expanded(
-          child: DataTable2(
+          child: screenWidth>600?DataTable2(
             columnSpacing: 12,
             horizontalMargin: 12,
             minWidth: 1000,
@@ -646,19 +648,102 @@ class ProductInventoryState extends State<ProductInventory> {
               const DataCell(Center(child: Text('25-09-2023'))),
             ])):
             List<DataRow>.generate(productInventoryListCus.length, (index) => DataRow(cells: [
-              DataCell(Center(child: Text('${index + 1}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
-              DataCell(Text(productInventoryListCus[index].categoryName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-              DataCell(Text(productInventoryListCus[index].model, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-              DataCell(Text(productInventoryListCus[index].deviceId, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+              DataCell(Center(child: Text('${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
+              DataCell(Text(productInventoryListCus[index].categoryName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+              DataCell(Text(productInventoryListCus[index].model, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+              DataCell(Text(productInventoryListCus[index].deviceId, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
               DataCell(Center(child: Text(productInventoryListCus[index].productStatus==3? '-' : productInventoryListCus[index].siteName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
               DataCell(Center(child: productInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))],):
               const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))],))),
-              const DataCell(Center(child: Text('25-09-2023', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
+              DataCell(Center(child: Text(getDateTime(productInventoryListCus[index].modifyDate), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)))),
             ])),
-          ),
+          ):
+          ListView.separated(
+              itemCount: productInventoryListCus.length,
+              itemBuilder: (context, index) {
+                return Row(
+                  children: [
+                    const Expanded(
+                      flex: 1, child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Category', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12)),
+                          Text('Model', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12)),
+                          Text('Device Id', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12)),
+                          Text('Status', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12)),
+                          Text('Used In', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12)),
+                          Text('Modify date', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12)),
+                        ],
+                                            ),
+                      )
+                    ),
+                    Expanded(
+                        flex: 1, child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.end,
+                                                children: [
+                          Text(productInventoryListCus[index].categoryName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                          Text(productInventoryListCus[index].model, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                          Text(productInventoryListCus[index].deviceId, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                          Center(child: productInventoryListCus[index].productStatus==3? const Row(mainAxisAlignment: MainAxisAlignment.end,children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))],):
+                          const Row(crossAxisAlignment: CrossAxisAlignment.end, mainAxisAlignment: MainAxisAlignment.end, children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))],)),
+                          Text(productInventoryListCus[index].productStatus==3? '-' : productInventoryListCus[index].siteName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                          Text(getDateTime(productInventoryListCus[index].modifyDate), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                                ],
+                                              ),
+                        )
+                    ),
+                  ],
+                );
+                return ListTile(
+                  title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(productInventoryListCus[index].categoryName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      Text(productInventoryListCus[index].model, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    ],
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(productInventoryListCus[index].deviceId, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      Text(productInventoryListCus[index].productStatus==3? '-' : productInventoryListCus[index].siteName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    ],
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Center(child: productInventoryListCus[index].productStatus==3? const Row(children: [CircleAvatar(backgroundColor: Colors.orange, radius: 5,), SizedBox(width: 5,), Text('Free', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))],):
+                          const Row(children: [CircleAvatar(backgroundColor: Colors.green, radius: 5,), SizedBox(width: 5,), Text('Active', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))],)),
+                          Text(getDateTime(productInventoryListCus[index].modifyDate), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        ],
+                      )
+                    ],
+                  ),
+                );
+              },
+              separatorBuilder: (context, index) {
+                return Container(
+                  height: 0.5,
+                  color: Colors.teal.shade200,
+                );
+              },
+            ),
         ),
       ],
     );
+  }
+
+  String getDateTime(dateString){
+    DateTime dateTime = DateTime.parse(dateString);
+    String dateOnly = "${dateTime.year.toString().padLeft(4, '0')}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}";
+    return dateOnly;
   }
 
   Future<void> _displayEditProductDialog(BuildContext context, int catId, String catName, String mdlName, int mdlId, String imeiNo, int warranty, int productId) async

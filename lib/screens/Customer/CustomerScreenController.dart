@@ -57,6 +57,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   late String _myCurrentMasterC;
   late String _myCurrentIrrLine;
 
+  bool appbarBottomOpen = false;
+
 
   @override
   void initState() {
@@ -260,71 +262,19 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   Widget buildNarrowLayout(screenWidth, payload2408, allIrrigationResumeFlag, wifiStrength, provider)
   {
-
     return Scaffold(
       backgroundColor: Colors.teal.shade50,
       appBar: AppBar(
         title:  Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            siteListFinal.length>1? DropdownButton(
-              underline: Container(),
-              items: (siteListFinal ?? []).map((site) {
-                return DropdownMenuItem(
-                  value: site.groupName,
-                  child: Text(site.groupName, style: const TextStyle(color: Colors.white, fontSize: 17),),
-                );
-              }).toList(),
-              onChanged: (newSiteName) {
-                int newIndex = siteListFinal.indexWhere((site) => site.groupName == newSiteName);
-                if (newIndex != -1 && siteListFinal.length > 1) {
-                  setState(() {
-                    _myCurrentSite = newSiteName!;
-                    siteIndex = newIndex;
-                  });
-                  MyFunction().clearMQTTPayload(context);
-                  subscribeAndUpdateSite();
-                  getProgramList();
-                }
-              },
-              value: _myCurrentSite,
-              dropdownColor: Colors.teal,
-              iconEnabledColor: Colors.white,
-              iconDisabledColor: Colors.white,
-              focusColor: Colors.transparent,
-            ) :
-            Text(siteListFinal[siteIndex].groupName, style: const TextStyle(fontSize: 17),),
-
-            const SizedBox(width: 05,),
-            Container(width: 1,height: 20, color: Colors.white54,),
-            const SizedBox(width: 5,),
-            siteListFinal[siteIndex].master.length>1? DropdownButton(
-              underline: Container(),
-              items: (siteListFinal[siteIndex].master ?? []).map((master) {
-                return DropdownMenuItem(
-                  value: master.categoryName,
-                  child: Text(master.categoryName, style: const TextStyle(color: Colors.white, fontSize: 17),),
-                );
-              }).toList(),
-              onChanged: (newMaterName) {
-                int newIndex = siteListFinal[siteIndex].master.indexWhere((master)
-                => master.categoryName == newMaterName);
-                if (newIndex != -1 && siteListFinal[siteIndex].master.length > 1) {
-                  setState(() {
-                    _myCurrentMasterC = newMaterName!;
-                    masterIndex = newIndex;
-                    subscribeAndUpdateSite();
-                  });
-                }
-              },
-              value: _myCurrentMasterC,
-              dropdownColor: Colors.teal,
-              iconEnabledColor: Colors.white,
-              iconDisabledColor: Colors.white,
-              focusColor: Colors.transparent,
-            ):
-            Text(siteListFinal[siteIndex].master[masterIndex].categoryName, style: const TextStyle(fontSize: 17),),
-
+            Expanded(child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(_selectedIndex==0?'Dashboard': _selectedIndex==1?'My devices': _selectedIndex==2?'Sent & Received': _selectedIndex==3?'Logs & Reports': _selectedIndex==4?'Weather':'Settings'),
+                Text('Last sync : ${'${siteListFinal[siteIndex].master[masterIndex].liveSyncDate} - ${siteListFinal[siteIndex].master[masterIndex].liveSyncTime}'}', style: const TextStyle(fontSize: 11, color: Colors.white),),
+              ],
+            )),
             const SizedBox(width: 5,),
             siteListFinal[siteIndex].master[masterIndex].irrigationLine.length>1 && Provider.of<MqttPayloadProvider>(context).currentSchedule.isNotEmpty?
             CircleAvatar(
@@ -333,9 +283,14 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               backgroundColor: Colors.blue.shade100,
             ):
             const SizedBox(),
+            const SizedBox(width: 5,),
+            IconButton(onPressed: (){
+              setState(() {
+                appbarBottomOpen = !appbarBottomOpen;
+              });
+            }, icon: Icon(appbarBottomOpen?Icons.keyboard_double_arrow_up:Icons.keyboard_double_arrow_down)),
           ],
         ),
-        leadingWidth: 45,
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -346,47 +301,113 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             ),
           ),
         ),
-        bottom: Tab(
-          height: 35,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        bottom: appbarBottomOpen? Tab(
+          height: 80,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(width: 15,),
-              siteListFinal[siteIndex].master[masterIndex].categoryId == 1 ||
-                  siteListFinal[siteIndex].master[masterIndex].categoryId == 2? DropdownButton(
-                underline: Container(),
-                items: (siteListFinal[siteIndex].master[masterIndex].irrigationLine ?? []).map((line) {
-                  return DropdownMenuItem(
-                    value: line.name,
-                    child: Text(line.name, style: const TextStyle(color: Colors.white, fontSize: 17),),
-                  );
-                }).toList(),
-                onChanged: (newLineName) {
-                  int newIndex = siteListFinal[siteIndex].master[masterIndex].irrigationLine.indexWhere((line)
-                  => line.name == newLineName);
-                  if (newIndex != -1 && siteListFinal[siteIndex].master[masterIndex].irrigationLine.length > 1) {
-                    setState(() {
-                      _myCurrentIrrLine = newLineName!;
-                      lineIndex = newIndex;
-                    });
-                  }
-                },
-                value: _myCurrentIrrLine,
-                dropdownColor: Colors.teal,
-                iconEnabledColor: Colors.white,
-                iconDisabledColor: Colors.white,
-                focusColor: Colors.transparent,
-              ):
-              const SizedBox(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const SizedBox(width: 15,),
+                  siteListFinal.length>1? DropdownButton(
+                    underline: Container(),
+                    items: (siteListFinal ?? []).map((site) {
+                      return DropdownMenuItem(
+                        value: site.groupName,
+                        child: Text(site.groupName, style: const TextStyle(color: Colors.white, fontSize: 17),),
+                      );
+                    }).toList(),
+                    onChanged: (newSiteName) {
+                      int newIndex = siteListFinal.indexWhere((site) => site.groupName == newSiteName);
+                      if (newIndex != -1 && siteListFinal.length > 1) {
+                        setState(() {
+                          _myCurrentSite = newSiteName!;
+                          siteIndex = newIndex;
+                        });
+                        MyFunction().clearMQTTPayload(context);
+                        subscribeAndUpdateSite();
+                        getProgramList();
+                      }
+                    },
+                    value: _myCurrentSite,
+                    dropdownColor: Colors.teal,
+                    iconEnabledColor: Colors.white,
+                    iconDisabledColor: Colors.white,
+                    focusColor: Colors.transparent,
+                  ) :
+                  Text(siteListFinal[siteIndex].groupName, style: const TextStyle(fontSize: 17, color: Colors.white, fontWeight: FontWeight.normal),),
 
-              const SizedBox(width: 05,),
-              Container(width: 1, height: 20, color: Colors.white54,),
-              const SizedBox(width: 5,),
-              Text('Last sync : ${'${siteListFinal[siteIndex].master[masterIndex].liveSyncDate} - ${siteListFinal[siteIndex].master[masterIndex].liveSyncTime}'}', style: const TextStyle(fontSize: 11, color: Colors.white),),
-              const SizedBox(width: 5,),
+                  const SizedBox(width: 05,),
+                  Container(width: 1,height: 20, color: Colors.white54,),
+                  const SizedBox(width: 5,),
+                  siteListFinal[siteIndex].master.length>1? DropdownButton(
+                    underline: Container(),
+                    items: (siteListFinal[siteIndex].master ?? []).map((master) {
+                      return DropdownMenuItem(
+                        value: master.categoryName,
+                        child: Text(master.categoryName, style: const TextStyle(color: Colors.white, fontSize: 17),),
+                      );
+                    }).toList(),
+                    onChanged: (newMaterName) {
+                      int newIndex = siteListFinal[siteIndex].master.indexWhere((master)
+                      => master.categoryName == newMaterName);
+                      if (newIndex != -1 && siteListFinal[siteIndex].master.length > 1) {
+                        setState(() {
+                          _myCurrentMasterC = newMaterName!;
+                          masterIndex = newIndex;
+                          subscribeAndUpdateSite();
+                        });
+                      }
+                    },
+                    value: _myCurrentMasterC,
+                    dropdownColor: Colors.teal,
+                    iconEnabledColor: Colors.white,
+                    iconDisabledColor: Colors.white,
+                    focusColor: Colors.transparent,
+                  ):
+                  Text(siteListFinal[siteIndex].master[masterIndex].categoryName, style: const TextStyle(fontSize: 17, color: Colors.white, fontWeight: FontWeight.normal),),
+                  const SizedBox(width: 5,),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const SizedBox(width: 15,),
+                  siteListFinal[siteIndex].master[masterIndex].categoryId == 1 ||
+                      siteListFinal[siteIndex].master[masterIndex].categoryId == 2? DropdownButton(
+                    underline: Container(),
+                    items: (siteListFinal[siteIndex].master[masterIndex].irrigationLine ?? []).map((line) {
+                      return DropdownMenuItem(
+                        value: line.name,
+                        child: Text(line.name, style: const TextStyle(color: Colors.white, fontSize: 17),),
+                      );
+                    }).toList(),
+                    onChanged: (newLineName) {
+                      int newIndex = siteListFinal[siteIndex].master[masterIndex].irrigationLine.indexWhere((line)
+                      => line.name == newLineName);
+                      if (newIndex != -1 && siteListFinal[siteIndex].master[masterIndex].irrigationLine.length > 1) {
+                        setState(() {
+                          _myCurrentIrrLine = newLineName!;
+                          lineIndex = newIndex;
+                        });
+                      }
+                    },
+                    value: _myCurrentIrrLine,
+                    dropdownColor: Colors.teal,
+                    iconEnabledColor: Colors.white,
+                    iconDisabledColor: Colors.white,
+                    focusColor: Colors.transparent,
+                  ):
+                  const SizedBox(),
+                  const SizedBox(width: 05,),
+                ],
+              ),
             ],
           ),
-        ),
+        ):
+        null,
       ),
       drawer: Drawer(
         shape: const RoundedRectangleBorder(),
@@ -554,7 +575,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       body: buildScreen(screenWidth, provider, wifiStrength),
     );
   }
-
 
   Widget buildWideLayout(screenWidth, payload2408, allIrrigationResumeFlag, wifiStrength, provider) {
     return Scaffold(

@@ -235,10 +235,10 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                   provider.sourcePump[index]['OnDelayLeft'] !='00:00:00'?
                   Positioned(
                     top: 40,
-                    left: 10,
+                    left: 7.5,
                     child: Container(
                       color: Colors.greenAccent,
-                      width: 50,
+                      width: 55,
                       child: Center(
                         child: Text(provider.sourcePump[index]['OnDelayLeft'], style: const TextStyle(
                           color: Colors.black,
@@ -415,10 +415,10 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                   filteredPumps[index]['OnDelayLeft'] != '00:00:00'?
                   Positioned(
                     top: 40,
-                    left: 10,
+                    left: 7.5,
                     child: Container(
                       color: Colors.greenAccent,
-                      width: 50,
+                      width: 55,
                       child: Center(
                         child: ValueListenableBuilder<String>(
                           valueListenable: Provider.of<DurationNotifier>(context).onDelayLeft,
@@ -619,10 +619,10 @@ class _DisplayFilterState extends State<DisplayFilter> {
                             ),
                             Positioned(
                               top: 40,
-                              left: 10,
+                              left: 7.5,
                               child: filteredCentralFilter[i]['DurationLeft']!='00:00:00'? filteredCentralFilter[i]['Status'] == (flIndex+1) ? Container(
                                 color: Colors.greenAccent,
-                                width: 50,
+                                width: 55,
                                 child: Center(
                                   child: Text(filteredCentralFilter[i]['DurationLeft'], style: const TextStyle(
                                     color: Colors.black,
@@ -1427,10 +1427,10 @@ class _LocalFilterState extends State<LocalFilter> {
                             ),
                             Positioned(
                               top: 40,
-                              left: 10,
+                              left: 7.5,
                               child: filteredLocalFilter[i]['DurationLeft']!='00:00:00'? filteredLocalFilter[i]['Status'] == (flIndex+1) ? Container(
                                 color: Colors.greenAccent,
-                                width: 50,
+                                width: 55,
                                 child: Center(
                                   child: Text(filteredLocalFilter[i]['DurationLeft'], style: const TextStyle(
                                     color: Colors.black,

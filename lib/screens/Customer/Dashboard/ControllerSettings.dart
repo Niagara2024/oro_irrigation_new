@@ -462,42 +462,35 @@ class _ControllerSettingsState extends State<ControllerSettings> {
           children: [
             Column(
               children: [
-                ListTile(
-                  title: const Text('Form Name'),
-                  leading: const Icon(Icons.area_chart_outlined),
-                  trailing: SizedBox(
-                    width: 300,
-                    child: TextField(
-                      controller: txtEcSiteName,
-                      decoration: InputDecoration(
-                        filled: false,
-                        border: OutlineInputBorder(
-                          borderSide: const BorderSide(color: Colors.blue, width: 2.0),
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        labelText: 'Form name',
-                        suffixIcon: const Icon(Icons.edit),
+                const SizedBox(height: 8,),
+                SizedBox(
+                  width: screenWidth,
+                  child: TextField(
+                    controller: txtEcSiteName,
+                    decoration: InputDecoration(
+                      filled: false,
+                      border: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.blue, width: 2.0),
+                        borderRadius: BorderRadius.circular(10.0),
                       ),
+                      labelText: 'Form name',
+                      suffixIcon: const Icon(Icons.edit),
                     ),
                   ),
                 ),
                 const Divider(),
-                ListTile(
-                  title: const Text('Controller Name'),
-                  leading: const Icon(Icons.developer_board),
-                  trailing: SizedBox(
-                    width: 300,
-                    child: TextField(
-                      controller: txtEcGroupName,
-                      decoration: InputDecoration(
-                        filled: false,
-                        border: OutlineInputBorder(
-                          borderSide: const BorderSide(color: Colors.blue, width: 2.0),
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        labelText: 'Controller name',
-                        suffixIcon: const Icon(Icons.edit),
+                SizedBox(
+                  width: screenWidth,
+                  child: TextField(
+                    controller: txtEcGroupName,
+                    decoration: InputDecoration(
+                      filled: false,
+                      border: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.blue, width: 2.0),
+                        borderRadius: BorderRadius.circular(10.0),
                       ),
+                      labelText: 'Controller name',
+                      suffixIcon: const Icon(Icons.edit),
                     ),
                   ),
                 ),

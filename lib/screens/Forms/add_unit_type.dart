@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../Models/global_settings.dart';
 import '../../Models/unit_type.dart';
 import '../../constants/http_service.dart';
+import '../../constants/snack_bar.dart';
 import '../../constants/theme.dart';
 
 class AddUnitType extends StatefulWidget {
@@ -19,6 +21,7 @@ class AddUnitType extends StatefulWidget {
 class _AddUnitTypeState extends State<AddUnitType> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController unitTypeCtl = TextEditingController();
+  TextEditingController unitNameCtl = TextEditingController();
   TextEditingController unitDisCtl = TextEditingController();
 
   List<UnitType> unitTypeList = <UnitType>[];
@@ -26,10 +29,18 @@ class _AddUnitTypeState extends State<AddUnitType> {
   bool editActive = false;
   int sldUnitTypeID = 0;
 
+  final TextEditingController dropdownSettingsList = TextEditingController();
+  late List<DropdownMenuEntry<DDCategoryList>> ddValues;
+  List<DDCategoryList> activeSettingsMenuList = <DDCategoryList>[];
+  bool showDdError = false;
+  int sldUnitCategoryID = 0;
+
   @override
   void initState() {
     super.initState();
+    ddValues =  <DropdownMenuEntry<DDCategoryList>>[];
     getUnitTypeList();
+    getUnitCategoryByActiveList();
   }
 
   Future<void> getUnitTypeList() async
@@ -51,6 +62,37 @@ class _AddUnitTypeState extends State<AddUnitType> {
     }
     else{
       _showSnackBar(response.body);
+    }
+  }
+
+  Future<void> getUnitCategoryByActiveList() async
+  {
+    Map<String, Object> body = {
+      "active" : "1",
+    };
+    final response = await HttpService().postRequest("getUnitCategoryByActive", body);
+    if (response.statusCode == 200)
+    {
+      activeSettingsMenuList.clear();
+      var data = jsonDecode(response.body);
+      final cntList = data["data"] as List;
+
+      for (int i=0; i < cntList.length; i++) {
+        activeSettingsMenuList.add(DDCategoryList.fromJson(cntList[i]));
+      }
+
+      ddValues =  <DropdownMenuEntry<DDCategoryList>>[];
+      for (final DDCategoryList index in activeSettingsMenuList) {
+        ddValues.add(DropdownMenuEntry<DDCategoryList>(value: index, label: index.categoryName));
+      }
+      setState(() {
+        ddValues;
+      });
+    }
+    else{
+      if (context.mounted){
+        GlobalSnackBar.show(context, response.body, response.statusCode);
+      }
     }
   }
 
@@ -87,6 +129,7 @@ class _AddUnitTypeState extends State<AddUnitType> {
                           editActive = false;
                         });
                         unitTypeCtl.clear();
+                        unitNameCtl.clear();
                         unitDisCtl.clear();
                       }, icon: editUnitType ? Icon(Icons.done_all, color: myTheme.primaryColor,) : Icon(Icons.edit_note_outlined, color: myTheme.primaryColor,)),
                     ),
@@ -102,14 +145,36 @@ class _AddUnitTypeState extends State<AddUnitType> {
                               borderRadius: const BorderRadius.all(Radius.circular(5.0)),
                             ),
                             child: ListTile(
-                              title: Text(unitTypeList[index].unit),
-                              subtitle: Text(unitTypeList[index].unitDescription,),
+                              title: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Category Name', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
+                                      Text('Unit Name', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
+                                      Text('Unit', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13),),
+                                      Text('Unit Description', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13),)
+                                    ],
+                                  ),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(unitTypeList[index].categoryName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
+                                      Text(unitTypeList[index].unitName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
+                                      Text(unitTypeList[index].unit, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
+                                      Text(unitTypeList[index].unitDescription, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),),
+                                    ],
+                                  ),
+                                ],
+                              ),
                               trailing: editUnitType ? Wrap(
                                 spacing: 12, // space between two icons
                                 children: <Widget>[
                                   IconButton(onPressed: ()
                                   {
                                     unitTypeCtl.text = unitTypeList[index].unit;
+                                    unitNameCtl.text = unitTypeList[index].unitName;
                                     unitDisCtl.text = unitTypeList[index].unitDescription;
                                     sldUnitTypeID = unitTypeList[index].unitTypeId;
 
@@ -157,7 +222,7 @@ class _AddUnitTypeState extends State<AddUnitType> {
                         },
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: mediaQuery.size.width > 1200 ? 2 : 1,
-                          childAspectRatio: mediaQuery.size.width / 250,
+                          childAspectRatio: mediaQuery.size.width / 370,
                         ),
                       )),
                 ],
@@ -194,6 +259,26 @@ class _AddUnitTypeState extends State<AddUnitType> {
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
                               const SizedBox(height: 10,),
+                              DropdownMenu<DDCategoryList>(
+                                controller: dropdownSettingsList,
+                                errorText: showDdError ? 'Select category Name' : null,
+                                hintText: 'Unit Category',
+                                width: MediaQuery.sizeOf(context).width/3.6,
+                                //label: const Text('Category'),
+                                dropdownMenuEntries: ddValues,
+                                inputDecorationTheme: const InputDecorationTheme(
+                                  filled: false,
+                                  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                                  border: OutlineInputBorder(),
+                                ),
+                                onSelected: (DDCategoryList? icon) {
+                                  setState(() {
+                                    sldUnitCategoryID = icon!.unitCategoryId;
+                                    showDdError = false;
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: 15,),
                               TextFormField(
                                 controller: unitTypeCtl,
                                 validator: (value){
@@ -206,12 +291,11 @@ class _AddUnitTypeState extends State<AddUnitType> {
                                   contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                                   border: OutlineInputBorder(),
                                   labelText: 'Unit Type',
-                                  icon: Icon(Icons.contactless_outlined),
                                 ),
                               ),
-                              const SizedBox(height: 13,),
+                              const SizedBox(height: 10,),
                               TextFormField(
-                                controller: unitDisCtl,
+                                controller: unitNameCtl,
                                 validator: (value){
                                   if(value==null ||value.isEmpty){
                                     return 'Please fill out this field';
@@ -221,8 +305,22 @@ class _AddUnitTypeState extends State<AddUnitType> {
                                 decoration: const InputDecoration(
                                   contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                                   border: OutlineInputBorder(),
+                                  labelText: 'Unit Name',
+                                ),
+                              ),
+                              const SizedBox(height: 13,),
+                              TextFormField(
+                                controller: unitDisCtl,
+                                validator:(value){
+                                  if(value==null ||value.isEmpty){
+                                    return 'Please fill out this field';
+                                  }
+                                  return null;
+                                },
+                                decoration: const InputDecoration(
+                                  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                                  border: OutlineInputBorder(),
                                   labelText: 'Unit Description',
-                                  icon: Icon(Icons.content_paste_go),
                                 ),
                               ),
                               const SizedBox(height: 20,),
@@ -230,7 +328,6 @@ class _AddUnitTypeState extends State<AddUnitType> {
                           ),
                         ),
                       ),
-
                     ],
                   ),
                   Container(
@@ -243,7 +340,7 @@ class _AddUnitTypeState extends State<AddUnitType> {
                           ElevatedButton(
                             child: editActive ? const Text('Save'): const Text('Submit'),
                             onPressed: () async {
-                              if (_formKey.currentState!.validate()) {
+                              if (_formKey.currentState!.validate() && sldUnitCategoryID!=0) {
                                 _formKey.currentState!.save();
 
                                 final prefs = await SharedPreferences.getInstance();
@@ -251,23 +348,32 @@ class _AddUnitTypeState extends State<AddUnitType> {
                                 final Response response;
 
                                 if(editActive){
-                                  print(sldUnitTypeID);
                                   Map<String, Object> body = {
-                                    "unitTypeId": sldUnitTypeID.toString(),
+                                    'unitTypeId': sldUnitTypeID,
+                                    'unitCategoryId': sldUnitCategoryID,
                                     'unit': unitTypeCtl.text,
+                                    'unitName': unitNameCtl.text,
                                     'unitDescription': unitDisCtl.text,
                                     'modifyUser': userID,
                                   };
+                                  //print(body);
+
                                   response = await HttpService().putRequest("updateUnitType", body);
                                 }
                                 else{
                                   Map<String, Object> body = {
+                                    'unitCategoryId': sldUnitCategoryID,
                                     'unit': unitTypeCtl.text,
+                                    'unitName': unitNameCtl.text,
                                     'unitDescription': unitDisCtl.text,
                                     'createUser': userID,
                                   };
+                                  print(body);
                                   response = await HttpService().postRequest("createUnitType", body);
                                 }
+
+
+
 
                                 if(response.statusCode == 200)
                                 {
@@ -275,6 +381,7 @@ class _AddUnitTypeState extends State<AddUnitType> {
                                   if(data["code"]==200)
                                   {
                                     unitTypeCtl.clear();
+                                    unitNameCtl.clear();
                                     unitDisCtl.clear();
                                     _showSnackBar(data["message"]);
                                     getUnitTypeList();
@@ -283,6 +390,9 @@ class _AddUnitTypeState extends State<AddUnitType> {
                                     _showSnackBar(data["message"]);
                                   }
                                 }
+                              }
+                              else{
+                                GlobalSnackBar.show(context, 'Please select Unit category and try again later', 200);
                               }
                             },
                           ),

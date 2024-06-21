@@ -265,6 +265,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     return Scaffold(
       backgroundColor: Colors.teal.shade50,
       appBar: AppBar(
+        elevation: 10,
         title:  Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
@@ -302,7 +303,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           ),
         ),
         bottom: appbarBottomOpen? Tab(
-          height: 90,
+          height: 95,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -310,7 +311,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const SizedBox(width: 15,),
+                  const SizedBox(width: 5,),
                   siteListFinal.length>1? DropdownButton(
                     underline: Container(),
                     items: (siteListFinal ?? []).map((site) {
@@ -339,9 +340,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   ) :
                   Text(siteListFinal[siteIndex].groupName, style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.normal),),
 
-                  const SizedBox(width: 05,),
+                  const SizedBox(width: 3,),
                   Container(width: 1, height: 20, color: Colors.white54,),
-                  const SizedBox(width: 5,),
+                  const SizedBox(width: 3,),
+
                   siteListFinal[siteIndex].master.length>1? DropdownButton(
                     underline: Container(),
                     items: (siteListFinal[siteIndex].master ?? []).map((master) {
@@ -374,7 +376,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const SizedBox(width: 15,),
+                  const SizedBox(width: 5,),
                   siteListFinal[siteIndex].master[masterIndex].categoryId == 1 ||
                       siteListFinal[siteIndex].master[masterIndex].categoryId == 2? DropdownButton(
                     underline: Container(),
@@ -2067,8 +2069,8 @@ class _SideSheetClassState extends State<SideSheetClass> {
     ):
     Container(
       padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.teal.shade50,
+      decoration: const BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.zero,
       ),
       height: screenHeight,

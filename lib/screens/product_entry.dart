@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:oro_irrigation_new/screens/Forms/contacts.dart';
+import 'Forms/UnitCategory.dart';
 import 'Forms/add_global_settings.dart';
 import 'Forms/add_interface_type.dart';
 import 'Forms/add_language.dart';
@@ -35,6 +36,7 @@ class _AllEntryState extends State<AllEntry> with SingleTickerProviderStateMixin
     'Languages',
     'Name type',
     'Widget Type',
+    'Unit Category',
     'Unit Type',
   ];
 
@@ -51,6 +53,7 @@ class _AllEntryState extends State<AllEntry> with SingleTickerProviderStateMixin
     'Settings category': const AddSettingCategory(),
     'Languages': const AddLanguage(),
     'Widget Type': const AddWidgetType(),
+    'Unit Category': const UnitCategory(),
     'Unit Type': const AddUnitType(),
   };
 

@@ -32,13 +32,37 @@ class _AccountManagementState extends State<AccountManagement> {
   }
 
   Future<void> getUserAccountDetails() async {
-    final prefs = await SharedPreferences.getInstance();
-    countryCode = prefs.getString('countryCode')!;
-    controllerMblNo.text = prefs.getString('mobileNumber')!;
-    controllerUsrName.text = prefs.getString('userName')!;
-    controllerEmail.text = prefs.getString('email')!;
-    controllerPwd.text = prefs.getString('password')!;
+
+    Map<String, Object> body = {'userId': widget.userID};
+    final response = await HttpService().postRequest("getUser", body);
+    if (response.statusCode == 200)
+    {
+      var data = jsonDecode(response.body);
+      final cntList = data["data"] as List;
+      print(response.body);
+
+      countryCode = cntList[0]['countryCode']!;
+      controllerMblNo.text = cntList[0]['mobileNumber']!;
+      controllerUsrName.text = cntList[0]['userName']!;
+      controllerEmail.text = cntList[0]['email']!;
+      controllerPwd.text = cntList[0]['password']!;
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userType', cntList[0]["userType"].toString());
+      await prefs.setString('userName', cntList[0]["userName"].toString());
+      await prefs.setString('userId', cntList[0]["userId"].toString());
+      await prefs.setString('countryCode', cntList[0]["countryCode"].toString());
+      await prefs.setString('mobileNumber', cntList[0]["mobileNumber"].toString());
+      await prefs.setString('password', cntList[0]["password"].toString());
+      await prefs.setString('email', cntList[0]["email"].toString());
+
+      setState(() {
+        countryCode;
+      });
+    }
+
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -53,246 +77,7 @@ class _AccountManagementState extends State<AccountManagement> {
           child: screenWidth>600? buildWideLayout(screenWidth): buildNarrowLayout(screenWidth),
         ),
       ),
-      /*body: SizedBox(
-        height: 600,
-        child: Container(
-          color: Colors.blueGrey.shade50,
-          child: Row(
-            children: [
-              Flexible(
-                flex :1,
-                fit: FlexFit.loose,
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 330,
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Flexible(
-                                    flex :1,
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const SizedBox(height: 20),
-                                        InternationalPhoneNumberInput(
-                                          onInputChanged: (PhoneNumber number) {
-                                            //print(number.phoneNumber);
-                                          },
-                                          selectorConfig: const SelectorConfig(
-                                            selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
-                                            setSelectorButtonAsPrefixIcon: true,
-                                            leadingPadding: 10,
-                                            useEmoji: false,
-                                          ),
-                                          ignoreBlank: false,
-                                          inputDecoration: InputDecoration(
-                                            labelText: 'Mobile Number',
-                                            border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(10.0), // Border radius
-                                            ),
-                                          ),
-                                          autoValidateMode: AutovalidateMode.disabled,
-                                          selectorTextStyle: const TextStyle(color: Colors.black),
-                                          initialValue: PhoneNumber(isoCode: 'IN'),
-                                          textFieldController: controllerMblNo,
-                                          formatInput: false,
-                                          keyboardType: const TextInputType.numberWithOptions(signed: true, decimal: true),
-                                          onSaved: (PhoneNumber number) {
-                                            //print('On Saved: $number');
-                                          },
-                                        ),
-                                        Form(
-                                          key: formKey,
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: <Widget>[
-                                              const SizedBox(height: 20),
-                                              TextFormField(
-                                                controller: controllerUsrName,
-                                                decoration: InputDecoration(
-                                                  labelText: 'Name',
-                                                  border: OutlineInputBorder(
-                                                    borderRadius: BorderRadius.circular(10.0), // Border radius
-                                                  ),
-                                                ),
-                                                validator: (value) {
-                                                  if (value!.isEmpty) {
-                                                    return 'Please enter your name';
-                                                  }
-                                                  return null;
-                                                },
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    //_name = value;
-                                                  });
-                                                },
-                                              ),
-                                              const SizedBox(height: 20),
-                                              TextFormField(
-                                                controller: controllerPwd,
-                                                decoration: InputDecoration(
-                                                  labelText: 'Password',
-                                                  border: OutlineInputBorder(
-                                                    borderRadius: BorderRadius.circular(10.0), // Border radius
-                                                  ),
-                                                ),
-                                                validator: (value) {
-                                                  if (value!.isEmpty) {
-                                                    return 'Please enter your password';
-                                                  }
-                                                  return null;
-                                                },
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    //_name = value;
-                                                  });
-                                                },
-                                              ),
-                                              const SizedBox(height: 20),
-                                              TextFormField(
-                                                controller: controllerEmail,
-                                                decoration: InputDecoration(
-                                                  labelText: 'Email Id',
-                                                  border: OutlineInputBorder(
-                                                    borderRadius: BorderRadius.circular(10.0), // Border radius
-                                                  ),
-                                                ),
-                                                validator: (value) {
-                                                  if (value!.isEmpty) {
-                                                    return 'Please enter your email id';
-                                                  }
-                                                  return null;
-                                                },
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    //_name = value;
-                                                  });
-                                                },
-                                              ),
-                                              const SizedBox(height: 20),
-                                              Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  MaterialButton(
-                                                    color: Colors.grey,
-                                                    textColor: Colors.white,
-                                                    child: const Text('CANCEL'),
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                    },
-                                                  ),
-                                                  const SizedBox(width: 20,),
-                                                  MaterialButton(
-                                                    color: Colors.blue,
-                                                    textColor: Colors.white,
-                                                    child: const Text('SAVE CHANGES'),
-                                                    onPressed: () async {
-                                                      try {
-                                                        if (formKey.currentState!.validate()) {
-                                                          final body = {"userId": widget.userID, "userName": controllerUsrName.text, "countryCode": countryCode, "mobileNumber": controllerMblNo.text,
-                                                            "emailAddress": controllerEmail.text,"password": controllerPwd.text,"modifyUser": widget.userID,};
-                                                          final response = await HttpService().putRequest("updateUserDetails", body);
-                                                          if (response.statusCode == 200) {
-                                                            final jsonResponse = json.decode(response.body);
-                                                            widget.callback(jsonResponse['message']);
-                                                          }
-                                                        }
-                                                      } catch (e) {
-                                                        print('Error: $e');
-                                                      }
-                                                    },
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const Flexible(
-                                    flex :1,
-                                    child: Padding(
-                                      padding: EdgeInsets.all(10.0),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text('When Mobile Number and Email update', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),),
-                                          SizedBox(height: 10,),
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                flex: 5,
-                                                child: Text("OTP (One-Time Password) is crucial when changing your "
-                                                    "mobile number or email associated with the account"
-                                                  , style: TextStyle(fontWeight: FontWeight.normal),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          SizedBox(height: 15,),
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                flex: 5,
-                                                child: Text("When you initiate such changes, the app often sends"
-                                                    " an OTP to your current registered mobile number or email address."
-                                                    " You need to enter this OTP to confirm and complete the update"
-                                                  , style: TextStyle(fontWeight: FontWeight.normal),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          SizedBox(height: 20,),
-                                          Text('Password requirement', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),),
-                                          SizedBox(height: 10,),
-                                          Row(
-                                            children: [
-                                              Text('1.'),
-                                              SizedBox(width: 10,),
-                                              Text('at least 6 characters password', style: TextStyle(fontWeight: FontWeight.normal),),
-                                            ],
-                                          ),
-                                          SizedBox(height: 10,),
-                                          Row(
-                                            children: [
-                                              Text('2.'),
-                                              SizedBox(width: 10,),
-                                              Text('at least one uppercase letter', style: TextStyle(fontWeight: FontWeight.normal),),
-                                            ],
-                                          ),
-                                          SizedBox(height: 10,),
-                                          Row(
-                                            children: [
-                                              Text('3.'),
-                                              SizedBox(width: 10,),
-                                              Text('at least one number', style: TextStyle(fontWeight: FontWeight.normal),),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),*/
+
     );
   }
 
@@ -555,6 +340,7 @@ class _AccountManagementState extends State<AccountManagement> {
                             if (formKey.currentState!.validate()) {
                               final body = {"userId": widget.userID, "userName": controllerUsrName.text, "countryCode": countryCode, "mobileNumber": controllerMblNo.text,
                                 "emailAddress": controllerEmail.text,"password": controllerPwd.text,"modifyUser": widget.userID,};
+                              print(body);
                               final response = await HttpService().putRequest("updateUserDetails", body);
                               if (response.statusCode == 200) {
                                 final jsonResponse = json.decode(response.body);

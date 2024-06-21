@@ -1,98 +1,56 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../Models/global_settings.dart';
-import '../../Models/setting_category.dart';
+import '../../Models/unit_type.dart';
 import '../../constants/http_service.dart';
-import '../../constants/snack_bar.dart';
 import '../../constants/theme.dart';
 
-class AddSettingCategory extends StatefulWidget {
-  const AddSettingCategory({Key? key}) : super(key: key);
+class UnitCategory extends StatefulWidget {
+  const UnitCategory({Key? key}) : super(key: key);
 
   @override
-  State<AddSettingCategory> createState() => _AddSettingCategoryState();
+  State<UnitCategory> createState() => _UnitCategoryState();
 }
 
-class _AddSettingCategoryState extends State<AddSettingCategory> {
+class _UnitCategoryState extends State<UnitCategory> {
+
   final _formKey = GlobalKey<FormState>();
-  TextEditingController settingNameCtl = TextEditingController();
-  TextEditingController settingsDisCtl = TextEditingController();
-  TextEditingController settingsTypeCtl = TextEditingController();
+  TextEditingController unitCatTypeCtl = TextEditingController();
+  TextEditingController unitCatDisCtl = TextEditingController();
 
-  List<SettingCategory> settingCategoryList = <SettingCategory>[];
-  bool editStCat = false;
+  List<UnitCategoryModel> unitCategoryList = <UnitCategoryModel>[];
+  bool editCategoryType = false;
   bool editActive = false;
-  int sldStCatID = 0;
+  int sldUnitCategoryID = 0;
 
-  final TextEditingController dropdownSettingsList = TextEditingController();
-  late List<DropdownMenuEntry<GlobalSettings>> ddValues;
-  List<GlobalSettings> activeSettingsMenuList = <GlobalSettings>[];
-  bool showDdError = false;
-  int sldSettingID = 0;
 
   @override
   void initState() {
     super.initState();
-    ddValues =  <DropdownMenuEntry<GlobalSettings>>[];
-    getSettingCategoryByActiveList();
-    getSettingCategoryList();
+    getUnitCategoryList();
   }
 
-  Future<void> getSettingCategoryList() async
+  Future<void> getUnitCategoryList() async
   {
     Map<String, Object> body = {};
-    final response = await HttpService().postRequest("getSettingCategory", body);
+    final response = await HttpService().postRequest("getUnitCategory", body);
     if (response.statusCode == 200)
     {
-      settingCategoryList.clear();
+      unitCategoryList.clear();
       var data = jsonDecode(response.body);
       final cntList = data["data"] as List;
-
       for (int i=0; i < cntList.length; i++) {
-        settingCategoryList.add(SettingCategory.fromJson(cntList[i]));
+        unitCategoryList.add(UnitCategoryModel.fromJson(cntList[i]));
       }
       setState(() {
-        settingCategoryList;
+        unitCategoryList;
       });
     }
     else{
       _showSnackBar(response.body);
-    }
-  }
-
-  Future<void> getSettingCategoryByActiveList() async
-  {
-    Map<String, Object> body = {
-      "active" : "1",
-    };
-    final response = await HttpService().postRequest("getSettingMenuByActive", body);
-    if (response.statusCode == 200)
-    {
-      activeSettingsMenuList.clear();
-      var data = jsonDecode(response.body);
-      final cntList = data["data"] as List;
-
-      for (int i=0; i < cntList.length; i++) {
-        activeSettingsMenuList.add(GlobalSettings.fromJson(cntList[i]));
-      }
-
-      ddValues =  <DropdownMenuEntry<GlobalSettings>>[];
-      for (final GlobalSettings index in activeSettingsMenuList) {
-        ddValues.add(DropdownMenuEntry<GlobalSettings>(value: index, label: index.menuName));
-      }
-      setState(() {
-        ddValues;
-      });
-    }
-    else{
-      if (context.mounted){
-        GlobalSnackBar.show(context, response.body, response.statusCode);
-      }
     }
   }
 
@@ -120,64 +78,59 @@ class _AddSettingCategoryState extends State<AddSettingCategory> {
                     height: 60,
                     color: Colors.white,
                     child: ListTile(
-                      title: Text('Settings Category', style: myTheme.textTheme.titleLarge),
-                      subtitle: Text('Settings Category with Description', style: myTheme.textTheme.titleSmall),
+                      title: Text('Unit Category', style: myTheme.textTheme.titleLarge),
+                      subtitle: Text('Unit Category with Description', style: myTheme.textTheme.titleSmall),
                       trailing: IconButton(onPressed: ()
                       {
                         setState(() {
-                          editStCat = !editStCat;
+                          editCategoryType = !editCategoryType;
                           editActive = false;
                         });
-                        settingNameCtl.clear();
-                        settingsDisCtl.clear();
-                        settingsTypeCtl.clear();
-                      }, icon: editStCat ? Icon(Icons.done_all, color: myTheme.primaryColor,) : Icon(Icons.edit_note_outlined, color: myTheme.primaryColor,)),
+                        unitCatTypeCtl.clear();
+                        unitCatDisCtl.clear();
+                      }, icon: editCategoryType ? Icon(Icons.done_all, color: myTheme.primaryColor,) : Icon(Icons.edit_note_outlined, color: myTheme.primaryColor,)),
                     ),
                   ),
                   Expanded(
                       child: GridView.builder(
-                        itemCount: settingCategoryList.length,
+                        itemCount: unitCategoryList.length,
                         itemBuilder: (context, index) {
                           return Container(
                             margin: const EdgeInsetsDirectional.all(5.0),
                             decoration: BoxDecoration(
-                              color: settingCategoryList[index].active=='1'? myTheme.primaryColor.withOpacity(0.2) : Colors.red.shade100,
+                              color: unitCategoryList[index].active=='1'? myTheme.primaryColor.withOpacity(0.2) : Colors.red.shade100,
                               borderRadius: const BorderRadius.all(Radius.circular(5.0)),
                             ),
                             child: ListTile(
-                              title: Text(settingCategoryList[index].settingName,),
-                              subtitle: Text(settingCategoryList[index].settingDescription,),
-                              trailing: editStCat ? Wrap(
+                              title: Text(unitCategoryList[index].categoryName),
+                              subtitle: Text(unitCategoryList[index].categoryDescription,),
+                              trailing: editCategoryType ? Wrap(
                                 spacing: 12, // space between two icons
                                 children: <Widget>[
                                   IconButton(onPressed: ()
                                   {
-                                    dropdownSettingsList.text = settingCategoryList[index].menuName;
-                                    settingNameCtl.text = settingCategoryList[index].settingName;
-                                    settingsDisCtl.text = settingCategoryList[index].settingDescription;
-                                    settingsTypeCtl.text = settingCategoryList[index].settingType;
-                                    sldStCatID = settingCategoryList[index].settingId;
-                                    sldSettingID  = settingCategoryList[index].menuId;
+                                    unitCatTypeCtl.text = unitCategoryList[index].categoryName;
+                                    unitCatDisCtl.text = unitCategoryList[index].categoryDescription;
+                                    sldUnitCategoryID = unitCategoryList[index].unitCategoryId;
 
                                     setState(() {
                                       editActive = true;
                                     });
-
                                   }, icon: Icon(Icons.edit_outlined, color: myTheme.primaryColor,),),
                                   IconButton(onPressed: () async {
                                     final prefs = await SharedPreferences.getInstance();
                                     String userID = (prefs.getString('userId') ?? "");
 
                                     Map<String, Object> body = {
-                                      'settingId': settingCategoryList[index].settingId.toString(),
+                                      'unitCategoryId': unitCategoryList[index].unitCategoryId.toString(),
                                       'modifyUser': userID,
                                     };
 
                                     final Response response;
-                                    if(settingCategoryList[index].active=='1'){
-                                      response = await HttpService().putRequest("inactiveSettingCategory", body);
+                                    if(unitCategoryList[index].active=='1'){
+                                      response = await HttpService().putRequest("inactiveUnitCategory", body);
                                     }else{
-                                      response = await HttpService().putRequest("activeSettingCategory", body);
+                                      response = await HttpService().putRequest("activeUnitCategory", body);
                                     }
 
                                     if(response.statusCode == 200)
@@ -186,7 +139,7 @@ class _AddSettingCategoryState extends State<AddSettingCategory> {
                                       if(data["code"]==200)
                                       {
                                         _showSnackBar(data["message"]);
-                                        getSettingCategoryList();
+                                        getUnitCategoryList();
                                       }
                                       else{
                                         _showSnackBar(data["message"]);
@@ -195,7 +148,7 @@ class _AddSettingCategoryState extends State<AddSettingCategory> {
                                       _showSnackBar(response.body);
                                     }
 
-                                  }, icon: settingCategoryList[index].active=='1'? Icon(Icons.check_circle_outlined, color: Colors.green,):Icon(Icons.unpublished_outlined, color: Colors.red,)),
+                                  }, icon: unitCategoryList[index].active=='1'? Icon(Icons.check_circle_outlined, color: Colors.green,):Icon(Icons.unpublished_outlined, color: Colors.red,)),
                                 ],
                               ): null,
                             ),
@@ -225,7 +178,7 @@ class _AddSettingCategoryState extends State<AddSettingCategory> {
                     height: 60,
                     color: Colors.white,
                     child: ListTile(
-                      title: Text("Add Settings Category", style: myTheme.textTheme.titleLarge),
+                      title: Text("Add Unit Category Type", style: myTheme.textTheme.titleLarge),
                       subtitle: Text("Please fill out all details correctly.", style: myTheme.textTheme.titleSmall),
                     ),
                   ),
@@ -240,28 +193,8 @@ class _AddSettingCategoryState extends State<AddSettingCategory> {
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
                               const SizedBox(height: 10,),
-                              DropdownMenu<GlobalSettings>(
-                                controller: dropdownSettingsList,
-                                errorText: showDdError ? 'Select Settings category Type' : null,
-                                hintText: 'Settings Category',
-                                width: MediaQuery.sizeOf(context).width/3.6,
-                                //label: const Text('Category'),
-                                dropdownMenuEntries: ddValues,
-                                inputDecorationTheme: const InputDecorationTheme(
-                                  filled: false,
-                                  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                                  border: OutlineInputBorder(),
-                                ),
-                                onSelected: (GlobalSettings? icon) {
-                                  setState(() {
-                                    sldSettingID = icon!.menuId;
-                                    showDdError = false;
-                                  });
-                                },
-                              ),
-                              const SizedBox(height: 10,),
                               TextFormField(
-                                controller: settingNameCtl,
+                                controller: unitCatTypeCtl,
                                 validator: (value){
                                   if(value==null ||value.isEmpty){
                                     return 'Please fill out this field';
@@ -271,12 +204,13 @@ class _AddSettingCategoryState extends State<AddSettingCategory> {
                                 decoration: const InputDecoration(
                                   contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                                   border: OutlineInputBorder(),
-                                  labelText: 'Settings Category Name',
+                                  labelText: 'Unit Category',
+                                  icon: Icon(Icons.contactless_outlined),
                                 ),
                               ),
                               const SizedBox(height: 13,),
                               TextFormField(
-                                controller: settingsTypeCtl,
+                                controller: unitCatDisCtl,
                                 validator: (value){
                                   if(value==null ||value.isEmpty){
                                     return 'Please fill out this field';
@@ -286,22 +220,8 @@ class _AddSettingCategoryState extends State<AddSettingCategory> {
                                 decoration: const InputDecoration(
                                   contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                                   border: OutlineInputBorder(),
-                                  labelText: 'Type',
-                                ),
-                              ),
-                              const SizedBox(height: 13,),
-                              TextFormField(
-                                controller: settingsDisCtl,
-                                validator: (value){
-                                  if(value==null ||value.isEmpty){
-                                    return 'Please fill out this field';
-                                  }
-                                  return null;
-                                },
-                                decoration: const InputDecoration(
-                                  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                                  border: OutlineInputBorder(),
-                                  labelText: 'Settings Category Description',
+                                  labelText: 'Category Description',
+                                  icon: Icon(Icons.content_paste_go),
                                 ),
                               ),
                               const SizedBox(height: 20,),
@@ -322,7 +242,7 @@ class _AddSettingCategoryState extends State<AddSettingCategory> {
                           ElevatedButton(
                             child: editActive ? const Text('Save'): const Text('Submit'),
                             onPressed: () async {
-                              if (_formKey.currentState!.validate() && sldSettingID!=0) {
+                              if (_formKey.currentState!.validate()) {
                                 _formKey.currentState!.save();
 
                                 final prefs = await SharedPreferences.getInstance();
@@ -331,26 +251,20 @@ class _AddSettingCategoryState extends State<AddSettingCategory> {
 
                                 if(editActive){
                                   Map<String, Object> body = {
-                                    "menuId": sldSettingID,
-                                    "settingId": sldStCatID.toString(),
-                                    'settingName': settingNameCtl.text,
-                                    'settingDescription': settingsDisCtl.text,
-                                    'settingType': settingsTypeCtl.text,
+                                    "unitCategoryId": sldUnitCategoryID.toString(),
+                                    'categoryName': unitCatTypeCtl.text,
+                                    'categoryDescription': unitCatDisCtl.text,
                                     'modifyUser': userID,
                                   };
-                                  print(body);
-                                  response = await HttpService().putRequest("updateSettingCategory", body);
+                                  response = await HttpService().putRequest("updateUnitCategory", body);
                                 }
                                 else{
                                   Map<String, Object> body = {
-                                    "menuId": sldSettingID,
-                                    'settingName': settingNameCtl.text,
-                                    'settingDescription': settingsDisCtl.text,
-                                    'settingType': settingsTypeCtl.text,
+                                    'categoryName': unitCatTypeCtl.text,
+                                    'categoryDescription': unitCatDisCtl.text,
                                     'createUser': userID,
                                   };
-                                  print(body);
-                                  response = await HttpService().postRequest("createSettingCategory", body);
+                                  response = await HttpService().postRequest("createUnitCategory", body);
                                 }
 
                                 if(response.statusCode == 200)
@@ -358,24 +272,14 @@ class _AddSettingCategoryState extends State<AddSettingCategory> {
                                   var data = jsonDecode(response.body);
                                   if(data["code"]==200)
                                   {
-                                    dropdownSettingsList.clear();
-                                    settingNameCtl.clear();
-                                    settingsDisCtl.clear();
-                                    settingsTypeCtl.clear();
-
+                                    unitCatTypeCtl.clear();
+                                    unitCatDisCtl.clear();
                                     _showSnackBar(data["message"]);
-                                    getSettingCategoryList();
+                                    getUnitCategoryList();
                                   }
                                   else{
                                     _showSnackBar(data["message"]);
                                   }
-                                }
-                              }
-                              else{
-                                if(sldSettingID==0){
-                                  setState(() {
-                                    showDdError = true;
-                                  });
                                 }
                               }
                             },

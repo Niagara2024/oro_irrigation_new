@@ -665,7 +665,7 @@ class ProductInventoryState extends State<ProductInventory> {
                   children: [
                     const Expanded(
                       flex: 1, child: Padding(
-                        padding: EdgeInsets.all(8.0),
+                        padding: EdgeInsets.only(left: 16, top: 8, bottom: 8),
                         child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -681,7 +681,7 @@ class ProductInventoryState extends State<ProductInventory> {
                     ),
                     Expanded(
                         flex: 1, child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: EdgeInsets.only(right: 16, top: 8, bottom: 8),
                           child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.end,
                                                 children: [

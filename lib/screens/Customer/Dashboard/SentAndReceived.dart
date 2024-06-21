@@ -3,6 +3,7 @@ import 'dart:html';
 
 import 'package:chat_bubbles/bubbles/bubble_special_one.dart';
 import 'package:chat_bubbles/bubbles/bubble_special_two.dart';
+import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -189,16 +190,22 @@ class _SentAndReceivedState extends State<SentAndReceived> {
           {
             return Padding(
               padding: const EdgeInsets.all(5.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  BubbleSpecialTwo(
+                  BubbleSpecialOne(
                     text: sentAndReceivedList[index].message,
                     isSender: false,
                     color: Colors.blue.shade100,
                     textStyle: const TextStyle(fontSize: 12),
                   ),
-                  Text(' - ${convertTo12hrs(sentAndReceivedList[index].time)}', style: const TextStyle(fontSize: 11),)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: Container(color:Colors.blue.shade600,child: Padding(
+                      padding: const EdgeInsets.all(2.0),
+                      child: Text('${sentAndReceivedList[index].sentUser} - ${convertTo12hrs(sentAndReceivedList[index].time)}', style: const TextStyle(fontSize: 12, color: Colors.white),),
+                    )),
+                  ),
                 ],
               ),
             );
@@ -224,6 +231,7 @@ class _SentAndReceivedState extends State<SentAndReceived> {
       final response = await HttpService().postRequest("getUserSentAndReceivedMessageStatus", body);
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
+        print(response.body);
         if(jsonResponse['code']==200){
           sentAndReceivedList = [
             ...jsonResponse['data'].map((programJson) => SentAndReceivedModel.fromJson(programJson)).toList(),

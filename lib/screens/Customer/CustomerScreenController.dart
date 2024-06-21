@@ -266,32 +266,36 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       backgroundColor: Colors.teal.shade50,
       appBar: AppBar(
         elevation: 10,
-        title:  Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+        title:  Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(_selectedIndex==0?'Dashboard': _selectedIndex==1?'My devices': _selectedIndex==2?'Sent & Received': _selectedIndex==3?'Logs & Reports': _selectedIndex==4?'Weather':'Settings'),
-                Text('Last sync : ${'${siteListFinal[siteIndex].master[masterIndex].liveSyncDate} - ${siteListFinal[siteIndex].master[masterIndex].liveSyncTime}'}', style: const TextStyle(fontSize: 11, color: Colors.white),),
-              ],
-            )),
-            const SizedBox(width: 5,),
-            siteListFinal[siteIndex].master[masterIndex].irrigationLine.length>1 && Provider.of<MqttPayloadProvider>(context).currentSchedule.isNotEmpty?
-            CircleAvatar(
-              radius: 15,
-              backgroundImage: const AssetImage('assets/GifFile/water_drop_ani.gif'),
-              backgroundColor: Colors.blue.shade100,
-            ):
-            const SizedBox(),
-            const SizedBox(width: 5,),
-            IconButton(onPressed: (){
-              setState(() {
-                appbarBottomOpen = !appbarBottomOpen;
-              });
-            }, icon: Icon(appbarBottomOpen?Icons.keyboard_double_arrow_up:Icons.keyboard_double_arrow_down)),
+            Text(_selectedIndex==0?'Dashboard': _selectedIndex==1?'My devices': _selectedIndex==2?'Sent & Received': _selectedIndex==3?'Logs & Reports': _selectedIndex==4?'Weather':'Settings'),
+            Text('Last sync : ${'${siteListFinal[siteIndex].master[masterIndex].liveSyncDate} - ${siteListFinal[siteIndex].master[masterIndex].liveSyncTime}'}', style: const TextStyle(fontSize: 11, color: Colors.white),),
           ],
         ),
+        actions: [
+          siteListFinal[siteIndex].master[masterIndex].irrigationLine.length>1 && Provider.of<MqttPayloadProvider>(context).currentSchedule.isNotEmpty?
+          CircleAvatar(
+            radius: 15,
+            backgroundImage: const AssetImage('assets/GifFile/water_drop_ani.gif'),
+            backgroundColor: Colors.blue.shade100,
+          ):
+          const SizedBox(),
+          const SizedBox(width: 3,),
+          IconButton(onPressed: (){
+            setState(() {
+              appbarBottomOpen = !appbarBottomOpen;
+            });
+          }, icon: Icon(appbarBottomOpen?Icons.keyboard_double_arrow_up:Icons.keyboard_double_arrow_down)),
+          const SizedBox(width: 3,),
+          IconButton(
+            icon: Icon(Icons.list), // Custom image icon
+            onPressed: () {
+              sideSheet();
+            },
+          ),
+          const SizedBox(width: 3,),
+        ],
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -565,14 +569,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             ),
           ],
         ),
-      ),
-      endDrawer: Drawer(
-        //width: 400,
-        shape: const RoundedRectangleBorder(),
-        child: SideSheetClass(customerID: widget.customerId, nodeList: siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList,
-          deviceId: siteListFinal[siteIndex].master[masterIndex].deviceId,
-          lastSyncDate: '${siteListFinal[siteIndex].master[masterIndex].liveSyncDate} - ${siteListFinal[siteIndex].master[masterIndex].liveSyncTime}',
-          deviceName: siteListFinal[siteIndex].master[masterIndex].categoryName,),
       ),
       body: buildScreen(screenWidth, provider, wifiStrength),
     );

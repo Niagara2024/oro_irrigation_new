@@ -260,7 +260,7 @@ class _AllNodeListAndDetailsState extends State<AllNodeListAndDetails> {
         return '${baseImgPath}dl_ec_sensor.png';
       case 'PH':
         return '${baseImgPath}dl_ph_sensor.png';
-      case 'Temperature Sensor':
+      case 'Temperature':
         return '${baseImgPath}dl_temperature_sensor.png';
       case 'Soil Temperature Sensor':
         return '${baseImgPath}dl_soil_temperature_sensor.png';
@@ -296,7 +296,7 @@ class _AllNodeListAndDetailsState extends State<AllNodeListAndDetails> {
         return '${baseImgPath}dl_fertilization_sets.png';
       case 'Filter Set':
         return '${baseImgPath}dl_filter_sets.png';
-      case 'Moisture Sensor':
+      case 'SM':
         return '${baseImgPath}dl_moisture_sensor.png';
       case 'Float':
         return '${baseImgPath}dl_float.png';

@@ -478,8 +478,8 @@ class ProductInventoryState extends State<ProductInventory> {
                         filterProductInventoryList[index].productStatus==1? const Text('In-Stock'):
                         filterProductInventoryList[index].productStatus==2? const Text('Stock'):
                         filterProductInventoryList[index].productStatus==3? const Text('Sold-Out'):
-                        filterProductInventoryList[index].productStatus==4? const Text('Pending'):
-                        filterProductInventoryList[index].productStatus==5? const Text('Installed'):
+                        //filterProductInventoryList[index].productStatus==4? const Text('Pending'):
+                        //filterProductInventoryList[index].productStatus==5? const Text('Installed'):
                         const Text('Active'),
                       ],
                     ):
@@ -490,14 +490,14 @@ class ProductInventoryState extends State<ProductInventory> {
                           filterProductInventoryList[index].productStatus==1? Colors.pink:
                           filterProductInventoryList[index].productStatus==2? Colors.purple:
                           filterProductInventoryList[index].productStatus==3? Colors.yellow:
-                          filterProductInventoryList[index].productStatus==4? Colors.deepOrangeAccent:
+                          //filterProductInventoryList[index].productStatus==4? Colors.deepOrangeAccent:
                           Colors.green,
                         ),
                         const SizedBox(width: 5,),
                         filterProductInventoryList[index].productStatus==2? const Text('In-Stock'):
                         filterProductInventoryList[index].productStatus==3? const Text('Sold-Out'):
-                        filterProductInventoryList[index].productStatus==4? const Text('Pending'):
-                        filterProductInventoryList[index].productStatus==5? const Text('Installed'):
+                        //filterProductInventoryList[index].productStatus==4? const Text('Pending'):
+                        //filterProductInventoryList[index].productStatus==5? const Text('Installed'):
                         const Text('Active'),
                       ],
                     ),
@@ -532,16 +532,16 @@ class ProductInventoryState extends State<ProductInventory> {
                           productInventoryList[index].productStatus==1? Colors.pink:
                           productInventoryList[index].productStatus==2? Colors.blue:
                           productInventoryList[index].productStatus==3? Colors.purple:
-                          productInventoryList[index].productStatus==4? Colors.yellow:
-                          productInventoryList[index].productStatus==5? Colors.deepOrangeAccent:
+                          //productInventoryList[index].productStatus==4? Colors.yellow:
+                          //productInventoryList[index].productStatus==5? Colors.deepOrangeAccent:
                           Colors.green,
                         ),
                         const SizedBox(width: 5,),
                         productInventoryList[index].productStatus==1? const Text('In-Stock', style: const TextStyle(fontSize: 12)):
                         productInventoryList[index].productStatus==2? const Text('Stock', style: const TextStyle(fontSize: 12)):
                         productInventoryList[index].productStatus==3? const Text('Sold-Out', style: const TextStyle(fontSize: 12)):
-                        productInventoryList[index].productStatus==4? const Text('Pending', style: const TextStyle(fontSize: 12)):
-                        productInventoryList[index].productStatus==5? const Text('Installed', style: const TextStyle(fontSize: 12)):
+                        //productInventoryList[index].productStatus==4? const Text('Pending', style: const TextStyle(fontSize: 12)):
+                        //productInventoryList[index].productStatus==5? const Text('Installed', style: const TextStyle(fontSize: 12)):
                         const Text('Active', style: const TextStyle(fontSize: 12)),
                       ],
                     ):
@@ -552,18 +552,18 @@ class ProductInventoryState extends State<ProductInventory> {
                           productInventoryList[index].productStatus==1? Colors.pink:
                           productInventoryList[index].productStatus==2? Colors.purple:
                           productInventoryList[index].productStatus==3? Colors.yellow:
-                          productInventoryList[index].productStatus==4? Colors.deepOrangeAccent:
+                          //productInventoryList[index].productStatus==4? Colors.deepOrangeAccent:
                           Colors.green,
                         ),
                         const SizedBox(width: 5,),
                         productInventoryList[index].productStatus==2? const Text('In-Stock', style: const TextStyle(fontSize: 12)):
                         productInventoryList[index].productStatus==3? const Text('Sold-Out', style: const TextStyle(fontSize: 12)):
-                        productInventoryList[index].productStatus==4? const Text('Pending', style: const TextStyle(fontSize: 12)):
-                        productInventoryList[index].productStatus==5? const Text('Installed', style: const TextStyle(fontSize: 12)):
+                        //productInventoryList[index].productStatus==4? const Text('Pending', style: const TextStyle(fontSize: 12)):
+                        //productInventoryList[index].productStatus==5? const Text('Installed', style: const TextStyle(fontSize: 12)):
                         const Text('Active', style: const TextStyle(fontSize: 12)),
                       ],
                     ),
-                  )
+                  ),
               ),
               DataCell(Center(child: widget.userName==productInventoryList[index].latestBuyer? Text('-'):Text(productInventoryList[index].latestBuyer, style: const TextStyle(fontSize: 12)))),
               const DataCell(Center(child: Text('25-09-2023', style: const TextStyle(fontSize: 12)))),

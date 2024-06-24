@@ -88,7 +88,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   void onRefreshClicked() {
     String livePayload = '';
     Future.delayed(const Duration(milliseconds: 1000), () {
-
       if(siteListFinal[siteIndex].master[masterIndex].modelId==1||
           siteListFinal[siteIndex].master[masterIndex].modelId==2){
         livePayload = jsonEncode({"3000": [{"3001": ""}]});
@@ -307,7 +306,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           ),
         ),
         bottom: appbarBottomOpen? Tab(
-          height: 95,
+          height: 75,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -629,10 +628,20 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 int newIndex = siteListFinal[siteIndex].master.indexWhere((master)
                 => master.categoryName == newMaterName);
                 if (newIndex != -1 && siteListFinal[siteIndex].master.length > 1) {
+
+                  MQTTManager().unsubscribeFromAllTopics('FirmwareToApp/${siteListFinal[siteIndex].master[masterIndex].deviceId}');
+
                   setState(() {
                     _myCurrentMasterC = newMaterName!;
                     masterIndex = newIndex;
                   });
+
+                  MyFunction().clearMQTTPayload(context);
+                  subscribeAndUpdateSite();
+                  if(siteListFinal[siteIndex].master[masterIndex].categoryId == 1 ||
+                      siteListFinal[siteIndex].master[masterIndex].categoryId == 2){
+                    getProgramList();
+                  }
                 }
               },
               value: _myCurrentMasterC,
@@ -962,6 +971,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 child: buildScreen(screenWidth, provider, wifiStrength),
               ),
             ),
+            siteListFinal[siteIndex].master[masterIndex].categoryId==1 ||
+                siteListFinal[siteIndex].master[masterIndex].categoryId==2?
             Container(
               width: 60,
               height: MediaQuery.sizeOf(context).height,
@@ -971,8 +982,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const SizedBox(height: 10),
-                  siteListFinal[siteIndex].master[masterIndex].categoryId==1 ||
-                      siteListFinal[siteIndex].master[masterIndex].categoryId==2 ? CircleAvatar(
+                  CircleAvatar(
                     radius: 20,
                     backgroundColor: myTheme.primaryColorDark,
                     child: SizedBox(
@@ -982,8 +992,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                         sideSheet();
                       }, icon: const Icon(Icons.menu, color: Colors.white)),
                     ),
-                  ):
-                  const SizedBox(),
+                  ),
                   const SizedBox(height: 15),
                   Container(
                     decoration: BoxDecoration(
@@ -1110,7 +1119,53 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   ),
                 ],
               ),
-            )
+            ):
+            Container(
+              width: 60,
+              height: MediaQuery.sizeOf(context).height,
+              color: myTheme.primaryColor,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 10),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.transparent
+                    ),
+                    width: 45,
+                    height: 45,
+                    child: IconButton(
+                      tooltip: 'refresh',
+                      icon: const Icon(Icons.refresh, color: Colors.white,),
+                      onPressed: onRefreshClicked,
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.transparent
+                    ),
+                    width: 45,
+                    height: 45,
+                    child: BadgeButton(
+                      onPressed: () {
+                        if(provider.alarmList.isNotEmpty){
+                          showAlarmBottomSheet(context, provider);
+                        }else{
+                          GlobalSnackBar.show(context, 'Alarm is Empty', 200);
+                        }
+                      },
+                      icon: Icons.alarm,
+                      badgeNumber: provider.alarmList.length,
+
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -1124,7 +1179,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       const EdgeInsets.all(0),
       child:
       _selectedIndex == 0 ? SizedBox(child: siteListFinal[siteIndex].master[masterIndex].categoryId==1 ||
-          siteListFinal[siteIndex].master[masterIndex].categoryId==2 ?
+          siteListFinal[siteIndex].master[masterIndex].categoryId==2?
       Column(
         children: [
           Expanded(child: CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: siteListFinal[siteIndex], crrIrrLine: siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex], masterInx: masterIndex, lineIdx: lineIndex,)),

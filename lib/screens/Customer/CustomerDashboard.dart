@@ -115,6 +115,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
       int? irrigationPauseFlag = getIrrigationPauseFlag(widget.crrIrrLine.id, Provider.of<MqttPayloadProvider>(context).payload2408);
 
+      //print('irrigationPauseFlag:$irrigationPauseFlag');
       return Column(
         children: [
           irrigationPauseFlag!=0 && irrigationPauseFlag!=null? Padding(
@@ -127,7 +128,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(2.0),
-                child: Center(child: Text(irrigationPauseFlag==1? 'The line paused by manually'.toUpperCase():'The line paused by condition'.toUpperCase(),
+                child: Center(child: Text(irrigationPauseFlag==1? 'The line paused by manually'.toUpperCase(): 'The line paused by condition'.toUpperCase(),
                   style: const TextStyle(fontSize: 15, fontWeight: FontWeight.normal),)),
               ),
             ),

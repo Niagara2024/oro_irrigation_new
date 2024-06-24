@@ -352,7 +352,6 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                               }
                             }
                           }
-
                         },
                       ),
                     ],
@@ -628,16 +627,16 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                         customerProductList[index].productStatus==1? Colors.pink:
                         customerProductList[index].productStatus==2? Colors.blue:
                         customerProductList[index].productStatus==3? Colors.purple:
-                        customerProductList[index].productStatus==4? Colors.yellow:
-                        customerProductList[index].productStatus==5? Colors.deepOrangeAccent:
+                        //customerProductList[index].productStatus==4? Colors.yellow:
+                        //customerProductList[index].productStatus==5? Colors.deepOrangeAccent:
                         Colors.green,
                       ),
                       const SizedBox(width: 5,),
                       customerProductList[index].productStatus==1? const Text('In-Stock'):
                       customerProductList[index].productStatus==2? const Text('Stock'):
                       customerProductList[index].productStatus==3? const Text('Sold-Out'):
-                      customerProductList[index].productStatus==4? const Text('Pending'):
-                      customerProductList[index].productStatus==5? const Text('Installed'):
+                      //customerProductList[index].productStatus==4? const Text('Pending'):
+                      //customerProductList[index].productStatus==5? const Text('Installed'):
                       const Text('Active'),
                     ],
                   ) :
@@ -647,15 +646,15 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                         backgroundColor:
                         customerProductList[index].productStatus==2? Colors.pink:
                         customerProductList[index].productStatus==3? Colors.blue:
-                        customerProductList[index].productStatus==4? Colors.yellow:
-                        customerProductList[index].productStatus==5? Colors.deepOrangeAccent:
+                        //customerProductList[index].productStatus==4? Colors.yellow:
+                        //customerProductList[index].productStatus==5? Colors.deepOrangeAccent:
                         Colors.green,
                       ),
                       const SizedBox(width: 5,),
                       customerProductList[index].productStatus==2? const Text('In-Stock'):
                       customerProductList[index].productStatus==3? const Text('Stock'):
-                      customerProductList[index].productStatus==4? const Text('Pending'):
-                      customerProductList[index].productStatus==5? const Text('Installed'):
+                      //customerProductList[index].productStatus==4? const Text('Pending'):
+                      //customerProductList[index].productStatus==5? const Text('Installed'):
                       const Text('Active'),
                     ],
                   ) :
@@ -664,14 +663,14 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                       CircleAvatar(radius: 5,
                         backgroundColor:
                         customerProductList[index].productStatus==3? Colors.pink:
-                        customerProductList[index].productStatus==4? Colors.yellow:
-                        customerProductList[index].productStatus==5? Colors.deepOrangeAccent:
+                        //customerProductList[index].productStatus==4? Colors.yellow:
+                        //customerProductList[index].productStatus==5? Colors.deepOrangeAccent:
                         Colors.green,
                       ),
                       const SizedBox(width: 5,),
                       customerProductList[index].productStatus==3? const Text('In-Stock'):
-                      customerProductList[index].productStatus==4? const Text('Pending'):
-                      customerProductList[index].productStatus==5? const Text('Installed'):
+                      //customerProductList[index].productStatus==4? const Text('Pending'):
+                      //customerProductList[index].productStatus==5? const Text('Installed'):
                       const Text('Active'),
                     ],
                   ),

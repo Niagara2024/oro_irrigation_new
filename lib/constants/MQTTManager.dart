@@ -24,12 +24,12 @@ class MQTTManager {
     String uniqueId = const Uuid().v4();
 
     //development
-    String baseURL = 'ws://192.168.68.141';
-    int port = 9001;
+    // String baseURL = 'ws://192.168.68.141';
+    // int port = 9001;
 
     //cloud
-    //  String baseURL = 'ws://13.235.254.21:8083/mqtt';
-    //  int port = 8083;
+     String baseURL = 'ws://13.235.254.21:8083/mqtt';
+     int port = 8083;
 
     if (_client == null) {
        providerState = state;
@@ -111,6 +111,11 @@ class MQTTManager {
     assert(isConnected);
     providerState?.setAppConnectionState(MQTTConnectionState.connected);
     print('Mosquitto client connected....');
+  }
+
+  void unsubscribeFromAllTopics(String topic) {
+    _client!.unsubscribe(topic);
+    print('Unsubscribed from $topic');
   }
 
 }

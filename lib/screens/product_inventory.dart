@@ -542,7 +542,7 @@ class ProductInventoryState extends State<ProductInventory> {
                         productInventoryList[index].productStatus==3? const Text('Sold-Out', style: const TextStyle(fontSize: 12)):
                         //productInventoryList[index].productStatus==4? const Text('Pending', style: const TextStyle(fontSize: 12)):
                         //productInventoryList[index].productStatus==5? const Text('Installed', style: const TextStyle(fontSize: 12)):
-                        const Text('Active', style: const TextStyle(fontSize: 12)),
+                        const Text('Active', style: TextStyle(fontSize: 12)),
                       ],
                     ):
                     Row(

@@ -358,8 +358,8 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
             size: ColumnSize.S,
           ),
           DataColumn2(
-            label: Center(child: Text('Total (D/F)', style: TextStyle(fontSize: 13),)),
-            fixedWidth: 90,
+            label: Center(child: Text('Total (D/FL)', style: TextStyle(fontSize: 13),)),
+            fixedWidth: 100,
           ),
           DataColumn2(
             label: Center(child: Text('Remaining', style: TextStyle(fontSize: 13),)),
@@ -377,7 +377,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(widget.currentSchedule[index].programName),
-                  Text('${getContentByCode(widget.currentSchedule[index].reasonCode)} - ${widget.currentSchedule[index].reasonCode}', style: const TextStyle(fontSize: 11, color: Colors.black),),
+                  Text(getContentByCode(widget.currentSchedule[index].reasonCode), style: const TextStyle(fontSize: 11, color: Colors.black),),
                 ],
               ),
           ),
@@ -387,8 +387,9 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
           DataCell(Center(child: Text(formatRtcValues(widget.currentSchedule[index].currentRtc, widget.currentSchedule[index].totalRtc)))),
           DataCell(Center(child: Text(formatRtcValues(widget.currentSchedule[index].currentCycle,widget.currentSchedule[index].totalCycle)))),
           DataCell(Center(child: Text(_convertTime(widget.currentSchedule[index].startTime)))),
-          DataCell(Center(child: Text(widget.currentSchedule[index].duration_Qty))),
-          DataCell(Center(child: Text(widget.currentSchedule[index].duration_QtyLeft,style: const TextStyle(fontSize: 20)))),
+          DataCell(Center(child: Text(widget.currentSchedule[index].programName=='StandAlone - Manual'?'Timeless': widget.currentSchedule[index].duration_Qty))),
+          DataCell(Center(child: Text(widget.currentSchedule[index].programName=='StandAlone - Manual'? '----': widget.currentSchedule[index].duration_QtyLeft,
+              style:  TextStyle(fontSize: widget.currentSchedule[index].programName=='StandAlone - Manual'? 15:20)))),
           DataCell(Center(
             child: widget.currentSchedule[index].programName=='StandAlone - Manual'?
             MaterialButton(

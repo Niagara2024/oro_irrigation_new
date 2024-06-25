@@ -246,7 +246,7 @@ class UpcomingProgram extends StatelessWidget {
               size: ColumnSize.M,
             ),
             const DataColumn2(
-              label: Text('Message', style: TextStyle(fontSize: 13)),
+              label: Text('Status', style: TextStyle(fontSize: 13)),
               size: ColumnSize.L,
             ),
             const DataColumn2(
@@ -286,7 +286,7 @@ class UpcomingProgram extends StatelessWidget {
             DataCell(Text(scheduledPrograms[index].progName)),
             DataCell(Text(scheduledPrograms[index].schedulingMethod==1?'No Schedule':scheduledPrograms[index].schedulingMethod==2?'Schedule by days':
             scheduledPrograms[index].schedulingMethod==3?'Schedule as run list':'Day count schedule')),
-            DataCell(Text('${getContentByCode(scheduledPrograms[index].startStopReason)} - ${scheduledPrograms[index].startStopReason}', style: const TextStyle(fontSize: 12),)),
+            DataCell(Text(getContentByCode(scheduledPrograms[index].startStopReason), style: const TextStyle(fontSize: 12),)),
             DataCell(Center(child: Text('${scheduledPrograms[index].totalZone}'))),
             DataCell(Center(child: Text('${scheduledPrograms[index].startDate} : ${_convertTime(scheduledPrograms[index].startTime)}'))),
             DataCell(Center(child: Text(scheduledPrograms[index].endDate))),
@@ -352,6 +352,7 @@ class UpcomingProgram extends StatelessWidget {
                   child: const Text('Resume'),
                 ),
                 const SizedBox(width: 5),
+
                 /*IconButton(tooltip: 'View details', icon: const Icon(Icons.more_vert), onPressed: () {
                               showDialog(
                                 context: context,

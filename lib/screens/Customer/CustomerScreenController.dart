@@ -832,9 +832,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                             ],
                           ),
                           Text('Hi, ${widget.customerName}!',style: const TextStyle(fontSize: 20)),
-                          Text(widget.emailId, style: const TextStyle(fontSize: 13)),
+                          //Text(widget.emailId, style: const TextStyle(fontSize: 13)),
                           Text(widget.mobileNo, style: const TextStyle(fontSize: 13)),
-                          const SizedBox(height: 15),
+                          const SizedBox(height: 8),
                           MaterialButton(
                             color: myTheme.primaryColor,
                             textColor: Colors.white,

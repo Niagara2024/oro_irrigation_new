@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
@@ -200,6 +202,11 @@ class DisplaySourcePump extends StatefulWidget {
 class _DisplaySourcePumpState extends State<DisplaySourcePump> {
 
   Timer? timer;
+  //final GlobalKey _spKey = GlobalKey();
+  final List<GlobalKey> _keys = [];
+  OverlayEntry? _overlayEntry;
+  bool _isHoveringButton = false;
+  bool _isHoveringMenu = false;
 
   @override
   void initState() {
@@ -213,6 +220,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<MqttPayloadProvider>(context);
@@ -223,28 +231,58 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
         itemCount: provider.sourcePump.length,
         scrollDirection: Axis.horizontal,
         itemBuilder: (BuildContext context, int index) {
+          _keys.add(GlobalKey());
           return Column(
             children: [
               Stack(
                 children: [
-                  SizedBox(
-                    width: 70,
-                    height: 70,
-                    child: AppImages.getAsset('sourcePump', provider.sourcePump[index]['Status'],''),
+                  MouseRegion(
+                    onEnter: (_) {
+                      _isHoveringButton = true;
+                      _showSPOnOffMenu(provider, index);
+                    },
+                    onExit: (_){
+                      _isHoveringButton = false;
+                      _checkForExit();
+                    },
+                    child: SizedBox(
+                      width: 70,
+                      height: 70,
+                      key: _keys[index],
+                      child: AppImages.getAsset('sourcePump', provider.sourcePump[index]['Status'],''),
+                    ),
                   ),
                   provider.sourcePump[index]['OnDelayLeft'] !='00:00:00'?
                   Positioned(
-                    top: 40,
+                    top: 30,
                     left: 7.5,
                     child: Container(
-                      color: Colors.greenAccent,
+                      decoration: BoxDecoration(
+                        color:Colors.greenAccent,
+                        borderRadius: const BorderRadius.all(Radius.circular(2)),
+                        border: Border.all(color: Colors.green, width: .50,),
+                      ),
                       width: 55,
                       child: Center(
-                        child: Text(provider.sourcePump[index]['OnDelayLeft'], style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        child: Column(
+                          children: [
+                            const Text("On delay", style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 10,
+                              fontWeight: FontWeight.normal,
+                            )),
+                            const Padding(
+                              padding: EdgeInsets.only(left: 3, right: 3),
+                              child: Divider(height: 0, color: Colors.grey,),
+                            ),
+                            Text(provider.sourcePump[index]['OnDelayLeft'],
+                              style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -269,6 +307,80 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
         },
       ),
     );
+  }
+
+  void _showSPOnOffMenu(provider, index) {
+    if (_overlayEntry == null) {
+      final RenderBox renderBox = _keys[index].currentContext!.findRenderObject() as RenderBox;
+      final Offset offset = renderBox.localToGlobal(Offset.zero);
+
+      _overlayEntry = OverlayEntry(
+        builder: (context) => Positioned(
+          left: offset.dx,
+          top: offset.dy + renderBox.size.height,
+          child: MouseRegion(
+            onEnter: (_) => _isHoveringMenu = true,
+            onExit: (_) {
+              _isHoveringMenu = false;
+              _checkForExit();
+            },
+            child: Material(
+              elevation: 8.0,
+              color: Colors.teal.shade100,
+              borderRadius: BorderRadius.circular(5),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <PopupMenuEntry<int>>[
+                  PopupMenuItem<int>(
+                    onTap: null,
+                    value: 0,
+                    child: Container(
+                      color: Colors.transparent,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 8,),
+                          Center(child: Text(provider.sourcePump[index]['Name'], style: const TextStyle(color: Colors.black),)),
+                          const SizedBox(height: 8,),
+                          Row(
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: Colors.green,
+                                child: IconButton(tooltip:'On',onPressed: (){}, icon: const Icon(Icons.power_settings_new, color: Colors.white,)),
+                              ),
+                              const SizedBox(width: 8,),
+                              CircleAvatar(
+                                backgroundColor: Colors.redAccent,
+                                child: IconButton(tooltip:'Off',onPressed: (){}, icon: const Icon(Icons.power_settings_new, color: Colors.white,)),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10,),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      Overlay.of(context).insert(_overlayEntry!);
+    }
+  }
+
+  void _removePopupMenu() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  void _checkForExit() {
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (!_isHoveringButton && !_isHoveringMenu) {
+        _removePopupMenu();
+      }
+    });
   }
 
 
@@ -414,20 +526,37 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                   ),
                   filteredPumps[index]['OnDelayLeft'] != '00:00:00'?
                   Positioned(
-                    top: 40,
+                    top: 30,
                     left: 7.5,
                     child: Container(
-                      color: Colors.greenAccent,
+                      decoration: BoxDecoration(
+                        color:Colors.greenAccent,
+                        borderRadius: const BorderRadius.all(Radius.circular(2)),
+                        border: Border.all(color: Colors.green, width: .50,),
+                      ),
                       width: 55,
                       child: Center(
                         child: ValueListenableBuilder<String>(
                           valueListenable: Provider.of<DurationNotifier>(context).onDelayLeft,
                           builder: (context, value, child) {
-                            return Text(value, style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ));
+                            return Column(
+                              children: [
+                                const Text("On delay", style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.normal,
+                                )),
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 3, right: 3),
+                                  child: Divider(height: 0, color: Colors.grey,),
+                                ),
+                                Text(value, style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                )),
+                              ],
+                            );
                           },
                         ),
                       ),
@@ -624,7 +753,8 @@ class _DisplayFilterState extends State<DisplayFilter> {
                                 color: Colors.greenAccent,
                                 width: 55,
                                 child: Center(
-                                  child: Text(filteredCentralFilter[i]['DurationLeft'], style: const TextStyle(
+                                  child: Text(filteredCentralFilter[i]['DurationLeft'],
+                                    style: const TextStyle(
                                     color: Colors.black,
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
@@ -1133,7 +1263,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                 ? fertilizer['FertMethod']
                 : int.parse(fertilizer['FertMethod']);
 
-            if (fertilizer['Status'] != 0 && ferMethod == 1) {
+            if (fertilizer['Status']==1 && ferMethod == 1) {
               //fertilizer time base
               List<String> parts = fertilizer['DurationLeft'].split(':');
               String updatedDurationQtyLeft = formatDuration(parts);
@@ -1141,7 +1271,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                 fertilizer['DurationLeft'] = updatedDurationQtyLeft;
               });
             }
-            else if (fertilizer['Status'] != 0 && ferMethod == 2) {
+            else if (fertilizer['Status']==1 && ferMethod == 2) {
               //fertilizer flow base
               double qtyLeftDouble = convertQtyLeftToDouble(fertilizer['QtyLeft']);
               double flowRate = convertFlowValueToDouble(fertilizer['FlowRate']);
@@ -1151,7 +1281,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                 fertilizer['QtyLeft'] = qtyLeftDouble;
               });
             }
-            else if (fertilizer['Status'] != 0 && ferMethod == 3){
+            else if (fertilizer['Status']==1 && ferMethod == 3){
               //fertilizer proposal time base
               double fcOnTime = convertQtyLeftToDouble(fertilizer['OnTime']);
               double fcOffTime = convertQtyLeftToDouble(fertilizer['OffTime']);
@@ -1190,7 +1320,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                 }
               }
             }
-            else if (fertilizer['Status'] != 0 && ferMethod == 4){
+            else if (fertilizer['Status']==1 && ferMethod == 4){
               //fertilizer proposal qty base
               double fcOnTime = convertQtyLeftToDouble(fertilizer['OnTime']);
               double fcOffTime = convertQtyLeftToDouble(fertilizer['OffTime']);
@@ -1231,7 +1361,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                 }
               }
             }
-            else if (fertilizer['Status'] != 0 && ferMethod == 5){
+            else if (fertilizer['Status']==1 && ferMethod == 5){
               //fertilizer pro qty per 1000 Lit
               double fcOnTime = convertQtyLeftToDouble(fertilizer['OnTime']);
               double fcOffTime = convertQtyLeftToDouble(fertilizer['OffTime']);
@@ -1545,7 +1675,6 @@ class _LocalFilterState extends State<LocalFilter> {
         final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
         if(provider.filtersLocal.isNotEmpty) {
           if(provider.filtersLocal[0]['DurationLeft']!='00:00:00'){
-            print('Duration Left updating....');
             List<String> parts = provider.filtersLocal[0]['DurationLeft'].split(':');
             int hours = int.parse(parts[0]);
             int minutes = int.parse(parts[1]);
@@ -1961,7 +2090,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
             int ferMethod = fertilizer['FertMethod'] is int
                 ? fertilizer['FertMethod']
                 : int.parse(fertilizer['FertMethod']);
-            if (fertilizer['Status'] != 0 && ferMethod == 1) {
+            if (fertilizer['Status']==1 && ferMethod == 1) {
               //fertilizer time base
               List<String> parts = fertilizer['DurationLeft'].split(':');
               String updatedDurationQtyLeft = formatDuration(parts);
@@ -1969,7 +2098,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                 fertilizer['DurationLeft'] = updatedDurationQtyLeft;
               });
             }
-            else if (fertilizer['Status'] != 0 && ferMethod == 2) {
+            else if (fertilizer['Status']==1 && ferMethod == 2) {
               //fertilizer flow base
               double qtyLeftDouble = convertQtyLeftToDouble(fertilizer['QtyLeft']);
               double flowRate = convertFlowValueToDouble(fertilizer['FlowRate']);
@@ -1979,7 +2108,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                 fertilizer['QtyLeft'] = qtyLeftDouble;
               });
             }
-            else if (fertilizer['Status'] != 0 && ferMethod == 3){
+            else if (fertilizer['Status']==1 && ferMethod == 3){
               //fertilizer proposal time base
               double fcOnTime = convertQtyLeftToDouble(fertilizer['OnTime']);
               double fcOffTime = convertQtyLeftToDouble(fertilizer['OffTime']);
@@ -2018,7 +2147,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                 }
               }
             }
-            else if (fertilizer['Status'] != 0 && ferMethod == 4){
+            else if (fertilizer['Status']==1 && ferMethod == 4){
               //fertilizer proposal qty base
               double fcOnTime = convertQtyLeftToDouble(fertilizer['OnTime']);
               double fcOffTime = convertQtyLeftToDouble(fertilizer['OffTime']);
@@ -2059,7 +2188,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                 }
               }
             }
-            else if (fertilizer['Status'] != 0 && ferMethod == 5){
+            else if (fertilizer['Status']==1 && ferMethod == 5){
               //fertilizer pro qty per 1000 Lit
               double fcOnTime = convertQtyLeftToDouble(fertilizer['OnTime']);
               double fcOffTime = convertQtyLeftToDouble(fertilizer['OffTime']);

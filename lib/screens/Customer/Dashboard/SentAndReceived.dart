@@ -14,8 +14,9 @@ import 'package:table_calendar/table_calendar.dart';
 import '../../../constants/http_service.dart';
 
 class SentAndReceived extends StatefulWidget {
-  const SentAndReceived({Key? key, required this.customerID, required this.controllerId}) : super(key: key);
+  const SentAndReceived({Key? key, required this.customerID, required this.controllerId, required this.from}) : super(key: key);
   final int customerID, controllerId;
+  final String from;
 
   @override
   State<SentAndReceived> createState() => _SentAndReceivedState();
@@ -47,7 +48,7 @@ class _SentAndReceivedState extends State<SentAndReceived> {
     final screenWidth = MediaQuery.of(context).size.width;
     return screenWidth>600? SizedBox(
       width: MediaQuery.sizeOf(context).width,
-      height:  MediaQuery.sizeOf(context).height,
+      height: MediaQuery.sizeOf(context).height,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
        children: [
@@ -95,7 +96,7 @@ class _SentAndReceivedState extends State<SentAndReceived> {
                ),
              ),
              const SizedBox(width: 5,),
-             Container(width: 0.5, height: MediaQuery.sizeOf(context).height-77, color: Colors.teal.shade200,),
+             Container(width: 0.5, height: widget.from=='Gem'? MediaQuery.sizeOf(context).height-77: MediaQuery.sizeOf(context).height-120, color: Colors.teal.shade200,),
              msgListBox(screenWidth),
            ],
          )
@@ -162,8 +163,8 @@ class _SentAndReceivedState extends State<SentAndReceived> {
 
   SizedBox msgListBox(screenWidth) {
     return SizedBox(
-      width: screenWidth>600? MediaQuery.sizeOf(context).width-512 : MediaQuery.sizeOf(context).width,
-      height: screenWidth>600? MediaQuery.sizeOf(context).height-77: MediaQuery.sizeOf(context).height-230,
+      width: screenWidth>600? widget.from=='Gem'? MediaQuery.sizeOf(context).width-512 : MediaQuery.sizeOf(context).width-828: MediaQuery.sizeOf(context).width,
+      height: screenWidth>600? widget.from=='Gem'? MediaQuery.sizeOf(context).height-77: MediaQuery.sizeOf(context).height-120 : MediaQuery.sizeOf(context).height-230,
       child: sentAndReceivedList.isNotEmpty? ListView.builder(
         padding: const EdgeInsets.only(top: 10),
         itemCount: sentAndReceivedList.length,
@@ -173,14 +174,18 @@ class _SentAndReceivedState extends State<SentAndReceived> {
           {
             return Padding(
               padding: const EdgeInsets.all(5.0),
-              child: Row(
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('${convertTo12hrs(sentAndReceivedList[index].time)} - ', style: const TextStyle(fontSize: 11),),
                   BubbleSpecialOne(
                     textStyle: const TextStyle(fontSize: 12),
                     text: sentAndReceivedList[index].message,
                     color: Colors.green.shade100,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 25),
+                    child: Text(convertTo12hrs(sentAndReceivedList[index].time), style: const TextStyle(fontSize: 11, color: Colors.grey),),
                   ),
                 ],
               ),
@@ -200,11 +205,8 @@ class _SentAndReceivedState extends State<SentAndReceived> {
                     textStyle: const TextStyle(fontSize: 12),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(left: 16),
-                    child: Container(color:Colors.blue.shade600,child: Padding(
-                      padding: const EdgeInsets.all(2.0),
-                      child: Text('${sentAndReceivedList[index].sentUser} - ${convertTo12hrs(sentAndReceivedList[index].time)}', style: const TextStyle(fontSize: 12, color: Colors.white),),
-                    )),
+                    padding: const EdgeInsets.only(left: 25),
+                    child: Text('${sentAndReceivedList[index].sentUser} - ${convertTo12hrs(sentAndReceivedList[index].time)}', style: const TextStyle(fontSize: 11, color: Colors.grey),),
                   ),
                 ],
               ),

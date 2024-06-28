@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:loading_indicator/loading_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -13,7 +12,6 @@ import '../../constants/theme.dart';
 import '../my_preference.dart';
 import '../product_entry.dart';
 import '../product_inventory.dart';
-import '../web_view.dart';
 import 'AdminDashboard.dart';
 
 enum Calendar {day, week, month, year}

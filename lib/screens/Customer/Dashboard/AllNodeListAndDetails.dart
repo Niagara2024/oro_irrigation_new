@@ -25,7 +25,7 @@ class _AllNodeListAndDetailsState extends State<AllNodeListAndDetails> {
           IconButton(tooltip: 'Set serial for all nodes', onPressed: (){
             /*String payLoadFinal = jsonEncode({
               "2300": [
-                {"2301": "${widget.siteData.master[widget.masterInx].liveData[0].nodeList[i].serialNumber}"},
+                {"2301": "${widget.siteData.master[widget.masterInx].gemLive[0].nodeList[i].serialNumber}"},
               ]
             });*/
             //MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[widget.masterInx].deviceId}');
@@ -34,7 +34,7 @@ class _AllNodeListAndDetailsState extends State<AllNodeListAndDetails> {
           IconButton(tooltip: 'Test communication', onPressed: (){
             /*String payLoadFinal = jsonEncode({
               "2300": [
-                {"2301": "${widget.siteData.master[widget.masterInx].liveData[0].nodeList[i].serialNumber}"},
+                {"2301": "${widget.siteData.master[widget.masterInx].gemLive[0].nodeList[i].serialNumber}"},
               ]
             });*/
             //MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[widget.masterInx].deviceId}');
@@ -44,7 +44,7 @@ class _AllNodeListAndDetailsState extends State<AllNodeListAndDetails> {
       ),
       body: ListView(
         children: [
-          for (int i = 0; i < widget.siteData.master[widget.masterInx].liveData[0].nodeList.length; i++)
+          for (int i = 0; i < widget.siteData.master[widget.masterInx].gemLive[0].nodeList.length; i++)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -55,23 +55,23 @@ class _AllNodeListAndDetailsState extends State<AllNodeListAndDetails> {
                   margin: EdgeInsets.zero,
                   child: ListTile(
                     tileColor: myTheme.primaryColor.withOpacity(0.1),
-                    title: Text(widget.siteData.master[widget.masterInx].liveData[0].nodeList[i].categoryName),
-                    subtitle: Text(widget.siteData.master[widget.masterInx].liveData[0].nodeList[i].deviceId),
+                    title: Text(widget.siteData.master[widget.masterInx].gemLive[0].nodeList[i].categoryName),
+                    subtitle: Text(widget.siteData.master[widget.masterInx].gemLive[0].nodeList[i].deviceId),
                     leading: const CircleAvatar(radius:10, backgroundColor: Colors.green,),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(Icons.solar_power_outlined),
                         const SizedBox(width: 5,),
-                        Text('${widget.siteData.master[widget.masterInx].liveData[0].nodeList[i].sVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                        Text('${widget.siteData.master[widget.masterInx].gemLive[0].nodeList[i].sVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
                         const SizedBox(width: 5,),
                         const Icon(Icons.battery_3_bar_rounded),
-                        Text('${widget.siteData.master[widget.masterInx].liveData[0].nodeList[i].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                        Text('${widget.siteData.master[widget.masterInx].gemLive[0].nodeList[i].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
                         const SizedBox(width: 5,),
                         IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
                           String payLoadFinal = jsonEncode({
                             "2300": [
-                              {"2301": "${widget.siteData.master[widget.masterInx].liveData[0].nodeList[i].serialNumber}"},
+                              {"2301": "${widget.siteData.master[widget.masterInx].gemLive[0].nodeList[i].serialNumber}"},
                             ]
                           });
                           MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[widget.masterInx].deviceId}');
@@ -93,7 +93,7 @@ class _AllNodeListAndDetailsState extends State<AllNodeListAndDetails> {
                       GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: widget.siteData.master[widget.masterInx].liveData[0].nodeList[i].rlyStatus.length,
+                        itemCount: widget.siteData.master[widget.masterInx].gemLive[0].nodeList[i].rlyStatus.length,
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 10,
                         ),
@@ -111,15 +111,15 @@ class _AllNodeListAndDetailsState extends State<AllNodeListAndDetails> {
                                   CircleAvatar(
                                     radius: 10,
                                     backgroundColor: Colors.grey,
-                                    child: Text('${widget.siteData.master[widget.masterInx].liveData[0].nodeList[i].rlyStatus[index].rlyNo}', style: const TextStyle(color: Colors.black, fontSize: 12)),
+                                    child: Text('${widget.siteData.master[widget.masterInx].gemLive[0].nodeList[i].rlyStatus[index].rlyNo}', style: const TextStyle(color: Colors.black, fontSize: 12)),
                                   ),
                                   const SizedBox(height: 5,),
                                   CircleAvatar(
                                     radius: 25,
-                                    backgroundImage: AssetImage(getImageForProduct(widget.siteData.master[widget.masterInx].liveData[0].nodeList[i].rlyStatus[index].name!)),
+                                    backgroundImage: AssetImage(getImageForProduct(widget.siteData.master[widget.masterInx].gemLive[0].nodeList[i].rlyStatus[index].name!)),
                                     backgroundColor: Colors.transparent,
                                   ),
-                                  Text(widget.siteData.master[widget.masterInx].liveData[0].nodeList[i].rlyStatus[index].name!, style: const TextStyle(color: Colors.black, fontSize: 12)),
+                                  Text(widget.siteData.master[widget.masterInx].gemLive[0].nodeList[i].rlyStatus[index].name!, style: const TextStyle(color: Colors.black, fontSize: 12)),
                                 ],
                               ),
                             ),
@@ -133,7 +133,7 @@ class _AllNodeListAndDetailsState extends State<AllNodeListAndDetails> {
                       GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: widget.siteData.master[widget.masterInx].liveData[0].nodeList[i].sensor.length,
+                        itemCount: widget.siteData.master[widget.masterInx].gemLive[0].nodeList[i].sensor.length,
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 10,
                         ),
@@ -151,13 +151,13 @@ class _AllNodeListAndDetailsState extends State<AllNodeListAndDetails> {
                                   /*CircleAvatar(
                                     radius: 10,
                                     backgroundColor: Colors.grey,
-                                    child: Text('${widget.siteData.master[widget.masterInx].liveData[0].nodeList[i].sensor[index].id}', style: const TextStyle(color: Colors.black, fontSize: 12)),
+                                    child: Text('${widget.siteData.master[widget.masterInx].gemLive[0].nodeList[i].sensor[index].id}', style: const TextStyle(color: Colors.black, fontSize: 12)),
                                   ),
                                   const SizedBox(height: 5,),*/
 
                                   CircleAvatar(
                                     radius: 25,
-                                    backgroundImage: AssetImage(getImageForProduct(widget.siteData.master[widget.masterInx].liveData[0].nodeList[i].sensor[index].Name!)),
+                                    backgroundImage: AssetImage(getImageForProduct(widget.siteData.master[widget.masterInx].gemLive[0].nodeList[i].sensor[index].Name!)),
                                     backgroundColor: Colors.transparent,
                                   ),
                                   Container(width: 40, height: 14,
@@ -165,13 +165,13 @@ class _AllNodeListAndDetailsState extends State<AllNodeListAndDetails> {
                                         borderRadius: BorderRadius.circular(3),
                                         color: Colors.yellow,
                                       ),
-                                      child: Center(child: Text('${widget.siteData.master[widget.masterInx].liveData[0].nodeList[i].sensor[index].Value}', style: const TextStyle(color: Colors.black, fontSize: 10)))
+                                      child: Center(child: Text('${widget.siteData.master[widget.masterInx].gemLive[0].nodeList[i].sensor[index].Value}', style: const TextStyle(color: Colors.black, fontSize: 10)))
                                   ),
                                   /*Stack(
                                     children: [
                                       CircleAvatar(
                                         radius: 25,
-                                        backgroundImage: AssetImage(getImageForProduct(widget.siteData.master[widget.masterInx].liveData[0].nodeList[i].sensor[index].Name!)),
+                                        backgroundImage: AssetImage(getImageForProduct(widget.siteData.master[widget.masterInx].gemLive[0].nodeList[i].sensor[index].Name!)),
                                         backgroundColor: Colors.transparent,
                                       ),
                                       Positioned(
@@ -182,7 +182,7 @@ class _AllNodeListAndDetailsState extends State<AllNodeListAndDetails> {
                                               borderRadius: BorderRadius.circular(3),
                                               color: Colors.yellow,
                                             ),
-                                            child: Center(child: Text('${widget.siteData.master[widget.masterInx].liveData[0].nodeList[i].sensor[index].Value}', style: const TextStyle(color: Colors.black, fontSize: 10)))
+                                            child: Center(child: Text('${widget.siteData.master[widget.masterInx].gemLive[0].nodeList[i].sensor[index].Value}', style: const TextStyle(color: Colors.black, fontSize: 10)))
                                         ),
                                       ),
                                     ],
@@ -191,7 +191,7 @@ class _AllNodeListAndDetailsState extends State<AllNodeListAndDetails> {
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Text(widget.siteData.master[widget.masterInx].liveData[0].nodeList[i].sensor[index].Name!, style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                      Text(widget.siteData.master[widget.masterInx].gemLive[0].nodeList[i].sensor[index].Name!, style: const TextStyle(color: Colors.black, fontSize: 10)),
                                     ],
                                   ),
                                 ],

@@ -26,7 +26,8 @@ class DashboardModel {
 }
 
 class MasterData {
-  List<LiveData> liveData;
+  List<LiveData> gemLive;
+  List<CM> pumpLive;
   List<IrrigationLine> irrigationLine;
   int controllerId;
   String deviceId;
@@ -39,7 +40,7 @@ class MasterData {
   String liveSyncTime;
 
   MasterData({
-    required this.liveData,
+    required this.gemLive,
     required this.controllerId,
     required this.deviceId,
     required this.deviceName,
@@ -50,6 +51,7 @@ class MasterData {
     required this.liveSyncDate,
     required this.liveSyncTime,
     required this.irrigationLine,
+    required this.pumpLive,
   });
 
   factory MasterData.fromJson(Map<String, dynamic> json) {
@@ -71,11 +73,21 @@ class MasterData {
         modelName: json['modelName'],
         liveSyncDate: json['liveSyncDate'] ?? '',
         liveSyncTime: json['liveSyncTime'] ?? '',
-        liveData: liveList,
+        gemLive: liveList,
         irrigationLine: irgLine,
+        pumpLive: [],
       );
     }else{
       //pump controller
+      var liveMessage;
+      print(json['liveMessage']);
+     /* if (json['liveMessage'] == null) {
+        print('liveMessage is null');
+      } else {
+        liveMessage = json['liveMessage'] as List;
+      }*/
+      List<CM> pumpLiveList = json['liveMessage']!=null && json['liveMessage'].isNotEmpty? json['liveMessage'].map((live) => CM.fromJson(live)).toList() : [];
+
       return MasterData(
         controllerId: json['controllerId'],
         deviceId: json['deviceId'],
@@ -86,8 +98,9 @@ class MasterData {
         modelName: json['modelName'],
         liveSyncDate: json['liveSyncDate'] ?? '',
         liveSyncTime: json['liveSyncTime'] ?? '',
-        liveData: [],
+        gemLive: [],
         irrigationLine: [],
+        pumpLive: pumpLiveList,
       );
     }
   }
@@ -1157,6 +1170,149 @@ class Booster {
     return {
       'Name': name,
       'Status': status,
+    };
+  }
+}
+
+/*class PumpCLive {
+  List<CM> cM;
+
+  PumpCLive({
+    required this.cM,
+  });
+
+  factory PumpCLive.fromJson(Map<String, dynamic> json) {
+    return PumpCLive(
+      cM: List<CM>.from(json['cM'].map((x) => CM.fromJson(x))),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'cM': List<dynamic>.from(cM.map((x) => x.toJson())),
+    };
+  }
+}*/
+
+abstract class CM {
+  CM();
+  factory CM.fromJson(Map<String, dynamic> json) {
+    if (json.containsKey('V')) {
+      return CMType2.fromJson(json);
+    } else {
+      return CMType1.fromJson(json);
+    }
+  }
+
+  Map<String, dynamic> toJson();
+}
+
+class CMType1 extends CM {
+  int? st;
+  int? rn;
+  double? at;
+  double? se;
+  int? ph;
+  String? wm;
+  String? cf;
+  String? pr;
+  String? lv;
+  String? ft;
+  String? od;
+  String? odc;
+  String? odl;
+
+  CMType1({
+    this.st,
+    this.rn,
+    this.at,
+    this.se,
+    this.ph,
+    this.wm,
+    this.cf,
+    this.pr,
+    this.lv,
+    this.ft,
+    this.od,
+    this.odc,
+    this.odl,
+  });
+
+  factory CMType1.fromJson(Map<String, dynamic> json) {
+    return CMType1(
+      st: json['ST'],
+      rn: json['RN'],
+      at: (json['AT'] ?? 0).toDouble(),
+      se: (json['SE'] ?? 0).toDouble(),
+      ph: json['PH'],
+      wm: json['WM'],
+      cf: json['CF'],
+      pr: json['PR'],
+      lv: json['LV'],
+      ft: json['FT'],
+      od: json['OD'],
+      odc: json['ODC'],
+      odl: json['ODL'],
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'ST': st,
+      'RN': rn,
+      'AT': at,
+      'SE': se,
+      'PH': ph,
+      'WM': wm,
+      'CF': cf,
+      'PR': pr,
+      'LV': lv,
+      'FT': ft,
+      'OD': od,
+      'ODC': odc,
+      'ODL': odl,
+    };
+  }
+}
+
+class CMType2 extends CM {
+  String? v;
+  String? c;
+  int? ss;
+  int? b;
+  String? vs;
+  String? np;
+
+  CMType2({
+    this.v,
+    this.c,
+    this.ss,
+    this.b,
+    this.vs,
+    this.np,
+  });
+
+  factory CMType2.fromJson(Map<String, dynamic> json) {
+    return CMType2(
+      v: json['V'],
+      c: json['C'],
+      ss: json['SS'],
+      b: json['B'],
+      vs: json['VS'],
+      np: json['NP'],
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'V': v,
+      'C': c,
+      'SS': ss,
+      'B': b,
+      'VS': vs,
+      'NP': np,
     };
   }
 }

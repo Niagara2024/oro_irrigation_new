@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:html';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:intl/intl.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
@@ -10,6 +12,8 @@ import '../../../constants/http_service.dart';
 import '../../../constants/snack_bar.dart';
 import '../../Config/names_form.dart';
 import '../../Forms/create_account.dart';
+
+import 'package:timezone/standalone.dart' as tz;
 
 class ControllerSettings extends StatefulWidget {
   const ControllerSettings({Key? key, required this.customerID, required this.siteData, required this.masterIndex, required this.adDrId}) : super(key: key);
@@ -36,41 +40,16 @@ class _ControllerSettingsState extends State<ControllerSettings> {
     'Yellow': Colors.yellow,
   };
 
-  String? selectedTime;
-  List<String> utcTimes = [
-    "+0",
-    "+1",
-    "+2",
-    "+3",
-    "+4",
-    "+5",
-    "+6",
-    "+7",
-    "+8",
-    "+9",
-    "+10",
-    "+11",
-    "+12",
-    "+13",
-    "-11",
-    "-10",
-    "-9",
-    "-8",
-    "-7",
-    "-6",
-    "-5",
-    "-4",
-    "-3",
-    "-2",
-    "-1",
-  ];
-
   List<Map<String, dynamic>> subUsers = [];
 
   final TextEditingController txtEcSiteName = TextEditingController();
   final TextEditingController txtEcGroupName = TextEditingController();
   String modelName= '', deviceId= '', categoryName= '';
   int groupId=0;
+
+  String? _selectedTimeZone;
+  String _currentDate = '';
+  String _currentTime = '';
 
   @override
   void initState() {
@@ -140,6 +119,20 @@ class _ControllerSettingsState extends State<ControllerSettings> {
         });
       }
     }
+  }
+
+  final List<String> _timeZones = tz.timeZoneDatabase.locations.keys.toList();
+
+  void _updateCurrentDateTime(String timeZone) {
+    final tz.Location location = tz.getLocation(timeZone);
+    final tz.TZDateTime now = tz.TZDateTime.now(location);
+
+    setState(() {
+      String formattedDateTime = DateFormat.yMd().add_jm().format(now);
+      _currentDate = DateFormat.yMd().format(now); // Date only
+      _currentTime = DateFormat.jm().format(now); // Time only
+      _selectedTimeZone = timeZone;
+    });
   }
 
   @override
@@ -329,45 +322,42 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                             ),
                           ),
                           const Divider(),
-                          const ListTile(
-                            title: Text('Current UTC Time'),
-                            leading: Icon(Icons.date_range),
-                            trailing: Text('15:10:00', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
-                          ),
-                          const Divider(),
-                          const ListTile(
-                            title: Text('Time Format'),
-                            leading: Icon(Icons.date_range),
-                            trailing: Text('24 Hrs', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
-                          ),
-                          const Divider(),
-                          const ListTile(
-                            title: Text('Current Date'),
-                            leading: Icon(Icons.date_range),
-                            trailing: Text('13-05-2024', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
-                          ),
-                          const Divider(),
                           ListTile(
                             title: const Text('UTC'),
                             leading: const Icon(Icons.timer_outlined),
                             trailing: DropdownButton<String>(
-                              underline: Container(),
-                              value: selectedTime,
-                              hint: const Text('UTC time'),
-                              onChanged: (String? newValue) { // Change the type to String?
-                                if (newValue != null) { // Check if newValue is not null
-                                  setState(() {
-                                    selectedTime = newValue;
-                                  });
+                              hint: const Text('Select Time Zone'),
+                              value: _selectedTimeZone,
+                              onChanged: (String? newValue) {
+                                if (newValue != null) {
+                                  _updateCurrentDateTime(newValue);
                                 }
                               },
-                              items: utcTimes.map<DropdownMenuItem<String>>((String value) {
+                              items: _timeZones.map<DropdownMenuItem<String>>((String value) {
                                 return DropdownMenuItem<String>(
                                   value: value,
                                   child: Text(value),
                                 );
                               }).toList(),
                             ),
+                          ),
+                          const Divider(),
+                          ListTile(
+                            title: const Text('Current Date'),
+                            leading: Icon(Icons.date_range),
+                            trailing: Text(_currentDate, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
+                          ),
+                          const Divider(),
+                          ListTile(
+                            title: const Text('Current UTC Time'),
+                            leading: const Icon(Icons.date_range),
+                            trailing: Text(_currentTime, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
+                          ),
+                          const Divider(),
+                          const ListTile(
+                            title: Text('Time Format'),
+                            leading: Icon(Icons.date_range),
+                            trailing: Text('24 Hrs', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
                           ),
                           const Divider(),
                           const ListTile(
@@ -396,6 +386,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                     'groupId': groupId,
                     'groupName': txtEcSiteName.text,
                     'modifyUser': widget.customerID,
+                    'timeZone': _selectedTimeZone ?? '',
                   };
                   final Response response = await HttpService().putRequest("updateUserMasterDetails", body);
                   if(response.statusCode == 200)
@@ -583,29 +574,6 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                   title: Text('Current Date'),
                   leading: Icon(Icons.date_range),
                   trailing: Text('13-05-2024', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
-                ),
-                const Divider(),
-                ListTile(
-                  title: const Text('UTC'),
-                  leading: const Icon(Icons.timer_outlined),
-                  trailing: DropdownButton<String>(
-                    underline: Container(),
-                    value: selectedTime,
-                    hint: const Text('UTC time'),
-                    onChanged: (String? newValue) { // Change the type to String?
-                      if (newValue != null) { // Check if newValue is not null
-                        setState(() {
-                          selectedTime = newValue;
-                        });
-                      }
-                    },
-                    items: utcTimes.map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  ),
                 ),
                 const Divider(),
                 const ListTile(

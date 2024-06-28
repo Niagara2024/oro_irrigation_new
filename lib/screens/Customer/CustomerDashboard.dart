@@ -36,7 +36,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   void initState() {
     super.initState();
     liveSync();
-    print(widget.crrIrrLine.name);
   }
 
   void liveSync(){
@@ -65,7 +64,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
       final filteredScheduledPrograms = filterProgramsByCategory(Provider.of<MqttPayloadProvider>(context).scheduledProgram, widget.crrIrrLine.id);
       final filteredProgramsQueue = filterProgramsQueueByCategory(Provider.of<MqttPayloadProvider>(context).programQueue, widget.crrIrrLine.id);
       final filteredCurrentSchedule = filterCurrentScheduleByCategory(Provider.of<MqttPayloadProvider>(context).currentSchedule, widget.crrIrrLine.id);
-      filteredCurrentSchedule.insertAll(0, filterCurrentScheduleByProgramName(Provider.of<MqttPayloadProvider>(context).currentSchedule, 'StandAlone'));
+      filteredCurrentSchedule.insertAll(0, filterCurrentScheduleByProgramName(Provider.of<MqttPayloadProvider>(context).currentSchedule, 'StandAlone - Manual'));
 
       final nodeList = Provider.of<MqttPayloadProvider>(context).nodeList;
 
@@ -210,7 +209,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                               //i pump
                               provider.irrigationPump.isNotEmpty? Padding(
                                 padding: const EdgeInsets.only(top: 15),
-                                child: DisplayIrrigationPump(currentLineId: widget.crrIrrLine.id, pumpList: widget.siteData.master[widget.masterInx].liveData[0].pumpList,),
+                                child: DisplayIrrigationPump(currentLineId: widget.crrIrrLine.id, pumpList: widget.siteData.master[widget.masterInx].gemLive[0].pumpList,),
                               ):
                               const SizedBox(),
 
@@ -411,8 +410,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   }
 
   int getNodePositionInNodeList(int mIndex, String decId) {
-    for (int i = 0; i < widget.siteData.master[mIndex].liveData[0].nodeList.length; i++) {
-      if (widget.siteData.master[mIndex].liveData[0].nodeList[i].deviceId == decId) {
+    for (int i = 0; i < widget.siteData.master[mIndex].gemLive[0].nodeList.length; i++) {
+      if (widget.siteData.master[mIndex].gemLive[0].nodeList[i].deviceId == decId) {
         return i;
       }
     }

@@ -55,7 +55,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   late String _myCurrentSite;
   late String _myCurrentMasterC;
-  late String _myCurrentIrrLine;
+  String _myCurrentIrrLine= 'No Line Available';
 
   bool appbarBottomOpen = false;
 
@@ -92,7 +92,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           siteListFinal[siteIndex].master[masterIndex].modelId==2){
         livePayload = jsonEncode({"3000": [{"3001": ""}]});
       }else{
-        livePayload = jsonEncode({"sentSMS": [{"#live": ""}]});
+        livePayload = jsonEncode({"sentSMS": "#live"});
       }
       MQTTManager().publish(livePayload, 'AppToFirmware/${siteListFinal[siteIndex].master[masterIndex].deviceId}');
     });
@@ -163,36 +163,36 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   void loadServerData(){
     MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
 
-    List<dynamic> ndlLst = siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList.map((ndl) => ndl.toJson()).toList();
+    List<dynamic> ndlLst = siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList.map((ndl) => ndl.toJson()).toList();
     payloadProvider.updateNodeList(ndlLst);
 
-    List<dynamic> csLst = siteListFinal[siteIndex].master[masterIndex].liveData[0].currentSchedule.map((cs) => cs.toJson()).toList();
+    List<dynamic> csLst = siteListFinal[siteIndex].master[masterIndex].gemLive[0].currentSchedule.map((cs) => cs.toJson()).toList();
     List<CurrentScheduleModel> cs = csLst.map((cs) => CurrentScheduleModel.fromJson(cs)).toList();
     payloadProvider.updateCurrentScheduled(cs);
 
-    List<dynamic> pqLst = siteListFinal[siteIndex].master[masterIndex].liveData[0].queProgramList.map((pq) => pq.toJson()).toList();
+    List<dynamic> pqLst = siteListFinal[siteIndex].master[masterIndex].gemLive[0].queProgramList.map((pq) => pq.toJson()).toList();
     List<ProgramQueue> pq = pqLst.map((pq) => ProgramQueue.fromJson(pq)).toList();
     payloadProvider.updateProgramQueue(pq);
 
-    List<dynamic> spLst = siteListFinal[siteIndex].master[masterIndex].liveData[0].scheduledProgramList.map((sp) => sp.toJson()).toList();
+    List<dynamic> spLst = siteListFinal[siteIndex].master[masterIndex].gemLive[0].scheduledProgramList.map((sp) => sp.toJson()).toList();
     List<ScheduledProgram> sp = spLst.map((sp) => ScheduledProgram.fromJson(sp)).toList();
     payloadProvider.updateScheduledProgram(sp);
 
-    String filterList = jsonEncode(siteListFinal[siteIndex].master[masterIndex].liveData[0].filterList.map((filter) => filter.toJson()).toList());
+    String filterList = jsonEncode(siteListFinal[siteIndex].master[masterIndex].gemLive[0].filterList.map((filter) => filter.toJson()).toList());
     List<dynamic> jsonFilterList = jsonDecode(filterList);
     String filterPayloadFinal = jsonEncode({
       "2400": [{"2405": jsonFilterList.toList()}]
     });
     payloadProvider.updateFilterPayload(filterPayloadFinal);
 
-    String fertilizerSiteList = jsonEncode(siteListFinal[siteIndex].master[masterIndex].liveData[0].fertilizerSiteList.map((pump) => pump.toJson()).toList());
+    String fertilizerSiteList = jsonEncode(siteListFinal[siteIndex].master[masterIndex].gemLive[0].fertilizerSiteList.map((pump) => pump.toJson()).toList());
     List<dynamic> jsonFertilizerList = jsonDecode(fertilizerSiteList);
     String fertilizerPayloadFinal = jsonEncode({
       "2400": [{"2406": jsonFertilizerList.toList()}]
     });
     payloadProvider.updateFertilizerPayload(fertilizerPayloadFinal);
 
-    String pumpList= jsonEncode(siteListFinal[siteIndex].master[masterIndex].liveData[0].pumpList.map((pump) => pump.toJson()).toList());
+    String pumpList= jsonEncode(siteListFinal[siteIndex].master[masterIndex].gemLive[0].pumpList.map((pump) => pump.toJson()).toList());
     List<dynamic> jsonPumpList = jsonDecode(pumpList);
     String pumpPayloadFinal = jsonEncode({
       "2400": [{"2407": jsonPumpList.toList()}]
@@ -261,6 +261,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   Widget buildNarrowLayout(screenWidth, payload2408, allIrrigationResumeFlag, wifiStrength, provider)
   {
+
     return Scaffold(
       backgroundColor: Colors.teal.shade50,
       appBar: AppBar(
@@ -952,7 +953,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               ],
             ),
             Container(
-              width: MediaQuery.sizeOf(context).width-140,
+              width: siteListFinal[siteIndex].master[masterIndex].categoryId==1 ||
+                  siteListFinal[siteIndex].master[masterIndex].categoryId==2? MediaQuery.sizeOf(context).width-140:
+              MediaQuery.sizeOf(context).width-80,
               height: MediaQuery.sizeOf(context).height,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -964,7 +967,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               ),
               child: Container(
                 decoration: BoxDecoration(
-                  //color: Color(0x64C4E9EE),
                   color: Colors.teal.shade50,
                   borderRadius: const BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
                 ),
@@ -1120,52 +1122,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 ],
               ),
             ):
-            Container(
-              width: 60,
-              height: MediaQuery.sizeOf(context).height,
-              color: myTheme.primaryColor,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 10),
-                  Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: Colors.transparent
-                    ),
-                    width: 45,
-                    height: 45,
-                    child: IconButton(
-                      tooltip: 'refresh',
-                      icon: const Icon(Icons.refresh, color: Colors.white,),
-                      onPressed: onRefreshClicked,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: Colors.transparent
-                    ),
-                    width: 45,
-                    height: 45,
-                    child: BadgeButton(
-                      onPressed: () {
-                        if(provider.alarmList.isNotEmpty){
-                          showAlarmBottomSheet(context, provider);
-                        }else{
-                          GlobalSnackBar.show(context, 'Alarm is Empty', 200);
-                        }
-                      },
-                      icon: Icons.alarm,
-                      badgeNumber: provider.alarmList.length,
-
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            const SizedBox(),
           ],
         ),
       ),
@@ -1313,14 +1270,15 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               const SizedBox(),
         ],
       ):
-      PumpDashboard(siteData: siteListFinal[siteIndex], masterIndex: masterIndex,)):
+      PumpDashboard(siteData: siteListFinal[siteIndex], masterIndex: masterIndex, customerId: widget.customerId,)):
       _selectedIndex == 1 ? ProductInventory(userName: widget.customerName):
-      _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId):
+      _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId, from: 'Gem',):
       _selectedIndex == 3 ? ListOfLogConfig(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId,):
       _selectedIndex == 4 ? WeatherScreen(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId, deviceID: siteListFinal[siteIndex].master[masterIndex].deviceId,):
       ControllerSettings(customerID: widget.customerId, siteData: siteListFinal[siteIndex], masterIndex: masterIndex, adDrId: widget.comingFrom=='AdminORDealer'? widget.userId:0,),
     );
   }
+
 
   void sideSheet() {
     showGeneralDialog(
@@ -1338,7 +1296,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             borderRadius: BorderRadius.zero,
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter stateSetter) {
-                return SideSheetClass(customerID: widget.customerId, nodeList: siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList,
+                return SideSheetClass(customerID: widget.customerId, nodeList: siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList,
                   deviceId: siteListFinal[siteIndex].master[masterIndex].deviceId,
                   lastSyncDate: '${siteListFinal[siteIndex].master[masterIndex].liveSyncDate} - ${siteListFinal[siteIndex].master[masterIndex].liveSyncTime}',
                   deviceName: siteListFinal[siteIndex].master[masterIndex].categoryName,);
@@ -1405,7 +1363,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 flex: 1,
                 child: ListView(
                   children: [
-                    for (int i = 0; i < siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList.length; i++)
+                    for (int i = 0; i < siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList.length; i++)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1416,21 +1374,21 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                             margin: EdgeInsets.zero,
                             child: ListTile(
                               tileColor: myTheme.primaryColor.withOpacity(0.1),
-                              title: Text('${siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].categoryName} - ${siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].deviceId}'),
+                              title: Text('${siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].categoryName} - ${siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].deviceId}'),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   const Icon(Icons.solar_power_outlined),
                                   const SizedBox(width: 5,),
-                                  Text('${siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].sVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                  Text('${siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
                                   const SizedBox(width: 5,),
                                   const Icon(Icons.battery_3_bar_rounded),
-                                  Text('${siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                  Text('${siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
                                   const SizedBox(width: 5,),
                                   IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
                                     String payLoadFinal = jsonEncode({
                                       "2300": [
-                                        {"2301": "${siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].serialNumber}"},
+                                        {"2301": "${siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].serialNumber}"},
                                       ]
                                     });
                                     MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteListFinal[siteIndex].master[masterIndex].deviceId}');
@@ -1446,7 +1404,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                 GridView.builder(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus.length,
+                                  itemCount: siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus.length,
                                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 8,
                                   ),
@@ -1455,33 +1413,33 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                       children: [
                                         CircleAvatar(
                                           backgroundColor: Colors.transparent,
-                                          backgroundImage: siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("SP") ?
+                                          backgroundImage: siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("SP") ?
                                           const AssetImage('assets/images/irrigation_pump.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("IP") ?
+                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("IP") ?
                                           const AssetImage('assets/images/irrigation_pump.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("VL") ?
+                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("VL") ?
                                           const AssetImage('assets/images/valve_gray.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("MV") ?
+                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("MV") ?
                                           const AssetImage('assets/images/dp_main_valve.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("FL") ?
+                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FL") ?
                                           const AssetImage('assets/images/dp_filter.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("FC") ?
+                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FC") ?
                                           const AssetImage('assets/images/fert_chanel.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("FG") ?
+                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FG") ?
                                           const AssetImage('assets/images/fogger.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("FB") ?
+                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FB") ?
                                           const AssetImage('assets/images/booster_pump.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("AG") ?
+                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("AG") ?
                                           const AssetImage('assets/images/dp_agitator_gray.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("DV") ?
+                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("DV") ?
                                           const AssetImage('assets/images/downstream_valve.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("SL") ?
+                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("SL") ?
                                           const AssetImage('assets/images/selector.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("FN") ?
+                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FN") ?
                                           const AssetImage('assets/images/fan.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("LI") ?
+                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("LI") ?
                                           const AssetImage('assets/images/pressure_sensor.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!.contains("LO") ?
+                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("LO") ?
                                           const AssetImage('assets/images/pressure_sensor.png'):
                                           const AssetImage('assets/images/pressure_sensor.png'),
                                         ),
@@ -1493,7 +1451,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                               backgroundColor: Colors.grey,
                                             ),
                                             const SizedBox(width: 3),
-                                            Text('${siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].name!}(${siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].rlyStatus[index].rlyNo})', style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                            Text('${siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!}(${siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].rlyNo})', style: const TextStyle(color: Colors.black, fontSize: 10)),
                                           ],
                                         ),
                                       ],
@@ -1503,7 +1461,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                 GridView.builder(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].sensor.length,
+                                  itemCount: siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor.length,
                                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 8,
                                   ),
@@ -1515,7 +1473,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                           height: 40,
                                           child: Stack(
                                             children: [
-                                              AppImages.getAsset('sensor',0, siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].sensor[index].Name!),
+                                              AppImages.getAsset('sensor',0, siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor[index].Name!),
                                               Positioned(
                                                 top: 25,
                                                 left: 0,
@@ -1524,7 +1482,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                                       borderRadius: BorderRadius.circular(3),
                                                       color: Colors.yellow,
                                                     ),
-                                                    child: Center(child: Text('${siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].sensor[index].Value}', style: const TextStyle(color: Colors.black, fontSize: 10)))
+                                                    child: Center(child: Text('${siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor[index].Value}', style: const TextStyle(color: Colors.black, fontSize: 10)))
                                                 ),
                                               ),
                                             ],
@@ -1533,7 +1491,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
-                                            Text(siteListFinal[siteIndex].master[masterIndex].liveData[0].nodeList[i].sensor[index].Name!, style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                            Text(siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor[index].Name!, style: const TextStyle(color: Colors.black, fontSize: 10)),
                                           ],
                                         ),
                                       ],

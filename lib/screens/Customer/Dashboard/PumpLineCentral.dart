@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
@@ -77,7 +75,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                     const SizedBox(),
                     provider.irrigationPump.isNotEmpty? Padding(
                       padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                      child: DisplayIrrigationPump(currentLineId: widget.crrIrrLine.id, pumpList: widget.currentSiteData.master[widget.masterIdx].liveData[0].pumpList,),
+                      child: DisplayIrrigationPump(currentLineId: widget.crrIrrLine.id, pumpList: widget.currentSiteData.master[widget.masterIdx].gemLive[0].pumpList,),
                     ):
                     const SizedBox(),
                     provider.filtersCentral.isNotEmpty? Padding(

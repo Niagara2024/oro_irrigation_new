@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:oro_irrigation_new/state_management/scheule_view_provider.dart';
-
 import '../Models/Customer/Dashboard/DashboardNode.dart';
 
 enum MQTTConnectionState { connected, disconnected, connecting }
@@ -13,6 +12,7 @@ class MqttPayloadProvider with ChangeNotifier {
   late ScheduleViewProvider mySchedule;
 
   int wifiStrength = 0;
+  int batVolt = 0;
   //List<dynamic> nodeList = [];
   //List<dynamic> currentSchedule = [];
   List<dynamic> PrsIn = [];
@@ -43,6 +43,9 @@ class MqttPayloadProvider with ChangeNotifier {
 
   String currentDate = '', currentTime = '';
 
+  //pump controller payload
+  String pumpControllerLive='';
+
   void editMySchedule(ScheduleViewProvider instance){
     mySchedule = instance;
     notifyListeners();
@@ -57,12 +60,7 @@ class MqttPayloadProvider with ChangeNotifier {
         if (data.containsKey('2400') && data['2400'] != null && data['2400'].isNotEmpty) {
           dashBoardPayload = payload;
 
-          final DateTime now = DateTime.now();
-          final DateFormat dateFormatter = DateFormat('yyyy-MM-dd');
-          final DateFormat timeFormatter = DateFormat('HH:mm:ss');
-
-          currentDate = dateFormatter.format(now);
-          currentTime = timeFormatter.format(now);
+          updateLastSync();
 
           if(data['2400'][0].containsKey('WifiStrength')) {
             wifiStrength = data['2400'][0]['WifiStrength'];
@@ -138,12 +136,35 @@ class MqttPayloadProvider with ChangeNotifier {
         }
       }else{
         print('pump controller payload :$payload');
-      }
+        updateLastSync();
+        Map<String, dynamic> json = jsonDecode(payload);
+        if(json['mC']=='LD01'){
 
+          pumpControllerLive = payload;
+          /*_pcLivePayload = PumpCLive.fromJson(json);
+
+          if (_pcLivePayload?.cM[3] is CMType2) {
+            wifiStrength = (_pcLivePayload?.cM[3] as CMType2).ss!;
+            batVolt = (_pcLivePayload?.cM[3] as CMType2).b!;
+          }*/
+        }
+
+      }
       notifyListeners();
     } catch (e) {
       print('Error parsing JSON: $e');
     }
+    //notifyListeners();
+  }
+
+  void updateLastSync(){
+    final DateTime now = DateTime.now();
+    final DateFormat dateFormatter = DateFormat('yyyy-MM-dd');
+    final DateFormat timeFormatter = DateFormat('HH:mm:ss');
+
+    currentDate = dateFormatter.format(now);
+    currentTime = timeFormatter.format(now);
+
     //notifyListeners();
   }
 

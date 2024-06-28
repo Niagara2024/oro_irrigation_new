@@ -20,8 +20,10 @@ import 'package:oro_irrigation_new/state_management/scheule_view_provider.dart';
 import 'package:oro_irrigation_new/state_management/system_definition_provider.dart';
 import 'package:provider/provider.dart';
 import 'state_management/config_maker_provider.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 void main() {
+  tz.initializeTimeZones();
   ScheduleViewProvider mySchedule = ScheduleViewProvider();
   MqttPayloadProvider myMqtt = MqttPayloadProvider();
   myMqtt.editMySchedule(mySchedule);

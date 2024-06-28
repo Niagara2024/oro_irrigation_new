@@ -101,6 +101,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
           modelName = data["data"][0]['modelName'];
           categoryName = data["data"][0]['categoryName'];
           groupId = data["data"][0]['groupId'];
+          _updateCurrentDateTime(data["data"][0]['timeZone']);
         });
       }
     }
@@ -128,7 +129,6 @@ class _ControllerSettingsState extends State<ControllerSettings> {
     final tz.TZDateTime now = tz.TZDateTime.now(location);
 
     setState(() {
-      String formattedDateTime = DateFormat.yMd().add_jm().format(now);
       _currentDate = DateFormat.yMd().format(now); // Date only
       _currentTime = DateFormat.jm().format(now); // Time only
       _selectedTimeZone = timeZone;

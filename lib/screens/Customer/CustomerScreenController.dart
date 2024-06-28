@@ -88,8 +88,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   void onRefreshClicked() {
     String livePayload = '';
     Future.delayed(const Duration(milliseconds: 1000), () {
-      if(siteListFinal[siteIndex].master[masterIndex].modelId==1||
-          siteListFinal[siteIndex].master[masterIndex].modelId==2){
+      if(siteListFinal[siteIndex].master[masterIndex].categoryId==1||
+          siteListFinal[siteIndex].master[masterIndex].categoryId==2){
         livePayload = jsonEncode({"3000": [{"3001": ""}]});
       }else{
         livePayload = jsonEncode({"sentSMS": "#live"});

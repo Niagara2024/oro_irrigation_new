@@ -61,7 +61,7 @@ dependencies:
   audioplayers: ^5.2.1
   flutter_svg: ^0.22.0
   snapping_sheet: ^3.1.0
-  timezone: ^0.9.3
+  syncfusion_flutter_calendar: ^22.2.12
 
 dev_dependencies:
   flutter_test:

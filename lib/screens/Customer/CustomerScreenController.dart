@@ -39,11 +39,10 @@ class CustomerScreenController extends StatefulWidget {
   _CustomerScreenControllerState createState() => _CustomerScreenControllerState();
 }
 
-class _CustomerScreenControllerState extends State<CustomerScreenController> with SingleTickerProviderStateMixin
+class _CustomerScreenControllerState extends State<CustomerScreenController> with TickerProviderStateMixin
 {
-  late TabController _lineTbc;
 
-  List<DashboardModel> siteListFinal = [];
+  List<DashboardModel> mySiteList = [];//SL = Site List
   int siteIndex = 0;
   int masterIndex = 0;
   int lineIndex = 0;
@@ -54,7 +53,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   String lastSyncData = '';
 
   late String _myCurrentSite;
-  late String _myCurrentMasterC;
+  late String _myCurrentMaster;
   String _myCurrentIrrLine= 'No Line Available';
 
   bool appbarBottomOpen = false;
@@ -73,7 +72,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   @override
   void dispose() {
-    _lineTbc.dispose();
     super.dispose();
   }
 
@@ -88,13 +86,13 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   void onRefreshClicked() {
     String livePayload = '';
     Future.delayed(const Duration(milliseconds: 1000), () {
-      if(siteListFinal[siteIndex].master[masterIndex].categoryId==1||
-          siteListFinal[siteIndex].master[masterIndex].categoryId==2){
+      if(mySiteList[siteIndex].master[masterIndex].categoryId==1||
+          mySiteList[siteIndex].master[masterIndex].categoryId==2){
         livePayload = jsonEncode({"3000": [{"3001": ""}]});
       }else{
         livePayload = jsonEncode({"sentSMS": "#live"});
       }
-      MQTTManager().publish(livePayload, 'AppToFirmware/${siteListFinal[siteIndex].master[masterIndex].deviceId}');
+      MQTTManager().publish(livePayload, 'AppToFirmware/${mySiteList[siteIndex].master[masterIndex].deviceId}');
     });
   }
 
@@ -106,17 +104,17 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     final response = await HttpService().postRequest("getCustomerDashboard", body);
     if (response.statusCode == 200)
     {
-      siteListFinal.clear();
+      mySiteList.clear();
       var data = jsonDecode(response.body);
       print(response.body);
       if(data["code"]==200)
       {
         final jsonData = data["data"] as List;
         try {
-          siteListFinal = jsonData.map((json) => DashboardModel.fromJson(json)).toList();
+          mySiteList = jsonData.map((json) => DashboardModel.fromJson(json)).toList();
           indicatorViewHide();
-          if(siteListFinal.isNotEmpty){
-            /*if(siteListFinal[siteIndex].master[masterIndex].irrigationLine.length>1){
+          if(mySiteList.isNotEmpty){
+            /*if(mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1){
               IrrigationLine newLine = IrrigationLine(
                 sNo: 0,
                 id: '0',
@@ -127,16 +125,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 mainValve: [],
                 valve: [],
               );
-              siteListFinal[siteIndex].master[masterIndex].irrigationLine.insert(0, newLine);
+              mySiteList[siteIndex].master[masterIndex].irrigationLine.insert(0, newLine);
             }*/
-            _myCurrentSite = siteListFinal[siteIndex].groupName;
-            _myCurrentMasterC = siteListFinal[siteIndex].master[masterIndex].categoryName;
-            _myCurrentIrrLine = siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex].name;
 
-            intTabController();
-            subscribeAndUpdateSite();
-            getProgramList();
-            loadServerData();
+            updateSite(0,0,0);
           }
         } catch (e) {
           print('Error: $e');
@@ -149,68 +141,58 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     }
   }
 
-  void intTabController(){
-    _lineTbc = TabController(length: siteListFinal[siteIndex].master[masterIndex].irrigationLine.length, vsync: this);
-    _lineTbc.addListener(() {
-      if (_lineTbc.indexIsChanging) {
-        setState(() {
-          lineIndex = _lineTbc.index;
-        });
-      }
+  void updateSite(sIdx, mIdx, lIdx){
+    _myCurrentSite = mySiteList[sIdx].groupName;
+    updateMaster(sIdx, mIdx, lIdx);
+  }
+
+  void updateMaster(sIdx, mIdx, lIdx){
+    _myCurrentMaster = mySiteList[sIdx].master[mIdx].categoryName;
+    try{
+      //MQTTManager().unsubscribeFromAllTopics('FirmwareToApp/${mySiteList[sIdx].master[mIdx].deviceId}');
+      MyFunction().clearMQTTPayload(context);
+    }catch(e){
+      print(e);
+    }
+    subscribeCurrentMaster(sIdx, mIdx);
+
+    if(mySiteList[sIdx].master[mIdx].categoryId == 1 ||
+        mySiteList[sIdx].master[mIdx].categoryId == 2){
+      //gem or gem+ controller
+      updateMasterLine(sIdx, mIdx, lIdx);
+    }else{
+      //pump controller
+    }
+
+    setState(() {
+    });
+
+  }
+
+  void subscribeCurrentMaster(sIdx, mIdx) {
+    Future.delayed(const Duration(seconds: 3), () {
+      MQTTManager().subscribeToTopic('FirmwareToApp/${mySiteList[sIdx].master[mIdx].deviceId}');
     });
   }
 
-  void loadServerData(){
-    MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
-
-    List<dynamic> ndlLst = siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList.map((ndl) => ndl.toJson()).toList();
-    payloadProvider.updateNodeList(ndlLst);
-
-    List<dynamic> csLst = siteListFinal[siteIndex].master[masterIndex].gemLive[0].currentSchedule.map((cs) => cs.toJson()).toList();
-    List<CurrentScheduleModel> cs = csLst.map((cs) => CurrentScheduleModel.fromJson(cs)).toList();
-    payloadProvider.updateCurrentScheduled(cs);
-
-    List<dynamic> pqLst = siteListFinal[siteIndex].master[masterIndex].gemLive[0].queProgramList.map((pq) => pq.toJson()).toList();
-    List<ProgramQueue> pq = pqLst.map((pq) => ProgramQueue.fromJson(pq)).toList();
-    payloadProvider.updateProgramQueue(pq);
-
-    List<dynamic> spLst = siteListFinal[siteIndex].master[masterIndex].gemLive[0].scheduledProgramList.map((sp) => sp.toJson()).toList();
-    List<ScheduledProgram> sp = spLst.map((sp) => ScheduledProgram.fromJson(sp)).toList();
-    payloadProvider.updateScheduledProgram(sp);
-
-    String filterList = jsonEncode(siteListFinal[siteIndex].master[masterIndex].gemLive[0].filterList.map((filter) => filter.toJson()).toList());
-    List<dynamic> jsonFilterList = jsonDecode(filterList);
-    String filterPayloadFinal = jsonEncode({
-      "2400": [{"2405": jsonFilterList.toList()}]
-    });
-    payloadProvider.updateFilterPayload(filterPayloadFinal);
-
-    String fertilizerSiteList = jsonEncode(siteListFinal[siteIndex].master[masterIndex].gemLive[0].fertilizerSiteList.map((pump) => pump.toJson()).toList());
-    List<dynamic> jsonFertilizerList = jsonDecode(fertilizerSiteList);
-    String fertilizerPayloadFinal = jsonEncode({
-      "2400": [{"2406": jsonFertilizerList.toList()}]
-    });
-    payloadProvider.updateFertilizerPayload(fertilizerPayloadFinal);
-
-    String pumpList= jsonEncode(siteListFinal[siteIndex].master[masterIndex].gemLive[0].pumpList.map((pump) => pump.toJson()).toList());
-    List<dynamic> jsonPumpList = jsonDecode(pumpList);
-    String pumpPayloadFinal = jsonEncode({
-      "2400": [{"2407": jsonPumpList.toList()}]
-    });
-    payloadProvider.updatePumpPayload(pumpPayloadFinal);
-
+  void updateMasterLine(sIdx, mIdx, lIdx){
+    if(mySiteList[sIdx].master[mIdx].irrigationLine.isNotEmpty){
+      _myCurrentIrrLine = mySiteList[sIdx].master[mIdx].irrigationLine[lIdx].name;
+      getProgramList();
+      loadServerData();
+    }
   }
 
   Future<void> getProgramList() async
   {
     programList.clear();
     try {
-      Map<String, Object> body = {"userId": widget.customerId, "controllerId": siteListFinal[siteIndex].master[masterIndex].controllerId};
+      Map<String, Object> body = {"userId": widget.customerId, "controllerId": mySiteList[siteIndex].master[masterIndex].controllerId};
       final response = await HttpService().postRequest("getUserProgramNameList", body);
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         List<dynamic> programsJson = jsonResponse['data'];
-        setState(() {
+        setState((){
           programList = [...programsJson.map((programJson) => ProgramList.fromJson(programJson)).toList()];
         });
       }
@@ -219,6 +201,49 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     }
   }
 
+
+  void loadServerData(){
+    MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
+
+    List<dynamic> ndlLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList.map((ndl) => ndl.toJson()).toList();
+    payloadProvider.updateNodeList(ndlLst);
+
+    List<dynamic> csLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].currentSchedule.map((cs) => cs.toJson()).toList();
+    List<CurrentScheduleModel> cs = csLst.map((cs) => CurrentScheduleModel.fromJson(cs)).toList();
+    payloadProvider.updateCurrentScheduled(cs);
+
+    List<dynamic> pqLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].queProgramList.map((pq) => pq.toJson()).toList();
+    List<ProgramQueue> pq = pqLst.map((pq) => ProgramQueue.fromJson(pq)).toList();
+    payloadProvider.updateProgramQueue(pq);
+
+    List<dynamic> spLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].scheduledProgramList.map((sp) => sp.toJson()).toList();
+    List<ScheduledProgram> sp = spLst.map((sp) => ScheduledProgram.fromJson(sp)).toList();
+    payloadProvider.updateScheduledProgram(sp);
+
+    String filterList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].filterList.map((filter) => filter.toJson()).toList());
+    List<dynamic> jsonFilterList = jsonDecode(filterList);
+    String filterPayloadFinal = jsonEncode({
+      "2400": [{"2405": jsonFilterList.toList()}]
+    });
+    payloadProvider.updateFilterPayload(filterPayloadFinal);
+
+    String fertilizerSiteList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].fertilizerSiteList.map((pump) => pump.toJson()).toList());
+    List<dynamic> jsonFertilizerList = jsonDecode(fertilizerSiteList);
+    String fertilizerPayloadFinal = jsonEncode({
+      "2400": [{"2406": jsonFertilizerList.toList()}]
+    });
+    payloadProvider.updateFertilizerPayload(fertilizerPayloadFinal);
+
+    String pumpList= jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].pumpList.map((pump) => pump.toJson()).toList());
+    List<dynamic> jsonPumpList = jsonDecode(pumpList);
+    String pumpPayloadFinal = jsonEncode({
+      "2400": [{"2407": jsonPumpList.toList()}]
+    });
+
+    payloadProvider.updatePumpPayload(pumpPayloadFinal);
+  }
+
+
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -226,12 +251,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
         duration: const Duration(seconds: 3),
       ),
     );
-  }
-
-  void subscribeAndUpdateSite() {
-    Future.delayed(const Duration(seconds: 3), () {
-      MQTTManager().subscribeToTopic('FirmwareToApp/${siteListFinal[siteIndex].master[masterIndex].deviceId}');
-    });
   }
 
 
@@ -247,10 +266,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     final payload2408 = Provider.of<MqttPayloadProvider>(context).payload2408;
     bool allIrrigationResumeFlag = payload2408.every((record) => record['IrrigationPauseFlag'] == 1);
 
-    if(siteListFinal.isNotEmpty){
+    if(mySiteList.isNotEmpty){
       if(currentDate.isNotEmpty){
-        siteListFinal[siteIndex].master[masterIndex].liveSyncDate = currentDate;
-        siteListFinal[siteIndex].master[masterIndex].liveSyncTime = currentTime;
+        mySiteList[siteIndex].master[masterIndex].liveSyncDate = currentDate;
+        mySiteList[siteIndex].master[masterIndex].liveSyncTime = currentTime;
       }
     }
 
@@ -261,7 +280,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   Widget buildNarrowLayout(screenWidth, payload2408, allIrrigationResumeFlag, wifiStrength, provider)
   {
-
     return Scaffold(
       backgroundColor: Colors.teal.shade50,
       appBar: AppBar(
@@ -270,11 +288,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(_selectedIndex==0?'Dashboard': _selectedIndex==1?'My devices': _selectedIndex==2?'Sent & Received': _selectedIndex==3?'Logs & Reports': _selectedIndex==4?'Weather':'Settings'),
-            Text('Last sync : ${'${siteListFinal[siteIndex].master[masterIndex].liveSyncDate} - ${siteListFinal[siteIndex].master[masterIndex].liveSyncTime}'}', style: const TextStyle(fontSize: 11, color: Colors.white),),
+            Text('Last sync : ${'${mySiteList[siteIndex].master[masterIndex].liveSyncDate} - ${mySiteList[siteIndex].master[masterIndex].liveSyncTime}'}', style: const TextStyle(fontSize: 11, color: Colors.white),),
           ],
         ),
         actions: [
-          siteListFinal[siteIndex].master[masterIndex].irrigationLine.length>1 && Provider.of<MqttPayloadProvider>(context).currentSchedule.isNotEmpty?
+          mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1 && Provider.of<MqttPayloadProvider>(context).currentSchedule.isNotEmpty?
           CircleAvatar(
             radius: 15,
             backgroundImage: const AssetImage('assets/GifFile/water_drop_ani.gif'),
@@ -316,24 +334,33 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const SizedBox(width: 5,),
-                  siteListFinal.length>1? DropdownButton(
+                  mySiteList.length>1? DropdownButton(
                     underline: Container(),
-                    items: (siteListFinal ?? []).map((site) {
+                    items: (mySiteList ?? []).map((site) {
                       return DropdownMenuItem(
                         value: site.groupName,
                         child: Text(site.groupName, style: const TextStyle(color: Colors.white, fontSize: 16),),
                       );
                     }).toList(),
                     onChanged: (newSiteName) {
-                      int newIndex = siteListFinal.indexWhere((site) => site.groupName == newSiteName);
-                      if (newIndex != -1 && siteListFinal.length > 1) {
-                        setState(() {
-                          _myCurrentSite = newSiteName!;
-                          siteIndex = newIndex;
-                        });
-                        MyFunction().clearMQTTPayload(context);
-                        subscribeAndUpdateSite();
+                      int newIndex = mySiteList.indexWhere((site) => site.groupName == newSiteName);
+                      if (newIndex != -1 && mySiteList.length > 1) {
+
+                        siteIndex = newIndex;
+                        masterIndex = 0;
+                        lineIndex = 0;
+                        updateSite(newIndex, 0, 0);
+
+                        /*_myCurrentSite = mySiteList[newIndex].groupName;
+                        _myCurrentMaster = mySiteList[newIndex].master[masterIndex].categoryName;
+
+                        if(mySiteList[siteIndex].master[masterIndex].irrigationLine.isNotEmpty){
+                          _myCurrentIrrLine = mySiteList[siteIndex].master[masterIndex].irrigationLine[lineIndex].name;
+                        }
+
+                        subscribeCurrentMaster();
                         getProgramList();
+                        loadServerData();*/
                       }
                     },
                     value: _myCurrentSite,
@@ -342,38 +369,43 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     iconDisabledColor: Colors.white,
                     focusColor: Colors.transparent,
                   ) :
-                  Text(siteListFinal[siteIndex].groupName, style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.normal),),
+                  Text(mySiteList[siteIndex].groupName, style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.normal),),
 
                   const SizedBox(width: 3,),
                   Container(width: 1, height: 20, color: Colors.white54,),
                   const SizedBox(width: 3,),
 
-                  siteListFinal[siteIndex].master.length>1? DropdownButton(
+                  mySiteList[siteIndex].master.length>1? DropdownButton(
                     underline: Container(),
-                    items: (siteListFinal[siteIndex].master ?? []).map((master) {
+                    items: (mySiteList[siteIndex].master ?? []).map((master) {
                       return DropdownMenuItem(
                         value: master.categoryName,
                         child: Text(master.categoryName, style: const TextStyle(color: Colors.white, fontSize: 16),),
                       );
                     }).toList(),
                     onChanged: (newMaterName) {
-                      int newIndex = siteListFinal[siteIndex].master.indexWhere((master)
-                      => master.categoryName == newMaterName);
-                      if (newIndex != -1 && siteListFinal[siteIndex].master.length > 1) {
+                      int masterIdx = mySiteList[siteIndex].master.indexWhere((master) => master.categoryName == newMaterName);
+                      if (masterIdx != -1 && mySiteList[siteIndex].master.length > 1) {
+                        masterIndex = masterIdx;
+                        lineIndex = 0;
+                        updateMaster(siteIndex, masterIdx, 0);
+
+                        /*updateSite(newIndex, 0, 0);
+
                         setState(() {
-                          _myCurrentMasterC = newMaterName!;
+                          _myCurrentMaster = newMaterName!;
                           masterIndex = newIndex;
-                          subscribeAndUpdateSite();
-                        });
+                          subscribeCurrentMaster();
+                        });*/
                       }
                     },
-                    value: _myCurrentMasterC,
+                    value: _myCurrentMaster,
                     dropdownColor: Colors.teal,
                     iconEnabledColor: Colors.white,
                     iconDisabledColor: Colors.white,
                     focusColor: Colors.transparent,
                   ):
-                  Text(siteListFinal[siteIndex].master[masterIndex].categoryName, style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.normal),),
+                  Text(mySiteList[siteIndex].master[masterIndex].categoryName, style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.normal),),
                   const SizedBox(width: 5,),
                 ],
               ),
@@ -381,19 +413,19 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const SizedBox(width: 5,),
-                  siteListFinal[siteIndex].master[masterIndex].categoryId == 1 ||
-                      siteListFinal[siteIndex].master[masterIndex].categoryId == 2? DropdownButton(
+                  mySiteList[siteIndex].master[masterIndex].categoryId == 1 ||
+                      mySiteList[siteIndex].master[masterIndex].categoryId == 2? DropdownButton(
                     underline: Container(),
-                    items: (siteListFinal[siteIndex].master[masterIndex].irrigationLine ?? []).map((line) {
+                    items: (mySiteList[siteIndex].master[masterIndex].irrigationLine ?? []).map((line) {
                       return DropdownMenuItem(
                         value: line.name,
                         child: Text(line.name, style: const TextStyle(color: Colors.white, fontSize: 16),),
                       );
                     }).toList(),
                     onChanged: (newLineName) {
-                      int newIndex = siteListFinal[siteIndex].master[masterIndex].irrigationLine.indexWhere((line)
+                      int newIndex = mySiteList[siteIndex].master[masterIndex].irrigationLine.indexWhere((line)
                       => line.name == newLineName);
-                      if (newIndex != -1 && siteListFinal[siteIndex].master[masterIndex].irrigationLine.length > 1) {
+                      if (newIndex != -1 && mySiteList[siteIndex].master[masterIndex].irrigationLine.length > 1) {
                         setState(() {
                           _myCurrentIrrLine = newLineName!;
                           lineIndex = newIndex;
@@ -586,24 +618,21 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             const SizedBox(width: 10,),
             Container(width: 1, height: 20, color: Colors.white54,),
             const SizedBox(width: 5,),
-            siteListFinal.length>1? DropdownButton(
+            mySiteList.length>1? DropdownButton(
               underline: Container(),
-              items: (siteListFinal ?? []).map((site) {
+              items: (mySiteList ?? []).map((site) {
                 return DropdownMenuItem(
                   value: site.groupName,
                   child: Text(site.groupName, style: const TextStyle(color: Colors.white, fontSize: 17),),
                 );
               }).toList(),
               onChanged: (newSiteName) {
-                int newIndex = siteListFinal.indexWhere((site) => site.groupName == newSiteName);
-                if (newIndex != -1 && siteListFinal.length > 1) {
-                  setState(() {
-                    _myCurrentSite = newSiteName!;
-                    siteIndex = newIndex;
-                  });
-                  MyFunction().clearMQTTPayload(context);
-                  subscribeAndUpdateSite();
-                  getProgramList();
+                int newIndex = mySiteList.indexWhere((site) => site.groupName == newSiteName);
+                if (newIndex != -1 && mySiteList.length > 1) {
+                  siteIndex = newIndex;
+                  masterIndex = 0;
+                  lineIndex = 0;
+                  updateSite(newIndex, 0, 0);
                 }
               },
               value: _myCurrentSite,
@@ -612,70 +641,58 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               iconDisabledColor: Colors.white,
               focusColor: Colors.transparent,
             ) :
-            Text(siteListFinal[siteIndex].groupName, style: const TextStyle(fontSize: 17),),
+            Text(mySiteList[siteIndex].groupName, style: const TextStyle(fontSize: 17),),
 
             const SizedBox(width: 15,),
             Container(width: 1,height: 20, color: Colors.white54,),
             const SizedBox(width: 5,),
-            siteListFinal[siteIndex].master.length>1? DropdownButton(
+            mySiteList[siteIndex].master.length>1? DropdownButton(
               underline: Container(),
-              items: (siteListFinal[siteIndex].master ?? []).map((master) {
+              items: (mySiteList[siteIndex].master ?? []).map((master) {
                 return DropdownMenuItem(
                   value: master.categoryName,
                   child: Text(master.categoryName, style: const TextStyle(color: Colors.white, fontSize: 17),),
                 );
               }).toList(),
               onChanged: (newMaterName) {
-                int newIndex = siteListFinal[siteIndex].master.indexWhere((master)
+                int masterIdx = mySiteList[siteIndex].master.indexWhere((master)
                 => master.categoryName == newMaterName);
-                if (newIndex != -1 && siteListFinal[siteIndex].master.length > 1) {
-
-                  MQTTManager().unsubscribeFromAllTopics('FirmwareToApp/${siteListFinal[siteIndex].master[masterIndex].deviceId}');
-
-                  setState(() {
-                    _myCurrentMasterC = newMaterName!;
-                    masterIndex = newIndex;
-                  });
-
-                  MyFunction().clearMQTTPayload(context);
-                  subscribeAndUpdateSite();
-                  if(siteListFinal[siteIndex].master[masterIndex].categoryId == 1 ||
-                      siteListFinal[siteIndex].master[masterIndex].categoryId == 2){
-                    getProgramList();
-                  }
+                if (masterIdx != -1 && mySiteList[siteIndex].master.length > 1) {
+                  masterIndex = masterIdx;
+                  lineIndex = 0;
+                  updateMaster(siteIndex, masterIdx, 0);
                 }
               },
-              value: _myCurrentMasterC,
+              value: _myCurrentMaster,
               dropdownColor: Colors.teal,
               iconEnabledColor: Colors.white,
               iconDisabledColor: Colors.white,
               focusColor: Colors.transparent,
             ) :
-            Text(siteListFinal[siteIndex].master[masterIndex].categoryName, style: const TextStyle(fontSize: 17),),
+            Text(mySiteList[siteIndex].master[masterIndex].categoryName, style: const TextStyle(fontSize: 17),),
 
-            siteListFinal[siteIndex].master[masterIndex].categoryId == 1 ||
-                siteListFinal[siteIndex].master[masterIndex].categoryId == 2? const SizedBox(width: 15,): const SizedBox(),
-            siteListFinal[siteIndex].master[masterIndex].categoryId == 1 ||
-                siteListFinal[siteIndex].master[masterIndex].categoryId == 2? Container(width: 1,height: 20, color: Colors.white54,): const SizedBox(),
-            siteListFinal[siteIndex].master[masterIndex].categoryId == 1 ||
-                siteListFinal[siteIndex].master[masterIndex].categoryId == 2? const SizedBox(width: 5,): const SizedBox(),
-            siteListFinal[siteIndex].master[masterIndex].categoryId == 1 ||
-                siteListFinal[siteIndex].master[masterIndex].categoryId == 2? DropdownButton(
+            mySiteList[siteIndex].master[masterIndex].categoryId == 1 ||
+                mySiteList[siteIndex].master[masterIndex].categoryId == 2? const SizedBox(width: 15,): const SizedBox(),
+            mySiteList[siteIndex].master[masterIndex].categoryId == 1 ||
+                mySiteList[siteIndex].master[masterIndex].categoryId == 2? Container(width: 1,height: 20, color: Colors.white54,): const SizedBox(),
+            mySiteList[siteIndex].master[masterIndex].categoryId == 1 ||
+                mySiteList[siteIndex].master[masterIndex].categoryId == 2? const SizedBox(width: 5,): const SizedBox(),
+            mySiteList[siteIndex].master[masterIndex].categoryId == 1 ||
+                mySiteList[siteIndex].master[masterIndex].categoryId == 2? DropdownButton(
               underline: Container(),
-              items: (siteListFinal[siteIndex].master[masterIndex].irrigationLine ?? []).map((line) {
+              items: (mySiteList[siteIndex].master[masterIndex].irrigationLine ?? []).map((line) {
                 return DropdownMenuItem(
                   value: line.name,
                   child: Text(line.name, style: const TextStyle(color: Colors.white, fontSize: 17),),
                 );
               }).toList(),
               onChanged: (newLineName) {
-                int newIndex = siteListFinal[siteIndex].master[masterIndex].irrigationLine.indexWhere((line)
+                int lIndex = mySiteList[siteIndex].master[masterIndex].irrigationLine.indexWhere((line)
                 => line.name == newLineName);
-                if (newIndex != -1 && siteListFinal[siteIndex].master[masterIndex].irrigationLine.length > 1) {
-                  setState(() {
-                    _myCurrentIrrLine = newLineName!;
-                    lineIndex = newIndex;
-                  });
+                if (lineIndex != -1 && mySiteList[siteIndex].master[masterIndex].irrigationLine.length > 1) {
+                  _myCurrentIrrLine = newLineName!;
+                  lineIndex = lIndex;
+                  updateMasterLine(siteIndex, masterIndex, lIndex);
                 }
               },
               value: _myCurrentIrrLine,
@@ -689,7 +706,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             const SizedBox(width: 15,),
             Container(width: 1, height: 20, color: Colors.white54,),
             const SizedBox(width: 5,),
-            Text('Last sync : ${'${siteListFinal[siteIndex].master[masterIndex].liveSyncDate} - ${siteListFinal[siteIndex].master[masterIndex].liveSyncTime}'}', style: const TextStyle(fontSize: 15),),
+            Text('Last sync : ${'${mySiteList[siteIndex].master[masterIndex].liveSyncDate} - ${mySiteList[siteIndex].master[masterIndex].liveSyncTime}'}', style: const TextStyle(fontSize: 15),),
           ],
         ),
         leadingWidth: 75,
@@ -707,7 +724,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              siteListFinal[siteIndex].master[masterIndex].irrigationLine.length>1 && Provider.of<MqttPayloadProvider>(context).currentSchedule.isNotEmpty?
+              mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1 && Provider.of<MqttPayloadProvider>(context).currentSchedule.isNotEmpty?
               CircleAvatar(
                 radius: 15,
                 backgroundImage: const AssetImage('assets/GifFile/water_drop_ani.gif'),
@@ -716,7 +733,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               const SizedBox(),
               const SizedBox(width: 10,),
 
-              siteListFinal[siteIndex].master[masterIndex].irrigationLine.length>1? TextButton(
+              mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1? TextButton(
                 onPressed: () {
                   String strPRPayload = '';
                   for (int i = 0; i < payload2408.length; i++) {
@@ -729,7 +746,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   String payloadFinal = jsonEncode({
                     "4900": [{"4901": strPRPayload}]
                   });
-                  MQTTManager().publish(payloadFinal, 'AppToFirmware/${siteListFinal[siteIndex].master[masterIndex].deviceId}');
+                  MQTTManager().publish(payloadFinal, 'AppToFirmware/${mySiteList[siteIndex].master[masterIndex].deviceId}');
                 },
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all<Color>(allIrrigationResumeFlag?Colors.green: Colors.orange),
@@ -953,8 +970,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               ],
             ),
             Container(
-              width: siteListFinal[siteIndex].master[masterIndex].categoryId==1 ||
-                  siteListFinal[siteIndex].master[masterIndex].categoryId==2? MediaQuery.sizeOf(context).width-140:
+              width: mySiteList[siteIndex].master[masterIndex].categoryId==1 ||
+                  mySiteList[siteIndex].master[masterIndex].categoryId==2? MediaQuery.sizeOf(context).width-140:
               MediaQuery.sizeOf(context).width-80,
               height: MediaQuery.sizeOf(context).height,
               decoration: BoxDecoration(
@@ -973,8 +990,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 child: buildScreen(screenWidth, provider, wifiStrength),
               ),
             ),
-            siteListFinal[siteIndex].master[masterIndex].categoryId==1 ||
-                siteListFinal[siteIndex].master[masterIndex].categoryId==2?
+            mySiteList[siteIndex].master[masterIndex].categoryId==1 ||
+                mySiteList[siteIndex].master[masterIndex].categoryId==2?
             Container(
               width: 60,
               height: MediaQuery.sizeOf(context).height,
@@ -984,32 +1001,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const SizedBox(height: 10),
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: myTheme.primaryColorDark,
-                    child: SizedBox(
-                      height: 45,
-                      width: 45,
-                      child: IconButton(tooltip:'Show node list', onPressed: (){
-                        sideSheet();
-                      }, icon: const Icon(Icons.menu, color: Colors.white)),
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: Colors.transparent
-                    ),
-                    width: 45,
-                    height: 45,
-                    child: IconButton(
-                      tooltip: 'refresh',
-                      icon: const Icon(Icons.refresh, color: Colors.white,),
-                      onPressed: onRefreshClicked,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
                   Container(
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5),
@@ -1037,17 +1028,60 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     width: 45,
                     height: 45,
                     child: IconButton(
+                      tooltip: 'refresh',
+                      icon: const Icon(Icons.refresh, color: Colors.white,),
+                      onPressed: onRefreshClicked,
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Colors.transparent,
+                    child: SizedBox(
+                      height: 45,
+                      width: 45,
+                      child: IconButton(tooltip:'Show node list', onPressed: (){
+                        sideSheet();
+                      }, icon: const Icon(Icons.menu, color: Colors.white)),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.transparent
+                    ),
+                    width: 45,
+                    height: 45,
+                    child: IconButton(tooltip:'View all Node details', onPressed: (){
+                      //showNodeDetailsBottomSheet(context);
+                      Navigator.push(context,
+                        MaterialPageRoute(
+                          builder: (context) => AllNodeListAndDetails(userID: widget.customerId, customerID: widget.customerId, masterInx: masterIndex, siteData: mySiteList[siteIndex],),
+                        ),
+                      );
+                    }, icon: const Icon(Icons.grid_view, color: Colors.white)),
+                  ),
+                  const SizedBox(height: 15),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.transparent
+                    ),
+                    width: 45,
+                    height: 45,
+                    child: IconButton(
                       tooltip: 'Manual Mode',
                       icon: const Icon(Icons.touch_app_outlined, color: Colors.white),
                       onPressed: () async {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => RunByManual(siteID: siteListFinal[siteIndex].userGroupId,
-                                siteName: siteListFinal[siteIndex].groupName,
-                                controllerID: siteListFinal[siteIndex].master[masterIndex].controllerId,
+                            builder: (context) => RunByManual(siteID: mySiteList[siteIndex].userGroupId,
+                                siteName: mySiteList[siteIndex].groupName,
+                                controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
                                 customerID: widget.customerId,
-                                imeiNo: siteListFinal[siteIndex].master[masterIndex].deviceId,
+                                imeiNo: mySiteList[siteIndex].master[masterIndex].deviceId,
                                 programList: programList, callbackFunction: callbackFunction),
                           ),
                         );
@@ -1071,32 +1105,15 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                           MaterialPageRoute(
                             builder: (context) => ProgramSchedule(
                               customerID: widget.customerId,
-                              controllerID: siteListFinal[siteIndex].master[masterIndex].controllerId,
-                              siteName: siteListFinal[siteIndex].groupName,
-                              imeiNumber: siteListFinal[siteIndex].master[masterIndex].deviceId,
+                              controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
+                              siteName: mySiteList[siteIndex].groupName,
+                              imeiNumber: mySiteList[siteIndex].master[masterIndex].deviceId,
                               userId: widget.customerId,
                             ),
                           ),
                         );
                       },
                     ),
-                  ),
-                  const SizedBox(height: 15),
-                  Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: Colors.transparent
-                    ),
-                    width: 45,
-                    height: 45,
-                    child: IconButton(tooltip:'View all Node details', onPressed: (){
-                      //showNodeDetailsBottomSheet(context);
-                      Navigator.push(context,
-                        MaterialPageRoute(
-                          builder: (context) => AllNodeListAndDetails(userID: widget.customerId, customerID: widget.customerId, masterInx: masterIndex, siteData: siteListFinal[siteIndex],),
-                        ),
-                      );
-                    }, icon: const Icon(Icons.grid_view, color: Colors.white)),
                   ),
                   const SizedBox(height: 15),
                   Container(
@@ -1135,11 +1152,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       padding: screenWidth>600? const EdgeInsets.all(8.0):
       const EdgeInsets.all(0),
       child:
-      _selectedIndex == 0 ? SizedBox(child: siteListFinal[siteIndex].master[masterIndex].categoryId==1 ||
-          siteListFinal[siteIndex].master[masterIndex].categoryId==2?
+      _selectedIndex == 0 ? SizedBox(child: mySiteList[siteIndex].master[masterIndex].categoryId==1 ||
+          mySiteList[siteIndex].master[masterIndex].categoryId==2?
       Column(
         children: [
-          Expanded(child: CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: siteListFinal[siteIndex], crrIrrLine: siteListFinal[siteIndex].master[masterIndex].irrigationLine[lineIndex], masterInx: masterIndex, lineIdx: lineIndex,)),
+          Expanded(child: CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: mySiteList[siteIndex], masterInx: masterIndex, lineIdx: lineIndex,)),
           screenWidth<600? Container(
             height: 60,
             color: Colors.teal.shade500,
@@ -1191,11 +1208,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => RunByManual(siteID: siteListFinal[siteIndex].userGroupId,
-                              siteName: siteListFinal[siteIndex].groupName,
-                              controllerID: siteListFinal[siteIndex].master[masterIndex].controllerId,
+                          builder: (context) => RunByManual(siteID: mySiteList[siteIndex].userGroupId,
+                              siteName: mySiteList[siteIndex].groupName,
+                              controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
                               customerID: widget.customerId,
-                              imeiNo: siteListFinal[siteIndex].master[masterIndex].deviceId,
+                              imeiNo: mySiteList[siteIndex].master[masterIndex].deviceId,
                               programList: programList, callbackFunction: callbackFunction),
                         ),
                       );
@@ -1218,9 +1235,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                         MaterialPageRoute(
                           builder: (context) => ProgramSchedule(
                             customerID: widget.customerId,
-                            controllerID: siteListFinal[siteIndex].master[masterIndex].controllerId,
-                            siteName: siteListFinal[siteIndex].groupName,
-                            imeiNumber: siteListFinal[siteIndex].master[masterIndex].deviceId,
+                            controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
+                            siteName: mySiteList[siteIndex].groupName,
+                            imeiNumber: mySiteList[siteIndex].master[masterIndex].deviceId,
                             userId: widget.customerId,
                           ),
                         ),
@@ -1239,7 +1256,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     //showNodeDetailsBottomSheet(context);
                     Navigator.push(context,
                       MaterialPageRoute(
-                        builder: (context) => AllNodeListAndDetails(userID: widget.customerId, customerID: widget.customerId, masterInx: masterIndex, siteData: siteListFinal[siteIndex],),
+                        builder: (context) => AllNodeListAndDetails(userID: widget.customerId, customerID: widget.customerId, masterInx: masterIndex, siteData: mySiteList[siteIndex],),
                       ),
                     );
                   }, icon: const Icon(Icons.grid_view, color: Colors.white)),
@@ -1270,12 +1287,12 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               const SizedBox(),
         ],
       ):
-      PumpDashboard(siteData: siteListFinal[siteIndex], masterIndex: masterIndex, customerId: widget.customerId,)):
+      PumpDashboard(siteData: mySiteList[siteIndex], masterIndex: masterIndex, customerId: widget.customerId,)):
       _selectedIndex == 1 ? ProductInventory(userName: widget.customerName):
-      _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId, from: 'Gem',):
-      _selectedIndex == 3 ? ListOfLogConfig(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId,):
-      _selectedIndex == 4 ? WeatherScreen(userId: widget.customerId, controllerId: siteListFinal[siteIndex].master[masterIndex].controllerId, deviceID: siteListFinal[siteIndex].master[masterIndex].deviceId,):
-      ControllerSettings(customerID: widget.customerId, siteData: siteListFinal[siteIndex], masterIndex: masterIndex, adDrId: widget.comingFrom=='AdminORDealer'? widget.userId:0,),
+      _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId, from: 'Gem',):
+      _selectedIndex == 3 ? ListOfLogConfig(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,):
+      _selectedIndex == 4 ? WeatherScreen(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId,):
+      ControllerSettings(customerID: widget.customerId, siteData: mySiteList[siteIndex], masterIndex: masterIndex, adDrId: widget.comingFrom=='AdminORDealer'? widget.userId:0,),
     );
   }
 
@@ -1296,10 +1313,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             borderRadius: BorderRadius.zero,
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter stateSetter) {
-                return SideSheetClass(customerID: widget.customerId, nodeList: siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList,
-                  deviceId: siteListFinal[siteIndex].master[masterIndex].deviceId,
-                  lastSyncDate: '${siteListFinal[siteIndex].master[masterIndex].liveSyncDate} - ${siteListFinal[siteIndex].master[masterIndex].liveSyncTime}',
-                  deviceName: siteListFinal[siteIndex].master[masterIndex].categoryName,);
+                return SideSheetClass(customerID: widget.customerId, nodeList: mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList,
+                  deviceId: mySiteList[siteIndex].master[masterIndex].deviceId,
+                  lastSyncDate: '${mySiteList[siteIndex].master[masterIndex].liveSyncDate} - ${mySiteList[siteIndex].master[masterIndex].liveSyncTime}',
+                  deviceName: mySiteList[siteIndex].master[masterIndex].categoryName,);
               },
             ),
           ),
@@ -1315,7 +1332,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   }
 
   Future<void>showNodeDetailsBottomSheet(BuildContext context) async{
-    //print(siteListFinal[siteIndex].nodeList);
+    //print(mySiteList[siteIndex].nodeList);
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -1363,7 +1380,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 flex: 1,
                 child: ListView(
                   children: [
-                    for (int i = 0; i < siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList.length; i++)
+                    for (int i = 0; i < mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList.length; i++)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1374,24 +1391,24 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                             margin: EdgeInsets.zero,
                             child: ListTile(
                               tileColor: myTheme.primaryColor.withOpacity(0.1),
-                              title: Text('${siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].categoryName} - ${siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].deviceId}'),
+                              title: Text('${mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].categoryName} - ${mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].deviceId}'),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   const Icon(Icons.solar_power_outlined),
                                   const SizedBox(width: 5,),
-                                  Text('${siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                  Text('${mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
                                   const SizedBox(width: 5,),
                                   const Icon(Icons.battery_3_bar_rounded),
-                                  Text('${siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                  Text('${mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
                                   const SizedBox(width: 5,),
                                   IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
                                     String payLoadFinal = jsonEncode({
                                       "2300": [
-                                        {"2301": "${siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].serialNumber}"},
+                                        {"2301": "${mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].serialNumber}"},
                                       ]
                                     });
-                                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteListFinal[siteIndex].master[masterIndex].deviceId}');
+                                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${mySiteList[siteIndex].master[masterIndex].deviceId}');
                                   }, icon: const Icon(Icons.fact_check_outlined))
                                 ],
                               ),
@@ -1404,7 +1421,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                 GridView.builder(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus.length,
+                                  itemCount: mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus.length,
                                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 8,
                                   ),
@@ -1413,33 +1430,33 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                       children: [
                                         CircleAvatar(
                                           backgroundColor: Colors.transparent,
-                                          backgroundImage: siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("SP") ?
+                                          backgroundImage: mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("SP") ?
                                           const AssetImage('assets/images/irrigation_pump.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("IP") ?
+                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("IP") ?
                                           const AssetImage('assets/images/irrigation_pump.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("VL") ?
+                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("VL") ?
                                           const AssetImage('assets/images/valve_gray.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("MV") ?
+                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("MV") ?
                                           const AssetImage('assets/images/dp_main_valve.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FL") ?
+                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FL") ?
                                           const AssetImage('assets/images/dp_filter.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FC") ?
+                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FC") ?
                                           const AssetImage('assets/images/fert_chanel.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FG") ?
+                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FG") ?
                                           const AssetImage('assets/images/fogger.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FB") ?
+                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FB") ?
                                           const AssetImage('assets/images/booster_pump.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("AG") ?
+                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("AG") ?
                                           const AssetImage('assets/images/dp_agitator_gray.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("DV") ?
+                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("DV") ?
                                           const AssetImage('assets/images/downstream_valve.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("SL") ?
+                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("SL") ?
                                           const AssetImage('assets/images/selector.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FN") ?
+                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FN") ?
                                           const AssetImage('assets/images/fan.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("LI") ?
+                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("LI") ?
                                           const AssetImage('assets/images/pressure_sensor.png'):
-                                          siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("LO") ?
+                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("LO") ?
                                           const AssetImage('assets/images/pressure_sensor.png'):
                                           const AssetImage('assets/images/pressure_sensor.png'),
                                         ),
@@ -1451,7 +1468,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                               backgroundColor: Colors.grey,
                                             ),
                                             const SizedBox(width: 3),
-                                            Text('${siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!}(${siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].rlyNo})', style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                            Text('${mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!}(${mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].rlyNo})', style: const TextStyle(color: Colors.black, fontSize: 10)),
                                           ],
                                         ),
                                       ],
@@ -1461,7 +1478,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                 GridView.builder(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor.length,
+                                  itemCount: mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor.length,
                                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 8,
                                   ),
@@ -1473,7 +1490,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                           height: 40,
                                           child: Stack(
                                             children: [
-                                              AppImages.getAsset('sensor',0, siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor[index].Name!),
+                                              AppImages.getAsset('sensor',0, mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor[index].Name!),
                                               Positioned(
                                                 top: 25,
                                                 left: 0,
@@ -1482,7 +1499,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                                       borderRadius: BorderRadius.circular(3),
                                                       color: Colors.yellow,
                                                     ),
-                                                    child: Center(child: Text('${siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor[index].Value}', style: const TextStyle(color: Colors.black, fontSize: 10)))
+                                                    child: Center(child: Text('${mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor[index].Value}', style: const TextStyle(color: Colors.black, fontSize: 10)))
                                                 ),
                                               ),
                                             ],
@@ -1491,7 +1508,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
-                                            Text(siteListFinal[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor[index].Name!, style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                            Text(mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor[index].Name!, style: const TextStyle(color: Colors.black, fontSize: 10)),
                                           ],
                                         ),
                                       ],
@@ -1581,7 +1598,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                         String payLoadFinal = jsonEncode({
                           "4100": [{"4101": payload}]
                         });
-                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteListFinal[siteIndex].master[masterIndex].deviceId}');
+                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${mySiteList[siteIndex].master[masterIndex].deviceId}');
 
                       },
                       child: const Text('Reset'),

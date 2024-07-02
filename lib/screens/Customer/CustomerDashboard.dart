@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/NextSchedule.dart';
-import 'package:oro_irrigation_new/screens/Customer/Dashboard/UpcomingProgram.dart';
+import 'package:oro_irrigation_new/screens/Customer/Dashboard/ScheduledProgramList.dart';
 import 'package:provider/provider.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../Models/node_model.dart';
@@ -16,11 +16,10 @@ import 'Dashboard/CustomerHome.dart';
 import 'Dashboard/PumpLineCentral.dart';
 
 class CustomerDashboard extends StatefulWidget {
-  const CustomerDashboard({Key? key, required this.userID, required this.customerID, required this.type, required this.customerName, required this.mobileNo, required this.siteData, required this.crrIrrLine, required this.masterInx, required this.lineIdx}) : super(key: key);
+  const CustomerDashboard({Key? key, required this.userID, required this.customerID, required this.type, required this.customerName, required this.mobileNo, required this.siteData, required this.masterInx, required this.lineIdx}) : super(key: key);
   final int userID, customerID, type, masterInx, lineIdx;
   final String customerName, mobileNo;
   final DashboardModel siteData;
-  final IrrigationLine crrIrrLine;
 
   @override
   State<CustomerDashboard> createState() => _CustomerDashboardState();
@@ -28,8 +27,8 @@ class CustomerDashboard extends StatefulWidget {
 
 class _CustomerDashboardState extends State<CustomerDashboard> {
 
+  late IrrigationLine crrIrrLine;
   int wifiStrength = 0, siteIndex = 0;
-
   List<RelayStatus> rlyStatusList = [];
 
   @override
@@ -56,104 +55,114 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    var screenWidth = MediaQuery.of(context).size.width;
-    final provider = Provider.of<MqttPayloadProvider>(context);
-    if(widget.siteData.master[widget.masterInx].irrigationLine[widget.lineIdx].sNo==0){
-      return CustomerHome(currentMaster: widget.siteData.master[widget.masterInx],);
+
+    if(widget.siteData.master[widget.masterInx].irrigationLine.isNotEmpty){
+      crrIrrLine = widget.siteData.master[widget.masterInx].irrigationLine[widget.lineIdx];
     }else{
-      final filteredScheduledPrograms = filterProgramsByCategory(Provider.of<MqttPayloadProvider>(context).scheduledProgram, widget.crrIrrLine.id);
-      final filteredProgramsQueue = filterProgramsQueueByCategory(Provider.of<MqttPayloadProvider>(context).programQueue, widget.crrIrrLine.id);
-      final filteredCurrentSchedule = filterCurrentScheduleByCategory(Provider.of<MqttPayloadProvider>(context).currentSchedule, widget.crrIrrLine.id);
-      filteredCurrentSchedule.insertAll(0, filterCurrentScheduleByProgramName(Provider.of<MqttPayloadProvider>(context).currentSchedule, 'StandAlone - Manual'));
+      print('irrigation line empty');
+    }
 
-      final nodeList = Provider.of<MqttPayloadProvider>(context).nodeList;
+    if(widget.siteData.master[widget.masterInx].irrigationLine.isNotEmpty){
+      var screenWidth = MediaQuery.of(context).size.width;
+      final provider = Provider.of<MqttPayloadProvider>(context);
+      if(widget.siteData.master[widget.masterInx].irrigationLine[widget.lineIdx].sNo==0){
+        return CustomerHome(currentMaster: widget.siteData.master[widget.masterInx],);
+      }else{
+        final filteredScheduledPrograms = filterProgramsByCategory(Provider.of<MqttPayloadProvider>(context).scheduledProgram, crrIrrLine.id);
+        final filteredProgramsQueue = filterProgramsQueueByCategory(Provider.of<MqttPayloadProvider>(context).programQueue, crrIrrLine.id);
+        final filteredCurrentSchedule = filterCurrentScheduleByCategory(Provider.of<MqttPayloadProvider>(context).currentSchedule, crrIrrLine.id);
+        filteredCurrentSchedule.insertAll(0, filterCurrentScheduleByProgramName(Provider.of<MqttPayloadProvider>(context).currentSchedule, 'StandAlone - Manual'));
 
-      try{
-        for (var items in nodeList) {
-          if (items is Map<String, dynamic>) {
-            try {
-              int position = getNodePositionInNodeList(widget.masterInx, items['DeviceId']);
-              if (position != -1) {
-                List<dynamic> rlyStatuses = items['RlyStatus'];
-                Map<int, int> statusMap = {};
-                try{
-                  statusMap = {for (var item in rlyStatuses) item['S_No']: item['Status']};
-                }catch(e){
-                  statusMap = {for (var item in rlyStatuses) item.S_No: item.Status};
-                }
+        final nodeList = Provider.of<MqttPayloadProvider>(context).nodeList;
+        try{
+          for (var items in nodeList) {
+            if (items is Map<String, dynamic>) {
+              try {
+                int position = getNodePositionInNodeList(widget.masterInx, items['DeviceId']);
+                if (position != -1) {
+                  List<dynamic> rlyStatuses = items['RlyStatus'];
+                  Map<int, int> statusMap = {};
+                  try{
+                    statusMap = {for (var item in rlyStatuses) item['S_No']: item['Status']};
+                  }catch(e){
+                    statusMap = {for (var item in rlyStatuses) item.S_No: item.Status};
+                  }
 
-                for (var line in widget.siteData.master[widget.masterInx].irrigationLine) {
-                  // Update mainValves
-                  for (var mainValve in line.mainValve) {
-                    if (statusMap.containsKey(mainValve.sNo)) {
-                      mainValve.status = statusMap[mainValve.sNo]!;
+                  for (var line in widget.siteData.master[widget.masterInx].irrigationLine) {
+                    // Update mainValves
+                    for (var mainValve in line.mainValve) {
+                      if (statusMap.containsKey(mainValve.sNo)) {
+                        mainValve.status = statusMap[mainValve.sNo]!;
+                      }
+                    }
+                    // Update valves
+                    for (var valve in line.valve) {
+                      if (statusMap.containsKey(valve.sNo)) {
+                        valve.status = statusMap[valve.sNo]!;
+                      }
                     }
                   }
-                  // Update valves
-                  for (var valve in line.valve) {
-                    if (statusMap.containsKey(valve.sNo)) {
-                      valve.status = statusMap[valve.sNo]!;
-                    }
-                  }
+                }else{
+                  print('${items['SNo']} The serial number not found');
                 }
-              }else{
-                print('${items['SNo']} The serial number not found');
+              } catch (e) {
+                print('Error updating node properties: $e');
               }
-            } catch (e) {
-              print('Error updating node properties: $e');
             }
           }
+          setState(() {
+            crrIrrLine;
+          });
         }
-        setState(() {
-          widget.crrIrrLine;
-        });
-      }
-      catch(e){
-        print(e);
-      }
+        catch(e){
+          print(e);
+        }
 
-      int? irrigationPauseFlag = getIrrigationPauseFlag(widget.crrIrrLine.id, Provider.of<MqttPayloadProvider>(context).payload2408);
+        int? irrigationPauseFlag = getIrrigationPauseFlag(crrIrrLine.id, Provider.of<MqttPayloadProvider>(context).payload2408);
 
-      //print('irrigationPauseFlag:$irrigationPauseFlag');
-      return Column(
-        children: [
-          irrigationPauseFlag!=0 && irrigationPauseFlag!=null? Padding(
-            padding: const EdgeInsets.only(left: 4, right: 4),
-            child: Container(
-              width: MediaQuery.sizeOf(context).width,
-              decoration: BoxDecoration(
-                color: irrigationPauseFlag==1?Colors.orange.shade100:Colors.red.shade100,
-                borderRadius: BorderRadius.circular(02),
+        return Column(
+          children: [
+            irrigationPauseFlag!=0 && irrigationPauseFlag!=null? Padding(
+              padding: const EdgeInsets.only(left: 4, right: 4),
+              child: Container(
+                width: MediaQuery.sizeOf(context).width,
+                decoration: BoxDecoration(
+                  color: irrigationPauseFlag==1?Colors.orange.shade100:Colors.red.shade100,
+                  borderRadius: BorderRadius.circular(02),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: Center(child: Text(irrigationPauseFlag==1? 'The line paused by manually'.toUpperCase(): 'The line paused by condition'.toUpperCase(),
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.normal),)),
+                ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(2.0),
-                child: Center(child: Text(irrigationPauseFlag==1? 'The line paused by manually'.toUpperCase(): 'The line paused by condition'.toUpperCase(),
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.normal),)),
+            ):
+            const SizedBox(),
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    screenWidth > 600 ? buildWideLayout(filteredCurrentSchedule):
+                    buildNarrowLayout(provider),
+                    filteredCurrentSchedule.isNotEmpty? CurrentSchedule(siteData: widget.siteData, customerID: widget.customerID, currentSchedule: filteredCurrentSchedule,):
+                    const SizedBox(),
+                    filteredProgramsQueue.isNotEmpty? NextSchedule(siteData: widget.siteData, userID: widget.userID, customerID: widget.customerID, programQueue: filteredProgramsQueue,):
+                    const SizedBox(),
+                    filteredScheduledPrograms.isNotEmpty? ScheduledProgramList(siteData: widget.siteData, customerId: widget.customerID, scheduledPrograms: filteredScheduledPrograms,):
+                    const SizedBox(),
+                    const SizedBox(height: 8,),
+                  ],
+                ),
               ),
             ),
-          ):
-          const SizedBox(),
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  screenWidth > 600 ? buildWideLayout(filteredCurrentSchedule):
-                  buildNarrowLayout(provider),
-                  filteredCurrentSchedule.isNotEmpty? CurrentSchedule(siteData: widget.siteData, customerID: widget.customerID, currentSchedule: filteredCurrentSchedule,):
-                  const SizedBox(),
-                  filteredProgramsQueue.isNotEmpty? NextSchedule(siteData: widget.siteData, userID: widget.userID, customerID: widget.customerID, programQueue: filteredProgramsQueue,):
-                  const SizedBox(),
-                  filteredScheduledPrograms.isNotEmpty? UpcomingProgram(siteData: widget.siteData, customerId: widget.customerID, scheduledPrograms: filteredScheduledPrograms,):
-                  const SizedBox(),
-                  const SizedBox(height: 8,),
-                ],
-              ),
-            ),
-          ),
-        ],
-      );
+          ],
+        );
+      }
+    }
+    else{
+      return const Center(child: Text('Site not configure'));
     }
   }
 
@@ -209,7 +218,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                               //i pump
                               provider.irrigationPump.isNotEmpty? Padding(
                                 padding: const EdgeInsets.only(top: 15),
-                                child: DisplayIrrigationPump(currentLineId: widget.crrIrrLine.id, pumpList: widget.siteData.master[widget.masterInx].gemLive[0].pumpList,),
+                                child: DisplayIrrigationPump(currentLineId: crrIrrLine.id, pumpList: widget.siteData.master[widget.masterInx].gemLive[0].pumpList,),
                               ):
                               const SizedBox(),
 
@@ -217,13 +226,13 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                               for(int i=0; i<provider.payload2408.length; i++)
                                 provider.payload2408.isNotEmpty?  Padding(
                                   padding: const EdgeInsets.only(top: 15),
-                                  child: provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(crInx: i):null,
+                                  child: provider.payload2408[i]['Line'].contains(crrIrrLine.id)? DisplaySensor(crInx: i):null,
                                 ) : const SizedBox(),
 
                               //filter
                               provider.filtersCentral.isNotEmpty? Padding(
                                 padding: const EdgeInsets.only(top: 15),
-                                child: DisplayFilter(currentLineId: widget.crrIrrLine.id,),
+                                child: DisplayFilter(currentLineId: crrIrrLine.id,),
                               ): const SizedBox(),
 
                             ],
@@ -275,7 +284,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 //fertilizer Central
-                                provider.fertilizerCentral.isNotEmpty? DisplayCentralFertilizer(currentLineId: widget.crrIrrLine.id,): const SizedBox(),
+                                provider.fertilizerCentral.isNotEmpty? DisplayCentralFertilizer(currentLineId: crrIrrLine.id,): const SizedBox(),
 
                                 //local
                                 provider.irrigationPump.isNotEmpty? Column(
@@ -305,10 +314,10 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                                         const SizedBox(),
                                         provider.filtersLocal.isNotEmpty? Padding(
                                           padding: EdgeInsets.only(top: provider.fertilizerLocal.isNotEmpty?38.4:0),
-                                          child: LocalFilter(currentLineId: widget.crrIrrLine.id,),
+                                          child: LocalFilter(currentLineId: crrIrrLine.id,),
                                         ):
                                         const SizedBox(),
-                                        provider.fertilizerLocal.isNotEmpty? DisplayLocalFertilizer(currentLineId: widget.crrIrrLine.id,):
+                                        provider.fertilizerLocal.isNotEmpty? DisplayLocalFertilizer(currentLineId: crrIrrLine.id,):
                                         const SizedBox(),
                                       ],
                                     ),
@@ -350,7 +359,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                   surfaceTintColor: Colors.white,
                   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(3))),
                   elevation: 5,
-                  child: DisplayIrrigationLine(irrigationLine: widget.crrIrrLine),
+                  child: DisplayIrrigationLine(irrigationLine: crrIrrLine),
                 ),
               ),
               Positioned(
@@ -389,14 +398,14 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            PumpLineCentral(currentSiteData: widget.siteData, crrIrrLine:  widget.crrIrrLine, masterIdx: widget.masterInx,),
+            PumpLineCentral(currentSiteData: widget.siteData, crrIrrLine:  crrIrrLine, masterIdx: widget.masterInx,),
             Divider(height: 0, color: Colors.grey.shade300),
             Container(height: 4, color: Colors.white24),
             Padding(
               padding: const EdgeInsets.only(left: 05, right: 00),
               child: Divider(height: 0, color: Colors.grey.shade300),
             ),
-            DisplayIrrigationLine(irrigationLine: widget.crrIrrLine),
+            DisplayIrrigationLine(irrigationLine: crrIrrLine),
           ],
         ),
       ),

@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../constants/MQTTManager.dart';
+import '../../../constants/MyFunction.dart';
 import '../../../constants/http_service.dart';
 import '../../../state_management/MqttPayloadProvider.dart';
 
@@ -362,6 +363,10 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
             fixedWidth: 100,
           ),
           DataColumn2(
+            label: Center(child: Text('Flow Rate', style: TextStyle(fontSize: 13),)),
+            fixedWidth: 80,
+          ),
+          DataColumn2(
             label: Center(child: Text('Remaining', style: TextStyle(fontSize: 13),)),
             size: ColumnSize.S,
           ),
@@ -388,6 +393,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
           DataCell(Center(child: Text(formatRtcValues(widget.currentSchedule[index].currentCycle,widget.currentSchedule[index].totalCycle)))),
           DataCell(Center(child: Text(_convertTime(widget.currentSchedule[index].startTime)))),
           DataCell(Center(child: Text(widget.currentSchedule[index].programName=='StandAlone - Manual'?'Timeless': widget.currentSchedule[index].duration_Qty))),
+          DataCell(Center(child: Text('${widget.currentSchedule[index].avgFlwRt}-bar'))),
           DataCell(Center(child: Text(widget.currentSchedule[index].programName=='StandAlone - Manual'? '----': widget.currentSchedule[index].duration_QtyLeft,
               style:  TextStyle(fontSize: widget.currentSchedule[index].programName=='StandAlone - Manual'? 15:20)))),
           DataCell(Center(
@@ -574,120 +580,8 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
     return formattedTime;
   }
 
- /* void durationUpdatingFunction() {
-    timer?.cancel();
-    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-      try{
-        final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
-        for (int i = 0; i < provider.currentSchedule.length; i++) {
-          if(provider.currentSchedule[i]['Duration_QtyLeft']!=null){
-
-            if('${provider.currentSchedule[i]['Duration_QtyLeft']}'.contains(':'))
-            {
-              List<String> parts = provider.currentSchedule[i]['Duration_QtyLeft'].split(':');
-              int hours = int.parse(parts[0]);
-              int minutes = int.parse(parts[1]);
-              int seconds = int.parse(parts[2]);
-
-              if (seconds > 0) {
-                seconds--;
-              } else {
-                if (minutes > 0) {
-                  minutes--;
-                  seconds = 59;
-                } else {
-                  if (hours > 0) {
-                    hours--;
-                    minutes = 59;
-                    seconds = 59;
-                  }
-                }
-              }
-
-              String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-              if(provider.currentSchedule[i]['Duration_QtyLeft']!='00:00:00'){
-                setState(() {
-                  provider.currentSchedule[i]['Duration_QtyLeft'] = updatedDurationQtyLeft;
-                });
-              }
-            }
-            else{
-              //flow
-              double remainFlow = double.parse(provider.currentSchedule[i]['Duration_QtyLeft']);
-              if (remainFlow > 0) {
-                double flowRate = provider.currentSchedule[i]['AverageFlowRate'] is String
-                    ? double.parse(provider.currentSchedule[i]['AverageFlowRate'])
-                    : provider.currentSchedule[i]['AverageFlowRate'];
-                remainFlow -= flowRate;
-                String formattedFlow = remainFlow.toStringAsFixed(2);
-                setState(() {
-                  provider.currentSchedule[i]['Duration_QtyLeft'] = formattedFlow;
-                });
-              } else {
-                setState(() {
-                  provider.currentSchedule[i]['Duration_QtyLeft'] = '0.00';
-                });
-              }
-            }
-          }
-        }
-      }
-      catch(e){
-        print(e);
-      }
-
-    });
-  }*/
-
   String getContentByCode(int code) {
-    switch (code) {
-      case 1:
-        return 'Running As Per Schedule';
-      case 2:
-        return 'Turned On Manually';
-      case 3:
-        return 'Started By Condition';
-      case 4:
-        return 'Turned Off Manually';
-      case 5:
-        return 'Program Turned Off';
-      case 6:
-        return 'Zone Turned Off';
-      case 7:
-        return 'Stopped By Condition';
-      case 8:
-        return 'Disabled By Condition';
-      case 9:
-        return 'StandAlone Program Started';
-      case 10:
-        return 'StandAlone Program Stopped';
-      case 11:
-        return 'StandAlone Program Stopped After Set Value';
-      case 12:
-        return 'StandAlone Manual Started';
-      case 13:
-        return 'StandAlone Manual Stopped';
-      case 14:
-        return 'StandAlone Manual Stopped After Set Value';
-      case 15:
-        return 'Started By Day Count Rtc';
-      case 16:
-        return 'Paused By User';
-      case 17:
-        return 'Manually Started Paused By User';
-      case 18:
-        return 'Program Deleted';
-      case 19:
-        return 'Program Ready';
-      case 20:
-        return 'Program Completed';
-      case 21:
-        return 'Resumed By User';
-      case 23:
-        return 'Paused By Condition';
-      default:
-        return 'Unknown content';
-    }
+    return GemReasonCode.fromCode(code).content;
   }
 
   Future<void>sentManualModeToServer(manualOperation) async {

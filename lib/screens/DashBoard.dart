@@ -49,9 +49,19 @@ class _MainDashBoardState extends State<MainDashBoard> {
     mqttServer.initializeMQTTServer(state: payloadProvider);
   }
 
+
+
   @override
   Widget build(BuildContext context)
   {
+    /*final connection = Provider.of<MqttPayloadProvider>(context).mqttConnection;
+    if(!connection){
+      MQTTManager manager = MQTTManager();
+      MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
+      manager.initializeMQTTClient(state: payloadProvider);
+      manager.connect();
+    }*/
+
     return FutureBuilder<SharedPreferences>(
       future: SharedPreferences.getInstance(),
       builder: (context, snapshot) {

@@ -1279,7 +1279,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                 fertilizer['QtyLeft'] = qtyLeftDouble;
               });
             }
-            else if (fertilizer['Status']==1 && ferMethod == 3){
+            else if ((fertilizer['Status']==1 || fertilizer['Status']==4) && ferMethod == 3){
               //fertilizer proposal time base
               double fcOnTime = convertQtyLeftToDouble(fertilizer['OnTime']);
               double fcOffTime = convertQtyLeftToDouble(fertilizer['OffTime']);
@@ -1318,7 +1318,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                 }
               }
             }
-            else if (fertilizer['Status']==1 && ferMethod == 4){
+            else if ((fertilizer['Status']==1 || fertilizer['Status']==4) && ferMethod == 4){
               //fertilizer proposal qty base
               double fcOnTime = convertQtyLeftToDouble(fertilizer['OnTime']);
               double fcOffTime = convertQtyLeftToDouble(fertilizer['OffTime']);
@@ -1359,7 +1359,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                 }
               }
             }
-            else if (fertilizer['Status']==1 && ferMethod == 5){
+            else if ((fertilizer['Status']==1 || fertilizer['Status']==4) && ferMethod == 5){
               //fertilizer pro qty per 1000 Lit
               double fcOnTime = convertQtyLeftToDouble(fertilizer['OnTime']);
               double fcOffTime = convertQtyLeftToDouble(fertilizer['OffTime']);
@@ -2085,8 +2085,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
 
         for (var local in fertilizerLocal) {
           local['Fertilizer'].forEach((fertilizer) {
-            int ferMethod = fertilizer['FertMethod'] is int
-                ? fertilizer['FertMethod']
+            int ferMethod = fertilizer['FertMethod'] is int? fertilizer['FertMethod']
                 : int.parse(fertilizer['FertMethod']);
             if (fertilizer['Status']==1 && ferMethod == 1) {
               //fertilizer time base
@@ -2106,10 +2105,11 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                 fertilizer['QtyLeft'] = qtyLeftDouble;
               });
             }
-            else if (fertilizer['Status']==1 && ferMethod == 3){
+            else if ((fertilizer['Status']==1 || fertilizer['Status']==4) && ferMethod == 3){
               //fertilizer proposal time base
               double fcOnTime = convertQtyLeftToDouble(fertilizer['OnTime']);
               double fcOffTime = convertQtyLeftToDouble(fertilizer['OffTime']);
+
               int fcOnTimeRd = fcOnTime.round();
               int fcOffTimeRd = fcOffTime.round();
 
@@ -2134,8 +2134,8 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                 });
               }else if(fcOffTimeRd>0){
                 fcOffTimeRd--;
-                setState(() {
-                  fertilizer['OffTime'] = '$fcOffTimeRd';
+                fertilizer['OffTime'] = '$fcOffTimeRd';
+                setState((){
                   fertilizer['Status'] = 4;
                 });
 
@@ -2145,7 +2145,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                 }
               }
             }
-            else if (fertilizer['Status']==1 && ferMethod == 4){
+            else if ((fertilizer['Status']==1 || fertilizer['Status']==4) && ferMethod == 4){
               //fertilizer proposal qty base
               double fcOnTime = convertQtyLeftToDouble(fertilizer['OnTime']);
               double fcOffTime = convertQtyLeftToDouble(fertilizer['OffTime']);
@@ -2186,7 +2186,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                 }
               }
             }
-            else if (fertilizer['Status']==1 && ferMethod == 5){
+            else if ((fertilizer['Status']==1 || fertilizer['Status']==4) && ferMethod == 5){
               //fertilizer pro qty per 1000 Lit
               double fcOnTime = convertQtyLeftToDouble(fertilizer['OnTime']);
               double fcOffTime = convertQtyLeftToDouble(fertilizer['OffTime']);
@@ -2228,7 +2228,8 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
               }
             }
             else{
-              //print('ferMethod 6');
+              print('ferMethod 6');
+              timer?.cancel();
             }
           });
         }

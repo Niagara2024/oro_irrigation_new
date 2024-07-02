@@ -79,14 +79,9 @@ class MasterData {
       );
     }else{
       //pump controller
-      var liveMessage;
-      print(json['liveMessage']);
-     /* if (json['liveMessage'] == null) {
-        print('liveMessage is null');
-      } else {
-        liveMessage = json['liveMessage'] as List;
-      }*/
-      List<CM> pumpLiveList = json['liveMessage']!=null && json['liveMessage'].isNotEmpty? json['liveMessage'].map((live) => CM.fromJson(live)).toList() : [];
+      //print(json['liveMessage']);
+      var liveMessage = json['liveMessage'] != null ? json['liveMessage'] as List : [];
+      List<CM> pumpLiveList = liveMessage.isNotEmpty? liveMessage.map((live) => CM.fromJson(live)).toList() : [];
 
       return MasterData(
         controllerId: json['controllerId'],

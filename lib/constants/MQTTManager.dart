@@ -24,12 +24,12 @@ class MQTTManager {
     String uniqueId = const Uuid().v4();
 
     //development
-    String baseURL = 'ws://192.168.68.141';
-    int port = 9001;
+    // String baseURL = 'ws://192.168.68.141';
+    // int port = 9001;
 
     //cloud
-    //  String baseURL = 'ws://13.235.254.21:8083/mqtt';
-    //  int port = 8083;
+     String baseURL = 'ws://13.235.254.21:8083/mqtt';
+     int port = 8083;
 
     if (_client == null) {
        providerState = state;
@@ -74,21 +74,26 @@ class MQTTManager {
   }
 
   void subscribeToTopic(String topic) {
-
-    _client!.subscribe(topic, MqttQos.atLeastOnce);
-
-    _client!.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
-      final MqttPublishMessage recMess = c![0].payload as MqttPublishMessage;
-
-      final String pt = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-      providerState?.updateReceivedPayload(pt);
-    });
+    try {
+      _client!.subscribe(topic, MqttQos.atLeastOnce);
+      _client!.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
+        final MqttPublishMessage recMess = c![0].payload as MqttPublishMessage;
+        final String pt = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        providerState?.updateReceivedPayload(pt);
+      });
+    } catch (e) {
+      print('Error while subscribing to topic: $e');
+    }
   }
 
   void publish(String message, String topic) {
-    final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
-    builder.addString(message);
-    _client!.publishMessage(topic, MqttQos.exactlyOnce, builder.payload!);
+    try {
+      final builder = MqttClientPayloadBuilder();
+      builder.addString(message);
+      _client!.publishMessage(topic, MqttQos.exactlyOnce, builder.payload!);
+    } catch (e) {
+      print('Error while publishing message: $e');
+    }
   }
 
   /// The subscribed callback
@@ -101,8 +106,10 @@ class MQTTManager {
     print('OnDisconnected client callback - Client disconnection');
     if (_client!.connectionStatus!.returnCode == MqttConnectReturnCode.noneSpecified) {
       print('OnDisconnected callback is solicited, this is correct');
+      //providerState?.mqttConnectionStatus(false);
     }
     providerState?.setAppConnectionState(MQTTConnectionState.disconnected);
+
     //connect();
 
   }
@@ -111,6 +118,7 @@ class MQTTManager {
     assert(isConnected);
     providerState?.setAppConnectionState(MQTTConnectionState.connected);
     print('Mosquitto client connected....');
+    providerState?.mqttConnectionStatus(true);
   }
 
   void unsubscribeFromAllTopics(String topic) {

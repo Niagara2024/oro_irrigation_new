@@ -11,6 +11,7 @@ class MqttPayloadProvider with ChangeNotifier {
   String dashBoardPayload = '', schedulePayload = '';
   late ScheduleViewProvider mySchedule;
 
+  bool mqttConnection = false;
   int wifiStrength = 0;
   int batVolt = 0;
   //List<dynamic> nodeList = [];
@@ -155,6 +156,11 @@ class MqttPayloadProvider with ChangeNotifier {
       print('Error parsing JSON: $e');
     }
     //notifyListeners();
+  }
+
+  void mqttConnectionStatus(status){
+    mqttConnection = status;
+    notifyListeners();
   }
 
   void updateLastSync(){

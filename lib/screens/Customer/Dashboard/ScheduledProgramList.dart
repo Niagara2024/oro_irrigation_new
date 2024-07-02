@@ -3,13 +3,15 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/irrigation_program_main.dart';
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../constants/MQTTManager.dart';
+import '../../../constants/MyFunction.dart';
 import '../../../constants/http_service.dart';
 import '../ScheduleView.dart';
 
-class UpcomingProgram extends StatelessWidget {
-  UpcomingProgram({Key? key, required this.siteData, required this.customerId, required this.scheduledPrograms}) : super(key: key);
+class ScheduledProgramList extends StatelessWidget {
+  ScheduledProgramList({Key? key, required this.siteData, required this.customerId, required this.scheduledPrograms}) : super(key: key);
   final DashboardModel siteData;
   final int customerId;
   final AudioPlayer audioPlayer = AudioPlayer();
@@ -279,7 +281,7 @@ class UpcomingProgram extends StatelessWidget {
 
                 ],
               ),
-              fixedWidth: 230,
+              fixedWidth: 265,
             ),
           ],
           rows: List<DataRow>.generate(scheduledPrograms.length, (index) => DataRow(cells: [
@@ -353,28 +355,13 @@ class UpcomingProgram extends StatelessWidget {
                 ),
                 const SizedBox(width: 5),
 
-                /*IconButton(tooltip: 'View details', icon: const Icon(Icons.more_vert), onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text(scheduledPrograms[index].progName),
-                                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0))),
-                                    content: Text('Start or Stop Reason Code = ${scheduledPrograms[index].startStopReason}'),
-                                    actions: <Widget>[
-                                      MaterialButton(
-                                        color: Colors.green,
-                                        textColor: Colors.white,
-                                        onPressed:() {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: const Text('OK'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },),*/
+                IconButton(tooltip: 'Edit program', icon: const Icon(Icons.edit_outlined), onPressed: () {
+                  Navigator.push(context,
+                    MaterialPageRoute(
+                      builder: (context) => IrrigationProgram(deviceId: siteData.master[0].deviceId, userId: customerId, controllerId: siteData.master[0].controllerId, serialNumber: scheduledPrograms[index].sNo,),
+                    ),
+                  );
+                },),
               ],
             ),),
           ])),
@@ -393,54 +380,7 @@ class UpcomingProgram extends StatelessWidget {
   }
 
   String getContentByCode(int code) {
-    switch (code) {
-      case 1:
-        return 'Running As Per Schedule';
-      case 2:
-        return 'Turned On Manually';
-      case 3:
-        return 'Started By Condition';
-      case 4:
-        return 'Turned Off Manually';
-      case 5:
-        return 'Program Turned Off';
-      case 6:
-        return 'Zone Turned Off';
-      case 7:
-        return 'Stopped By Condition';
-      case 8:
-        return 'Disabled By Condition';
-      case 9:
-        return 'StandAlone Program Started';
-      case 10:
-        return 'StandAlone Program Stopped';
-      case 11:
-        return 'StandAlone Program Stopped After Set Value';
-      case 12:
-        return 'StandAlone Manual Started';
-      case 13:
-        return 'StandAlone Manual Stopped';
-      case 14:
-        return 'StandAlone Manual Stopped After Set Value';
-      case 15:
-        return 'Started By Day Count Rtc';
-      case 16:
-        return 'Paused By User';
-      case 17:
-        return 'Manually Started Paused By User';
-      case 18:
-        return 'Program Deleted';
-      case 19:
-        return 'Program Ready';
-      case 20:
-        return 'Program Completed';
-      case 21:
-        return 'Resumed By User';
-      case 23:
-        return 'Paused By Condition';
-      default:
-        return 'Unknown content';
-    }
+    return GemReasonCode.fromCode(code).content;
   }
 
   void sentUserOperationToServer(String msg, String data) async
@@ -455,4 +395,3 @@ class UpcomingProgram extends StatelessWidget {
   }
 
 }
-

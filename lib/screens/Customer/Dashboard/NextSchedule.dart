@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
+import '../../../constants/MyFunction.dart';
 import '../../../state_management/MqttPayloadProvider.dart';
 
 class NextSchedule extends StatefulWidget {
@@ -85,7 +86,7 @@ class _NextScheduleState extends State<NextSchedule> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text('${widget.programQueue[index].programName} & ${widget.programQueue[index].currentZone}/${widget.programQueue[index].totalZone}'),
-                          Text('${_convertTime(widget.programQueue[index].startTime)} & ${widget.programQueue[index].totalDurORQty}'),
+                          Text('${convert24HourTo12Hour(widget.programQueue[index].startTime)} & ${widget.programQueue[index].totalDurORQty}'),
                           Text('${widget.programQueue[index].programCategory} & ${widget.programQueue[index].zoneName}'),
                         ],
                       ),
@@ -158,7 +159,7 @@ class _NextScheduleState extends State<NextSchedule> {
             DataCell(Text(widget.programQueue[index].programCategory)),
             DataCell(Center(child: Text('${widget.programQueue[index].currentZone}'))),
             DataCell(Center(child: Center(child: Text(widget.programQueue[index].zoneName)))),
-            DataCell(Center(child: Text(_convertTime(widget.programQueue[index].startTime)))),
+            DataCell(Center(child: Text(convert24HourTo12Hour(widget.programQueue[index].startTime)))),
             DataCell(Center(child: Text(widget.programQueue[index].totalDurORQty))),
           ])),
         ),
@@ -166,9 +167,5 @@ class _NextScheduleState extends State<NextSchedule> {
     );
   }
 
-  String _convertTime(String timeString) {
-    final parsedTime = DateFormat('HH:mm:ss').parse(timeString);
-    final formattedTime = DateFormat('hh:mm a').format(parsedTime);
-    return formattedTime;
-  }
+
 }

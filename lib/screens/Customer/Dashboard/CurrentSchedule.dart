@@ -3,16 +3,12 @@ import 'dart:convert';
 
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../constants/MQTTManager.dart';
 import '../../../constants/MyFunction.dart';
 import '../../../constants/http_service.dart';
-import '../../../state_management/MqttPayloadProvider.dart';
 
 class CurrentSchedule extends StatefulWidget {
   const CurrentSchedule({Key? key, required this.siteData, required this.customerID, required this.currentSchedule}) : super(key: key);
@@ -171,7 +167,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                     children: [
                                       const Text('Start at', style: TextStyle(fontWeight: FontWeight.normal),),
                                       const SizedBox(width: 5,),
-                                      Text(_convertTime(widget.currentSchedule[index].startTime)),
+                                      Text(convert24HourTo12Hour(widget.currentSchedule[index].startTime)),
                                     ],
                                   ),
                                   Row(
@@ -391,7 +387,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
           DataCell(Text(widget.currentSchedule[index].zoneName)),
           DataCell(Center(child: Text(formatRtcValues(widget.currentSchedule[index].currentRtc, widget.currentSchedule[index].totalRtc)))),
           DataCell(Center(child: Text(formatRtcValues(widget.currentSchedule[index].currentCycle,widget.currentSchedule[index].totalCycle)))),
-          DataCell(Center(child: Text(_convertTime(widget.currentSchedule[index].startTime)))),
+          DataCell(Center(child: Text(convert24HourTo12Hour(widget.currentSchedule[index].startTime)))),
           DataCell(Center(child: Text(widget.currentSchedule[index].programName=='StandAlone - Manual'?'Timeless': widget.currentSchedule[index].duration_Qty))),
           DataCell(Center(child: Text('${widget.currentSchedule[index].avgFlwRt}-bar'))),
           DataCell(Center(child: Text(widget.currentSchedule[index].programName=='StandAlone - Manual'? '----': widget.currentSchedule[index].duration_QtyLeft,
@@ -473,74 +469,6 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
     }
   }
 
-  Widget buildWidget(String type, int status, String name) {
-    String imagePath;
-    if(type=='MV'){
-      if (status == 0) {
-        imagePath = 'assets/images/dp_main_valve_not_open.png';
-      } else if (status == 1) {
-        imagePath = 'assets/images/dp_main_valve_open.png';
-      } else if (status == 2) {
-        imagePath = 'assets/images/dp_main_valve_wait.png';
-      } else {
-        imagePath = 'assets/images/dp_main_valve_closed.png';
-      }
-    }
-    else if(type=='VL'){
-      if (status == 0) {
-        imagePath = 'assets/images/valve_gray.png';
-      } else if (status == 1) {
-        imagePath = 'assets/images/valve_green.png';
-      } else if (status == 2) {
-        imagePath = 'assets/images/valve_orange.png';
-      } else {
-        imagePath = 'assets/images/valve_red.png';
-      }
-    }
-    else if(type=='FG'){
-      if (status == 0) {
-        imagePath = 'assets/images/fogger.png';
-      } else if (status == 1) {
-        imagePath = 'assets/images/fogger_green.png';
-      } else if (status == 2) {
-        imagePath = 'assets/images/fogger_orange.png';
-      } else {
-        imagePath = 'assets/images/fogger_red.png';
-      }
-    }else if(type=='SL'){
-      if (status == 0) {
-        imagePath = 'assets/images/selector.png';
-      } else if (status == 1) {
-        imagePath = 'assets/images/selector_g.png';
-      } else if (status == 2) {
-        imagePath = 'assets/images/selector_y.png';
-      } else {
-        imagePath = 'assets/images/selector_r.png';
-      }
-    }else if(type=='FN'){
-      if (status == 0) {
-        imagePath = 'assets/images/fan.png';
-      } else if (status == 1) {
-        imagePath = 'assets/images/fan_green.png';
-      } else if (status == 2) {
-        imagePath = 'assets/images/fan_orange.png';
-      } else {
-        imagePath = 'assets/images/fan_red.png';
-      }
-    }else{
-      imagePath = 'assets/images/virtual_water_meter.png';
-    }
-
-    return Column(
-      children: [
-        const SizedBox(height: 3),
-        Image.asset(imagePath, width: 40, height: 40),
-        const SizedBox(height: 3),
-        Text(name, style: const TextStyle(fontSize: 10)),
-      ],
-    );
-  }
-
   List<Widget> buildValveRows(List<Map<String, dynamic>> valveData) {
     return valveData.map((valve) {
       return Expanded(
@@ -574,11 +502,6 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
     }).toList();
   }
 
-  String _convertTime(String timeString) {
-    final parsedTime = DateFormat('HH:mm:ss').parse(timeString);
-    final formattedTime = DateFormat('hh:mm a').format(parsedTime);
-    return formattedTime;
-  }
 
   String getContentByCode(int code) {
     return GemReasonCode.fromCode(code).content;

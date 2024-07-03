@@ -270,10 +270,4 @@ class _CustomerHomeState extends State<CustomerHome> {
     }
   }
 
-  String _convertTime(String timeString) {
-    final parsedTime = DateFormat('HH:mm:ss').parse(timeString);
-    final formattedTime = DateFormat('hh:mm a').format(parsedTime);
-    return formattedTime;
-  }
-
 }

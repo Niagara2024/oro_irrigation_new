@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../state_management/MqttPayloadProvider.dart';
@@ -60,4 +61,13 @@ enum GemReasonCode {
       orElse: () => GemReasonCode.unknown,
     );
   }
+}
+
+String convert24HourTo12Hour(String timeString) {
+  if(timeString=='-'){
+    return '-';
+  }
+  final parsedTime = DateFormat('HH:mm:ss').parse(timeString);
+  final formattedTime = DateFormat('hh:mm a').format(parsedTime);
+  return formattedTime;
 }

@@ -23,16 +23,16 @@ class MQTTManager {
 
     String uniqueId = const Uuid().v4();
 
-    //development
-    // String baseURL = 'ws://192.168.68.141';
-    // int port = 9001;
+    // development
+    //   String baseURL = 'ws://192.168.68.141';
+    //   int port = 9001;
 
-    //cloud
-     String baseURL = 'ws://13.235.254.21:8083/mqtt';
-     int port = 8083;
+    // cloud
+    String baseURL = 'ws://13.235.254.21:8083/mqtt';
+    int port = 8083;
 
     if (_client == null) {
-       providerState = state;
+      providerState = state;
       _client = MqttBrowserClient(baseURL, uniqueId);
       _client!.port = port;
       _client!.keepAlivePeriod = 60;
@@ -48,7 +48,7 @@ class MQTTManager {
           .withWillMessage('My Will message')
           .startClean()
           .withWillQos(MqttQos.atLeastOnce);
-          print('Mosquitto client connecting....');
+      print('Mosquitto client connecting....');
       _client!.connectionMessage = connMess;
     }
   }
@@ -74,26 +74,24 @@ class MQTTManager {
   }
 
   void subscribeToTopic(String topic) {
-    try {
-      _client!.subscribe(topic, MqttQos.atLeastOnce);
-      _client!.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
-        final MqttPublishMessage recMess = c![0].payload as MqttPublishMessage;
-        final String pt = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-        providerState?.updateReceivedPayload(pt);
-      });
-    } catch (e) {
-      print('Error while subscribing to topic: $e');
-    }
+
+    _client!.subscribe(topic, MqttQos.atLeastOnce);
+
+    _client!.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
+      final MqttPublishMessage recMess = c![0].payload as MqttPublishMessage;
+
+      final String pt = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+      providerState?.updateReceivedPayload(pt);
+
+    });
+
   }
 
-  void publish(String message, String topic) {
-    try {
-      final builder = MqttClientPayloadBuilder();
-      builder.addString(message);
-      _client!.publishMessage(topic, MqttQos.exactlyOnce, builder.payload!);
-    } catch (e) {
-      print('Error while publishing message: $e');
-    }
+
+  Future<void> publish(String message, String topic) async {
+    final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
+    builder.addString(message);
+    _client!.publishMessage(topic, MqttQos.exactlyOnce, builder.payload!);
   }
 
   /// The subscribed callback
@@ -106,24 +104,39 @@ class MQTTManager {
     print('OnDisconnected client callback - Client disconnection');
     if (_client!.connectionStatus!.returnCode == MqttConnectReturnCode.noneSpecified) {
       print('OnDisconnected callback is solicited, this is correct');
-      //providerState?.mqttConnectionStatus(false);
     }
     providerState?.setAppConnectionState(MQTTConnectionState.disconnected);
 
-    //connect();
-
+    // Attempt reconnection after a delay
+    Future.delayed(const Duration(seconds: 03), () {
+      //_client!.disconnect();
+      //connect();
+    });
   }
 
   void onConnected() {
     assert(isConnected);
     providerState?.setAppConnectionState(MQTTConnectionState.connected);
     print('Mosquitto client connected....');
-    providerState?.mqttConnectionStatus(true);
+  }
+
+  void unsubscribeTopic(String topic) {
+    _client!.unsubscribe(topic);
+    print('unsubscribeTopic from $topic');
   }
 
   void unsubscribeFromAllTopics(String topic) {
     _client!.unsubscribe(topic);
     print('Unsubscribed from $topic');
+  }
+
+  Future<void> reconnect() async {
+    print('Attempting to reconnect...');
+    if (_client?.connectionStatus?.state == MqttConnectionState.disconnected) {
+      //_client?.conn
+      //initializeMQTTClient(providerState);
+     // await _connectMqtt();
+    }
   }
 
 }

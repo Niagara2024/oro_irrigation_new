@@ -8,6 +8,7 @@ import 'package:oro_irrigation_new/state_management/DurationNotifier.dart';
 import 'package:oro_irrigation_new/state_management/FertilizerSetProvider.dart';
 import 'package:oro_irrigation_new/state_management/GlobalFertLimitProvider.dart';
 import 'package:oro_irrigation_new/state_management/MqttPayloadProvider.dart';
+import 'package:oro_irrigation_new/state_management/ConnectivityService.dart';
 import 'package:oro_irrigation_new/state_management/SelectedGroupProvider.dart';
 import 'package:oro_irrigation_new/state_management/constant_provider.dart';
 import 'package:oro_irrigation_new/state_management/data_acquisition_provider.dart';
@@ -31,6 +32,7 @@ void main() {
   runApp(
       MultiProvider(
         providers: [
+          ChangeNotifierProvider(create: (_) => ConnectivityService()),
           ChangeNotifierProvider(create: (context) => ConfigMakerProvider()),
           ChangeNotifierProvider(create: (context) => PreferencesMainProvider()),
           ChangeNotifierProvider(create: (context) => DataAcquisitionProvider()),
@@ -51,7 +53,6 @@ void main() {
         child: const MyApp(),
       )
   );
-
 
 }
 

@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/SentAndReceived.dart';
@@ -170,16 +168,18 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   }
 
   void subscribeCurrentMaster(sIdx, mIdx) {
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 1), () {
       MQTTManager().subscribeToTopic('FirmwareToApp/${mySiteList[sIdx].master[mIdx].deviceId}');
     });
   }
 
   void updateMasterLine(sIdx, mIdx, lIdx){
+    //live call
     if(mySiteList[sIdx].master[mIdx].irrigationLine.isNotEmpty){
       _myCurrentIrrLine = mySiteList[sIdx].master[mIdx].irrigationLine[lIdx].name;
       getProgramList();
       loadServerData();
+      onRefreshClicked();
     }
   }
 
@@ -1649,6 +1649,27 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
         break;
       case 11:
         msg ='Wrong Feedback';
+        break;
+      case 12:
+        msg ='Sump Tank Empty';
+        break;
+      case 13:
+        msg ='Top Tank Full';
+        break;
+      case 13:
+        msg ='Top Tank Full';
+        break;
+      case 14:
+        msg ='Low Battery';
+        break;
+      case 15:
+        msg ='Ec Difference';
+        break;
+      case 16:
+        msg ='Ph Difference';
+        break;
+      case 17:
+        msg ='Pump Off Alarm';
         break;
       default:
         msg ='alarmType default';

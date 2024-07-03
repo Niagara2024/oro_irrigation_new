@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:oro_irrigation_new/state_management/scheule_view_provider.dart';
 import '../Models/Customer/Dashboard/DashboardNode.dart';
+import '../constants/snack_bar.dart';
 
 enum MQTTConnectionState { connected, disconnected, connecting }
 
@@ -12,6 +13,9 @@ class MqttPayloadProvider with ChangeNotifier {
   late ScheduleViewProvider mySchedule;
 
   bool mqttConnection = false;
+
+  dynamic messageFromHw;
+
   int wifiStrength = 0;
   int batVolt = 0;
   //List<dynamic> nodeList = [];
@@ -55,6 +59,10 @@ class MqttPayloadProvider with ChangeNotifier {
   void updateReceivedPayload(String payload) {
     try {
       Map<String, dynamic> data = jsonDecode(payload);
+
+      if(data.containsKey('4200')){
+        messageFromHw = data['4200'][0]['4201'];
+      }
 
       if(data.containsKey('2400')){
         print('Gem controller payload :$payload');

@@ -150,7 +150,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                     const SizedBox(),
                     filteredProgramsQueue.isNotEmpty? NextSchedule(siteData: widget.siteData, userID: widget.userID, customerID: widget.customerID, programQueue: filteredProgramsQueue,):
                     const SizedBox(),
-                    filteredScheduledPrograms.isNotEmpty? ScheduledProgramList(siteData: widget.siteData, customerId: widget.customerID, scheduledPrograms: filteredScheduledPrograms,):
+                    filteredScheduledPrograms.isNotEmpty? ScheduledProgramList(siteData: widget.siteData, customerId: widget.customerID, scheduledPrograms: filteredScheduledPrograms, masterInx: widget.masterInx,):
                     const SizedBox(),
                     const SizedBox(height: 8,),
                   ],

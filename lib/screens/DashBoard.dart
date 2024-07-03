@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/MQTTManager.dart';
 import '../constants/MqttServer.dart';
 import '../state_management/MqttPayloadProvider.dart';
+import '../state_management/ConnectivityService.dart';
 import 'Admin/AdminScreenController.dart';
 import 'Customer/CustomerScreenController.dart';
 import 'Dealer/DealerScreenController.dart';
@@ -18,6 +19,7 @@ class MainDashBoard extends StatefulWidget
   @override
   State<MainDashBoard> createState() => _MainDashBoardState();
 }
+
 
 class _MainDashBoardState extends State<MainDashBoard> {
 
@@ -33,7 +35,7 @@ class _MainDashBoardState extends State<MainDashBoard> {
         mqttConfigureAndConnect();
       } else {
         print('other platform');
-        mqttSeverConfigureAndConnect();
+        //mqttSeverConfigureAndConnect();
       }
     });
   }
@@ -58,9 +60,10 @@ class _MainDashBoardState extends State<MainDashBoard> {
     if(!connection){
       MQTTManager manager = MQTTManager();
       MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
-      manager.initializeMQTTClient(state: payloadProvider);
-      manager.connect();
+      manager.initializeMQTTServer(state: payloadProvider);
+      //manager.connect();
     }*/
+
 
     return FutureBuilder<SharedPreferences>(
       future: SharedPreferences.getInstance(),
@@ -76,16 +79,33 @@ class _MainDashBoardState extends State<MainDashBoard> {
           final mobileNo = sharedPreferences.getString('mobileNumber') ?? '';
           final emailId = sharedPreferences.getString('emailId') ?? '';
 
-          if (userId.isNotEmpty) {
-            return BuildDashboardScreen(userId: int.parse(userId), userType: int.parse(userType), userName: userName, countryCode: countryCode, mobileNo: mobileNo, emailId: emailId,);
-          } else {
-            return const LoginForm();
-          }
+          return Consumer<ConnectivityService>(
+            builder: (context, connectivityService, child) {
+              final isConnected = connectivityService.isConnected;
+              return  isConnected ? userId.isNotEmpty? BuildDashboardScreen(userId: int.parse(userId), userType: int.parse(userType), userName: userName, countryCode: countryCode, mobileNo: mobileNo, emailId: emailId,):
+              const LoginForm():
+              const Scaffold(
+                body: Center(child: Text('No Internet Connection')),
+              );
+            },
+          );
         }
       },
     );
   }
 }
+
+
+/*Consumer<MQTTManager>(
+builder: (context, mqttServer, child) {
+final isConnected = mqttServer.isConnected;
+
+return Text(
+isConnected ? 'Connected to MQTT Broker' : 'Disconnected from MQTT Broker',
+style: const TextStyle(fontSize: 24),
+);
+},
+),*/
 
 
 class BuildDashboardScreen extends StatefulWidget

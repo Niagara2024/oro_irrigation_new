@@ -2,23 +2,32 @@ import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/irrigation_program_main.dart';
+import 'package:provider/provider.dart';
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../constants/MQTTManager.dart';
 import '../../../constants/MyFunction.dart';
 import '../../../constants/http_service.dart';
+import '../../../constants/snack_bar.dart';
+import '../../../state_management/MqttPayloadProvider.dart';
 import '../ScheduleView.dart';
 
 class ScheduledProgramList extends StatelessWidget {
-  ScheduledProgramList({Key? key, required this.siteData, required this.customerId, required this.scheduledPrograms}) : super(key: key);
+  ScheduledProgramList({Key? key, required this.siteData, required this.customerId, required this.scheduledPrograms, required this.masterInx}) : super(key: key);
   final DashboardModel siteData;
-  final int customerId;
+  final int customerId, masterInx;
   final AudioPlayer audioPlayer = AudioPlayer();
   final List<ScheduledProgram> scheduledPrograms;
 
   @override
   Widget build(BuildContext context) {
+
+    final hwConformationMsg = Provider.of<MqttPayloadProvider>(context).messageFromHw;
+    /*if(hwConformationMsg!=null){
+      GlobalSnackBar.show(context, hwConformationMsg['Message'], int.parse(hwConformationMsg['Code']));
+      Provider.of<MqttPayloadProvider>(context).messageFromHw = null;
+    }*/
+
     var screenWidth = MediaQuery.of(context).size.width;
     return Padding(
       padding: const EdgeInsets.all(3.0),
@@ -106,7 +115,7 @@ class ScheduledProgramList extends StatelessWidget {
                               const SizedBox(height: 3,),
                               Text('${scheduledPrograms[index].totalZone}'),
                               const SizedBox(height: 3,),
-                              Text('${scheduledPrograms[index].startDate} : ${_convertTime(scheduledPrograms[index].startTime)}'),
+                              Text('${scheduledPrograms[index].startDate} : ${convert24HourTo12Hour(scheduledPrograms[index].startTime)}'),
                               const SizedBox(height: 3,),
                               Text(scheduledPrograms[index].endDate)
                             ],
@@ -127,7 +136,7 @@ class ScheduledProgramList extends StatelessWidget {
                               String payLoadFinal = jsonEncode({
                                 "2900": [{"2901": payload}]
                               });
-                              MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
+                              MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
                               sentUserOperationToServer('${scheduledPrograms[index].progName} Started by Manual', payLoadFinal);
                             },
                             child: const Text('Start by Manual'),
@@ -142,7 +151,7 @@ class ScheduledProgramList extends StatelessWidget {
                               String payLoadFinal = jsonEncode({
                                 "2900": [{"2901": payload}]
                               });
-                              MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
+                              MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
                               sentUserOperationToServer('${scheduledPrograms[index].progName} Stopped by Manual', payLoadFinal);
                             },
                             child: const Text('Stop by Manual'),
@@ -156,7 +165,7 @@ class ScheduledProgramList extends StatelessWidget {
                               String payLoadFinal = jsonEncode({
                                 "2900": [{"2901": payload}]
                               });
-                              MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
+                              MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
                               sentUserOperationToServer('${scheduledPrograms[index].progName} Paused by Manual', payLoadFinal);
                             },
                             child: const Text('Pause'),
@@ -171,7 +180,7 @@ class ScheduledProgramList extends StatelessWidget {
                               String payLoadFinal = jsonEncode({
                                 "2900": [{"2901": payload}]
                               });
-                              MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
+                              MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
                               sentUserOperationToServer('${scheduledPrograms[index].progName} Resume by Manual', payLoadFinal);
                             },
                             child: const Text('Resume'),
@@ -273,7 +282,7 @@ class ScheduledProgramList extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ScheduleViewScreen(deviceId: siteData.master[0].deviceId, userId: customerId, controllerId: siteData.master[0].controllerId, customerId: customerId),
+                            builder: (context) => ScheduleViewScreen(deviceId: siteData.master[masterInx].deviceId, userId: customerId, controllerId: siteData.master[masterInx].controllerId, customerId: customerId),
                           ),
                         );
                       },
@@ -290,7 +299,7 @@ class ScheduledProgramList extends StatelessWidget {
             scheduledPrograms[index].schedulingMethod==3?'Schedule as run list':'Day count schedule')),
             DataCell(Text(getContentByCode(scheduledPrograms[index].startStopReason), style: const TextStyle(fontSize: 12),)),
             DataCell(Center(child: Text('${scheduledPrograms[index].totalZone}'))),
-            DataCell(Center(child: Text('${scheduledPrograms[index].startDate} : ${_convertTime(scheduledPrograms[index].startTime)}'))),
+            DataCell(Center(child: Text('${scheduledPrograms[index].startDate} : ${convert24HourTo12Hour(scheduledPrograms[index].startTime)}'))),
             DataCell(Center(child: Text(scheduledPrograms[index].endDate))),
             DataCell(Row(
               children: [
@@ -304,7 +313,7 @@ class ScheduledProgramList extends StatelessWidget {
                     String payLoadFinal = jsonEncode({
                       "2900": [{"2901": payload}]
                     });
-                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
+                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
                     sentUserOperationToServer('${scheduledPrograms[index].progName} Started by Manual', payLoadFinal);
                   },
                   child: const Text('Start by Manual'),
@@ -319,7 +328,7 @@ class ScheduledProgramList extends StatelessWidget {
                     String payLoadFinal = jsonEncode({
                       "2900": [{"2901": payload}]
                     });
-                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
+                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
                     sentUserOperationToServer('${scheduledPrograms[index].progName} Stopped by Manual', payLoadFinal);
                   },
                   child: const Text('Stop by Manual'),
@@ -333,7 +342,7 @@ class ScheduledProgramList extends StatelessWidget {
                     String payLoadFinal = jsonEncode({
                       "2900": [{"2901": payload}]
                     });
-                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
+                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
                     sentUserOperationToServer('${scheduledPrograms[index].progName} Paused by Manual', payLoadFinal);
                   },
                   child: const Text('Pause'),
@@ -348,7 +357,7 @@ class ScheduledProgramList extends StatelessWidget {
                     String payLoadFinal = jsonEncode({
                       "2900": [{"2901": payload}]
                     });
-                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[0].deviceId}');
+                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
                     sentUserOperationToServer('${scheduledPrograms[index].progName} Resume by Manual', payLoadFinal);
                   },
                   child: const Text('Resume'),
@@ -358,7 +367,7 @@ class ScheduledProgramList extends StatelessWidget {
                 IconButton(tooltip: 'Edit program', icon: const Icon(Icons.edit_outlined), onPressed: () {
                   Navigator.push(context,
                     MaterialPageRoute(
-                      builder: (context) => IrrigationProgram(deviceId: siteData.master[0].deviceId, userId: customerId, controllerId: siteData.master[0].controllerId, serialNumber: scheduledPrograms[index].sNo,),
+                      builder: (context) => IrrigationProgram(deviceId: siteData.master[masterInx].deviceId, userId: customerId, controllerId: siteData.master[masterInx].controllerId, serialNumber: scheduledPrograms[index].sNo,),
                     ),
                   );
                 },),
@@ -370,14 +379,6 @@ class ScheduledProgramList extends StatelessWidget {
     );
   }
 
-  String _convertTime(String timeString) {
-    if(timeString=='-'){
-      return '-';
-    }
-    final parsedTime = DateFormat('HH:mm:ss').parse(timeString);
-    final formattedTime = DateFormat('hh:mm a').format(parsedTime);
-    return formattedTime;
-  }
 
   String getContentByCode(int code) {
     return GemReasonCode.fromCode(code).content;
@@ -385,7 +386,7 @@ class ScheduledProgramList extends StatelessWidget {
 
   void sentUserOperationToServer(String msg, String data) async
   {
-    Map<String, Object> body = {"userId": customerId, "controllerId": siteData.master[0].controllerId, "messageStatus": msg, "data": data, "createUser": customerId};
+    Map<String, Object> body = {"userId": customerId, "controllerId": siteData.master[masterInx].controllerId, "messageStatus": msg, "data": data, "createUser": customerId};
     final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
     if (response.statusCode == 200) {
       print(response.body);

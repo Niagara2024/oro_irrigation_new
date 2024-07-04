@@ -365,9 +365,20 @@ class ScheduledProgramList extends StatelessWidget {
                 const SizedBox(width: 5),
 
                 IconButton(tooltip: 'Edit program', icon: const Icon(Icons.edit_outlined), onPressed: () {
+                  String prgType = '';
+                  bool conditionL = false;
+                  if(scheduledPrograms[index].progCategory.contains('IL')){
+                    prgType='Irrigation Program';
+                  }else{
+                    prgType='Agitator Program';
+                  }
+                  if(siteData.master[masterInx].conditionLibraryCount>0){
+                    conditionL = true;
+                  }
+
                   Navigator.push(context,
                     MaterialPageRoute(
-                      builder: (context) => IrrigationProgram(deviceId: siteData.master[masterInx].deviceId, userId: customerId, controllerId: siteData.master[masterInx].controllerId, serialNumber: scheduledPrograms[index].sNo,),
+                      builder: (context) => IrrigationProgram(deviceId: siteData.master[masterInx].deviceId, userId: customerId, controllerId: siteData.master[masterInx].controllerId, serialNumber: scheduledPrograms[index].sNo, programType: prgType, conditionsLibraryIsNotEmpty: conditionL,),
                     ),
                   );
                 },),

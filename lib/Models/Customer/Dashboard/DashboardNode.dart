@@ -38,6 +38,7 @@ class MasterData {
   String modelName;
   String liveSyncDate;
   String liveSyncTime;
+  int conditionLibraryCount;
 
   MasterData({
     required this.gemLive,
@@ -52,6 +53,7 @@ class MasterData {
     required this.liveSyncTime,
     required this.irrigationLine,
     required this.pumpLive,
+    required this.conditionLibraryCount,
   });
 
   factory MasterData.fromJson(Map<String, dynamic> json) {
@@ -76,6 +78,7 @@ class MasterData {
         gemLive: liveList,
         irrigationLine: irgLine,
         pumpLive: [],
+        conditionLibraryCount: json['conditionLibraryCount'] ?? 0,
       );
     }else{
       //pump controller
@@ -96,6 +99,7 @@ class MasterData {
         gemLive: [],
         irrigationLine: [],
         pumpLive: pumpLiveList,
+        conditionLibraryCount: json['conditionLibraryCount'] ?? 0,
       );
     }
   }
@@ -447,7 +451,7 @@ class ProgramQueue {
 class CurrentScheduleModel {
   String programName, programCategory,zoneName,startTime, duration_Qty, duration_QtyLeft;
   String message, avgFlwRt;
-  final int programId, programType, totalRtc,currentRtc,totalCycle,currentCycle,totalZone,currentZone, srlNo, reasonCode;
+  final int programId, programType, totalRtc,currentRtc,totalCycle,currentCycle,totalZone,currentZone, srlNo, reasonCode, actualFlowRate;
   List<dynamic> mainValve;
   List<dynamic> valve;
 
@@ -472,6 +476,7 @@ class CurrentScheduleModel {
     required this.srlNo,
     required this.reasonCode,
     required this.avgFlwRt,
+    required this.actualFlowRate,
   });
 
   factory CurrentScheduleModel.fromJson(Map<String, dynamic> json) {
@@ -512,6 +517,7 @@ class CurrentScheduleModel {
       srlNo: json['ScheduleS_No'] ?? 0,
       reasonCode: json['ProgramStartStopReason'] ?? 0,
       avgFlwRt: json['AverageFlowRate'] ?? '0',
+      actualFlowRate: json['actualFlowRate'] ?? 0,
     );
   }
 
@@ -536,6 +542,7 @@ class CurrentScheduleModel {
       'ScheduleS_No': srlNo,
       'ProgramStartStopReason': reasonCode,
       'AverageFlowRate': avgFlwRt,
+      'actualFlowRate': actualFlowRate,
     };
   }
 

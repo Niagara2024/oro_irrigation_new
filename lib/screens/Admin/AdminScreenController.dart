@@ -19,11 +19,11 @@ enum Calendar {day, week, month, year}
 typedef CallbackFunction = void Function(String result);
 
 class AdminScreenController extends StatefulWidget {
-  const AdminScreenController({Key? key, required this.userName, required this.countryCode, required this.mobileNo, required this.fromLogin, required this.userId}) : super(key: key);
+  const AdminScreenController({Key? key, required this.userName, required this.countryCode, required this.mobileNo, required this.fromLogin, required this.userId, required this.userType}) : super(key: key);
 
   final String userName, countryCode, mobileNo;
   final bool fromLogin;
-  final int userId;
+  final int userId, userType;
 
   @override
   State<AdminScreenController> createState() => _AdminScreenControllerState();
@@ -224,7 +224,7 @@ class _AdminScreenControllerState extends State<AdminScreenController> {
             ],
           ),
           Expanded(
-            child: mainMenu(_selectedIndex),
+            child: widget.userType==0? const Center(child: Text('Super admin')): mainMenu(_selectedIndex),
           ),
         ],
       ),

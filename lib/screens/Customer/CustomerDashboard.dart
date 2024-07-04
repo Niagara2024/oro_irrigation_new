@@ -467,7 +467,7 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
       ...widget.irrigationLine.valve.map((vl) => ValveWidget(vl: vl, status: vl.status,)).toList(),
     ];
 
-    int crossAxisCount = (screenWidth / 140).floor().clamp(1, double.infinity).toInt();
+    int crossAxisCount = (screenWidth / 100).floor().clamp(1, double.infinity).toInt();
     int rowCount = (valveWidgets.length / crossAxisCount).ceil();
     double itemHeight = 70;
     double gridHeight = rowCount * (itemHeight + 5);
@@ -480,7 +480,7 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
         child: GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
-            childAspectRatio: 1.87,
+            childAspectRatio: 1.32,
             mainAxisSpacing: 1.0,
             crossAxisSpacing: 1.0,
           ),

@@ -134,13 +134,13 @@ class _BuildDashboardScreenState extends State<BuildDashboardScreen> {
 
   Widget mainScreen(int userType) {
     switch (userType) {
-      case 1:
+      case 0||1:
         return AdminScreenController(
           userName: widget.userName,
           countryCode: widget.countryCode,
           mobileNo: widget.mobileNo,
           fromLogin: true,
-          userId: widget.userId,);
+          userId: widget.userId, userType: userType,);
       case 2:
         return DealerScreenController(
           userName: widget.userName,

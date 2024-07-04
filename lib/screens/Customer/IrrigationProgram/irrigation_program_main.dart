@@ -25,15 +25,15 @@ class IrrigationProgram extends StatefulWidget {
   final int userId;
   final int controllerId;
   final int serialNumber;
-  final String? programType;
+  final String programType;
   final String deviceId;
-  final bool? conditionsLibraryIsNotEmpty;
+  final bool conditionsLibraryIsNotEmpty;
   const IrrigationProgram({Key? irrigationProgramKey,
     required this.userId,
     required this.controllerId,
     required this.serialNumber,
-    this.programType,
-    this.conditionsLibraryIsNotEmpty, required this.deviceId}) :super(key: irrigationProgramKey);
+    required this.programType,
+    required this.conditionsLibraryIsNotEmpty, required this.deviceId}) :super(key: irrigationProgramKey);
 
   @override
   State<IrrigationProgram> createState() => _IrrigationProgramState();

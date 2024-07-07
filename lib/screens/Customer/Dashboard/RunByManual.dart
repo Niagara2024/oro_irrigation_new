@@ -323,7 +323,32 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                   strSldSelectorSrlNo,
                 ];
 
-                if(strSldValveOrLineSrlNo.isNotEmpty){
+                if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
+                  showDialog<String>(
+                      context: context,
+                      builder: (BuildContext dgContext) => AlertDialog(
+                        title: const Text('StandAlone'),
+                        content: const Text('Valve is not open! Are you sure! You want to Start the Selected Pump?'),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () => Navigator.pop(dgContext, 'Cancel'),
+                            child: const Text('No'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              startByStandaloneDefault(allRelaySrlNo);
+                              Navigator.pop(dgContext, 'OK');
+                            },
+                            child: const Text('Yes'),
+                          ),
+                        ],
+                      )
+                  );
+                }else{
+                  startByStandaloneDefault(allRelaySrlNo);
+                }
+
+                /*if(strSldValveOrLineSrlNo.isNotEmpty){
                   if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
                     showDialog<String>(
                         context: context,
@@ -350,7 +375,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                   }
                 }else{
                   displaySnackBar(context, 'Empty selection Not allowed');
-                }
+                }*/
               }
               else{
                 Map<String, List<DashBoardValve>> groupedValves = {};

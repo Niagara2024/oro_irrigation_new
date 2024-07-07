@@ -255,7 +255,10 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                           ListTile(
                             title: const Text('Device ID'),
                             leading: const Icon(Icons.numbers_outlined),
-                            trailing: Text(deviceId, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
+                            trailing: SelectableText(
+                              deviceId,
+                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
                           ),
                           const Divider(),
                           ListTile(

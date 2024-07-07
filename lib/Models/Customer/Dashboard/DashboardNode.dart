@@ -131,23 +131,23 @@ class LiveData {
     var nodeData = json['2401'] as List;
     List<NodeData> nodeList = nodeData.isNotEmpty? nodeData.map((node) => NodeData.fromJson(node)).toList() : [];
 
-    var currentScheduleData = json['2402'] as List;
-    List<CurrentScheduleModel> currentSchedule = currentScheduleData.isNotEmpty? currentScheduleData.map((cSch) => CurrentScheduleModel.fromJson(cSch)).toList() : [];
+    var rPrg = json['2402'] as List;
+    List<CurrentScheduleModel> currentSchedule = rPrg.isNotEmpty? rPrg.map((cSch) => CurrentScheduleModel.fromJson(cSch)).toList() : [];
 
     var programData = json['2404'] as List;
     List<ScheduledProgram> programList = programData.isNotEmpty? programData.map((prg) => ScheduledProgram.fromJson(prg)).toList() : [];
 
-    var queProgramData = json['2403'] as List;
-    List<ProgramQueue> queProgramList = queProgramData.isNotEmpty? queProgramData.map((quePrg) => ProgramQueue.fromJson(quePrg)).toList() : [];
+    var pQ = json['2403'] as List;
+    List<ProgramQueue> pInQ = pQ.isNotEmpty? pQ.map((quePrg) => ProgramQueue.fromJson(quePrg)).toList(): [];
 
     var filterData = json['2405'] as List;
-    List<Filter> filterList = filterData.isNotEmpty? filterData.map((filter) => Filter.fromJson(filter)).toList() : [];
+    List<Filter> filterList = filterData.isNotEmpty? filterData.map((filter) => Filter.fromJson(filter)).toList(): [];
 
     var fertilizerData = json['2406'] as List;
-    List<FertilizerSite> fertilizerSiteList = fertilizerData.isNotEmpty? fertilizerData.map((fertilizer) => FertilizerSite.fromJson(fertilizer)).toList() : [];
+    List<FertilizerSite> fertilizerSiteList = fertilizerData.isNotEmpty? fertilizerData.map((fertilizer) => FertilizerSite.fromJson(fertilizer)).toList(): [];
 
     var pumpData = json['2407'] as List;
-    List<PumpData> pumpList = pumpData.isNotEmpty? pumpData.map((pmp) => PumpData.fromJson(pmp)).toList() : [];
+    List<PumpData> pumpList = pumpData.isNotEmpty? pumpData.map((pmp) => PumpData.fromJson(pmp)).toList(): [];
 
     return LiveData(
       nodeList: nodeList,
@@ -155,7 +155,7 @@ class LiveData {
       filterList: filterList,
       fertilizerSiteList: fertilizerSiteList,
       scheduledProgramList: programList,
-      queProgramList: queProgramList,
+      queProgramList: pInQ,
       currentSchedule: currentSchedule,
     );
   }
@@ -217,6 +217,8 @@ class NodeData {
     var sensorList = json['Sensor'] as List;
     List<SensorStatus> sensor = sensorList.map((sensor) => SensorStatus.fromJson(sensor)).toList();
 
+    bool lfKey = json.containsKey('LastFeedbackReceivedTime');
+
 
     return NodeData(
       controllerId: json['controllerId'],
@@ -233,7 +235,7 @@ class NodeData {
       rlyStatus: rlyStatus,
       sensor: sensor,
       status: json['Status'],
-      lastFeedbackReceivedTime: json['LastFeedbackReceivedTime'],
+      lastFeedbackReceivedTime: lfKey? json['LastFeedbackReceivedTime'] ?? '0': '0',
     );
   }
 
@@ -341,6 +343,7 @@ class ScheduledProgram {
   final int progOnOff;
   final int progPauseResume;
   final int startStopReason;
+  bool isLoading;
 
   ScheduledProgram({
     required this.sNo,
@@ -354,9 +357,11 @@ class ScheduledProgram {
     required this.progOnOff,
     required this.progPauseResume,
     required this.startStopReason,
+    required this.isLoading,
   });
 
   factory ScheduledProgram.fromJson(Map<String, dynamic> json) {
+    bool hasLoadingKey = json.containsKey('isLoading');
     return ScheduledProgram(
       sNo: json['SNo'],
       progCategory: json['ProgCategory'],
@@ -369,6 +374,7 @@ class ScheduledProgram {
       progOnOff: json['ProgOnOff'],
       progPauseResume: json['ProgPauseResume'],
       startStopReason: json['StartStopReason'],
+      isLoading: hasLoadingKey? hasLoadingKey: false,
     );
   }
 
@@ -385,6 +391,8 @@ class ScheduledProgram {
       'ProgOnOff': progOnOff,
       'ProgPauseResume': progPauseResume,
       'StartStopReason': startStopReason,
+      'isLoading': isLoading,
+
     };
   }
 

@@ -72,8 +72,6 @@ class _SentAndReceivedState extends State<SentAndReceived> {
                      setState(() {
                        _selectedDay = selectedDay;
                        _focusedDay = focusedDay;
-                       print(selectedDay);
-                       print(focusedDay);
                        getLogs(widget.controllerId, DateFormat('yyyy-MM-dd').format(_focusedDay));
 
                      });
@@ -119,8 +117,6 @@ class _SentAndReceivedState extends State<SentAndReceived> {
               setState(() {
                 _selectedDay = selectedDay;
                 _focusedDay = focusedDay;
-                print(selectedDay);
-                print(focusedDay);
                 getLogs(widget.controllerId, DateFormat('yyyy-MM-dd').format(_focusedDay));
 
               });
@@ -206,7 +202,7 @@ class _SentAndReceivedState extends State<SentAndReceived> {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(left: 25),
-                    child: Text('${sentAndReceivedList[index].sentUser} - ${convertTo12hrs(sentAndReceivedList[index].time)}', style: const TextStyle(fontSize: 11, color: Colors.grey),),
+                    child: Text('${sentAndReceivedList[index].sentUser}(${sentAndReceivedList[index].sentMobileNumber}) - ${convertTo12hrs(sentAndReceivedList[index].time)}', style: const TextStyle(fontSize: 11, color: Colors.grey),),
                   ),
                 ],
               ),

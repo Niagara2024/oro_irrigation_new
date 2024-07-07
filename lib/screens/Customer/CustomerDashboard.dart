@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:oro_irrigation_new/constants/LoadingIndicatorView.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/NextSchedule.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/ScheduledProgramList.dart';
 import 'package:provider/provider.dart';
@@ -26,10 +27,10 @@ class CustomerDashboard extends StatefulWidget {
 }
 
 class _CustomerDashboardState extends State<CustomerDashboard> {
-
   late IrrigationLine crrIrrLine;
   int wifiStrength = 0, siteIndex = 0;
   List<RelayStatus> rlyStatusList = [];
+  bool showNoHwCm = false;
 
   @override
   void initState() {
@@ -52,6 +53,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     }
     return null;
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +79,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
         final nodeList = Provider.of<MqttPayloadProvider>(context).nodeList;
         try{
           for (var items in nodeList) {
-            if (items is Map<String, dynamic>) {
+            if (items is Map<String, dynamic>){
               try {
                 int position = getNodePositionInNodeList(widget.masterInx, items['DeviceId']);
                 if (position != -1) {
@@ -119,9 +122,39 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
         }
 
         int? irrigationPauseFlag = getIrrigationPauseFlag(crrIrrLine.id, Provider.of<MqttPayloadProvider>(context).payload2408);
+        var liveSync = Provider.of<MqttPayloadProvider>(context).liveSync;
+        Duration lastCommunication = Provider.of<MqttPayloadProvider>(context).lastCommunication;
 
         return Column(
           children: [
+
+            lastCommunication.inMinutes >= 10? Padding(
+              padding: const EdgeInsets.only(left: 3, right: 3),
+              child: Container(
+                width: MediaQuery.sizeOf(context).width,
+                decoration: BoxDecoration(
+                  color: Colors.red.shade500,
+                  borderRadius: BorderRadius.circular(03),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: Center(child: Text('No communication from controller, Please check your controller connection...'.toUpperCase(),
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.normal, color: Colors.white70),)),
+                ),
+              ),
+            ):
+            const SizedBox(),
+
+            liveSync? Padding(
+              padding: const EdgeInsets.only(left: 3, right: 3),
+              child: LinearProgressIndicator(
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+                backgroundColor: Colors.grey[200],
+                minHeight: 4,
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+            ): const SizedBox(),
+
             irrigationPauseFlag!=0 && irrigationPauseFlag!=null? Padding(
               padding: const EdgeInsets.only(left: 4, right: 4),
               child: Container(
@@ -144,9 +177,9 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    screenWidth > 600 ? buildWideLayout(filteredCurrentSchedule):
+                    screenWidth > 600 ? buildWideLayout():
                     buildNarrowLayout(provider),
-                    filteredCurrentSchedule.isNotEmpty? CurrentSchedule(siteData: widget.siteData, customerID: widget.customerID, currentSchedule: filteredCurrentSchedule,):
+                    filteredCurrentSchedule.isNotEmpty? CurrentSchedule(siteData: widget.siteData, customerID: widget.customerID, filteredCurrentSchedule: filteredCurrentSchedule,):
                     const SizedBox(),
                     filteredProgramsQueue.isNotEmpty? NextSchedule(siteData: widget.siteData, userID: widget.userID, customerID: widget.customerID, programQueue: filteredProgramsQueue,):
                     const SizedBox(),
@@ -193,9 +226,9 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               //src pump
-                              provider.sourcePump.isNotEmpty? const Padding(
-                                padding: EdgeInsets.only(top: 15),
-                                child: DisplaySourcePump(),
+                              provider.sourcePump.isNotEmpty? Padding(
+                                padding: const EdgeInsets.only(top: 15),
+                                child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId,),
                               ):
                               const SizedBox(),
 
@@ -383,7 +416,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     );
   }
 
-  Widget buildWideLayout(filteredCurrentSchedule) {
+  Widget buildWideLayout() {
     return Padding(
       padding: const EdgeInsets.all(3.0),
       child: Container(

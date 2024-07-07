@@ -11,18 +11,23 @@ import '../../../constants/MyFunction.dart';
 import '../../../constants/http_service.dart';
 
 class CurrentSchedule extends StatefulWidget {
-  const CurrentSchedule({Key? key, required this.siteData, required this.customerID, required this.currentSchedule}) : super(key: key);
+  const CurrentSchedule({Key? key, required this.siteData, required this.customerID, required this.filteredCurrentSchedule}) : super(key: key);
   final DashboardModel siteData;
   final int customerID;
-  final List<CurrentScheduleModel> currentSchedule;
+  final List<CurrentScheduleModel> filteredCurrentSchedule;
 
   @override
   State<CurrentSchedule> createState() => _CurrentScheduleState();
 }
 
 class _CurrentScheduleState extends State<CurrentSchedule> {
-
   Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    //_startTimer();
+  }
 
   @override
   void dispose() {
@@ -37,14 +42,15 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
     });
   }
 
+
   void _updateDurationQtyLeft() {
     bool allOnDelayLeftZero = true;
     try {
-      if(widget.currentSchedule.isNotEmpty){
-        for (int i = 0; i < widget.currentSchedule.length; i++) {
-          if(widget.currentSchedule[i].message=='Running.'){
-            if (widget.currentSchedule[i].duration_QtyLeft.contains(':')) {
-              List<String> parts = widget.currentSchedule[i].duration_QtyLeft.split(':');
+      if(widget.filteredCurrentSchedule.isNotEmpty){
+        for (int i = 0; i < widget.filteredCurrentSchedule.length; i++) {
+          if(widget.filteredCurrentSchedule[i].message=='Running.'){
+            if (widget.filteredCurrentSchedule[i].duration_QtyLeft.contains(':')){
+              List<String> parts = widget.filteredCurrentSchedule[i].duration_QtyLeft.split(':');
               int hours = int.parse(parts[0]);
               int minutes = int.parse(parts[1]);
               int seconds = int.parse(parts[2]);
@@ -65,23 +71,23 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
               }
 
               String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-              if (widget.currentSchedule[i].duration_QtyLeft != '00:00:00') {
+              if (widget.filteredCurrentSchedule[i].duration_QtyLeft != '00:00:00') {
                 setState(() {
-                  widget.currentSchedule[i].duration_QtyLeft = updatedDurationQtyLeft;
+                  widget.filteredCurrentSchedule[i].duration_QtyLeft = updatedDurationQtyLeft;
                 });
               }
             }
             else {
-              double remainFlow = double.parse(widget.currentSchedule[i].duration_QtyLeft);
+              double remainFlow = double.parse(widget.filteredCurrentSchedule[i].duration_QtyLeft);
               if (remainFlow > 0) {
-                double flowRate = double.parse(widget.currentSchedule[i].avgFlwRt);
+                double flowRate = double.parse(widget.filteredCurrentSchedule[i].avgFlwRt);
                 remainFlow -= flowRate;
                 String formattedFlow = remainFlow.toStringAsFixed(2);
                 setState(() {
-                  widget.currentSchedule[i].duration_QtyLeft = formattedFlow;
+                  widget.filteredCurrentSchedule[i].duration_QtyLeft = formattedFlow;
                 });
               } else {
-                widget.currentSchedule[i].duration_QtyLeft = '0.00';
+                widget.filteredCurrentSchedule[i].duration_QtyLeft = '0.00';
               }
             }
             allOnDelayLeftZero = false;
@@ -101,8 +107,10 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
 
   @override
   Widget build(BuildContext context) {
-    _startTimer();
+
     var screenWidth = MediaQuery.of(context).size.width;
+    _startTimer();
+
     return Padding(
       padding: const EdgeInsets.all(3.0),
       child: Column(
@@ -138,13 +146,13 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
 
   Widget buildNarrowLayout() {
     return SizedBox(
-      height: widget.currentSchedule.length * 200,
+      height: widget.filteredCurrentSchedule.length * 200,
       child: Card(
         surfaceTintColor: Colors.white,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(3))),
         elevation: 5,
         child: ListView.builder(
-          itemCount: widget.currentSchedule.length,
+          itemCount: widget.filteredCurrentSchedule.length,
           physics: const NeverScrollableScrollPhysics(),
           itemBuilder: (context, index) {
             return Column(
@@ -167,14 +175,14 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                     children: [
                                       const Text('Start at', style: TextStyle(fontWeight: FontWeight.normal),),
                                       const SizedBox(width: 5,),
-                                      Text(convert24HourTo12Hour(widget.currentSchedule[index].startTime)),
+                                      Text(convert24HourTo12Hour(widget.filteredCurrentSchedule[index].startTime)),
                                     ],
                                   ),
                                   Row(
                                     children: [
                                       const Text('Duration', style: TextStyle(fontWeight: FontWeight.normal),),
                                       const SizedBox(width: 5,),
-                                      Text(widget.currentSchedule[index].duration_Qty),
+                                      Text(widget.filteredCurrentSchedule[index].duration_Qty),
                                     ],
                                   ),
                                 ],
@@ -186,9 +194,9 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  Text(widget.currentSchedule[index].duration_QtyLeft,style: const TextStyle(fontSize: 20)),
+                                  Text(widget.filteredCurrentSchedule[index].duration_QtyLeft,style: const TextStyle(fontSize: 20)),
                                   const VerticalDivider(),
-                                  Text('${widget.currentSchedule[index].currentZone}/${widget.currentSchedule[index].totalZone}',
+                                  Text('${widget.filteredCurrentSchedule[index].currentZone}/${widget.filteredCurrentSchedule[index].totalZone}',
                                       style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal)),
                                 ],
                               ),
@@ -215,12 +223,12 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Text(widget.currentSchedule[index].programName),
+                              Text(widget.filteredCurrentSchedule[index].programName),
                               const SizedBox(height: 3,),
-                              Text('${widget.currentSchedule[index].programCategory} & ${widget.currentSchedule[index].zoneName}'),
+                              Text('${widget.filteredCurrentSchedule[index].programCategory} & ${widget.filteredCurrentSchedule[index].zoneName}'),
                               const SizedBox(height: 3,),
-                              Text('${formatRtcValues(widget.currentSchedule[index].currentRtc, widget.currentSchedule[index].totalRtc)} & '
-                                  '${formatRtcValues(widget.currentSchedule[index].currentCycle,widget.currentSchedule[index].totalCycle)}'),
+                              Text('${formatRtcValues(widget.filteredCurrentSchedule[index].currentRtc, widget.filteredCurrentSchedule[index].totalRtc)} & '
+                                  '${formatRtcValues(widget.filteredCurrentSchedule[index].currentCycle,widget.filteredCurrentSchedule[index].totalCycle)}'),
                             ],
                           ),
                         ],
@@ -229,12 +237,12 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(getContentByCode(widget.currentSchedule[index].reasonCode), style: const TextStyle(fontSize: 12, color: Colors.black),),
-                          widget.currentSchedule[index].programName=='StandAlone - Manual'?
+                          Text(getContentByCode(widget.filteredCurrentSchedule[index].reasonCode), style: const TextStyle(fontSize: 12, color: Colors.black),),
+                          widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual'?
                           MaterialButton(
                             color: Colors.redAccent,
                             textColor: Colors.white,
-                            onPressed: widget.currentSchedule[index].message=='Running.'? (){
+                            onPressed: widget.filteredCurrentSchedule[index].message=='Running.'? (){
                               String payload = '0,0,0,0';
                               String payLoadFinal = jsonEncode({
                                 "800": [{"801": payload}]
@@ -253,21 +261,21 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                             } : null,
                             child: const Text('Stop'),
                           ):
-                          widget.currentSchedule[index].programName.contains('StandAlone') ?
+                          widget.filteredCurrentSchedule[index].programName.contains('StandAlone') ?
                           MaterialButton(
                             color: Colors.redAccent,
                             textColor: Colors.white,
                             onPressed: () async {
-                              print(widget.currentSchedule[index]);
+                              print(widget.filteredCurrentSchedule[index]);
                               final prefs = await SharedPreferences.getInstance();
-                              String? prgOffPayload = prefs.getString(widget.currentSchedule[index].programName);
+                              String? prgOffPayload = prefs.getString(widget.filteredCurrentSchedule[index].programName);
                               String payLoadFinal = jsonEncode({
                                 "3900": [{"3901": prgOffPayload}]
                               });
                               MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
                               Map<String, dynamic> manualOperation = {
-                                "programName": widget.currentSchedule[index].programName,
-                                "programId": widget.currentSchedule[index].programType,
+                                "programName": widget.filteredCurrentSchedule[index].programName,
+                                "programId": widget.filteredCurrentSchedule[index].programType,
                                 "startFlag":0,
                                 "method": 1,
                                 "time": '00:00:00',
@@ -275,15 +283,15 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                 "selected": [],
                               };
                               sentManualModeToServer(manualOperation);
-                              prefs.remove(widget.currentSchedule[index].programName);
+                              prefs.remove(widget.filteredCurrentSchedule[index].programName);
                             },
                             child: const Text('Stop'),
                           ):
                           MaterialButton(
                             color: Colors.green,
                             textColor: Colors.white,
-                            onPressed: widget.currentSchedule[index].message=='Running.'? (){
-                              String payload = '${widget.currentSchedule[index].srlNo},0';
+                            onPressed: widget.filteredCurrentSchedule[index].message=='Running.'? (){
+                              String payload = '${widget.filteredCurrentSchedule[index].srlNo},0';
                               String payLoadFinal = jsonEncode({
                                 "3700": [{"3701": payload}]
                               });
@@ -296,7 +304,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                     ],
                   ),
                 ),
-                if(index != widget.currentSchedule.length - 1)
+                if(index != widget.filteredCurrentSchedule.length - 1)
                   Divider(height: 5, color: Colors.teal.shade50, thickness: 4,),
                 const SizedBox(height: 5,),
               ],
@@ -317,7 +325,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
         ),
         borderRadius: const BorderRadius.all(Radius.circular(5)),
       ),
-      height: (widget.currentSchedule.length * 45) + 45,
+      height: (widget.filteredCurrentSchedule.length * 45) + 45,
       child: DataTable2(
         columnSpacing: 12,
         horizontalMargin: 12,
@@ -359,7 +367,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
             fixedWidth: 100,
           ),
           DataColumn2(
-            label: Center(child: Text('A/Flow Rate', style: TextStyle(fontSize: 13),)),
+            label: Center(child: Text('Avg/Flw Rate', style: TextStyle(fontSize: 13),)),
             fixedWidth: 100,
           ),
           DataColumn2(
@@ -371,33 +379,33 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
             fixedWidth: 90,
           ),
         ],
-        rows: List<DataRow>.generate(widget.currentSchedule.length, (index) => DataRow(cells: [
+        rows: List<DataRow>.generate(widget.filteredCurrentSchedule.length, (index) => DataRow(cells: [
           DataCell(
            Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(widget.currentSchedule[index].programName),
-                  Text(getContentByCode(widget.currentSchedule[index].reasonCode), style: const TextStyle(fontSize: 11, color: Colors.black),),
+                  Text(widget.filteredCurrentSchedule[index].programName),
+                  Text(getContentByCode(widget.filteredCurrentSchedule[index].reasonCode), style: const TextStyle(fontSize: 11, color: Colors.black),),
                 ],
               ),
           ),
-          DataCell(Text(widget.currentSchedule[index].programCategory)),
-          DataCell(Text('${widget.currentSchedule[index].currentZone}/${widget.currentSchedule[index].totalZone}')),
-          DataCell(Text(widget.currentSchedule[index].zoneName)),
-          DataCell(Center(child: Text(formatRtcValues(widget.currentSchedule[index].currentRtc, widget.currentSchedule[index].totalRtc)))),
-          DataCell(Center(child: Text(formatRtcValues(widget.currentSchedule[index].currentCycle,widget.currentSchedule[index].totalCycle)))),
-          DataCell(Center(child: Text(convert24HourTo12Hour(widget.currentSchedule[index].startTime)))),
-          DataCell(Center(child: Text(widget.currentSchedule[index].programName=='StandAlone - Manual'?'Timeless': widget.currentSchedule[index].duration_Qty))),
-          DataCell(Center(child: Text('${widget.currentSchedule[index].actualFlowRate}/hr'))),
-          DataCell(Center(child: Text(widget.currentSchedule[index].programName=='StandAlone - Manual'? '----': widget.currentSchedule[index].duration_QtyLeft,
-              style:  TextStyle(fontSize: widget.currentSchedule[index].programName=='StandAlone - Manual'? 15:20)))),
+          DataCell(Text(widget.filteredCurrentSchedule[index].programCategory)),
+          DataCell(Text('${widget.filteredCurrentSchedule[index].currentZone}/${widget.filteredCurrentSchedule[index].totalZone}')),
+          DataCell(Text(widget.filteredCurrentSchedule[index].zoneName)),
+          DataCell(Center(child: Text(formatRtcValues(widget.filteredCurrentSchedule[index].currentRtc, widget.filteredCurrentSchedule[index].totalRtc)))),
+          DataCell(Center(child: Text(formatRtcValues(widget.filteredCurrentSchedule[index].currentCycle,widget.filteredCurrentSchedule[index].totalCycle)))),
+          DataCell(Center(child: Text(convert24HourTo12Hour(widget.filteredCurrentSchedule[index].startTime)))),
+          DataCell(Center(child: Text(widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual'?'Timeless': widget.filteredCurrentSchedule[index].duration_Qty))),
+          DataCell(Center(child: Text('${widget.filteredCurrentSchedule[index].actualFlowRate}/hr'))),
+          DataCell(Center(child: Text(widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual'? '----': widget.filteredCurrentSchedule[index].duration_QtyLeft,
+              style:  TextStyle(fontSize: widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual'? 15:20)))),
           DataCell(Center(
-            child: widget.currentSchedule[index].programName=='StandAlone - Manual'?
+            child: widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual'?
             MaterialButton(
               color: Colors.redAccent,
               textColor: Colors.white,
-              onPressed: widget.currentSchedule[index].message=='Running.'? (){
+              onPressed: widget.filteredCurrentSchedule[index].message=='Running.'? (){
                 String payload = '0,0,0,0';
                 String payLoadFinal = jsonEncode({
                   "800": [{"801": payload}]
@@ -416,21 +424,21 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
               } : null,
               child: const Text('Stop'),
             ):
-            widget.currentSchedule[index].programName.contains('StandAlone') ?
+            widget.filteredCurrentSchedule[index].programName.contains('StandAlone') ?
             MaterialButton(
               color: Colors.redAccent,
               textColor: Colors.white,
               onPressed: () async {
-                print(widget.currentSchedule[index]);
+                print(widget.filteredCurrentSchedule[index]);
                 final prefs = await SharedPreferences.getInstance();
-                String? prgOffPayload = prefs.getString(widget.currentSchedule[index].programName);
+                String? prgOffPayload = prefs.getString(widget.filteredCurrentSchedule[index].programName);
                 String payLoadFinal = jsonEncode({
                   "3900": [{"3901": prgOffPayload}]
                 });
                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
                 Map<String, dynamic> manualOperation = {
-                  "programName": widget.currentSchedule[index].programName,
-                  "programId": widget.currentSchedule[index].programType,
+                  "programName": widget.filteredCurrentSchedule[index].programName,
+                  "programId": widget.filteredCurrentSchedule[index].programType,
                   "startFlag":0,
                   "method": 1,
                   "time": '00:00:00',
@@ -438,15 +446,15 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                   "selected": [],
                 };
                 sentManualModeToServer(manualOperation);
-                prefs.remove(widget.currentSchedule[index].programName);
+                prefs.remove(widget.filteredCurrentSchedule[index].programName);
               },
               child: const Text('Stop'),
             ):
             MaterialButton(
               color: Colors.green,
               textColor: Colors.white,
-              onPressed: widget.currentSchedule[index].message=='Running.'? (){
-                String payload = '${widget.currentSchedule[index].srlNo},0';
+              onPressed: widget.filteredCurrentSchedule[index].message=='Running.'? (){
+                String payload = '${widget.filteredCurrentSchedule[index].srlNo},0';
                 String payLoadFinal = jsonEncode({
                   "3700": [{"3701": payload}]
                 });

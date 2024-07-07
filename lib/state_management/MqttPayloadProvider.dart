@@ -13,8 +13,8 @@ class MqttPayloadProvider with ChangeNotifier {
   late ScheduleViewProvider mySchedule;
 
   bool mqttConnection = false;
-
-  dynamic messageFromHw;
+  dynamic messageFromHw = '';
+  String agm = '';
 
   int wifiStrength = 0;
   int batVolt = 0;
@@ -47,6 +47,8 @@ class MqttPayloadProvider with ChangeNotifier {
   List<CurrentScheduleModel> get currentSchedule => _currentSchedule;
 
   String currentDate = '', currentTime = '';
+  bool liveSync = false;
+  Duration lastCommunication = Duration.zero;
 
   //pump controller payload
   String pumpControllerLive='';
@@ -62,13 +64,14 @@ class MqttPayloadProvider with ChangeNotifier {
 
       if(data.containsKey('4200')){
         messageFromHw = data['4200'][0]['4201'];
+        agm = messageFromHw['PayloadCode'];
       }
 
       if(data.containsKey('2400')){
         print('Gem controller payload :$payload');
         if (data.containsKey('2400') && data['2400'] != null && data['2400'].isNotEmpty) {
           dashBoardPayload = payload;
-
+          liveSyncCall(false);
           updateLastSync();
 
           if(data['2400'][0].containsKey('WifiStrength')) {
@@ -166,8 +169,15 @@ class MqttPayloadProvider with ChangeNotifier {
     //notifyListeners();
   }
 
+
+
   void mqttConnectionStatus(status){
     mqttConnection = status;
+    notifyListeners();
+  }
+
+  void liveSyncCall(ls){
+    liveSync= ls;
     notifyListeners();
   }
 
@@ -178,8 +188,16 @@ class MqttPayloadProvider with ChangeNotifier {
 
     currentDate = dateFormatter.format(now);
     currentTime = timeFormatter.format(now);
-
+    updateLastCommunication(currentDate, currentTime);
     //notifyListeners();
+  }
+
+  void updateLastCommunication(currentDate, currentTime) {
+    final String lastSyncString = "$currentDate $currentTime";
+    DateTime lastSyncDateTime = DateFormat("yyyy-MM-dd HH:mm:ss").parse(lastSyncString);
+    DateTime currentDateTime = DateTime.now();
+    lastCommunication = currentDateTime.difference(lastSyncDateTime);
+    notifyListeners();
   }
 
   void updateNodeList(List<dynamic> nds) {

@@ -128,6 +128,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
     final response = await HttpService().postRequest("getUserList", body);
     if (response.statusCode == 200) {
       myCustomerList.clear();
+      print(response.body);
       var data = jsonDecode(response.body);
       if (data["code"] == 200) {
         final cntList = data["data"] as List;
@@ -301,22 +302,6 @@ class _DealerDashboardState extends State<DealerDashboard> {
                             ),
                             child: ListTile(
                               title: Text('Product Stock(${productStockList.length})', style: const TextStyle(fontSize: 20, color: Colors.black),),
-                              trailing : IconButton(tooltip: 'Add new stock', icon: const Icon(Icons.add_box_outlined), color: myTheme.primaryColor, onPressed: () async
-                              {
-                                showModalBottomSheet(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return Container(
-                                      height: 600,
-                                      color: Colors.white,
-                                      child: Center(
-                                        child: AddProduct(callback: callbackFunction),
-                                      ),
-                                    );
-                                  },
-                                );
-                                //Navigator.push(context, MaterialPageRoute(builder: (context) =>  AddProduct(callback: (String ) {},)),);
-                              }),
                             ),
                           ),
                           Expanded(
@@ -390,7 +375,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
               ),
             ),
             SizedBox(
-              width: 270,
+              width: 300,
               child: Card(
                 elevation: 5,
                 surfaceTintColor: Colors.white,
@@ -420,59 +405,76 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                 backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
                                 backgroundColor: Colors.transparent,
                               ),
-                              trailing: PopupMenuButton<String>(
-                                onSelected: (String value) {
-                                  setState(() {
-                                    if(value=='View'){
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => CustomerScreenController(
-                                            customerId: myCustomerList[index].userId,
-                                            customerName: myCustomerList[index].userName,
-                                            mobileNo: '+${myCustomerList[index].countryCode}-${myCustomerList[index].mobileNumber}',
-                                            comingFrom: 'AdminORDealer',
-                                            emailId: myCustomerList[index].emailId, userId: widget.userId,),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  PopupMenuButton<String>(
+                                    onSelected: (String value) {
+                                      setState(() {
+                                        if(value=='View'){
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => CustomerScreenController(
+                                                customerId: myCustomerList[index].userId,
+                                                customerName: myCustomerList[index].userName,
+                                                mobileNo: '+${myCustomerList[index].countryCode}-${myCustomerList[index].mobileNumber}',
+                                                comingFrom: 'AdminORDealer',
+                                                emailId: myCustomerList[index].emailId, userId: widget.userId,),
+                                            ),
+                                          );
+                                        }
+                                      });
+                                    },
+                                    icon: const Icon(Icons.more_vert),
+                                    itemBuilder: (BuildContext context) {
+                                      return [
+                                        const PopupMenuItem<String>(
+                                          value: 'View',
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.view_quilt_outlined, color: Colors.black),
+                                              SizedBox(width: 8),
+                                              Text('View Customer Dashboard'),
+                                            ],
+                                          ),
                                         ),
-                                      );
-                                    }
-                                  });
-                                },
-                                icon: const Icon(Icons.more_vert),
-                                itemBuilder: (BuildContext context) {
-                                  return [
-                                    const PopupMenuItem<String>(
-                                      value: 'View',
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.view_quilt_outlined, color: Colors.black),
-                                          SizedBox(width: 8),
-                                          Text('View Customer Dashboard'),
-                                        ],
-                                      ),
+                                        const PopupMenuItem<String>(
+                                          value: 'Edit',
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.edit_outlined, color: Colors.blue),
+                                              SizedBox(width: 8),
+                                              Text('Edit Account'),
+                                            ],
+                                          ),
+                                        ),
+                                        const PopupMenuItem<String>(
+                                          value: 'Delete',
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.delete, color: Colors.redAccent),
+                                              SizedBox(width: 8),
+                                              Text('Delete Account'),
+                                            ],
+                                          ),
+                                        ),
+                                      ];
+                                    },
+                                  ),
+                                  IconButton(
+                                    iconSize: 24,
+                                    icon: CircleAvatar(
+                                      radius: 12,
+                                      child: Text('1', style: TextStyle(color: Colors.white,fontSize: 12, fontWeight: FontWeight.normal),),
+                                      backgroundColor: Colors.redAccent,
                                     ),
-                                    const PopupMenuItem<String>(
-                                      value: 'Edit',
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.edit_outlined, color: Colors.blue),
-                                          SizedBox(width: 8),
-                                          Text('Edit Account'),
-                                        ],
-                                      ),
-                                    ),
-                                    const PopupMenuItem<String>(
-                                      value: 'Delete',
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.delete, color: Colors.redAccent),
-                                          SizedBox(width: 8),
-                                          Text('Delete Account'),
-                                        ],
-                                      ),
-                                    ),
-                                  ];
-                                },
+                                    onPressed: () {
+                                      // Define the action to be performed on button press
+                                      print('Icon button pressed');
+                                    },
+                                  ),
+                                ],
                               ),
                               title: Text(myCustomerList[index].userName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
                               subtitle: Text('+${myCustomerList[index].countryCode} ${myCustomerList[index].mobileNumber}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal)),

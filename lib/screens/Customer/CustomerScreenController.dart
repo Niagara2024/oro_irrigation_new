@@ -55,6 +55,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   String _myCurrentIrrLine= 'No Line Available';
 
   bool appbarBottomOpen = false;
+  bool _isHovered1 = false;
+  bool _isHovered2 = false;
+  bool _isHovered3 = false;
+  bool _isHovered4 = false;
+  bool _isHovered5 = false;
 
 
   @override
@@ -82,6 +87,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   }
 
   void onRefreshClicked() {
+
+    MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
+    payloadProvider.liveSyncCall(true);
     String livePayload = '';
     Future.delayed(const Duration(milliseconds: 1000), () {
       if(mySiteList[siteIndex].master[masterIndex].categoryId==1||
@@ -91,6 +99,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
         livePayload = jsonEncode({"sentSMS": "#live"});
       }
       MQTTManager().publish(livePayload, 'AppToFirmware/${mySiteList[siteIndex].master[masterIndex].deviceId}');
+    });
+    Future.delayed(const Duration(milliseconds: 6000), () {
+      payloadProvider.liveSyncCall(false);
     });
   }
 
@@ -112,20 +123,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           mySiteList = jsonData.map((json) => DashboardModel.fromJson(json)).toList();
           indicatorViewHide();
           if(mySiteList.isNotEmpty){
-            /*if(mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1){
-              IrrigationLine newLine = IrrigationLine(
-                sNo: 0,
-                id: '0',
-                hid: '0',
-                name: 'Line overview',
-                location: 'No location',
-                type: 'no type',
-                mainValve: [],
-                valve: [],
-              );
-              mySiteList[siteIndex].master[masterIndex].irrigationLine.insert(0, newLine);
-            }*/
-
             updateSite(0,0,0);
           }
         } catch (e) {
@@ -145,6 +142,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   }
 
   void updateMaster(sIdx, mIdx, lIdx){
+    MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
+    payloadProvider.updateLastCommunication(mySiteList[sIdx].master[mIdx].liveSyncDate, mySiteList[sIdx].master[mIdx].liveSyncTime);
     _myCurrentMaster = mySiteList[sIdx].master[mIdx].categoryName;
     try{
       //MQTTManager().unsubscribeFromAllTopics('FirmwareToApp/${mySiteList[sIdx].master[mIdx].deviceId}');
@@ -174,12 +173,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   }
 
   void updateMasterLine(sIdx, mIdx, lIdx){
-    //live call
     if(mySiteList[sIdx].master[mIdx].irrigationLine.isNotEmpty){
       _myCurrentIrrLine = mySiteList[sIdx].master[mIdx].irrigationLine[lIdx].name;
-      getProgramList();
       loadServerData();
-      onRefreshClicked();
+      //onRefreshClicked();
     }
   }
 
@@ -265,11 +262,23 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
     final payload2408 = Provider.of<MqttPayloadProvider>(context).payload2408;
     bool allIrrigationResumeFlag = payload2408.every((record) => record['IrrigationPauseFlag'] == 1);
+    Duration lastComDifference = Provider.of<MqttPayloadProvider>(context).lastCommunication;
 
     if(mySiteList.isNotEmpty){
       if(currentDate.isNotEmpty){
         mySiteList[siteIndex].master[masterIndex].liveSyncDate = currentDate;
         mySiteList[siteIndex].master[masterIndex].liveSyncTime = currentTime;
+      }
+
+      if(lastComDifference.inMinutes>=10){
+        mySiteList[siteIndex].master[masterIndex].gemLive[0].currentSchedule=[];
+        mySiteList[siteIndex].master[masterIndex].gemLive[0].queProgramList=[];
+      }else{
+        List<CurrentScheduleModel> currentSchedule = provider.currentSchedule;
+        mySiteList[siteIndex].master[masterIndex].gemLive[0].currentSchedule = currentSchedule;
+
+        List<ProgramQueue> programQueue = provider.programQueue;
+        mySiteList[siteIndex].master[masterIndex].gemLive[0].queProgramList = programQueue;
       }
     }
 
@@ -288,7 +297,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(_selectedIndex==0?'Dashboard': _selectedIndex==1?'My devices': _selectedIndex==2?'Sent & Received': _selectedIndex==3?'Logs & Reports': _selectedIndex==4?'Weather':'Settings'),
-            Text('Last sync : ${'${mySiteList[siteIndex].master[masterIndex].liveSyncDate} - ${mySiteList[siteIndex].master[masterIndex].liveSyncTime}'}', style: const TextStyle(fontSize: 11, color: Colors.white),),
+            Text('Last sync : ${'${mySiteList[siteIndex].master[masterIndex].liveSyncDate} - ${mySiteList[siteIndex].master[masterIndex].liveSyncTime}'}', style: const TextStyle(fontSize: 11, color: Colors.white70),),
           ],
         ),
         actions: [
@@ -607,6 +616,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   }
 
   Widget buildWideLayout(screenWidth, payload2408, allIrrigationResumeFlag, wifiStrength, provider) {
+
+
     return Scaffold(
       appBar: AppBar(
         leading: const Padding(
@@ -690,7 +701,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 int lIndex = mySiteList[siteIndex].master[masterIndex].irrigationLine.indexWhere((line)
                 => line.name == newLineName);
                 if (lineIndex != -1 && mySiteList[siteIndex].master[masterIndex].irrigationLine.length > 1) {
-                  _myCurrentIrrLine = newLineName!;
                   lineIndex = lIndex;
                   updateMasterLine(siteIndex, masterIndex, lIndex);
                 }
@@ -706,7 +716,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             const SizedBox(width: 15,),
             Container(width: 1, height: 20, color: Colors.white54,),
             const SizedBox(width: 5,),
-            Text('Last sync : ${'${mySiteList[siteIndex].master[masterIndex].liveSyncDate} - ${mySiteList[siteIndex].master[masterIndex].liveSyncTime}'}', style: const TextStyle(fontSize: 15),),
+            Text('Last sync : ${'${mySiteList[siteIndex].master[masterIndex].liveSyncDate} - ${mySiteList[siteIndex].master[masterIndex].liveSyncTime}'}', style: const TextStyle(fontSize: 15, color: Colors.white70),),
           ],
         ),
         leadingWidth: 75,
@@ -1008,15 +1018,20 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     ),
                     width: 45,
                     height: 45,
-                    child: IconButton(
-                      tooltip: '$wifiStrength %',
-                      icon: Icon(wifiStrength == 0? Icons.wifi_off:
-                      wifiStrength >= 1 && wifiStrength <= 20 ? Icons.network_wifi_1_bar_outlined:
-                      wifiStrength >= 21 && wifiStrength <= 40 ? Icons.network_wifi_2_bar_outlined:
-                      wifiStrength >= 41 && wifiStrength <= 60 ? Icons.network_wifi_3_bar_outlined:
-                      wifiStrength >= 61 && wifiStrength <= 80 ? Icons.network_wifi_3_bar_outlined:
-                      Icons.wifi, color: Colors.white,),
-                      onPressed: null,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(wifiStrength == 0? Icons.wifi_off:
+                        wifiStrength >= 1 && wifiStrength <= 20 ? Icons.network_wifi_1_bar_outlined:
+                        wifiStrength >= 21 && wifiStrength <= 40 ? Icons.network_wifi_2_bar_outlined:
+                        wifiStrength >= 41 && wifiStrength <= 60 ? Icons.network_wifi_3_bar_outlined:
+                        wifiStrength >= 61 && wifiStrength <= 80 ? Icons.network_wifi_3_bar_outlined:
+                        Icons.wifi, color: Colors.white,),
+                        Text('$wifiStrength %',style: const TextStyle(fontSize: 11.0, color: Colors.white70),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 15),
@@ -1027,10 +1042,17 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     ),
                     width: 45,
                     height: 45,
-                    child: IconButton(
-                      tooltip: 'refresh',
-                      icon: const Icon(Icons.refresh, color: Colors.white,),
-                      onPressed: onRefreshClicked,
+                    child: MouseRegion(
+                      onEnter: (_) => setState(() => _isHovered1 = true),
+                      onExit: (_) => setState(() => _isHovered1 = false),
+                      child: IconButton(
+                        tooltip: 'refresh',
+                        onPressed: onRefreshClicked,
+                        icon: const Icon(Icons.refresh),
+                        color: Colors.white,
+                        iconSize: 24.0,
+                        hoverColor: Colors.cyan,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 15),
@@ -1040,52 +1062,20 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     child: SizedBox(
                       height: 45,
                       width: 45,
-                      child: IconButton(tooltip:'Show node list', onPressed: (){
-                        sideSheet();
-                      }, icon: const Icon(Icons.menu, color: Colors.white)),
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: Colors.transparent
-                    ),
-                    width: 45,
-                    height: 45,
-                    child: IconButton(tooltip:'View all Node details', onPressed: (){
-                      //showNodeDetailsBottomSheet(context);
-                      Navigator.push(context,
-                        MaterialPageRoute(
-                          builder: (context) => AllNodeListAndDetails(userID: widget.customerId, customerID: widget.customerId, masterInx: masterIndex, siteData: mySiteList[siteIndex],),
+                      child: MouseRegion(
+                        onEnter: (_) => setState(() => _isHovered2 = true),
+                        onExit: (_) => setState(() => _isHovered2 = false),
+                        child: IconButton(
+                          tooltip: 'Show node list',
+                          onPressed: () {
+                            sideSheet();
+                          },
+                          icon: const Icon(Icons.menu),
+                          color: Colors.white,
+                          iconSize: 24.0,
+                          hoverColor: Colors.cyan,
                         ),
-                      );
-                    }, icon: const Icon(Icons.grid_view, color: Colors.white)),
-                  ),
-                  const SizedBox(height: 15),
-                  Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: Colors.transparent
-                    ),
-                    width: 45,
-                    height: 45,
-                    child: IconButton(
-                      tooltip: 'Manual Mode',
-                      icon: const Icon(Icons.touch_app_outlined, color: Colors.white),
-                      onPressed: () async {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => RunByManual(siteID: mySiteList[siteIndex].userGroupId,
-                                siteName: mySiteList[siteIndex].groupName,
-                                controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
-                                customerID: widget.customerId,
-                                imeiNo: mySiteList[siteIndex].master[masterIndex].deviceId,
-                                programList: programList, callbackFunction: callbackFunction),
-                          ),
-                        );
-                      },
+                      ),
                     ),
                   ),
                   const SizedBox(height: 15),
@@ -1096,23 +1086,91 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     ),
                     width: 45,
                     height: 45,
-                    child: IconButton(
-                      tooltip: 'Planning',
-                      icon: const Icon(Icons.list_alt, color: Colors.white),
-                      onPressed: () async {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ProgramSchedule(
-                              customerID: widget.customerId,
-                              controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
-                              siteName: mySiteList[siteIndex].groupName,
-                              imeiNumber: mySiteList[siteIndex].master[masterIndex].deviceId,
-                              userId: widget.customerId,
+                    child: MouseRegion(
+                      onEnter: (_) => setState(() => _isHovered3 = true),
+                      onExit: (_) => setState(() => _isHovered3 = false),
+                      child: IconButton(
+                        tooltip: 'View all Node details',
+                        onPressed: () {
+                          //showNodeDetailsBottomSheet(context);
+                          Navigator.push(context,
+                            MaterialPageRoute(
+                              builder: (context) => AllNodeListAndDetails(userID: widget.customerId, customerID: widget.customerId, masterInx: masterIndex, siteData: mySiteList[siteIndex],),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                        icon: const Icon(Icons.grid_view),
+                        color: Colors.white,
+                        iconSize: 24.0,
+                        hoverColor: Colors.cyan,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.transparent
+                    ),
+                    width: 45,
+                    height: 45,
+                    child: MouseRegion(
+                      onEnter: (_) => setState(() => _isHovered4 = true),
+                      onExit: (_) => setState(() => _isHovered4 = false),
+                      child: IconButton(
+                        tooltip: 'Manual Mode',
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RunByManual(siteID: mySiteList[siteIndex].userGroupId,
+                                  siteName: mySiteList[siteIndex].groupName,
+                                  controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
+                                  customerID: widget.customerId,
+                                  imeiNo: mySiteList[siteIndex].master[masterIndex].deviceId,
+                                  programList: programList, callbackFunction: callbackFunction),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.touch_app_outlined),
+                        color: Colors.white,
+                        iconSize: 24.0,
+                        hoverColor: Colors.cyan,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.transparent
+                    ),
+                    width: 45,
+                    height: 45,
+                    child: MouseRegion(
+                      onEnter: (_) => setState(() => _isHovered5 = true),
+                      onExit: (_) => setState(() => _isHovered5 = false),
+                      child: IconButton(
+                        tooltip: 'Planning',
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProgramSchedule(
+                                customerID: widget.customerId,
+                                controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
+                                siteName: mySiteList[siteIndex].groupName,
+                                imeiNumber: mySiteList[siteIndex].master[masterIndex].deviceId,
+                                userId: widget.customerId,
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.list_alt),
+                        color: Colors.white,
+                        iconSize: 24.0,
+                        hoverColor: Colors.cyan,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 15),

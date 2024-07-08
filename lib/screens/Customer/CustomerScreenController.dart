@@ -125,6 +125,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           indicatorViewHide();
           if(mySiteList.isNotEmpty){
             updateSite(0,0,0);
+            getProgramList();
           }
         } catch (e) {
           print('Error: $e');
@@ -355,22 +356,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     onChanged: (newSiteName) {
                       int newIndex = mySiteList.indexWhere((site) => site.groupName == newSiteName);
                       if (newIndex != -1 && mySiteList.length > 1) {
-
                         siteIndex = newIndex;
                         masterIndex = 0;
                         lineIndex = 0;
                         updateSite(newIndex, 0, 0);
-
-                        /*_myCurrentSite = mySiteList[newIndex].groupName;
-                        _myCurrentMaster = mySiteList[newIndex].master[masterIndex].categoryName;
-
-                        if(mySiteList[siteIndex].master[masterIndex].irrigationLine.isNotEmpty){
-                          _myCurrentIrrLine = mySiteList[siteIndex].master[masterIndex].irrigationLine[lineIndex].name;
-                        }
-
-                        subscribeCurrentMaster();
                         getProgramList();
-                        loadServerData();*/
                       }
                     },
                     value: _myCurrentSite,
@@ -378,7 +368,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     iconEnabledColor: Colors.white,
                     iconDisabledColor: Colors.white,
                     focusColor: Colors.transparent,
-                  ) :
+                  ):
                   Text(mySiteList[siteIndex].groupName, style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.normal),),
 
                   const SizedBox(width: 3,),

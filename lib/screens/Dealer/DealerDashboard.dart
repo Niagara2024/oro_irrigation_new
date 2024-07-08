@@ -14,6 +14,7 @@ import '../Customer/CustomerScreenController.dart';
 import '../Forms/add_product.dart';
 import '../Forms/create_account.dart';
 import '../Forms/device_list.dart';
+import 'ServiceRequestsTable.dart';
 
 enum Calendar {day, week, month, year}
 typedef CallbackFunction = void Function(String result);
@@ -408,6 +409,33 @@ class _DealerDashboardState extends State<DealerDashboard> {
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
+                                  (myCustomerList[index].criticalAlarmCount + myCustomerList[index].serviceRequestCount)>0? BadgeButton(
+                                    onPressed: () {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return  Column(
+                                            children: [
+                                              Container(
+                                                width: MediaQuery.sizeOf(context).width,
+                                                color: Colors.teal.shade100,
+                                                height: 30,
+                                                child: Center(child: Text(myCustomerList[index].userName)),
+                                              ),
+                                              SizedBox(
+                                                width: MediaQuery.sizeOf(context).width,
+                                                height: MediaQuery.sizeOf(context).height-345,
+                                                child: ServiceRequestsTable(userId: myCustomerList[index].userId),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                    icon: Icons.hail,
+                                    badgeNumber: myCustomerList[index].criticalAlarmCount + myCustomerList[index].serviceRequestCount,
+                                  ):
+                                  const SizedBox(),
                                   PopupMenuButton<String>(
                                     onSelected: (String value) {
                                       setState(() {
@@ -461,14 +489,6 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                         ),
                                       ];
                                     },
-                                  ),
-                                  BadgeButton(
-                                    onPressed: () {
-
-                                    },
-                                    icon: Icons.hail,
-                                    badgeNumber: myCustomerList[index].criticalAlarmCount + myCustomerList[index].serviceRequestCount,
-
                                   ),
                                 ],
                               ),

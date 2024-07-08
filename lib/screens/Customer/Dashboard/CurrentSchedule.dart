@@ -396,9 +396,12 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
           DataCell(Center(child: Text(formatRtcValues(widget.filteredCurrentSchedule[index].currentRtc, widget.filteredCurrentSchedule[index].totalRtc)))),
           DataCell(Center(child: Text(formatRtcValues(widget.filteredCurrentSchedule[index].currentCycle,widget.filteredCurrentSchedule[index].totalCycle)))),
           DataCell(Center(child: Text(convert24HourTo12Hour(widget.filteredCurrentSchedule[index].startTime)))),
-          DataCell(Center(child: Text(widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual'?'Timeless': widget.filteredCurrentSchedule[index].duration_Qty))),
+          DataCell(Center(child: Text(widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual' &&
+              (widget.filteredCurrentSchedule[index].duration_Qty=='00:00:00'||widget.filteredCurrentSchedule[index].duration_Qty=='0')?
+          'Timeless': widget.filteredCurrentSchedule[index].duration_Qty))),
           DataCell(Center(child: Text('${widget.filteredCurrentSchedule[index].actualFlowRate}/hr'))),
-          DataCell(Center(child: Text(widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual'? '----': widget.filteredCurrentSchedule[index].duration_QtyLeft,
+          DataCell(Center(child: Text(widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual' &&
+              (widget.filteredCurrentSchedule[index].duration_Qty=='00:00:00'||widget.filteredCurrentSchedule[index].duration_Qty=='0')? '----': widget.filteredCurrentSchedule[index].duration_QtyLeft,
               style:  TextStyle(fontSize: widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual'? 15:20)))),
           DataCell(Center(
             child: widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual'?

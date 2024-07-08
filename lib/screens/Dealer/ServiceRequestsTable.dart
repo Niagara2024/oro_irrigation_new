@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ServiceRequestsTable extends StatefulWidget {
-  const ServiceRequestsTable({Key? key, required this.userId, required this.controllerId}) : super(key: key);
-  final int userId, controllerId;
+  const ServiceRequestsTable({Key? key, required this.userId}) : super(key: key);
+  final int userId;
 
   @override
   State<ServiceRequestsTable> createState() => _ServiceRequestsTableState();

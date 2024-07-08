@@ -24,6 +24,7 @@ import 'Dashboard/AllNodeListAndDetails.dart';
 import 'Dashboard/ControllerLogs.dart';
 import 'Dashboard/ControllerSettings.dart';
 import 'Dashboard/RunByManual.dart';
+import 'Dashboard/TicketHomePage.dart';
 import 'ProgramSchedule.dart';
 import 'PumpControllerScreen/PumpDashboard.dart';
 
@@ -296,7 +297,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
         title:  Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(_selectedIndex==0?'Dashboard': _selectedIndex==1?'My devices': _selectedIndex==2?'Sent & Received': _selectedIndex==3?'Logs & Reports': _selectedIndex==4?'Weather':'Settings'),
+            Text(_selectedIndex==0?'Dashboard': _selectedIndex==1?'My devices': _selectedIndex==2?'Sent & Received': _selectedIndex==3?'Logs & Reports': _selectedIndex==4?'Weather':_selectedIndex==5?'Service request':'Settings'),
             Text('Last sync : ${'${mySiteList[siteIndex].master[masterIndex].liveSyncDate} - ${mySiteList[siteIndex].master[masterIndex].liveSyncTime}'}', style: const TextStyle(fontSize: 11, color: Colors.white70),),
           ],
         ),
@@ -553,8 +554,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     },
                   ),
                   ListTile(
-                    title: const Text('Controller setting', style: TextStyle(color: Colors.white)),
-                    leading: const Icon(Icons.settings_outlined, color: Colors.white,),
+                    title: const Text('Service request', style: TextStyle(color: Colors.white)),
+                    leading: const Icon(Icons.request_page_outlined, color: Colors.white,),
                     onTap: () {
                       Navigator.pop(context);
                       setState(() {
@@ -562,6 +563,17 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                       });
                     },
                   ),
+                  ListTile(
+                    title: const Text('Controller setting', style: TextStyle(color: Colors.white)),
+                    leading: const Icon(Icons.settings_outlined, color: Colors.white,),
+                    onTap: () {
+                      Navigator.pop(context);
+                      setState(() {
+                        _selectedIndex=6;
+                      });
+                    },
+                  ),
+
                 ],
               ),
             ),
@@ -973,6 +985,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   label: Text(''),
                 ),
                 NavigationRailDestination(
+                  icon: Icon(Icons.request_page_outlined),
+                  selectedIcon: Icon(Icons.request_page_outlined, color: Colors.white,),
+                  label: Text(''),
+                ),
+                NavigationRailDestination(
                   icon: Icon(Icons.settings_outlined),
                   selectedIcon: Icon(Icons.settings_outlined, color: Colors.white,),
                   label: Text(''),
@@ -1350,6 +1367,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId, from: 'Gem',):
       _selectedIndex == 3 ? ListOfLogConfig(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,):
       _selectedIndex == 4 ? WeatherScreen(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId,):
+      _selectedIndex == 5 ? TicketHomePage(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,):
       ControllerSettings(customerID: widget.customerId, siteData: mySiteList[siteIndex], masterIndex: masterIndex, adDrId: widget.comingFrom=='AdminORDealer'? widget.userId:0,),
     );
   }
@@ -1869,6 +1887,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
 
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    List<bool> _expanded = List.generate(5, (index) => false);
 
     return screenWidth>600? Container(
       padding: const EdgeInsets.all(10),
@@ -2013,7 +2032,185 @@ class _SideSheetClassState extends State<SideSheetClass> {
             SizedBox(
               width: 400,
               height: MediaQuery.sizeOf(context).height-150,
-              child: DataTable2(
+              child: Column(
+                children: [
+                  SizedBox(
+                    width:400,
+                    height: 35,
+                    child: DataTable2(
+                        columnSpacing: 12,
+                        horizontalMargin: 12,
+                        minWidth: 325,
+                        headingRowHeight: 35.0,
+                        headingRowColor: MaterialStateProperty.all<Color>(myTheme.primaryColorDark.withOpacity(0.3)),
+                        columns: const [
+                          DataColumn2(
+                              label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
+                              fixedWidth: 35
+                          ),
+                          DataColumn2(
+                            label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
+                            fixedWidth: 55,
+                          ),
+                          DataColumn2(
+                            label: Center(child: Text('Rf.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
+                            fixedWidth: 45,
+                          ),
+                          DataColumn2(
+                            label: Text('Category', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),),
+                            size: ColumnSize.M,
+                            numeric: true,
+                          ),
+                          DataColumn2(
+                            label: Text('Info', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),),
+                            fixedWidth: 40,
+                          ),
+                        ],
+                        rows: List<DataRow>.generate(0,(index) => const DataRow(cells: [],),
+                        ),
+                      ),
+                  ),
+                  SizedBox(
+                    width: 400,
+                    height: 500,
+                    child: ListView.builder(
+                      itemCount: widget.nodeList.length,
+                      itemBuilder: (context, index) {
+                        return ExpansionTile(
+                          //initiallyExpanded: true,
+                          trailing: widget.nodeList[index].rlyStatus.any((rly) => rly.Status == 2 || rly.Status == 3)? const Icon(Icons.warning, color: Colors.orangeAccent):
+                          const Icon(Icons.info_outline),
+                          backgroundColor: Colors.teal.shade50,
+                          title: Row(
+                            children: [
+                              SizedBox(width: 35, child: Text('${widget.nodeList[index].serialNumber}', style: const TextStyle(fontSize: 13),)),
+                              SizedBox(
+                                width:55,
+                                child: Center(child: CircleAvatar(radius: 7, backgroundColor:
+                                widget.nodeList[index].status == 1? Colors.green.shade400:
+                                widget.nodeList[index].status == 2? Colors.grey:
+                                widget.nodeList[index].status == 3? Colors.redAccent:
+                                widget.nodeList[index].status == 4? Colors.yellow:
+                                Colors.grey,
+                                )),
+                              ),
+                              SizedBox(width: 45, child: Center(child: Text('${widget.nodeList[index].referenceNumber}', style: const TextStyle(fontSize: 13),))),
+                              SizedBox(
+                                width: 169,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Text(widget.nodeList[index].categoryName, style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 13)),
+                                    Text(widget.nodeList[index].deviceId, style: const TextStyle(fontWeight: FontWeight.normal,fontSize: 11, color: Colors.black)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          children: [
+                            SizedBox(
+                              width: double.infinity,
+                              height: 250,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: <Widget>[
+                                  ListTile(
+                                    tileColor: myTheme.primaryColor,
+                                    textColor: Colors.black,
+                                    title: const Text('Last feedback',style: TextStyle(fontSize: 12),),
+                                    subtitle: Text(formatDateTime(widget.nodeList[index].lastFeedbackReceivedTime),style: TextStyle(fontSize: 11),),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.solar_power_outlined, color: Colors.teal),
+                                        const SizedBox(width: 5,),
+                                        Text('${widget.nodeList[index].sVolt} - V', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                        const SizedBox(width: 5,),
+                                        const Icon(Icons.battery_3_bar_rounded, color: Colors.teal),
+                                        const SizedBox(width: 5,),
+                                        Text('${widget.nodeList[index].batVolt} - V', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                        const SizedBox(width: 5,),
+                                        IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
+                                          String payLoadFinal = jsonEncode({
+                                            "2300": [
+                                              {"2301": "${widget.nodeList[index].serialNumber}"},
+                                            ]
+                                          });
+                                          MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                        }, icon: Icon(Icons.fact_check_outlined, color: Colors.teal))
+                                      ],
+                                    ),
+                                  ),
+                                  Column(
+                                    children: [
+                                      const SizedBox(
+                                        width: double.infinity,
+                                        height : 20,
+                                        child: Row(
+                                          children: [
+                                            SizedBox(width: 10),
+                                            CircleAvatar(radius: 5,backgroundColor: Colors.green,),
+                                            SizedBox(width: 5),
+                                            Text('ON', style: TextStyle(fontSize: 12)),
+                                            SizedBox(width: 20),
+                                            CircleAvatar(radius: 5,backgroundColor: Colors.black45),
+                                            SizedBox(width: 5),
+                                            Text('OFF', style: TextStyle(fontSize: 12)),
+                                            SizedBox(width: 20),
+                                            CircleAvatar(radius: 5,backgroundColor: Colors.orange),
+                                            SizedBox(width: 5),
+                                            Text('ON in OFF', style: TextStyle(fontSize: 12)),
+                                            SizedBox(width: 20),
+                                            CircleAvatar(radius: 5,backgroundColor: Colors.redAccent),
+                                            SizedBox(width: 5),
+                                            Text('OFF in ON', style: TextStyle(fontSize: 12)),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 5),
+                                      SizedBox(
+                                        width: double.infinity,
+                                        height : 150,
+                                        child: GridView.builder(
+                                          itemCount: widget.nodeList[index].rlyStatus.length, // Number of items in the grid
+                                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: 7,
+                                            crossAxisSpacing: 5.0,
+                                            mainAxisSpacing: 5.0,
+                                            childAspectRatio:1.2,
+                                          ),
+                                          itemBuilder: (BuildContext context, int indexGv) {
+                                            print(widget.nodeList[index].rlyStatus[indexGv].name);
+                                            return Column(
+                                              children: [
+                                                CircleAvatar(
+                                                  radius: 13,
+                                                  backgroundColor: widget.nodeList[index].rlyStatus[indexGv].Status==0 ? Colors.grey :
+                                                  widget.nodeList[index].rlyStatus[indexGv].Status==1 ? Colors.green :
+                                                  widget.nodeList[index].rlyStatus[indexGv].Status==2 ? Colors.orange :
+                                                  widget.nodeList[index].rlyStatus[indexGv].Status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
+                                                  child: Text((widget.nodeList[index].rlyStatus[indexGv].rlyNo).toString(), style: const TextStyle(color: Colors.white,fontSize: 12)),
+                                                ),
+                                                Text((widget.nodeList[index].rlyStatus[indexGv].name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                              ],
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              /*child: DataTable2(
                 columnSpacing: 12,
                 horizontalMargin: 12,
                 minWidth: 325,
@@ -2166,7 +2363,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                     },
                   ))),
                 ])),
-              ),
+              ),*/
             )
           ],
         ),

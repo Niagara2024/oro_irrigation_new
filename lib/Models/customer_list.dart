@@ -5,10 +5,12 @@ class CustomerListMDL
     this.userName = '',
     this.countryCode = '',
     this.mobileNumber = '',
-    this.emailId = ''
+    this.emailId = '',
+    this.serviceRequestCount = 0,
+    this.criticalAlarmCount = 0,
   });
 
-  int userId;
+  int userId,serviceRequestCount,criticalAlarmCount;
   String userName, countryCode, mobileNumber, emailId;
 
   factory CustomerListMDL.fromJson(Map<String, dynamic> json) => CustomerListMDL(
@@ -17,6 +19,8 @@ class CustomerListMDL
     countryCode: json['countryCode'],
     mobileNumber: json['mobileNumber'],
     emailId: json['emailId'],
+    serviceRequestCount: json['serviceRequestCount'],
+    criticalAlarmCount: json['criticalAlarmCount'],
   );
 
   Map<String, dynamic> toJson() => {
@@ -25,6 +29,7 @@ class CustomerListMDL
     'countryCode': countryCode,
     'mobileNumber': mobileNumber,
     'emailId': emailId,
-
+    'serviceRequestCount': serviceRequestCount,
+    'criticalAlarmCount': criticalAlarmCount,
   };
 }

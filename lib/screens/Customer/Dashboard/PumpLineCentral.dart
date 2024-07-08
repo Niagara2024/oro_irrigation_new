@@ -352,6 +352,9 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                   });
                                   MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
 
+                                  _isHoveringMenu = false;
+                                  _checkForExit();
+
                                 }, icon: const Icon(Icons.power_settings_new, color: Colors.white,)),
                               ),
                               const SizedBox(width: 8,),
@@ -363,6 +366,10 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                     "800": [{"801": payload}]
                                   });
                                   MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+
+                                  _isHoveringMenu = false;
+                                  _checkForExit();
+
                                 }, icon: const Icon(Icons.power_settings_new, color: Colors.white,)),
                               ),
                             ],

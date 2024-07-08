@@ -128,7 +128,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
     final response = await HttpService().postRequest("getUserList", body);
     if (response.statusCode == 200) {
       myCustomerList.clear();
-      print(response.body);
+      //print(response.body);
       var data = jsonDecode(response.body);
       if (data["code"] == 200) {
         final cntList = data["data"] as List;
@@ -462,17 +462,13 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                       ];
                                     },
                                   ),
-                                  IconButton(
-                                    iconSize: 24,
-                                    icon: CircleAvatar(
-                                      radius: 12,
-                                      child: Text('1', style: TextStyle(color: Colors.white,fontSize: 12, fontWeight: FontWeight.normal),),
-                                      backgroundColor: Colors.redAccent,
-                                    ),
+                                  BadgeButton(
                                     onPressed: () {
-                                      // Define the action to be performed on button press
-                                      print('Icon button pressed');
+
                                     },
+                                    icon: Icons.hail,
+                                    badgeNumber: myCustomerList[index].criticalAlarmCount + myCustomerList[index].serviceRequestCount,
+
                                   ),
                                 ],
                               ),
@@ -583,4 +579,55 @@ class _ChartData {
   final int rtu;
   final int oSwitch;
   final int oSpot;
+}
+
+
+class BadgeButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  final IconData icon;
+  final int badgeNumber;
+
+  const BadgeButton({
+    Key? key,
+    required this.onPressed,
+    required this.icon,
+    required this.badgeNumber,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        IconButton(
+          tooltip: 'My alarm and Service request',
+          onPressed: onPressed,
+          icon: Icon(icon,),
+        ),
+        if (badgeNumber > 0)
+          Positioned(
+            right: 0,
+            top: 0,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              constraints: const BoxConstraints(
+                minWidth: 16,
+                minHeight: 16,
+              ),
+              child: Text(
+                badgeNumber.toString(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
 }

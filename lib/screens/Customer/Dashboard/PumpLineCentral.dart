@@ -998,7 +998,9 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                                 left: 18,
                                 child: fertilizerCentral[fIndex]['FertilizerTankSelector'].isNotEmpty ? Container(
                                   decoration: BoxDecoration(
-                                    color: fertilizerCentral[fIndex]['FertilizerTankSelector'][0]['Status']!=0? Colors.greenAccent : Colors.grey.shade300,
+                                    color: fertilizerCentral[fIndex]['FertilizerTankSelector'][0]['Status']==0? Colors.grey.shade300:
+                                    fertilizerCentral[fIndex]['FertilizerTankSelector'][0]['Status']==1? Colors.greenAccent:
+                                    fertilizerCentral[fIndex]['FertilizerTankSelector'][0]['Status']==2? Colors.orangeAccent:Colors.redAccent,
                                     borderRadius: BorderRadius.circular(3),
                                   ),
                                   width: 45,
@@ -1187,7 +1189,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Center(child: Text('${fertilizerCentral[fIndex]['Ec'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal))),
-                                          Center(child: Text(fertilizerCentral[fIndex]['Ec'][index]['Status'], style: const TextStyle(fontSize: 10))),
+                                          Center(child: Text('${fertilizerCentral[fIndex]['Ec'][index]['Status']}', style: const TextStyle(fontSize: 10))),
                                           const SizedBox(width: 10,),
                                         ],
                                       );
@@ -1204,7 +1206,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                                       return Row(
                                         children: [
                                           Center(child: Text('${fertilizerCentral[fIndex]['Ph'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),)),
-                                          Center(child: Text(fertilizerCentral[fIndex]['Ph'][index]['Status'], style: const TextStyle(fontSize: 10))),
+                                          Center(child: Text('${fertilizerCentral[fIndex]['Ph'][index]['Status']}', style: const TextStyle(fontSize: 10))),
                                           const SizedBox(width: 10,),
                                         ],
                                       );
@@ -1813,7 +1815,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                                     ),
                                     ),
                                   ),
-                                ) :
+                                ):
                                 const SizedBox(),
                               ),
                               Positioned(
@@ -1821,7 +1823,9 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                                 left: 18,
                                 child: fertilizerLocal[fIndex]['FertilizerTankSelector'].isNotEmpty ? Container(
                                   decoration: BoxDecoration(
-                                    color: fertilizerLocal[fIndex]['FertilizerTankSelector'][0]['Status']!=0? Colors.greenAccent : Colors.grey.shade300,
+                                    color: fertilizerLocal[fIndex]['FertilizerTankSelector'][0]['Status']==0? Colors.grey.shade300:
+                                    fertilizerLocal[fIndex]['FertilizerTankSelector'][0]['Status']==1? Colors.greenAccent:
+                                    fertilizerLocal[fIndex]['FertilizerTankSelector'][0]['Status']==2? Colors.orangeAccent:Colors.redAccent,
                                     borderRadius: BorderRadius.circular(3),
                                   ),
                                   width: 45,
@@ -2010,7 +2014,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Center(child: Text('${fertilizerLocal[fIndex]['Ec'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal))),
-                                          Center(child: Text(fertilizerLocal[fIndex]['Ec'][index]['Status'], style: const TextStyle(fontSize: 10))),
+                                          Center(child: Text('${fertilizerLocal[fIndex]['Ec'][index]['Status']}', style: const TextStyle(fontSize: 10))),
                                           const SizedBox(width: 10,),
                                         ],
                                       );
@@ -2027,7 +2031,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                                       return Row(
                                         children: [
                                           Center(child: Text('${fertilizerLocal[fIndex]['Ph'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),)),
-                                          Center(child: Text(fertilizerLocal[fIndex]['Ph'][index]['Status'], style: const TextStyle(fontSize: 10))),
+                                          Center(child: Text('${fertilizerLocal[fIndex]['Ph'][index]['Status']}', style: const TextStyle(fontSize: 10))),
                                           const SizedBox(width: 10,),
                                         ],
                                       );

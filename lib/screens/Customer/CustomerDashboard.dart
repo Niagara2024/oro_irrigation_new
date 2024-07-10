@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../Models/node_model.dart';
 import '../../constants/MQTTManager.dart';
+import '../../constants/MyFunction.dart';
 import '../../state_management/MqttPayloadProvider.dart';
 import 'Dashboard/CurrentSchedule.dart';
 import 'Dashboard/CustomerHome.dart';
@@ -54,6 +55,9 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     return null;
   }
 
+  String getContentByCode(int code) {
+    return GemReasonCode.fromCode(code).content;
+  }
 
 
   @override
@@ -165,7 +169,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(2.0),
-                  child: Center(child: Text(irrigationPauseFlag==1? 'The line paused by manually'.toUpperCase(): 'The line paused by condition'.toUpperCase(),
+                  child: Center(child: Text(getContentByCode(irrigationPauseFlag).toUpperCase(),
                     style: const TextStyle(fontSize: 15, fontWeight: FontWeight.normal),)),
                 ),
               ),

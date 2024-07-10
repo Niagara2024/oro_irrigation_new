@@ -115,6 +115,7 @@ class LiveData {
   List<ProgramQueue> queProgramList;
   List<CurrentScheduleModel> currentSchedule;
  // List<SensorData> sensorList;
+  int WifiStrength;
 
   LiveData({
     required this.nodeList,
@@ -124,6 +125,7 @@ class LiveData {
     required this.scheduledProgramList,
     required this.queProgramList,
     required this.currentSchedule,
+    required this.WifiStrength,
   });
 
   factory LiveData.fromJson(Map<String, dynamic> json) {
@@ -157,6 +159,7 @@ class LiveData {
       scheduledProgramList: programList,
       queProgramList: pInQ,
       currentSchedule: currentSchedule,
+      WifiStrength: json['WifiStrength'],
     );
   }
 
@@ -170,6 +173,7 @@ class LiveData {
       '2406': fertilizerSiteList.map((e) => e.toJson()).toList(),
       '2407': pumpList.map((e) => e.toJson()).toList(),
       //'2408': sensorList.map((e) => e.toJson()).toList(),
+      'WifiStrength': WifiStrength,
     };
   }
 }
@@ -343,7 +347,6 @@ class ScheduledProgram {
   final int progOnOff;
   final int progPauseResume;
   final int startStopReason;
-  bool isLoading;
 
   ScheduledProgram({
     required this.sNo,
@@ -357,7 +360,6 @@ class ScheduledProgram {
     required this.progOnOff,
     required this.progPauseResume,
     required this.startStopReason,
-    required this.isLoading,
   });
 
   factory ScheduledProgram.fromJson(Map<String, dynamic> json) {
@@ -374,7 +376,6 @@ class ScheduledProgram {
       progOnOff: json['ProgOnOff'],
       progPauseResume: json['ProgPauseResume'],
       startStopReason: json['StartStopReason'],
-      isLoading: hasLoadingKey? hasLoadingKey: false,
     );
   }
 
@@ -391,7 +392,6 @@ class ScheduledProgram {
       'ProgOnOff': progOnOff,
       'ProgPauseResume': progPauseResume,
       'StartStopReason': startStopReason,
-      'isLoading': isLoading,
 
     };
   }

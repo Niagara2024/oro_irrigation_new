@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_indicator/loading_indicator.dart';
@@ -23,7 +24,9 @@ import 'CustomerDashboard.dart';
 import 'Dashboard/AllNodeListAndDetails.dart';
 import 'Dashboard/ControllerLogs.dart';
 import 'Dashboard/ControllerSettings.dart';
+import 'Dashboard/NodeHourlyLog/NodeHrsLog.dart';
 import 'Dashboard/RunByManual.dart';
+import 'Dashboard/SensorHourlyLog/SensorHourlyLogs.dart';
 import 'Dashboard/TicketHomePage.dart';
 import 'ProgramSchedule.dart';
 import 'PumpControllerScreen/PumpDashboard.dart';
@@ -147,6 +150,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
     payloadProvider.updateLastCommunication(mySiteList[sIdx].master[mIdx].liveSyncDate, mySiteList[sIdx].master[mIdx].liveSyncTime);
     _myCurrentMaster = mySiteList[sIdx].master[mIdx].categoryName;
+
     try{
       //MQTTManager().unsubscribeFromAllTopics('FirmwareToApp/${mySiteList[sIdx].master[mIdx].deviceId}');
       MyFunction().clearMQTTPayload(context);
@@ -154,17 +158,14 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       print(e);
     }
     subscribeCurrentMaster(sIdx, mIdx);
+    //displayServerData();
 
     if(mySiteList[sIdx].master[mIdx].categoryId == 1 ||
         mySiteList[sIdx].master[mIdx].categoryId == 2){
-      //gem or gem+ controller
       updateMasterLine(sIdx, mIdx, lIdx);
     }else{
       //pump controller
     }
-
-    setState(() {
-    });
 
   }
 
@@ -176,8 +177,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   void updateMasterLine(sIdx, mIdx, lIdx){
     if(mySiteList[sIdx].master[mIdx].irrigationLine.isNotEmpty){
-      _myCurrentIrrLine = mySiteList[sIdx].master[mIdx].irrigationLine[lIdx].name;
-      loadServerData();
+      setState(() {
+        _myCurrentIrrLine = mySiteList[sIdx].master[mIdx].irrigationLine[lIdx].name;
+      });
+
+      displayServerData();
       //onRefreshClicked();
     }
   }
@@ -201,45 +205,117 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   }
 
 
-  void loadServerData(){
+  void displayServerData(){
     MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
+
+    payloadProvider.updateWifiStrength(mySiteList[siteIndex].master[masterIndex].gemLive[0].WifiStrength);
 
     List<dynamic> ndlLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList.map((ndl) => ndl.toJson()).toList();
     payloadProvider.updateNodeList(ndlLst);
-
-    List<dynamic> csLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].currentSchedule.map((cs) => cs.toJson()).toList();
-    List<CurrentScheduleModel> cs = csLst.map((cs) => CurrentScheduleModel.fromJson(cs)).toList();
-    payloadProvider.updateCurrentScheduled(cs);
-
-    List<dynamic> pqLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].queProgramList.map((pq) => pq.toJson()).toList();
-    List<ProgramQueue> pq = pqLst.map((pq) => ProgramQueue.fromJson(pq)).toList();
-    payloadProvider.updateProgramQueue(pq);
 
     List<dynamic> spLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].scheduledProgramList.map((sp) => sp.toJson()).toList();
     List<ScheduledProgram> sp = spLst.map((sp) => ScheduledProgram.fromJson(sp)).toList();
     payloadProvider.updateScheduledProgram(sp);
 
-    String filterList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].filterList.map((filter) => filter.toJson()).toList());
-    List<dynamic> jsonFilterList = jsonDecode(filterList);
-    String filterPayloadFinal = jsonEncode({
-      "2400": [{"2405": jsonFilterList.toList()}]
-    });
-    payloadProvider.updateFilterPayload(filterPayloadFinal);
+    if(payloadProvider.lastCommunication.inMinutes>=10){
+      mySiteList[siteIndex].master[masterIndex].gemLive[0].currentSchedule=[];
+      mySiteList[siteIndex].master[masterIndex].gemLive[0].queProgramList=[];
 
-    String fertilizerSiteList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].fertilizerSiteList.map((pump) => pump.toJson()).toList());
-    List<dynamic> jsonFertilizerList = jsonDecode(fertilizerSiteList);
-    String fertilizerPayloadFinal = jsonEncode({
-      "2400": [{"2406": jsonFertilizerList.toList()}]
-    });
-    payloadProvider.updateFertilizerPayload(fertilizerPayloadFinal);
+      //pump-------------------------------------------------
+      String pumpList= jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].pumpList.map((pump) => pump.toJson()).toList());
+      List<dynamic> jsonPumpList = jsonDecode(pumpList);
+      for (var item in jsonPumpList) {
+        if (item["Status"] != 0) {
+          item["Status"] = 0;
+        }
+      }
+      String pumpPayloadFinal = jsonEncode({
+        "2400": [{"2407": jsonPumpList.toList()}]
+      });
+      payloadProvider.updatePumpPayload(pumpPayloadFinal);
 
-    String pumpList= jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].pumpList.map((pump) => pump.toJson()).toList());
-    List<dynamic> jsonPumpList = jsonDecode(pumpList);
-    String pumpPayloadFinal = jsonEncode({
-      "2400": [{"2407": jsonPumpList.toList()}]
-    });
+      //filter-----------------------------------------------
+      String filterList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].filterList.map((filter) => filter.toJson()).toList());
+      List<dynamic> jsonFilterList = jsonDecode(filterList);
+      for (var item in jsonFilterList) {
+        if (item["Status"] != 0) {
+          item["Status"] = 0;
+        }
+        if (item.containsKey("FilterStatus")) {
+          for (var filterStatus in item["FilterStatus"]) {
+            if (filterStatus["Status"] != 0) {
+              filterStatus["Status"] = 0;
+            }
+          }
+        }
+      }
 
-    payloadProvider.updatePumpPayload(pumpPayloadFinal);
+      String filterPayloadFinal = jsonEncode({
+        "2400": [{"2405": jsonFilterList.toList()}]
+      });
+      payloadProvider.updateFilterPayload(filterPayloadFinal);
+
+      //fertilizer----------------------------------------
+      String fertilizerSiteList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].fertilizerSiteList.map((pump) => pump.toJson()).toList());
+      List<dynamic> jsonFertilizerList = jsonDecode(fertilizerSiteList);
+      for (var item in jsonFertilizerList) {
+        updateFertStatus(item);
+      }
+      String fertilizerPayloadFinal = jsonEncode({
+        "2400": [{"2406": jsonFertilizerList.toList()}]
+      });
+      payloadProvider.updateFertilizerPayload(fertilizerPayloadFinal);
+
+    }else{
+      List<dynamic> csLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].currentSchedule.map((cs) => cs.toJson()).toList();
+      List<CurrentScheduleModel> cs = csLst.map((cs) => CurrentScheduleModel.fromJson(cs)).toList();
+      payloadProvider.updateCurrentScheduled(cs);
+
+      List<dynamic> pqLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].queProgramList.map((pq) => pq.toJson()).toList();
+      List<ProgramQueue> pq = pqLst.map((pq) => ProgramQueue.fromJson(pq)).toList();
+      payloadProvider.updateProgramQueue(pq);
+
+      //pump-------------------------------------------------
+      String pumpList= jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].pumpList.map((pump) => pump.toJson()).toList());
+      List<dynamic> jsonPumpList = jsonDecode(pumpList);
+      String pumpPayloadFinal = jsonEncode({
+        "2400": [{"2407": jsonPumpList.toList()}]
+      });
+      payloadProvider.updatePumpPayload(pumpPayloadFinal);
+
+      //filter------------------------------------
+      String filterList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].filterList.map((filter) => filter.toJson()).toList());
+      List<dynamic> jsonFilterList = jsonDecode(filterList);
+      String filterPayloadFinal = jsonEncode({
+        "2400": [{"2405": jsonFilterList.toList()}]
+      });
+      payloadProvider.updateFilterPayload(filterPayloadFinal);
+
+      //fertilizer------------------------------------------
+      String fertilizerSiteList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].fertilizerSiteList.map((pump) => pump.toJson()).toList());
+      List<dynamic> jsonFertilizerList = jsonDecode(fertilizerSiteList);
+      String fertilizerPayloadFinal = jsonEncode({
+        "2400": [{"2406": jsonFertilizerList.toList()}]
+      });
+      payloadProvider.updateFertilizerPayload(fertilizerPayloadFinal);
+    }
+
+  }
+
+  void updateFertStatus(Map<String, dynamic> json) {
+    json.forEach((key, value) {
+      if (key == "Status" && value != 0) {
+        json[key] = 0;
+      } else if (value is List) {
+        for (var item in value) {
+          if (item is Map<String, dynamic>) {
+            updateFertStatus(item);
+          }
+        }
+      } else if (value is Map<String, dynamic>) {
+        updateFertStatus(value);
+      }
+    });
   }
 
 
@@ -618,8 +694,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   }
 
   Widget buildWideLayout(screenWidth, payload2408, allIrrigationResumeFlag, wifiStrength, provider) {
-
-
     return Scaffold(
       appBar: AppBar(
         leading: const Padding(
@@ -780,6 +854,13 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               ):
               const SizedBox(),
               const SizedBox(width: 10),
+              IconButton(tooltip : 'Ai-Controller', onPressed: (){
+
+              }, icon: const CircleAvatar(
+                radius: 17,
+                backgroundColor: Colors.white,
+                child: Icon(Icons.mic),
+              )),
               IconButton(tooltip : 'Help & Support', onPressed: (){
                 showMenu(
                   context: context,
@@ -1382,7 +1463,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 return SideSheetClass(customerID: widget.customerId, nodeList: mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList,
                   deviceId: mySiteList[siteIndex].master[masterIndex].deviceId,
                   lastSyncDate: '${mySiteList[siteIndex].master[masterIndex].liveSyncDate} - ${mySiteList[siteIndex].master[masterIndex].liveSyncTime}',
-                  deviceName: mySiteList[siteIndex].master[masterIndex].categoryName,);
+                  deviceName: mySiteList[siteIndex].master[masterIndex].categoryName, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,);
               },
             ),
           ),
@@ -1827,8 +1908,8 @@ class BadgeButton extends StatelessWidget {
 
 
 class SideSheetClass extends StatefulWidget {
-  const SideSheetClass({Key? key, required this.customerID, required this.nodeList, required this.deviceId, required this.lastSyncDate, required this.deviceName}) : super(key: key);
-  final int customerID;
+  const SideSheetClass({Key? key, required this.customerID, required this.nodeList, required this.deviceId, required this.lastSyncDate, required this.deviceName, required this.controllerId}) : super(key: key);
+  final int customerID, controllerId;
   final String deviceId, deviceName, lastSyncDate;
   final List<NodeData> nodeList;
 
@@ -1877,7 +1958,6 @@ class _SideSheetClassState extends State<SideSheetClass> {
 
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    List<bool> _expanded = List.generate(5, (index) => false);
 
     return screenWidth>600? Container(
       padding: const EdgeInsets.all(10),
@@ -1901,7 +1981,29 @@ class _SideSheetClassState extends State<SideSheetClass> {
                 ),
               ],
             ),
-            const Text('NODE LIST', style: TextStyle(color: Colors.black, fontSize: 15)),
+            Padding(
+              padding: const EdgeInsets.only(left: 5, right: 5),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  const Expanded(child: Text('NODE LIST', style: TextStyle(color: Colors.black, fontSize: 15))),
+                  IconButton(tooltip:'Node Hourly logs',onPressed: (){
+                    Navigator.push(context,
+                      MaterialPageRoute(
+                        builder: (context) => NodeHrsLog(userId: widget.customerID, controllerId: widget.controllerId,),
+                      ),
+                    );
+                  }, icon: const Icon(Icons.ssid_chart)),
+                  IconButton(tooltip:'Sensor Hourly logs',onPressed: (){
+                    Navigator.push(context,
+                      MaterialPageRoute(
+                        builder: (context) => SensorHourlyLogs(userId: widget.customerID, controllerId: widget.controllerId,),
+                      ),
+                    );
+                  }, icon: const Icon(Icons.sensors)),
+                ],
+              ),
+            ),
             const Divider(),
             SizedBox(
               height: 50,
@@ -2128,7 +2230,8 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                             ]
                                           });
                                           MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                        }, icon: Icon(Icons.fact_check_outlined, color: Colors.teal))
+                                          GlobalSnackBar.show(context, 'Your comment sent successfully', 200);
+                                        }, icon: const Icon(Icons.fact_check_outlined, color: Colors.teal))
                                       ],
                                     ),
                                   ),
@@ -2415,7 +2518,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                     ]
                                   });
                                   MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                  GlobalSnackBar.show(context, 'Sent your comment successfully', 200);
+                                  GlobalSnackBar.show(context, 'Your comment sent successfully', 200);
                                   Navigator.of(context).pop();
                                 },
                                 child: const Text('Yes'),

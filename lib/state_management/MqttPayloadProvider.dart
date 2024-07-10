@@ -14,7 +14,7 @@ class MqttPayloadProvider with ChangeNotifier {
 
   bool mqttConnection = false;
   dynamic messageFromHw = '';
-  String agm = '';
+  String agmScheduledProgram = '';
 
   int wifiStrength = 0;
   int batVolt = 0;
@@ -64,7 +64,9 @@ class MqttPayloadProvider with ChangeNotifier {
 
       if(data.containsKey('4200')){
         messageFromHw = data['4200'][0]['4201'];
-        agm = messageFromHw['PayloadCode'];
+        if(messageFromHw['PayloadCode']=='2900'){
+          agmScheduledProgram = messageFromHw['PayloadCode'];
+        }
       }
 
       if(data.containsKey('2400')){
@@ -75,7 +77,7 @@ class MqttPayloadProvider with ChangeNotifier {
           updateLastSync();
 
           if(data['2400'][0].containsKey('WifiStrength')) {
-            wifiStrength = data['2400'][0]['WifiStrength'];
+            updateWifiStrength(data['2400'][0]['WifiStrength']);
           }
 
           if(data['2400'][0].containsKey('2401')) {
@@ -178,6 +180,14 @@ class MqttPayloadProvider with ChangeNotifier {
 
   void liveSyncCall(ls){
     liveSync= ls;
+    notifyListeners();
+  }
+
+  void updateWifiStrength(int nds) {
+    wifiStrength = nds;
+    if (wifiStrength < 0) {
+      wifiStrength = 0;
+    }
     notifyListeners();
   }
 

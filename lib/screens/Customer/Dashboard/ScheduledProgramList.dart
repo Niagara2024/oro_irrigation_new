@@ -136,11 +136,10 @@ class ScheduledProgramList extends StatelessWidget {
                               String payLoadFinal = jsonEncode({
                                 "2900": [{"2901": payload}]
                               });
-                              scheduledPrograms[index].isLoading = true;
                               MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
                               sentUserOperationToServer('${scheduledPrograms[index].progName} Started by Manual', payLoadFinal);
                             },
-                            child: scheduledPrograms[index].isLoading? Text('Start by Manual'):Text('Loading...'),
+                            child: const Text('Start by Manual'),
                           ):
                           MaterialButton(
                             color: Colors.redAccent,

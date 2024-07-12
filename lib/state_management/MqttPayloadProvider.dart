@@ -51,7 +51,6 @@ class MqttPayloadProvider with ChangeNotifier {
   Duration lastCommunication = Duration.zero;
 
   //pump controller payload
-
   List<CM> _pumpLiveList = [];
   List<CM> get pumpLiveList => _pumpLiveList;
 

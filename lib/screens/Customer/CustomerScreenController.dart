@@ -208,96 +208,104 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   void displayServerData(){
     MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
 
-    payloadProvider.updateWifiStrength(mySiteList[siteIndex].master[masterIndex].gemLive[0].WifiStrength);
+    if(mySiteList[siteIndex].master[masterIndex].categoryId==1||
+        mySiteList[siteIndex].master[masterIndex].categoryId==2){
+      //gem or gem+ controller
+      payloadProvider.updateWifiStrength(mySiteList[siteIndex].master[masterIndex].gemLive[0].WifiStrength);
 
-    List<dynamic> ndlLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList.map((ndl) => ndl.toJson()).toList();
-    payloadProvider.updateNodeList(ndlLst);
+      List<dynamic> ndlLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList.map((ndl) => ndl.toJson()).toList();
+      payloadProvider.updateNodeList(ndlLst);
 
-    List<dynamic> spLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].scheduledProgramList.map((sp) => sp.toJson()).toList();
-    List<ScheduledProgram> sp = spLst.map((sp) => ScheduledProgram.fromJson(sp)).toList();
-    payloadProvider.updateScheduledProgram(sp);
+      List<dynamic> spLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].scheduledProgramList.map((sp) => sp.toJson()).toList();
+      List<ScheduledProgram> sp = spLst.map((sp) => ScheduledProgram.fromJson(sp)).toList();
+      payloadProvider.updateScheduledProgram(sp);
 
-    if(payloadProvider.lastCommunication.inMinutes>=10){
-      mySiteList[siteIndex].master[masterIndex].gemLive[0].currentSchedule=[];
-      mySiteList[siteIndex].master[masterIndex].gemLive[0].queProgramList=[];
+      if(payloadProvider.lastCommunication.inMinutes>=10){
+        mySiteList[siteIndex].master[masterIndex].gemLive[0].currentSchedule=[];
+        mySiteList[siteIndex].master[masterIndex].gemLive[0].queProgramList=[];
 
-      //pump-------------------------------------------------
-      String pumpList= jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].pumpList.map((pump) => pump.toJson()).toList());
-      List<dynamic> jsonPumpList = jsonDecode(pumpList);
-      for (var item in jsonPumpList) {
-        if (item["Status"] != 0) {
-          item["Status"] = 0;
+        //pump-------------------------------------------------
+        String pumpList= jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].pumpList.map((pump) => pump.toJson()).toList());
+        List<dynamic> jsonPumpList = jsonDecode(pumpList);
+        for (var item in jsonPumpList) {
+          if (item["Status"] != 0) {
+            item["Status"] = 0;
+          }
         }
-      }
-      String pumpPayloadFinal = jsonEncode({
-        "2400": [{"2407": jsonPumpList.toList()}]
-      });
-      payloadProvider.updatePumpPayload(pumpPayloadFinal);
+        String pumpPayloadFinal = jsonEncode({
+          "2400": [{"2407": jsonPumpList.toList()}]
+        });
+        payloadProvider.updatePumpPayload(pumpPayloadFinal);
 
-      //filter-----------------------------------------------
-      String filterList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].filterList.map((filter) => filter.toJson()).toList());
-      List<dynamic> jsonFilterList = jsonDecode(filterList);
-      for (var item in jsonFilterList) {
-        if (item["Status"] != 0) {
-          item["Status"] = 0;
-        }
-        if (item.containsKey("FilterStatus")) {
-          for (var filterStatus in item["FilterStatus"]) {
-            if (filterStatus["Status"] != 0) {
-              filterStatus["Status"] = 0;
+        //filter-----------------------------------------------
+        String filterList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].filterList.map((filter) => filter.toJson()).toList());
+        List<dynamic> jsonFilterList = jsonDecode(filterList);
+        for (var item in jsonFilterList) {
+          if (item["Status"] != 0) {
+            item["Status"] = 0;
+          }
+          if (item.containsKey("FilterStatus")) {
+            for (var filterStatus in item["FilterStatus"]) {
+              if (filterStatus["Status"] != 0) {
+                filterStatus["Status"] = 0;
+              }
             }
           }
         }
+
+        String filterPayloadFinal = jsonEncode({
+          "2400": [{"2405": jsonFilterList.toList()}]
+        });
+        payloadProvider.updateFilterPayload(filterPayloadFinal);
+
+        //fertilizer----------------------------------------
+        String fertilizerSiteList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].fertilizerSiteList.map((pump) => pump.toJson()).toList());
+        List<dynamic> jsonFertilizerList = jsonDecode(fertilizerSiteList);
+        for (var item in jsonFertilizerList) {
+          updateFertStatus(item);
+        }
+        String fertilizerPayloadFinal = jsonEncode({
+          "2400": [{"2406": jsonFertilizerList.toList()}]
+        });
+        payloadProvider.updateFertilizerPayload(fertilizerPayloadFinal);
+
       }
+      else{
+        List<dynamic> csLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].currentSchedule.map((cs) => cs.toJson()).toList();
+        List<CurrentScheduleModel> cs = csLst.map((cs) => CurrentScheduleModel.fromJson(cs)).toList();
+        payloadProvider.updateCurrentScheduled(cs);
 
-      String filterPayloadFinal = jsonEncode({
-        "2400": [{"2405": jsonFilterList.toList()}]
-      });
-      payloadProvider.updateFilterPayload(filterPayloadFinal);
+        List<dynamic> pqLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].queProgramList.map((pq) => pq.toJson()).toList();
+        List<ProgramQueue> pq = pqLst.map((pq) => ProgramQueue.fromJson(pq)).toList();
+        payloadProvider.updateProgramQueue(pq);
 
-      //fertilizer----------------------------------------
-      String fertilizerSiteList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].fertilizerSiteList.map((pump) => pump.toJson()).toList());
-      List<dynamic> jsonFertilizerList = jsonDecode(fertilizerSiteList);
-      for (var item in jsonFertilizerList) {
-        updateFertStatus(item);
+        //pump-------------------------------------------------
+        String pumpList= jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].pumpList.map((pump) => pump.toJson()).toList());
+        List<dynamic> jsonPumpList = jsonDecode(pumpList);
+        String pumpPayloadFinal = jsonEncode({
+          "2400": [{"2407": jsonPumpList.toList()}]
+        });
+        payloadProvider.updatePumpPayload(pumpPayloadFinal);
+
+        //filter------------------------------------
+        String filterList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].filterList.map((filter) => filter.toJson()).toList());
+        List<dynamic> jsonFilterList = jsonDecode(filterList);
+        String filterPayloadFinal = jsonEncode({
+          "2400": [{"2405": jsonFilterList.toList()}]
+        });
+        payloadProvider.updateFilterPayload(filterPayloadFinal);
+
+        //fertilizer------------------------------------------
+        String fertilizerSiteList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].fertilizerSiteList.map((pump) => pump.toJson()).toList());
+        List<dynamic> jsonFertilizerList = jsonDecode(fertilizerSiteList);
+        String fertilizerPayloadFinal = jsonEncode({
+          "2400": [{"2406": jsonFertilizerList.toList()}]
+        });
+        payloadProvider.updateFertilizerPayload(fertilizerPayloadFinal);
       }
-      String fertilizerPayloadFinal = jsonEncode({
-        "2400": [{"2406": jsonFertilizerList.toList()}]
-      });
-      payloadProvider.updateFertilizerPayload(fertilizerPayloadFinal);
-
-    }else{
-      List<dynamic> csLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].currentSchedule.map((cs) => cs.toJson()).toList();
-      List<CurrentScheduleModel> cs = csLst.map((cs) => CurrentScheduleModel.fromJson(cs)).toList();
-      payloadProvider.updateCurrentScheduled(cs);
-
-      List<dynamic> pqLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].queProgramList.map((pq) => pq.toJson()).toList();
-      List<ProgramQueue> pq = pqLst.map((pq) => ProgramQueue.fromJson(pq)).toList();
-      payloadProvider.updateProgramQueue(pq);
-
-      //pump-------------------------------------------------
-      String pumpList= jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].pumpList.map((pump) => pump.toJson()).toList());
-      List<dynamic> jsonPumpList = jsonDecode(pumpList);
-      String pumpPayloadFinal = jsonEncode({
-        "2400": [{"2407": jsonPumpList.toList()}]
-      });
-      payloadProvider.updatePumpPayload(pumpPayloadFinal);
-
-      //filter------------------------------------
-      String filterList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].filterList.map((filter) => filter.toJson()).toList());
-      List<dynamic> jsonFilterList = jsonDecode(filterList);
-      String filterPayloadFinal = jsonEncode({
-        "2400": [{"2405": jsonFilterList.toList()}]
-      });
-      payloadProvider.updateFilterPayload(filterPayloadFinal);
-
-      //fertilizer------------------------------------------
-      String fertilizerSiteList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].fertilizerSiteList.map((pump) => pump.toJson()).toList());
-      List<dynamic> jsonFertilizerList = jsonDecode(fertilizerSiteList);
-      String fertilizerPayloadFinal = jsonEncode({
-        "2400": [{"2406": jsonFertilizerList.toList()}]
-      });
-      payloadProvider.updateFertilizerPayload(fertilizerPayloadFinal);
+    }
+    else{
+      //pump controller
     }
 
   }
@@ -343,21 +351,45 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     Duration lastComDifference = Provider.of<MqttPayloadProvider>(context).lastCommunication;
 
     if(mySiteList.isNotEmpty){
-      if(currentDate.isNotEmpty){
-        mySiteList[siteIndex].master[masterIndex].liveSyncDate = currentDate;
-        mySiteList[siteIndex].master[masterIndex].liveSyncTime = currentTime;
-      }
 
-      if(lastComDifference.inMinutes>=10){
-        mySiteList[siteIndex].master[masterIndex].gemLive[0].currentSchedule=[];
-        mySiteList[siteIndex].master[masterIndex].gemLive[0].queProgramList=[];
+      if(mySiteList[siteIndex].master[masterIndex].categoryId==1||
+          mySiteList[siteIndex].master[masterIndex].categoryId==2){
+        //gem or gem+ controller
+        if(currentDate.isNotEmpty){
+          mySiteList[siteIndex].master[masterIndex].liveSyncDate = currentDate;
+          mySiteList[siteIndex].master[masterIndex].liveSyncTime = currentTime;
+        }
+        if(lastComDifference.inMinutes>=10){
+          mySiteList[siteIndex].master[masterIndex].gemLive[0].currentSchedule=[];
+          mySiteList[siteIndex].master[masterIndex].gemLive[0].queProgramList=[];
+        }
+        else{
+          List<CurrentScheduleModel> currentSchedule = provider.currentSchedule;
+          mySiteList[siteIndex].master[masterIndex].gemLive[0].currentSchedule = currentSchedule;
+
+          List<ProgramQueue> programQueue = provider.programQueue;
+          mySiteList[siteIndex].master[masterIndex].gemLive[0].queProgramList = programQueue;
+        }
       }else{
-        List<CurrentScheduleModel> currentSchedule = provider.currentSchedule;
-        mySiteList[siteIndex].master[masterIndex].gemLive[0].currentSchedule = currentSchedule;
+        //pump controller
 
-        List<ProgramQueue> programQueue = provider.programQueue;
-        mySiteList[siteIndex].master[masterIndex].gemLive[0].queProgramList = programQueue;
+        if(provider.pumpLiveList.isNotEmpty){
+          List<CM> pl = provider.pumpLiveList;
+          mySiteList[siteIndex].master[masterIndex].pumpLive = pl;
+        }
+
+
+        // var liveMessage = json['liveMessage'] != null ? json['liveMessage'] as List : [];
+        // List<CM> pumpLiveList = liveMessage.isNotEmpty? liveMessage.map((live) => CM.fromJson(live)).toList(): [];
+        //
+        // final pcLivePayload = Provider.of<MqttPayloadProvider>(context).pumpControllerLive;
+        // Map<String, dynamic> json = jsonDecode(pcLivePayload);
+        // List<CM> pumpLiveList = json.isNotEmpty? json.map((live) => CM.fromJson(live)).toList() : [];
+        //
+        // mySiteList[siteIndex].master[masterIndex].pumpLive = pumpLiveList;
+
       }
+
     }
 
     return visibleLoading? buildLoadingIndicator(visibleLoading, screenWidth):
@@ -1012,7 +1044,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       ),
       backgroundColor: Colors.white,
       extendBody: true,
-      body: Container(
+      body:
+      (mySiteList[siteIndex].master[masterIndex].categoryId==1 ||
+          mySiteList[siteIndex].master[masterIndex].categoryId==2)?
+      Container(
         width: double.infinity,
         height: double.infinity,
         //color: myTheme.primaryColorLight.withOpacity(0.1),
@@ -1288,7 +1323,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             const SizedBox(),
           ],
         ),
-      ),
+      ):
+      PumpDashboard(siteData: mySiteList[siteIndex], masterIndex: masterIndex, customerId: widget.customerId, dealerId: widget.comingFrom=='AdminORDealer'? widget.userId:0,),
     );
   }
 
@@ -1298,10 +1334,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       padding: screenWidth>600? const EdgeInsets.all(8.0):
       const EdgeInsets.all(0),
       child:
-      _selectedIndex == 0 ? SizedBox(child: mySiteList[siteIndex].master[masterIndex].categoryId==1 ||
-          mySiteList[siteIndex].master[masterIndex].categoryId==2?
-      Column(
-        children: [
+      _selectedIndex == 0 ? SizedBox(child: Column(children: [
           Expanded(child: CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: mySiteList[siteIndex], masterInx: masterIndex, lineIdx: lineIndex,)),
           screenWidth<600? Container(
             height: 60,
@@ -1431,9 +1464,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             ),
           ):
               const SizedBox(),
-        ],
-      ):
-      PumpDashboard(siteData: mySiteList[siteIndex], masterIndex: masterIndex, customerId: widget.customerId,)):
+        ],)):
       _selectedIndex == 1 ? ProductInventory(userName: widget.customerName):
       _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId, from: 'Gem',):
       _selectedIndex == 3 ? ListOfLogConfig(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,):

@@ -159,7 +159,7 @@ class _SentAndReceivedState extends State<SentAndReceived> {
 
   SizedBox msgListBox(screenWidth) {
     return SizedBox(
-      width: screenWidth>600? widget.from=='Gem'? MediaQuery.sizeOf(context).width-512 : MediaQuery.sizeOf(context).width-828: MediaQuery.sizeOf(context).width,
+      width: screenWidth>600? widget.from=='Gem'? MediaQuery.sizeOf(context).width-512 : MediaQuery.sizeOf(context).width-676: MediaQuery.sizeOf(context).width,
       height: screenWidth>600? widget.from=='Gem'? MediaQuery.sizeOf(context).height-77: MediaQuery.sizeOf(context).height-120 : MediaQuery.sizeOf(context).height-230,
       child: sentAndReceivedList.isNotEmpty? ListView.builder(
         padding: const EdgeInsets.only(top: 10),
@@ -210,7 +210,7 @@ class _SentAndReceivedState extends State<SentAndReceived> {
           }
         },
       ):
-      const Center(child: Text('There have been no updates or messages from the controller today',
+      const Center(child: Text('Controller have been no updates or messages from the controller today',
         style: TextStyle(fontSize: 17,fontWeight: FontWeight.normal),),),
     );
   }

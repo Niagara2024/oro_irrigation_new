@@ -51,7 +51,9 @@ class MqttPayloadProvider with ChangeNotifier {
   Duration lastCommunication = Duration.zero;
 
   //pump controller payload
-  String pumpControllerLive='';
+
+  List<CM> _pumpLiveList = [];
+  List<CM> get pumpLiveList => _pumpLiveList;
 
   void editMySchedule(ScheduleViewProvider instance){
     mySchedule = instance;
@@ -154,13 +156,9 @@ class MqttPayloadProvider with ChangeNotifier {
         Map<String, dynamic> json = jsonDecode(payload);
         if(json['mC']=='LD01'){
 
-          pumpControllerLive = payload;
-          /*_pcLivePayload = PumpCLive.fromJson(json);
-
-          if (_pcLivePayload?.cM[3] is CMType2) {
-            wifiStrength = (_pcLivePayload?.cM[3] as CMType2).ss!;
-            batVolt = (_pcLivePayload?.cM[3] as CMType2).b!;
-          }*/
+          var liveMessage = json['cM'] != null ? json['cM'] as List : [];
+          List<CM> pumpLiveList = liveMessage.isNotEmpty? liveMessage.map((live) => CM.fromJson(live)).toList(): [];
+          updatePumpControllerLive(pumpLiveList);
         }
 
       }
@@ -230,6 +228,7 @@ class MqttPayloadProvider with ChangeNotifier {
     notifyListeners();
   }
 
+
   void updatePumpPayload(String payload) {
     try {
       Map<String, dynamic> data = jsonDecode(payload);
@@ -281,6 +280,11 @@ class MqttPayloadProvider with ChangeNotifier {
     } catch (e) {
       print('Error parsing JSON: $e');
     }
+  }
+
+  void updatePumpControllerLive(List<CM> pl) {
+    _pumpLiveList = pl;
+    notifyListeners();
   }
 
   void setAppConnectionState(MQTTConnectionState state) {

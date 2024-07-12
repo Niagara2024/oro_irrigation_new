@@ -285,7 +285,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                         ),
                       ),
                     ),
-                  ) :
+                  ):
                   const SizedBox(),
                 ],
               ),
@@ -297,8 +297,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                     color: Colors.black,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                  ),
-                  ),
+                  ),),
                 ),
               ),
             ],

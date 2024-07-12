@@ -590,7 +590,7 @@ class MainValveWidget extends StatelessWidget {
             'assets/images/dp_main_valve_closed.png',
           ),
           const SizedBox(height: 5),
-          Text(mv.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10),),
+          Text(mv.name.isNotEmpty? mv.name:mv.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10),),
         ],
       ),
     );
@@ -634,7 +634,7 @@ class ValveWidget extends StatelessWidget {
             'assets/images/valve_red.png',
           ),
           const SizedBox(height: 4),
-          Text(vl.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10),),
+          Text(vl.name.isNotEmpty? vl.name:vl.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10),),
         ],
       ),
     );

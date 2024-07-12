@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import '../../../Models/Customer/Dashboard/DashboardNode.dart';
+
 import '../../../Models/language.dart';
 import '../../../constants/http_service.dart';
 import '../../../constants/snack_bar.dart';
@@ -13,16 +13,16 @@ import '../../Forms/create_account.dart';
 
 import 'package:timezone/standalone.dart' as tz;
 
-class ControllerSettings extends StatefulWidget {
-  const ControllerSettings({Key? key, required this.customerID, required this.siteData, required this.masterIndex, required this.adDrId}) : super(key: key);
-  final int customerID, masterIndex, adDrId;
-  final DashboardModel siteData;
+class PumpControllerSettings extends StatefulWidget {
+  const PumpControllerSettings({Key? key, required this.customerId, required this.controllerId, required this.adDrId}) : super(key: key);
+
+  final int customerId, controllerId, adDrId;
 
   @override
-  State<ControllerSettings> createState() => _ControllerSettingsState();
+  State<PumpControllerSettings> createState() => _PumpControllerSettingsState();
 }
 
-class _ControllerSettingsState extends State<ControllerSettings> {
+class _PumpControllerSettingsState extends State<PumpControllerSettings> {
 
   bool visibleLoading = false;
 
@@ -47,13 +47,15 @@ class _ControllerSettingsState extends State<ControllerSettings> {
   String? _selectedTimeZone;
   String _currentDate = '';
   String _currentTime = '';
-
+  
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
     getLanguage();
     getControllerInfo();
     getSubUserList();
+
   }
 
   void callbackFunction(String message)
@@ -84,7 +86,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
   }
 
   Future<void> getControllerInfo() async{
-    final response = await HttpService().postRequest("getUserMasterDetails", {"userId": widget.customerID,"controllerId": widget.siteData.master[widget.masterIndex].controllerId});
+    final response = await HttpService().postRequest("getUserMasterDetails", {"userId": widget.customerId,"controllerId": widget.controllerId});
     if (response.statusCode == 200)
     {
       print(response.body);
@@ -104,8 +106,9 @@ class _ControllerSettingsState extends State<ControllerSettings> {
     }
   }
 
+
   Future<void> getSubUserList() async {
-    final response = await HttpService().postRequest("getUserSharedList", {"userId": widget.customerID});
+    final response = await HttpService().postRequest("getUserSharedList", {"userId": widget.customerId});
     if (response.statusCode == 200)
     {
       languageList.clear();
@@ -160,7 +163,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                     child: buildGeneralContent(screenWidth),
                   ),
                   const Center(child: Text('Tab 3 Content')),
-                  Center(child: Names(userID: widget.customerID,  customerID: widget.customerID, controllerId: widget.siteData.master[0].controllerId)),
+                  Center(child: Names(userID: widget.customerId,  customerID: widget.customerId, controllerId: widget.controllerId)),
                 ],
               ),
             ),
@@ -192,185 +195,175 @@ class _ControllerSettingsState extends State<ControllerSettings> {
             SizedBox(
               height: 385,
               child: Row(
-                  children: [
-                    Flexible(
-                      flex: 1,
-                      child: Column(
-                        children: [
-                          ListTile(
-                            title: const Text('Form Name'),
-                            leading: const Icon(Icons.area_chart_outlined),
-                            trailing: SizedBox(
-                              width: 300,
-                              child: TextField(
-                                controller: txtEcSiteName,
-                                decoration: InputDecoration(
-                                  filled: false,
-                                  border: OutlineInputBorder(
-                                    borderSide: const BorderSide(color: Colors.blue, width: 2.0),
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                  labelText: 'Form name',
-                                  suffixIcon: const Icon(Icons.edit),
-                                ),
+                children: [
+                  Flexible(
+                    flex: 1,
+                    child: Column(
+                      children: [
+                        ListTile(
+                          title: const Text('Form Name'),
+                          leading: const Icon(Icons.area_chart_outlined),
+                          trailing: SizedBox(
+                            width: 300,
+                            child: TextField(
+                              controller: txtEcSiteName,
+                              decoration: const InputDecoration(
+                                filled: false,
+                                suffixIcon: Icon(Icons.edit),
                               ),
                             ),
                           ),
-                          const Divider(),
-                          ListTile(
-                            title: const Text('Controller Name'),
-                            leading: const Icon(Icons.developer_board),
-                            trailing: SizedBox(
-                              width: 300,
-                              child: TextField(
-                                controller: txtEcGroupName,
-                                decoration: InputDecoration(
-                                  filled: false,
-                                  border: OutlineInputBorder(
-                                    borderSide: const BorderSide(color: Colors.blue, width: 2.0),
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                  labelText: 'Controller name',
-                                  suffixIcon: const Icon(Icons.edit),
-                                ),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          title: const Text('Controller Name'),
+                          leading: const Icon(Icons.developer_board),
+                          trailing: SizedBox(
+                            width: 300,
+                            child: TextField(
+                              controller: txtEcGroupName,
+                              decoration: const InputDecoration(
+                                filled: false,
+                                suffixIcon: Icon(Icons.edit),
                               ),
                             ),
                           ),
-                          const Divider(),
-                          ListTile(
-                            title: const Text('Device Category'),
-                            leading: const Icon(Icons.category_outlined),
-                            trailing: Text(categoryName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          title: const Text('Device Category'),
+                          leading: const Icon(Icons.category_outlined),
+                          trailing: Text(categoryName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          title: const Text('Model'),
+                          leading: const Icon(Icons.model_training),
+                          trailing: Text(modelName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          title: const Text('Device ID'),
+                          leading: const Icon(Icons.numbers_outlined),
+                          trailing: SelectableText(
+                            deviceId,
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                           ),
-                          const Divider(),
-                          ListTile(
-                            title: const Text('Model'),
-                            leading: const Icon(Icons.model_training),
-                            trailing: Text(modelName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          title: const Text('Language'),
+                          leading: const Icon(Icons.language),
+                          trailing: DropdownButton(
+                            underline: Container(),
+                            items: languageList.map((item) {
+                              return DropdownMenuItem(
+                                value: item.languageName,
+                                child: Text(item.languageName),
+                              );
+                            }).toList(),
+                            onChanged: (newVal) {
+                              setState(() {
+                                _mySelection = newVal!;
+                              });
+                            },
+                            value: _mySelection,
                           ),
-                          const Divider(),
-                          ListTile(
-                            title: const Text('Device ID'),
-                            leading: const Icon(Icons.numbers_outlined),
-                            trailing: SelectableText(
-                              deviceId,
-                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          const Divider(),
-                          ListTile(
-                            title: const Text('Language'),
-                            leading: const Icon(Icons.language),
-                            trailing: DropdownButton(
-                              underline: Container(),
-                              items: languageList.map((item) {
-                                return DropdownMenuItem(
-                                  value: item.languageName,
-                                  child: Text(item.languageName),
-                                );
-                              }).toList(),
-                              onChanged: (newVal) {
+                        ),
+                        const Divider(),
+                      ],
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 15),
+                    child: VerticalDivider(width: 0),
+                  ),
+                  Flexible(
+                    flex: 1,
+                    child: Column(
+                      children: [
+                        ListTile(
+                          title: const Text('App Theme Color'),
+                          leading: const Icon(Icons.color_lens_outlined),
+                          trailing: DropdownButton<String>(
+                            underline: Container(),
+                            value: selectedTheme,
+                            hint: const Text('Select your theme color'),
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
                                 setState(() {
-                                  _mySelection = newVal!;
+                                  selectedTheme = newValue;
                                 });
-                              },
-                              value: _mySelection,
-                            ),
+                              }
+                            },
+                            items: themeColors.entries.map<DropdownMenuItem<String>>((entry) {
+                              return DropdownMenuItem<String>(
+                                value: entry.key,
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 20,
+                                      height: 20,
+                                      color: entry.value,
+                                      margin: const EdgeInsets.only(right: 8),
+                                    ),
+                                    Text(entry.key),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
                           ),
-                          const Divider(),
-                        ],
-                      ),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          title: const Text('UTC'),
+                          leading: const Icon(Icons.timer_outlined),
+                          trailing: DropdownButton<String>(
+                            hint: const Text('Select Time Zone'),
+                            value: _selectedTimeZone,
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                _updateCurrentDateTime(newValue);
+                              }
+                            },
+                            items: _timeZones.map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          title: const Text('Current Date'),
+                          leading: Icon(Icons.date_range),
+                          trailing: Text(_currentDate, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          title: const Text('Current UTC Time'),
+                          leading: const Icon(Icons.date_range),
+                          trailing: Text(_currentTime, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
+                        ),
+                        const Divider(),
+                        const ListTile(
+                          title: Text('Time Format'),
+                          leading: Icon(Icons.date_range),
+                          trailing: Text('24 Hrs', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
+                        ),
+                        const Divider(),
+                        const ListTile(
+                          title: Text('Unit'),
+                          leading: Icon(Icons.ac_unit_rounded),
+                          trailing: Text('m3', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
+                        ),
+                        const Divider(),
+                      ],
                     ),
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 15),
-                      child: VerticalDivider(width: 0),
-                    ),
-                    Flexible(
-                      flex: 1,
-                      child: Column(
-                        children: [
-                          ListTile(
-                            title: const Text('App Theme Color'),
-                            leading: const Icon(Icons.color_lens_outlined),
-                            trailing: DropdownButton<String>(
-                              underline: Container(),
-                              value: selectedTheme,
-                              hint: const Text('Select your theme color'),
-                              onChanged: (String? newValue) {
-                                if (newValue != null) {
-                                  setState(() {
-                                    selectedTheme = newValue;
-                                  });
-                                }
-                              },
-                              items: themeColors.entries.map<DropdownMenuItem<String>>((entry) {
-                                return DropdownMenuItem<String>(
-                                  value: entry.key,
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 20,
-                                        height: 20,
-                                        color: entry.value,
-                                        margin: const EdgeInsets.only(right: 8),
-                                      ),
-                                      Text(entry.key),
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                          const Divider(),
-                          ListTile(
-                            title: const Text('UTC'),
-                            leading: const Icon(Icons.timer_outlined),
-                            trailing: DropdownButton<String>(
-                              hint: const Text('Select Time Zone'),
-                              value: _selectedTimeZone,
-                              onChanged: (String? newValue) {
-                                if (newValue != null) {
-                                  _updateCurrentDateTime(newValue);
-                                }
-                              },
-                              items: _timeZones.map<DropdownMenuItem<String>>((String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value),
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                          const Divider(),
-                          ListTile(
-                            title: const Text('Current Date'),
-                            leading: Icon(Icons.date_range),
-                            trailing: Text(_currentDate, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
-                          ),
-                          const Divider(),
-                          ListTile(
-                            title: const Text('Current UTC Time'),
-                            leading: const Icon(Icons.date_range),
-                            trailing: Text(_currentTime, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
-                          ),
-                          const Divider(),
-                          const ListTile(
-                            title: Text('Time Format'),
-                            leading: Icon(Icons.date_range),
-                            trailing: Text('24 Hrs', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
-                          ),
-                          const Divider(),
-                          const ListTile(
-                            title: Text('Unit'),
-                            leading: Icon(Icons.ac_unit_rounded),
-                            trailing: Text('m3', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
-                          ),
-                          const Divider(),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
             ),
             SizedBox(
               height: 50,
@@ -380,12 +373,12 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                 textColor: Colors.white,
                 onPressed:() async {
                   Map<String, Object> body = {
-                    'userId': widget.customerID,
-                    'controllerId': widget.siteData.master[0].controllerId,
+                    'userId': widget.customerId,
+                    'controllerId': widget.controllerId,
                     'deviceName': txtEcGroupName.text,
                     'groupId': groupId,
                     'groupName': txtEcSiteName.text,
-                    'modifyUser': widget.customerID,
+                    'modifyUser': widget.customerId,
                     'timeZone': _selectedTimeZone ?? '',
                   };
                   final Response response = await HttpService().putRequest("updateUserMasterDetails", body);
@@ -408,10 +401,10 @@ class _ControllerSettingsState extends State<ControllerSettings> {
               title: const Text('My Sub users', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),),
               trailing: widget.adDrId!=0?IconButton(tooltip:'Add new sub user', onPressed: () async {
                 showDialog<void>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      content: CreateAccount(callback: callbackFunction, subUsrAccount: true, customerId: widget.customerID,),
-                    ),
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    content: CreateAccount(callback: callbackFunction, subUsrAccount: true, customerId: widget.customerId,),
+                  ),
                 );
               }, icon: const Icon(Icons.add)):
               null,
@@ -592,12 +585,12 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                 textColor: Colors.white,
                 onPressed:() async {
                   Map<String, Object> body = {
-                    'userId': widget.customerID,
-                    'controllerId': widget.siteData.master[0].controllerId,
+                    'userId': widget.customerId,
+                    'controllerId': widget.controllerId,
                     'deviceName': txtEcGroupName.text,
                     'groupId': groupId,
                     'groupName': txtEcSiteName.text,
-                    'modifyUser': widget.customerID,
+                    'modifyUser': widget.customerId,
                   };
                   final Response response = await HttpService().putRequest("updateUserMasterDetails", body);
                   if(response.statusCode == 200)
@@ -621,7 +614,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                 showDialog<void>(
                   context: context,
                   builder: (context) => AlertDialog(
-                    content: CreateAccount(callback: callbackFunction, subUsrAccount: true, customerId: widget.customerID,),
+                    content: CreateAccount(callback: callbackFunction, subUsrAccount: true, customerId: widget.customerId,),
                   ),
                 );
               }, icon: const Icon(Icons.add)):

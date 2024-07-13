@@ -15,13 +15,13 @@ class PumpSettingsMDL {
     if (json['individualPumpSetting'] != null) {
       individualPumpSetting = <IndividualPumpSetting>[];
       json['individualPumpSetting'].forEach((v) {
-        individualPumpSetting!.add(new IndividualPumpSetting.fromJson(v));
+        individualPumpSetting!.add(IndividualPumpSetting.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     if (commonPumpSetting != null) {
       data['commonPumpSetting'] =
           commonPumpSetting!.map((v) => v.toJson()).toList();
@@ -56,19 +56,19 @@ class CommonPumpSetting {
     if (json['settingList'] != null) {
       settingList = <SettingList>[];
       json['settingList'].forEach((v) {
-        settingList!.add(new SettingList.fromJson(v));
+        settingList!.add(SettingList.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['controllerId'] = this.controllerId;
-    data['deviceId'] = this.deviceId;
-    data['deviceName'] = this.deviceName;
-    data['serialNumber'] = this.serialNumber;
-    if (this.settingList != null) {
-      data['settingList'] = this.settingList!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['controllerId'] = controllerId;
+    data['deviceId'] = deviceId;
+    data['deviceName'] = deviceName;
+    data['serialNumber'] = serialNumber;
+    if (settingList != null) {
+      data['settingList'] = settingList!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -87,17 +87,17 @@ class SettingList {
     if (json['setting'] != null) {
       setting = <SettingCmm>[];
       json['setting'].forEach((v) {
-        setting!.add(new SettingCmm.fromJson(v));
+        setting!.add(SettingCmm.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['type'] = this.type;
-    data['name'] = this.name;
-    if (this.setting != null) {
-      data['setting'] = this.setting!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['type'] = type;
+    data['name'] = name;
+    if (setting != null) {
+      data['setting'] = setting!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -109,7 +109,7 @@ class SettingCmm {
   int? widgetTypeId;
   String? iconCodePoint;
   String? iconFontFamily;
-  bool? value;
+  dynamic value;
   bool? hidden;
 
   SettingCmm(
@@ -122,6 +122,7 @@ class SettingCmm {
         this.hidden});
 
   SettingCmm.fromJson(Map<String, dynamic> json) {
+
     sNo = json['sNo'];
     title = json['title'];
     widgetTypeId = json['widgetTypeId'];
@@ -132,14 +133,14 @@ class SettingCmm {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['sNo'] = this.sNo;
-    data['title'] = this.title;
-    data['widgetTypeId'] = this.widgetTypeId;
-    data['iconCodePoint'] = this.iconCodePoint;
-    data['iconFontFamily'] = this.iconFontFamily;
-    data['value'] = this.value;
-    data['hidden'] = this.hidden;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['sNo'] = sNo;
+    data['title'] = title;
+    data['widgetTypeId'] = widgetTypeId;
+    data['iconCodePoint'] = iconCodePoint;
+    data['iconFontFamily'] = iconFontFamily;
+    data['value'] = value;
+    data['hidden'] = hidden;
     return data;
   }
 }
@@ -175,22 +176,22 @@ class IndividualPumpSetting {
     if (json['settingList'] != null) {
       settingList = <SettingList>[];
       json['settingList'].forEach((v) {
-        settingList!.add(new SettingList.fromJson(v));
+        settingList!.add(SettingList.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['sNo'] = this.sNo;
-    data['id'] = this.id;
-    data['hid'] = this.hid;
-    data['name'] = this.name;
-    data['location'] = this.location;
-    data['type'] = this.type;
-    data['deviceId'] = this.deviceId;
-    if (this.settingList != null) {
-      data['settingList'] = this.settingList!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['sNo'] = sNo;
+    data['id'] = id;
+    data['hid'] = hid;
+    data['name'] = name;
+    data['location'] = location;
+    data['type'] = type;
+    data['deviceId'] = deviceId;
+    if (settingList != null) {
+      data['settingList'] = settingList!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -225,14 +226,14 @@ class Setting {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['sNo'] = this.sNo;
-    data['title'] = this.title;
-    data['widgetTypeId'] = this.widgetTypeId;
-    data['iconCodePoint'] = this.iconCodePoint;
-    data['iconFontFamily'] = this.iconFontFamily;
-    data['value'] = this.value;
-    data['hidden'] = this.hidden;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['sNo'] = sNo;
+    data['title'] = title;
+    data['widgetTypeId'] = widgetTypeId;
+    data['iconCodePoint'] = iconCodePoint;
+    data['iconFontFamily'] = iconFontFamily;
+    data['value'] = value;
+    data['hidden'] = hidden;
     return data;
   }
 }

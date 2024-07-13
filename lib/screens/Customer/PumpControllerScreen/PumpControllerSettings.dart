@@ -13,6 +13,8 @@ import '../../Forms/create_account.dart';
 
 import 'package:timezone/standalone.dart' as tz;
 
+import 'PumpPreferenceScreen.dart';
+
 class PumpControllerSettings extends StatefulWidget {
   const PumpControllerSettings({Key? key, required this.customerId, required this.controllerId, required this.adDrId}) : super(key: key);
 
@@ -162,8 +164,8 @@ class _PumpControllerSettingsState extends State<PumpControllerSettings> {
                     padding: const EdgeInsets.all(8.0),
                     child: buildGeneralContent(screenWidth),
                   ),
-                  const Center(child: Text('Tab 3 Content')),
-                  Center(child: Names(userID: widget.customerId,  customerID: widget.customerId, controllerId: widget.controllerId)),
+                  PumpPreferenceScreen(customerId: widget.customerId, controllerId: widget.controllerId,),
+                  Names(userID: widget.customerId,  customerID: widget.customerId, controllerId: widget.controllerId),
                 ],
               ),
             ),

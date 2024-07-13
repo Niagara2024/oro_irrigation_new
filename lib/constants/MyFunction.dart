@@ -26,7 +26,7 @@ class MyFunction {
 
 }
 
-enum GemReasonCode {
+enum GemProgramSSReasonCode {
   runningAsPerSchedule(1, 'Running As Per Schedule'),
   turnedOnManually(2, 'Turned On Manually'),
   startedByCondition(3, 'Started By Condition'),
@@ -54,11 +54,39 @@ enum GemReasonCode {
   final int code;
   final String content;
 
-  const GemReasonCode(this.code, this.content);
+  const GemProgramSSReasonCode(this.code, this.content);
 
-  static GemReasonCode fromCode(int code) {
-    return GemReasonCode.values.firstWhere((e) => e.code == code,
-      orElse: () => GemReasonCode.unknown,
+  static GemProgramSSReasonCode fromCode(int code) {
+    return GemProgramSSReasonCode.values.firstWhere((e) => e.code == code,
+      orElse: () => GemProgramSSReasonCode.unknown,
+    );
+  }
+}
+
+enum GemLineSSReasonCode {
+  linePausedManually(1, 'The Line Paused Manually'),
+  pausedByStandAloneMode(2, 'The Line Paused By StandAlone Mode'),
+  pausedBySystemDefinition(3, 'The Line Paused By System Definition'),
+  pausedByLowFlowAlarm(4, 'The Line Paused By Low Flow Alarm'),
+  pausedByHighFlowAlarm(5, 'The Line Paused By High Flow Alarm'),
+  pausedByNoFlowAlarm(6, 'The Line Paused By No Flow Alarm'),
+  pausedByEcHigh(7, 'The Line Paused By Ec High'),
+  pausedByPhLow(8, 'The Line Paused By Ph Low'),
+  pausedByPhHigh(9, 'The Line Paused By Ph High'),
+  pausedByPressureLow(10, 'The Line Paused By Pressure Low'),
+  pausedByPressureHigh(11, 'The Line Paused By Pressure High'),
+  pausedByNoPowerSupply(12, 'The Line Paused By No Power Supply'),
+  pausedByNoCommunication(13, 'The Line Paused By No Communication'),
+  unknown(0, 'Unknown content');
+
+  final int code;
+  final String content;
+
+  const GemLineSSReasonCode(this.code, this.content);
+
+  static GemLineSSReasonCode fromCode(int code) {
+    return GemLineSSReasonCode.values.firstWhere((e) => e.code == code,
+      orElse: () => GemLineSSReasonCode.unknown,
     );
   }
 }
@@ -70,4 +98,53 @@ String convert24HourTo12Hour(String timeString) {
   final parsedTime = DateFormat('HH:mm:ss').parse(timeString);
   final formattedTime = DateFormat('hh:mm a').format(parsedTime);
   return formattedTime;
+}
+
+enum PumpReasonCode {
+  reason1(1, 'Motor off due to sump empty'),
+  reason2(2, 'Motor off due to upper tank full'),
+  reason3(3, 'Motor off due to low voltage'),
+  reason4(4, 'Motor off due to high voltage'),
+  reason5(5, 'Motor off due to voltage SPP'),
+  reason6(6, 'Motor off due to reverse phase'),
+  reason7(7, 'Motor off due to starter trip'),
+  reason8(8, 'Motor off due to dry run'),
+  reason9(9, 'Motor off due to overload'),
+  reason10(10, 'Motor off due to current SPP'),
+  reason11(11, 'Motor off due to cyclic trip'),
+  reason12(12, 'Motor off due to maximum run time'),
+  reason13(13, 'Motor off due to sump empty'),
+  reason14(14, 'Motor off due to upper tank full'),
+  reason15(15, 'Motor off due to RTC 1'),
+  reason16(16, 'Motor off due to RTC 2'),
+  reason17(17, 'Motor off due to RTC 3'),
+  reason18(18, 'Motor off due to RTC 4'),
+  reason19(19, 'Motor off due to RTC 5'),
+  reason20(20, 'Motor off due to RTC 6'),
+  reason21(21, 'Motor off due to auto mobile key off'),
+
+  reason22(22, 'Motor on due to cyclic time'),
+  reason23(23, 'Motor on due to RTC 1'),
+  reason24(24, 'Motor on due to RTC 2'),
+  reason25(25, 'Motor on due to RTC 3'),
+  reason26(26, 'Motor on due to RTC 4'),
+  reason27(27, 'Motor on due to RTC 5'),
+  reason28(28, 'Motor on due to RTC 6'),
+  reason29(29, 'Motor on due to auto mobile key on'),
+  reason30(30, 'Motor on due to Power off'),
+  reason31(31, 'Motor on due to Power on'),
+  unknown(0, 'Unknown content');
+
+  final int code;
+  final String content;
+  final String motorOff = "Motor off due to";
+  final String motorOn = "Motor on due to";
+
+  const PumpReasonCode(this.code, this.content);
+
+  static PumpReasonCode fromCode(int code) {
+    return PumpReasonCode.values.firstWhere((e) => e.code == code,
+      orElse: () => PumpReasonCode.unknown,
+    );
+  }
 }

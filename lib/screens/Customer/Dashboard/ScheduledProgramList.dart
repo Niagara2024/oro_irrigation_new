@@ -392,7 +392,7 @@ class ScheduledProgramList extends StatelessWidget {
 
 
   String getContentByCode(int code) {
-    return GemReasonCode.fromCode(code).content;
+    return GemProgramSSReasonCode.fromCode(code).content;
   }
 
   void sentUserOperationToServer(String msg, String data) async

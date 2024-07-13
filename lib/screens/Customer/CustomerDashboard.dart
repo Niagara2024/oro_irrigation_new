@@ -56,7 +56,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   }
 
   String getContentByCode(int code) {
-    return GemReasonCode.fromCode(code).content;
+    return GemLineSSReasonCode.fromCode(code).content;
   }
 
 

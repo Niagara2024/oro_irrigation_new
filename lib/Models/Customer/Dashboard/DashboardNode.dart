@@ -1108,8 +1108,8 @@ class Fertilizer {
       qtyLeft: qtyLeft,
       onTime: hasOnTimeKey? json['OnTime']:'0',
       offTime: hasOffTimeKey? json['OffTime']:'0',
-      flowMeter: json['FlowMeter'],
-      level: json['Level'],
+      flowMeter: json['FlowMeter'].runtimeType==String?[]:json['FlowMeter'],
+      level: json['Level'].runtimeType==String?[]:json['Level'],
     );
   }
 

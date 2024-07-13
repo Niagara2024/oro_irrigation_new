@@ -876,7 +876,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                           ):
                           Container(),
 
-                        if (dashBoardData.isNotEmpty)
+                        if (ddCurrentPosition==0 && dashBoardData.isNotEmpty)
                           dashBoardData[0].centralFertilizerSite.isNotEmpty ? Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Column(
@@ -991,7 +991,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                             ),
                           ): Container(),
 
-                        if (dashBoardData.isNotEmpty)
+                        if (ddCurrentPosition==0 && dashBoardData.isNotEmpty)
                           dashBoardData[0].localFertilizerSite.isNotEmpty ? Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Column(

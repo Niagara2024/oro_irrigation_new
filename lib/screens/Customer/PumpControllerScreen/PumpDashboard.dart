@@ -10,6 +10,7 @@ import 'package:oro_irrigation_new/constants/theme.dart';
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../Models/Customer/Dashboard/PumpControllerModel/PumpSettingsMDL.dart';
 import '../../../constants/MQTTManager.dart';
+import '../../../constants/MyFunction.dart';
 import '../../../constants/http_service.dart';
 import '../Dashboard/SentAndReceived.dart';
 
@@ -36,7 +37,7 @@ class _PumpDashboardState extends State<PumpDashboard> with SingleTickerProvider
 
   Map<String, double> rybCurrentValues = {};
   List<CMType1> pumpList = [];
-  late PumpSettingsMDL pumpControllerSettings;
+
 
   //late List<ChartSampleData> chartData;
 
@@ -107,7 +108,6 @@ class _PumpDashboardState extends State<PumpDashboard> with SingleTickerProvider
     addAppointmentDetails();
     syncLive();
     getPumpLogs();
-    getUserPreferenceSetting();
   }
 
   void refreshCurrentTab() {
@@ -154,31 +154,6 @@ class _PumpDashboardState extends State<PumpDashboard> with SingleTickerProvider
     }
   }
 
-  Future<void> getUserPreferenceSetting() async
-  {
-    Map<String, Object> body = {
-      "userId": widget.customerId,
-      "controllerId": widget.siteData.master[widget.masterIndex].controllerId,
-    };
-    print(body);
-    final response = await HttpService().postRequest("getUserPreferenceSetting", body);
-    if (response.statusCode == 200) {
-      var data = jsonDecode(response.body);
-      print(response.body);
-      if (data["code"] == 200) {
-        final jsonData = data["data"];
-        try {
-          pumpControllerSettings = (jsonData != null ? PumpSettingsMDL.fromJson(jsonData) : null)!;
-        } catch (e) {
-          print('Error: $e');
-        }
-
-      }
-    }
-    else {
-      //_showSnackBar(response.body);
-    }
-  }
 
   @override
   void dispose() {
@@ -340,9 +315,13 @@ class _PumpDashboardState extends State<PumpDashboard> with SingleTickerProvider
                                     color: Colors.teal.shade100,
                                     child: Row(
                                       children: [
-                                        const Expanded(child: Center(child: Text(
-                                            'reason text here',
-                                            style: TextStyle(fontSize: 11),)),),
+                                        Expanded(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 5),
+                                            child: Text(pumpList[index].rn!!=0? getContentByCode(pumpList[index].rn!):'',
+                                              style: const TextStyle(fontSize: 10),),
+                                          ),
+                                        ),
                                         VerticalDivider(color: Colors.teal.shade200,),
                                         SizedBox(
                                           width: 50,
@@ -460,7 +439,7 @@ class _PumpDashboardState extends State<PumpDashboard> with SingleTickerProvider
                                                           style: TextStyle(
                                                               fontWeight: FontWeight
                                                                   .normal,
-                                                              fontSize: 16,
+                                                              fontSize: 14,
                                                               color: Colors
                                                                   .teal),),
                                                         Text('${floatVal[1]}%',
@@ -472,7 +451,7 @@ class _PumpDashboardState extends State<PumpDashboard> with SingleTickerProvider
                                                           style: TextStyle(
                                                               fontWeight: FontWeight
                                                                   .normal,
-                                                              fontSize: 16,
+                                                              fontSize: 14,
                                                               color: Colors
                                                                   .teal),),
                                                         Text('${floatVal[2]}%',
@@ -484,7 +463,7 @@ class _PumpDashboardState extends State<PumpDashboard> with SingleTickerProvider
                                                           style: TextStyle(
                                                               fontWeight: FontWeight
                                                                   .normal,
-                                                              fontSize: 16,
+                                                              fontSize: 14,
                                                               color: Colors
                                                                   .teal),),
                                                         Text('${floatVal[3]}%',
@@ -710,6 +689,10 @@ class _PumpDashboardState extends State<PumpDashboard> with SingleTickerProvider
     );
   }
 
+  String getContentByCode(int code) {
+    return PumpReasonCode.fromCode(code).content;
+  }
+
   /// The method called whenever the calendar view navigated to previous/next
   /// view or switched to different calendar view, based on the view changed
   /// details new appointment collection added to the calendar
@@ -804,7 +787,6 @@ class _PumpDashboardState extends State<PumpDashboard> with SingleTickerProvider
     _subjectCollection.add('Pump 1 OFF');
     _subjectCollection.add('Pump 2 OFF');
     _subjectCollection.add('Pump 3 OFF');
-
 
     _colorCollection.add(const Color(0xFF0F8644));
     _colorCollection.add(const Color(0xFF8B1FA9));

@@ -283,7 +283,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                 "selected": [],
                               };
                               sentManualModeToServer(manualOperation);
-                              prefs.remove(widget.filteredCurrentSchedule[index].programName);
+                              //prefs.remove(widget.filteredCurrentSchedule[index].programName);
                             },
                             child: const Text('Stop'),
                           ):
@@ -515,7 +515,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
 
 
   String getContentByCode(int code) {
-    return GemReasonCode.fromCode(code).content;
+    return GemProgramSSReasonCode.fromCode(code).content;
   }
 
   Future<void>sentManualModeToServer(manualOperation) async {

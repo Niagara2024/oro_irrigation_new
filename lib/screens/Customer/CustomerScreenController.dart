@@ -24,6 +24,7 @@ import 'CustomerDashboard.dart';
 import 'Dashboard/AllNodeListAndDetails.dart';
 import 'Dashboard/ControllerLogs.dart';
 import 'Dashboard/ControllerSettings.dart';
+import 'Dashboard/MyGemini.dart';
 import 'Dashboard/NodeHourlyLog/NodeHrsLog.dart';
 import 'Dashboard/RunByManual.dart';
 import 'Dashboard/SensorHourlyLog/SensorHourlyLogs.dart';
@@ -887,7 +888,12 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               const SizedBox(),
               const SizedBox(width: 10),
               IconButton(tooltip : 'Ai-Controller', onPressed: (){
-
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MyGemini(),
+                  ),
+                );
               }, icon: const CircleAvatar(
                 radius: 17,
                 backgroundColor: Colors.white,

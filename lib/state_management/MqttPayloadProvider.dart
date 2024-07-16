@@ -5,7 +5,7 @@ import 'package:oro_irrigation_new/state_management/scheule_view_provider.dart';
 import '../Models/Customer/Dashboard/DashboardNode.dart';
 import '../constants/snack_bar.dart';
 
-enum MQTTConnectionState { connected, disconnected, connecting }
+enum MQTTConnectionState { connected, disconnected, connecting}
 
 class MqttPayloadProvider with ChangeNotifier {
   MQTTConnectionState _appConnectionState = MQTTConnectionState.disconnected;

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../Models/Customer/Dashboard/PumpControllerModel/PumpSettingsMDL.dart';
 import '../../../constants/http_service.dart';
 import 'PrefrenceScreen/PumpCommonSettings.dart';
+import 'PrefrenceScreen/PumpIndividualSettings.dart';
 
 class PumpPreferenceScreen extends StatefulWidget {
   const PumpPreferenceScreen({Key? key, required this.customerId, required this.controllerId}) : super(key: key);
@@ -58,20 +59,21 @@ class _PumpPreferenceScreenState extends State<PumpPreferenceScreen> {
     return  Scaffold(
       body: Row(
         children: <Widget>[
-          // This is the permanent drawer
           SizedBox(
-            width: 200,
+            width: 250,
             child: Drawer(
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
               ),
+              surfaceTintColor: Colors.white,
+              shadowColor: Colors.teal,
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: <Widget>[
                   ListTile(
                     selected: listTileIndex==0? true: false,
-                    selectedTileColor: Colors.teal.shade300,
-                    selectedColor: Colors.white,
+                    //selectedTileColor: Colors.teal.shade300,
+                    selectedColor: Colors.teal,
                     title: const Text('Common settings'),
                     onTap: () {
                       setState(() {
@@ -81,8 +83,8 @@ class _PumpPreferenceScreenState extends State<PumpPreferenceScreen> {
                   ),
                   ListTile(
                     selected: listTileIndex==1? true: false,
-                    selectedTileColor: Colors.teal.shade300,
-                    selectedColor: Colors.white,
+                    //selectedTileColor: Colors.teal.shade300,
+                    selectedColor: Colors.teal,
                     title: const Text('Pump 1'),
                     onTap: () {
                       setState(() {
@@ -92,8 +94,8 @@ class _PumpPreferenceScreenState extends State<PumpPreferenceScreen> {
                   ),
                   ListTile(
                     selected: listTileIndex==2? true: false,
-                    selectedTileColor: Colors.teal.shade300,
-                    selectedColor: Colors.white,
+                    //selectedTileColor: Colors.teal.shade300,
+                    selectedColor: Colors.teal,
                     title: const Text('Pump 2'),
                     onTap: () {
                       setState(() {
@@ -103,8 +105,8 @@ class _PumpPreferenceScreenState extends State<PumpPreferenceScreen> {
                   ),
                   ListTile(
                     selected: listTileIndex==3? true: false,
-                    selectedTileColor: Colors.teal.shade300,
-                    selectedColor: Colors.white,
+                    //selectedTileColor: Colors.teal.shade300,
+                    selectedColor: Colors.teal,
                     title: const Text('Pump 3'),
                     onTap: () {
                       setState(() {
@@ -116,12 +118,9 @@ class _PumpPreferenceScreenState extends State<PumpPreferenceScreen> {
               ),
             ),
           ),
-          // This is the main content area
           Expanded(
             child: listTileIndex==0? PumpCommonSettings(pumpControllerSettings: pumpControllerSettings,):
-            Container(
-              color: Colors.greenAccent,
-            ),
+            PumpIndividualSettings(pumpControllerSettings: pumpControllerSettings, pumpInx: listTileIndex-1,),
           ),
         ],
       ),

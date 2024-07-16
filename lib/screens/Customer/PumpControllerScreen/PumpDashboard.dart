@@ -16,6 +16,7 @@ import '../Dashboard/SentAndReceived.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'PumpControllerSettings.dart';
+import 'PumpLogScreen.dart';
 
 class PumpDashboard extends StatefulWidget {
   const PumpDashboard({Key? key, required this.siteData, required this.masterIndex, required this.customerId, required this.dealerId}) : super(key: key);
@@ -48,66 +49,11 @@ class _PumpDashboardState extends State<PumpDashboard> with SingleTickerProvider
   // const actionForCalibration = "getUserPreferenceCalibration";
 
 
-  final List<String> _subjectCollection = <String>[];
-  final List<Color> _colorCollection = <Color>[];
-  final _MeetingDataSource _events = _MeetingDataSource(<_PumpModel>[]);
-  final DateTime _minDate = DateTime.now().subtract(const Duration(days: 365 ~/ 2)),
-      _maxDate = DateTime.now();
-
-  final List<CalendarView> _allowedViews = <CalendarView>[
-    CalendarView.day,
-    CalendarView.week,
-  ];
-
-  final List<String> _viewNavigationModeList =
-  <String>['snap', 'none'].toList();
-  final List<String> _numberOfDaysList = <String>[
-    'default',
-    '1 day',
-    '2 days',
-    '3 days',
-    '4 days',
-    '5 days',
-    '6 days',
-    '7 days'
-  ].toList();
-
-  final List<String> _numberOfDaysListWorkWeek = <String>[
-    'default',
-    '1 day',
-    '2 days',
-    '3 days',
-    '4 days',
-    '5 days',
-  ].toList();
-
-  /// Global key used to maintain the state, when we change the parent of the
-  /// widget
-  final GlobalKey _globalKey = GlobalKey();
-  final ScrollController _controller = ScrollController();
-  final CalendarController _calendarController = CalendarController();
-
-  List<DateTime> _blackoutDates = <DateTime>[];
-  bool _showLeadingAndTrailingDates = true;
-  bool _showDatePickerButton = true;
-  bool _allowViewNavigation = true;
-  bool _showCurrentTimeIndicator = true;
-  StateSetter? _setter;
-
-  ViewNavigationMode _viewNavigationMode = ViewNavigationMode.snap;
-  String _viewNavigationModeString = 'snap';
-  bool _showWeekNumber = false;
-  String _numberOfDaysString = 'default';
-  int _numberOfDays = -1;
-
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    _calendarController.view = CalendarView.day;
-    addAppointmentDetails();
     syncLive();
-    getPumpLogs();
   }
 
   void refreshCurrentTab() {
@@ -124,34 +70,6 @@ class _PumpDashboardState extends State<PumpDashboard> with SingleTickerProvider
           'AppToFirmware/${widget.siteData.master[widget.masterIndex]
               .deviceId}');
     });
-  }
-
-  Future<void> getPumpLogs() async
-  {
-    Map<String, Object> body = {
-      "userId": widget.customerId,
-      "controllerId": widget.siteData.master[widget.masterIndex].controllerId,
-      "fromDate": "2024-06-20",
-      "toDate": "2024-06-28"
-    };
-    print(body);
-    final response = await HttpService().postRequest("getUserPumpLog", body);
-    if (response.statusCode == 200) {
-      //siteListFinal.clear();
-      var data = jsonDecode(response.body);
-      print(response.body);
-      if (data["code"] == 200) {
-        final jsonData = data["data"] as List;
-        try {
-          //siteListFinal = jsonData.map((json) => DashboardModel.fromJson(json)).toList();
-        } catch (e) {
-          print('Error: $e');
-        }
-      }
-    }
-    else {
-      //_showSnackBar(response.body);
-    }
   }
 
 
@@ -186,15 +104,8 @@ class _PumpDashboardState extends State<PumpDashboard> with SingleTickerProvider
           rybCurrentValues[parts[0]] = double.parse(parts[1]);
         }
       }
-
       refreshCurrentTab();
     }
-
-    final Widget calendar = Theme(
-        key: _globalKey,
-        data: myTheme,
-        child: _getGettingStartedCalendar(_calendarController, _events,
-            _onViewChanged, _minDate, _maxDate, scheduleViewBuilder));
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -669,13 +580,7 @@ class _PumpDashboardState extends State<PumpDashboard> with SingleTickerProvider
                           controllerId: widget.siteData.master[widget
                               .masterIndex].controllerId,
                           from: 'Pump',),
-                        Center(
-                          child: Expanded(
-                            child: Container(
-                                color: Colors.white,
-                                child: calendar),
-                          ),
-                        ),
+                        PumpLogScreen(customerId: widget.customerId, controllerId: widget.siteData.master[widget.masterIndex].controllerId,),
                         PumpControllerSettings(customerId: widget.customerId, controllerId: widget.siteData.master[widget.masterIndex].controllerId, adDrId: widget.dealerId,),
                       ],
                     ),
@@ -693,281 +598,6 @@ class _PumpDashboardState extends State<PumpDashboard> with SingleTickerProvider
     return PumpReasonCode.fromCode(code).content;
   }
 
-  /// The method called whenever the calendar view navigated to previous/next
-  /// view or switched to different calendar view, based on the view changed
-  /// details new appointment collection added to the calendar
-  void _onViewChanged(ViewChangedDetails visibleDatesChangedDetails) {
-    final List<_PumpModel> appointment = <_PumpModel>[];
-    _events.appointments.clear();
-    final Random random = Random();
-    final List<DateTime> blockedDates = <DateTime>[];
-    /*if (_calendarController.view == CalendarView.month ||
-        _calendarController.view == CalendarView.timelineMonth) {
-      for (int i = 0; i < 5; i++) {
-        blockedDates.add(visibleDatesChangedDetails.visibleDates[
-        random.nextInt(visibleDatesChangedDetails.visibleDates.length)]);
-      }
-    }*/
-
-    SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-      setState(() {
-        if (_calendarController.view == CalendarView.workWeek) {
-          if (_numberOfDaysString == '6 days' || _numberOfDaysString == '7 days') {
-            _numberOfDaysString = '5 days';
-          }
-        }
-        if (_numberOfDays > 5 && _calendarController.view == CalendarView.workWeek) {
-          _numberOfDays = 5;
-        }
-
-      });
-      if (_setter != null) {
-        _setter!(() {});
-      }
-    });
-
-    /// Creates new appointment collection based on
-    /// the visible dates in calendar.
-    if (_calendarController.view != CalendarView.schedule) {
-      for (int i = 0; i < visibleDatesChangedDetails.visibleDates.length; i++) {
-        final DateTime date = visibleDatesChangedDetails.visibleDates[i];
-        if (blockedDates.isNotEmpty &&
-            blockedDates.contains(date)) {
-          continue;
-        }
-        final int count = 1 + random.nextInt(2);
-        for (int j = 0; j < count; j++) {
-          final DateTime startDate =
-          DateTime(date.year, date.month, date.day, 8 + random.nextInt(8));
-          appointment.add(_PumpModel(
-            _subjectCollection[random.nextInt(7)],
-            startDate,
-            startDate.add(Duration(hours: random.nextInt(3))),
-            _colorCollection[random.nextInt(9)],
-          ));
-        }
-      }
-    } else {
-      final DateTime rangeStartDate =
-      DateTime.now().add(const Duration(days: -(365 ~/ 2)));
-      final DateTime rangeEndDate =
-      DateTime.now().add(const Duration(days: 365));
-      for (DateTime i = rangeStartDate;
-      i.isBefore(rangeEndDate);
-      i = i.add(const Duration(days: 1))) {
-        final DateTime date = i;
-        final int count = 1 + random.nextInt(3);
-        for (int j = 0; j < count; j++) {
-          final DateTime startDate =
-          DateTime(date.year, date.month, date.day, 8 + random.nextInt(8));
-          appointment.add(_PumpModel(
-            _subjectCollection[random.nextInt(7)],
-            startDate,
-            startDate.add(Duration(hours: random.nextInt(3))),
-            _colorCollection[random.nextInt(9)],
-          ));
-        }
-      }
-    }
-
-    for (int i = 0; i < appointment.length; i++) {
-      _events.appointments.add(appointment[i]);
-    }
-
-    /// Resets the newly created appointment collection to render
-    /// the appointments on the visible dates.
-    _events.notifyListeners(CalendarDataSourceAction.reset, appointment);
-  }
-
-  /// Creates the required appointment details as a list.
-  void addAppointmentDetails() {
-    _subjectCollection.add('Pump 1 ON');
-    _subjectCollection.add('Pump 2 ON');
-    _subjectCollection.add('Pump 3 ON');
-    _subjectCollection.add('Pump 1 OFF');
-    _subjectCollection.add('Pump 2 OFF');
-    _subjectCollection.add('Pump 3 OFF');
-
-    _colorCollection.add(const Color(0xFF0F8644));
-    _colorCollection.add(const Color(0xFF8B1FA9));
-    _colorCollection.add(const Color(0xFFD20100));
-    _colorCollection.add(const Color(0xFFFC571D));
-    _colorCollection.add(const Color(0xFF36B37B));
-    _colorCollection.add(const Color(0xFF01A1EF));
-
-  }
-
-  /// Allows/Restrict switching to previous/next views through swipe interaction
-  void onViewNavigationModeChange(String value) {
-    _viewNavigationModeString = value;
-    if (value == 'snap') {
-      _viewNavigationMode = ViewNavigationMode.snap;
-    } else if (value == 'none') {
-      _viewNavigationMode = ViewNavigationMode.none;
-    }
-    setState(() {
-      /// update the view navigation mode changes
-    });
-  }
-
-  /// Allows to switching the days count customization in calendar.
-  void customNumberOfDaysInView(String value) {
-    _numberOfDaysString = value;
-    if (value == 'default') {
-      _numberOfDays = -1;
-    } else if (value == '1 day') {
-      _numberOfDays = 1;
-    } else if (value == '2 days') {
-      _numberOfDays = 2;
-    } else if (value == '3 days') {
-      _numberOfDays = 3;
-    } else if (value == '4 days') {
-      _numberOfDays = 4;
-    } else if (value == '5 days') {
-      _numberOfDays = 5;
-    } else if (value == '6 days') {
-      _numberOfDays = 6;
-    } else if (value == '7 days') {
-      _numberOfDays = 7;
-    }
-    setState(() {});
-  }
-
-
-  /// Returns the calendar widget based on the properties passed.
-  SfCalendar _getGettingStartedCalendar(
-      [CalendarController? calendarController,
-        CalendarDataSource? calendarDataSource,
-        ViewChangedCallback? viewChangedCallback,
-        DateTime? minDate,
-        DateTime? maxDate,
-        dynamic scheduleViewBuilder]) {
-    return SfCalendar(
-      controller: calendarController,
-      dataSource: calendarDataSource,
-      allowedViews: _allowedViews,
-      scheduleViewMonthHeaderBuilder: scheduleViewBuilder,
-      showNavigationArrow: true,
-      showDatePickerButton: _showDatePickerButton,
-      allowViewNavigation: _allowViewNavigation,
-      showCurrentTimeIndicator: _showCurrentTimeIndicator,
-      onViewChanged: viewChangedCallback,
-      blackoutDates: _blackoutDates,
-      blackoutDatesTextStyle: const TextStyle(
-          decoration: null,
-          color: Colors.red),
-      minDate: minDate,
-      maxDate: maxDate,
-      monthViewSettings: MonthViewSettings(
-          appointmentDisplayMode: MonthAppointmentDisplayMode.appointment,
-          showTrailingAndLeadingDates: _showLeadingAndTrailingDates),
-      timeSlotViewSettings: TimeSlotViewSettings(
-          numberOfDaysInView: _numberOfDays,
-          minimumAppointmentDuration: const Duration(minutes: 60)),
-      viewNavigationMode: _viewNavigationMode,
-      showWeekNumber: _showWeekNumber,
-    );
-  }
 }
 
-/// Returns the month name based on the month value passed from date.
-String _getMonthDate(int month) {
-  if (month == 01) {
-    return 'January';
-  } else if (month == 02) {
-    return 'February';
-  } else if (month == 03) {
-    return 'March';
-  } else if (month == 04) {
-    return 'April';
-  } else if (month == 05) {
-    return 'May';
-  } else if (month == 06) {
-    return 'June';
-  } else if (month == 07) {
-    return 'July';
-  } else if (month == 08) {
-    return 'August';
-  } else if (month == 09) {
-    return 'September';
-  } else if (month == 10) {
-    return 'October';
-  } else if (month == 11) {
-    return 'November';
-  } else {
-    return 'December';
-  }
-}
-
-/// Returns the builder for schedule view.
-Widget scheduleViewBuilder(BuildContext buildContext, ScheduleViewMonthHeaderDetails details)
-{
-  final String monthName = _getMonthDate(details.date.month);
-  return Stack(
-    children: <Widget>[
-      Image(
-          image: ExactAssetImage('images/$monthName.png'),
-          fit: BoxFit.cover,
-          width: details.bounds.width,
-          height: details.bounds.height),
-      Positioned(
-        left: 55,
-        right: 0,
-        top: 20,
-        bottom: 0,
-        child: Text(
-          '$monthName ${details.date.year}',
-          style: const TextStyle(fontSize: 18),
-        ),
-      )
-    ],
-  );
-}
-
-
-class _MeetingDataSource extends CalendarDataSource<_PumpModel> {
-  _MeetingDataSource(this.source);
-
-  List<_PumpModel> source;
-
-  @override
-  List<dynamic> get appointments => source;
-
-  @override
-  DateTime getStartTime(int index) {
-    return source[index].from;
-  }
-
-  @override
-  DateTime getEndTime(int index) {
-    return source[index].to;
-  }
-
-  @override
-  String getSubject(int index) {
-    return source[index].eventName;
-  }
-
-  @override
-  Color getColor(int index) {
-    return source[index].background;
-  }
-
-  @override
-  _PumpModel convertAppointmentToObject(
-      _PumpModel eventName, Appointment appointment) {
-    return _PumpModel(appointment.subject, appointment.startTime,  appointment.endTime, appointment.color);
-  }
-}
-
-/// Custom business object class which contains properties to hold the detailed
-/// information about the event data which will be rendered in calendar.
-class _PumpModel {
-  _PumpModel(this.eventName, this.from, this.to, this.background);
-
-  String eventName;
-  DateTime from;
-  DateTime to;
-  Color background;
-}
 

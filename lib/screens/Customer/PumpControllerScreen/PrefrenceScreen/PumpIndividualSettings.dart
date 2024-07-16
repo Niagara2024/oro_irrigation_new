@@ -1,20 +1,19 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:oro_irrigation_new/constants/theme.dart';
 
 import '../../../../Models/Customer/Dashboard/PumpControllerModel/PumpSettingsMDL.dart';
 import '../../../../constants/snack_bar.dart';
+import '../../../../constants/theme.dart';
 
-class PumpCommonSettings extends StatefulWidget {
-  const PumpCommonSettings({Key? key, required this.pumpControllerSettings}) : super(key: key);
+class PumpIndividualSettings extends StatefulWidget {
+  const PumpIndividualSettings({Key? key, required this.pumpControllerSettings, required this.pumpInx}) : super(key: key);
   final PumpSettingsMDL pumpControllerSettings;
+  final int pumpInx;
 
   @override
-  State<PumpCommonSettings> createState() => _PumpCommonSettingsState();
+  State<PumpIndividualSettings> createState() => _PumpIndividualSettingsState();
 }
 
-class _PumpCommonSettingsState extends State<PumpCommonSettings> {
+class _PumpIndividualSettingsState extends State<PumpIndividualSettings> {
 
   Map<int, bool> switchValues = {};
   Map<int, TimeOfDay> timeValues = {};
@@ -27,9 +26,9 @@ class _PumpCommonSettingsState extends State<PumpCommonSettings> {
         children: [
           Expanded(
             child: ListView.builder(
-                itemCount: widget.pumpControllerSettings.commonPumpSetting?[0].settingList?.length ?? 0,
+                itemCount: widget.pumpControllerSettings.individualPumpSetting?[0].settingList?.length ?? 0,
                 itemBuilder: (context, index) {
-                  var settingGroup = widget.pumpControllerSettings.commonPumpSetting?[0].settingList?[index];
+                  var settingGroup = widget.pumpControllerSettings.individualPumpSetting?[widget.pumpInx].settingList?[index];
                   String groupName = settingGroup?.name ?? 'Unknown Group';
                   List<SettingCmm> settings = settingGroup?.setting ?? [];
 
@@ -109,7 +108,6 @@ class _PumpCommonSettingsState extends State<PumpCommonSettings> {
       ),
     );
   }
-
 
   Widget _buildWidget(int widgetTypeId, dynamic value, int settingKey) {
     switch (widgetTypeId) {

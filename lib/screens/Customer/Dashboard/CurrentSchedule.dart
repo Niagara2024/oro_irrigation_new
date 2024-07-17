@@ -449,7 +449,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                   "selected": [],
                 };
                 sentManualModeToServer(manualOperation);
-                prefs.remove(widget.filteredCurrentSchedule[index].programName);
+                //prefs.remove(widget.filteredCurrentSchedule[index].programName);
               },
               child: const Text('Stop'),
             ):

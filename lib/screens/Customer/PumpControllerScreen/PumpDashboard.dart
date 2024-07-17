@@ -557,7 +557,7 @@ class _PumpDashboardState extends State<PumpDashboard> with SingleTickerProvider
                       ),
                       Row(
                         children: [
-                          Icon(Icons.report),
+                          Icon(Icons.report_gmailerrorred),
                           SizedBox(width: 5,),
                           Tab(text: 'Reports'),
                         ],

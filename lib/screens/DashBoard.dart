@@ -85,7 +85,10 @@ class _MainDashBoardState extends State<MainDashBoard> {
               return  isConnected ? userId.isNotEmpty? BuildDashboardScreen(userId: int.parse(userId), userType: int.parse(userType), userName: userName, countryCode: countryCode, mobileNo: mobileNo, emailId: emailId,):
               const LoginForm():
               const Scaffold(
-                body: Center(child: Text('No Internet Connection')),
+                body: Padding(
+                  padding: EdgeInsets.all(50.0),
+                  child: Center(child: Image(image: AssetImage('assets/images/no_internet_connection.png'))),
+                ),
               );
             },
           );

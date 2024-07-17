@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/SentAndReceived.dart';
@@ -644,7 +645,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   ),
                   ListTile(
                     title: const Text('Weather', style: TextStyle(color: Colors.white)),
-                    leading: const Icon(Icons.wb_cloudy_outlined, color: Colors.white,),
+                    leading: const Icon(CupertinoIcons.cloud_sun_bolt, color: Colors.white,),
                     onTap: () {
                       Navigator.pop(context);
                       setState(() {
@@ -672,7 +673,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                       });
                     },
                   ),
-
                 ],
               ),
             ),
@@ -1092,8 +1092,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   label: Text(''),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.wb_cloudy_outlined),
-                  selectedIcon: Icon(Icons.wb_cloudy_outlined, color: Colors.white,),
+                  icon: Icon(CupertinoIcons.cloud_sun_bolt),
+                  selectedIcon: Icon(CupertinoIcons.cloud_sun_bolt, color: Colors.white,),
                   label: Text(''),
                 ),
                 NavigationRailDestination(
@@ -1199,7 +1199,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                           onPressed: () {
                             sideSheet();
                           },
-                          icon: const Icon(Icons.menu),
+                          icon: const Icon(Icons.format_list_numbered),
                           color: Colors.white,
                           iconSize: 24.0,
                           hoverColor: Colors.cyan,
@@ -1228,7 +1228,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                             ),
                           );
                         },
-                        icon: const Icon(Icons.grid_view),
+                        icon: const Icon(Icons.view_list_outlined),
                         color: Colors.white,
                         iconSize: 24.0,
                         hoverColor: Colors.cyan,
@@ -2002,7 +2002,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
         color: Colors.white,
         borderRadius: BorderRadius.zero,
       ),
-      height: MediaQuery.sizeOf(context).height,
+      height: screenHeight,
       width: 400,
       child: Column(
         children: [
@@ -2159,7 +2159,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
           ),
           SizedBox(
             width: 400,
-            height: MediaQuery.sizeOf(context).height-170,
+            height: screenHeight-170,
             child: Column(
               children: [
                 SizedBox(
@@ -2198,9 +2198,8 @@ class _SideSheetClassState extends State<SideSheetClass> {
                       ),
                     ),
                 ),
-                SizedBox(
-                  width: 400,
-                  height: 500,
+                Expanded(
+                  flex:1,
                   child: ListView.builder(
                     itemCount: widget.nodeList.length,
                     itemBuilder: (context, index) {

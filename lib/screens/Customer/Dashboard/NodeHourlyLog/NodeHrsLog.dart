@@ -45,12 +45,12 @@ class _NodeHrsLogState extends State<NodeHrsLog> {
           nodeDataMap.clear();
           List<dynamic> hourlyData = jsonData[0].entries.toList();
 
-          for (var hourEntry in hourlyData) {
+          for (var hourEntry in hourlyData){
             String hour = hourEntry.key;
-            if (hour.startsWith('hour')) {
+            if (hour.startsWith('hour')){
               List<dynamic> nodeList = hourEntry.value;
-              if (nodeList.isNotEmpty) {
-                nodeList.removeAt(0); // Remove the 0th index
+              if (nodeList.isNotEmpty){
+                nodeList.removeAt(0);
               }
               for (var nodeData in nodeList) {
                 String nodeId = nodeData['NodeId'];

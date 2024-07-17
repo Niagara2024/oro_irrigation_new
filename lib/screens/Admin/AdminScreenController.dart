@@ -197,8 +197,8 @@ class _AdminScreenControllerState extends State<AdminScreenController> {
                 label: Text(''),
               ),
               NavigationRailDestination(
-                icon: Icon(Icons.list),
-                selectedIcon: Icon(Icons.list, color: Colors.white,),
+                icon: Icon(Icons.inventory_2_outlined),
+                selectedIcon: Icon(Icons.inventory_2_outlined, color: Colors.white,),
                 label: Text(''),
               ),
               NavigationRailDestination(
@@ -207,8 +207,8 @@ class _AdminScreenControllerState extends State<AdminScreenController> {
                 label: Text(''),
               ),
               NavigationRailDestination(
-                icon: Icon(Icons.settings_outlined),
-                selectedIcon: Icon(Icons.settings_outlined, color: Colors.white,),
+                icon: Icon(Icons.manage_accounts_outlined),
+                selectedIcon: Icon(Icons.manage_accounts_outlined, color: Colors.white,),
                 label: Text(''),
               ),
               NavigationRailDestination(

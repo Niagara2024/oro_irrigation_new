@@ -293,7 +293,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                 width: 70,
                 height: 20,
                 child: Center(
-                  child: Text(provider.sourcePump[index]['Name'], style: const TextStyle(
+                  child: Text(provider.sourcePump[index]['SW_Name'] ?? provider.sourcePump[index]['Name'], style: const TextStyle(
                     color: Colors.black,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -587,7 +587,8 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                 width: 70,
                 height: 20,
                 child: Center(
-                  child: Text(filteredPumps[index]['Name'], style: const TextStyle(
+                  child: Text(filteredPumps[index]['SW_Name'] ?? filteredPumps[index]['Name'],
+                    style: const TextStyle(
                     color: Colors.black,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -805,7 +806,7 @@ class _DisplayFilterState extends State<DisplayFilter> {
                           width: 70,
                           height: 20,
                           child: Center(
-                            child: Text(filteredCentralFilter[i]['FilterStatus'][flIndex]['Name'], style: const TextStyle(
+                            child: Text(filteredCentralFilter[i]['FilterStatus'][flIndex]['SW_Name'] ?? filteredCentralFilter[i]['FilterStatus'][flIndex]['Name'], style: const TextStyle(
                               color: Colors.black,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,

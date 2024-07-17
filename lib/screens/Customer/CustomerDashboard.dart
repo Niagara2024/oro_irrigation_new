@@ -137,7 +137,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
               child: Container(
                 width: MediaQuery.sizeOf(context).width,
                 decoration: BoxDecoration(
-                  color: Colors.red.shade500,
+                  color: Colors.red.shade400,
                   borderRadius: BorderRadius.circular(03),
                 ),
                 child: Padding(

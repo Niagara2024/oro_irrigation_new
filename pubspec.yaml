@@ -328,6 +328,7 @@ flutter:
      - assets/images/dl_humidity_sensor.png
      - assets/GifFile/water_drop_ani.gif
      - assets/SVGPicture/login_top_pic.svg
+     - assets/images/no_internet_connection.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

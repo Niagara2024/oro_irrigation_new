@@ -266,16 +266,15 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                             color: Colors.redAccent,
                             textColor: Colors.white,
                             onPressed: () async {
-                              print(widget.filteredCurrentSchedule[index]);
-                              final prefs = await SharedPreferences.getInstance();
-                              String? prgOffPayload = prefs.getString(widget.filteredCurrentSchedule[index].programName);
                               String payLoadFinal = jsonEncode({
-                                "3900": [{"3901": prgOffPayload}]
+                                "3900": [{"3901": '0,${widget.filteredCurrentSchedule[index].programCategory},${widget.filteredCurrentSchedule[index].srlNo},'
+                                    '${widget.filteredCurrentSchedule[index].zoneSNo},,,,,,,,,,;'}]
                               });
+                              print(payLoadFinal);
                               MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
                               Map<String, dynamic> manualOperation = {
                                 "programName": widget.filteredCurrentSchedule[index].programName,
-                                "programId": widget.filteredCurrentSchedule[index].programType,
+                                "programId": widget.filteredCurrentSchedule[index].programId,
                                 "startFlag":0,
                                 "method": 1,
                                 "time": '00:00:00',
@@ -283,7 +282,6 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                 "selected": [],
                               };
                               sentManualModeToServer(manualOperation);
-                              //prefs.remove(widget.filteredCurrentSchedule[index].programName);
                             },
                             child: const Text('Stop'),
                           ):
@@ -432,16 +430,15 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
               color: Colors.redAccent,
               textColor: Colors.white,
               onPressed: () async {
-                print(widget.filteredCurrentSchedule[index]);
-                final prefs = await SharedPreferences.getInstance();
-                String? prgOffPayload = prefs.getString(widget.filteredCurrentSchedule[index].programName);
+
                 String payLoadFinal = jsonEncode({
-                  "3900": [{"3901": prgOffPayload}]
+                  "3900": [{"3901": '0,${widget.filteredCurrentSchedule[index].programCategory},${widget.filteredCurrentSchedule[index].programId},'
+                      '${widget.filteredCurrentSchedule[index].zoneSNo},,,,,,,,,0,'}]
                 });
                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
                 Map<String, dynamic> manualOperation = {
                   "programName": widget.filteredCurrentSchedule[index].programName,
-                  "programId": widget.filteredCurrentSchedule[index].programType,
+                  "programId": widget.filteredCurrentSchedule[index].programId,
                   "startFlag":0,
                   "method": 1,
                   "time": '00:00:00',
@@ -449,7 +446,6 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                   "selected": [],
                 };
                 sentManualModeToServer(manualOperation);
-                //prefs.remove(widget.filteredCurrentSchedule[index].programName);
               },
               child: const Text('Stop'),
             ):

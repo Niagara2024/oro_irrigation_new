@@ -457,7 +457,7 @@ class ProgramQueue {
 }
 
 class CurrentScheduleModel {
-  String programName, programCategory,zoneName,startTime, duration_Qty, duration_QtyLeft;
+  String programName, programCategory,zoneName,zoneSNo,startTime, duration_Qty, duration_QtyLeft;
   String message, avgFlwRt;
   final int programId, programType, totalRtc,currentRtc,totalCycle,currentCycle,totalZone,currentZone, srlNo, reasonCode, actualFlowRate;
   List<dynamic> mainValve;
@@ -468,6 +468,7 @@ class CurrentScheduleModel {
     required this.programName,
     required this.programCategory,
     required this.zoneName,
+    required this.zoneSNo,
     required this.programType,
     required this.totalRtc,
     required this.currentRtc,
@@ -509,6 +510,7 @@ class CurrentScheduleModel {
       programName: json['ProgName'] ?? '',
       programCategory: json['ProgCategory'] ?? '',
       zoneName: json['ZoneName'] ?? "",
+      zoneSNo: json['ZoneS_No'] ?? "",
       programType: json['ProgType'] ?? 0,
       totalRtc: json['TotalRtc'] ?? 0,
       currentRtc: json['CurrentRtc'] ?? 0,
@@ -534,6 +536,7 @@ class CurrentScheduleModel {
       'ProgName': programName,
       'ProgCategory': programCategory,
       'ZoneName': zoneName,
+      'ZoneS_No': zoneSNo,
       'ProgType': programType,
       'TotalRtc': totalRtc,
       'CurrentRtc': currentRtc,
@@ -815,21 +818,54 @@ class RelayStatus {
 }
 
 class SensorStatus {
-  final String? Name;
-  final String? Value;
+  int sNo;
+  String name;
+  String? swName;
+  int? angIpNo;
+  int? pulseIpNo;
+  String value;
+  String latLong;
 
   SensorStatus({
-    required this.Name,
-    required this.Value,
+    required this.sNo,
+    required this.name,
+    this.swName,
+    this.angIpNo,
+    this.pulseIpNo,
+    required this.value,
+    required this.latLong,
   });
 
   factory SensorStatus.fromJson(Map<String, dynamic> json) {
     return SensorStatus(
-      Name: json['Name'],
-      Value: json['Value'],
+      sNo: json['S_No'],
+      name: json['Name'],
+      swName: json['SW_Name'],
+      angIpNo: json['AngIpNo'],
+      pulseIpNo: json['PulseIpNo'],
+      value: json['Value'],
+      latLong: json['Lat_Long'],
     );
   }
+
 }
+
+/*class SensorStatus {
+  final String? name;
+  final String? value;
+
+  SensorStatus({
+    required this.name,
+    required this.value,
+  });
+
+  factory SensorStatus.fromJson(Map<String, dynamic> json) {
+    return SensorStatus(
+      name: json['Name'],
+      value: json['Value'],
+    );
+  }
+}*/
 
 class Filter {
   final int type;

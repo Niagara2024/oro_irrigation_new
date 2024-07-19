@@ -1257,7 +1257,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                   controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
                                   customerID: widget.customerId,
                                   imeiNo: mySiteList[siteIndex].master[masterIndex].deviceId,
-                                  programList: programList, callbackFunction: callbackFunction),
+                                  callbackFunction: callbackFunction),
                             ),
                           );
                         },
@@ -1398,7 +1398,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                               controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
                               customerID: widget.customerId,
                               imeiNo: mySiteList[siteIndex].master[masterIndex].deviceId,
-                              programList: programList, callbackFunction: callbackFunction),
+                              callbackFunction: callbackFunction),
                         ),
                       );
                     },
@@ -1674,7 +1674,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                           height: 40,
                                           child: Stack(
                                             children: [
-                                              AppImages.getAsset('sensor',0, mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor[index].Name!),
+                                              AppImages.getAsset('sensor',0, mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor[index].name!),
                                               Positioned(
                                                 top: 25,
                                                 left: 0,
@@ -1683,7 +1683,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                                       borderRadius: BorderRadius.circular(3),
                                                       color: Colors.yellow,
                                                     ),
-                                                    child: Center(child: Text('${mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor[index].Value}', style: const TextStyle(color: Colors.black, fontSize: 10)))
+                                                    child: Center(child: Text('${mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor[index].value}', style: const TextStyle(color: Colors.black, fontSize: 10)))
                                                 ),
                                               ),
                                             ],
@@ -1692,7 +1692,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
-                                            Text(mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor[index].Name!, style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                            Text(mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor[index].name!, style: const TextStyle(color: Colors.black, fontSize: 10)),
                                           ],
                                         ),
                                       ],
@@ -2238,89 +2238,179 @@ class _SideSheetClassState extends State<SideSheetClass> {
                         children: [
                           SizedBox(
                             width: double.infinity,
-                            height: 250,
+                            height: calculateDynamicHeight(widget.nodeList[index]),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: <Widget>[
                                 ListTile(
                                   tileColor: myTheme.primaryColor,
                                   textColor: Colors.black,
-                                  title: const Text('Last feedback',style: TextStyle(fontSize: 12),),
-                                  subtitle: Text(formatDateTime(widget.nodeList[index].lastFeedbackReceivedTime),style: TextStyle(fontSize: 11),),
+                                  title: const Text('Last feedback', style: TextStyle(fontSize: 10)),
+                                  subtitle: Text(
+                                    formatDateTime(widget.nodeList[index].lastFeedbackReceivedTime),
+                                    style: TextStyle(fontSize: 11),
+                                  ),
                                   trailing: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       const Icon(Icons.solar_power_outlined, color: Colors.teal),
-                                      const SizedBox(width: 5,),
-                                      Text('${widget.nodeList[index].sVolt} - V', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                      const SizedBox(width: 5,),
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        '${widget.nodeList[index].sVolt} - V',
+                                        style: const TextStyle(fontWeight: FontWeight.normal),
+                                      ),
+                                      const SizedBox(width: 5),
                                       const Icon(Icons.battery_3_bar_rounded, color: Colors.teal),
-                                      const SizedBox(width: 5,),
-                                      Text('${widget.nodeList[index].batVolt} - V', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                      const SizedBox(width: 5,),
-                                      IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
-                                        String payLoadFinal = jsonEncode({
-                                          "2300": [
-                                            {"2301": "${widget.nodeList[index].serialNumber}"},
-                                          ]
-                                        });
-                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                        GlobalSnackBar.show(context, 'Your comment sent successfully', 200);
-                                      }, icon: const Icon(Icons.fact_check_outlined, color: Colors.teal))
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        '${widget.nodeList[index].batVolt} - V',
+                                        style: const TextStyle(fontWeight: FontWeight.normal),
+                                      ),
+                                      const SizedBox(width: 5),
+                                      IconButton(
+                                        tooltip: 'Serial set for all Relay',
+                                        onPressed: () {
+                                          String payLoadFinal = jsonEncode({
+                                            "2300": [
+                                              {"2301": "${widget.nodeList[index].serialNumber}"},
+                                            ]
+                                          });
+                                          MQTTManager().publish(
+                                              payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                          GlobalSnackBar.show(
+                                              context, 'Your comment sent successfully', 200);
+                                        },
+                                        icon: const Icon(Icons.fact_check_outlined, color: Colors.teal),
+                                      )
                                     ],
                                   ),
                                 ),
                                 Column(
                                   children: [
-                                    const SizedBox(
-                                      width: double.infinity,
-                                      height : 20,
-                                      child: Row(
-                                        children: [
-                                          SizedBox(width: 10),
-                                          CircleAvatar(radius: 5,backgroundColor: Colors.green,),
-                                          SizedBox(width: 5),
-                                          Text('ON', style: TextStyle(fontSize: 12)),
-                                          SizedBox(width: 20),
-                                          CircleAvatar(radius: 5,backgroundColor: Colors.black45),
-                                          SizedBox(width: 5),
-                                          Text('OFF', style: TextStyle(fontSize: 12)),
-                                          SizedBox(width: 20),
-                                          CircleAvatar(radius: 5,backgroundColor: Colors.orange),
-                                          SizedBox(width: 5),
-                                          Text('ON in OFF', style: TextStyle(fontSize: 12)),
-                                          SizedBox(width: 20),
-                                          CircleAvatar(radius: 5,backgroundColor: Colors.redAccent),
-                                          SizedBox(width: 5),
-                                          Text('OFF in ON', style: TextStyle(fontSize: 12)),
-                                        ],
+                                    if (widget.nodeList[index].rlyStatus.isNotEmpty ||
+                                        widget.nodeList[index].sensor.isNotEmpty)
+                                      const SizedBox(
+                                        width: double.infinity,
+                                        height: 20,
+                                        child: Row(
+                                          children: [
+                                            SizedBox(width: 10),
+                                            CircleAvatar(
+                                              radius: 5,
+                                              backgroundColor: Colors.green,
+                                            ),
+                                            SizedBox(width: 5),
+                                            Text('ON', style: TextStyle(fontSize: 12)),
+                                            SizedBox(width: 20),
+                                            CircleAvatar(
+                                              radius: 5,
+                                              backgroundColor: Colors.black45,
+                                            ),
+                                            SizedBox(width: 5),
+                                            Text('OFF', style: TextStyle(fontSize: 12)),
+                                            SizedBox(width: 20),
+                                            CircleAvatar(
+                                              radius: 5,
+                                              backgroundColor: Colors.orange,
+                                            ),
+                                            SizedBox(width: 5),
+                                            Text('ON in OFF', style: TextStyle(fontSize: 12)),
+                                            SizedBox(width: 20),
+                                            CircleAvatar(
+                                              radius: 5,
+                                              backgroundColor: Colors.redAccent,
+                                            ),
+                                            SizedBox(width: 5),
+                                            Text('OFF in ON', style: TextStyle(fontSize: 12)),
+                                          ],
+                                        ),
                                       ),
-                                    ),
                                     const SizedBox(height: 5),
                                     SizedBox(
                                       width: double.infinity,
-                                      height : 150,
+                                      height: calculateGridHeight(widget.nodeList[index].rlyStatus.length),
                                       child: GridView.builder(
                                         itemCount: widget.nodeList[index].rlyStatus.length, // Number of items in the grid
                                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                           crossAxisCount: 7,
                                           crossAxisSpacing: 5.0,
                                           mainAxisSpacing: 5.0,
-                                          childAspectRatio:1.2,
+                                          childAspectRatio: 1.2,
                                         ),
                                         itemBuilder: (BuildContext context, int indexGv) {
-                                          print(widget.nodeList[index].rlyStatus[indexGv].name);
                                           return Column(
                                             children: [
                                               CircleAvatar(
                                                 radius: 13,
-                                                backgroundColor: widget.nodeList[index].rlyStatus[indexGv].Status==0 ? Colors.grey :
-                                                widget.nodeList[index].rlyStatus[indexGv].Status==1 ? Colors.green :
-                                                widget.nodeList[index].rlyStatus[indexGv].Status==2 ? Colors.orange :
-                                                widget.nodeList[index].rlyStatus[indexGv].Status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
-                                                child: Text((widget.nodeList[index].rlyStatus[indexGv].rlyNo).toString(), style: const TextStyle(color: Colors.white,fontSize: 12)),
+                                                backgroundColor: widget.nodeList[index].rlyStatus[indexGv]
+                                                    .Status ==
+                                                    0
+                                                    ? Colors.grey
+                                                    : widget.nodeList[index].rlyStatus[indexGv].Status ==
+                                                    1
+                                                    ? Colors.green
+                                                    : widget.nodeList[index].rlyStatus[indexGv]
+                                                    .Status ==
+                                                    2
+                                                    ? Colors.orange
+                                                    : widget.nodeList[index].rlyStatus[indexGv]
+                                                    .Status ==
+                                                    3
+                                                    ? Colors.redAccent
+                                                    : Colors.black12, // Avatar background color
+                                                child: Text(
+                                                  (widget.nodeList[index].rlyStatus[indexGv].rlyNo)
+                                                      .toString(),
+                                                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                                                ),
                                               ),
-                                              Text((widget.nodeList[index].rlyStatus[indexGv].name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                              Text(
+                                                (widget.nodeList[index].rlyStatus[indexGv].name)
+                                                    .toString(),
+                                                style:
+                                                const TextStyle(color: Colors.black, fontSize: 10),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    const Padding(
+                                      padding: EdgeInsets.only(left: 8, right: 8),
+                                      child: Divider(
+                                        thickness: 0.5,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: calculateGridHeight(widget.nodeList[index].sensor.length),
+                                      child: GridView.builder(
+                                        itemCount: widget.nodeList[index].sensor.length, // Number of items in the grid
+                                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 7,
+                                          crossAxisSpacing: 5.0,
+                                          mainAxisSpacing: 5.0,
+                                          childAspectRatio: 1.2,
+                                        ),
+                                        itemBuilder: (BuildContext context, int indexSnr) {
+                                          return Column(
+                                            children: [
+                                              CircleAvatar(
+                                                radius: 13,
+                                                backgroundColor: Colors.black38,
+                                                child: Text(
+                                                  (widget.nodeList[index].sensor[indexSnr].angIpNo !=
+                                                      null
+                                                      ? 'AI-${widget.nodeList[index].sensor[indexSnr].angIpNo}'
+                                                      : 'PI-${widget.nodeList[index].sensor[indexSnr].pulseIpNo}')
+                                                      .toString(),
+                                                  style: const TextStyle(color: Colors.white, fontSize: 11),
+                                                ),
+                                              ),
+                                              Text(
+                                                (widget.nodeList[index].sensor[indexSnr].name).toString(),
+                                                style: const TextStyle(color: Colors.black, fontSize: 10),
+                                              ),
                                             ],
                                           );
                                         },
@@ -2338,160 +2428,6 @@ class _SideSheetClassState extends State<SideSheetClass> {
                 ),
               ],
             ),
-            /*child: DataTable2(
-              columnSpacing: 12,
-              horizontalMargin: 12,
-              minWidth: 325,
-              dataRowHeight: 40.0,
-              headingRowHeight: 35.0,
-              headingRowColor: MaterialStateProperty.all<Color>(myTheme.primaryColorDark.withOpacity(0.2)),
-              columns: const [
-                DataColumn2(
-                    label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
-                    fixedWidth: 35
-                ),
-                DataColumn2(
-                  label: Center(child: Text('Status', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
-                  fixedWidth: 55,
-                ),
-                DataColumn2(
-                  label: Center(child: Text('Rf.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
-                  fixedWidth: 45,
-                ),
-                DataColumn2(
-                  label: Text('Category', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),),
-                  size: ColumnSize.M,
-                  numeric: true,
-                ),
-                DataColumn2(
-                  label: Text('Info', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),),
-                  fixedWidth: 40,
-                ),
-              ],
-              rows: List<DataRow>.generate(widget.nodeList.length, (index) => DataRow(cells: [
-                DataCell(Center(child: Text('${widget.nodeList[index].serialNumber}', style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black),))),
-                DataCell(Center(child: CircleAvatar(radius: 7, backgroundColor:
-                widget.nodeList[index].status == 1? Colors.green.shade400:
-                widget.nodeList[index].status == 2? Colors.grey:
-                widget.nodeList[index].status == 3? Colors.redAccent:
-                widget.nodeList[index].status == 4? Colors.yellow:
-                Colors.grey,
-                ))),
-                DataCell(Center(child: Text('${widget.nodeList[index].referenceNumber}', style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black)))),
-                DataCell(Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(widget.nodeList[index].categoryName, style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black)),
-                    Text(widget.nodeList[index].deviceId, style: const TextStyle(fontWeight: FontWeight.normal,fontSize: 11, color: Colors.black)),
-                  ],
-                )),
-                DataCell(Center(child: IconButton(tooltip: 'View Relay status',
-                  icon: widget.nodeList[index].rlyStatus.any((rly) => rly.Status == 2 || rly.Status == 3)? const Icon(Icons.warning, color: Colors.orangeAccent):
-                  Icon(Icons.info_outline, color: myTheme.primaryColorDark), // Icon to display
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return SizedBox(
-                          width: double.infinity,
-                          height: 270,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              ListTile(
-                                tileColor: myTheme.primaryColor,
-                                textColor: Colors.white,
-                                leading: const Icon(Icons.developer_board_rounded, color: Colors.white),
-                                title: Text('${widget.nodeList[index].categoryName} - ${widget.nodeList[index].deviceId}'),
-                                subtitle: Text(formatDateTime(widget.nodeList[index].lastFeedbackReceivedTime)),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.solar_power_outlined, color: Colors.white),
-                                    const SizedBox(width: 5,),
-                                    Text('${widget.nodeList[index].sVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                    const SizedBox(width: 5,),
-                                    const Icon(Icons.battery_3_bar_rounded, color: Colors.white),
-                                    const SizedBox(width: 5,),
-                                    Text('${widget.nodeList[index].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                    const SizedBox(width: 5,),
-                                    IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
-                                      String payLoadFinal = jsonEncode({
-                                        "2300": [
-                                          {"2301": "${widget.nodeList[index].serialNumber}"},
-                                        ]
-                                      });
-                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                    }, icon: Icon(Icons.fact_check_outlined, color: Colors.white))
-                                  ],
-                                ),
-                              ),
-                              Column(
-                                children: [
-                                  const SizedBox(
-                                    width: double.infinity,
-                                    height : 40,
-                                    child: Row(
-                                      children: [
-                                        SizedBox(width: 10),
-                                        CircleAvatar(radius: 5,backgroundColor: Colors.green,),
-                                        SizedBox(width: 5),
-                                        Text('ON'),
-                                        SizedBox(width: 20),
-                                        CircleAvatar(radius: 5,backgroundColor: Colors.black45),
-                                        SizedBox(width: 5),
-                                        Text('OFF'),
-                                        SizedBox(width: 20),
-                                        CircleAvatar(radius: 5,backgroundColor: Colors.orange),
-                                        SizedBox(width: 5),
-                                        Text('ON IN OFF'),
-                                        SizedBox(width: 20),
-                                        CircleAvatar(radius: 5,backgroundColor: Colors.redAccent),
-                                        SizedBox(width: 5),
-                                        Text('OFF IN ON'),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    height : widget.nodeList[index].rlyStatus.length > 8? 160 : 80,
-                                    child: GridView.builder(
-                                      itemCount: widget.nodeList[index].rlyStatus.length, // Number of items in the grid
-                                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 8,
-                                        crossAxisSpacing: 05.0,
-                                        mainAxisSpacing: 05.0,
-                                      ),
-                                      itemBuilder: (BuildContext context, int indexGv) {
-                                        print(widget.nodeList[index].rlyStatus[indexGv].name);
-                                        return Column(
-                                          children: [
-                                            CircleAvatar(
-                                              backgroundColor: widget.nodeList[index].rlyStatus[indexGv].Status==0 ? Colors.grey :
-                                              widget.nodeList[index].rlyStatus[indexGv].Status==1 ? Colors.green :
-                                              widget.nodeList[index].rlyStatus[indexGv].Status==2 ? Colors.orange :
-                                              widget.nodeList[index].rlyStatus[indexGv].Status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
-                                              child: Text((widget.nodeList[index].rlyStatus[indexGv].rlyNo).toString(), style: const TextStyle(color: Colors.white)),
-                                            ),
-                                            Text((widget.nodeList[index].rlyStatus[indexGv].name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
-                                          ],
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ))),
-              ])),
-            ),*/
           )
         ],
       ),
@@ -2825,6 +2761,26 @@ class _SideSheetClassState extends State<SideSheetClass> {
     } catch (e) {
       return "Invalid date format";
     }
+  }
+
+  double calculateDynamicHeight(NodeData node) {
+    double baseHeight = 110;
+    double additionalHeight = 0;
+
+    if (node.rlyStatus.isNotEmpty) {
+      additionalHeight += calculateGridHeight(node.rlyStatus.length);
+    }
+
+    if (node.sensor.isNotEmpty) {
+      additionalHeight += calculateGridHeight(node.sensor.length);
+    }
+
+    return baseHeight + additionalHeight;
+  }
+
+  double calculateGridHeight(int itemCount) {
+    int rows = (itemCount / 7).ceil();
+    return rows * 45;
   }
 
 }

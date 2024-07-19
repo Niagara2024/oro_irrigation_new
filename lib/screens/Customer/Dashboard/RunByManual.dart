@@ -18,10 +18,9 @@ import '../../../constants/theme.dart';
 enum SegmentWithFlow {manual, duration, flow}
 
 class RunByManual extends StatefulWidget {
-  const RunByManual({Key? key, required this.customerID, required this.siteID, required this.controllerID, required this.siteName, required this.imeiNo, required this.programList, required this.callbackFunction}) : super(key: key);
+  const RunByManual({Key? key, required this.customerID, required this.siteID, required this.controllerID, required this.siteName, required this.imeiNo, required this.callbackFunction}) : super(key: key);
   final int customerID, siteID, controllerID;
   final String siteName, imeiNo;
-  final List<ProgramList> programList;
   final void Function(String msg) callbackFunction;
 
   @override
@@ -31,10 +30,11 @@ class RunByManual extends StatefulWidget {
 class _RunByManualState extends State<RunByManual>  with SingleTickerProviderStateMixin{
 
   late List<DashboardDataProvider> dashBoardData = [];
+  List<ProgramList> programList = [];
   bool visibleLoading = false;
   int ddCurrentPosition = 0;
   int programId = 0;
-  int method = 0;
+  int standAloneMethod = 0;
   int startFlag = 0;
   String strFlow = '0';
   String strDuration = '00:00:00';
@@ -42,47 +42,65 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
   String strSelectedLineOfProgram = '0';
 
   late List<Map<String,dynamic>> standaloneSelection  = [];
-
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-
     _tabController = TabController(length: 2, vsync: this);
-
-    ProgramList defaultProgram = ProgramList(
-      programId: 0,
-      serialNumber: 0,
-      programName: 'Default',
-      defaultProgramName: '',
-      programType: '',
-      priority: '',
-      startDate: '',
-      startTime: '',
-      sequenceCount: 0,
-      scheduleType: '',
-      firstSequence: '',
-      duration: '',
-      programCategory: '',
-    );
-
-    bool programWithNameExists = false;
-    for (ProgramList program in widget.programList) {
-      if (program.programName == 'Default') {
-        programWithNameExists = true;
-        break;
-      }
-    }
-
-    if (!programWithNameExists) {
-      widget.programList.insert(0, defaultProgram);
-    } else {
-      print('Program with name \'Default\' already exists in widget.programList.');
-    }
-    //getControllerDashboardDetails(ddSelectionId, ddCurrentPosition);
-    getExitManualOperation();
+    indicatorViewShow();
+    getProgramList();
   }
+
+  Future<void> getProgramList() async
+  {
+    programList.clear();
+    try {
+      Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.controllerID};
+      final response = await HttpService().postRequest("getUserProgramNameList", body);
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        print(response.body);
+        List<dynamic> programsJson = jsonResponse['data'];
+        programList = [...programsJson.map((programJson) => ProgramList.fromJson(programJson)).toList()];
+
+        ProgramList defaultProgram = ProgramList(
+          programId: 0,
+          serialNumber: 0,
+          programName: 'Default',
+          defaultProgramName: '',
+          programType: '',
+          priority: '',
+          startDate: '',
+          startTime: '',
+          sequenceCount: 0,
+          scheduleType: '',
+          firstSequence: '',
+          duration: '',
+          programCategory: '',
+        );
+
+        bool programWithNameExists = false;
+        for (ProgramList program in programList) {
+          if (program.programName == 'Default') {
+            programWithNameExists = true;
+            break;
+          }
+        }
+
+        if (!programWithNameExists) {
+          programList.insert(0, defaultProgram);
+        } else {
+          print('Program with name \'Default\' already exists in widget.programList.');
+        }
+        getExitManualOperation();
+
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
 
   Future<void> segmentSelectionCallbackFunction(segIndex, value, sldIrLine) async
   {
@@ -92,8 +110,13 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
       strFlow = value;
     }
     strSelectedLineOfProgram = sldIrLine;
+    print('segIndex=$segIndex');
     setState(() {
-      method = segIndex+1;
+      if(segIndex==0){
+        standAloneMethod = 3;
+      }else{
+        standAloneMethod = segIndex;
+      }
     });
   }
 
@@ -115,17 +138,17 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
     final response = await HttpService().postRequest("getUserManualOperation", body);
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
+      print(jsonResponse);
       if (jsonResponse['data'] != null){
         try{
           dynamic data = jsonResponse['data'];
           startFlag = data['startFlag'];
-          programId = data['programId'];
+          programId = data['programId'].runtimeType==int?data['programId']:0;
           strProgramName = data['programName'];
           try {
-            //print(data['method'].runtimeType);
-            method = data['method'];
-            if (method == 0){
-              method += 1;
+            standAloneMethod = data['method'];
+            if (standAloneMethod == 0){
+              standAloneMethod = 3;
             }
           } catch (e) {
             print('Error: $e');
@@ -135,7 +158,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
           strFlow = data['flow'];
           strDuration = data['time'];
 
-          int position = findPositionByName(strProgramName, widget.programList);
+          int position = findPositionByName(strProgramName, programList);
           if (position != -1) {
             ddCurrentPosition = position;
           }else {
@@ -189,7 +212,6 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: const Color(0xffefefef),
       appBar: AppBar(
@@ -348,34 +370,6 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                   startByStandaloneDefault(allRelaySrlNo);
                 }
 
-                /*if(strSldValveOrLineSrlNo.isNotEmpty){
-                  if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
-                    showDialog<String>(
-                        context: context,
-                        builder: (BuildContext dgContext) => AlertDialog(
-                          title: const Text('StandAlone'),
-                          content: const Text('Valve is not open! Are you sure! You want to Start the Selected Pump?'),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () => Navigator.pop(dgContext, 'Cancel'),
-                              child: const Text('No'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                startByStandaloneDefault(allRelaySrlNo);
-                                Navigator.pop(dgContext, 'OK');
-                              },
-                              child: const Text('Yes'),
-                            ),
-                          ],
-                        )
-                    );
-                  }else{
-                    startByStandaloneDefault(allRelaySrlNo);
-                  }
-                }else{
-                  displaySnackBar(context, 'Empty selection Not allowed');
-                }*/
               }
               else{
                 Map<String, List<DashBoardValve>> groupedValves = {};
@@ -448,13 +442,6 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                       'location': lineOrSq.location,
                       'selected': lineOrSq.selected,
                     });
-
-                    //strSldSqnLocation = lineOrSq.location;
-                    /*groupedValves = groupValvesByLocation(line.valves);
-                    groupedValves.forEach((location, valves) {
-                      strSldSqnLocation += '${location}_';
-                    });
-                    strSldSqnLocation = strSldSqnLocation.isNotEmpty ? strSldSqnLocation.substring(0, strSldSqnLocation.length - 1) : '';*/
                     break;
                   }
                 }
@@ -471,41 +458,64 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
             },
             child: const Text('Start'),
           ),
-          startFlag!=0?const SizedBox(width: 10):
-          const SizedBox(),
-          startFlag!=0?MaterialButton(
+          const SizedBox(width: 10),
+          MaterialButton(
             color: Colors.redAccent,
             textColor: Colors.white,
             onPressed:() async {
-              final prefs = await SharedPreferences.getInstance();
-              String? prgOffPayload = prefs.getString('StandAlone - ${widget.programList[ddCurrentPosition].programName}');
-              String payLoadFinal;
-              if(prgOffPayload != null){
-                payLoadFinal = jsonEncode({
-                  "3900": [{"3901": prgOffPayload}]
-                });
-              }else{
+              if(programList[ddCurrentPosition].programName=='Default'){
                 String payload = '0,0,0,0';
-                payLoadFinal = jsonEncode({
+                String payLoadFinal = jsonEncode({
                   "800": [{"801": payload}]
                 });
+                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
+                Map<String, dynamic> manualOperation = {
+                  "programName": 'Default',
+                  "programId": 0,
+                  "startFlag": 0,
+                  "method": 1,
+                  "time": '00:00:00',
+                  "flow": '0',
+                  "selected": [],
+                };
+                sentManualModeToServer(manualOperation);
               }
-              MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
-              Map<String, dynamic> manualOperation = {
-                "programName": prgOffPayload != null ? widget.programList[ddCurrentPosition].programName:'Default',
-                "programId": prgOffPayload != null ? widget.programList[ddCurrentPosition].programId:0,
-                "startFlag":0,
-                "method": method,
-                "time": '00:00:00',
-                "flow": '0',
-                "selected": [],
-              };
-              sentManualModeToServer(manualOperation);
-              prgOffPayload != null ? prefs.remove('StandAlone - ${widget.programList[ddCurrentPosition].programName}'): null;
+              else{
+
+                for (var lineOrSq in dashBoardData[0].lineOrSequence) {
+                  if(lineOrSq.selected){
+                    standaloneSelection.add({
+                      'id': lineOrSq.id,
+                      'sNo': lineOrSq.sNo,
+                      'name': lineOrSq.name,
+                      'location': lineOrSq.location,
+                      'selected': lineOrSq.selected,
+                    });
+                    break;
+                  }
+                }
+
+                String payLoadFinal = jsonEncode({
+                  "3900": [{"3901": '0,${programList[ddCurrentPosition].programCategory},${programList[ddCurrentPosition].serialNumber},'
+                      '${standaloneSelection.isNotEmpty?standaloneSelection[0]['sNo']:''},,,,,,,,,0,'}]
+                });
+                standaloneSelection.clear();
+
+                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
+                Map<String, dynamic> manualOperation = {
+                  "programName": programList[ddCurrentPosition].programName,
+                  "programId": programList[ddCurrentPosition].programId,
+                  "startFlag":0,
+                  "method": standAloneMethod,
+                  "time": '00:00:00',
+                  "flow": '0',
+                  "selected": [],
+                };
+                sentManualModeToServer(manualOperation);
+              }
             },
             child: const Text('Stop'),
-          ):
-          const SizedBox(),
+          ),
           const SizedBox(width: 15),
         ],
       ),
@@ -1298,7 +1308,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(right: 5),
-                    child: DisplayLineOrSequence(lineOrSequence: dashBoardData.isNotEmpty ? dashBoardData[0].lineOrSequence : [], programList: widget.programList, programSelectionCallback: scheduleSectionCallbackMethod, ddCurrentPosition: ddCurrentPosition, duration: dashBoardData[0].time, flow: dashBoardData[0].flow, segmentSelectionCallbackFunction: segmentSelectionCallbackFunction, method: dashBoardData[0].method,),
+                    child: DisplayLineOrSequence(lineOrSequence: dashBoardData.isNotEmpty ? dashBoardData[0].lineOrSequence : [], programList: programList, programSelectionCallback: scheduleSectionCallbackMethod, ddCurrentPosition: ddCurrentPosition, duration: dashBoardData[0].time, flow: dashBoardData[0].flow, segmentSelectionCallbackFunction: segmentSelectionCallbackFunction, method: dashBoardData[0].method,),
                   ),
                 ),
               ],
@@ -2085,7 +2095,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                     ],
                   ),
                 ),
-                DisplayLineOrSequence(lineOrSequence: dashBoardData.isNotEmpty ? dashBoardData[0].lineOrSequence : [], programList: widget.programList, programSelectionCallback: scheduleSectionCallbackMethod, ddCurrentPosition: ddCurrentPosition, duration: dashBoardData[0].time, flow: dashBoardData[0].flow, segmentSelectionCallbackFunction: segmentSelectionCallbackFunction, method: dashBoardData[0].method,),
+                DisplayLineOrSequence(lineOrSequence: dashBoardData.isNotEmpty ? dashBoardData[0].lineOrSequence : [], programList: programList, programSelectionCallback: scheduleSectionCallbackMethod, ddCurrentPosition: ddCurrentPosition, duration: dashBoardData[0].time, flow: dashBoardData[0].flow, segmentSelectionCallbackFunction: segmentSelectionCallbackFunction, method: dashBoardData[0].method,),
               ],
             ),
           ),
@@ -2126,7 +2136,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
     String payload = '';
     String payLoadFinal = '';
 
-    if(method==2 && strDuration=='00:00:00'){
+    if(standAloneMethod==1 && strDuration=='00:00:00'){
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Invalid Duration input'),
@@ -2134,7 +2144,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
         ),
       );
     }else{
-      payload = '${finalResult==''?0:1},${finalResult==''?0:finalResult},${method==1?3:method==2?1:2},${method==1?'0':method==2?strDuration:strFlow}';
+      payload = '${finalResult==''?0:1},${finalResult==''?0:finalResult},${standAloneMethod},${standAloneMethod==3?'0':standAloneMethod==1?strDuration:strFlow}';
       payLoadFinal = jsonEncode({
         "800": [{"801": payload}]
       });
@@ -2146,7 +2156,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
         "programName": 'Default',
         "startFlag":1,
         "programId": 0,
-        "method": method,
+        "method": standAloneMethod,
         "time": strDuration,
         "flow": strFlow,
         "selected": standaloneSelection,
@@ -2162,14 +2172,14 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
 
     String payload = '';
     String payLoadFinal = '';
-    if(method==2 && strDuration=='00:00:00'){
+    if(standAloneMethod==1 && strDuration=='00:00:00'){
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Invalid Duration input'),
           duration: Duration(seconds: 3),
         ),
       );
-    }else if(method==3 && (strFlow.isEmpty || strFlow=='0')){
+    }else if(standAloneMethod==2 && (strFlow.isEmpty || strFlow=='0')){
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Invalid Liter'),
@@ -2177,10 +2187,10 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
         ),
       );
     }else{
-      payload = '${1},$strSldSqnLocation,${widget.programList[ddCurrentPosition].serialNumber},'
+      payload = '${1},$strSldSqnLocation,${programList[ddCurrentPosition].serialNumber},'
           '$strSldSqnNo,$strSldIrrigationPumpId,$strSldMainValveId,$strSldCtrlFilterId,'
           '$sldCtrlFilterRelayOnOffStatus,$strSldLocFilterId,$sldLocFilterRelayOnOffStatus,'
-          '$strSldFanId,$strSldFgrId,${method==1?3:method==2?1:2},${method==1?'0':method==2?strDuration:strFlow};';
+          '$strSldFanId,$strSldFgrId,$standAloneMethod,${standAloneMethod==3?'0':standAloneMethod==1?strDuration:strFlow};';
 
       payLoadFinal = jsonEncode({
         "3900": [{"3901": payload}]
@@ -2188,20 +2198,17 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
 
       print(payLoadFinal);
 
-      String offPayload = '${0},$strSldSqnLocation,${widget.programList[ddCurrentPosition].serialNumber},'
+      String offPayload = '${0},$strSldSqnLocation,${programList[ddCurrentPosition].serialNumber},'
           '$strSldSqnNo,$strSldIrrigationPumpId,$strSldMainValveId,$strSldCtrlFilterId,'
           '$sldCtrlFilterRelayOnOffStatus,$strSldLocFilterId,$sldLocFilterRelayOnOffStatus,'
           '$strSldFanId,$strSldFgrId,${0},${0};';
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('StandAlone - ${widget.programList[ddCurrentPosition].programName}', offPayload);
-
       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
       Map<String, dynamic> manualOperation = {
-        "programName": widget.programList[ddCurrentPosition].programName,
-        "programId": widget.programList[ddCurrentPosition].programId,
+        "programName": programList[ddCurrentPosition].programName,
+        "programId": programList[ddCurrentPosition].programId,
         "startFlag":1,
-        "method": method,
+        "method": standAloneMethod,
         "time": strDuration,
         "flow": strFlow,
         "selected": standaloneSelection,
@@ -2331,9 +2338,9 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
   @override
   void initState() {
     super.initState();
-    if(widget.method == 1){
+    if(widget.method == 3){
       _segmentWithFlow = SegmentWithFlow.manual;
-    }else if(widget.method == 2){
+    }else if(widget.method == 1){
       _segmentWithFlow = SegmentWithFlow.duration;
     }else{
       _segmentWithFlow = SegmentWithFlow.flow;
@@ -2597,7 +2604,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
               ),
             ),
           ),
-        ) :
+        ):
         Container(),
         Expanded(
           child: ListView.builder(

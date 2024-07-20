@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:html';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -8,6 +8,7 @@ import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/http_service.dart';
 
+import 'package:flutter/services.dart';
 
 
 TextEditingController _mobileNoController = TextEditingController();
@@ -30,7 +31,14 @@ class LoginForm extends StatefulWidget
   State<LoginForm> createState() => _LoginFormState();
 }
 
+
 class _LoginFormState extends State<LoginForm> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     var screenWidth = MediaQuery.of(context).size.width;
@@ -38,6 +46,8 @@ class _LoginFormState extends State<LoginForm> {
       body: screenWidth > 600 ? buildWideLayout(screenWidth) : buildNarrowLayout(screenWidth),
     );
   }
+
+
 
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -176,6 +186,16 @@ class _LoginFormState extends State<LoginForm> {
                                       });
                                       if(_validate)
                                       {
+
+                                        String uniqueID;
+                                        try {
+                                          DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+                                          WebBrowserInfo webBrowserInfo = await deviceInfo.webBrowserInfo;
+                                          uniqueID = webBrowserInfo.userAgent ?? 'Unknown';
+                                        } catch (e) {
+                                          uniqueID = "Failed to get unique ID: $e";
+                                        }
+
                                         Map<String, Object> body = {
                                           'mobileNumber': _mobileNoController.text,
                                           'password': _passwordController.text,
@@ -195,7 +215,6 @@ class _LoginFormState extends State<LoginForm> {
 
                                             /*List<dynamic> siteData = data['data']['site'];
                                             List<String> siteList = siteData.map((site) => json.encode(site)).toList();*/
-
 
                                             final prefs = await SharedPreferences.getInstance();
                                             await prefs.setString('userType', customerInfo["userType"].toString());
@@ -241,6 +260,9 @@ class _LoginFormState extends State<LoginForm> {
       ],
     );
   }
+
+
+
 
   Widget buildNarrowLayout(double screenWidth) {
     final PageController pageController = PageController(initialPage: 0);

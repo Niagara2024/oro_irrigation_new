@@ -390,7 +390,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
           ),
           DataCell(Text(widget.filteredCurrentSchedule[index].programCategory)),
           DataCell(Text('${widget.filteredCurrentSchedule[index].currentZone}/${widget.filteredCurrentSchedule[index].totalZone}')),
-          DataCell(Text(widget.filteredCurrentSchedule[index].zoneName)),
+          DataCell(Text(widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual'? '--':widget.filteredCurrentSchedule[index].zoneName)),
           DataCell(Center(child: Text(formatRtcValues(widget.filteredCurrentSchedule[index].currentRtc, widget.filteredCurrentSchedule[index].totalRtc)))),
           DataCell(Center(child: Text(formatRtcValues(widget.filteredCurrentSchedule[index].currentCycle,widget.filteredCurrentSchedule[index].totalCycle)))),
           DataCell(Center(child: Text(convert24HourTo12Hour(widget.filteredCurrentSchedule[index].startTime)))),

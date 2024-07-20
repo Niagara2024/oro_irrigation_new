@@ -75,7 +75,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     print('coming userId: ${widget.userId}');
     print('coming customerId: ${widget.customerId}');
     indicatorViewShow();
-    MyFunction().clearMQTTPayload(context);
     getCustomerSite(widget.customerId);
   }
 
@@ -93,7 +92,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   }
 
   void onRefreshClicked() {
-
     MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
     payloadProvider.liveSyncCall(true);
     String livePayload = '';
@@ -115,7 +113,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   Future<void> getCustomerSite(userId) async
   {
     Map<String, Object> body = {"userId" : userId ?? 0};
-    //final response = await HttpService().postRequest("getUserDeviceListForCustomer", body);
     final response = await HttpService().postRequest("getCustomerDashboard", body);
     if (response.statusCode == 200)
     {
@@ -139,29 +136,19 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       }
     }
     else{
-      //_showSnackBar(response.body);
+      indicatorViewHide();
     }
   }
 
   void updateSite(sIdx, mIdx, lIdx){
     _myCurrentSite = mySiteList[sIdx].groupName;
+    MyFunction().clearMQTTPayload(context);
     updateMaster(sIdx, mIdx, lIdx);
   }
 
   void updateMaster(sIdx, mIdx, lIdx){
-    MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
-    payloadProvider.updateLastCommunication(mySiteList[sIdx].master[mIdx].liveSyncDate, mySiteList[sIdx].master[mIdx].liveSyncTime);
     _myCurrentMaster = mySiteList[sIdx].master[mIdx].categoryName;
-
-    try{
-      //MQTTManager().unsubscribeFromAllTopics('FirmwareToApp/${mySiteList[sIdx].master[mIdx].deviceId}');
-      MyFunction().clearMQTTPayload(context);
-    }catch(e){
-      print(e);
-    }
     subscribeCurrentMaster(sIdx, mIdx);
-    //displayServerData();
-
     if(mySiteList[sIdx].master[mIdx].categoryId == 1 ||
         mySiteList[sIdx].master[mIdx].categoryId == 2){
       updateMasterLine(sIdx, mIdx, lIdx);
@@ -174,7 +161,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   void subscribeCurrentMaster(sIdx, mIdx) {
     Future.delayed(const Duration(seconds: 1), () {
       MQTTManager().subscribeToTopic('FirmwareToApp/${mySiteList[sIdx].master[mIdx].deviceId}');
+      onRefreshClicked();
     });
+
   }
 
   void updateMasterLine(sIdx, mIdx, lIdx){
@@ -182,9 +171,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       setState(() {
         _myCurrentIrrLine = mySiteList[sIdx].master[mIdx].irrigationLine[lIdx].name;
       });
-
       displayServerData();
-      //onRefreshClicked();
     }
   }
 
@@ -1107,6 +1094,26 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   label: Text(''),
                 ),
               ],
+
+              trailing: Expanded(
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Tooltip(
+                      message: 'ⓒ Powered by Niagara Automation',
+                      child: CircleAvatar(
+                        radius: 17,
+                        backgroundColor: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 7, right: 4, left: 4),
+                          child: Image.asset('assets/images/company_logo.png'),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
             Container(
               width: mySiteList[siteIndex].master[masterIndex].categoryId==1 ||
@@ -2401,8 +2408,8 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                                 child: Text(
                                                   (widget.nodeList[index].sensor[indexSnr].angIpNo !=
                                                       null
-                                                      ? 'AI-${widget.nodeList[index].sensor[indexSnr].angIpNo}'
-                                                      : 'PI-${widget.nodeList[index].sensor[indexSnr].pulseIpNo}')
+                                                      ? 'A-${widget.nodeList[index].sensor[indexSnr].angIpNo}'
+                                                      : 'P-${widget.nodeList[index].sensor[indexSnr].pulseIpNo}')
                                                       .toString(),
                                                   style: const TextStyle(color: Colors.white, fontSize: 11),
                                                 ),

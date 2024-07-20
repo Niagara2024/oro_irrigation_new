@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
@@ -707,9 +708,9 @@ class _DisplayFilterState extends State<DisplayFilter> {
         .toList()
         .cast<Map<String, dynamic>>();
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         for(int i=0; i<filteredCentralFilter.length; i++)
           Row(
@@ -853,6 +854,7 @@ class _DisplayFilterState extends State<DisplayFilter> {
               const SizedBox(),
             ],
           ),
+        Text(filteredCentralFilter[0]['FilterSite'], style: const TextStyle(color: primaryColorDark),),
       ],
     );
 
@@ -1056,6 +1058,8 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                               }
                             }
 
+                            final isLastItem = index == fertilizerCentral[fIndex]['Fertilizer'].length - 1;
+
                             return SizedBox(
                               width: 70,
                               height: 120,
@@ -1138,6 +1142,21 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                                     ) :
                                     const SizedBox(),
                                   ),
+                                  if(isLastItem)
+                                    Positioned(
+                                      top: 80,
+                                      left: 23,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.transparent,
+                                          borderRadius: BorderRadius.circular(3),
+                                        ),
+                                        width: 45,
+                                        child: Center(
+                                          child: Text(fertilizerCentral[0]['FertilizerSite'], style: const TextStyle(color: primaryColorDark),),
+                                        ),
+                                      ),
+                                    ),
                                 ],
                               ),
                             );
@@ -1518,9 +1537,9 @@ class _LocalFilterState extends State<LocalFilter> {
         .where((pump) => pump['Location'].contains(widget.currentLineId)).toList()
         .cast<Map<String, dynamic>>();
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         for(int i=0; i<filteredLocalFilter.length; i++)
           Row(
@@ -1663,9 +1682,9 @@ class _LocalFilterState extends State<LocalFilter> {
               const SizedBox(),
             ],
           ),
+        Text(filteredLocalFilter[0]['FilterSite'], style: const TextStyle(color: primaryColorDark),),
       ],
     );
-
   }
 
   Widget buildFilterImage(int cIndex, int status) {
@@ -1881,6 +1900,8 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                               }
                             }
 
+                            final isLastItem = index == fertilizerLocal[fIndex]['Fertilizer'].length - 1;
+
                             return SizedBox(
                               width: 70,
                               height: 120,
@@ -1963,6 +1984,21 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                                     ) :
                                     const SizedBox(),
                                   ),
+                                  if(isLastItem)
+                                    Positioned(
+                                      top: 80,
+                                      left: 23,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.transparent,
+                                          borderRadius: BorderRadius.circular(3),
+                                        ),
+                                        width: 45,
+                                        child: Center(
+                                          child: Text(fertilizerLocal[0]['FertilizerSite'], style: const TextStyle(color: primaryColorDark),),
+                                        ),
+                                      ),
+                                    ),
                                 ],
                               ),
                             );

@@ -19,6 +19,7 @@ import '../../constants/http_service.dart';
 import '../../constants/snack_bar.dart';
 import '../../constants/theme.dart';
 import '../../state_management/MqttPayloadProvider.dart';
+import '../../widgets/Customer/MyWidgets.dart';
 import '../product_inventory.dart';
 import 'AccountManagement.dart';
 import 'CustomerDashboard.dart';
@@ -45,8 +46,7 @@ class CustomerScreenController extends StatefulWidget {
 
 class _CustomerScreenControllerState extends State<CustomerScreenController> with TickerProviderStateMixin
 {
-
-  List<DashboardModel> mySiteList = [];//SL = Site List
+  List<DashboardModel> mySiteList = [];
   int siteIndex = 0;
   int masterIndex = 0;
   int lineIndex = 0;
@@ -60,12 +60,16 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   late String _myCurrentMaster;
   String _myCurrentIrrLine= 'No Line Available';
 
+  String fromWhere = '';
+
   bool appbarBottomOpen = false;
   bool _isHovered1 = false;
   bool _isHovered2 = false;
   bool _isHovered3 = false;
   bool _isHovered4 = false;
   bool _isHovered5 = false;
+
+  final ValueNotifier<String> liveSyncNotifier = ValueNotifier<String>('2024-07-20 - 14:30');
 
 
   @override
@@ -126,6 +130,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           mySiteList = jsonData.map((json) => DashboardModel.fromJson(json)).toList();
           indicatorViewHide();
           if(mySiteList.isNotEmpty){
+            fromWhere = 'init';
             updateSite(0,0,0);
             getProgramList();
           }
@@ -158,6 +163,13 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   }
 
+  void updateMasterLine(sIdx, mIdx, lIdx){
+    if(mySiteList[sIdx].master[mIdx].irrigationLine.isNotEmpty){
+      _myCurrentIrrLine = mySiteList[sIdx].master[mIdx].irrigationLine[lIdx].name;
+      displayServerData();
+    }
+  }
+
   void subscribeCurrentMaster(sIdx, mIdx) {
     Future.delayed(const Duration(seconds: 1), () {
       MQTTManager().subscribeToTopic('FirmwareToApp/${mySiteList[sIdx].master[mIdx].deviceId}');
@@ -166,14 +178,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   }
 
-  void updateMasterLine(sIdx, mIdx, lIdx){
-    if(mySiteList[sIdx].master[mIdx].irrigationLine.isNotEmpty){
-      setState(() {
-        _myCurrentIrrLine = mySiteList[sIdx].master[mIdx].irrigationLine[lIdx].name;
-      });
-      displayServerData();
-    }
-  }
 
   Future<void> getProgramList() async
   {
@@ -201,6 +205,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
         mySiteList[siteIndex].master[masterIndex].categoryId==2){
       //gem or gem+ controller
       payloadProvider.updateWifiStrength(mySiteList[siteIndex].master[masterIndex].gemLive[0].WifiStrength);
+      payloadProvider.updateLastSync('${mySiteList[siteIndex].master[masterIndex].liveSyncDate} ${mySiteList[siteIndex].master[masterIndex].liveSyncTime}');
 
       List<dynamic> ndlLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList.map((ndl) => ndl.toJson()).toList();
       payloadProvider.updateNodeList(ndlLst);
@@ -260,37 +265,40 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
       }
       else{
-        List<dynamic> csLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].currentSchedule.map((cs) => cs.toJson()).toList();
-        List<CurrentScheduleModel> cs = csLst.map((cs) => CurrentScheduleModel.fromJson(cs)).toList();
-        payloadProvider.updateCurrentScheduled(cs);
+        if(fromWhere!='line'){
+          List<dynamic> csLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].currentSchedule.map((cs) => cs.toJson()).toList();
+          List<CurrentScheduleModel> cs = csLst.map((cs) => CurrentScheduleModel.fromJson(cs)).toList();
+          payloadProvider.updateCurrentScheduled(cs);
 
-        List<dynamic> pqLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].queProgramList.map((pq) => pq.toJson()).toList();
-        List<ProgramQueue> pq = pqLst.map((pq) => ProgramQueue.fromJson(pq)).toList();
-        payloadProvider.updateProgramQueue(pq);
+          List<dynamic> pqLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].queProgramList.map((pq) => pq.toJson()).toList();
+          List<ProgramQueue> pq = pqLst.map((pq) => ProgramQueue.fromJson(pq)).toList();
+          payloadProvider.updateProgramQueue(pq);
 
-        //pump-------------------------------------------------
-        String pumpList= jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].pumpList.map((pump) => pump.toJson()).toList());
-        List<dynamic> jsonPumpList = jsonDecode(pumpList);
-        String pumpPayloadFinal = jsonEncode({
-          "2400": [{"2407": jsonPumpList.toList()}]
-        });
-        payloadProvider.updatePumpPayload(pumpPayloadFinal);
+          //pump-------------------------------------------------
+          String pumpList= jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].pumpList.map((pump) => pump.toJson()).toList());
+          List<dynamic> jsonPumpList = jsonDecode(pumpList);
+          String pumpPayloadFinal = jsonEncode({
+            "2400": [{"2407": jsonPumpList.toList()}]
+          });
+          payloadProvider.updatePumpPayload(pumpPayloadFinal);
 
-        //filter------------------------------------
-        String filterList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].filterList.map((filter) => filter.toJson()).toList());
-        List<dynamic> jsonFilterList = jsonDecode(filterList);
-        String filterPayloadFinal = jsonEncode({
-          "2400": [{"2405": jsonFilterList.toList()}]
-        });
-        payloadProvider.updateFilterPayload(filterPayloadFinal);
+          //filter------------------------------------
+          String filterList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].filterList.map((filter) => filter.toJson()).toList());
+          List<dynamic> jsonFilterList = jsonDecode(filterList);
+          String filterPayloadFinal = jsonEncode({
+            "2400": [{"2405": jsonFilterList.toList()}]
+          });
+          payloadProvider.updateFilterPayload(filterPayloadFinal);
 
-        //fertilizer------------------------------------------
-        String fertilizerSiteList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].fertilizerSiteList.map((pump) => pump.toJson()).toList());
-        List<dynamic> jsonFertilizerList = jsonDecode(fertilizerSiteList);
-        String fertilizerPayloadFinal = jsonEncode({
-          "2400": [{"2406": jsonFertilizerList.toList()}]
-        });
-        payloadProvider.updateFertilizerPayload(fertilizerPayloadFinal);
+          //fertilizer------------------------------------------
+          String fertilizerSiteList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].fertilizerSiteList.map((pump) => pump.toJson()).toList());
+          List<dynamic> jsonFertilizerList = jsonDecode(fertilizerSiteList);
+          String fertilizerPayloadFinal = jsonEncode({
+            "2400": [{"2406": jsonFertilizerList.toList()}]
+          });
+          payloadProvider.updateFertilizerPayload(fertilizerPayloadFinal);
+        }
+
       }
     }
     else{
@@ -331,23 +339,12 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   {
     final screenWidth = MediaQuery.of(context).size.width;
     final provider = Provider.of<MqttPayloadProvider>(context);
-    final wifiStrength = Provider.of<MqttPayloadProvider>(context).wifiStrength;
-    final currentDate = Provider.of<MqttPayloadProvider>(context).currentDate;
-    final currentTime = Provider.of<MqttPayloadProvider>(context).currentTime;
-
-    final payload2408 = Provider.of<MqttPayloadProvider>(context).payload2408;
-    bool allIrrigationResumeFlag = payload2408.every((record) => record['IrrigationPauseFlag'] == 1);
-    Duration lastComDifference = Provider.of<MqttPayloadProvider>(context).lastCommunication;
+    Duration lastComDifference = provider.lastCommunication;
 
     if(mySiteList.isNotEmpty){
-
       if(mySiteList[siteIndex].master[masterIndex].categoryId==1||
           mySiteList[siteIndex].master[masterIndex].categoryId==2){
         //gem or gem+ controller
-        if(currentDate.isNotEmpty){
-          mySiteList[siteIndex].master[masterIndex].liveSyncDate = currentDate;
-          mySiteList[siteIndex].master[masterIndex].liveSyncTime = currentTime;
-        }
         if(lastComDifference.inMinutes>=10){
           mySiteList[siteIndex].master[masterIndex].gemLive[0].currentSchedule=[];
           mySiteList[siteIndex].master[masterIndex].gemLive[0].queProgramList=[];
@@ -381,12 +378,17 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
     }
 
-    return visibleLoading? buildLoadingIndicator(visibleLoading, screenWidth):
-    screenWidth > 600 ? buildWideLayout(screenWidth, payload2408, allIrrigationResumeFlag, wifiStrength, provider):
-    buildNarrowLayout(screenWidth, payload2408, allIrrigationResumeFlag, wifiStrength, provider);
+    return Consumer<MqttPayloadProvider>(
+      builder: (context, payload, child){
+        return visibleLoading? buildLoadingIndicator(visibleLoading, screenWidth):
+        screenWidth > 600 ? buildWideLayout(screenWidth, payload):
+        buildNarrowLayout(screenWidth, payload);
+      },
+    );
+
   }
 
-  Widget buildNarrowLayout(screenWidth, payload2408, allIrrigationResumeFlag, wifiStrength, provider)
+  Widget buildNarrowLayout(screenWidth, payload)
   {
     return Scaffold(
       backgroundColor: Colors.teal.shade50,
@@ -400,7 +402,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           ],
         ),
         actions: [
-          mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1 && Provider.of<MqttPayloadProvider>(context).currentSchedule.isNotEmpty?
+          mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1 && payload.currentSchedule.isNotEmpty?
           CircleAvatar(
             radius: 15,
             backgroundImage: const AssetImage('assets/GifFile/water_drop_ani.gif'),
@@ -456,6 +458,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                         siteIndex = newIndex;
                         masterIndex = 0;
                         lineIndex = 0;
+                        fromWhere='site';
                         updateSite(newIndex, 0, 0);
                         getProgramList();
                       }
@@ -485,6 +488,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                       if (masterIdx != -1 && mySiteList[siteIndex].master.length > 1) {
                         masterIndex = masterIdx;
                         lineIndex = 0;
+                        fromWhere='master';
                         updateMaster(siteIndex, masterIdx, 0);
 
                         /*updateSite(newIndex, 0, 0);
@@ -694,12 +698,12 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                         RoundedRectangleBorder(borderRadius: BorderRadius.circular(5),),
                       ),
                     ),
-                    child: Row(
+                    child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.exit_to_app, color: Colors.white),
-                        const SizedBox(width: 5),
-                        Text('Logout', style: const TextStyle(color: Colors.white)),
+                        Icon(Icons.exit_to_app, color: Colors.white),
+                        SizedBox(width: 5),
+                        Text('Logout', style: TextStyle(color: Colors.white)),
                       ],
                     ),
                   ),
@@ -709,11 +713,12 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           ],
         ),
       ),
-      body: buildScreen(screenWidth, provider, wifiStrength),
+      body: buildScreen(screenWidth, payload),
     );
   }
 
-  Widget buildWideLayout(screenWidth, payload2408, allIrrigationResumeFlag, wifiStrength, provider) {
+  Widget buildWideLayout(screenWidth, payload) {
+
     return Scaffold(
       appBar: AppBar(
         leading: const Padding(
@@ -739,6 +744,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   siteIndex = newIndex;
                   masterIndex = 0;
                   lineIndex = 0;
+                  fromWhere='site';
                   updateSite(newIndex, 0, 0);
                 }
               },
@@ -767,6 +773,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 if (masterIdx != -1 && mySiteList[siteIndex].master.length > 1) {
                   masterIndex = masterIdx;
                   lineIndex = 0;
+                  fromWhere='master';
                   updateMaster(siteIndex, masterIdx, 0);
                 }
               },
@@ -798,6 +805,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 => line.name == newLineName);
                 if (lineIndex != -1 && mySiteList[siteIndex].master[masterIndex].irrigationLine.length > 1) {
                   lineIndex = lIndex;
+                  fromWhere='line';
                   updateMasterLine(siteIndex, masterIndex, lIndex);
                 }
               },
@@ -812,7 +820,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             const SizedBox(width: 15,),
             Container(width: 1, height: 20, color: Colors.white54,),
             const SizedBox(width: 5,),
-            Text('Last sync : ${'${mySiteList[siteIndex].master[masterIndex].liveSyncDate} - ${mySiteList[siteIndex].master[masterIndex].liveSyncTime}'}', style: const TextStyle(fontSize: 15, color: Colors.white70),),
+            textWidget(
+              text: 'Last sync : ${payload.syncDateTime}',
+              style: const TextStyle(fontSize: 15, color: Colors.white70),
+            ),
           ],
         ),
         leadingWidth: 75,
@@ -830,7 +841,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1 && Provider.of<MqttPayloadProvider>(context).currentSchedule.isNotEmpty?
+              mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1 && payload.currentSchedule.isNotEmpty?
               CircleAvatar(
                 radius: 15,
                 backgroundImage: const AssetImage('assets/GifFile/water_drop_ani.gif'),
@@ -842,11 +853,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1? TextButton(
                 onPressed: () {
                   String strPRPayload = '';
-                  for (int i = 0; i < payload2408.length; i++) {
-                    if (allIrrigationResumeFlag) {
-                      strPRPayload += '${payload2408[i]['S_No']},0;';
+                  for (int i = 0; i < payload.payload2408.length; i++) {
+                    if (payload.payload2408.every((record) => record['IrrigationPauseFlag'] == 1)) {
+                      strPRPayload += '${payload.payload2408[i]['S_No']},0;';
                     } else {
-                      strPRPayload += '${payload2408[i]['S_No']},1;';
+                      strPRPayload += '${payload.payload2408[i]['S_No']},1;';
                     }
                   }
                   String payloadFinal = jsonEncode({
@@ -855,7 +866,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   MQTTManager().publish(payloadFinal, 'AppToFirmware/${mySiteList[siteIndex].master[masterIndex].deviceId}');
                 },
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(allIrrigationResumeFlag?Colors.green: Colors.orange),
+                  backgroundColor: MaterialStateProperty.all<Color>(payload.payload2408.every((record) => record['IrrigationPauseFlag'] == 1)?Colors.green: Colors.orange),
                   shape: MaterialStateProperty.all<OutlinedBorder>(
                     RoundedRectangleBorder(borderRadius: BorderRadius.circular(5),),
                   ),
@@ -863,11 +874,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    allIrrigationResumeFlag
+                    payload.payload2408.every((record) => record['IrrigationPauseFlag'] == 1)
                         ? const Icon(Icons.play_arrow_outlined, color: Colors.white)
                         : const Icon(Icons.pause, color: Colors.white),
                     const SizedBox(width: 5),
-                    Text(allIrrigationResumeFlag ? 'RESUME ALL LINE' : 'PAUSE ALL LINE',
+                    Text(payload.payload2408.every((record) => record['IrrigationPauseFlag'] == 1) ? 'RESUME ALL LINE' : 'PAUSE ALL LINE',
                         style: const TextStyle(color: Colors.white)),
                   ],
                 ),
@@ -1037,8 +1048,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       ),
       backgroundColor: Colors.white,
       extendBody: true,
-      body:
-      (mySiteList[siteIndex].master[masterIndex].categoryId==1 ||
+      body: (mySiteList[siteIndex].master[masterIndex].categoryId==1 ||
           mySiteList[siteIndex].master[masterIndex].categoryId==2)?
       Container(
         width: double.infinity,
@@ -1094,7 +1104,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   label: Text(''),
                 ),
               ],
-
               trailing: Expanded(
                 child: Align(
                   alignment: Alignment.bottomCenter,
@@ -1133,7 +1142,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   color: Colors.teal.shade50,
                   borderRadius: const BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
                 ),
-                child: buildScreen(screenWidth, provider, wifiStrength),
+                child: buildScreen(screenWidth, payload),
               ),
             ),
             mySiteList[siteIndex].master[masterIndex].categoryId==1 ||
@@ -1159,13 +1168,13 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(wifiStrength == 0? Icons.wifi_off:
-                        wifiStrength >= 1 && wifiStrength <= 20 ? Icons.network_wifi_1_bar_outlined:
-                        wifiStrength >= 21 && wifiStrength <= 40 ? Icons.network_wifi_2_bar_outlined:
-                        wifiStrength >= 41 && wifiStrength <= 60 ? Icons.network_wifi_3_bar_outlined:
-                        wifiStrength >= 61 && wifiStrength <= 80 ? Icons.network_wifi_3_bar_outlined:
+                        Icon(payload.wifiStrength == 0? Icons.wifi_off:
+                        payload.wifiStrength >= 1 && payload.wifiStrength <= 20 ? Icons.network_wifi_1_bar_outlined:
+                        payload.wifiStrength >= 21 && payload.wifiStrength <= 40 ? Icons.network_wifi_2_bar_outlined:
+                        payload.wifiStrength >= 41 && payload.wifiStrength <= 60 ? Icons.network_wifi_3_bar_outlined:
+                        payload.wifiStrength >= 61 && payload.wifiStrength <= 80 ? Icons.network_wifi_3_bar_outlined:
                         Icons.wifi, color: Colors.white,),
-                        Text('$wifiStrength %',style: const TextStyle(fontSize: 11.0, color: Colors.white70),
+                        Text('${payload.wifiStrength} %',style: const TextStyle(fontSize: 11.0, color: Colors.white70),
                         ),
                       ],
                     ),
@@ -1319,14 +1328,14 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     height: 45,
                     child: BadgeButton(
                       onPressed: () {
-                        if(provider.alarmList.isNotEmpty){
-                          showAlarmBottomSheet(context, provider);
+                        if(payload.alarmList.isNotEmpty){
+                          showAlarmBottomSheet(context, payload);
                         }else{
                           GlobalSnackBar.show(context, 'Alarm is Empty', 200);
                         }
                       },
                       icon: Icons.alarm,
-                      badgeNumber: provider.alarmList.length,
+                      badgeNumber: payload.alarmList.length,
 
                     ),
                   ),
@@ -1341,7 +1350,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     );
   }
 
-  Widget buildScreen(screenWidth, provider, wifiStrength)
+  Widget buildScreen(screenWidth, payload)
   {
     return Padding(
       padding: screenWidth>600? const EdgeInsets.all(8.0):
@@ -1376,12 +1385,12 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   width: 45,
                   height: 45,
                   child: IconButton(
-                    tooltip: '$wifiStrength %',
-                    icon: Icon(wifiStrength == 0? Icons.wifi_off:
-                    wifiStrength >= 1 && wifiStrength <= 20 ? Icons.network_wifi_1_bar_outlined:
-                    wifiStrength >= 21 && wifiStrength <= 40 ? Icons.network_wifi_2_bar_outlined:
-                    wifiStrength >= 41 && wifiStrength <= 60 ? Icons.network_wifi_3_bar_outlined:
-                    wifiStrength >= 61 && wifiStrength <= 80 ? Icons.network_wifi_3_bar_outlined:
+                    tooltip: '${payload.wifiStrength} %',
+                    icon: Icon(payload.wifiStrength == 0? Icons.wifi_off:
+                    payload.wifiStrength >= 1 && payload.wifiStrength <= 20 ? Icons.network_wifi_1_bar_outlined:
+                    payload.wifiStrength >= 21 && payload.wifiStrength <= 40 ? Icons.network_wifi_2_bar_outlined:
+                    payload.wifiStrength >= 41 && payload.wifiStrength <= 60 ? Icons.network_wifi_3_bar_outlined:
+                    payload.wifiStrength >= 61 && payload.wifiStrength <= 80 ? Icons.network_wifi_3_bar_outlined:
                     Icons.wifi, color: Colors.white,),
                     onPressed: null,
                   ),
@@ -1462,14 +1471,14 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   height: 45,
                   child: BadgeButton(
                     onPressed: () {
-                      if(provider.alarmList.isNotEmpty){
-                        showAlarmBottomSheet(context, provider);
+                      if(payload.alarmList.isNotEmpty){
+                        showAlarmBottomSheet(context, payload);
                       }else{
                         GlobalSnackBar.show(context, 'Alarm is Empty', 200);
                       }
                     },
                     icon: Icons.alarm,
-                    badgeNumber: provider.alarmList.length,
+                    badgeNumber: payload.alarmList.length,
 
                   ),
                 ),

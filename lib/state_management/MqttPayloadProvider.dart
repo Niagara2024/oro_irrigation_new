@@ -17,18 +17,14 @@ class MqttPayloadProvider with ChangeNotifier {
 
   int wifiStrength = 0;
   int batVolt = 0;
-  //List<dynamic> nodeList = [];
-  //List<dynamic> currentSchedule = [];
   List<dynamic> PrsIn = [];
   List<dynamic> PrsOut = [];
-  //List<dynamic> nextSchedule = [];
   List<dynamic> filtersCentral = [];
   List<dynamic> filtersLocal = [];
   List<dynamic> sourcePump = [];
   List<dynamic> irrigationPump = [];
   List<dynamic> fertilizerCentral = [];
   List<dynamic> fertilizerLocal = [];
-  //List<dynamic> flowMeter = [];
   List<dynamic> waterMeter = [];
   List<dynamic> alarmList = [];
   List<dynamic> payload2408 = [];
@@ -45,7 +41,9 @@ class MqttPayloadProvider with ChangeNotifier {
   List<CurrentScheduleModel> _currentSchedule = [];
   List<CurrentScheduleModel> get currentSchedule => _currentSchedule;
 
-  String currentDate = '', currentTime = '';
+  String _syncDateTime = '';
+  String get syncDateTime => _syncDateTime;
+
   bool liveSync = false;
   Duration lastCommunication = Duration.zero;
 
@@ -74,7 +72,10 @@ class MqttPayloadProvider with ChangeNotifier {
         if (data.containsKey('2400') && data['2400'] != null && data['2400'].isNotEmpty) {
           dashBoardPayload = payload;
           liveSyncCall(false);
-          updateLastSync();
+
+          if(data['2400'][0].containsKey('SentTime')) {
+            updateLastSync(data['2400'][0]['SentTime']);
+          }
 
           if(data['2400'][0].containsKey('WifiStrength')) {
             updateWifiStrength(data['2400'][0]['WifiStrength']);
@@ -150,7 +151,7 @@ class MqttPayloadProvider with ChangeNotifier {
         }
       }else{
         print('pump controller payload :$payload');
-        updateLastSync();
+        updateLastSync('000:00:00 - 00:00');
         Map<String, dynamic> json = jsonDecode(payload);
         if(json['mC']=='LD01'){
 
@@ -187,19 +188,14 @@ class MqttPayloadProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateLastSync(){
-    final DateTime now = DateTime.now();
-    final DateFormat dateFormatter = DateFormat('yyyy-MM-dd');
-    final DateFormat timeFormatter = DateFormat('HH:mm:ss');
-
-    currentDate = dateFormatter.format(now);
-    currentTime = timeFormatter.format(now);
-    updateLastCommunication(currentDate, currentTime);
-    //notifyListeners();
+  void updateLastSync(dt){
+    _syncDateTime = dt;
+    notifyListeners();
+    updateLastCommunication(dt);
   }
 
-  void updateLastCommunication(currentDate, currentTime) {
-    final String lastSyncString = "$currentDate $currentTime";
+  void updateLastCommunication(dt) {
+    final String lastSyncString = dt;
     DateTime lastSyncDateTime = DateFormat("yyyy-MM-dd HH:mm:ss").parse(lastSyncString);
     DateTime currentDateTime = DateTime.now();
     lastCommunication = currentDateTime.difference(lastSyncDateTime);

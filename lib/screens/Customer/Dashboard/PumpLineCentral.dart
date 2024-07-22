@@ -854,7 +854,7 @@ class _DisplayFilterState extends State<DisplayFilter> {
               const SizedBox(),
             ],
           ),
-        Text(filteredCentralFilter[0]['FilterSite'], style: const TextStyle(color: primaryColorDark),),
+        Text(filteredCentralFilter.isNotEmpty? filteredCentralFilter[0]['FilterSite']:'', style: const TextStyle(color: primaryColorDark),),
       ],
     );
 
@@ -1682,7 +1682,7 @@ class _LocalFilterState extends State<LocalFilter> {
               const SizedBox(),
             ],
           ),
-        Text(filteredLocalFilter[0]['FilterSite'], style: const TextStyle(color: primaryColorDark),),
+        Text(filteredLocalFilter.isNotEmpty? filteredLocalFilter[0]['FilterSite']:'', style: const TextStyle(color: primaryColorDark),),
       ],
     );
   }

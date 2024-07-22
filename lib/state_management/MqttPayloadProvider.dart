@@ -59,7 +59,6 @@ class MqttPayloadProvider with ChangeNotifier {
   void updateReceivedPayload(String payload) {
     try {
       Map<String, dynamic> data = jsonDecode(payload);
-
       if(data.containsKey('4200')){
         messageFromHw = data['4200'][0]['4201'];
         if(messageFromHw['PayloadCode']=='2900'){
@@ -167,7 +166,6 @@ class MqttPayloadProvider with ChangeNotifier {
     }
     //notifyListeners();
   }
-
 
 
   void mqttConnectionStatus(status){

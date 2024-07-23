@@ -284,14 +284,14 @@ class _AddProductState extends State<AddProduct> {
           onPressed: () async {
             if (sldCatID!=0 && sldModID!=0) {
 
-              if (isNotEmpty(ctrlIMI.text) && isNotEmpty(ctrlDofM.text) && isNotEmpty(ctrlWrM.text)) {
-                if (!isIMEIAlreadyExists(ctrlIMI.text, addedProductList)) {
+              if (isNotEmpty(ctrlIMI.text.trim()) && isNotEmpty(ctrlDofM.text) && isNotEmpty(ctrlWrM.text)) {
+                if (!isIMEIAlreadyExists(ctrlIMI.text.trim(), addedProductList)) {
                   Map<String, dynamic> productMap = {
                     "categoryName": ddCatList.text,
                     "categoryId": sldCatID.toString(),
                     "modelName": ddModelList.text,
                     "modelId": sldModID.toString(),
-                    "deviceId": ctrlIMI.text,
+                    "deviceId": ctrlIMI.text.trim(),
                     "productDescription": ctrlPrdDis.text,
                     'dateOfManufacturing': ctrlDofM.text,
                     'warrantyMonths': ctrlWrM.text,

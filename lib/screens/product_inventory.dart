@@ -859,7 +859,7 @@ class ProductInventoryState extends State<ProductInventory> {
                 onPressed: () async {
                   if (formKey.currentState!.validate())
                   {
-                    final body = {"productId": productId, "modelId": mdlId, "deviceId": ctrlIMI.text, "warrantyMonths": ctrlWrM.text, 'modifyUser': userID};
+                    final body = {"productId": productId, "modelId": mdlId, "deviceId": ctrlIMI.text.trim(), "warrantyMonths": ctrlWrM.text, 'modifyUser': userID};
                     final response = await HttpService().putRequest("updateProduct", body);
                     if (response.statusCode == 200)
                     {

@@ -90,9 +90,9 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                   List<dynamic> rlyStatuses = items['RlyStatus'];
                   Map<int, int> statusMap = {};
                   try{
-                    statusMap = {for (var item in rlyStatuses) item['S_No']: item['Status']};
+                    statusMap = {for (var item in rlyStatuses) item['S_No']:item['Status']};
                   }catch(e){
-                    statusMap = {for (var item in rlyStatuses) item.S_No: item.Status};
+                    statusMap = {for (var item in rlyStatuses) item.S_No:item.Status};
                   }
 
                   for (var line in widget.siteData.master[widget.masterInx].irrigationLine) {

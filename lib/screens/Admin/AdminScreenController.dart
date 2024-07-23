@@ -169,8 +169,6 @@ class _AdminScreenControllerState extends State<AdminScreenController> {
                       await prefs.remove('password');
                       await prefs.remove('email');
 
-                      MQTTManager().disconnect();
-
                       if (mounted){
                         Navigator.pushReplacementNamed(context, '/login');
                       }

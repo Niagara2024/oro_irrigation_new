@@ -152,6 +152,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     if(mySiteList[sIdx].master[mIdx].categoryId == 1 ||
         mySiteList[sIdx].master[mIdx].categoryId == 2){
       updateMasterLine(sIdx, mIdx, lIdx);
+      displayServerData();
     }else{
       //pump controller
     }
@@ -160,8 +161,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   void updateMasterLine(sIdx, mIdx, lIdx){
     if(mySiteList[sIdx].master[mIdx].irrigationLine.isNotEmpty){
-      _myCurrentIrrLine = mySiteList[sIdx].master[mIdx].irrigationLine[lIdx].name;
-      displayServerData();
+      setState(() {
+        _myCurrentIrrLine = mySiteList[sIdx].master[mIdx].irrigationLine[lIdx].name;
+      });
     }
   }
 
@@ -679,7 +681,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                       await prefs.remove('subscribeTopic');
                       await prefs.remove('password');
                       await prefs.remove('email');
-                      MQTTManager().disconnect();
+
+                      MyFunction().clearMQTTPayload(context);
                       if (context.mounted){
                         Navigator.pushReplacementNamed(context, '/login');
                       }
@@ -812,10 +815,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             const SizedBox(width: 15,),
             Container(width: 1, height: 20, color: Colors.white54,),
             const SizedBox(width: 5,),
-            csText(
-              text: 'Last sync : ${payload.syncDateTime}',
-              style: const TextStyle(fontSize: 15, color: Colors.white70),
-            ),
+            Text('Last sync : ${payload.syncDateTime}', style: const TextStyle(fontSize: 15, color: Colors.white70),),
+
           ],
         ),
         leadingWidth: 75,
@@ -1014,7 +1015,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                   await prefs.remove('subscribeTopic');
                                   await prefs.remove('password');
                                   await prefs.remove('email');
-                                  MQTTManager().disconnect();
+                                  //MQTTManager().disconnect();
                                   if (context.mounted){
                                     Navigator.pushReplacementNamed(context, '/login');
                                   }
@@ -1040,7 +1041,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       backgroundColor: Colors.white,
       extendBody: true,
       body: (mySiteList[siteIndex].master[masterIndex].categoryId==1 ||
-          mySiteList[siteIndex].master[masterIndex].categoryId==2)?
+          mySiteList[siteIndex].master[masterIndex].categoryId==2) ?
       Container(
         width: double.infinity,
         height: double.infinity,
@@ -1790,7 +1791,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                           "4100": [{"4101": payload}]
                         });
                         MQTTManager().publish(payLoadFinal, 'AppToFirmware/${mySiteList[siteIndex].master[masterIndex].deviceId}');
-
                       },
                       child: const Text('Reset'),
                     ))),

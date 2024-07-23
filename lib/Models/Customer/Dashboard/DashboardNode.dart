@@ -267,6 +267,7 @@ class NodeData {
 class PumpData {
   int type;
   String name;
+  String ? swName;
   String location;
   int status;
   int reason;
@@ -282,6 +283,7 @@ class PumpData {
   PumpData({
     required this.type,
     required this.name,
+    required this.swName,
     required this.location,
     required this.status,
     required this.reason,
@@ -302,6 +304,7 @@ class PumpData {
     return PumpData(
       type: type,
       name: json['Name'],
+      swName: json['SW_Name'],
       location: location,
       status: json['Status'],
       reason: json['Reason'],
@@ -318,8 +321,9 @@ class PumpData {
 
   Map<String, dynamic> toJson() {
     return {
-      'Type': Type,
+      'Type': type,
       'Name': name,
+      'SW_Name': swName,
       'Location': location,
       'Status': status,
       'Reason': reason,

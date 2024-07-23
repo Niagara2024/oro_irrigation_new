@@ -8,6 +8,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import '../../Models/DataResponse.dart';
 import '../../Models/customer_list.dart';
 import '../../Models/product_stock.dart';
+import '../../constants/MQTTManager.dart';
 import '../../constants/http_service.dart';
 import '../../constants/theme.dart';
 import '../my_preference.dart';
@@ -166,8 +167,6 @@ class _DealerScreenControllerState extends State<DealerScreenController> {
                       await prefs.remove('subscribeTopic');
                       await prefs.remove('password');
                       await prefs.remove('email');
-
-                      //MQTTManager().disconnect();
 
                       if (mounted){
                         Navigator.pushReplacementNamed(context, '/login');

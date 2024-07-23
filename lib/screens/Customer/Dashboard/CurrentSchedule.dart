@@ -451,7 +451,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
               child: const Text('Stop'),
             ):
             MaterialButton(
-              color: Colors.green,
+              color: Colors.orange,
               textColor: Colors.white,
               onPressed: widget.filteredCurrentSchedule[index].message=='Running.'? (){
                 String payload = '${widget.filteredCurrentSchedule[index].srlNo},0';

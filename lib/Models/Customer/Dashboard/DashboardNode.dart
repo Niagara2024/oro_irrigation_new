@@ -265,34 +265,34 @@ class NodeData {
 }
 
 class PumpData {
-  int Type;
-  String Name;
-  String Location;
-  int Status;
-  int Reason;
-  List<dynamic> Watermeter;
-  List<dynamic> Pressure;
-  List<dynamic> Level;
-  List<dynamic> Float;
-  String OnDelay;
-  String OnDelayCompleted;
-  String OnDelayLeft;
-  String Program;
+  int type;
+  String name;
+  String location;
+  int status;
+  int reason;
+  List<dynamic> waterMeter;
+  List<dynamic> pressure;
+  List<dynamic> level;
+  List<dynamic> float;
+  String onDelay;
+  String onDelayCompleted;
+  String onDelayLeft;
+  String program;
 
   PumpData({
-    required this.Type,
-    required this.Name,
-    required this.Location,
-    required this.Status,
-    required this.Reason,
-    required this.Watermeter,
-    required this.Pressure,
-    required this.Level,
-    required this.Float,
-    required this.OnDelay,
-    required this.OnDelayCompleted,
-    required this.OnDelayLeft,
-    required this.Program,
+    required this.type,
+    required this.name,
+    required this.location,
+    required this.status,
+    required this.reason,
+    required this.waterMeter,
+    required this.pressure,
+    required this.level,
+    required this.float,
+    required this.onDelay,
+    required this.onDelayCompleted,
+    required this.onDelayLeft,
+    required this.program,
   });
 
   factory PumpData.fromJson(Map<String, dynamic> json) {
@@ -300,37 +300,37 @@ class PumpData {
     int type = json['Type'] ?? 0;
     String location = json['Location'] ?? '-';
     return PumpData(
-      Type: type,
-      Name: json['Name'],
-      Location: location,
-      Status: json['Status'],
-      Reason: json['Reason'],
-      Watermeter: json['Watermeter'],
-      Pressure: json['Pressure'],
-      Level: json['Level'],
-      Float: json['Float'],
-      OnDelay: onDelay,
-      OnDelayCompleted: json['OnDelayCompleted'],
-      OnDelayLeft: json['OnDelayLeft'],
-      Program: json['Program'],
+      type: type,
+      name: json['Name'],
+      location: location,
+      status: json['Status'],
+      reason: json['Reason'],
+      waterMeter: json['Watermeter'],
+      pressure: json['Pressure'],
+      level: json['Level'],
+      float: json['Float'],
+      onDelay: onDelay,
+      onDelayCompleted: json['OnDelayCompleted'],
+      onDelayLeft: json['OnDelayLeft'],
+      program: json['Program'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'Type': Type,
-      'Name': Name,
-      'Location': Location,
-      'Status': Status,
-      'Reason': Reason,
-      'Watermeter': Watermeter,
-      'Pressure': Pressure,
-      'Level': Level,
-      'Float': Float,
-      'OnDelay': OnDelay,
-      'OnDelayCompleted': OnDelayCompleted,
-      'OnDelayLeft': OnDelayLeft,
-      'Program': Program,
+      'Name': name,
+      'Location': location,
+      'Status': status,
+      'Reason': reason,
+      'Watermeter': waterMeter,
+      'Pressure': pressure,
+      'Level': level,
+      'Float': float,
+      'OnDelay': onDelay,
+      'OnDelayCompleted': onDelayCompleted,
+      'OnDelayLeft': onDelayLeft,
+      'Program': program,
     };
   }
 }

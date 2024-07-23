@@ -82,10 +82,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     getCustomerSite(widget.customerId);
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   void callbackFunction(message)
   {
@@ -171,21 +167,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   void subscribeCurrentMaster(sIdx, mIdx) async {
     MyFunction().clearMQTTPayload(context);
-    MQTTManager().disconnect();
-    await MQTTManager().connect();
-
-    bool isConnected = await MQTTManager().retryConnect(5);
-
-    if (isConnected) {
-      Future.delayed(const Duration(seconds: 2), () {
-        MQTTManager().subscribeToTopic('FirmwareToApp/${mySiteList[sIdx].master[mIdx].deviceId}');
-        onRefreshClicked();
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to connect to MQTT broker. Please try again.')),
-      );
-    }
+    Future.delayed(const Duration(seconds: 1), () {
+      MQTTManager().subscribeToTopic('FirmwareToApp/${mySiteList[sIdx].master[mIdx].deviceId}');
+      onRefreshClicked();
+    });
   }
 
 
@@ -368,12 +353,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
         }
       }else{
         //pump controller
-
         if(provider.pumpLiveList.isNotEmpty){
           List<CM> pl = provider.pumpLiveList;
           mySiteList[siteIndex].master[masterIndex].pumpLive = pl;
         }
-
 
         // var liveMessage = json['liveMessage'] != null ? json['liveMessage'] as List : [];
         // List<CM> pumpLiveList = liveMessage.isNotEmpty? liveMessage.map((live) => CM.fromJson(live)).toList(): [];
@@ -762,7 +745,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               iconEnabledColor: Colors.white,
               iconDisabledColor: Colors.white,
               focusColor: Colors.transparent,
-            ) :
+            ):
             Text(mySiteList[siteIndex].groupName, style: const TextStyle(fontSize: 17),),
 
             const SizedBox(width: 15,),
@@ -875,8 +858,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   MQTTManager().publish(payloadFinal, 'AppToFirmware/${mySiteList[siteIndex].master[masterIndex].deviceId}');
                 },
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(payload.payload2408.every((record) => record['IrrigationPauseFlag'] == 1)?Colors.green: Colors.orange),
-                  shape: MaterialStateProperty.all<OutlinedBorder>(
+                  backgroundColor: WidgetStateProperty.all<Color>(payload.payload2408.every((record) => record['IrrigationPauseFlag'] == 1)?Colors.green: Colors.orange),
+                  shape: WidgetStateProperty.all<OutlinedBorder>(
                     RoundedRectangleBorder(borderRadius: BorderRadius.circular(5),),
                   ),
                 ),

@@ -89,10 +89,6 @@ class MQTTManager {
   void onDisconnected() {
     print('OnDisconnected client callback - Client disconnection');
     providerState?.setAppConnectionState(MQTTConnectionState.disconnected);
-
-    Future.delayed(const Duration(seconds: 3), () {
-      retryConnect(_maxAttempts);
-    });
   }
 
   void onConnected() {
@@ -111,29 +107,4 @@ class MQTTManager {
     print('Unsubscribed from $topic');
   }
 
-  Future<bool> retryConnect(int maxAttempts) async {
-    return await _retryConnect(maxAttempts);
-  }
-
-  Future<bool> _retryConnect(int maxAttempts) async {
-    int attempts = 0;
-    bool isConnected = false;
-
-    while (attempts < maxAttempts && !isConnected) {
-      try {
-        await connect();
-        isConnected = this.isConnected;
-      } catch (e) {
-        print('Connection attempt $attempts failed: $e');
-      }
-
-      if (!isConnected) {
-        await Future.delayed(const Duration(seconds: 2));
-      }
-
-      attempts++;
-    }
-
-    return isConnected;
-  }
 }

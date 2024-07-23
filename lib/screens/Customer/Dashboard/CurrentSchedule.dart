@@ -330,7 +330,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
         minWidth: 1200,
         dataRowHeight: 45.0,
         headingRowHeight: 40.0,
-        headingRowColor: MaterialStateProperty.all<Color>(Colors.green.shade50),
+        headingRowColor: WidgetStateProperty.all<Color>(Colors.green.shade50),
         columns: const [
           DataColumn2(
               label: Text('Name', style: TextStyle(fontSize: 13),),
@@ -377,6 +377,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
             fixedWidth: 90,
           ),
         ],
+
         rows: List<DataRow>.generate(widget.filteredCurrentSchedule.length, (index) => DataRow(cells: [
           DataCell(
            Column(

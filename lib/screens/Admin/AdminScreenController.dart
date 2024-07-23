@@ -156,6 +156,8 @@ class _AdminScreenControllerState extends State<AdminScreenController> {
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: IconButton(tooltip: 'Logout', icon: const Icon(Icons.logout, color: Colors.redAccent,),
+                    autofocus: true,
+                    focusColor: Colors.white,
                     onPressed: () async {
                       final prefs = await SharedPreferences.getInstance();
                       await prefs.remove('userId');

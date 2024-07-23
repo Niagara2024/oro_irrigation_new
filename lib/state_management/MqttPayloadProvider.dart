@@ -59,14 +59,14 @@ class MqttPayloadProvider with ChangeNotifier {
   void updateReceivedPayload(String payload) {
     try {
       Map<String, dynamic> data = jsonDecode(payload);
+
       if(data.containsKey('4200')){
         messageFromHw = data['4200'][0]['4201'];
         if(messageFromHw['PayloadCode']=='2900'){
           agmScheduledProgram = messageFromHw['PayloadCode'];
         }
       }
-
-      if(data.containsKey('2400')){
+      else if(data.containsKey('2400')){
         print('Gem controller payload :$payload');
         if (data.containsKey('2400') && data['2400'] != null && data['2400'].isNotEmpty) {
           dashBoardPayload = payload;
@@ -153,7 +153,6 @@ class MqttPayloadProvider with ChangeNotifier {
         updateLastSync('000:00:00 - 00:00');
         Map<String, dynamic> json = jsonDecode(payload);
         if(json['mC']=='LD01'){
-
           var liveMessage = json['cM'] != null ? json['cM'] as List : [];
           List<CM> pumpLiveList = liveMessage.isNotEmpty? liveMessage.map((live) => CM.fromJson(live)).toList(): [];
           updatePumpControllerLive(pumpLiveList);
@@ -166,7 +165,6 @@ class MqttPayloadProvider with ChangeNotifier {
     }
     //notifyListeners();
   }
-
 
   void mqttConnectionStatus(status){
     mqttConnection = status;

@@ -8,6 +8,7 @@ import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../Models/language.dart';
 import '../../../constants/http_service.dart';
 import '../../../constants/snack_bar.dart';
+import '../../../constants/theme.dart';
 import '../../Config/names_form.dart';
 import '../../Forms/create_account.dart';
 
@@ -419,7 +420,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
             const Divider(height: 0,),
             SizedBox(
               height: 70,
-              child: subUsers.length>0?ListView.builder(
+              child: subUsers.isNotEmpty?ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: subUsers.length,
                 itemBuilder: (context, index) {
@@ -434,7 +435,130 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                       child: ListTile(
                         title: Text(user['userName']),
                         subtitle: Text('+${user['countryCode']} ${user['mobileNumber']}'),
-                        trailing: IconButton(onPressed: () {  }, icon: const Icon(Icons.menu),),
+                        trailing: Builder(
+                          builder: (BuildContext context) {
+                            return IconButton(
+                              tooltip: 'Permission details',
+                              onPressed: () async {
+                                final RenderBox? button = context.findRenderObject() as RenderBox?;
+                                final RenderBox? overlay = Overlay.of(context).context.findRenderObject() as RenderBox?;
+
+                                if (button != null && overlay != null) {
+                                  final position = RelativeRect.fromRect(
+                                    Rect.fromPoints(
+                                      button.localToGlobal(Offset.zero, ancestor: overlay),
+                                      button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+                                    ),
+                                    Offset.zero & overlay.size,
+                                  );
+
+                                  bool _switchValue = false;
+
+                                  final result = await showMenu(
+                                    context: context,
+                                    position: position,
+                                    items: [
+                                      PopupMenuItem(
+                                        value: 1,
+                                        child: ListTile(
+                                          title: const Text('All permissions'),
+                                          trailing: Transform.scale(
+                                            scale: 0.7,
+                                            child: Switch(
+                                              activeColor: Colors.white,
+                                              activeTrackColor: myTheme.primaryColorDark,
+                                              value: _switchValue ?? false,
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  _switchValue = value;
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      PopupMenuItem(
+                                        value: 2,
+                                        child: ListTile(
+                                          title: const Text('Manual operation'),
+                                          trailing: Transform.scale(
+                                            scale: 0.7,
+                                            child: Switch(
+                                              activeColor: Colors.white,
+                                              activeTrackColor: myTheme.primaryColorDark,
+                                              value: _switchValue ?? false,
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  _switchValue = value;
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      PopupMenuItem(
+                                        value: 3,
+                                        child: ListTile(
+                                          title: const Text('Program creation'),
+                                          trailing: Transform.scale(
+                                            scale: 0.7,
+                                            child: Switch(
+                                              activeColor: Colors.white,
+                                              activeTrackColor: myTheme.primaryColorDark,
+                                              value: _switchValue ?? false,
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  _switchValue = value;
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      PopupMenuItem(
+                                        value: 4,
+                                        child: ListTile(
+                                          title: const Text('Program edit'),
+                                          trailing: Transform.scale(
+                                            scale: 0.7,
+                                            child: Switch(
+                                              activeColor: Colors.white,
+                                              activeTrackColor: myTheme.primaryColorDark,
+                                              value: _switchValue ?? false,
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  _switchValue = value;
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+
+                                  if (result != null) {
+                                    switch (result) {
+                                      case 1:
+                                      // Do something for Option 1
+                                        break;
+                                      case 2:
+                                      // Do something for Option 2
+                                        break;
+                                      case 3:
+                                      // Do something for Option 3
+                                        break;
+                                    }
+                                  }
+                                }
+                              },
+                              icon: const Icon(Icons.menu),
+                            );
+                          },
+                        ),
+                        /*trailing: IconButton(onPressed: () {
+                          //
+                        }, icon: const Icon(Icons.menu),),*/
                       ),
                     ),
                   );

@@ -147,7 +147,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   void updateSite(sIdx, mIdx, lIdx){
     _myCurrentSite = mySiteList[sIdx].groupName;
-    MyFunction().clearMQTTPayload(context);
     updateMaster(sIdx, mIdx, lIdx);
   }
 
@@ -170,12 +169,23 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     }
   }
 
-  void subscribeCurrentMaster(sIdx, mIdx) {
-    Future.delayed(const Duration(seconds: 1), () {
-      MQTTManager().subscribeToTopic('FirmwareToApp/${mySiteList[sIdx].master[mIdx].deviceId}');
-      onRefreshClicked();
-    });
+  void subscribeCurrentMaster(sIdx, mIdx) async {
+    MyFunction().clearMQTTPayload(context);
+    MQTTManager().disconnect();
+    await MQTTManager().connect();
 
+    bool isConnected = await MQTTManager().retryConnect(5);
+
+    if (isConnected) {
+      Future.delayed(const Duration(seconds: 2), () {
+        MQTTManager().subscribeToTopic('FirmwareToApp/${mySiteList[sIdx].master[mIdx].deviceId}');
+        onRefreshClicked();
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to connect to MQTT broker. Please try again.')),
+      );
+    }
   }
 
 
@@ -688,7 +698,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                       await prefs.remove('email');
                       MQTTManager().disconnect();
                       if (context.mounted){
-                        MyFunction().clearMQTTPayload(context);
                         Navigator.pushReplacementNamed(context, '/login');
                       }
                     },
@@ -820,7 +829,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             const SizedBox(width: 15,),
             Container(width: 1, height: 20, color: Colors.white54,),
             const SizedBox(width: 5,),
-            textWidget(
+            csText(
               text: 'Last sync : ${payload.syncDateTime}',
               style: const TextStyle(fontSize: 15, color: Colors.white70),
             ),
@@ -1024,7 +1033,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                   await prefs.remove('email');
                                   MQTTManager().disconnect();
                                   if (context.mounted){
-                                    MyFunction().clearMQTTPayload(context);
                                     Navigator.pushReplacementNamed(context, '/login');
                                   }
                                 },

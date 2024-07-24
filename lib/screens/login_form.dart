@@ -7,8 +7,6 @@ import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/http_service.dart';
 
-import 'package:universal_html/html.dart' as html;
-
 
 TextEditingController _mobileNoController = TextEditingController();
 TextEditingController _passwordController = TextEditingController();
@@ -226,7 +224,6 @@ class _LoginFormState extends State<LoginForm> {
                                             //await prefs.setStringList('site', siteList);
 
                                             if (mounted){
-                                              html.window.location.reload();
                                               Navigator.pushReplacementNamed(context, '/dashboard');
                                             }
                                           }
@@ -496,7 +493,6 @@ class _LoginFormState extends State<LoginForm> {
                                             //await prefs.setStringList('site', siteList);
 
                                             if (mounted){
-                                              html.window.location.reload();
                                               Navigator.pushReplacementNamed(context, '/dashboard');
                                             }
                                           }

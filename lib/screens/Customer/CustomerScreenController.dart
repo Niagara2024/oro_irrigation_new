@@ -683,6 +683,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                       await prefs.remove('email');
 
                       MyFunction().clearMQTTPayload(context);
+                      MQTTManager().onDisconnected();
                       if (context.mounted){
                         Navigator.pushReplacementNamed(context, '/login');
                       }
@@ -1015,7 +1016,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                   await prefs.remove('subscribeTopic');
                                   await prefs.remove('password');
                                   await prefs.remove('email');
-                                  //MQTTManager().disconnect();
+
+                                  MyFunction().clearMQTTPayload(context);
+                                  MQTTManager().onDisconnected();
+
                                   if (context.mounted){
                                     Navigator.pushReplacementNamed(context, '/login');
                                   }

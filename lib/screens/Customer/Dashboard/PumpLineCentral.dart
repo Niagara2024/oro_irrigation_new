@@ -226,7 +226,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
     final provider = Provider.of<MqttPayloadProvider>(context);
     return SizedBox(
       width: provider.sourcePump.length * 70,
-      height: 90,
+      height: 100,
       child: ListView.builder(
         itemCount: provider.sourcePump.length,
         scrollDirection: Axis.horizontal,
@@ -292,14 +292,14 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
               ),
               SizedBox(
                 width: 70,
-                height: 20,
-                child: Center(
-                  child: Text(provider.sourcePump[index]['SW_Name'] ?? provider.sourcePump[index]['Name'], style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),),
-                ),
+                height: 30,
+                child: Text(provider.sourcePump[index]['SW_Name'] ?? provider.sourcePump[index]['Name'],
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),),
               ),
             ],
           );
@@ -529,7 +529,7 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
 
     return SizedBox(
       width: filteredPumps.length * 70,
-      height: 90,
+      height: 100,
       child: ListView.builder(
         itemCount: filteredPumps.length,
         scrollDirection: Axis.horizontal,
@@ -586,15 +586,14 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
               ),
               SizedBox(
                 width: 70,
-                height: 20,
-                child: Center(
-                  child: Text(filteredPumps[index]['SW_Name'] ?? filteredPumps[index]['Name'],
-                    style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  ),
+                height: 30,
+                child: Text(filteredPumps[index]['SW_Name'] ?? filteredPumps[index]['Name'],
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
                 ),
               ),
             ],
@@ -854,7 +853,7 @@ class _DisplayFilterState extends State<DisplayFilter> {
               const SizedBox(),
             ],
           ),
-        Text(filteredCentralFilter.isNotEmpty? filteredCentralFilter[0]['FilterSite']:'', style: const TextStyle(color: primaryColorDark),),
+        Text(filteredCentralFilter.isNotEmpty? filteredCentralFilter[0]['SW_Name']?? filteredCentralFilter[0]['FilterSite']:'', style: const TextStyle(color: primaryColorDark),),
       ],
     );
 
@@ -980,6 +979,20 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                             children: [
                               AppImages.getAsset('booster', fertilizerCentral[fIndex]['Booster'][0]['Status'],''),
                               Positioned(
+                                top: 50,
+                                left: 15,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
+                                  width: 55,
+                                  child: Center(
+                                    child: Text(fertilizerCentral[0]['SW_Name']?? fertilizerCentral[0]['FertilizerSite'], style: const TextStyle(color: primaryColorDark),),
+                                  ),
+                                ),
+                              ),
+                              Positioned(
                                 top: 70,
                                 left: 15,
                                 child: fertilizerCentral[fIndex]['FertilizerTankSelector'].isNotEmpty ? const SizedBox(
@@ -1057,8 +1070,6 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                                 fertilizer['QtyLeft'] = fertilizer['QtyLeft'];
                               }
                             }
-
-                            final isLastItem = index == fertilizerCentral[fIndex]['Fertilizer'].length - 1;
 
                             return SizedBox(
                               width: 70,
@@ -1142,21 +1153,6 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                                     ) :
                                     const SizedBox(),
                                   ),
-                                  if(isLastItem)
-                                    Positioned(
-                                      top: 80,
-                                      left: 23,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.transparent,
-                                          borderRadius: BorderRadius.circular(3),
-                                        ),
-                                        width: 45,
-                                        child: Center(
-                                          child: Text(fertilizerCentral[0]['FertilizerSite'], style: const TextStyle(color: primaryColorDark),),
-                                        ),
-                                      ),
-                                    ),
                                 ],
                               ),
                             );
@@ -1822,6 +1818,20 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                             children: [
                               AppImages.getAsset('booster', fertilizerLocal[fIndex]['Booster'][0]['Status'],''),
                               Positioned(
+                                top: 50,
+                                left: 15,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
+                                  width: 55,
+                                  child: Center(
+                                    child: Text(fertilizerLocal[0]['SW_Name']?? fertilizerLocal[0]['FertilizerSite'], style: const TextStyle(color: primaryColorDark),),
+                                  ),
+                                ),
+                              ),
+                              Positioned(
                                 top: 70,
                                 left: 15,
                                 child: fertilizerLocal[fIndex]['FertilizerTankSelector'].isNotEmpty ? const SizedBox(
@@ -1899,8 +1909,6 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                                 fertilizer['QtyLeft'] = fertilizer['QtyLeft'];
                               }
                             }
-
-                            final isLastItem = index == fertilizerLocal[fIndex]['Fertilizer'].length - 1;
 
                             return SizedBox(
                               width: 70,
@@ -1984,21 +1992,6 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                                     ) :
                                     const SizedBox(),
                                   ),
-                                  if(isLastItem)
-                                    Positioned(
-                                      top: 80,
-                                      left: 23,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.transparent,
-                                          borderRadius: BorderRadius.circular(3),
-                                        ),
-                                        width: 45,
-                                        child: Center(
-                                          child: Text(fertilizerLocal[0]['FertilizerSite'], style: const TextStyle(color: primaryColorDark),),
-                                        ),
-                                      ),
-                                    ),
                                 ],
                               ),
                             );

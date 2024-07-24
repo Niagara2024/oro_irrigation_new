@@ -401,7 +401,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
           DataCell(Center(child: Text('${widget.filteredCurrentSchedule[index].actualFlowRate}/hr'))),
           DataCell(Center(child: Text(widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual' &&
               (widget.filteredCurrentSchedule[index].duration_Qty=='00:00:00'||widget.filteredCurrentSchedule[index].duration_Qty=='0')? '----': widget.filteredCurrentSchedule[index].duration_QtyLeft,
-              style:  TextStyle(fontSize: widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual'? 15:20)))),
+              style:  const TextStyle(fontSize: 20)))),
           DataCell(Center(
             child: widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual'?
             MaterialButton(

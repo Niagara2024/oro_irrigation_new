@@ -463,12 +463,12 @@ class ProgramQueue {
 class CurrentScheduleModel {
   String programName, programCategory,zoneName,zoneSNo,startTime, duration_Qty, duration_QtyLeft;
   String message, avgFlwRt;
-  final int programId, programType, totalRtc,currentRtc,totalCycle,currentCycle,totalZone,currentZone, srlNo, reasonCode, actualFlowRate;
+  final int programSno, programType, totalRtc,currentRtc,totalCycle,currentCycle,totalZone,currentZone, srlNo, reasonCode, actualFlowRate;
   List<dynamic> mainValve;
   List<dynamic> valve;
 
   CurrentScheduleModel({
-    required this.programId,
+    required this.programSno,
     required this.programName,
     required this.programCategory,
     required this.zoneName,
@@ -510,7 +510,7 @@ class CurrentScheduleModel {
     }
 
     return CurrentScheduleModel(
-      programId: 1,
+      programSno: json['ProgramS_No'],
       programName: json['ProgName'] ?? '',
       programCategory: json['ProgCategory'] ?? '',
       zoneName: json['ZoneName'] ?? "",
@@ -537,6 +537,7 @@ class CurrentScheduleModel {
 
   Map<String, dynamic> toJson() {
     return {
+      'ProgramS_No': programSno,
       'ProgName': programName,
       'ProgCategory': programCategory,
       'ZoneName': zoneName,

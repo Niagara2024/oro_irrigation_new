@@ -41,7 +41,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
   String strProgramName = '';
   String strSelectedLineOfProgram = '0';
 
-  late List<Map<String,dynamic>> standaloneSelection  = [];
+  late List<Map<String, dynamic>> standaloneSelection  = [];
   late TabController _tabController;
 
   @override
@@ -469,16 +469,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                   "800": [{"801": payload}]
                 });
                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
-                Map<String, dynamic> manualOperation = {
-                  "programName": 'Default',
-                  "programId": 0,
-                  "startFlag": 0,
-                  "method": 1,
-                  "time": '00:00:00',
-                  "flow": '0',
-                  "selected": [],
-                };
-                sentManualModeToServer(manualOperation);
+                sentManualModeToServer(programList[ddCurrentPosition].serialNumber, 0, standAloneMethod, '00:00:00', '0', []);
               }
               else{
 
@@ -502,16 +493,8 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                 standaloneSelection.clear();
 
                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
-                Map<String, dynamic> manualOperation = {
-                  "programName": programList[ddCurrentPosition].programName,
-                  "programId": programList[ddCurrentPosition].programId,
-                  "startFlag":0,
-                  "method": standAloneMethod,
-                  "time": '00:00:00',
-                  "flow": '0',
-                  "selected": [],
-                };
-                sentManualModeToServer(manualOperation);
+                sentManualModeToServer(programList[ddCurrentPosition].serialNumber, 0, standAloneMethod, '00:00:00', '0', []);
+
               }
             },
             child: const Text('Stop'),
@@ -2152,18 +2135,8 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
       print(payLoadFinal);
 
       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
-      Map<String, dynamic> manualOperation = {
-        "programName": 'Default',
-        "startFlag":1,
-        "programId": 0,
-        "method": standAloneMethod,
-        "time": strDuration,
-        "flow": strFlow,
-        "selected": standaloneSelection,
-      };
-      sentManualModeToServer(manualOperation);
+      sentManualModeToServer(0, 1, standAloneMethod, strDuration, strFlow, standaloneSelection);
     }
-
   }
 
   Future<void> sendCommandToControllerAndMqttProgram(String strSldSqnLocation,String strSldSqnNo,String strSldIrrigationPumpId,String strSldMainValveId
@@ -2196,31 +2169,25 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
         "3900": [{"3901": payload}]
       });
 
-      print(payLoadFinal);
-
-      String offPayload = '${0},$strSldSqnLocation,${programList[ddCurrentPosition].serialNumber},'
-          '$strSldSqnNo,$strSldIrrigationPumpId,$strSldMainValveId,$strSldCtrlFilterId,'
-          '$sldCtrlFilterRelayOnOffStatus,$strSldLocFilterId,$sldLocFilterRelayOnOffStatus,'
-          '$strSldFanId,$strSldFgrId,${0},${0};';
-
       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
-      Map<String, dynamic> manualOperation = {
-        "programName": programList[ddCurrentPosition].programName,
-        "programId": programList[ddCurrentPosition].programId,
-        "startFlag":1,
-        "method": standAloneMethod,
-        "time": strDuration,
-        "flow": strFlow,
-        "selected": standaloneSelection,
-      };
-      sentManualModeToServer(manualOperation);
+      sentManualModeToServer(programList[ddCurrentPosition].serialNumber, 1, standAloneMethod,strDuration, strFlow, standaloneSelection);
     }
 
   }
 
-  Future<void>sentManualModeToServer(manualOperation) async {
+  Future<void>sentManualModeToServer(int sNo, int sFlag, int method, String dur, String flow, List<Map<String, dynamic>> selection) async {
     try {
-      final body = {"userId": widget.customerID, "controllerId": widget.controllerID, "manualOperation": manualOperation, "createUser": widget.customerID};
+      final body = {
+        "userId": widget.customerID,
+        "controllerId": widget.controllerID,
+        "serialNumber": sNo,
+        "startFlag": 0,
+        "method": method,
+        "duration": '00:00:00',
+        "flow": '0',
+        "selection": selection,
+        "createUser": widget.customerID,
+      };
       final response = await HttpService().postRequest("createUserManualOperation", body);
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);

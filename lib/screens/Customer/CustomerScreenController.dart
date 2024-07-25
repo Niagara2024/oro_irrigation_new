@@ -92,10 +92,13 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   }
 
   void onRefreshClicked() {
+
     MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
-    payloadProvider.liveSyncCall(true);
-    String livePayload = '';
     Future.delayed(const Duration(milliseconds: 1000), () {
+
+      payloadProvider.liveSyncCall(true);
+      String livePayload = '';
+
       if(mySiteList[siteIndex].master[masterIndex].categoryId==1||
           mySiteList[siteIndex].master[masterIndex].categoryId==2){
         livePayload = jsonEncode({"3000": [{"3001": ""}]});
@@ -104,6 +107,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       }
       MQTTManager().publish(livePayload, 'AppToFirmware/${mySiteList[siteIndex].master[masterIndex].deviceId}');
     });
+
     Future.delayed(const Duration(milliseconds: 6000), () {
       payloadProvider.liveSyncCall(false);
     });
@@ -1488,7 +1492,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       _selectedIndex == 3 ? ListOfLogConfig(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,):
       _selectedIndex == 4 ? WeatherScreen(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId,):
       _selectedIndex == 5 ? TicketHomePage(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,):
-      ControllerSettings(customerID: widget.customerId, siteData: mySiteList[siteIndex], masterIndex: masterIndex, adDrId: widget.comingFrom=='AdminORDealer'? widget.userId:0,),
+      ControllerSettings(customerID: widget.customerId, siteData: mySiteList[siteIndex], masterIndex: masterIndex, adDrId: widget.comingFrom=='AdminORDealer'? widget.userId:0, allSiteList: mySiteList,),
     );
   }
 

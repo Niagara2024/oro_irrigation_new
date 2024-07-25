@@ -248,16 +248,9 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                 "800": [{"801": payload}]
                               });
                               MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
-                              Map<String, dynamic> manualOperation = {
-                                "programName": 'Default',
-                                "programId": 0,
-                                "startFlag": 0,
-                                "method": 1,
-                                "time": '00:00:00',
-                                "flow": '0',
-                                "selected": [],
-                              };
-                              sentManualModeToServer(manualOperation);
+                              sentManualModeToServer(0,
+                                  widget.filteredCurrentSchedule[index].duration_Qty=='00:00:00'? 3:
+                                  widget.filteredCurrentSchedule[index].duration_Qty.contains(':')?1: 2);
                             } : null,
                             child: const Text('Stop'),
                           ):
@@ -270,18 +263,11 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                 "3900": [{"3901": '0,${widget.filteredCurrentSchedule[index].programCategory},${widget.filteredCurrentSchedule[index].srlNo},'
                                     '${widget.filteredCurrentSchedule[index].zoneSNo},,,,,,,,,,;'}]
                               });
-                              print(payLoadFinal);
+
                               MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
-                              Map<String, dynamic> manualOperation = {
-                                "programName": widget.filteredCurrentSchedule[index].programName,
-                                "programId": widget.filteredCurrentSchedule[index].programId,
-                                "startFlag":0,
-                                "method": 1,
-                                "time": '00:00:00',
-                                "flow": '0',
-                                "selected": [],
-                              };
-                              sentManualModeToServer(manualOperation);
+                              sentManualModeToServer(widget.filteredCurrentSchedule[index].programSno,
+                                  widget.filteredCurrentSchedule[index].duration_Qty=='00:00:00'? 3:
+                                  widget.filteredCurrentSchedule[index].duration_Qty.contains(':')?1: 2);
                             },
                             child: const Text('Stop'),
                           ):
@@ -413,16 +399,8 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                   "800": [{"801": payload}]
                 });
                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
-                Map<String, dynamic> manualOperation = {
-                  "programName": 'Default',
-                  "programId": 0,
-                  "startFlag": 0,
-                  "method": 1,
-                  "time": '00:00:00',
-                  "flow": '0',
-                  "selected": [],
-                };
-                sentManualModeToServer(manualOperation);
+                sentManualModeToServer(0, widget.filteredCurrentSchedule[index].duration_Qty=='00:00:00'? 3:
+                widget.filteredCurrentSchedule[index].duration_Qty.contains(':')?1: 2);
               } : null,
               child: const Text('Stop'),
             ):
@@ -433,20 +411,14 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
               onPressed: () async {
 
                 String payLoadFinal = jsonEncode({
-                  "3900": [{"3901": '0,${widget.filteredCurrentSchedule[index].programCategory},${widget.filteredCurrentSchedule[index].programId},'
+                  "3900": [{"3901": '0,${widget.filteredCurrentSchedule[index].programCategory},${widget.filteredCurrentSchedule[index].programSno},'
                       '${widget.filteredCurrentSchedule[index].zoneSNo},,,,,,,,,0,'}]
                 });
                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
-                Map<String, dynamic> manualOperation = {
-                  "programName": widget.filteredCurrentSchedule[index].programName,
-                  "programId": widget.filteredCurrentSchedule[index].programId,
-                  "startFlag":0,
-                  "method": 1,
-                  "time": '00:00:00',
-                  "flow": '0',
-                  "selected": [],
-                };
-                sentManualModeToServer(manualOperation);
+
+                sentManualModeToServer(widget.filteredCurrentSchedule[index].programSno,
+                    widget.filteredCurrentSchedule[index].duration_Qty=='00:00:00'? 3:
+                    widget.filteredCurrentSchedule[index].duration_Qty.contains(':')?1: 2);
               },
               child: const Text('Stop'),
             ):
@@ -510,14 +482,24 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
     }).toList();
   }
 
-
   String getContentByCode(int code) {
     return GemProgramSSReasonCode.fromCode(code).content;
   }
 
-  Future<void>sentManualModeToServer(manualOperation) async {
+  Future<void>sentManualModeToServer(int sNo, int method) async {
     try {
-      final body = {"userId": widget.customerID, "controllerId": widget.siteData.master[0].controllerId, "manualOperation": manualOperation, "createUser": widget.customerID};
+      final body = {
+        "userId": widget.customerID,
+        "controllerId": widget.siteData.master[0].controllerId,
+        "serialNumber": sNo,
+        "startFlag": 0,
+        "method": method,
+        "duration": '00:00:00',
+        "flow": '0',
+        "selection": [],
+        "createUser": widget.customerID,
+      };
+
       final response = await HttpService().postRequest("createUserManualOperation", body);
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);

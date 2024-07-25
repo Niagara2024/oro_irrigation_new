@@ -8,16 +8,16 @@ import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../Models/language.dart';
 import '../../../constants/http_service.dart';
 import '../../../constants/snack_bar.dart';
-import '../../../constants/theme.dart';
 import '../../Config/names_form.dart';
 import '../../Forms/create_account.dart';
 
 import 'package:timezone/standalone.dart' as tz;
 
 class ControllerSettings extends StatefulWidget {
-  const ControllerSettings({Key? key, required this.customerID, required this.siteData, required this.masterIndex, required this.adDrId}) : super(key: key);
+  const ControllerSettings({Key? key, required this.customerID, required this.siteData, required this.masterIndex, required this.adDrId, required this.allSiteList}) : super(key: key);
   final int customerID, masterIndex, adDrId;
   final DashboardModel siteData;
+  final List<DashboardModel> allSiteList;
 
   @override
   State<ControllerSettings> createState() => _ControllerSettingsState();
@@ -106,7 +106,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
   }
 
   Future<void> getSubUserList() async {
-    final response = await HttpService().postRequest("getUserSharedList", {"userId": widget.customerID});
+    final response = await HttpService().postRequest("getUserSharedDeviceList", {"userId": widget.customerID});
     if (response.statusCode == 200)
     {
       languageList.clear();
@@ -435,130 +435,11 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                       child: ListTile(
                         title: Text(user['userName']),
                         subtitle: Text('+${user['countryCode']} ${user['mobileNumber']}'),
-                        trailing: Builder(
-                          builder: (BuildContext context) {
-                            return IconButton(
-                              tooltip: 'Permission details',
-                              onPressed: () async {
-                                final RenderBox? button = context.findRenderObject() as RenderBox?;
-                                final RenderBox? overlay = Overlay.of(context).context.findRenderObject() as RenderBox?;
-
-                                if (button != null && overlay != null) {
-                                  final position = RelativeRect.fromRect(
-                                    Rect.fromPoints(
-                                      button.localToGlobal(Offset.zero, ancestor: overlay),
-                                      button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
-                                    ),
-                                    Offset.zero & overlay.size,
-                                  );
-
-                                  bool _switchValue = false;
-
-                                  final result = await showMenu(
-                                    context: context,
-                                    position: position,
-                                    items: [
-                                      PopupMenuItem(
-                                        value: 1,
-                                        child: ListTile(
-                                          title: const Text('All permissions'),
-                                          trailing: Transform.scale(
-                                            scale: 0.7,
-                                            child: Switch(
-                                              activeColor: Colors.white,
-                                              activeTrackColor: myTheme.primaryColorDark,
-                                              value: _switchValue ?? false,
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  _switchValue = value;
-                                                });
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      PopupMenuItem(
-                                        value: 2,
-                                        child: ListTile(
-                                          title: const Text('Manual operation'),
-                                          trailing: Transform.scale(
-                                            scale: 0.7,
-                                            child: Switch(
-                                              activeColor: Colors.white,
-                                              activeTrackColor: myTheme.primaryColorDark,
-                                              value: _switchValue ?? false,
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  _switchValue = value;
-                                                });
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      PopupMenuItem(
-                                        value: 3,
-                                        child: ListTile(
-                                          title: const Text('Program creation'),
-                                          trailing: Transform.scale(
-                                            scale: 0.7,
-                                            child: Switch(
-                                              activeColor: Colors.white,
-                                              activeTrackColor: myTheme.primaryColorDark,
-                                              value: _switchValue ?? false,
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  _switchValue = value;
-                                                });
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      PopupMenuItem(
-                                        value: 4,
-                                        child: ListTile(
-                                          title: const Text('Program edit'),
-                                          trailing: Transform.scale(
-                                            scale: 0.7,
-                                            child: Switch(
-                                              activeColor: Colors.white,
-                                              activeTrackColor: myTheme.primaryColorDark,
-                                              value: _switchValue ?? false,
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  _switchValue = value;
-                                                });
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  );
-
-                                  if (result != null) {
-                                    switch (result) {
-                                      case 1:
-                                      // Do something for Option 1
-                                        break;
-                                      case 2:
-                                      // Do something for Option 2
-                                        break;
-                                      case 3:
-                                      // Do something for Option 3
-                                        break;
-                                    }
-                                  }
-                                }
-                              },
-                              icon: const Icon(Icons.menu),
-                            );
-                          },
+                        trailing: IconButton(
+                          tooltip: 'User Permission',
+                          onPressed: () => _showAlertDialog(context, user['userName']),
+                          icon: const Icon(Icons.menu),
                         ),
-                        /*trailing: IconButton(onPressed: () {
-                          //
-                        }, icon: const Icon(Icons.menu),),*/
                       ),
                     ),
                   );
@@ -782,6 +663,161 @@ class _ControllerSettingsState extends State<ControllerSettings> {
       ),
     );
   }
+
+  void _showAlertDialog(BuildContext context, String cName) {
+    Map<String, bool> siteChecks = {};
+    Map<String, bool> masterChecks = {};
+
+    for (var userGroup in widget.allSiteList) {
+      siteChecks[userGroup.groupName] = false;
+      for (var master in userGroup.master) {
+        masterChecks[master.deviceId] = false;
+      }
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('$cName - Permissions'),
+          content: SizedBox(
+            width: 400,
+            height: 300,
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                void updateMasterChecks(String groupName, bool? value) {
+                  for (var master in widget.allSiteList.firstWhere((group) => group.groupName == groupName).master) {
+                    masterChecks[master.deviceId] = value ?? false;
+                  }
+                  setState(() {});
+                }
+
+                void updateSiteCheck(String groupName) {
+                  var allChecked = widget.allSiteList
+                      .firstWhere((group) => group.groupName == groupName)
+                      .master
+                      .every((master) => masterChecks[master.deviceId] == true);
+                  siteChecks[groupName] = allChecked;
+                  setState(() {});
+                }
+
+                return ListView.builder(
+                  itemCount: widget.allSiteList.length,
+                  itemBuilder: (context, index) {
+                    var userGroup = widget.allSiteList[index];
+                    var groupName = userGroup.groupName;
+                    var masterList = userGroup.master;
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: siteChecks[groupName],
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  siteChecks[groupName] = value ?? false;
+                                  updateMasterChecks(groupName, value);
+                                });
+                              },
+                            ),
+                            Text(groupName),
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16.0),
+                          child: Column(
+                            children: [
+                              Column(
+                                children: masterList.map<Widget>((master) {
+                                  var deviceId = master.deviceId;
+                                  var deviceName = master.deviceName;
+                                  return Row(
+                                    children: [
+                                      Checkbox(
+                                        value: masterChecks[deviceId],
+                                        onChanged: (bool? value) {
+                                          setState(() {
+                                            masterChecks[deviceId] = value ?? false;
+                                            updateSiteCheck(groupName);
+                                          });
+                                        },
+                                      ),
+                                      Text(deviceName),
+                                    ],
+                                  );
+                                }).toList(),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 16.0),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Checkbox(
+                                          value: masterChecks[deviceId],
+                                          onChanged: (bool? value) {
+                                          },
+                                        ),
+                                        const Text('Manual opration'),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Checkbox(
+                                          value: masterChecks[deviceId],
+                                          onChanged: (bool? value) {
+
+                                          },
+                                        ),
+                                        const Text('Program'),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Checkbox(
+                                          value: masterChecks[deviceId],
+                                          onChanged: (bool? value) {
+
+                                          },
+                                        ),
+                                        const Text('Program Creation'),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Divider(),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Submit'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 }
 
 class ThemeChangeDialog extends StatefulWidget {

@@ -9,6 +9,7 @@ class MQTTManager {
   static MQTTManager? _instance;
   MqttPayloadProvider? providerState;
   MqttBrowserClient? _client;
+  String? currentTopic;
 
   factory MQTTManager() {
     _instance ??= MQTTManager._internal();
@@ -69,7 +70,16 @@ class MQTTManager {
   }
 
   void subscribeToTopic(String topic) {
-    _client!.subscribe(topic, MqttQos.atLeastOnce);
+
+    if (currentTopic != null) {
+      _client!.unsubscribe(currentTopic!);
+    }
+
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      _client!.subscribe(topic, MqttQos.atLeastOnce);
+      currentTopic = topic;
+    });
+
     _client!.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
       final MqttPublishMessage recMess = c![0].payload as MqttPublishMessage;
       final String pt = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);

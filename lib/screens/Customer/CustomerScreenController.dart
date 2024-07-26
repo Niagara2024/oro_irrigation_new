@@ -99,7 +99,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       payloadProvider.liveSyncCall(true);
       String livePayload = '';
 
-      if(mySiteList[siteIndex].master[masterIndex].categoryId==1||
+      if(mySiteList[siteIndex].master[masterIndex].categoryId==1 ||
           mySiteList[siteIndex].master[masterIndex].categoryId==2){
         livePayload = jsonEncode({"3000": [{"3001": ""}]});
       }else{
@@ -645,7 +645,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   ),
                   ListTile(
                     title: const Text('Service request', style: TextStyle(color: Colors.white)),
-                    leading: const Icon(Icons.request_page_outlined, color: Colors.white,),
+                    leading: const Icon(Icons.support_agent, color: Colors.white,),
                     onTap: () {
                       Navigator.pop(context);
                       setState(() {

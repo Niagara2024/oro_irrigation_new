@@ -43,7 +43,7 @@ class DashboardDataProvider
 
   factory DashboardDataProvider.fromJson(Map<String, dynamic> json) {
     bool startTogetherStatus = json['startTogether'];
-    String timeVal = json['time'];
+    String durVal = json['duration'];
     String flowVal = json['flow'];
     int method = json['method'];
     String headUnits = json['headUnits'];
@@ -101,7 +101,7 @@ class DashboardDataProvider
 
     return DashboardDataProvider(
       startTogether: startTogetherStatus,
-      time: timeVal,
+      time: durVal,
       flow: flowVal,
       method: method,
       headUnits: headUnits,

@@ -33,12 +33,11 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
   List<ProgramList> programList = [];
   bool visibleLoading = false;
   int ddCurrentPosition = 0;
-  int programId = 0;
+  int serialNumber = 0;
   int standAloneMethod = 0;
   int startFlag = 0;
   String strFlow = '0';
   String strDuration = '00:00:00';
-  String strProgramName = '';
   String strSelectedLineOfProgram = '0';
 
   late List<Map<String, dynamic>> standaloneSelection  = [];
@@ -67,7 +66,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
         ProgramList defaultProgram = ProgramList(
           programId: 0,
           serialNumber: 0,
-          programName: 'Default',
+          programName: 'Manual mode',
           defaultProgramName: '',
           programType: '',
           priority: '',
@@ -82,7 +81,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
 
         bool programWithNameExists = false;
         for (ProgramList program in programList) {
-          if (program.programName == 'Default') {
+          if (program.programName == 'Manual mode') {
             programWithNameExists = true;
             break;
           }
@@ -120,11 +119,11 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
     });
   }
 
-  Future<void> scheduleSectionCallbackMethod(programId, selection) async
+  Future<void> scheduleSectionCallbackMethod(serialNumber, selection) async
   {
     ddCurrentPosition = selection;
     try {
-      dashBoardData = await fetchControllerData(programId);
+      dashBoardData = await fetchControllerData(serialNumber);
       indicatorViewHide();
     } catch (e) {
       print('Error: $e');
@@ -143,8 +142,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
         try{
           dynamic data = jsonResponse['data'];
           startFlag = data['startFlag'];
-          programId = data['programId'].runtimeType==int?data['programId']:0;
-          strProgramName = data['programName'];
+          serialNumber = data['serialNumber'];
           try {
             standAloneMethod = data['method'];
             if (standAloneMethod == 0){
@@ -153,19 +151,17 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
           } catch (e) {
             print('Error: $e');
           }
-          //print(programId);
-          //print(widget.controllerID);
           strFlow = data['flow'];
-          strDuration = data['time'];
+          strDuration = data['duration'];
 
-          int position = findPositionByName(strProgramName, programList);
+          int position = findPositionByName(serialNumber, programList);
           if (position != -1) {
             ddCurrentPosition = position;
           }else {
-            print("'$strProgramName' not found in the list.");
+            print("'$serialNumber' not found in the list.");
           }
           await Future.delayed(const Duration(milliseconds: 500));
-          scheduleSectionCallbackMethod(programId, ddCurrentPosition);
+          scheduleSectionCallbackMethod(serialNumber, ddCurrentPosition);
         }catch(e){
           print(e);
         }
@@ -178,9 +174,9 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
     }
   }
 
-  int findPositionByName(String name, List<ProgramList> programList) {
+  int findPositionByName(int sNo, List<ProgramList> programList) {
     for (int i = 0; i < programList.length; i++) {
-      if (programList[i].programName == name) {
+      if (programList[i].serialNumber == sNo) {
         return i;
       }
     }
@@ -189,7 +185,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
 
   Future<List<DashboardDataProvider>>fetchControllerData(id) async
   {
-    Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.controllerID, "programId": id};
+    Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.controllerID, "serialNumber": id};
     final response = await HttpService().postRequest("getCustomerDashboardByManual", body);
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
@@ -225,7 +221,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
         ),
         actions: [
           IconButton(tooltip: 'Refresh', icon: const Icon(Icons.refresh), onPressed: () async {
-            scheduleSectionCallbackMethod(programId, ddCurrentPosition);
+            scheduleSectionCallbackMethod(serialNumber, ddCurrentPosition);
           }),
           const SizedBox(width: 10),
           MaterialButton(
@@ -2348,7 +2344,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                     segments: const <ButtonSegment<SegmentWithFlow>>[
                       ButtonSegment<SegmentWithFlow>(
                           value: SegmentWithFlow.manual,
-                          label: Text('Manual'),
+                          label: Text('Timeless'),
                           icon: Icon(Icons.pan_tool_alt_outlined)),
                       ButtonSegment<SegmentWithFlow>(
                           value: SegmentWithFlow.duration,
@@ -2375,7 +2371,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                     segments: const <ButtonSegment<SegmentWithFlow>>[
                       ButtonSegment<SegmentWithFlow>(
                           value: SegmentWithFlow.manual,
-                          label: Text('Manual'),
+                          label: Text('Timeless'),
                           icon: Icon(Icons.pan_tool_alt_outlined)),
                       ButtonSegment<SegmentWithFlow>(
                           value: SegmentWithFlow.duration,
@@ -2413,7 +2409,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                       );
                     }).toList(),
                     onChanged: (value) {
-                      widget.programSelectionCallback(value!.programId, widget.programList.indexOf(value),);
+                      widget.programSelectionCallback(value!.serialNumber, widget.programList.indexOf(value),);
                     },
                   ),
                 ):
@@ -2434,7 +2430,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                     segments: const <ButtonSegment<SegmentWithFlow>>[
                       ButtonSegment<SegmentWithFlow>(
                           value: SegmentWithFlow.manual,
-                          label: Text('Manual'),
+                          label: Text('Timeless'),
                           icon: Icon(Icons.pan_tool_alt_outlined)),
                       ButtonSegment<SegmentWithFlow>(
                           value: SegmentWithFlow.duration,
@@ -2461,7 +2457,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                     segments: const <ButtonSegment<SegmentWithFlow>>[
                       ButtonSegment<SegmentWithFlow>(
                           value: SegmentWithFlow.manual,
-                          label: Text('Manual'),
+                          label: Text('Timeless'),
                           icon: Icon(Icons.pan_tool_alt_outlined)),
                       ButtonSegment<SegmentWithFlow>(
                           value: SegmentWithFlow.duration,
@@ -2502,7 +2498,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                           );
                         }).toList(),
                         onChanged: (value) {
-                          widget.programSelectionCallback(value!.programId, widget.programList.indexOf(value),);
+                          widget.programSelectionCallback(value!.serialNumber, widget.programList.indexOf(value),);
                         },
                       ),
                     ):

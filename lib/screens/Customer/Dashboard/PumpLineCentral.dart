@@ -979,20 +979,6 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                             children: [
                               AppImages.getAsset('booster', fertilizerCentral[fIndex]['Booster'][0]['Status'],''),
                               Positioned(
-                                top: 50,
-                                left: 15,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.transparent,
-                                    borderRadius: BorderRadius.circular(3),
-                                  ),
-                                  width: 55,
-                                  child: Center(
-                                    child: Text(fertilizerCentral[0]['SW_Name']?? fertilizerCentral[0]['FertilizerSite'], style: const TextStyle(color: primaryColorDark),),
-                                  ),
-                                ),
-                              ),
-                              Positioned(
                                 top: 70,
                                 left: 15,
                                 child: fertilizerCentral[fIndex]['FertilizerTankSelector'].isNotEmpty ? const SizedBox(
@@ -1170,7 +1156,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                 ),
                 SizedBox(
                   height: 30,
-                  width: 200,
+                  width: fertilizerCentral[fIndex]['Fertilizer'].length * 70,
                   child: Row(
                     children: [
                       if(fIndex!=0)
@@ -1189,7 +1175,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                           VerticalDivider(width: 0,color: Colors.grey.shade300,),
                           const SizedBox(width: 5.0,),
                           SizedBox(
-                            width: 170,
+                            width: fertilizerCentral[fIndex]['Ec'].length>1? 170 : 85,
                             height: 30,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1227,9 +1213,19 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                                       );
                                     },
                                   ),
-                                ) :
+                                ):
                                 const SizedBox(),
                               ],
+                            ),
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                            width: fertilizerCentral[fIndex]['Fertilizer'].length>4? 150:100,
+                            child: Center(
+                              child: Text(fertilizerCentral[0]['SW_Name'] ?? fertilizerCentral[0]['FertilizerSite'], style: const TextStyle(color: primaryColorDark),),
                             ),
                           ),
                         ],
@@ -1631,7 +1627,7 @@ class _LocalFilterState extends State<LocalFilter> {
                           width: 70,
                           height: 20,
                           child: Center(
-                            child: Text(filteredLocalFilter[i]['FilterStatus'][flIndex]['Name'], style: const TextStyle(
+                            child: Text(filteredLocalFilter[i]['FilterStatus'][flIndex]['SW_Name'] ?? filteredLocalFilter[i]['FilterStatus'][flIndex]['Name'], style: const TextStyle(
                               color: Colors.black,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
@@ -1678,7 +1674,7 @@ class _LocalFilterState extends State<LocalFilter> {
               const SizedBox(),
             ],
           ),
-        Text(filteredLocalFilter.isNotEmpty? filteredLocalFilter[0]['FilterSite']:'', style: const TextStyle(color: primaryColorDark),),
+        Text(filteredLocalFilter.isNotEmpty? filteredLocalFilter[0]['SW_Name'] ?? filteredLocalFilter[0]['FilterSite']:'', style: const TextStyle(color: primaryColorDark),),
       ],
     );
   }
@@ -1817,20 +1813,6 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                           child : Stack(
                             children: [
                               AppImages.getAsset('booster', fertilizerLocal[fIndex]['Booster'][0]['Status'],''),
-                              Positioned(
-                                top: 50,
-                                left: 15,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.transparent,
-                                    borderRadius: BorderRadius.circular(3),
-                                  ),
-                                  width: 55,
-                                  child: Center(
-                                    child: Text(fertilizerLocal[0]['SW_Name']?? fertilizerLocal[0]['FertilizerSite'], style: const TextStyle(color: primaryColorDark),),
-                                  ),
-                                ),
-                              ),
                               Positioned(
                                 top: 70,
                                 left: 15,
@@ -2069,6 +2051,20 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                                 ) :
                                 const SizedBox(),
                               ],
+                            ),
+                          ),
+                          Positioned(
+                            top: 50,
+                            left: 15,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                              width: 55,
+                              child: Center(
+                                child: Text(fertilizerLocal[0]['SW_Name']?? fertilizerLocal[0]['FertilizerSite'], style: const TextStyle(color: primaryColorDark),),
+                              ),
                             ),
                           ),
                         ],

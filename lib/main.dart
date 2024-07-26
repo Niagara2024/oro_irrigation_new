@@ -29,31 +29,28 @@ void main() {
   MqttPayloadProvider myMqtt = MqttPayloadProvider();
   myMqtt.editMySchedule(mySchedule);
 
-  runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => ConnectivityService()),
-          ChangeNotifierProvider(create: (context) => ConfigMakerProvider()),
-          ChangeNotifierProvider(create: (context) => PreferencesMainProvider()),
-          ChangeNotifierProvider(create: (context) => DataAcquisitionProvider()),
-          ChangeNotifierProvider(create: (context) => OverAllUse()),
-          ChangeNotifierProvider(create: (context) => MessageProvider()),
-          ChangeNotifierProvider(create: (context) => IrrigationProgramMainProvider()),
-          ChangeNotifierProvider(create: (context) => ConstantProvider()),
-          ChangeNotifierProvider(create: (context) => SelectedGroupProvider()),
-          ChangeNotifierProvider(create: (context) => FertilizerSetProvider()),
-          ChangeNotifierProvider(create: (context) => GlobalFertLimitProvider()),
-          ChangeNotifierProvider(create: (context) => myMqtt),
-          ChangeNotifierProvider(create: (context) => SystemDefinitionProvider()),
-          ChangeNotifierProvider(create: (context) => ProgramQueueProvider()),
-          ChangeNotifierProvider(create: (context) => mySchedule),
-          ChangeNotifierProvider(create: (_) => CustomerDataProvider()),
-          ChangeNotifierProvider(create: (_) => DurationNotifier()),
-        ],
-        child: const MyApp(),
-      )
-  );
-
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => ConnectivityService()),
+      ChangeNotifierProvider(create: (context) => ConfigMakerProvider()),
+      ChangeNotifierProvider(create: (context) => PreferencesMainProvider()),
+      ChangeNotifierProvider(create: (context) => DataAcquisitionProvider()),
+      ChangeNotifierProvider(create: (context) => OverAllUse()),
+      ChangeNotifierProvider(create: (context) => MessageProvider()),
+      ChangeNotifierProvider(create: (context) => IrrigationProgramMainProvider()),
+      ChangeNotifierProvider(create: (context) => ConstantProvider()),
+      ChangeNotifierProvider(create: (context) => SelectedGroupProvider()),
+      ChangeNotifierProvider(create: (context) => FertilizerSetProvider()),
+      ChangeNotifierProvider(create: (context) => GlobalFertLimitProvider()),
+      ChangeNotifierProvider(create: (context) => myMqtt),
+      ChangeNotifierProvider(create: (context) => SystemDefinitionProvider()),
+      ChangeNotifierProvider(create: (context) => ProgramQueueProvider()),
+      ChangeNotifierProvider(create: (context) => mySchedule),
+      ChangeNotifierProvider(create: (_) => CustomerDataProvider()),
+      ChangeNotifierProvider(create: (_) => DurationNotifier()),
+    ],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -61,7 +58,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: myTheme.primaryColorDark,
       statusBarIconBrightness: Brightness.light,
@@ -77,5 +73,4 @@ class MyApp extends StatelessWidget {
       },
     );
   }
-
 }

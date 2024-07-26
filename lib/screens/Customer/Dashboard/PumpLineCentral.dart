@@ -1991,7 +1991,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                 ),
                 SizedBox(
                   height: 30,
-                  width: 200,
+                  width: fertilizerLocal[fIndex]['Fertilizer'].length * 70,
                   child: Row(
                     children: [
                       if(fIndex!=0)
@@ -2010,7 +2010,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                           VerticalDivider(width: 0,color: Colors.grey.shade300,),
                           const SizedBox(width: 5.0,),
                           SizedBox(
-                            width: 170,
+                            width: fertilizerLocal[fIndex]['Ec'].length>1? 170 : 85,
                             height: 30,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2053,18 +2053,14 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                               ],
                             ),
                           ),
-                          Positioned(
-                            top: 50,
-                            left: 15,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                borderRadius: BorderRadius.circular(3),
-                              ),
-                              width: 55,
-                              child: Center(
-                                child: Text(fertilizerLocal[0]['SW_Name']?? fertilizerLocal[0]['FertilizerSite'], style: const TextStyle(color: primaryColorDark),),
-                              ),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                            width: fertilizerLocal[fIndex]['Fertilizer'].length>4? 150:100,
+                            child: Center(
+                              child: Text(fertilizerLocal[0]['SW_Name'] ?? fertilizerLocal[0]['FertilizerSite'], style: const TextStyle(color: primaryColorDark),),
                             ),
                           ),
                         ],

@@ -66,7 +66,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
         ProgramList defaultProgram = ProgramList(
           programId: 0,
           serialNumber: 0,
-          programName: 'Manual mode',
+          programName: 'Manual',
           defaultProgramName: '',
           programType: '',
           priority: '',
@@ -81,7 +81,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
 
         bool programWithNameExists = false;
         for (ProgramList program in programList) {
-          if (program.programName == 'Manual mode') {
+          if (program.programName == 'Manual') {
             programWithNameExists = true;
             break;
           }
@@ -2123,7 +2123,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
         ),
       );
     }else{
-      payload = '${finalResult==''?0:1},${finalResult==''?0:finalResult},${standAloneMethod},${standAloneMethod==3?'0':standAloneMethod==1?strDuration:strFlow}';
+      payload = '${finalResult==''?0:1},${finalResult==''?0:finalResult},$standAloneMethod,${standAloneMethod==3?'0':standAloneMethod==1?strDuration:strFlow}';
       payLoadFinal = jsonEncode({
         "800": [{"801": payload}]
       });
@@ -2137,8 +2137,8 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
 
   Future<void> sendCommandToControllerAndMqttProgram(String strSldSqnLocation,String strSldSqnNo,String strSldIrrigationPumpId,String strSldMainValveId
       ,String strSldCtrlFilterId,String sldCtrlFilterRelayOnOffStatus,String strSldLocFilterId,String sldLocFilterRelayOnOffStatus,
-      String strSldFanId,String strSldFgrId) async {
-
+      String strSldFanId,String strSldFgrId) async
+  {
     String payload = '';
     String payLoadFinal = '';
     if(standAloneMethod==1 && strDuration=='00:00:00'){
@@ -2168,7 +2168,6 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
       sentManualModeToServer(programList[ddCurrentPosition].serialNumber, 1, standAloneMethod,strDuration, strFlow, standaloneSelection);
     }
-
   }
 
   Future<void>sentManualModeToServer(int sNo, int sFlag, int method, String dur, String flow, List<Map<String, dynamic>> selection) async {
@@ -2177,6 +2176,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
         "userId": widget.customerID,
         "controllerId": widget.controllerID,
         "serialNumber": sNo,
+        "programName": programList[ddCurrentPosition].programName,
         "startFlag": 0,
         "method": method,
         "duration": '00:00:00',

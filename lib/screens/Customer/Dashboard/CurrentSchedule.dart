@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../constants/MQTTManager.dart';
@@ -248,7 +247,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                 "800": [{"801": payload}]
                               });
                               MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
-                              sentManualModeToServer(0,
+                              sentManualModeToServer(0,widget.filteredCurrentSchedule[index].programName,
                                   widget.filteredCurrentSchedule[index].duration_Qty=='00:00:00'? 3:
                                   widget.filteredCurrentSchedule[index].duration_Qty.contains(':')?1: 2);
                             } : null,
@@ -265,7 +264,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                               });
 
                               MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
-                              sentManualModeToServer(widget.filteredCurrentSchedule[index].programSno,
+                              sentManualModeToServer(widget.filteredCurrentSchedule[index].programSno,widget.filteredCurrentSchedule[index].programName,
                                   widget.filteredCurrentSchedule[index].duration_Qty=='00:00:00'? 3:
                                   widget.filteredCurrentSchedule[index].duration_Qty.contains(':')?1: 2);
                             },
@@ -399,9 +398,9 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                   "800": [{"801": payload}]
                 });
                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
-                sentManualModeToServer(0, widget.filteredCurrentSchedule[index].duration_Qty=='00:00:00'? 3:
-                widget.filteredCurrentSchedule[index].duration_Qty.contains(':')?1: 2);
-              } : null,
+                sentManualModeToServer(0,widget.filteredCurrentSchedule[index].programName, widget.filteredCurrentSchedule[index].duration_Qty=='00:00:00'? 3:
+                widget.filteredCurrentSchedule[index].duration_Qty.contains(':')? 1: 2);
+              }: null,
               child: const Text('Stop'),
             ):
             widget.filteredCurrentSchedule[index].programName.contains('StandAlone') ?
@@ -416,7 +415,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                 });
                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
 
-                sentManualModeToServer(widget.filteredCurrentSchedule[index].programSno,
+                sentManualModeToServer(widget.filteredCurrentSchedule[index].programSno,widget.filteredCurrentSchedule[index].programName,
                     widget.filteredCurrentSchedule[index].duration_Qty=='00:00:00'? 3:
                     widget.filteredCurrentSchedule[index].duration_Qty.contains(':')?1: 2);
               },
@@ -486,12 +485,14 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
     return GemProgramSSReasonCode.fromCode(code).content;
   }
 
-  Future<void>sentManualModeToServer(int sNo, int method) async {
+  Future<void>sentManualModeToServer(int sNo, String prgName, int method) async {
     try {
+
       final body = {
         "userId": widget.customerID,
         "controllerId": widget.siteData.master[0].controllerId,
         "serialNumber": sNo,
+        "programName": prgName,
         "startFlag": 0,
         "method": method,
         "duration": '00:00:00',

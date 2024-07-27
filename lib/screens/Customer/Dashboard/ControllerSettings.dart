@@ -171,8 +171,8 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                             child: Names(
                                 userID: widget.customerID,
                                 customerID: widget.customerID,
-                                controllerId:
-                                    widget.siteData.master[0].controllerId)),
+                                controllerId: widget.siteData.master[0].controllerId,
+                              imeiNo: widget.siteData.master[0].deviceId,)),
                       ],
                     ),
                   ),
@@ -810,18 +810,19 @@ class _ControllerSettingsState extends State<ControllerSettings> {
     }
   }
 
-  void _showAlertDialog(BuildContext context, String cName, int suId) {
+  Future<void> _showAlertDialog(BuildContext context, String cName, int suId) async {
 
+    List<UserGroup> userGroups = [];
 
-    getUserSharedDeviceList(suId);
-
-    Map<String, bool> siteChecks = {};
-    Map<String, bool> masterChecks = {};
-
-    for (var userGroup in widget.allSiteList) {
-      siteChecks[userGroup.groupName] = false;
-      for (var master in userGroup.master) {
-        masterChecks[master.deviceId] = false;
+    final response = await HttpService().postRequest("getUserSharedDeviceList",
+        {"userId": widget.customerID, "sharedUserId": suId,});
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      if (data["code"] == 200) {
+        var list = data['data'] as List;
+        setState(() {
+          userGroups = list.map((i) => UserGroup.fromJson(i)).toList();
+        });
       }
     }
 
@@ -832,119 +833,14 @@ class _ControllerSettingsState extends State<ControllerSettings> {
           title: Text('$cName - Permissions'),
           content: SizedBox(
             width: 400,
-            height: 300,
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                void updateMasterChecks(String groupName, bool? value) {
-                  for (var master in widget.allSiteList
-                      .firstWhere((group) => group.groupName == groupName)
-                      .master) {
-                    masterChecks[master.deviceId] = value ?? false;
-                  }
-                  setState(() {});
-                }
-
-                void updateSiteCheck(String groupName) {
-                  var allChecked = widget.allSiteList
-                      .firstWhere((group) => group.groupName == groupName)
-                      .master
-                      .every((master) => masterChecks[master.deviceId] == true);
-                  siteChecks[groupName] = allChecked;
-                  setState(() {});
-                }
-
-                return ListView.builder(
-                  itemCount: widget.allSiteList.length,
-                  itemBuilder: (context, index) {
-                    var userGroup = widget.allSiteList[index];
-                    var groupName = userGroup.groupName;
-                    var masterList = userGroup.master;
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: siteChecks[groupName],
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  siteChecks[groupName] = value ?? false;
-                                  updateMasterChecks(groupName, value);
-                                });
-                              },
-                            ),
-                            Text(groupName),
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 16.0),
-                          child: Column(
-                            children: [
-                              Column(
-                                children: masterList.map<Widget>((master) {
-                                  var deviceId = master.deviceId;
-                                  var deviceName = master.deviceName;
-                                  return Row(
-                                    children: [
-                                      Checkbox(
-                                        value: masterChecks[deviceId],
-                                        onChanged: (bool? value) {
-                                          setState(() {
-                                            masterChecks[deviceId] =
-                                                value ?? false;
-                                            updateSiteCheck(groupName);
-                                          });
-                                        },
-                                      ),
-                                      Text(deviceName),
-                                    ],
-                                  );
-                                }).toList(),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 16.0),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Checkbox(
-                                          value: masterChecks[deviceId],
-                                          onChanged: (bool? value) {},
-                                        ),
-                                        const Text('Manual opration'),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        Checkbox(
-                                          value: masterChecks[deviceId],
-                                          onChanged: (bool? value) {},
-                                        ),
-                                        const Text('Program'),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        Checkbox(
-                                          value: masterChecks[deviceId],
-                                          onChanged: (bool? value) {},
-                                        ),
-                                        const Text('Program Creation'),
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Divider(),
-                      ],
-                    );
-                  },
-                );
-              },
+            height: 400,
+            child: Scaffold(
+              body: ListView.builder(
+                itemCount: userGroups.length,
+                itemBuilder: (context, index) {
+                  return UserGroupWidget(group: userGroups[index]);
+                },
+              ),
             ),
           ),
           actions: <Widget>[
@@ -957,6 +853,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
             TextButton(
               child: const Text('Submit'),
               onPressed: () {
+                print(userGroups);
                 Navigator.of(context).pop();
               },
             ),
@@ -1089,3 +986,162 @@ class _ThemeChangeDialogState extends State<ThemeChangeDialog> {
   }
 }
 
+
+class UserGroup {
+  final int userGroupId;
+  final String groupName;
+  final bool active;
+  final List<Master> master;
+
+  UserGroup({required this.userGroupId, required this.groupName, required this.active, required this.master});
+
+  factory UserGroup.fromJson(Map<String, dynamic> json) {
+    var list = json['master'] as List;
+    List<Master> masterList = list.map((i) => Master.fromJson(i)).toList();
+    return UserGroup(
+      userGroupId: json['userGroupId'],
+      groupName: json['groupName'],
+      active: json['active'] == '1',
+      master: masterList,
+    );
+  }
+}
+
+class Master {
+  final int controllerId;
+  final String deviceId;
+  final String deviceName;
+  bool isSharedDevice;
+  final List<UserPermission> userPermission;
+
+  Master({required this.controllerId, required this.deviceId, required this.deviceName, required this.isSharedDevice, required this.userPermission});
+
+  factory Master.fromJson(Map<String, dynamic> json) {
+    var list = json['userPermission'] as List;
+    List<UserPermission> userPermissionList = list.map((i) => UserPermission.fromJson(i)).toList();
+    return Master(
+      controllerId: json['controllerId'],
+      deviceId: json['deviceId'],
+      deviceName: json['deviceName'],
+      isSharedDevice: json['isSharedDevice'],
+      userPermission: userPermissionList,
+    );
+  }
+}
+
+class UserPermission {
+  final int sNo;
+  final String name;
+  bool status;
+
+  UserPermission({required this.sNo, required this.name, required this.status});
+
+  factory UserPermission.fromJson(Map<String, dynamic> json) {
+    return UserPermission(
+      sNo: json['sNo'],
+      name: json['name'],
+      status: json['status'],
+    );
+  }
+}
+
+
+class UserGroupWidget extends StatefulWidget {
+  final UserGroup group;
+  const UserGroupWidget({super.key, required this.group});
+
+  @override
+  _UserGroupWidgetState createState() => _UserGroupWidgetState();
+}
+
+class _UserGroupWidgetState extends State<UserGroupWidget> {
+  void toggleGroup(UserGroup group, bool value) {
+    setState(() {
+      for (var master in group.master) {
+        master.isSharedDevice = value;
+        for (var permission in master.userPermission) {
+          permission.status = value;
+        }
+      }
+    });
+  }
+
+  void toggleMaster(Master master, bool value) {
+    setState(() {
+      master.isSharedDevice = value;
+      for (var permission in master.userPermission) {
+        permission.status = value;
+      }
+
+      if (!value) {
+        for (var otherMaster in widget.group.master) {
+          if (otherMaster != master && otherMaster.isSharedDevice) return;
+        }
+      }
+    });
+  }
+
+  void togglePermission(UserGroup group, Master master, UserPermission permission, bool value) {
+    setState(() {
+      permission.status = value;
+
+      if (!value) {
+        bool allPermissionsUnchecked = master.userPermission.every((p) => !p.status);
+        if (allPermissionsUnchecked) {
+          master.isSharedDevice = false;
+          bool allMastersUnchecked = group.master.every((m) => !m.isSharedDevice);
+          if (allMastersUnchecked) {
+            group.master.forEach((m) => m.isSharedDevice = false);
+          }
+        }
+      } else {
+        master.isSharedDevice = true;
+        group.master.forEach((m) => m.isSharedDevice = true);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ExpansionTile(
+      initiallyExpanded: true,
+      childrenPadding: const EdgeInsets.only(left: 16),
+      enabled: false,
+      title: Row(
+        children: [
+          Checkbox(
+            value: widget.group.master.every((m) => m.isSharedDevice),
+            onChanged: (value) => toggleGroup(widget.group, value!),
+          ),
+          Text(widget.group.groupName),
+        ],
+      ),
+      children: widget.group.master.map((master){
+        return ExpansionTile(
+          initiallyExpanded: true,
+          childrenPadding: const EdgeInsets.only(left: 16),
+          enabled: false,
+          shape: InputBorder.none,
+          title: Row(
+            children: [
+              Checkbox(
+                value: master.isSharedDevice,
+                onChanged: (value) => toggleMaster(master, value!),
+              ),
+              Text(master.deviceName),
+            ],
+          ),
+          children: master.userPermission.map((permission) {
+            return ListTile(
+              leading: Checkbox(
+                value: permission.status,
+                onChanged: (value) => togglePermission(widget.group, master, permission, value!),
+              ),
+              title: Text(permission.name),
+            );
+          }).toList(),
+        );
+      }).toList(),
+    );
+  }
+}

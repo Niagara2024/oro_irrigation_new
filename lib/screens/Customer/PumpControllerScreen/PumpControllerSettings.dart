@@ -165,7 +165,7 @@ class _PumpControllerSettingsState extends State<PumpControllerSettings> {
                     child: buildGeneralContent(screenWidth),
                   ),
                   PumpPreferenceScreen(customerId: widget.customerId, controllerId: widget.controllerId,),
-                  Names(userID: widget.customerId,  customerID: widget.customerId, controllerId: widget.controllerId),
+                  Names(userID: widget.customerId,  customerID: widget.customerId, controllerId: widget.controllerId, imeiNo: '',),
                 ],
               ),
             ),

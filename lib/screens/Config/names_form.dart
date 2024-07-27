@@ -11,9 +11,10 @@ class Names extends StatefulWidget {
     Key? key,
     required this.userID,
     required this.customerID,
-    required this.controllerId,
+    required this.controllerId, required this.imeiNo,
   });
   final int userID, customerID, controllerId;
+  final String imeiNo;
 
   @override
   State<Names> createState() => _NamesState();

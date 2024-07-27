@@ -2176,10 +2176,10 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
         "controllerId": widget.controllerID,
         "serialNumber": sNo,
         "programName": programList[ddCurrentPosition].programName,
-        "startFlag": 0,
+        "startFlag": sFlag,
         "method": method,
-        "duration": '00:00:00',
-        "flow": '0',
+        "duration": dur,
+        "flow": flow,
         "selection": selection,
         "createUser": widget.customerID,
       };

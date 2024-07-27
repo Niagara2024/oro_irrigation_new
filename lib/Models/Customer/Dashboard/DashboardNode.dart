@@ -270,7 +270,7 @@ class PumpData {
   String ? swName;
   String location;
   int status;
-  int reason;
+  String reason;
   List<dynamic> waterMeter;
   List<dynamic> pressure;
   List<dynamic> level;
@@ -307,11 +307,11 @@ class PumpData {
       swName: json['SW_Name'],
       location: location,
       status: json['Status'],
-      reason: json['Reason'],
+      reason: json['OnOffReason'],
       waterMeter: json['Watermeter'],
       pressure: json['Pressure'],
       level: json['Level'],
-      float: json['Float'],
+      float: [],
       onDelay: onDelay,
       onDelayCompleted: json['OnDelayCompleted'],
       onDelayLeft: json['OnDelayLeft'],

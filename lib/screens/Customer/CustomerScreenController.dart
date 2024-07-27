@@ -19,7 +19,6 @@ import '../../constants/http_service.dart';
 import '../../constants/snack_bar.dart';
 import '../../constants/theme.dart';
 import '../../state_management/MqttPayloadProvider.dart';
-import '../../widgets/Customer/MyWidgets.dart';
 import '../product_inventory.dart';
 import 'AccountManagement.dart';
 import 'CustomerDashboard.dart';

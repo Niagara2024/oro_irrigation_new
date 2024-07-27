@@ -77,7 +77,7 @@ class _ConfigScreenState extends State<ConfigScreen> with SingleTickerProviderSt
         Expanded(
           child: Center(
             child: nvRSelection == 0 ?
-            Names(userID: widget.userID,  customerID: widget.customerID, controllerId: widget.controllerId):
+            Names(userID: widget.userID,  customerID: widget.customerID, controllerId: widget.controllerId, imeiNo: '',):
             nvRSelection == 1 ?
             PreferencesScreen(customerID: widget.customerID, controllerID: widget.controllerId, userID: widget.userID, deviceId: widget.imeiNumber):
             nvRSelection == 2 ?
@@ -104,7 +104,7 @@ class ConfigPage extends StatelessWidget
   Widget build(BuildContext context)
   {
    if(label.toString()=='Names'){
-      return Names(userID: userID,  customerID: customerID, controllerId: controllerId);
+      return Names(userID: userID,  customerID: customerID, controllerId: controllerId, imeiNo: '',);
     }else if(label.toString()=='Dealer definition'){
       return DealerDefinitionInConfig(userId: userID,  customerId: customerID, controllerId: controllerId, imeiNo: imeiNumber);
     }else if(label.toString()=='Preferences'){

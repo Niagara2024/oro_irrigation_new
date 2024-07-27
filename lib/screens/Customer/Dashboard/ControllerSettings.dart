@@ -112,7 +112,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
 
   Future<void> getSubUserList() async {
     final response = await HttpService()
-        .postRequest("getUserSharedDeviceList", {"userId": widget.customerID});
+        .postRequest("getUserSharedList", {"userId": widget.customerID});
     if (response.statusCode == 200) {
       languageList.clear();
       var data = jsonDecode(response.body);
@@ -510,7 +510,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                                     trailing: IconButton(
                                       tooltip: 'User Permission',
                                       onPressed: () => _showAlertDialog(
-                                          context, user['userName']),
+                                          context, user['userName'], user['userId']),
                                       icon: const Icon(Icons.menu),
                                     ),
                                   ),
@@ -796,7 +796,25 @@ class _ControllerSettingsState extends State<ControllerSettings> {
           );
   }
 
-  void _showAlertDialog(BuildContext context, String cName) {
+  Future<void> getUserSharedDeviceList(int suId) async {
+    final response = await HttpService()
+        .postRequest("getUserSharedDeviceList", {"userId": widget.customerID, "sharedUserId": suId,});
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      print(response.body);
+      if (data["code"] == 200) {
+        /*setState(() {
+          subUsers = List<Map<String, dynamic>>.from(data["data"]);
+        });*/
+      }
+    }
+  }
+
+  void _showAlertDialog(BuildContext context, String cName, int suId) {
+
+
+    getUserSharedDeviceList(suId);
+
     Map<String, bool> siteChecks = {};
     Map<String, bool> masterChecks = {};
 
@@ -994,7 +1012,7 @@ class _ThemeChangeDialogState extends State<ThemeChangeDialog> {
               color: Colors.yellow,
               width: 150,
               height: 75,
-              child: Center(child: const Text('Theme yellow')),
+              child: const Center(child: Text('Theme yellow')),
             ),
             value: ThemeData.light(),
             groupValue: _selectedTheme,
@@ -1009,7 +1027,7 @@ class _ThemeChangeDialogState extends State<ThemeChangeDialog> {
               color: Colors.green,
               width: 150,
               height: 75,
-              child: Center(child: const Text('Theme green')),
+              child: const Center(child: Text('Theme green')),
             ),
             value: ThemeData.light(),
             groupValue: _selectedTheme,
@@ -1024,7 +1042,7 @@ class _ThemeChangeDialogState extends State<ThemeChangeDialog> {
               color: Colors.pink,
               width: 150,
               height: 75,
-              child: Center(child: const Text('Theme pink')),
+              child: const Center(child: Text('Theme pink')),
             ),
             value: ThemeData.light(),
             groupValue: _selectedTheme,
@@ -1070,3 +1088,4 @@ class _ThemeChangeDialogState extends State<ThemeChangeDialog> {
     );
   }
 }
+

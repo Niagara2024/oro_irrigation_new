@@ -459,7 +459,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
             color: Colors.redAccent,
             textColor: Colors.white,
             onPressed:() async {
-              if(programList[ddCurrentPosition].programName=='Default'){
+              if(ddCurrentPosition==0){
                 String payload = '0,0,0,0';
                 String payLoadFinal = jsonEncode({
                   "800": [{"801": payload}]
@@ -468,7 +468,6 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                 sentManualModeToServer(programList[ddCurrentPosition].serialNumber, 0, standAloneMethod, '00:00:00', '0', []);
               }
               else{
-
                 for (var lineOrSq in dashBoardData[0].lineOrSequence) {
                   if(lineOrSq.selected){
                     standaloneSelection.add({

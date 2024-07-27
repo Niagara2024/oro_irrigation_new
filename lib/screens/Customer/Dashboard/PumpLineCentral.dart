@@ -135,7 +135,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
             ),
           ),
         ),
-        Padding(
+        irrigationPauseFlag !=2 ? Padding(
           padding: const EdgeInsets.all(8.0),
           child: Container(
             width: 110,
@@ -183,7 +183,8 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
               ),
             ),
           ),
-        ),
+        ):
+        const SizedBox(),
       ],
     );
   }
@@ -1705,9 +1706,10 @@ class _LocalFilterState extends State<LocalFilter> {
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       try{
         final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
-        if(provider.filtersLocal.isNotEmpty) {
-          if(provider.filtersLocal[0]['DurationLeft']!='00:00:00'){
-            List<String> parts = provider.filtersLocal[0]['DurationLeft'].split(':');
+        for(int fIndex=0; fIndex<provider.filtersLocal.length; fIndex++){
+          if(provider.filtersLocal[fIndex]['DurationLeft']!='00:00:00'){
+
+            List<String> parts = provider.filtersLocal[fIndex]['DurationLeft'].split(':');
             int hours = int.parse(parts[0]);
             int minutes = int.parse(parts[1]);
             int seconds = int.parse(parts[2]);
@@ -1728,9 +1730,11 @@ class _LocalFilterState extends State<LocalFilter> {
             }
 
             String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-            setState(() {
-              provider.filtersLocal[0]['DurationLeft'] = updatedDurationQtyLeft;
-            });
+            if(updatedDurationQtyLeft!='00:00:00'){
+              setState(() {
+                provider.filtersLocal[fIndex]['DurationLeft'] = updatedDurationQtyLeft;
+              });
+            }
           }
         }
       }

@@ -64,7 +64,7 @@ enum GemProgramSSReasonCode {
 
 enum GemLineSSReasonCode {
   linePausedManually(1, 'The Line Paused Manually'),
-  pausedByStandAloneMode(2, 'The Line Paused By StandAlone Mode'),
+  pausedByStandAloneMode(2, 'Scheduled Program paused by Standalone program'),
   pausedBySystemDefinition(3, 'The Line Paused By System Definition'),
   pausedByLowFlowAlarm(4, 'The Line Paused By Low Flow Alarm'),
   pausedByHighFlowAlarm(5, 'The Line Paused By High Flow Alarm'),

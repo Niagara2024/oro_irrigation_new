@@ -390,7 +390,6 @@ class ScheduledProgramList extends StatelessWidget {
     );
   }
 
-
   String getContentByCode(int code) {
     return GemProgramSSReasonCode.fromCode(code).content;
   }

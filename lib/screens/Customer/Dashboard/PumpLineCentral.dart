@@ -933,11 +933,11 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
   Widget build(BuildContext context) {
     final overallFrtCentral = Provider.of<MqttPayloadProvider>(context).fertilizerCentral;
 
-   // MqttPayloadProvider provider = Provider.of<MqttPayloadProvider>(context,listen: false);
-
     final List<Map<String, dynamic>> fertilizerCentral = overallFrtCentral
         .where((cfr) => cfr['Location'].contains(widget.currentLineId)).toList()
         .cast<Map<String, dynamic>>();
+
+    durationUpdatingFunction();
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -1773,9 +1773,13 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
   @override
   Widget build(BuildContext context) {
 
-    final List<Map<String, dynamic>> fertilizerLocal =  Provider.of<MqttPayloadProvider>(context,listen: false).fertilizerLocal
-        .where((frt) => frt['Location'].contains(widget.currentLineId)).toList()
+    final overallFrtLocal = Provider.of<MqttPayloadProvider>(context).fertilizerLocal;
+
+    final List<Map<String, dynamic>> fertilizerLocal = overallFrtLocal
+        .where((lfr) => lfr['Location'].contains(widget.currentLineId)).toList()
         .cast<Map<String, dynamic>>();
+
+    durationUpdatingFunction();
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,

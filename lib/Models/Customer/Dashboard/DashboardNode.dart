@@ -301,13 +301,14 @@ class PumpData {
     String onDelay = json['OnDelay'] ?? '00:00:00';
     int type = json['Type'] ?? 0;
     String location = json['Location'] ?? '-';
+    bool hasOnOffReasonKey = json.containsKey('OnOffReason');
     return PumpData(
       type: type,
       name: json['Name'],
       swName: json['SW_Name'],
       location: location,
       status: json['Status'],
-      reason: json['OnOffReason'],
+      reason: hasOnOffReasonKey? json['OnOffReason']:json['Reason'].toString(),
       waterMeter: json['Watermeter'],
       pressure: json['Pressure'],
       level: json['Level'],

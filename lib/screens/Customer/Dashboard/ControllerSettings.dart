@@ -818,6 +818,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
         {"userId": widget.customerID, "sharedUserId": suId,});
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
+      //print(response.body);
       if (data["code"] == 200) {
         var list = data['data'] as List;
         setState(() {
@@ -853,8 +854,13 @@ class _ControllerSettingsState extends State<ControllerSettings> {
             TextButton(
               child: const Text('Submit'),
               onPressed: () {
-                print(userGroups);
-                Navigator.of(context).pop();
+                List<MasterItem> masterList = [];
+                for(int gix=0; gix<userGroups.length; gix++){
+                  for(int mix=0; mix<userGroups[gix].master.length; mix++){
+                    masterList.add(MasterItem(id: userGroups[gix].master[mix].controllerId, action: userGroups[gix].master[mix].isSharedDevice, userPermission: userGroups[gix].master[mix].userPermission));
+                  }
+                }
+                sendUpdatedPermission(masterList.map((item) => item.toMap()).toList(), suId);
               },
             ),
           ],
@@ -862,6 +868,22 @@ class _ControllerSettingsState extends State<ControllerSettings> {
       },
     );
   }
+
+  Future<void> sendUpdatedPermission(List<Map<String, dynamic>> uptJson, int suId) async
+  {
+    print({"userId": widget.customerID, "masterList": uptJson, "sharedUser": suId, "createUser": widget.customerID,});
+    final response = await HttpService().postRequest("createUserSharedController",
+        {"userId": widget.customerID, "masterList": uptJson, "sharedUser": suId, "createUser": widget.customerID,});
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      print(response.body);
+      if (data["code"] == 200) {
+        GlobalSnackBar.show(context, data["message"], 200);
+        Navigator.of(context).pop();
+      }
+    }
+  }
+
 }
 
 class ThemeChangeDialog extends StatefulWidget {
@@ -1036,6 +1058,14 @@ class UserPermission {
 
   UserPermission({required this.sNo, required this.name, required this.status});
 
+  Map<String, dynamic> toMap() {
+    return {
+      'sNo': sNo,
+      'name': name,
+      'status': status,
+    };
+  }
+
   factory UserPermission.fromJson(Map<String, dynamic> json) {
     return UserPermission(
       sNo: json['sNo'],
@@ -1043,6 +1073,7 @@ class UserPermission {
       status: json['status'],
     );
   }
+
 }
 
 
@@ -1091,12 +1122,16 @@ class _UserGroupWidgetState extends State<UserGroupWidget> {
           master.isSharedDevice = false;
           bool allMastersUnchecked = group.master.every((m) => !m.isSharedDevice);
           if (allMastersUnchecked) {
-            group.master.forEach((m) => m.isSharedDevice = false);
+            for (var m in group.master) {
+              m.isSharedDevice = false;
+            }
           }
         }
       } else {
         master.isSharedDevice = true;
-        group.master.forEach((m) => m.isSharedDevice = true);
+        for (var m in group.master) {
+          m.isSharedDevice = true;
+        }
       }
     });
   }
@@ -1142,6 +1177,36 @@ class _UserGroupWidgetState extends State<UserGroupWidget> {
           }).toList(),
         );
       }).toList(),
+    );
+  }
+}
+
+class MasterItem {
+  final int id;
+  final bool action;
+  final List<UserPermission> userPermission;
+
+  MasterItem({
+    required this.id,
+    required this.action,
+    required this.userPermission,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'action': action,
+      'userPermission': userPermission.map((perm) => perm.toMap()).toList(),
+    };
+  }
+
+  factory MasterItem.fromJson(Map<String, dynamic> json) {
+    return MasterItem(
+      id: json['id'],
+      action: json['action'],
+      userPermission: List<UserPermission>.from(
+          json['userPermission'].map((x) => UserPermission.fromJson(x))
+      ),
     );
   }
 }

@@ -26,28 +26,31 @@ class MyFunction {
 }
 
 enum GemProgramSSReasonCode {
-  runningAsPerSchedule(1, 'Running As Per Schedule'),
-  turnedOnManually(2, 'Turned On Manually'),
-  startedByCondition(3, 'Started By Condition'),
-  turnedOffManually(4, 'Turned Off Manually'),
-  programTurnedOff(5, 'Program Turned Off'),
-  zoneTurnedOff(6, 'Zone Turned Off'),
-  stoppedByCondition(7, 'Stopped By Condition'),
-  disabledByCondition(8, 'Disabled By Condition'),
-  standAloneProgramStarted(9, 'StandAlone Program Started'),
-  standAloneProgramStopped(10, 'StandAlone Program Stopped'),
-  standAloneProgramStoppedAfterSetValue(11, 'StandAlone Program Stopped After Set Value'),
-  standAloneManualStarted(12, 'StandAlone Manual Started'),
-  standAloneManualStopped(13, 'StandAlone Manual Stopped'),
-  standAloneManualStoppedAfterSetValue(14, 'StandAlone Manual Stopped After Set Value'),
-  startedByDayCountRtc(15, 'Started By Day Count Rtc'),
-  pausedByUser(16, 'Paused By User'),
-  manuallyStartedPausedByUser(17, 'Manually Started Paused By User'),
-  programDeleted(18, 'Program Deleted'),
-  programReady(19, 'Program Ready'),
-  programCompleted(20, 'Program Completed'),
-  resumedByUser(21, 'Resumed By User'),
-  pausedByCondition(23, 'Paused By Condition'),
+  rs1(1, 'Running As Per Schedule'),
+  rs2(2, 'Turned On Manually'),
+  rs3(3, 'Started By Condition'),
+  rs4(4, 'Turned Off Manually'),
+  rs5(5, 'Program Turned Off'),
+  rs6(6, 'Zone Turned Off'),
+  rs7(7, 'Stopped By Condition'),
+  rs8(8, 'Disabled By Condition'),
+  rs9(9, 'StandAlone Program Started'),
+  rs10(10, 'StandAlone Program Stopped'),
+  rs11(11, 'StandAlone Program Stopped After Set Value'),
+  rs12(12, 'StandAlone Manual Started'),
+  rs13(13, 'StandAlone Manual Stopped'),
+  rs14(14, 'StandAlone Manual Stopped After Set Value'),
+  rs15(15, 'Started By Day Count Rtc'),
+  rs16(16, 'Paused By User'),
+  rs17(17, 'Manually Started Paused By User'),
+  rs18(18, 'Program Deleted'),
+  rs19(19, 'Program Ready'),
+  rs20(20, 'Program Completed'),
+  rs21(21, 'Resumed By User'),
+  rs22(22, 'Paused By Condition'),
+  rs23(23, 'Program Ready And Run By Condition'),
+  rs24(24, 'Running As Per Schedule And Condition'),
+  rs25(25, 'Started By Condition Paused By User'),
   unknown(0, 'Unknown content');
 
   final int code;
@@ -63,19 +66,19 @@ enum GemProgramSSReasonCode {
 }
 
 enum GemLineSSReasonCode {
-  linePausedManually(1, 'The Line Paused Manually'),
-  pausedByStandAloneMode(2, 'Scheduled Program paused by Standalone program'),
-  pausedBySystemDefinition(3, 'The Line Paused By System Definition'),
-  pausedByLowFlowAlarm(4, 'The Line Paused By Low Flow Alarm'),
-  pausedByHighFlowAlarm(5, 'The Line Paused By High Flow Alarm'),
-  pausedByNoFlowAlarm(6, 'The Line Paused By No Flow Alarm'),
-  pausedByEcHigh(7, 'The Line Paused By Ec High'),
-  pausedByPhLow(8, 'The Line Paused By Ph Low'),
-  pausedByPhHigh(9, 'The Line Paused By Ph High'),
-  pausedByPressureLow(10, 'The Line Paused By Pressure Low'),
-  pausedByPressureHigh(11, 'The Line Paused By Pressure High'),
-  pausedByNoPowerSupply(12, 'The Line Paused By No Power Supply'),
-  pausedByNoCommunication(13, 'The Line Paused By No Communication'),
+  lss1(1, 'The Line Paused Manually'),
+  lss2(2, 'Scheduled Program paused by Standalone program'),
+  lss3(3, 'The Line Paused By System Definition'),
+  lss4(4, 'The Line Paused By Low Flow Alarm'),
+  lss5(5, 'The Line Paused By High Flow Alarm'),
+  lss6(6, 'The Line Paused By No Flow Alarm'),
+  lss7(7, 'The Line Paused By Ec High'),
+  lss8(8, 'The Line Paused By Ph Low'),
+  lss9(9, 'The Line Paused By Ph High'),
+  lss10(10, 'The Line Paused By Pressure Low'),
+  lss11(11, 'The Line Paused By Pressure High'),
+  lss12(12, 'The Line Paused By No Power Supply'),
+  lss13(13, 'The Line Paused By No Communication'),
   unknown(0, 'Unknown content');
 
   final int code;
@@ -254,6 +257,3 @@ String getImageForProduct(String product) {
       return '${baseImgPath}dl_humidity_sensor.png';
   }
 }
-
-
-

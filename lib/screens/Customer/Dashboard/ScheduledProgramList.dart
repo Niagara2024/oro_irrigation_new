@@ -115,8 +115,7 @@ class ScheduledProgramList extends StatelessWidget {
                             children: [
                               Text(scheduledPrograms[index].progName),
                               const SizedBox(height: 3,),
-                              Text(scheduledPrograms[index].schedulingMethod==1?'No Schedule':scheduledPrograms[index].schedulingMethod==2?'Schedule by days':
-                              scheduledPrograms[index].schedulingMethod==3?'Schedule as run list':'Day count schedule'),
+                              Text(getSchedulingMethodName(scheduledPrograms[index].schedulingMethod)),
                               const SizedBox(height: 3,),
                               Text(getContentByCode(scheduledPrograms[index].startStopReason), style: const TextStyle(fontSize: 11, color: Colors.black),),
                               const SizedBox(height: 3,),
@@ -164,7 +163,7 @@ class ScheduledProgramList extends StatelessWidget {
                             child: const Text('Stop by Manual'),
                           ),
                           const SizedBox(width: 5),
-                          scheduledPrograms[index].progPauseResume == 1 ? MaterialButton(
+                          MaterialButton(
                             color: Colors.orange,
                             textColor: Colors.white,
                             onPressed:() {
@@ -176,45 +175,8 @@ class ScheduledProgramList extends StatelessWidget {
                               sentUserOperationToServer('${scheduledPrograms[index].progName} Paused by Manual', payLoadFinal);
                             },
                             child: const Text('Pause'),
-                          ) :
-                          MaterialButton(
-                            color: Colors.yellow,
-                            textColor: Colors.black,
-                            onPressed:() {
-                              String localFilePath = 'assets/audios/audio_off.mp3';
-                              audioPlayer.play(UrlSource(localFilePath));
-                              String payload = '${scheduledPrograms[index].sNo},3';
-                              String payLoadFinal = jsonEncode({
-                                "2900": [{"2901": payload}]
-                              });
-                              MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
-                              sentUserOperationToServer('${scheduledPrograms[index].progName} Resume by Manual', payLoadFinal);
-                            },
-                            child: const Text('Resume'),
                           ),
                           const SizedBox(width: 5),
-                          /*IconButton(tooltip: 'View details', icon: const Icon(Icons.more_vert), onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          title: Text(scheduledPrograms[index].progName),
-                                          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0))),
-                                          content: Text('Start or Stop Reason Code = ${scheduledPrograms[index].startStopReason}'),
-                                          actions: <Widget>[
-                                            MaterialButton(
-                                              color: Colors.green,
-                                              textColor: Colors.white,
-                                              onPressed:() {
-                                                Navigator.of(context).pop();
-                                              },
-                                              child: const Text('OK'),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                  },),*/
                         ],
                       ),
                     ],
@@ -264,7 +226,7 @@ class ScheduledProgramList extends StatelessWidget {
               size: ColumnSize.M,
             ),
             const DataColumn2(
-              label: Text('Status', style: TextStyle(fontSize: 13)),
+              label: Text('Status || Reason', style: TextStyle(fontSize: 13)),
               size: ColumnSize.L,
             ),
             const DataColumn2(
@@ -300,123 +262,211 @@ class ScheduledProgramList extends StatelessWidget {
               fixedWidth: 265,
             ),
           ],
-          rows: List<DataRow>.generate(scheduledPrograms.length, (index) => DataRow(cells: [
-            DataCell(Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(scheduledPrograms[index].progName),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Expanded(
-                      child: LinearProgressIndicator(
-                        value: scheduledPrograms[index].programStatusPercentage / 100.0,
-                        borderRadius: const BorderRadius.all(Radius.circular(3)),
-                        color: Colors.blue.shade300,
-                        backgroundColor: Colors.grey.shade200,
-                        minHeight: 2.5,
+          rows: List<DataRow>.generate(scheduledPrograms.length, (index) {
+            String buttonName = getButtonName(int.parse(scheduledPrograms[index].progOnOff));
+            bool isStop = buttonName.contains('Stop');
+            bool isBypass = buttonName.contains('Bypass');
+
+            return DataRow(cells: [
+              DataCell(Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(scheduledPrograms[index].progName),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(
+                        child: LinearProgressIndicator(
+                          value: scheduledPrograms[index].programStatusPercentage / 100.0,
+                          borderRadius: const BorderRadius.all(Radius.circular(3)),
+                          color: Colors.blue.shade300,
+                          backgroundColor: Colors.grey.shade200,
+                          minHeight: 2.5,
+                        ),
+                      ),
+                      const SizedBox(width: 7),
+                      Text(
+                        '${scheduledPrograms[index].programStatusPercentage}%',
+                        style: const TextStyle(fontSize: 12, color: Colors.black45),
+                      ),
+                    ],
+                  ),
+                ],
+              )),
+              DataCell(Text(getSchedulingMethodName(scheduledPrograms[index].schedulingMethod))),
+              DataCell(Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              const TextSpan(
+                                text: 'Start Stop: ',
+                                style: TextStyle(
+                                  color: Colors.teal,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              TextSpan(
+                                text: getContentByCode(scheduledPrograms[index].startStopReason),
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              const TextSpan(
+                                text: 'Pause Resume: ',
+                                style: TextStyle(
+                                  color: Colors.teal,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              TextSpan(
+                                text: getContentByCode(scheduledPrograms[index].pauseResumeReason),
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  scheduledPrograms[index].startCondition.condition.isNotEmpty ||
+                      scheduledPrograms[index].stopCondition.condition.isNotEmpty
+                      ? IconButton(
+                    tooltip: 'view condition',
+                    onPressed: () {
+                      showAlertDialog(
+                        context,
+                        scheduledPrograms[index].startCondition,
+                        scheduledPrograms[index].stopCondition,
+                        scheduledPrograms[index].progName,
+                      );
+                    },
+                    icon: const Icon(Icons.visibility_outlined),
+                  )
+                      : const SizedBox(),
+                ],
+              )),
+              DataCell(Center(child: Text('${scheduledPrograms[index].totalZone}'))),
+              DataCell(Center(child: Text('${scheduledPrograms[index].startDate} : ${convert24HourTo12Hour(scheduledPrograms[index].startTime)}'))),
+              DataCell(Center(child: Text(scheduledPrograms[index].endDate))),
+              DataCell(Row(
+                children: [
+                  Tooltip(
+                    message: getDescription(int.parse(scheduledPrograms[index].progOnOff)),
+                    child: MaterialButton(
+                      color: int.parse(scheduledPrograms[index].progOnOff) >= 0? isStop?Colors.red: isBypass?Colors.orange :Colors.green : Colors.grey.shade300,
+                      textColor: Colors.white,
+                      onPressed: () {
+                        if (int.parse(scheduledPrograms[index].progOnOff) >= 0) {
+                          String localFilePath = 'assets/audios/button_click_sound.mp3';
+                          audioPlayer.play(UrlSource(localFilePath));
+                          String payload = '${scheduledPrograms[index].sNo},${scheduledPrograms[index].progOnOff}';
+                          String payLoadFinal = jsonEncode({
+                            "2900": [
+                              {"2901": payload}
+                            ]
+                          });
+                          MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
+                          sentUserOperationToServer(
+                            '${scheduledPrograms[index].progName} ${getDescription(int.parse(scheduledPrograms[index].progOnOff))}',
+                            payLoadFinal,
+                          );
+                        }
+                      },
+                      child: Text(
+                        buttonName,
+                        style: const TextStyle(color: Colors.white),
                       ),
                     ),
-                    const SizedBox(width: 7,),
-                    Text('${scheduledPrograms[index].programStatusPercentage}%', style: const TextStyle(fontSize: 12, color: Colors.black45),)
-                  ],
-                )
-              ],
-            )),
-            DataCell(Text(scheduledPrograms[index].schedulingMethod==1?'No Schedule':scheduledPrograms[index].schedulingMethod==2?'Schedule by days':
-            scheduledPrograms[index].schedulingMethod==3?'Schedule as run list':'Day count schedule')),
-            DataCell(Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(child: Text(getContentByCode(scheduledPrograms[index].startStopReason), style: const TextStyle(fontSize: 12),)),
-                scheduledPrograms[index].startCondition.condition.isNotEmpty || scheduledPrograms[index].stopCondition.condition.isNotEmpty? IconButton(tooltip:'view condition', onPressed: () {
-                  showAlertDialog(context, scheduledPrograms[index].startCondition, scheduledPrograms[index].stopCondition,scheduledPrograms[index].progName);
-                }, icon: const Icon(Icons.visibility_outlined,)) :
-                    const SizedBox(),
-              ],
-            )),
-            DataCell(Center(child: Text('${scheduledPrograms[index].totalZone}'))),
-            DataCell(Center(child: Text('${scheduledPrograms[index].startDate} : ${convert24HourTo12Hour(scheduledPrograms[index].startTime)}'))),
-            DataCell(Center(child: Text(scheduledPrograms[index].endDate))),
-            DataCell(Row(
-              children: [
-                Tooltip(
-                  message: getDescription(int.parse(scheduledPrograms[index].progOnOff)),
-                  child: MaterialButton(
-                    color: int.parse(scheduledPrograms[index].progOnOff)>0? Colors.green: Colors.grey.shade300,
-                    textColor: Colors.white,
-                    onPressed:() {
-                      if(int.parse(scheduledPrograms[index].progOnOff)>0){
-                        String localFilePath = 'assets/audios/button_click_sound.mp3';
-                        audioPlayer.play(UrlSource(localFilePath));
-                        String payload = '${scheduledPrograms[index].sNo},${scheduledPrograms[index].progOnOff}';
-                        String payLoadFinal = jsonEncode({
-                          "2900": [{"2901": payload}]
-                        });
-                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
-                        sentUserOperationToServer('${scheduledPrograms[index].progName} ${getDescription(int.parse(scheduledPrograms[index].progOnOff))}', payLoadFinal);
-                      }
-                    },
-                    child: Text(getButtonName(int.parse(scheduledPrograms[index].progOnOff))),
                   ),
-                ),
-                const SizedBox(width: 5),
-                scheduledPrograms[index].progPauseResume == 1 ? MaterialButton(
-                  color: Colors.orange,
-                  textColor: Colors.white,
-                  onPressed:() {
-                    String payload = '${scheduledPrograms[index].sNo},2';
-                    String payLoadFinal = jsonEncode({
-                      "2900": [{"2901": payload}]
-                    });
-                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
-                    sentUserOperationToServer('${scheduledPrograms[index].progName} Paused by Manual', payLoadFinal);
-                  },
-                  child: const Text('Pause'),
-                ) :
-                MaterialButton(
-                  color: Colors.yellow,
-                  textColor: Colors.black,
-                  onPressed:() {
-                    String localFilePath = 'assets/audios/audio_off.mp3';
-                    audioPlayer.play(UrlSource(localFilePath));
-                    String payload = '${scheduledPrograms[index].sNo},3';
-                    String payLoadFinal = jsonEncode({
-                      "2900": [{"2901": payload}]
-                    });
-                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
-                    sentUserOperationToServer('${scheduledPrograms[index].progName} Resume by Manual', payLoadFinal);
-                  },
-                  child: const Text('Resume'),
-                ),
-                const SizedBox(width: 5),
+                  const SizedBox(width: 5),
+                  MaterialButton(
+                    color: scheduledPrograms[index].progPauseResume == '3' ? Colors.orange : Colors.yellow,
+                    textColor: scheduledPrograms[index].progPauseResume == '3' ? Colors.white : Colors.black,
+                    onPressed: () {
+                      String payload = '${scheduledPrograms[index].sNo},${scheduledPrograms[index].progPauseResume}';
+                      String payLoadFinal = jsonEncode({
+                        "2900": [
+                          {"2901": payload}
+                        ]
+                      });
+                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
+                      sentUserOperationToServer(
+                        '${scheduledPrograms[index].progName} ${getDescription(int.parse(scheduledPrograms[index].progPauseResume))}',
+                        payLoadFinal,
+                      );
+                    },
+                    child: Text(getButtonName(int.parse(scheduledPrograms[index].progPauseResume))),
+                  ),
+                  const SizedBox(width: 5),
+                  IconButton(
+                    tooltip: 'Edit program',
+                    icon: const Icon(Icons.edit_outlined),
+                    onPressed: () {
+                      String prgType = '';
+                      bool conditionL = false;
+                      if (scheduledPrograms[index].progCategory.contains('IL')) {
+                        prgType = 'Irrigation Program';
+                      } else {
+                        prgType = 'Agitator Program';
+                      }
+                      if (siteData.master[masterInx].conditionLibraryCount > 0) {
+                        conditionL = true;
+                      }
 
-                IconButton(tooltip: 'Edit program', icon: const Icon(Icons.edit_outlined), onPressed: () {
-                  String prgType = '';
-                  bool conditionL = false;
-                  if(scheduledPrograms[index].progCategory.contains('IL')){
-                    prgType='Irrigation Program';
-                  }else{
-                    prgType='Agitator Program';
-                  }
-                  if(siteData.master[masterInx].conditionLibraryCount>0){
-                    conditionL = true;
-                  }
-
-                  Navigator.push(context,
-                    MaterialPageRoute(
-                      builder: (context) => IrrigationProgram(deviceId: siteData.master[masterInx].deviceId, userId: customerId, controllerId: siteData.master[masterInx].controllerId, serialNumber: scheduledPrograms[index].sNo, programType: prgType, conditionsLibraryIsNotEmpty: conditionL,),
-                    ),
-                  );
-                },),
-              ],
-            ),),
-          ])),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => IrrigationProgram(
+                            deviceId: siteData.master[masterInx].deviceId,
+                            userId: customerId,
+                            controllerId: siteData.master[masterInx].controllerId,
+                            serialNumber: scheduledPrograms[index].sNo,
+                            programType: prgType,
+                            conditionsLibraryIsNotEmpty: conditionL,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              )),
+            ]);
+          }),
         ),
       ),
     );
+  }
+
+  String getSchedulingMethodName(int code) {
+    switch (code) {
+      case 1:
+        return 'No Schedule';
+      case 2:
+        return 'Schedule by days';
+      case 3:
+        return 'Schedule as run list';
+      default:
+        return 'Day count schedule';
+    }
   }
 
   String getButtonName(int code) {

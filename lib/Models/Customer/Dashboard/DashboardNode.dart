@@ -355,6 +355,7 @@ class ScheduledProgram {
   final int programStatusPercentage;
   final StartCondition startCondition;
   final StopCondition stopCondition;
+  final int pauseResumeReason;
 
   ScheduledProgram({
     required this.sNo,
@@ -371,6 +372,7 @@ class ScheduledProgram {
     required this.programStatusPercentage,
     required this.startCondition,
     required this.stopCondition,
+    required this.pauseResumeReason,
   });
 
   factory ScheduledProgram.fromJson(Map<String, dynamic> json) {
@@ -391,6 +393,7 @@ class ScheduledProgram {
       programStatusPercentage: json['ProgramStatusPercentage'],
       startCondition: StartCondition.fromJson(json['StartCondition'] ?? {}),
       stopCondition: StopCondition.fromJson(json['StopCondition'] ?? {}),
+      pauseResumeReason: json['PauseResumeReason'],
     );
   }
 
@@ -410,6 +413,7 @@ class ScheduledProgram {
       'ProgramStatusPercentage': programStatusPercentage,
       'StartCondition': startCondition.toJson(),
       'StopCondition': stopCondition.toJson(),
+      'PauseResumeReason': pauseResumeReason,
     };
   }
 

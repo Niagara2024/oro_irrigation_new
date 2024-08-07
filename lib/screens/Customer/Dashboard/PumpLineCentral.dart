@@ -79,6 +79,28 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                       child: DisplayIrrigationPump(currentLineId: widget.crrIrrLine.id, pumpList: widget.currentSiteData.master[widget.masterIdx].gemLive[0].pumpList,),
                     ):
                     const SizedBox(),
+
+                    provider.filtersCentral.isEmpty && provider.fertilizerCentral.isEmpty &&
+                        provider.filtersLocal.isEmpty && provider.fertilizerLocal.isEmpty ? SizedBox(
+                      width: 4.5,
+                      height: 100,
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 7),
+                            child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
+                          ),
+                          const SizedBox(width: 4.5,),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 3),
+                            child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
+                          ),
+                        ],
+                      ),
+                    ):
+                    const SizedBox(),
+
+
                     provider.filtersCentral.isNotEmpty? Padding(
                       padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
                       child: DisplayFilter(currentLineId: widget.crrIrrLine.id,),
@@ -136,57 +158,237 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
           ),
         ),
         irrigationPauseFlag !=2 ? Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            width: 110,
-            height: 30,
-            decoration: BoxDecoration(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child:TextButton(
-              onPressed: () {
-                int prFlag = 0;
-                List<dynamic> records = provider.payload2408;
-                int sNoToCheck = widget.crrIrrLine.sNo;
-                var record = records.firstWhere((record) => record['S_No'] == sNoToCheck, orElse: () => null,);
-                if (record != null) {
-                  bool isIrrigationPauseFlagZero = record['IrrigationPauseFlag'] == 0;
-                  if (isIrrigationPauseFlagZero) {
-                    prFlag=1;
-                  } else {
-                    prFlag=0;
-                  }
-                  String payLoadFinal = jsonEncode({
-                    "4900": [{"4901":
-                    "$sNoToCheck, $prFlag",},]
-                  });
-                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.currentSiteData.master[widget.masterIdx].deviceId}');
-                }else{
-                  const GlobalSnackBar(code: 200, message: 'Controller connection lost...');
+          padding: const EdgeInsets.all(8),
+          child: TextButton(
+            onPressed: () {
+              int prFlag = 0;
+              List<dynamic> records = provider.payload2408;
+              int sNoToCheck = widget.crrIrrLine.sNo;
+              var record = records.firstWhere(
+                    (record) => record['S_No'] == sNoToCheck,
+                orElse: () => null,
+              );
+              if (record != null) {
+                bool isIrrigationPauseFlagZero = record['IrrigationPauseFlag'] == 0;
+                if (isIrrigationPauseFlagZero) {
+                  prFlag = 1;
+                } else {
+                  prFlag = 0;
                 }
-              },
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(irrigationPauseFlag==1? Colors.green: Colors.orange),
-                shape: MaterialStateProperty.all<OutlinedBorder>(
-                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(5),),
+                String payLoadFinal = jsonEncode({
+                  "4900": [
+                    {
+                      "4901": "$sNoToCheck, $prFlag",
+                    }
+                  ]
+                });
+                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.currentSiteData.master[widget.masterIdx].deviceId}');
+              } else {
+                const GlobalSnackBar(code: 200, message: 'Controller connection lost...');
+              }
+            },
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all<Color>(irrigationPauseFlag == 1 ? Colors.green : Colors.orange),
+              shape: WidgetStateProperty.all<OutlinedBorder>(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
                 ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  irrigationPauseFlag==1? const Icon(Icons.play_arrow_outlined, color: Colors.white):
-                  const Icon(Icons.pause, color: Colors.white),
-                  const SizedBox(width: 5),
-                  Text(irrigationPauseFlag==1? 'RESUME' : 'PAUSE', style: const TextStyle(color: Colors.white)),
-                ],
-              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                irrigationPauseFlag == 1
+                    ? const Icon(Icons.play_arrow_outlined, color: Colors.white)
+                    : const Icon(Icons.pause, color: Colors.white),
+                const SizedBox(width: 5),
+                Text(
+                  irrigationPauseFlag == 1 ? 'RESUME THE LINE' : 'PAUSE THE LINE',
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ],
             ),
           ),
         ):
         const SizedBox(),
+        /*irrigationPauseFlag !=2 ? Card(
+          elevation: 4.0,
+          surfaceTintColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5),
+            side: BorderSide(
+              color: Colors.grey.shade300,
+              width: 1.0,
+            ),
+          ),
+          child: SizedBox(
+            width: 175,
+            height: 100,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: TextButton(
+                    onPressed: () {
+                      int prFlag = 0;
+                      List<dynamic> records = provider.payload2408;
+                      int sNoToCheck = widget.crrIrrLine.sNo;
+                      var record = records.firstWhere(
+                            (record) => record['S_No'] == sNoToCheck,
+                        orElse: () => null,
+                      );
+                      if (record != null) {
+                        bool isIrrigationPauseFlagZero = record['IrrigationPauseFlag'] == 0;
+                        if (isIrrigationPauseFlagZero) {
+                          prFlag = 1;
+                        } else {
+                          prFlag = 0;
+                        }
+                        String payLoadFinal = jsonEncode({
+                          "4900": [
+                            {
+                              "4901": "$sNoToCheck, $prFlag",
+                            }
+                          ]
+                        });
+                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.currentSiteData.master[widget.masterIdx].deviceId}');
+                      } else {
+                        const GlobalSnackBar(code: 200, message: 'Controller connection lost...');
+                      }
+                    },
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all<Color>(irrigationPauseFlag == 1 ? Colors.green : Colors.orange),
+                      shape: WidgetStateProperty.all<OutlinedBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        irrigationPauseFlag == 1
+                            ? const Icon(Icons.play_arrow_outlined, color: Colors.white)
+                            : const Icon(Icons.pause, color: Colors.white),
+                        const SizedBox(width: 5),
+                        Text(
+                          irrigationPauseFlag == 1 ? 'RESUME THE LINE' : 'PAUSE THE LINE',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Next Program', style: TextStyle(fontSize: 15, color: Colors.black54),),
+                      const Text('Program 3'),
+                      const Text('Start at 3:30 PM'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ):
+        const SizedBox(),*/
       ],
     );
+
+    /*final provider = Provider.of<MqttPayloadProvider>(context);
+    return ScrollConfiguration(
+      behavior: const ScrollBehavior(),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 9, left: 5, right: 5),
+          child: provider.irrigationPump.isNotEmpty? Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              provider.sourcePump.isNotEmpty? Padding(
+                padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                child: DisplaySourcePump(deviceId: widget.currentSiteData.master[widget.masterIdx].deviceId,),
+              ):
+              const SizedBox(),
+              provider.irrigationPump.isNotEmpty? Padding(
+                padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                child: SizedBox(
+                  width: 52.50,
+                  height: 70,
+                  child : Stack(
+                    children: [
+                      provider.sourcePump.isNotEmpty? Image.asset('assets/images/dp_sump_src.png'):
+                      Image.asset('assets/images/dp_sump.png'),
+                    ],
+                  ),
+                ),
+              ):
+              const SizedBox(),
+              provider.irrigationPump.isNotEmpty? Padding(
+                padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                child: DisplayIrrigationPump(currentLineId: widget.crrIrrLine.id, pumpList: widget.currentSiteData.master[widget.masterIdx].gemLive[0].pumpList,),
+              ):
+              const SizedBox(),
+              provider.filtersCentral.isNotEmpty? Padding(
+                padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                child: DisplayFilter(currentLineId: widget.crrIrrLine.id,),
+              ): const SizedBox(),
+              for(int i=0; i<provider.payload2408.length; i++)
+                provider.payload2408.isNotEmpty?  Padding(
+                  padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                  child: provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(crInx: i):null,
+                ) : const SizedBox(),
+              provider.fertilizerCentral.isNotEmpty? DisplayCentralFertilizer(currentLineId: widget.crrIrrLine.id,): const SizedBox(),
+
+              //local
+              provider.irrigationPump.isNotEmpty? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      (provider.fertilizerCentral.isNotEmpty || provider.filtersCentral.isNotEmpty) && provider.fertilizerLocal.isNotEmpty? SizedBox(
+                        width: 4.5,
+                        height: 150,
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 42),
+                              child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
+                            ),
+                            const SizedBox(width: 4.5,),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 45),
+                              child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
+                            ),
+                          ],
+                        ),
+                      ):
+                      const SizedBox(),
+                      provider.filtersLocal.isNotEmpty? Padding(
+                        padding: EdgeInsets.only(top: provider.fertilizerLocal.isNotEmpty?38.4:0),
+                        child: LocalFilter(currentLineId: widget.crrIrrLine.id,),
+                      ):
+                      const SizedBox(),
+                      provider.fertilizerLocal.isNotEmpty? DisplayLocalFertilizer(currentLineId: widget.crrIrrLine.id,):
+                      const SizedBox(),
+                    ],
+                  ),
+                ],
+              ):
+              const SizedBox(height: 20)
+            ],
+          ):
+          const SizedBox(height: 20),
+        ),
+      ),
+    );*/
   }
 
 }

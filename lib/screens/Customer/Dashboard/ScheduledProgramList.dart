@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:calendar_view/calendar_view.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/irrigation_program_main.dart';
@@ -27,6 +28,12 @@ class ScheduledProgramList extends StatelessWidget {
       GlobalSnackBar.show(context, hwConformationMsg['Message'], int.parse(hwConformationMsg['Code']));
       Provider.of<MqttPayloadProvider>(context).messageFromHw = null;
     }*/
+
+    scheduledPrograms.sort((a, b) {
+      DateTime dateTimeA = a.getDateTime();
+      DateTime dateTimeB = b.getDateTime();
+      return dateTimeA.compareTo(dateTimeB);
+    });
 
     var screenWidth = MediaQuery.of(context).size.width;
     return Padding(
@@ -246,7 +253,7 @@ class ScheduledProgramList extends StatelessWidget {
           minWidth: 1000,
           dataRowHeight: 45.0,
           headingRowHeight: 40.0,
-          headingRowColor: MaterialStateProperty.all<Color>(Colors.yellow.shade50),
+          headingRowColor: WidgetStateProperty.all<Color>(Colors.yellow.shade50),
           columns:  [
             const DataColumn2(
               label: Text('Name', style: TextStyle(fontSize: 13),),
@@ -294,44 +301,66 @@ class ScheduledProgramList extends StatelessWidget {
             ),
           ],
           rows: List<DataRow>.generate(scheduledPrograms.length, (index) => DataRow(cells: [
-            DataCell(Text(scheduledPrograms[index].progName)),
+            DataCell(Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(scheduledPrograms[index].progName),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Expanded(
+                      child: LinearProgressIndicator(
+                        value: scheduledPrograms[index].programStatusPercentage / 100.0,
+                        borderRadius: const BorderRadius.all(Radius.circular(3)),
+                        color: Colors.blue.shade300,
+                        backgroundColor: Colors.grey.shade200,
+                        minHeight: 2.5,
+                      ),
+                    ),
+                    const SizedBox(width: 7,),
+                    Text('${scheduledPrograms[index].programStatusPercentage}%', style: const TextStyle(fontSize: 12, color: Colors.black45),)
+                  ],
+                )
+              ],
+            )),
             DataCell(Text(scheduledPrograms[index].schedulingMethod==1?'No Schedule':scheduledPrograms[index].schedulingMethod==2?'Schedule by days':
             scheduledPrograms[index].schedulingMethod==3?'Schedule as run list':'Day count schedule')),
-            DataCell(Text(getContentByCode(scheduledPrograms[index].startStopReason), style: const TextStyle(fontSize: 12),)),
+            DataCell(Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(child: Text(getContentByCode(scheduledPrograms[index].startStopReason), style: const TextStyle(fontSize: 12),)),
+                scheduledPrograms[index].startCondition.condition.isNotEmpty || scheduledPrograms[index].stopCondition.condition.isNotEmpty? IconButton(tooltip:'view condition', onPressed: () {
+                  showAlertDialog(context, scheduledPrograms[index].startCondition, scheduledPrograms[index].stopCondition,scheduledPrograms[index].progName);
+                }, icon: const Icon(Icons.visibility_outlined,)) :
+                    const SizedBox(),
+              ],
+            )),
             DataCell(Center(child: Text('${scheduledPrograms[index].totalZone}'))),
             DataCell(Center(child: Text('${scheduledPrograms[index].startDate} : ${convert24HourTo12Hour(scheduledPrograms[index].startTime)}'))),
             DataCell(Center(child: Text(scheduledPrograms[index].endDate))),
             DataCell(Row(
               children: [
-                scheduledPrograms[index].progOnOff == 0 ? MaterialButton(
-                  color: Colors.green,
-                  textColor: Colors.white,
-                  onPressed:() {
-                    String localFilePath = 'assets/audios/button_click_sound.mp3';
-                    audioPlayer.play(UrlSource(localFilePath));
-                    String payload = '${scheduledPrograms[index].sNo},1';
-                    String payLoadFinal = jsonEncode({
-                      "2900": [{"2901": payload}]
-                    });
-                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
-                    sentUserOperationToServer('${scheduledPrograms[index].progName} Started by Manual', payLoadFinal);
-                  },
-                  child: const Text('Start by Manual'),
-                ):
-                MaterialButton(
-                  color: Colors.redAccent,
-                  textColor: Colors.white,
-                  onPressed:() {
-                    String localFilePath = 'assets/audios/audio_off.mp3';
-                    audioPlayer.play(UrlSource(localFilePath));
-                    String payload = '${scheduledPrograms[index].sNo},0';
-                    String payLoadFinal = jsonEncode({
-                      "2900": [{"2901": payload}]
-                    });
-                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
-                    sentUserOperationToServer('${scheduledPrograms[index].progName} Stopped by Manual', payLoadFinal);
-                  },
-                  child: const Text('Stop by Manual'),
+                Tooltip(
+                  message: getDescription(int.parse(scheduledPrograms[index].progOnOff)),
+                  child: MaterialButton(
+                    color: int.parse(scheduledPrograms[index].progOnOff)>0? Colors.green: Colors.grey.shade300,
+                    textColor: Colors.white,
+                    onPressed:() {
+                      if(int.parse(scheduledPrograms[index].progOnOff)>0){
+                        String localFilePath = 'assets/audios/button_click_sound.mp3';
+                        audioPlayer.play(UrlSource(localFilePath));
+                        String payload = '${scheduledPrograms[index].sNo},${scheduledPrograms[index].progOnOff}';
+                        String payLoadFinal = jsonEncode({
+                          "2900": [{"2901": payload}]
+                        });
+                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
+                        sentUserOperationToServer('${scheduledPrograms[index].progName} ${getDescription(int.parse(scheduledPrograms[index].progOnOff))}', payLoadFinal);
+                      }
+                    },
+                    child: Text(getButtonName(int.parse(scheduledPrograms[index].progOnOff))),
+                  ),
                 ),
                 const SizedBox(width: 5),
                 scheduledPrograms[index].progPauseResume == 1 ? MaterialButton(
@@ -387,6 +416,179 @@ class ScheduledProgramList extends StatelessWidget {
           ])),
         ),
       ),
+    );
+  }
+
+  String getButtonName(int code) {
+    const Map<int, String> codeDescriptionMap = {
+      -1: 'Paused Couldn\'t',
+      1: 'Start Manually',
+      -2: 'Cond Couldn\'t',
+      7: 'Stop Manually',
+      13: 'Bypass Start',
+      11: 'Bypass Cond',
+      12: 'Bypass Stop',
+      0: 'Stop Manually',
+      2: 'Pause',
+      3: 'Resume',
+      4: 'Cont Manually',
+    };
+    return codeDescriptionMap[code] ?? 'Code not found';
+  }
+
+  String getDescription(int code) {
+    const Map<int, String> codeDescriptionMap = {
+      -1: 'Paused Couldn\'t Start',
+      1: 'Start Manually',
+      -2: 'Started By Condition Couldn\'t Stop',
+      7: 'Stop Manually',
+      13: 'Bypass Start Condition',
+      11: 'Bypass Condition',
+      12: 'Bypass Stop Condition and Start',
+      0: 'Stop Manually',
+      2: 'Pause',
+      3: 'Resume',
+      4: 'Continue Manually',
+    };
+    return codeDescriptionMap[code] ?? 'Code not found';
+  }
+
+  void showAlertDialog(BuildContext context, StartCondition startCondition, StopCondition stopCondition, pName){
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(pName),
+          content: SizedBox(
+            height: startCondition.condition.isNotEmpty && stopCondition.condition.isNotEmpty ?250:120,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                startCondition.condition.isNotEmpty ? Text('START CONDITION', style: TextStyle(fontSize: 15, color: startCondition.status==1? Colors.green: Colors.red)):
+                const SizedBox(),
+                startCondition.condition.isNotEmpty ?Column(
+                  children: [
+                    const SizedBox(height: 5,),
+                    Text(startCondition.condition, style: TextStyle(fontSize: 12, color: startCondition.status==1? Colors.green.shade500: Colors.red.shade500),),
+                    const SizedBox(height: 8,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const SizedBox(width: 5,),
+                        Container(
+                          width: 100,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: Colors.grey.shade300,
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              const Text('Set Value', style: TextStyle(color: Colors.black45),),
+                              Divider(height: 4, color: Colors.grey.shade300,),
+                              Text('${startCondition.set}'),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8,),
+                        Container(
+                          width: 100,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: Colors.grey.shade300,
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              const Text('Actual Value', style: TextStyle(color: Colors.black54),),
+                              Divider(height: 4, color: Colors.grey.shade300,),
+                              Text('${startCondition.actual}'),
+                            ],
+                          ),
+                        ),
+                      ],)
+                  ],
+                ):
+                const SizedBox(),
+
+                startCondition.condition.isNotEmpty ? const Divider():
+                const SizedBox(),
+
+                stopCondition.condition.isNotEmpty ? Text('STOP CONDITION', style: TextStyle(fontSize: 15, color: stopCondition.status==1? Colors.green: Colors.red)):
+                const SizedBox(),
+                stopCondition.condition.isNotEmpty ?Column(
+                  children: [
+                    const SizedBox(height: 5,),
+                    Text(stopCondition.condition, style: TextStyle(fontSize: 12, color: stopCondition.status==1? Colors.green.shade500: Colors.red.shade500),),
+                    const SizedBox(height: 8,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                      const SizedBox(width: 5,),
+                      Container(
+                        width: 100,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(
+                            color: Colors.grey.shade300,
+                            width: 1,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            const Text('Set Value', style: TextStyle(color: Colors.black54),),
+                            Divider(height: 4, color: Colors.grey.shade300,),
+                            Text('${stopCondition.set}'),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8,),
+                        Container(
+                          width: 100,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: Colors.grey.shade300,
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              const Text('Actual Value',style: TextStyle(color: Colors.black54),),
+                              Divider(height: 4, color: Colors.grey.shade300,),
+                              Text('${stopCondition.actual}'),
+                            ],
+                          ),
+                        ),
+                    ],)
+                  ],
+                ):
+                const SizedBox(),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 

@@ -349,9 +349,12 @@ class ScheduledProgram {
   final String endDate;
   final String startTime;
   final int schedulingMethod;
-  final int progOnOff;
-  final int progPauseResume;
+  final String progOnOff;
+  final String progPauseResume;
   final int startStopReason;
+  final int programStatusPercentage;
+  final StartCondition startCondition;
+  final StopCondition stopCondition;
 
   ScheduledProgram({
     required this.sNo,
@@ -365,9 +368,13 @@ class ScheduledProgram {
     required this.progOnOff,
     required this.progPauseResume,
     required this.startStopReason,
+    required this.programStatusPercentage,
+    required this.startCondition,
+    required this.stopCondition,
   });
 
   factory ScheduledProgram.fromJson(Map<String, dynamic> json) {
+    print(json);
     bool hasLoadingKey = json.containsKey('isLoading');
     return ScheduledProgram(
       sNo: json['SNo'],
@@ -381,6 +388,9 @@ class ScheduledProgram {
       progOnOff: json['ProgOnOff'],
       progPauseResume: json['ProgPauseResume'],
       startStopReason: json['StartStopReason'],
+      programStatusPercentage: json['ProgramStatusPercentage'],
+      startCondition: StartCondition.fromJson(json['StartCondition'] ?? {}),
+      stopCondition: StopCondition.fromJson(json['StopCondition'] ?? {}),
     );
   }
 
@@ -397,10 +407,99 @@ class ScheduledProgram {
       'ProgOnOff': progOnOff,
       'ProgPauseResume': progPauseResume,
       'StartStopReason': startStopReason,
-
+      'ProgramStatusPercentage': programStatusPercentage,
+      'StartCondition': startCondition.toJson(),
+      'StopCondition': stopCondition.toJson(),
     };
   }
 
+  DateTime getDateTime() {
+    if (startDate == "-" || startTime == "-") {
+      return DateTime(9999);
+    }
+    return DateTime.parse('$startDate $startTime');
+  }
+
+}
+
+class StartCondition {
+  String sNo;
+  String? swName;
+  int status;
+  String condition;
+  int set;
+  int actual;
+
+  StartCondition({
+    required this.sNo,
+    this.swName,
+    required this.status,
+    required this.condition,
+    required this.set,
+    required this.actual,
+  });
+
+  factory StartCondition.fromJson(Map<String, dynamic> json) {
+    return StartCondition(
+      sNo: json['S_No'] ?? '',
+      swName: json['Sw_Name'],
+      status: json['Status'] ?? 0,
+      condition: json['Condition'] ?? '',
+      set: json['Set'] ?? 0,
+      actual: json['Actual'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'S_No': sNo,
+      'Sw_Name': swName,
+      'Status': status,
+      'Condition': condition,
+      'Set': set,
+      'Actual': actual,
+    };
+  }
+}
+
+class StopCondition {
+  String sNo;
+  String? swName;
+  int status;
+  String condition;
+  int set;
+  int actual;
+
+  StopCondition({
+    required this.sNo,
+    this.swName,
+    required this.status,
+    required this.condition,
+    required this.set,
+    required this.actual,
+  });
+
+  factory StopCondition.fromJson(Map<String, dynamic> json) {
+    return StopCondition(
+      sNo: json['S_No'] ?? '',
+      swName: json['Sw_Name'],
+      status: json['Status'] ?? 0,
+      condition: json['Condition'] ?? '',
+      set: json['Set'] ?? 0,
+      actual: json['Actual'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'S_No': sNo,
+      'Sw_Name': swName,
+      'Status': status,
+      'Condition': condition,
+      'Set': set,
+      'Actual': actual,
+    };
+  }
 }
 
 class ProgramQueue {

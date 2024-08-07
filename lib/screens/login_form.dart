@@ -210,9 +210,6 @@ class _LoginFormState extends State<LoginForm> {
                                             final customerData = data["data"];
                                             final customerInfo = customerData["user"];
 
-                                            /*List<dynamic> siteData = data['data']['site'];
-                                            List<String> siteList = siteData.map((site) => json.encode(site)).toList();*/
-
                                             final prefs = await SharedPreferences.getInstance();
                                             await prefs.setString('userType', customerInfo["userType"].toString());
                                             await prefs.setString('userName', customerInfo["userName"].toString());
@@ -221,7 +218,14 @@ class _LoginFormState extends State<LoginForm> {
                                             await prefs.setString('mobileNumber', customerInfo["mobileNumber"].toString());
                                             await prefs.setString('password', customerInfo["password"].toString());
                                             await prefs.setString('email', customerInfo["email"].toString());
-                                            //await prefs.setStringList('site', siteList);
+
+                                            if(customerInfo["userType"]=='1'){
+                                              await prefs.setString('LoginType', 'Admin');
+                                            }else if(customerInfo["userType"]=='2'){
+                                              await prefs.setString('LoginType', 'Dealer');
+                                            }else{
+                                              await prefs.setString('LoginType', 'Customer');
+                                            }
 
                                             if (mounted){
                                               Navigator.pushReplacementNamed(context, '/dashboard');

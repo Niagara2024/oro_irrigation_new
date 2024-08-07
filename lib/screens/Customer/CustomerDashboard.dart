@@ -12,6 +12,7 @@ import '../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../Models/node_model.dart';
 import '../../constants/MQTTManager.dart';
 import '../../constants/MyFunction.dart';
+import '../../constants/snack_bar.dart';
 import '../../state_management/MqttPayloadProvider.dart';
 import 'Dashboard/CurrentSchedule.dart';
 import 'Dashboard/CustomerHome.dart';
@@ -125,7 +126,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
           print(e);
         }
 
-        int? irrigationPauseFlag = getIrrigationPauseFlag(crrIrrLine.id, Provider.of<MqttPayloadProvider>(context).payload2408);
         var liveSync = Provider.of<MqttPayloadProvider>(context).liveSync;
         Duration lastCommunication = Provider.of<MqttPayloadProvider>(context).lastCommunication;
 
@@ -159,22 +159,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
               ),
             ): const SizedBox(),
 
-            irrigationPauseFlag!=0 && irrigationPauseFlag!=null? Padding(
-              padding: const EdgeInsets.only(left: 4, right: 4),
-              child: Container(
-                width: MediaQuery.sizeOf(context).width,
-                decoration: BoxDecoration(
-                  color: irrigationPauseFlag==1?Colors.orange.shade100:Colors.red.shade100,
-                  borderRadius: BorderRadius.circular(02),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(2.0),
-                  child: Center(child: Text(getContentByCode(irrigationPauseFlag).toUpperCase(),
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.normal),)),
-                ),
-              ),
-            ):
-            const SizedBox(),
             Expanded(
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
@@ -432,17 +416,24 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
           ),
           borderRadius: const BorderRadius.all(Radius.circular(5)),
         ),
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            PumpLineCentral(currentSiteData: widget.siteData, crrIrrLine:  crrIrrLine, masterIdx: widget.masterInx,),
-            Divider(height: 0, color: Colors.grey.shade300),
-            Container(height: 4, color: Colors.white24),
-            Padding(
-              padding: const EdgeInsets.only(left: 05, right: 00),
-              child: Divider(height: 0, color: Colors.grey.shade300),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  PumpLineCentral(currentSiteData: widget.siteData, crrIrrLine:  crrIrrLine, masterIdx: widget.masterInx,),
+                  Divider(height: 0, color: Colors.grey.shade300),
+                  Container(height: 4, color: Colors.white24),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 05, right: 00),
+                    child: Divider(height: 0, color: Colors.grey.shade300),
+                  ),
+                  DisplayIrrigationLine(irrigationLine: crrIrrLine),
+                ],
+              ),
             ),
-            DisplayIrrigationLine(irrigationLine: crrIrrLine),
           ],
         ),
       ),
@@ -504,9 +495,9 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
       ...widget.irrigationLine.valve.map((vl) => ValveWidget(vl: vl, status: vl.status,)).toList(),
     ];
 
-    int crossAxisCount = (screenWidth / 100).floor().clamp(1, double.infinity).toInt();
+    int crossAxisCount = (screenWidth / 105).floor().clamp(1, double.infinity).toInt();
     int rowCount = (valveWidgets.length / crossAxisCount).ceil();
-    double itemHeight = 70;
+    double itemHeight = 72;
     double gridHeight = rowCount * (itemHeight + 5);
 
     return screenWidth>600? SizedBox(

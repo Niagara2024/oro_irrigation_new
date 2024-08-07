@@ -9,6 +9,7 @@ import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Models/ProductListWithNode.dart';
 import '../../Models/customer_list.dart';
@@ -70,8 +71,14 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
+    print(widget.userType);
+    initFunction();
+  }
 
-    List<Object> configList = (widget.userType == 1) ? ['Product'] : ['Product', 'Site'];
+  Future<void> initFunction() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final loginType = prefs.getString('LoginType') ?? '';
+    List<Object> configList = (widget.userType == 1) ? ['Product'] : loginType=='Admin'? ['Product', 'Site']: ['Product'] ;
     _configTabs = List.generate(configList.length, (index) => configList[index]);
     _tabCont = TabController(length: configList.length, vsync: this);
     _tabCont.addListener(() {
@@ -677,9 +684,36 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                 )
             ),
             DataCell(Text(DateFormat('dd-MM-yyyy').format(DateTime.parse(customerProductList[index].modifyDate)))),
-            widget.userType==2 ? DataCell(Center(child: IconButton(tooltip:'Delete product',onPressed: () {
-              print('IconButton click');
-            }, icon: const Icon(Icons.delete_outline, color:  Colors.red,),))) : DataCell.empty,
+            widget.userType==2 ? DataCell(Center(child:
+            customerProductList[index].productStatus==2||customerProductList[index].productStatus==3? IconButton(tooltip:'Remove product',onPressed: () {
+              print('${customerProductList[index].productId}');
+
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Remove Product'),
+                    content: Text('Are you sure you want to remove the ${customerProductList[index].categoryName}?'),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('Cancel'),
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close the dialog
+                        },
+                      ),
+                      TextButton(
+                        child: Text('Remove'),
+                        onPressed: () {
+                          getMyAllProduct();
+                          Navigator.of(context).pop(); // Close the dialog
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+
+            }, icon: const Icon(Icons.remove_circle_outline, color:  Colors.red,),):const Text('--'))) : DataCell.empty,
           ]))),
     );
   }

@@ -63,6 +63,25 @@ class MasterData {
       List<LiveData> liveList = liveData.isNotEmpty? liveData.map((live) => LiveData.fromJson(live)).toList() : [];
 
       var irrigationLine = json['irrigationLine'] as List;
+      /*var allLine = {
+        "sNo": 0,
+        "id": "",
+        "hid": "",
+        "name": "All Line",
+        "location": "",
+        "type": "",
+        "mainValve": [],
+        "valve": [],
+        "moistureSensor": [],
+        "levelSensor": [],
+        "pressureSensor": [],
+        "waterMeter": [],
+        "fan": [],
+        "fogger": [],
+        "pressureSwitch": [],
+        "powerSupply": []
+      };
+      irrigationLine.insert(0, allLine);*/
       List<IrrigationLine> irgLine = irrigationLine.isNotEmpty? irrigationLine.map((irl) => IrrigationLine.fromJson(irl)).toList() : [];
 
       return MasterData(
@@ -376,7 +395,7 @@ class ScheduledProgram {
   });
 
   factory ScheduledProgram.fromJson(Map<String, dynamic> json) {
-    print(json);
+    //print(json);
     bool hasLoadingKey = json.containsKey('isLoading');
     return ScheduledProgram(
       sNo: json['SNo'],
@@ -741,6 +760,7 @@ class IrrigationLine {
   });
 
   factory IrrigationLine.fromJson(Map<String, dynamic> json) {
+    print(json);
     var mainValve = json['mainValve'] as List;
     List<MainValve> mainValveList = mainValve.isNotEmpty? mainValve.map((mv) => MainValve.fromJson(mv)).toList() : [];
 

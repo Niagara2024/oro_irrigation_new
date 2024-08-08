@@ -512,8 +512,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const SizedBox(width: 5,),
-                  mySiteList[siteIndex].master[masterIndex].categoryId == 1 ||
-                      mySiteList[siteIndex].master[masterIndex].categoryId == 2? DropdownButton(
+                  (mySiteList[siteIndex].master[masterIndex].categoryId == 1 ||
+                      mySiteList[siteIndex].master[masterIndex].categoryId == 2) && mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1? DropdownButton(
                     underline: Container(),
                     items: (mySiteList[siteIndex].master[masterIndex].irrigationLine ?? []).map((line) {
                       return DropdownMenuItem(

@@ -57,8 +57,9 @@ enum GemProgramSSReasonCode {
   rs29(29, 'Continue Manually'),
   rs30(30, '-'),
   rs31(31, 'Program Completed'),
+  rs32(32, 'Waiting For Condition'),
+  rs33(33, 'Started By Condition and run as per Schedule'),
   unknown(0, 'Unknown content');
-
 
   final int code;
   final String content;

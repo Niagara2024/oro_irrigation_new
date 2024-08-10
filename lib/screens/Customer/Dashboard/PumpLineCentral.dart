@@ -211,91 +211,6 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
           ),
         ):
         const SizedBox(),
-        /*irrigationPauseFlag !=2 ? Card(
-          elevation: 4.0,
-          surfaceTintColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5),
-            side: BorderSide(
-              color: Colors.grey.shade300,
-              width: 1.0,
-            ),
-          ),
-          child: SizedBox(
-            width: 175,
-            height: 100,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: TextButton(
-                    onPressed: () {
-                      int prFlag = 0;
-                      List<dynamic> records = provider.payload2408;
-                      int sNoToCheck = widget.crrIrrLine.sNo;
-                      var record = records.firstWhere(
-                            (record) => record['S_No'] == sNoToCheck,
-                        orElse: () => null,
-                      );
-                      if (record != null) {
-                        bool isIrrigationPauseFlagZero = record['IrrigationPauseFlag'] == 0;
-                        if (isIrrigationPauseFlagZero) {
-                          prFlag = 1;
-                        } else {
-                          prFlag = 0;
-                        }
-                        String payLoadFinal = jsonEncode({
-                          "4900": [
-                            {
-                              "4901": "$sNoToCheck, $prFlag",
-                            }
-                          ]
-                        });
-                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.currentSiteData.master[widget.masterIdx].deviceId}');
-                      } else {
-                        const GlobalSnackBar(code: 200, message: 'Controller connection lost...');
-                      }
-                    },
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all<Color>(irrigationPauseFlag == 1 ? Colors.green : Colors.orange),
-                      shape: WidgetStateProperty.all<OutlinedBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        irrigationPauseFlag == 1
-                            ? const Icon(Icons.play_arrow_outlined, color: Colors.white)
-                            : const Icon(Icons.pause, color: Colors.white),
-                        const SizedBox(width: 5),
-                        Text(
-                          irrigationPauseFlag == 1 ? 'RESUME THE LINE' : 'PAUSE THE LINE',
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Next Program', style: TextStyle(fontSize: 15, color: Colors.black54),),
-                      const Text('Program 3'),
-                      const Text('Start at 3:30 PM'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ):
-        const SizedBox(),*/
       ],
     );
 
@@ -405,11 +320,6 @@ class DisplaySourcePump extends StatefulWidget {
 class _DisplaySourcePumpState extends State<DisplaySourcePump> {
 
   Timer? timer;
-  //final GlobalKey _spKey = GlobalKey();
-  final List<GlobalKey> _keys = [];
-  OverlayEntry? _overlayEntry;
-  bool _isHoveringButton = false;
-  bool _isHoveringMenu = false;
 
   @override
   void initState() {
@@ -434,25 +344,261 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
         itemCount: provider.sourcePump.length,
         scrollDirection: Axis.horizontal,
         itemBuilder: (BuildContext context, int index) {
-          _keys.add(GlobalKey());
           return Column(
             children: [
               Stack(
                 children: [
-                  MouseRegion(
-                    onEnter: (_) {
-                      _isHoveringButton = true;
-                      _showSPOnOffMenu(provider, index);
-                    },
-                    onExit: (_){
-                      _isHoveringButton = false;
-                      _checkForExit();
-                    },
-                    child: SizedBox(
-                      width: 70,
-                      height: 70,
-                      key: _keys[index],
-                      child: AppImages.getAsset('sourcePump', provider.sourcePump[index]['Status'],''),
+                  Tooltip(
+                    message: 'More details',
+                    child: TextButton(
+                      onPressed: () {
+                        bool voltKeyExists = provider.sourcePump[index].containsKey('Voltage');
+                        int signalStrength = voltKeyExists? int.parse(provider.sourcePump[index]['SignalStrength']):0;
+                        int batteryVolt = voltKeyExists? int.parse(provider.sourcePump[index]['Battery']):0;
+                        List<String> voltages = voltKeyExists? provider.sourcePump[index]['Voltage'].split(','):[];
+                        List<String> current = voltKeyExists? provider.sourcePump[index]['Current'].split(','):[];
+
+                        List<String> columns = ['-', '-', '-'];
+
+                        for (var pair in current) {
+                          List<String> parts = pair.split(':');
+                          int columnIndex = int.parse(parts[0]) - 1;
+                          columns[columnIndex] = parts[1];
+                        }
+
+
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: voltKeyExists? ListTile(
+                                title: Text(provider.sourcePump[index]['SW_Name'] ?? provider.sourcePump[index]['Name']),
+                                subtitle: Text('Version : 1.0.1'),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(signalStrength == 0 ? Icons.wifi_off :
+                                    signalStrength >= 1 && signalStrength <= 20 ?
+                                    Icons.network_wifi_1_bar_outlined :
+                                    signalStrength >= 21 && signalStrength <= 40 ?
+                                    Icons.network_wifi_2_bar_outlined :
+                                    signalStrength >= 41 && signalStrength <= 60 ?
+                                    Icons.network_wifi_3_bar_outlined :
+                                    signalStrength >= 61 && signalStrength <= 80 ?
+                                    Icons.network_wifi_3_bar_outlined :
+                                    Icons.wifi, color: Colors.black,),
+                                    const SizedBox(width: 5,),
+                                    Text('$signalStrength%'),
+
+                                    const SizedBox(width: 5,),
+                                    batteryVolt==0?const Icon(Icons.battery_0_bar):
+                                    batteryVolt>0&&batteryVolt<=10?const Icon(Icons.battery_1_bar_rounded):
+                                    batteryVolt>10&&batteryVolt<=30?const Icon(Icons.battery_2_bar_rounded):
+                                    batteryVolt>30&&batteryVolt<=50?const Icon(Icons.battery_3_bar_rounded):
+                                    batteryVolt>50&&batteryVolt<=70?const Icon(Icons.battery_4_bar_rounded):
+                                    batteryVolt>70&&batteryVolt<=90?const Icon(Icons.battery_5_bar_rounded):
+                                    const Icon(Icons.battery_6_bar_rounded),
+                                    Text('$batteryVolt%'),
+                                  ],
+                                ),
+                              ):
+                              Text(provider.sourcePump[index]['SW_Name'] ?? provider.sourcePump[index]['Name']),
+                              content: SizedBox(
+                                width: voltKeyExists?270:100,
+                                height: voltKeyExists?175: 40,
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        voltKeyExists?Column(
+                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            const Text('Voltage :'),
+                                            const SizedBox(height: 3,),
+                                            Container(
+                                              width: 75,
+                                              height: 30,
+                                              decoration: BoxDecoration(
+                                                color:Colors.red.shade50,
+                                                borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                                border: Border.all(color: Colors.red, width: .50,),
+                                              ),
+                                              child: Center(child: Text('R : ${voltages[0]}')),
+                                            ),
+                                            const SizedBox(height: 8,),
+                                            Container(
+                                              width: 75,
+                                              height: 30,
+                                              decoration: BoxDecoration(
+                                                color:Colors.yellow.shade50,
+                                                borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                                border: Border.all(color: Colors.yellow, width: .50,),
+                                              ),
+                                              child: Center(child: Text('Y : ${voltages[1]}')),
+                                            ),
+                                            const SizedBox(height: 8,),
+                                            Container(
+                                              width: 75,
+                                              height: 30,
+                                              decoration: BoxDecoration(
+                                                color:Colors.blue.shade50,
+                                                borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                                border: Border.all(color: Colors.blue, width: .50,),
+                                              ),
+                                              child: Center(child: Text('B : ${voltages[2]}')),
+                                            ),
+                                          ],
+                                        ):
+                                        const SizedBox(),
+
+                                        const SizedBox(width: 16,),
+
+                                        voltKeyExists? Column(
+                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            const Text('Current :'),
+                                            const SizedBox(height: 3,),
+                                            Container(
+                                              width: 70,
+                                              height: 30,
+                                              decoration: BoxDecoration(
+                                                color: Colors.teal.shade50,
+                                                borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                                border: Border.all(color: Colors.teal, width: 0.50),
+                                              ),
+                                              child: Center(child: Text(columns[0])),  // Display the value for R
+                                            ),
+                                            const SizedBox(height: 8,),
+                                            Container(
+                                              width: 70,
+                                              height: 30,
+                                              decoration: BoxDecoration(
+                                                color: Colors.teal.shade50,
+                                                borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                                border: Border.all(color: Colors.teal, width: 0.50),
+                                              ),
+                                              child: Center(child: Text(columns[1])),  // Display the value for Y
+                                            ),
+                                            const SizedBox(height: 8,),
+                                            Container(
+                                              width: 70,
+                                              height: 30,
+                                              decoration: BoxDecoration(
+                                                color: Colors.teal.shade50,
+                                                borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                                border: Border.all(color: Colors.teal, width: 0.50),
+                                              ),
+                                              child: Center(child: Text(columns[2])),  // Display the value for B
+                                            )
+                                          ],
+                                        ):
+                                        const SizedBox(),
+
+                                        const SizedBox(width: 16,),
+
+                                        voltKeyExists? Column(
+                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            RichText(
+                                              text: TextSpan(
+                                                children: [
+                                                  const TextSpan(
+                                                    text: 'Phase : ',
+                                                    style: TextStyle(
+                                                      color: Colors.black45,
+                                                      fontSize: 15,
+                                                    ),
+                                                  ),
+                                                  TextSpan(
+                                                    text: '${provider.sourcePump[index]['Phase']}',
+                                                    style: const TextStyle(
+                                                      color: Colors.black,
+                                                      fontSize: 17,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            const SizedBox(height: 3,),
+                                            const Text('Level'),
+                                            const SizedBox(height: 3,),
+                                            Container(
+                                              width: 70,
+                                              height: 80,
+                                              decoration: BoxDecoration(
+                                                color: Colors.blue.shade50,
+                                                borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                                border: Border.all(color: Colors.blue, width: 0.50),
+                                              ),
+                                              child: Center(child: Text('70%')),  // Display the value for R
+                                            ),
+                                          ],
+                                        ):
+                                        const SizedBox(),
+                                      ],
+                                    ),
+
+                                    voltKeyExists? const Divider():
+                                    const SizedBox(),
+
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                      children: [
+                                        MaterialButton(
+                                          color: Colors.green,
+                                          textColor: Colors.white,
+                                          onPressed: () {
+                                            String payload = '1,${provider.sourcePump[index]['S_No']},3,0';
+                                            String payLoadFinal = jsonEncode({
+                                              "800": [{"801": payload}]
+                                            });
+                                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                          },
+                                          child: const Text('Start'),
+                                        ),
+                                        MaterialButton(
+                                          color: Colors.redAccent,
+                                          textColor: Colors.white,
+                                          onPressed: () {
+                                            String payload = '0,${provider.sourcePump[index]['S_No']},3,0';
+                                            String payLoadFinal = jsonEncode({
+                                              "800": [{"801": payload}]
+                                            });
+                                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+
+                                          },
+                                          child: const Text('Stop'),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              actions: <Widget>[
+                                MaterialButton(
+                                  color: Colors.grey,
+                                  textColor: Colors.black,
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Cancel'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      style: ButtonStyle(
+                        padding: WidgetStateProperty.all(EdgeInsets.zero),
+                        minimumSize: WidgetStateProperty.all(Size.zero),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        backgroundColor: WidgetStateProperty.all(Colors.transparent),
+                      ),
+                      child: SizedBox(
+                        width: 70,
+                        height: 70,
+                        child: AppImages.getAsset('sourcePump', provider.sourcePump[index]['Status'], ''),
+                      ),
                     ),
                   ),
                   provider.sourcePump[index]['OnDelayLeft'] !='00:00:00'?
@@ -510,101 +656,6 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
       ),
     );
   }
-
-  void _showSPOnOffMenu(provider, index) {
-    if (_overlayEntry == null) {
-      final RenderBox renderBox = _keys[index].currentContext!.findRenderObject() as RenderBox;
-      final Offset offset = renderBox.localToGlobal(Offset.zero);
-
-      _overlayEntry = OverlayEntry(
-        builder: (context) => Positioned(
-          left: offset.dx,
-          top: offset.dy + renderBox.size.height,
-          child: MouseRegion(
-            onEnter: (_) => _isHoveringMenu = true,
-            onExit: (_) {
-              _isHoveringMenu = false;
-              _checkForExit();
-            },
-            child: Material(
-              elevation: 8.0,
-              color: Colors.teal.shade100,
-              borderRadius: BorderRadius.circular(5),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <PopupMenuEntry<int>>[
-                  PopupMenuItem<int>(
-                    onTap: null,
-                    value: 0,
-                    child: Container(
-                      color: Colors.transparent,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 8,),
-                          Center(child: Text(provider.sourcePump[index]['Name'], style: const TextStyle(color: Colors.black),)),
-                          const SizedBox(height: 8,),
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: Colors.green,
-                                child: IconButton(tooltip:'On',onPressed: (){
-                                  String payload = '1,${provider.sourcePump[index]['S_No']},3,0';
-                                  String payLoadFinal = jsonEncode({
-                                    "800": [{"801": payload}]
-                                  });
-                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-
-                                  _isHoveringMenu = false;
-                                  _checkForExit();
-
-                                }, icon: const Icon(Icons.power_settings_new, color: Colors.white,)),
-                              ),
-                              const SizedBox(width: 8,),
-                              CircleAvatar(
-                                backgroundColor: Colors.redAccent,
-                                child: IconButton(tooltip:'Off',onPressed: (){
-                                  String payload = '0,${provider.sourcePump[index]['S_No']},3,0';
-                                  String payLoadFinal = jsonEncode({
-                                    "800": [{"801": payload}]
-                                  });
-                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-
-                                  _isHoveringMenu = false;
-                                  _checkForExit();
-
-                                }, icon: const Icon(Icons.power_settings_new, color: Colors.white,)),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10,),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-      Overlay.of(context).insert(_overlayEntry!);
-    }
-  }
-
-  void _removePopupMenu() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
-  }
-
-  void _checkForExit() {
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (!_isHoveringButton && !_isHoveringMenu) {
-        _removePopupMenu();
-      }
-    });
-  }
-
 
   void durationUpdatingFunction() {
     timer?.cancel();

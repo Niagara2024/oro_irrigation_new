@@ -370,7 +370,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(widget.filteredCurrentSchedule[index].programName),
-                  Text(getContentByCode(widget.filteredCurrentSchedule[index].reasonCode), style: const TextStyle(fontSize: 11, color: Colors.black),),
+                  Text(getContentByCode(widget.filteredCurrentSchedule[index].reasonCode), style: const TextStyle(fontSize: 10, color: Colors.black),),
                 ],
               ),
           ),

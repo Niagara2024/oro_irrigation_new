@@ -242,7 +242,6 @@ class NodeData {
 
     bool lfKey = json.containsKey('LastFeedbackReceivedTime');
 
-
     return NodeData(
       controllerId: json['controllerId'],
       deviceId: json['deviceId'],
@@ -372,8 +371,8 @@ class ScheduledProgram {
   final String progPauseResume;
   final int startStopReason;
   final int programStatusPercentage;
-  final StartCondition startCondition;
-  final StopCondition stopCondition;
+  final Condition startCondition;
+  final Condition stopCondition;
   final int pauseResumeReason;
 
   ScheduledProgram({
@@ -410,8 +409,12 @@ class ScheduledProgram {
       progPauseResume: json['ProgPauseResume'],
       startStopReason: json['StartStopReason'],
       programStatusPercentage: json['ProgramStatusPercentage'],
-      startCondition: StartCondition.fromJson(json['StartCondition'] ?? {}),
-      stopCondition: StopCondition.fromJson(json['StopCondition'] ?? {}),
+      startCondition: json['StartCondition'] != null && (json['StartCondition'] as Map).isNotEmpty
+          ? Condition.fromJson(json['StartCondition'])
+          : Condition.empty(),
+      stopCondition: json['StopCondition'] != null && (json['StopCondition'] as Map).isNotEmpty
+          ? Condition.fromJson(json['StopCondition'])
+          : Condition.empty(),
       pauseResumeReason: json['PauseResumeReason'],
     );
   }
@@ -445,82 +448,59 @@ class ScheduledProgram {
 
 }
 
-class StartCondition {
-  String sNo;
-  String? swName;
-  int status;
-  String condition;
-  int set;
-  int actual;
+class Condition {
+  final String sNo;
+  final int status;
+  final String condition;
+  final int set;
+  final int? actual;
+  final List<Condition> combined;
 
-  StartCondition({
+  Condition({
     required this.sNo,
-    this.swName,
     required this.status,
     required this.condition,
     required this.set,
     required this.actual,
+    required this.combined,
   });
 
-  factory StartCondition.fromJson(Map<String, dynamic> json) {
-    return StartCondition(
-      sNo: json['S_No'] ?? '',
-      swName: json['Sw_Name'],
-      status: json['Status'] ?? 0,
-      condition: json['Condition'] ?? '',
-      set: json['Set'] ?? 0,
-      actual: json['Actual'] ?? 0,
+  factory Condition.fromJson(dynamic json) {
+    if (json != null && json is Map<String, dynamic>) {
+      return Condition(
+        sNo: json['S_No'] ?? '',
+        status: json['Status'] ?? 0,
+        condition: json['Condition'] ?? '',
+        set: json['Set'] ?? 0,
+        actual: json['Actual'] ?? 0,
+        combined: json['Combined'] != null && (json['Combined'] as List).isNotEmpty
+            ? (json['Combined'] as List).map((e) => Condition.fromJson(e)).toList()
+            : [],
+      );
+    } else {
+      return Condition.empty();
+    }
+  }
+
+  factory Condition.empty() {
+    return Condition(
+      sNo: '',
+      status: 0,
+      condition: '',
+      set: 0,
+      actual: 0,
+      combined: [],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'S_No': sNo,
-      'Sw_Name': swName,
       'Status': status,
       'Condition': condition,
       'Set': set,
       'Actual': actual,
-    };
-  }
-}
-
-class StopCondition {
-  String sNo;
-  String? swName;
-  int status;
-  String condition;
-  int set;
-  int actual;
-
-  StopCondition({
-    required this.sNo,
-    this.swName,
-    required this.status,
-    required this.condition,
-    required this.set,
-    required this.actual,
-  });
-
-  factory StopCondition.fromJson(Map<String, dynamic> json) {
-    return StopCondition(
-      sNo: json['S_No'] ?? '',
-      swName: json['Sw_Name'],
-      status: json['Status'] ?? 0,
-      condition: json['Condition'] ?? '',
-      set: json['Set'] ?? 0,
-      actual: json['Actual'] ?? 0,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'S_No': sNo,
-      'Sw_Name': swName,
-      'Status': status,
-      'Condition': condition,
-      'Set': set,
-      'Actual': actual,
+      'Combined': combined.map((e) => e.toJson()).toList(),
     };
   }
 }

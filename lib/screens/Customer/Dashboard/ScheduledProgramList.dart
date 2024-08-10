@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:calendar_view/calendar_view.dart';
@@ -351,16 +352,12 @@ class ScheduledProgramList extends StatelessWidget {
                       ? IconButton(
                     tooltip: 'view condition',
                     onPressed: () {
-                      showAlertDialog(
-                        context,
-                        scheduledPrograms[index].startCondition,
-                        scheduledPrograms[index].stopCondition,
-                        scheduledPrograms[index].progName,
+                      showAutoUpdateDialog(context,
+                        scheduledPrograms[index].sNo,
                       );
                     },
-                    icon: const Icon(Icons.visibility_outlined),
-                  )
-                      : const SizedBox(),
+                    icon: const Icon(Icons.visibility_outlined, color: Colors.teal,),
+                  ): const SizedBox(),
                 ],
               )),
               DataCell(Center(child: Text('${scheduledPrograms[index].totalZone}'))),
@@ -504,159 +501,12 @@ class ScheduledProgramList extends StatelessWidget {
     return codeDescriptionMap[code] ?? 'Code not found';
   }
 
-  void showAlertDialog(BuildContext context, StartCondition startCondition, StopCondition stopCondition, pName){
+  void showAutoUpdateDialog(BuildContext context, int prmSNo) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(pName),
-          content: SizedBox(
-            height: startCondition.condition.isNotEmpty && stopCondition.condition.isNotEmpty ?250:120,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                startCondition.condition.isNotEmpty ? Text('START CONDITION', style: TextStyle(fontSize: 15, color: startCondition.status==1? Colors.green: Colors.red)):
-                const SizedBox(),
-                startCondition.condition.isNotEmpty ?Container(
-                  decoration: BoxDecoration(
-                    color: startCondition.status==1? Colors.green.shade50: Colors.red.shade50,
-                    borderRadius: BorderRadius.circular(5),
-                    border: Border.all(
-                      color: startCondition.status==1? Colors.green.shade100: Colors.red.shade100,
-                      width: 1,
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 5,),
-                      Text(startCondition.condition, style: const TextStyle(fontSize: 12),),
-                      const SizedBox(height: 8,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Container(
-                            width: 100,
-                            height: 45,
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(5),
-                              border: Border.all(
-                                color: startCondition.status==1? Colors.green.shade100: Colors.red.shade100,
-                                width: 1,
-                              ),
-                            ),
-                            child: Column(
-                              children: [
-                                const Text('Set Value', style: TextStyle(color: Colors.black45),),
-                                Divider(height: 4, color: Colors.grey.shade300,),
-                                Text('${startCondition.set}'),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            width: 100,
-                            height: 45,
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(5),
-                              border: Border.all(
-                                color: Colors.grey.shade300,
-                                width: 1,
-                              ),
-                            ),
-                            child: Column(
-                              children: [
-                                const Text('Actual Value', style: TextStyle(color: Colors.black54),),
-                                Divider(height: 4, color: Colors.grey.shade300,),
-                                Text('${startCondition.actual}'),
-                              ],
-                            ),
-                          ),
-                        ],)
-                    ],
-                  ),
-                ):
-                const SizedBox(),
-
-                startCondition.condition.isNotEmpty ? const Divider():
-                const SizedBox(),
-
-                stopCondition.condition.isNotEmpty ? Text('STOP CONDITION', style: TextStyle(fontSize: 15, color: stopCondition.status==1? Colors.green: Colors.red)):
-                const SizedBox(),
-                stopCondition.condition.isNotEmpty ? Container(
-                  decoration: BoxDecoration(
-                    color: stopCondition.status==1? Colors.green.shade50: Colors.red.shade50,
-                    borderRadius: BorderRadius.circular(5),
-                    border: Border.all(
-                      color: stopCondition.status==1? Colors.green.shade100: Colors.red.shade100,
-                      width: 1,
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 5,),
-                        Text(stopCondition.condition, style: const TextStyle(fontSize: 12),),
-                        const SizedBox(height: 8,),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                          Container(
-                            width: 100,
-                            height: 45,
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(5),
-                              border: Border.all(
-                                color: Colors.grey.shade300,
-                                width: 1,
-                              ),
-                            ),
-                            child: Column(
-                              children: [
-                                const Text('Set Value', style: TextStyle(color: Colors.black54),),
-                                Divider(height: 4, color: Colors.grey.shade300,),
-                                Text('${stopCondition.set}'),
-                              ],
-                            ),
-                          ),
-                          Container(
-                              width: 100,
-                              height: 45,
-                              decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                borderRadius: BorderRadius.circular(5),
-                                border: Border.all(
-                                  color: Colors.grey.shade300,
-                                  width: 1,
-                                ),
-                              ),
-                              child: Column(
-                                children: [
-                                  const Text('Actual Value',style: TextStyle(color: Colors.black54),),
-                                  Divider(height: 4, color: Colors.grey.shade300,),
-                                  Text('${stopCondition.actual}'),
-                                ],
-                              ),
-                            ),
-                        ],),
-                      ],
-                    ),
-                  ),
-                ):
-                const SizedBox(),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
+        return ConditionDialog(
+          prmSNo: prmSNo,
         );
       },
     );
@@ -677,4 +527,331 @@ class ScheduledProgramList extends StatelessWidget {
     }
   }
 
+}
+
+class ConditionDialog extends StatefulWidget {
+  final int prmSNo;
+  const ConditionDialog({super.key, required this.prmSNo});
+  @override
+  _ConditionDialogState createState() => _ConditionDialogState();
+}
+
+class _ConditionDialogState extends State<ConditionDialog> {
+
+  final List<Color> colorList = [
+    Colors.red.shade50,
+    Colors.green.shade50,
+    Colors.blue.shade50,
+    Colors.orange.shade50,
+    Colors.purple.shade50,
+    Colors.yellow.shade50,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+
+    var scheduleProgram = Provider.of<MqttPayloadProvider>(context).scheduledProgram;
+    final filteredScheduledPrograms = filterProgramsBySNo(scheduleProgram, widget.prmSNo);
+    final Condition startCondition = filteredScheduledPrograms[0].startCondition;
+    final Condition stopCondition = filteredScheduledPrograms[0].stopCondition;
+
+
+    return AlertDialog(
+      title: Text(filteredScheduledPrograms[0].progName),
+      content: SizedBox(
+        width: 500,
+        child: ListView(
+          children: [
+            ExpansionPanelList(
+              elevation: 1,
+              expandedHeaderPadding: const EdgeInsets.all(0),
+              children: [
+                ExpansionPanel(
+                  backgroundColor: startCondition.status==1? Colors.green.shade50:Colors.red.shade50,
+                  headerBuilder: (BuildContext context, bool isExpanded) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 8),
+                      child: Text('START CONDITION', style: TextStyle(fontSize: 17, color: startCondition.status==1?Colors.green:Colors.red),),
+                    );
+                  },
+                  body: _buildConditionPanel(startCondition),
+                  isExpanded: true,
+                ),
+                ExpansionPanel(
+                  backgroundColor: stopCondition.status==1?Colors.green.shade50:Colors.red.shade50,
+                  headerBuilder: (BuildContext context, bool isExpanded) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 8),
+                      child: Text('STOP CONDITION', style: TextStyle(fontSize: 17, color: stopCondition.status==1?Colors.green:Colors.red),),
+                    );
+                  },
+                  body: _buildConditionPanel(stopCondition),
+                  isExpanded: stopCondition.condition.isNotEmpty?true:false,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      /*content: SizedBox(
+        height: startCondition.condition.isNotEmpty && startCondition.condition.isNotEmpty ? 225 : 100,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            startCondition.condition.isNotEmpty ? Text(
+                'START CONDITION',
+                style: TextStyle(fontSize: 15, color: startCondition.status == 1 ? Colors.green : Colors.red)
+            ) : const SizedBox(),
+            startCondition.condition.isNotEmpty ? Container(
+              decoration: BoxDecoration(
+                color: startCondition.status == 1 ? Colors.green.shade50 : Colors.red.shade50,
+                borderRadius: BorderRadius.circular(5),
+                border: Border.all(
+                  color: startCondition.status == 1 ? Colors.green.shade100 : Colors.red.shade100,
+                  width: 1,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 5),
+                    Text(startCondition.condition, style: const TextStyle(fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // Set Value Container
+                        Container(
+                          width: 100,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: Colors.grey.shade400,
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              const Text('Set Value', style: TextStyle(color: Colors.black45)),
+                              Divider(height: 4, color: Colors.grey.shade300),
+                              Text('${startCondition.set}'),
+                            ],
+                          ),
+                        ),
+                        // Actual Value Container
+                        Container(
+                          width: 100,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: Colors.grey.shade300,
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              const Text('Actual Value', style: TextStyle(color: Colors.black54)),
+                              Divider(height: 4, color: Colors.grey.shade300),
+                              Text('${startCondition.actual}'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ) : const SizedBox(),
+
+            // Spacer
+            startCondition.condition.isNotEmpty ? const SizedBox(height: 8) : const SizedBox(),
+
+            // Stop Condition
+            stopCondition.condition.isNotEmpty ? Text(
+                'STOP CONDITION',
+                style: TextStyle(fontSize: 15, color: stopCondition.status == 1 ? Colors.green : Colors.red)
+            ) : const SizedBox(),
+            stopCondition.condition.isNotEmpty ? Container(
+              decoration: BoxDecoration(
+                color: stopCondition.status == 1 ? Colors.green.shade50 : Colors.red.shade50,
+                borderRadius: BorderRadius.circular(5),
+                border: Border.all(
+                  color: stopCondition.status == 1 ? Colors.green.shade100 : Colors.red.shade100,
+                  width: 1,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 5),
+                    Text(stopCondition.condition, style: const TextStyle(fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // Set Value Container
+                        Container(
+                          width: 100,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: Colors.grey.shade300,
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              const Text('Set Value', style: TextStyle(color: Colors.black54)),
+                              Divider(height: 4, color: Colors.grey.shade300),
+                              Text('${stopCondition.set}'),
+                            ],
+                          ),
+                        ),
+                        // Actual Value Container
+                        Container(
+                          width: 100,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: Colors.grey.shade300,
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              const Text('Actual Value', style: TextStyle(color: Colors.black54)),
+                              Divider(height: 4, color: Colors.grey.shade300),
+                              Text('${stopCondition.actual}'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ) : const SizedBox(),
+          ],
+        ),
+      ),*/
+      actions: <Widget>[
+        TextButton(
+          child: const Text('OK'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildConditionPanel(Condition condition, {bool isLast = false}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          children: [
+            SizedBox(
+              width: 10,
+              child: Column(
+                children: [
+                  Container(
+                    height: 45,
+                    width: 2,
+                    color: Colors.pink.shade400,
+                  ),
+                  if (!isLast)
+                    Container(
+                      height: 24,
+                      width: 2,
+                      color: Colors.grey.shade400,  // Vertical continuation line
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ListTile(
+                tileColor: condition.status == 1 ? Colors.green.shade50 : Colors.red.shade50,
+                title: Text(condition.condition),
+                subtitle: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          const TextSpan(
+                            text: 'Set Value: ',
+                            style: TextStyle(
+                              color: Colors.black45,
+                              fontSize: 15,
+                            ),
+                          ),
+                          TextSpan(
+                            text: '${condition.set}',
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 17,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          const TextSpan(
+                            text: 'Actual Value: ',
+                            style: TextStyle(
+                              color: Colors.black45,
+                              fontSize: 15,
+                            ),
+                          ),
+                          TextSpan(
+                            text: '${condition.actual}',
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 17,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Render subconditions
+              ...List.generate(condition.combined.length, (index) {
+                return Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: _buildConditionPanel(
+                    condition.combined[index],
+                    isLast: index == condition.combined.length - 1,
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<ScheduledProgram> filterProgramsBySNo(List<ScheduledProgram> prg, int sNo) {
+    return prg.where((program) => program.sNo == sNo).toList();
+  }
 }

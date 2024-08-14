@@ -150,7 +150,7 @@ class MqttPayloadProvider with ChangeNotifier {
         }
       }else{
         print('pump controller payload :$payload');
-        updateLastSync('000:00:00 - 00:00');
+        //updateLastSync('000:00:00 - 00:00');
         Map<String, dynamic> json = jsonDecode(payload);
         if(json['mC']=='LD01'){
           var liveMessage = json['cM'] != null ? json['cM'] as List : [];

@@ -63,25 +63,28 @@ class MasterData {
       List<LiveData> liveList = liveData.isNotEmpty? liveData.map((live) => LiveData.fromJson(live)).toList() : [];
 
       var irrigationLine = json['irrigationLine'] as List;
-      /*var allLine = {
-        "sNo": 0,
-        "id": "",
-        "hid": "",
-        "name": "All Line",
-        "location": "",
-        "type": "",
-        "mainValve": [],
-        "valve": [],
-        "moistureSensor": [],
-        "levelSensor": [],
-        "pressureSensor": [],
-        "waterMeter": [],
-        "fan": [],
-        "fogger": [],
-        "pressureSwitch": [],
-        "powerSupply": []
-      };
-      irrigationLine.insert(0, allLine);*/
+      if(irrigationLine.isNotEmpty && irrigationLine.length>1){
+        var allLine = {
+          "sNo": 0,
+          "id": "",
+          "hid": "",
+          "name": "All irrigation line",
+          "location": "",
+          "type": "",
+          "mainValve": [],
+          "valve": [],
+          "moistureSensor": [],
+          "levelSensor": [],
+          "pressureSensor": [],
+          "waterMeter": [],
+          "fan": [],
+          "fogger": [],
+          "pressureSwitch": [],
+          "powerSupply": []
+        };
+        irrigationLine.insert(0, allLine);
+      }
+
       List<IrrigationLine> irgLine = irrigationLine.isNotEmpty? irrigationLine.map((irl) => IrrigationLine.fromJson(irl)).toList() : [];
 
       return MasterData(
@@ -396,6 +399,9 @@ class ScheduledProgram {
   factory ScheduledProgram.fromJson(Map<String, dynamic> json) {
     //print(json);
     bool hasLoadingKey = json.containsKey('isLoading');
+    bool hasPPRisInt = json['ProgPauseResume'].runtimeType==int?true:false;
+    bool hasPOOisInt = json['ProgOnOff'].runtimeType==int?true:false;
+
     return ScheduledProgram(
       sNo: json['SNo'],
       progCategory: json['ProgCategory'],
@@ -405,8 +411,8 @@ class ScheduledProgram {
       endDate: json['EndDate'],
       startTime: json['StartTime'],
       schedulingMethod: json['SchedulingMethod'],
-      progOnOff: json['ProgOnOff'],
-      progPauseResume: json['ProgPauseResume'],
+      progOnOff: hasPOOisInt?json['ProgOnOff'].toString():json['ProgOnOff'],
+      progPauseResume: hasPPRisInt? json['ProgPauseResume'].toString(): json['ProgPauseResume'],
       startStopReason: json['StartStopReason'],
       programStatusPercentage: json['ProgramStatusPercentage'],
       startCondition: json['StartCondition'] != null && (json['StartCondition'] as Map).isNotEmpty

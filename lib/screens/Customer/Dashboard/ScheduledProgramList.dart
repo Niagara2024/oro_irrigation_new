@@ -219,6 +219,10 @@ class ScheduledProgramList extends StatelessWidget {
           headingRowColor: WidgetStateProperty.all<Color>(Colors.yellow.shade50),
           columns:  [
             const DataColumn2(
+              label: Text('Line Id', style: TextStyle(fontSize: 13),),
+              fixedWidth: 50,
+            ),
+            const DataColumn2(
               label: Text('Name', style: TextStyle(fontSize: 13),),
               size: ColumnSize.M,
             ),
@@ -268,6 +272,7 @@ class ScheduledProgramList extends StatelessWidget {
             bool isBypass = buttonName.contains('Bypass');
 
             return DataRow(cells: [
+              DataCell(Text(scheduledPrograms[index].progCategory)),
               DataCell(Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -278,7 +283,7 @@ class ScheduledProgramList extends StatelessWidget {
                     children: [
                       Expanded(
                         child: LinearProgressIndicator(
-                          value: scheduledPrograms[index].programStatusPercentage / 100.0,
+                          value: 20 / 100.0,
                           borderRadius: const BorderRadius.all(Radius.circular(3)),
                           color: Colors.blue.shade300,
                           backgroundColor: Colors.grey.shade200,
@@ -287,7 +292,7 @@ class ScheduledProgramList extends StatelessWidget {
                       ),
                       const SizedBox(width: 7),
                       Text(
-                        '${scheduledPrograms[index].programStatusPercentage}%',
+                        '10%',
                         style: const TextStyle(fontSize: 12, color: Colors.black45),
                       ),
                     ],
@@ -348,8 +353,8 @@ class ScheduledProgramList extends StatelessWidget {
                     ),
                   ),
                   scheduledPrograms[index].startCondition.condition.isNotEmpty ||
-                      scheduledPrograms[index].stopCondition.condition.isNotEmpty
-                      ? IconButton(
+                      scheduledPrograms[index].stopCondition.condition.isNotEmpty?
+                  IconButton(
                     tooltip: 'view condition',
                     onPressed: () {
                       showAutoUpdateDialog(context,
@@ -357,7 +362,8 @@ class ScheduledProgramList extends StatelessWidget {
                       );
                     },
                     icon: const Icon(Icons.visibility_outlined, color: Colors.teal,),
-                  ): const SizedBox(),
+                  ):
+                  const SizedBox(),
                 ],
               )),
               DataCell(Center(child: Text('${scheduledPrograms[index].totalZone}'))),
@@ -559,12 +565,14 @@ class _ConditionDialogState extends State<ConditionDialog> {
     return AlertDialog(
       title: Text(filteredScheduledPrograms[0].progName),
       content: SizedBox(
-        width: 500,
+        width: 600,
+        height: 400,
         child: ListView(
           children: [
             ExpansionPanelList(
               elevation: 1,
               expandedHeaderPadding: const EdgeInsets.all(0),
+              expandIconColor: Colors.transparent,
               children: [
                 ExpansionPanel(
                   backgroundColor: startCondition.status==1? Colors.green.shade50:Colors.red.shade50,
@@ -575,7 +583,7 @@ class _ConditionDialogState extends State<ConditionDialog> {
                     );
                   },
                   body: _buildConditionPanel(startCondition),
-                  isExpanded: true,
+                  isExpanded: startCondition.condition.isNotEmpty?true:false,
                 ),
                 ExpansionPanel(
                   backgroundColor: stopCondition.status==1?Colors.green.shade50:Colors.red.shade50,
@@ -759,34 +767,11 @@ class _ConditionDialogState extends State<ConditionDialog> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Column(
-          children: [
-            SizedBox(
-              width: 10,
-              child: Column(
-                children: [
-                  Container(
-                    height: 45,
-                    width: 2,
-                    color: Colors.pink.shade400,
-                  ),
-                  if (!isLast)
-                    Container(
-                      height: 24,
-                      width: 2,
-                      color: Colors.grey.shade400,  // Vertical continuation line
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ListTile(
-                tileColor: condition.status == 1 ? Colors.green.shade50 : Colors.red.shade50,
                 title: Text(condition.condition),
                 subtitle: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -834,16 +819,27 @@ class _ConditionDialogState extends State<ConditionDialog> {
                   ],
                 ),
               ),
-              // Render subconditions
-              ...List.generate(condition.combined.length, (index) {
-                return Padding(
-                  padding: const EdgeInsets.only(left: 16),
-                  child: _buildConditionPanel(
-                    condition.combined[index],
-                    isLast: index == condition.combined.length - 1,
-                  ),
-                );
-              }),
+              if (condition.combined.isNotEmpty)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: List.generate(condition.combined.length, (index) {
+                    return Container(
+                      margin: const EdgeInsets.only(left: 10.0, right: 5, bottom: 5),
+                      decoration: BoxDecoration(
+                        color: condition.combined[index].status == 1 ? Colors.green.shade50 : Colors.red.shade50,
+                        border: Border.all(
+                          color: condition.combined[index].status == 1 ? Colors.green.shade100 : Colors.red.shade100,
+                          width: 1.0,
+                        ),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      child: _buildConditionPanel(
+                        condition.combined[index],
+                        isLast: index == condition.combined.length - 1,
+                      ),
+                    );
+                  }),
+                ),
             ],
           ),
         ),

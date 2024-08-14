@@ -383,7 +383,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
         buildNarrowLayout(screenWidth, payload);
       },
     );
-
   }
 
   Widget buildNarrowLayout(screenWidth, payload)
@@ -513,7 +512,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 children: [
                   const SizedBox(width: 5,),
                   (mySiteList[siteIndex].master[masterIndex].categoryId == 1 ||
-                      mySiteList[siteIndex].master[masterIndex].categoryId == 2) && mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1? DropdownButton(
+                      mySiteList[siteIndex].master[masterIndex].categoryId == 2) &&
+                      mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1?
+                  DropdownButton(
                     underline: Container(),
                     items: (mySiteList[siteIndex].master[masterIndex].irrigationLine ?? []).map((line) {
                       return DropdownMenuItem(
@@ -537,7 +538,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     iconDisabledColor: Colors.white,
                     focusColor: Colors.transparent,
                   ):
-                  const SizedBox(),
+                  Text(mySiteList[siteIndex].master[masterIndex].irrigationLine[0].name),
                   const SizedBox(width: 05,),
                 ],
               ),
@@ -814,7 +815,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               iconDisabledColor: Colors.white,
               focusColor: Colors.transparent,
             ):
-            const SizedBox(),
+            Text(mySiteList[siteIndex].master[masterIndex].irrigationLine[0].name),
 
             const SizedBox(width: 15,),
             Container(width: 1, height: 20, color: Colors.white54,),
@@ -2784,11 +2785,9 @@ class _SideSheetClassState extends State<SideSheetClass> {
     if (node.rlyStatus.isNotEmpty) {
       additionalHeight += calculateGridHeight(node.rlyStatus.length);
     }
-
     if (node.sensor.isNotEmpty) {
       additionalHeight += calculateGridHeight(node.sensor.length);
     }
-
     return baseHeight + additionalHeight;
   }
 

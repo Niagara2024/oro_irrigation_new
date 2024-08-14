@@ -1,21 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:oro_irrigation_new/constants/LoadingIndicatorView.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/NextSchedule.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/ScheduledProgramList.dart';
 import 'package:provider/provider.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
-import '../../Models/node_model.dart';
 import '../../constants/MQTTManager.dart';
 import '../../constants/MyFunction.dart';
-import '../../constants/snack_bar.dart';
 import '../../state_management/MqttPayloadProvider.dart';
 import 'Dashboard/CurrentSchedule.dart';
-import 'Dashboard/CustomerHome.dart';
+import 'Dashboard/DisplayAllLine.dart';
 import 'Dashboard/PumpLineCentral.dart';
 
 class CustomerDashboard extends StatefulWidget {
@@ -73,65 +69,111 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     if(widget.siteData.master[widget.masterInx].irrigationLine.isNotEmpty){
       var screenWidth = MediaQuery.of(context).size.width;
       final provider = Provider.of<MqttPayloadProvider>(context);
+
+      var liveSync = provider.liveSync;
+      Duration lastCommunication = provider.lastCommunication;
+
+      try{
+        for (var items in provider.nodeList) {
+          if (items is Map<String, dynamic>){
+            try {
+              int position = getNodePositionInNodeList(widget.masterInx, items['DeviceId']);
+              if (position != -1) {
+                List<dynamic> rlyStatuses = items['RlyStatus'];
+                Map<int, int> statusMap = {};
+                try{
+                  statusMap = {for (var item in rlyStatuses) item['S_No']:item['Status']};
+                }catch(e){
+                  statusMap = {for (var item in rlyStatuses) item.S_No:item.Status};
+                }
+
+                for (var line in widget.siteData.master[widget.masterInx].irrigationLine) {
+                  // Update mainValves
+                  for (var mainValve in line.mainValve) {
+                    if (statusMap.containsKey(mainValve.sNo)) {
+                      mainValve.status = statusMap[mainValve.sNo]!;
+                    }
+                  }
+                  // Update valves
+                  for (var valve in line.valve) {
+                    if (statusMap.containsKey(valve.sNo)) {
+                      valve.status = statusMap[valve.sNo]!;
+                    }
+                  }
+                }
+              }else{
+                print('${items['SNo']} The serial number not found');
+              }
+            } catch (e) {
+              print('Error updating node properties: $e');
+            }
+          }
+        }
+        setState(() {
+          crrIrrLine;
+        });
+      }
+      catch(e){
+        print(e);
+      }
+
       if(widget.siteData.master[widget.masterInx].irrigationLine[widget.lineIdx].sNo==0){
-        return CustomerHome(currentMaster: widget.siteData.master[widget.masterInx],);
+        return Column(
+          children: [
+            lastCommunication.inMinutes >= 10? Padding(
+              padding: const EdgeInsets.only(left: 3, right: 3),
+              child: Container(
+                width: MediaQuery.sizeOf(context).width,
+                decoration: BoxDecoration(
+                  color: Colors.red.shade400,
+                  borderRadius: BorderRadius.circular(03),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: Center(child: Text('No communication from controller, Please check your controller connection...'.toUpperCase(),
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.normal, color: Colors.white70),)),
+                ),
+              ),
+            ):
+            const SizedBox(),
+
+            liveSync? Padding(
+              padding: const EdgeInsets.only(left: 3, right: 3),
+              child: LinearProgressIndicator(
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+                backgroundColor: Colors.grey[200],
+                minHeight: 4,
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+            ): const SizedBox(),
+
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Column(
+                  children: [
+                    DisplayAllLine(currentMaster: (widget.siteData.master[widget.masterInx]), provider: provider,),
+                    provider.currentSchedule.isNotEmpty? CurrentSchedule(siteData: widget.siteData, customerID: widget.customerID, currentSchedule: provider.currentSchedule,):
+                    const SizedBox(),
+                    provider.programQueue.isNotEmpty? NextSchedule(siteData: widget.siteData, userID: widget.userID, customerID: widget.customerID, programQueue: provider.programQueue,):
+                    const SizedBox(),
+                    provider.scheduledProgram.isNotEmpty? ScheduledProgramList(siteData: widget.siteData, customerId: widget.customerID, scheduledPrograms: provider.scheduledProgram, masterInx: widget.masterInx,):
+                    const SizedBox(),
+                    const SizedBox(height: 8,),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
       }else{
         final filteredScheduledPrograms = filterProgramsByCategory(Provider.of<MqttPayloadProvider>(context).scheduledProgram, crrIrrLine.id);
         final filteredProgramsQueue = filterProgramsQueueByCategory(Provider.of<MqttPayloadProvider>(context).programQueue, crrIrrLine.id);
         final filteredCurrentSchedule = filterCurrentScheduleByCategory(Provider.of<MqttPayloadProvider>(context).currentSchedule, crrIrrLine.id);
         filteredCurrentSchedule.insertAll(0, filterCurrentScheduleByProgramName(Provider.of<MqttPayloadProvider>(context).currentSchedule, 'StandAlone - Manual'));
 
-        final nodeList = Provider.of<MqttPayloadProvider>(context).nodeList;
-        try{
-          for (var items in nodeList) {
-            if (items is Map<String, dynamic>){
-              try {
-                int position = getNodePositionInNodeList(widget.masterInx, items['DeviceId']);
-                if (position != -1) {
-                  List<dynamic> rlyStatuses = items['RlyStatus'];
-                  Map<int, int> statusMap = {};
-                  try{
-                    statusMap = {for (var item in rlyStatuses) item['S_No']:item['Status']};
-                  }catch(e){
-                    statusMap = {for (var item in rlyStatuses) item.S_No:item.Status};
-                  }
-
-                  for (var line in widget.siteData.master[widget.masterInx].irrigationLine) {
-                    // Update mainValves
-                    for (var mainValve in line.mainValve) {
-                      if (statusMap.containsKey(mainValve.sNo)) {
-                        mainValve.status = statusMap[mainValve.sNo]!;
-                      }
-                    }
-                    // Update valves
-                    for (var valve in line.valve) {
-                      if (statusMap.containsKey(valve.sNo)) {
-                        valve.status = statusMap[valve.sNo]!;
-                      }
-                    }
-                  }
-                }else{
-                  print('${items['SNo']} The serial number not found');
-                }
-              } catch (e) {
-                print('Error updating node properties: $e');
-              }
-            }
-          }
-          setState(() {
-            crrIrrLine;
-          });
-        }
-        catch(e){
-          print(e);
-        }
-
-        var liveSync = Provider.of<MqttPayloadProvider>(context).liveSync;
-        Duration lastCommunication = Provider.of<MqttPayloadProvider>(context).lastCommunication;
-
         return Column(
           children: [
-
             lastCommunication.inMinutes >= 10? Padding(
               padding: const EdgeInsets.only(left: 3, right: 3),
               child: Container(
@@ -165,9 +207,9 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    screenWidth > 600 ? buildWideLayout():
+                    screenWidth > 600 ? buildWideLayout(crrIrrLine):
                     buildNarrowLayout(provider),
-                    filteredCurrentSchedule.isNotEmpty? CurrentSchedule(siteData: widget.siteData, customerID: widget.customerID, filteredCurrentSchedule: filteredCurrentSchedule,):
+                    filteredCurrentSchedule.isNotEmpty? CurrentSchedule(siteData: widget.siteData, customerID: widget.customerID, currentSchedule: filteredCurrentSchedule,):
                     const SizedBox(),
                     filteredProgramsQueue.isNotEmpty? NextSchedule(siteData: widget.siteData, userID: widget.userID, customerID: widget.customerID, programQueue: filteredProgramsQueue,):
                     const SizedBox(),
@@ -380,7 +422,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                   surfaceTintColor: Colors.white,
                   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(3))),
                   elevation: 5,
-                  child: DisplayIrrigationLine(irrigationLine: crrIrrLine),
+                  child: DisplayIrrigationLine(irrigationLine: crrIrrLine, currentLineId: crrIrrLine.id, currentMaster: widget.siteData.master[widget.masterInx]),
                 ),
               ),
               Positioned(
@@ -404,7 +446,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     );
   }
 
-  Widget buildWideLayout() {
+  Widget buildWideLayout(cIL) {
+
     return Padding(
       padding: const EdgeInsets.all(3.0),
       child: Container(
@@ -423,14 +466,14 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  PumpLineCentral(currentSiteData: widget.siteData, crrIrrLine:  crrIrrLine, masterIdx: widget.masterInx,),
+                  PumpLineCentral(currentSiteData: widget.siteData, crrIrrLine:cIL, masterIdx: widget.masterInx,),
                   Divider(height: 0, color: Colors.grey.shade300),
                   Container(height: 4, color: Colors.white24),
                   Padding(
                     padding: const EdgeInsets.only(left: 05, right: 00),
                     child: Divider(height: 0, color: Colors.grey.shade300),
                   ),
-                  DisplayIrrigationLine(irrigationLine: crrIrrLine),
+                  DisplayIrrigationLine(irrigationLine: crrIrrLine, currentLineId: crrIrrLine.id, currentMaster: widget.siteData.master[widget.masterInx]),
                 ],
               ),
             ),
@@ -475,8 +518,10 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
 
 class DisplayIrrigationLine extends StatefulWidget {
-  const DisplayIrrigationLine({Key? key, required this.irrigationLine}) : super(key: key);
+  const DisplayIrrigationLine({Key? key, required this.irrigationLine, required this.currentLineId, required this.currentMaster}) : super(key: key);
+  final MasterData currentMaster;
   final IrrigationLine irrigationLine;
+  final String currentLineId;
 
   @override
   State<DisplayIrrigationLine> createState() => _DisplayIrrigationLineState();
@@ -490,10 +535,21 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
 
     final screenWidth = MediaQuery.of(context).size.width;
 
-    final List<Widget> valveWidgets = [
-      ...widget.irrigationLine.mainValve.map((mv) => MainValveWidget(mv: mv, status: mv.status,)).toList(),
-      ...widget.irrigationLine.valve.map((vl) => ValveWidget(vl: vl, status: vl.status,)).toList(),
-    ];
+    final List<Widget> valveWidgets;
+
+    if(widget.currentLineId=='all'){
+      valveWidgets = [
+        for (var line in widget.currentMaster.irrigationLine) ...[
+          ...line.mainValve.map((mv) => MainValveWidget(mv: mv, status: mv.status)).toList(),
+          ...line.valve.map((vl) => ValveWidget(vl: vl, status: vl.status)).toList(),
+        ]
+      ];
+    }else{
+      valveWidgets = [
+        ...widget.irrigationLine.mainValve.map((mv) => MainValveWidget(mv: mv, status: mv.status,)).toList(),
+        ...widget.irrigationLine.valve.map((vl) => ValveWidget(vl: vl, status: vl.status,)).toList(),
+      ];
+    }
 
     int crossAxisCount = (screenWidth / 105).floor().clamp(1, double.infinity).toInt();
     int rowCount = (valveWidgets.length / crossAxisCount).ceil();

@@ -10,10 +10,10 @@ import '../../../constants/MyFunction.dart';
 import '../../../constants/http_service.dart';
 
 class CurrentSchedule extends StatefulWidget {
-  const CurrentSchedule({Key? key, required this.siteData, required this.customerID, required this.filteredCurrentSchedule}) : super(key: key);
+  const CurrentSchedule({Key? key, required this.siteData, required this.customerID, required this.currentSchedule}) : super(key: key);
   final DashboardModel siteData;
   final int customerID;
-  final List<CurrentScheduleModel> filteredCurrentSchedule;
+  final List<CurrentScheduleModel> currentSchedule;
 
   @override
   State<CurrentSchedule> createState() => _CurrentScheduleState();
@@ -26,6 +26,8 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
   void initState() {
     super.initState();
     //_startTimer();
+    print(widget.currentSchedule);
+    Text('');
   }
 
   @override
@@ -45,11 +47,11 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
   void _updateDurationQtyLeft() {
     bool allOnDelayLeftZero = true;
     try {
-      if(widget.filteredCurrentSchedule.isNotEmpty){
-        for (int i = 0; i < widget.filteredCurrentSchedule.length; i++) {
-          if(widget.filteredCurrentSchedule[i].message=='Running.'){
-            if (widget.filteredCurrentSchedule[i].duration_QtyLeft.contains(':')){
-              List<String> parts = widget.filteredCurrentSchedule[i].duration_QtyLeft.split(':');
+      if(widget.currentSchedule.isNotEmpty){
+        for (int i = 0; i < widget.currentSchedule.length; i++) {
+          if(widget.currentSchedule[i].message=='Running.'){
+            if (widget.currentSchedule[i].duration_QtyLeft.contains(':')){
+              List<String> parts = widget.currentSchedule[i].duration_QtyLeft.split(':');
               int hours = int.parse(parts[0]);
               int minutes = int.parse(parts[1]);
               int seconds = int.parse(parts[2]);
@@ -70,23 +72,23 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
               }
 
               String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-              if (widget.filteredCurrentSchedule[i].duration_QtyLeft != '00:00:00') {
+              if (widget.currentSchedule[i].duration_QtyLeft != '00:00:00') {
                 setState(() {
-                  widget.filteredCurrentSchedule[i].duration_QtyLeft = updatedDurationQtyLeft;
+                  widget.currentSchedule[i].duration_QtyLeft = updatedDurationQtyLeft;
                 });
               }
             }
             else {
-              double remainFlow = double.parse(widget.filteredCurrentSchedule[i].duration_QtyLeft);
+              double remainFlow = double.parse(widget.currentSchedule[i].duration_QtyLeft);
               if (remainFlow > 0) {
-                double flowRate = double.parse(widget.filteredCurrentSchedule[i].avgFlwRt);
+                double flowRate = double.parse(widget.currentSchedule[i].avgFlwRt);
                 remainFlow -= flowRate;
                 String formattedFlow = remainFlow.toStringAsFixed(2);
                 setState(() {
-                  widget.filteredCurrentSchedule[i].duration_QtyLeft = formattedFlow;
+                  widget.currentSchedule[i].duration_QtyLeft = formattedFlow;
                 });
               } else {
-                widget.filteredCurrentSchedule[i].duration_QtyLeft = '0.00';
+                widget.currentSchedule[i].duration_QtyLeft = '0.00';
               }
             }
             allOnDelayLeftZero = false;
@@ -145,13 +147,13 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
 
   Widget buildNarrowLayout() {
     return SizedBox(
-      height: widget.filteredCurrentSchedule.length * 200,
+      height: widget.currentSchedule.length * 200,
       child: Card(
         surfaceTintColor: Colors.white,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(3))),
         elevation: 5,
         child: ListView.builder(
-          itemCount: widget.filteredCurrentSchedule.length,
+          itemCount: widget.currentSchedule.length,
           physics: const NeverScrollableScrollPhysics(),
           itemBuilder: (context, index) {
             return Column(
@@ -174,14 +176,14 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                     children: [
                                       const Text('Start at', style: TextStyle(fontWeight: FontWeight.normal),),
                                       const SizedBox(width: 5,),
-                                      Text(convert24HourTo12Hour(widget.filteredCurrentSchedule[index].startTime)),
+                                      Text(convert24HourTo12Hour(widget.currentSchedule[index].startTime)),
                                     ],
                                   ),
                                   Row(
                                     children: [
                                       const Text('Duration', style: TextStyle(fontWeight: FontWeight.normal),),
                                       const SizedBox(width: 5,),
-                                      Text(widget.filteredCurrentSchedule[index].duration_Qty),
+                                      Text(widget.currentSchedule[index].duration_Qty),
                                     ],
                                   ),
                                 ],
@@ -193,9 +195,9 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  Text(widget.filteredCurrentSchedule[index].duration_QtyLeft,style: const TextStyle(fontSize: 20)),
+                                  Text(widget.currentSchedule[index].duration_QtyLeft,style: const TextStyle(fontSize: 20)),
                                   const VerticalDivider(),
-                                  Text('${widget.filteredCurrentSchedule[index].currentZone}/${widget.filteredCurrentSchedule[index].totalZone}',
+                                  Text('${widget.currentSchedule[index].currentZone}/${widget.currentSchedule[index].totalZone}',
                                       style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal)),
                                 ],
                               ),
@@ -222,12 +224,12 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Text(widget.filteredCurrentSchedule[index].programName),
+                              Text(widget.currentSchedule[index].programName),
                               const SizedBox(height: 3,),
-                              Text('${widget.filteredCurrentSchedule[index].programCategory} & ${widget.filteredCurrentSchedule[index].zoneName}'),
+                              Text('${widget.currentSchedule[index].programCategory} & ${widget.currentSchedule[index].zoneName}'),
                               const SizedBox(height: 3,),
-                              Text('${formatRtcValues(widget.filteredCurrentSchedule[index].currentRtc, widget.filteredCurrentSchedule[index].totalRtc)} & '
-                                  '${formatRtcValues(widget.filteredCurrentSchedule[index].currentCycle,widget.filteredCurrentSchedule[index].totalCycle)}'),
+                              Text('${formatRtcValues(widget.currentSchedule[index].currentRtc, widget.currentSchedule[index].totalRtc)} & '
+                                  '${formatRtcValues(widget.currentSchedule[index].currentCycle,widget.currentSchedule[index].totalCycle)}'),
                             ],
                           ),
                         ],
@@ -236,45 +238,45 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(getContentByCode(widget.filteredCurrentSchedule[index].reasonCode), style: const TextStyle(fontSize: 12, color: Colors.black),),
-                          widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual'?
+                          Text(getContentByCode(widget.currentSchedule[index].reasonCode), style: const TextStyle(fontSize: 12, color: Colors.black),),
+                          widget.currentSchedule[index].programName=='StandAlone - Manual'?
                           MaterialButton(
                             color: Colors.redAccent,
                             textColor: Colors.white,
-                            onPressed: widget.filteredCurrentSchedule[index].message=='Running.'? (){
+                            onPressed: widget.currentSchedule[index].message=='Running.'? (){
                               String payload = '0,0,0,0';
                               String payLoadFinal = jsonEncode({
                                 "800": [{"801": payload}]
                               });
                               MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
-                              sentManualModeToServer(0,widget.filteredCurrentSchedule[index].programName,
-                                  widget.filteredCurrentSchedule[index].duration_Qty=='00:00:00'? 3:
-                                  widget.filteredCurrentSchedule[index].duration_Qty.contains(':')?1: 2);
+                              sentManualModeToServer(0,widget.currentSchedule[index].programName,
+                                  widget.currentSchedule[index].duration_Qty=='00:00:00'? 3:
+                                  widget.currentSchedule[index].duration_Qty.contains(':')?1: 2);
                             } : null,
                             child: const Text('Stop'),
                           ):
-                          widget.filteredCurrentSchedule[index].programName.contains('StandAlone') ?
+                          widget.currentSchedule[index].programName.contains('StandAlone') ?
                           MaterialButton(
                             color: Colors.redAccent,
                             textColor: Colors.white,
                             onPressed: () async {
                               String payLoadFinal = jsonEncode({
-                                "3900": [{"3901": '0,${widget.filteredCurrentSchedule[index].programCategory},${widget.filteredCurrentSchedule[index].srlNo},'
-                                    '${widget.filteredCurrentSchedule[index].zoneSNo},,,,,,,,,,;'}]
+                                "3900": [{"3901": '0,${widget.currentSchedule[index].programCategory},${widget.currentSchedule[index].srlNo},'
+                                    '${widget.currentSchedule[index].zoneSNo},,,,,,,,,,;'}]
                               });
 
                               MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
-                              sentManualModeToServer(widget.filteredCurrentSchedule[index].programSno,widget.filteredCurrentSchedule[index].programName,
-                                  widget.filteredCurrentSchedule[index].duration_Qty=='00:00:00'? 3:
-                                  widget.filteredCurrentSchedule[index].duration_Qty.contains(':')?1: 2);
+                              sentManualModeToServer(widget.currentSchedule[index].programSno,widget.currentSchedule[index].programName,
+                                  widget.currentSchedule[index].duration_Qty=='00:00:00'? 3:
+                                  widget.currentSchedule[index].duration_Qty.contains(':')?1: 2);
                             },
                             child: const Text('Stop'),
                           ):
                           MaterialButton(
                             color: Colors.green,
                             textColor: Colors.white,
-                            onPressed: widget.filteredCurrentSchedule[index].message=='Running.'? (){
-                              String payload = '${widget.filteredCurrentSchedule[index].srlNo},0';
+                            onPressed: widget.currentSchedule[index].message=='Running.'? (){
+                              String payload = '${widget.currentSchedule[index].srlNo},0';
                               String payLoadFinal = jsonEncode({
                                 "3700": [{"3701": payload}]
                               });
@@ -287,7 +289,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                     ],
                   ),
                 ),
-                if(index != widget.filteredCurrentSchedule.length - 1)
+                if(index != widget.currentSchedule.length - 1)
                   Divider(height: 5, color: Colors.teal.shade50, thickness: 4,),
                 const SizedBox(height: 5,),
               ],
@@ -308,7 +310,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
         ),
         borderRadius: const BorderRadius.all(Radius.circular(5)),
       ),
-      height: (widget.filteredCurrentSchedule.length * 45) + 45,
+      height: (widget.currentSchedule.length * 45) + 45,
       child: DataTable2(
         columnSpacing: 12,
         horizontalMargin: 12,
@@ -363,69 +365,69 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
           ),
         ],
 
-        rows: List<DataRow>.generate(widget.filteredCurrentSchedule.length, (index) => DataRow(cells: [
+        rows: List<DataRow>.generate(widget.currentSchedule.length, (index) => DataRow(cells: [
           DataCell(
            Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(widget.filteredCurrentSchedule[index].programName),
-                  Text(getContentByCode(widget.filteredCurrentSchedule[index].reasonCode), style: const TextStyle(fontSize: 10, color: Colors.black),),
+                  Text(widget.currentSchedule[index].programName),
+                  Text(getContentByCode(widget.currentSchedule[index].reasonCode), style: const TextStyle(fontSize: 10, color: Colors.black),),
                 ],
               ),
           ),
-          DataCell(Text(widget.filteredCurrentSchedule[index].programCategory)),
-          DataCell(Text('${widget.filteredCurrentSchedule[index].currentZone}/${widget.filteredCurrentSchedule[index].totalZone}')),
-          DataCell(Text(widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual'? '--':widget.filteredCurrentSchedule[index].zoneName)),
-          DataCell(Center(child: Text(formatRtcValues(widget.filteredCurrentSchedule[index].currentRtc, widget.filteredCurrentSchedule[index].totalRtc)))),
-          DataCell(Center(child: Text(formatRtcValues(widget.filteredCurrentSchedule[index].currentCycle,widget.filteredCurrentSchedule[index].totalCycle)))),
-          DataCell(Center(child: Text(convert24HourTo12Hour(widget.filteredCurrentSchedule[index].startTime)))),
-          DataCell(Center(child: Text(widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual' &&
-              (widget.filteredCurrentSchedule[index].duration_Qty=='00:00:00'||widget.filteredCurrentSchedule[index].duration_Qty=='0')?
-          'Timeless': widget.filteredCurrentSchedule[index].duration_Qty))),
-          DataCell(Center(child: Text('${widget.filteredCurrentSchedule[index].actualFlowRate}/hr'))),
-          DataCell(Center(child: Text(widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual' &&
-              (widget.filteredCurrentSchedule[index].duration_Qty=='00:00:00'||widget.filteredCurrentSchedule[index].duration_Qty=='0')? '----': widget.filteredCurrentSchedule[index].duration_QtyLeft,
+          DataCell(Text(widget.currentSchedule[index].programCategory)),
+          DataCell(Text('${widget.currentSchedule[index].currentZone}/${widget.currentSchedule[index].totalZone}')),
+          DataCell(Text(widget.currentSchedule[index].programName=='StandAlone - Manual'? '--':widget.currentSchedule[index].zoneName)),
+          DataCell(Center(child: Text(formatRtcValues(widget.currentSchedule[index].currentRtc, widget.currentSchedule[index].totalRtc)))),
+          DataCell(Center(child: Text(formatRtcValues(widget.currentSchedule[index].currentCycle,widget.currentSchedule[index].totalCycle)))),
+          DataCell(Center(child: Text(convert24HourTo12Hour(widget.currentSchedule[index].startTime)))),
+          DataCell(Center(child: Text(widget.currentSchedule[index].programName=='StandAlone - Manual' &&
+              (widget.currentSchedule[index].duration_Qty=='00:00:00'||widget.currentSchedule[index].duration_Qty=='0')?
+          'Timeless': widget.currentSchedule[index].duration_Qty))),
+          DataCell(Center(child: Text('${widget.currentSchedule[index].actualFlowRate}/hr'))),
+          DataCell(Center(child: Text(widget.currentSchedule[index].programName=='StandAlone - Manual' &&
+              (widget.currentSchedule[index].duration_Qty=='00:00:00'||widget.currentSchedule[index].duration_Qty=='0')? '----': widget.currentSchedule[index].duration_QtyLeft,
               style:  const TextStyle(fontSize: 20)))),
           DataCell(Center(
-            child: widget.filteredCurrentSchedule[index].programName=='StandAlone - Manual'?
+            child: widget.currentSchedule[index].programName=='StandAlone - Manual'?
             MaterialButton(
               color: Colors.redAccent,
               textColor: Colors.white,
-              onPressed: widget.filteredCurrentSchedule[index].message=='Running.'? (){
+              onPressed: widget.currentSchedule[index].message=='Running.'? (){
                 String payload = '0,0,0,0';
                 String payLoadFinal = jsonEncode({
                   "800": [{"801": payload}]
                 });
                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
-                sentManualModeToServer(0,widget.filteredCurrentSchedule[index].programName, widget.filteredCurrentSchedule[index].duration_Qty=='00:00:00'? 3:
-                widget.filteredCurrentSchedule[index].duration_Qty.contains(':')? 1: 2);
+                sentManualModeToServer(0,widget.currentSchedule[index].programName, widget.currentSchedule[index].duration_Qty=='00:00:00'? 3:
+                widget.currentSchedule[index].duration_Qty.contains(':')? 1: 2);
               }: null,
               child: const Text('Stop'),
             ):
-            widget.filteredCurrentSchedule[index].programName.contains('StandAlone') ?
+            widget.currentSchedule[index].programName.contains('StandAlone') ?
             MaterialButton(
               color: Colors.redAccent,
               textColor: Colors.white,
               onPressed: () async {
 
                 String payLoadFinal = jsonEncode({
-                  "3900": [{"3901": '0,${widget.filteredCurrentSchedule[index].programCategory},${widget.filteredCurrentSchedule[index].programSno},'
-                      '${widget.filteredCurrentSchedule[index].zoneSNo},,,,,,,,,0,'}]
+                  "3900": [{"3901": '0,${widget.currentSchedule[index].programCategory},${widget.currentSchedule[index].programSno},'
+                      '${widget.currentSchedule[index].zoneSNo},,,,,,,,,0,'}]
                 });
                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
 
-                sentManualModeToServer(widget.filteredCurrentSchedule[index].programSno,widget.filteredCurrentSchedule[index].programName,
-                    widget.filteredCurrentSchedule[index].duration_Qty=='00:00:00'? 3:
-                    widget.filteredCurrentSchedule[index].duration_Qty.contains(':')?1: 2);
+                sentManualModeToServer(widget.currentSchedule[index].programSno,widget.currentSchedule[index].programName,
+                    widget.currentSchedule[index].duration_Qty=='00:00:00'? 3:
+                    widget.currentSchedule[index].duration_Qty.contains(':')?1: 2);
               },
               child: const Text('Stop'),
             ):
             MaterialButton(
               color: Colors.orange,
               textColor: Colors.white,
-              onPressed: widget.filteredCurrentSchedule[index].message=='Running.'? (){
-                String payload = '${widget.filteredCurrentSchedule[index].srlNo},0';
+              onPressed: widget.currentSchedule[index].message=='Running.'? (){
+                String payload = '${widget.currentSchedule[index].srlNo},0';
                 String payLoadFinal = jsonEncode({
                   "3700": [{"3701": payload}]
                 });

@@ -201,8 +201,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   void displayServerData(){
     MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
 
-    if(mySiteList[siteIndex].master[masterIndex].categoryId==1||
-        mySiteList[siteIndex].master[masterIndex].categoryId==2){
+    if(mySiteList[siteIndex].master[masterIndex].categoryId==1 ||
+        mySiteList[siteIndex].master[masterIndex].categoryId==2) {
       //gem or gem+ controller
       payloadProvider.updateWifiStrength(mySiteList[siteIndex].master[masterIndex].gemLive[0].WifiStrength);
       payloadProvider.updateLastSync('${mySiteList[siteIndex].master[masterIndex].liveSyncDate} ${mySiteList[siteIndex].master[masterIndex].liveSyncTime}');
@@ -414,7 +414,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           }, icon: Icon(appbarBottomOpen?Icons.keyboard_double_arrow_up:Icons.keyboard_double_arrow_down)),
           const SizedBox(width: 3,),
           IconButton(
-            icon: Icon(Icons.list), // Custom image icon
+            icon: const Icon(Icons.list), // Custom image icon
             onPressed: () {
               sideSheet();
             },
@@ -787,12 +787,16 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
             mySiteList[siteIndex].master[masterIndex].categoryId == 1 ||
                 mySiteList[siteIndex].master[masterIndex].categoryId == 2? const SizedBox(width: 15,): const SizedBox(),
+
             mySiteList[siteIndex].master[masterIndex].categoryId == 1 ||
                 mySiteList[siteIndex].master[masterIndex].categoryId == 2? Container(width: 1,height: 20, color: Colors.white54,): const SizedBox(),
+
             mySiteList[siteIndex].master[masterIndex].categoryId == 1 ||
                 mySiteList[siteIndex].master[masterIndex].categoryId == 2? const SizedBox(width: 5,): const SizedBox(),
-            mySiteList[siteIndex].master[masterIndex].categoryId == 1 ||
-                mySiteList[siteIndex].master[masterIndex].categoryId == 2? DropdownButton(
+
+            (mySiteList[siteIndex].master[masterIndex].categoryId == 1 ||
+                mySiteList[siteIndex].master[masterIndex].categoryId == 2) && mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1?
+            DropdownButton(
               underline: Container(),
               items: (mySiteList[siteIndex].master[masterIndex].irrigationLine ?? []).map((line) {
                 return DropdownMenuItem(
@@ -814,8 +818,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               iconEnabledColor: Colors.white,
               iconDisabledColor: Colors.white,
               focusColor: Colors.transparent,
-            ):
-            Text(mySiteList[siteIndex].master[masterIndex].irrigationLine[0].name),
+            ) :
+            Text(mySiteList[siteIndex].master[masterIndex].irrigationLine[0].name, style: const TextStyle(fontSize: 17),),
 
             const SizedBox(width: 15,),
             Container(width: 1, height: 20, color: Colors.white54,),
@@ -1869,6 +1873,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
         break;
       case 17:
         msg ='Pump Off Alarm';
+        break;
+      case 18:
+        msg ='Pressure Switch high';
         break;
       default:
         msg ='alarmType default';

@@ -1,16 +1,9 @@
-import 'dart:async';
 
-import 'package:data_table_2/data_table_2.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:oro_irrigation_new/constants/theme.dart';
-import 'package:provider/provider.dart';
 
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../state_management/MqttPayloadProvider.dart';
 import '../CustomerDashboard.dart';
-import 'CurrentSchedule.dart';
 import 'PumpLineCentral.dart';
 
 class DisplayAllLine extends StatefulWidget {
@@ -23,7 +16,6 @@ class DisplayAllLine extends StatefulWidget {
 }
 
 class _DisplayAllLineState extends State<DisplayAllLine> {
-
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +70,7 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
 
                             widget.provider.irrigationPump.isNotEmpty? Padding(
                               padding: EdgeInsets.only(top: widget.provider.fertilizerCentral.isNotEmpty || widget.provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                              child: DisplayIrrigationPump(currentLineId: 'all', pumpList: widget.currentMaster.gemLive[0].pumpList,),
+                              child: DisplayIrrigationPump(currentLineId: 'all', deviceId: widget.currentMaster.deviceId,),
                             ):
                             const SizedBox(),
 
@@ -170,7 +162,6 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
                   ),
 
                   DisplayIrrigationLine(irrigationLine: widget.currentMaster.irrigationLine[0], currentLineId: 'all', currentMaster: widget.currentMaster,)
-
                 ],
               ),
             ),

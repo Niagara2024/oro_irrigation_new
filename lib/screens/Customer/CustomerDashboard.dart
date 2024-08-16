@@ -171,6 +171,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
         final filteredProgramsQueue = filterProgramsQueueByCategory(Provider.of<MqttPayloadProvider>(context).programQueue, crrIrrLine.id);
         final filteredCurrentSchedule = filterCurrentScheduleByCategory(Provider.of<MqttPayloadProvider>(context).currentSchedule, crrIrrLine.id);
         filteredCurrentSchedule.insertAll(0, filterCurrentScheduleByProgramName(Provider.of<MqttPayloadProvider>(context).currentSchedule, 'StandAlone - Manual'));
+        int? irrigationPauseFlag = getIrrigationPauseFlag(crrIrrLine.id, Provider.of<MqttPayloadProvider>(context).payload2408);
 
         return Column(
           children: [
@@ -186,6 +187,23 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                   padding: const EdgeInsets.all(2.0),
                   child: Center(child: Text('No communication from controller, Please check your controller connection...'.toUpperCase(),
                     style: const TextStyle(fontSize: 15, fontWeight: FontWeight.normal, color: Colors.white70),)),
+                ),
+              ),
+            ):
+            const SizedBox(),
+
+            irrigationPauseFlag !=0? Padding(
+              padding: const EdgeInsets.only(left: 3, right: 3),
+              child: Container(
+                width: MediaQuery.sizeOf(context).width,
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade200,
+                  borderRadius: BorderRadius.circular(03),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: Center(child: Text(getContentByCode(irrigationPauseFlag!).toUpperCase(),
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.normal, color: Colors.black54),)),
                 ),
               ),
             ):
@@ -207,7 +225,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    screenWidth > 600 ? buildWideLayout(crrIrrLine):
+                    screenWidth > 600 ? buildWideLayout():
                     buildNarrowLayout(provider),
                     filteredCurrentSchedule.isNotEmpty? CurrentSchedule(siteData: widget.siteData, customerID: widget.customerID, currentSchedule: filteredCurrentSchedule,):
                     const SizedBox(),
@@ -281,7 +299,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                               //i pump
                               provider.irrigationPump.isNotEmpty? Padding(
                                 padding: const EdgeInsets.only(top: 15),
-                                child: DisplayIrrigationPump(currentLineId: crrIrrLine.id, pumpList: widget.siteData.master[widget.masterInx].gemLive[0].pumpList,),
+                                child: DisplayIrrigationPump(currentLineId: crrIrrLine.id, deviceId: widget.siteData.master[widget.masterInx].deviceId,),
                               ):
                               const SizedBox(),
 
@@ -446,7 +464,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     );
   }
 
-  Widget buildWideLayout(cIL) {
+  Widget buildWideLayout() {
 
     return Padding(
       padding: const EdgeInsets.all(3.0),
@@ -466,7 +484,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  PumpLineCentral(currentSiteData: widget.siteData, crrIrrLine:cIL, masterIdx: widget.masterInx,),
+                  PumpLineCentral(currentSiteData: widget.siteData, crrIrrLine:crrIrrLine, masterIdx: widget.masterInx,),
                   Divider(height: 0, color: Colors.grey.shade300),
                   Container(height: 4, color: Colors.white24),
                   Padding(

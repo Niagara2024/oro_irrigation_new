@@ -40,6 +40,44 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
     final provider = Provider.of<MqttPayloadProvider>(context);
     int? irrigationPauseFlag = getIrrigationPauseFlag(widget.crrIrrLine.id, Provider.of<MqttPayloadProvider>(context).payload2408);
 
+    /*if(provider.filtersCentral.isEmpty && provider.filtersLocal.isEmpty
+        && provider.fertilizerCentral.isEmpty && provider.fertilizerLocal.isEmpty){
+      return Padding(
+        padding: const EdgeInsets.only(top: 9, left: 5, right: 5),
+        child: provider.irrigationPump.isNotEmpty? Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            provider.sourcePump.isNotEmpty? Padding(
+              padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+              child: DisplaySourcePump(deviceId: widget.currentSiteData.master[widget.masterIdx].deviceId,),
+            ):
+            const SizedBox(),
+            provider.irrigationPump.isNotEmpty? Padding(
+              padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+              child: SizedBox(
+                width: 52.50,
+                height: 70,
+                child : Stack(
+                  children: [
+                    provider.sourcePump.isNotEmpty? Image.asset('assets/images/dp_sump_src.png'):
+                    Image.asset('assets/images/dp_sump.png'),
+                  ],
+                ),
+              ),
+            ):
+            const SizedBox(),
+            provider.irrigationPump.isNotEmpty? Padding(
+              padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+              child: DisplayIrrigationPump(currentLineId: widget.crrIrrLine.id, deviceId: widget.currentSiteData.master[widget.masterIdx].deviceId,),
+            ):
+            const SizedBox(),
+          ],
+        ):
+        const SizedBox(height: 20),
+      );
+    }*/
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -120,7 +158,8 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            (provider.fertilizerCentral.isNotEmpty || provider.filtersCentral.isNotEmpty) && provider.fertilizerLocal.isNotEmpty? SizedBox(
+                            (provider.fertilizerCentral.isNotEmpty || provider.filtersCentral.isNotEmpty) && provider.fertilizerLocal.isNotEmpty?
+                            SizedBox(
                               width: 4.5,
                               height: 150,
                               child: Row(
@@ -214,96 +253,6 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
       ],
     );
 
-    /*final provider = Provider.of<MqttPayloadProvider>(context);
-    return ScrollConfiguration(
-      behavior: const ScrollBehavior(),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Padding(
-          padding: const EdgeInsets.only(top: 9, left: 5, right: 5),
-          child: provider.irrigationPump.isNotEmpty? Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              provider.sourcePump.isNotEmpty? Padding(
-                padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                child: DisplaySourcePump(deviceId: widget.currentSiteData.master[widget.masterIdx].deviceId,),
-              ):
-              const SizedBox(),
-              provider.irrigationPump.isNotEmpty? Padding(
-                padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                child: SizedBox(
-                  width: 52.50,
-                  height: 70,
-                  child : Stack(
-                    children: [
-                      provider.sourcePump.isNotEmpty? Image.asset('assets/images/dp_sump_src.png'):
-                      Image.asset('assets/images/dp_sump.png'),
-                    ],
-                  ),
-                ),
-              ):
-              const SizedBox(),
-              provider.irrigationPump.isNotEmpty? Padding(
-                padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                child: DisplayIrrigationPump(currentLineId: widget.crrIrrLine.id, pumpList: widget.currentSiteData.master[widget.masterIdx].gemLive[0].pumpList,),
-              ):
-              const SizedBox(),
-              provider.filtersCentral.isNotEmpty? Padding(
-                padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                child: DisplayFilter(currentLineId: widget.crrIrrLine.id,),
-              ): const SizedBox(),
-              for(int i=0; i<provider.payload2408.length; i++)
-                provider.payload2408.isNotEmpty?  Padding(
-                  padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                  child: provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(crInx: i):null,
-                ) : const SizedBox(),
-              provider.fertilizerCentral.isNotEmpty? DisplayCentralFertilizer(currentLineId: widget.crrIrrLine.id,): const SizedBox(),
-
-              //local
-              provider.irrigationPump.isNotEmpty? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      (provider.fertilizerCentral.isNotEmpty || provider.filtersCentral.isNotEmpty) && provider.fertilizerLocal.isNotEmpty? SizedBox(
-                        width: 4.5,
-                        height: 150,
-                        child: Row(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(top: 42),
-                              child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
-                            ),
-                            const SizedBox(width: 4.5,),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 45),
-                              child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
-                            ),
-                          ],
-                        ),
-                      ):
-                      const SizedBox(),
-                      provider.filtersLocal.isNotEmpty? Padding(
-                        padding: EdgeInsets.only(top: provider.fertilizerLocal.isNotEmpty?38.4:0),
-                        child: LocalFilter(currentLineId: widget.crrIrrLine.id,),
-                      ):
-                      const SizedBox(),
-                      provider.fertilizerLocal.isNotEmpty? DisplayLocalFertilizer(currentLineId: widget.crrIrrLine.id,):
-                      const SizedBox(),
-                    ],
-                  ),
-                ],
-              ):
-              const SizedBox(height: 20)
-            ],
-          ):
-          const SizedBox(height: 20),
-        ),
-      ),
-    );*/
   }
 
 }
@@ -686,10 +635,10 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
     timer?.cancel();
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       try{
-        final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
-        for (int i = 0; i < provider.sourcePump.length; i++) {
-          if(provider.sourcePump[i]['OnDelayLeft']!=null){
-            List<String> parts = provider.sourcePump[i]['OnDelayLeft'].split(':');
+        final sourcePump = Provider.of<MqttPayloadProvider>(context, listen: false).sourcePump;
+        for (int i = 0; i < sourcePump.length; i++) {
+          if(sourcePump[i]['OnDelayLeft']!=null){
+            List<String> parts = sourcePump[i]['OnDelayLeft'].split(':');
             int hours = int.parse(parts[0]);
             int minutes = int.parse(parts[1]);
             int seconds = int.parse(parts[2]);
@@ -710,9 +659,9 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
             }
 
             String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-            if(provider.sourcePump[i]['OnDelayLeft']!='00:00:00'){
+            if(sourcePump[i]['OnDelayLeft']!='00:00:00'){
               setState(() {
-                provider.sourcePump[i]['OnDelayLeft'] = updatedDurationQtyLeft;
+                sourcePump[i]['OnDelayLeft'] = updatedDurationQtyLeft;
               });
             }
           }
@@ -1269,7 +1218,6 @@ class _DisplayFilterState extends State<DisplayFilter> {
           .cast<Map<String, dynamic>>();
     }
 
-
     return widget.currentLineId=='all' ?Column(
       children: [
         Row(
@@ -1277,6 +1225,172 @@ class _DisplayFilterState extends State<DisplayFilter> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             for(int i=0; i<filteredCentralFilter.length; i++)
+              Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      filteredCentralFilter[i]['PrsIn']!='-'?
+                      SizedBox(
+                        width: 70,
+                        height: 70,
+                        child : Stack(
+                          children: [
+                            Image.asset('assets/images/dp_prs_sensor.png',),
+                            Positioned(
+                              top: 42,
+                              left: 5,
+                              child: Container(
+                                width: 60,
+                                height: 17,
+                                decoration: BoxDecoration(
+                                  color:Colors.yellow,
+                                  borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                  border: Border.all(color: Colors.grey, width: .50,),
+                                ),
+                                child: Center(
+                                  child: Text('${double.parse(filteredCentralFilter[i]['PrsIn']).toStringAsFixed(2)} bar', style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ):
+                      const SizedBox(),
+                      SizedBox(
+                        height: 90,
+                        width: filteredCentralFilter[i]['FilterStatus'].length * 70,
+                        child: ListView.builder(
+                          itemCount: filteredCentralFilter[i]['FilterStatus'].length,
+                          scrollDirection: Axis.horizontal,
+                          //reverse: true,
+                          itemBuilder: (BuildContext context, int flIndex) {
+                            return Column(
+                              children: [
+                                Stack(
+                                  children: [
+                                    SizedBox(
+                                      width: 70,
+                                      height: 70,
+                                      child: AppImages.getAsset('filter', filteredCentralFilter[i]['FilterStatus'][flIndex]['Status'],''),
+                                    ),
+                                    Positioned(
+                                      top: 40,
+                                      left: 7.5,
+                                      child: filteredCentralFilter[i]['DurationLeft']!='00:00:00'? filteredCentralFilter[i]['Status'] == (flIndex+1) ? Container(
+                                        color: Colors.greenAccent,
+                                        width: 55,
+                                        child: Center(
+                                          child: Text(filteredCentralFilter[i]['DurationLeft'],
+                                            style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          ),
+                                        ),
+                                      ) :
+                                      const SizedBox(): const SizedBox(),
+                                    ),
+                                    Positioned(
+                                      top: 0,
+                                      left: 45,
+                                      child: filteredCentralFilter[i]['PrsIn']!='-' && filteredCentralFilter[i]['FilterStatus'].length-1==flIndex? Container(
+                                        width:25,
+                                        decoration: BoxDecoration(
+                                          color:Colors.yellow,
+                                          borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                          border: Border.all(color: Colors.grey, width: .50,),
+                                        ),
+                                        child: Center(
+                                          child: Text('${filteredCentralFilter[i]['DpValue']}', style: const TextStyle(fontSize: 10),),
+                                        ),
+
+                                      ) :
+                                      const SizedBox(),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  width: 70,
+                                  height: 20,
+                                  child: Center(
+                                    child: Text(filteredCentralFilter[i]['FilterStatus'][flIndex]['SW_Name'] ?? filteredCentralFilter[i]['FilterStatus'][flIndex]['Name'], style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                      filteredCentralFilter[i]['PrsOut'] != '-'?
+                      SizedBox(
+                        width: 70,
+                        height: 70,
+                        child : Stack(
+                          children: [
+                            Image.asset('assets/images/dp_prs_sensor.png',),
+                            Positioned(
+                              top: 42,
+                              left: 5,
+                              child: Container(
+                                width: 60,
+                                height: 17,
+                                decoration: BoxDecoration(
+                                  color:Colors.yellow,
+                                  borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                  border: Border.all(color: Colors.grey, width: .50,),
+                                ),
+                                child: Center(
+                                  child: Text('${double.parse(filteredCentralFilter[i]['PrsOut']).toStringAsFixed(2)} bar', style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ) :
+                      const SizedBox(),
+                    ],
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade50,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    width: filteredCentralFilter[i]['FilterStatus'].length * 60,
+                    child: Center(
+                      child: Text(filteredCentralFilter[i]['SW_Name'] ?? filteredCentralFilter[i]['FilterSite'], style: const TextStyle(color: primaryColorDark),),
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ],
+    ):
+    Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        for(int i=0; i<filteredCentralFilter.length; i++)
+          Column(
+            children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1339,10 +1453,10 @@ class _DisplayFilterState extends State<DisplayFilter> {
                                     child: Center(
                                       child: Text(filteredCentralFilter[i]['DurationLeft'],
                                         style: const TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                          color: Colors.black,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                   ) :
@@ -1418,158 +1532,18 @@ class _DisplayFilterState extends State<DisplayFilter> {
                   const SizedBox(),
                 ],
               ),
-          ],
-        ),
-        Text(filteredCentralFilter.isNotEmpty? filteredCentralFilter[0]['SW_Name']?? filteredCentralFilter[0]['FilterSite']:'', style: const TextStyle(color: primaryColorDark),),
-      ],
-    ):
-    Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        for(int i=0; i<filteredCentralFilter.length; i++)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              filteredCentralFilter[i]['PrsIn']!='-'?
-              SizedBox(
-                width: 70,
-                height: 70,
-                child : Stack(
-                  children: [
-                    Image.asset('assets/images/dp_prs_sensor.png',),
-                    Positioned(
-                      top: 42,
-                      left: 5,
-                      child: Container(
-                        width: 60,
-                        height: 17,
-                        decoration: BoxDecoration(
-                          color:Colors.yellow,
-                          borderRadius: const BorderRadius.all(Radius.circular(2)),
-                          border: Border.all(color: Colors.grey, width: .50,),
-                        ),
-                        child: Center(
-                          child: Text('${double.parse(filteredCentralFilter[i]['PrsIn']).toStringAsFixed(2)} bar', style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(3),
                 ),
-              ):
-              const SizedBox(),
-              SizedBox(
-                height: 90,
-                width: filteredCentralFilter[i]['FilterStatus'].length * 70,
-                child: ListView.builder(
-                  itemCount: filteredCentralFilter[i]['FilterStatus'].length,
-                  scrollDirection: Axis.horizontal,
-                  //reverse: true,
-                  itemBuilder: (BuildContext context, int flIndex) {
-                    return Column(
-                      children: [
-                        Stack(
-                          children: [
-                            SizedBox(
-                              width: 70,
-                              height: 70,
-                              child: AppImages.getAsset('filter', filteredCentralFilter[i]['FilterStatus'][flIndex]['Status'],''),
-                            ),
-                            Positioned(
-                              top: 40,
-                              left: 7.5,
-                              child: filteredCentralFilter[i]['DurationLeft']!='00:00:00'? filteredCentralFilter[i]['Status'] == (flIndex+1) ? Container(
-                                color: Colors.greenAccent,
-                                width: 55,
-                                child: Center(
-                                  child: Text(filteredCentralFilter[i]['DurationLeft'],
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ) :
-                              const SizedBox(): const SizedBox(),
-                            ),
-                            Positioned(
-                              top: 0,
-                              left: 45,
-                              child: filteredCentralFilter[i]['PrsIn']!='-' && filteredCentralFilter[i]['FilterStatus'].length-1==flIndex? Container(
-                                width:25,
-                                decoration: BoxDecoration(
-                                  color:Colors.yellow,
-                                  borderRadius: const BorderRadius.all(Radius.circular(2)),
-                                  border: Border.all(color: Colors.grey, width: .50,),
-                                ),
-                                child: Center(
-                                  child: Text('${filteredCentralFilter[i]['DpValue']}', style: const TextStyle(fontSize: 10),),
-                                ),
-
-                              ) :
-                              const SizedBox(),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          width: 70,
-                          height: 20,
-                          child: Center(
-                            child: Text(filteredCentralFilter[i]['FilterStatus'][flIndex]['SW_Name'] ?? filteredCentralFilter[i]['FilterStatus'][flIndex]['Name'], style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                width: filteredCentralFilter[i]['FilterStatus'].length * 60,
+                child: Center(
+                  child: Text(filteredCentralFilter[0]['SW_Name'] ?? filteredCentralFilter[0]['FilterSite'], style: const TextStyle(color: primaryColorDark),),
                 ),
               ),
-              filteredCentralFilter[i]['PrsOut'] != '-'?
-              SizedBox(
-                width: 70,
-                height: 70,
-                child : Stack(
-                  children: [
-                    Image.asset('assets/images/dp_prs_sensor.png',),
-                    Positioned(
-                      top: 42,
-                      left: 5,
-                      child: Container(
-                        width: 60,
-                        height: 17,
-                        decoration: BoxDecoration(
-                          color:Colors.yellow,
-                          borderRadius: const BorderRadius.all(Radius.circular(2)),
-                          border: Border.all(color: Colors.grey, width: .50,),
-                        ),
-                        child: Center(
-                          child: Text('${double.parse(filteredCentralFilter[i]['PrsOut']).toStringAsFixed(2)} bar', style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ) :
-              const SizedBox(),
             ],
           ),
-        Text(filteredCentralFilter.isNotEmpty? filteredCentralFilter[0]['SW_Name']?? filteredCentralFilter[0]['FilterSite']:'', style: const TextStyle(color: primaryColorDark),),
       ],
     );
 
@@ -1579,11 +1553,11 @@ class _DisplayFilterState extends State<DisplayFilter> {
     timer?.cancel();
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       try{
-        final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
-        for(int fIndex=0; fIndex<provider.filtersCentral.length; fIndex++){
-          if(provider.filtersCentral[fIndex]['DurationLeft']!='00:00:00'){
+        final filtersCentral = Provider.of<MqttPayloadProvider>(context, listen: false).filtersCentral;
+        for(int fIndex=0; fIndex<filtersCentral.length; fIndex++){
+          if(filtersCentral[fIndex]['DurationLeft']!='00:00:00'){
 
-            List<String> parts = provider.filtersCentral[fIndex]['DurationLeft'].split(':');
+            List<String> parts = filtersCentral[fIndex]['DurationLeft'].split(':');
             int hours = int.parse(parts[0]);
             int minutes = int.parse(parts[1]);
             int seconds = int.parse(parts[2]);
@@ -1606,7 +1580,7 @@ class _DisplayFilterState extends State<DisplayFilter> {
             String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
             if(updatedDurationQtyLeft!='00:00:00'){
               setState(() {
-                provider.filtersCentral[fIndex]['DurationLeft'] = updatedDurationQtyLeft;
+                filtersCentral[fIndex]['DurationLeft'] = updatedDurationQtyLeft;
               });
             }
           }
@@ -1895,7 +1869,8 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                           const SizedBox(width: 4.0,),
                           VerticalDivider(width: 0,color: Colors.grey.shade300,),
                           const SizedBox(width: 5.0,),
-                          SizedBox(
+
+                          fertilizerCentral[fIndex]['Ec'].length!=0?SizedBox(
                             width: fertilizerCentral[fIndex]['Ec'].length>1? 115 : 57,
                             height: 30,
                             child: Column(
@@ -1938,13 +1913,14 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                                 const SizedBox(),
                               ],
                             ),
-                          ),
+                          ):
+                          const SizedBox(),
                           Container(
                             decoration: BoxDecoration(
                               color: Colors.green.shade50,
                               borderRadius: BorderRadius.circular(3),
                             ),
-                            width: fertilizerCentral[fIndex]['Fertilizer'].length * 25,
+                            width: (fertilizerCentral[fIndex]['Fertilizer'].length * 65) - (fertilizerCentral[fIndex]['Ec'].length * 70),
                             child: Center(
                               child: Text(fertilizerCentral[0]['SW_Name'] ?? fertilizerCentral[0]['FertilizerSite'], style: const TextStyle(color: primaryColorDark),),
                             ),
@@ -2009,8 +1985,8 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
     timer?.cancel();
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       try{
-        final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
-        for (var central in provider.fertilizerCentral) {
+        final fertilizerCentral = Provider.of<MqttPayloadProvider>(context, listen: false).fertilizerCentral;
+        for (var central in fertilizerCentral) {
           central['Fertilizer'].forEach((fertilizer) {
             int ferMethod = fertilizer['FertMethod'] is int
                 ? fertilizer['FertMethod']
@@ -2263,6 +2239,172 @@ class _LocalFilterState extends State<LocalFilter> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             for(int i=0; i<filteredLocalFilter.length; i++)
+              Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      filteredLocalFilter[i]['PrsIn']!='-'?
+                      SizedBox(
+                        width: 70,
+                        height: 70,
+                        child : Stack(
+                          children: [
+                            Image.asset('assets/images/dp_prs_sensor.png',),
+                            Positioned(
+                              top: 42,
+                              left: 5,
+                              child: Container(
+                                width: 60,
+                                height: 17,
+                                decoration: BoxDecoration(
+                                  color:Colors.yellow,
+                                  borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                  border: Border.all(color: Colors.grey, width: .50,),
+                                ),
+                                child: Center(
+                                  child: Text('${double.parse(filteredLocalFilter[i]['PrsIn']).toStringAsFixed(2)} bar', style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ):
+                      const SizedBox(),
+                      SizedBox(
+                        height: 90,
+                        width: filteredLocalFilter[i]['FilterStatus'].length * 70,
+                        child: ListView.builder(
+                          itemCount: filteredLocalFilter[i]['FilterStatus'].length,
+                          scrollDirection: Axis.horizontal,
+                          //reverse: true,
+                          itemBuilder: (BuildContext context, int flIndex) {
+                            return Column(
+                              children: [
+                                Stack(
+                                  children: [
+                                    SizedBox(
+                                      width: 70,
+                                      height: 70,
+                                      child: AppImages.getAsset('filter', filteredLocalFilter[i]['FilterStatus'][flIndex]['Status'],''),
+                                    ),
+                                    Positioned(
+                                      top: 40,
+                                      left: 7.5,
+                                      child: filteredLocalFilter[i]['DurationLeft']!='00:00:00'? filteredLocalFilter[i]['Status'] == (flIndex+1) ? Container(
+                                        color: Colors.greenAccent,
+                                        width: 55,
+                                        child: Center(
+                                          child: Text(filteredLocalFilter[i]['DurationLeft'],
+                                            style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ) :
+                                      const SizedBox(): const SizedBox(),
+                                    ),
+                                    Positioned(
+                                      top: 0,
+                                      left: 45,
+                                      child: filteredLocalFilter[i]['PrsIn']!='-' && filteredLocalFilter[i]['FilterStatus'].length-1==flIndex? Container(
+                                        width:25,
+                                        decoration: BoxDecoration(
+                                          color:Colors.yellow,
+                                          borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                          border: Border.all(color: Colors.grey, width: .50,),
+                                        ),
+                                        child: Center(
+                                          child: Text('${filteredLocalFilter[i]['DpValue']}', style: const TextStyle(fontSize: 10),),
+                                        ),
+
+                                      ) :
+                                      const SizedBox(),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  width: 70,
+                                  height: 20,
+                                  child: Center(
+                                    child: Text(filteredLocalFilter[i]['FilterStatus'][flIndex]['SW_Name'] ?? filteredLocalFilter[i]['FilterStatus'][flIndex]['Name'], style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                      filteredLocalFilter[i]['PrsOut'] != '-'?
+                      SizedBox(
+                        width: 70,
+                        height: 70,
+                        child : Stack(
+                          children: [
+                            Image.asset('assets/images/dp_prs_sensor.png',),
+                            Positioned(
+                              top: 42,
+                              left: 5,
+                              child: Container(
+                                width: 60,
+                                height: 17,
+                                decoration: BoxDecoration(
+                                  color:Colors.yellow,
+                                  borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                  border: Border.all(color: Colors.grey, width: .50,),
+                                ),
+                                child: Center(
+                                  child: Text('${double.parse(filteredLocalFilter[i]['PrsOut']).toStringAsFixed(2)} bar', style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ) :
+                      const SizedBox(),
+                    ],
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade50,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    width: filteredLocalFilter[i]['FilterStatus'].length * 60,
+                    child: Center(
+                      child: Text(filteredLocalFilter[i]['SW_Name'] ?? filteredLocalFilter[i]['FilterSite'], style: const TextStyle(color: primaryColorDark),),
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ],
+    ) :
+    Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        for(int i=0; i<filteredLocalFilter.length; i++)
+          Column(
+            children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -2403,157 +2545,18 @@ class _LocalFilterState extends State<LocalFilter> {
                   const SizedBox(),
                 ],
               ),
-          ],
-        ),
-        Text(filteredLocalFilter.isNotEmpty? filteredLocalFilter[0]['SW_Name'] ?? filteredLocalFilter[0]['FilterSite']:'', style: const TextStyle(color: primaryColorDark),),
-      ],
-    ):
-    Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        for(int i=0; i<filteredLocalFilter.length; i++)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              filteredLocalFilter[i]['PrsIn']!='-'?
-              SizedBox(
-                width: 70,
-                height: 70,
-                child : Stack(
-                  children: [
-                    Image.asset('assets/images/dp_prs_sensor.png',),
-                    Positioned(
-                      top: 42,
-                      left: 5,
-                      child: Container(
-                        width: 60,
-                        height: 17,
-                        decoration: BoxDecoration(
-                          color:Colors.yellow,
-                          borderRadius: const BorderRadius.all(Radius.circular(2)),
-                          border: Border.all(color: Colors.grey, width: .50,),
-                        ),
-                        child: Center(
-                          child: Text('${double.parse(filteredLocalFilter[i]['PrsIn']).toStringAsFixed(2)} bar', style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(3),
                 ),
-              ):
-              const SizedBox(),
-              SizedBox(
-                height: 90,
-                width: filteredLocalFilter[i]['FilterStatus'].length * 70,
-                child: ListView.builder(
-                  itemCount: filteredLocalFilter[i]['FilterStatus'].length,
-                  scrollDirection: Axis.horizontal,
-                  //reverse: true,
-                  itemBuilder: (BuildContext context, int flIndex) {
-                    return Column(
-                      children: [
-                        Stack(
-                          children: [
-                            SizedBox(
-                              width: 70,
-                              height: 70,
-                              child: AppImages.getAsset('filter', filteredLocalFilter[i]['FilterStatus'][flIndex]['Status'],''),
-                            ),
-                            Positioned(
-                              top: 40,
-                              left: 7.5,
-                              child: filteredLocalFilter[i]['DurationLeft']!='00:00:00'? filteredLocalFilter[i]['Status'] == (flIndex+1) ? Container(
-                                color: Colors.greenAccent,
-                                width: 55,
-                                child: Center(
-                                  child: Text(filteredLocalFilter[i]['DurationLeft'], style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  ),
-                                ),
-                              ) :
-                              const SizedBox(): const SizedBox(),
-                            ),
-                            Positioned(
-                              top: 0,
-                              left: 45,
-                              child: filteredLocalFilter[i]['PrsIn']!='-' && filteredLocalFilter[i]['FilterStatus'].length-1==flIndex? Container(
-                                width:25,
-                                decoration: BoxDecoration(
-                                  color:Colors.yellow,
-                                  borderRadius: const BorderRadius.all(Radius.circular(2)),
-                                  border: Border.all(color: Colors.grey, width: .50,),
-                                ),
-                                child: Center(
-                                  child: Text('${filteredLocalFilter[i]['DpValue']}', style: const TextStyle(fontSize: 10),),
-                                ),
-
-                              ) :
-                              const SizedBox(),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          width: 70,
-                          height: 20,
-                          child: Center(
-                            child: Text(filteredLocalFilter[i]['FilterStatus'][flIndex]['SW_Name'] ?? filteredLocalFilter[i]['FilterStatus'][flIndex]['Name'], style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                width: filteredLocalFilter[i]['FilterStatus'].length * 60,
+                child: Center(
+                  child: Text(filteredLocalFilter[i]['SW_Name'] ?? filteredLocalFilter[i]['FilterSite'], style: const TextStyle(color: primaryColorDark),),
                 ),
               ),
-              filteredLocalFilter[i]['PrsOut'] != '-'?
-              SizedBox(
-                width: 70,
-                height: 70,
-                child : Stack(
-                  children: [
-                    Image.asset('assets/images/dp_prs_sensor.png',),
-                    Positioned(
-                      top: 42,
-                      left: 5,
-                      child: Container(
-                        width: 60,
-                        height: 17,
-                        decoration: BoxDecoration(
-                          color:Colors.yellow,
-                          borderRadius: const BorderRadius.all(Radius.circular(2)),
-                          border: Border.all(color: Colors.grey, width: .50,),
-                        ),
-                        child: Center(
-                          child: Text('${double.parse(filteredLocalFilter[i]['PrsOut']).toStringAsFixed(2)} bar', style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ) :
-              const SizedBox(),
             ],
           ),
-        Text(filteredLocalFilter.isNotEmpty? filteredLocalFilter[0]['SW_Name'] ?? filteredLocalFilter[0]['FilterSite']:'', style: const TextStyle(color: primaryColorDark),),
       ],
     );
   }
@@ -2583,11 +2586,11 @@ class _LocalFilterState extends State<LocalFilter> {
     timer?.cancel();
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       try{
-        final provider = Provider.of<MqttPayloadProvider>(context, listen: false);
-        for(int fIndex=0; fIndex<provider.filtersLocal.length; fIndex++){
-          if(provider.filtersLocal[fIndex]['DurationLeft']!='00:00:00'){
+        final filtersLocal = Provider.of<MqttPayloadProvider>(context, listen: false).filtersLocal;
+        for(int fIndex=0; fIndex<filtersLocal.length; fIndex++){
+          if(filtersLocal[fIndex]['DurationLeft']!='00:00:00'){
 
-            List<String> parts = provider.filtersLocal[fIndex]['DurationLeft'].split(':');
+            List<String> parts = filtersLocal[fIndex]['DurationLeft'].split(':');
             int hours = int.parse(parts[0]);
             int minutes = int.parse(parts[1]);
             int seconds = int.parse(parts[2]);
@@ -2610,7 +2613,7 @@ class _LocalFilterState extends State<LocalFilter> {
             String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
             if(updatedDurationQtyLeft!='00:00:00'){
               setState(() {
-                provider.filtersLocal[fIndex]['DurationLeft'] = updatedDurationQtyLeft;
+                filtersLocal[fIndex]['DurationLeft'] = updatedDurationQtyLeft;
               });
             }
           }
@@ -2900,8 +2903,8 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                           const SizedBox(width: 4.0,),
                           VerticalDivider(width: 0,color: Colors.grey.shade300,),
                           const SizedBox(width: 5.0,),
-                          SizedBox(
-                            width: fertilizerLocal[fIndex]['Ec'].length>1? 170 : 85,
+                          fertilizerLocal[fIndex]['Ec'].length!=0?SizedBox(
+                            width: fertilizerLocal[fIndex]['Ec'].length>1? 115 : 57,
                             height: 30,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2943,15 +2946,16 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                                 const SizedBox(),
                               ],
                             ),
-                          ),
+                          ):
+                          const SizedBox(),
                           Container(
                             decoration: BoxDecoration(
-                              color: Colors.transparent,
+                              color: Colors.green.shade50,
                               borderRadius: BorderRadius.circular(3),
                             ),
-                            width: fertilizerLocal[fIndex]['Fertilizer'].length>4? 150:100,
+                            width: (fertilizerLocal[fIndex]['Fertilizer'].length * 63) - (fertilizerLocal[fIndex]['Ec'].length * 70),
                             child: Center(
-                              child: Text(fertilizerLocal[0]['SW_Name'] ?? fertilizerLocal[0]['FertilizerSite'], style: const TextStyle(color: primaryColorDark),),
+                              child: Text(fertilizerLocal[0]['SW_Name']?? fertilizerLocal[0]['FertilizerSite'], style: const TextStyle(color: primaryColorDark),),
                             ),
                           ),
                         ],
@@ -3014,16 +3018,13 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
     timer?.cancel();
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       try{
-        MqttPayloadProvider provider = Provider.of<MqttPayloadProvider>(context,listen: false);
-        final List<Map<String, dynamic>> fertilizerLocal = provider.fertilizerLocal
-            .where((pump) => pump['Location'].contains(widget.currentLineId))
-            .toList()
-            .cast<Map<String, dynamic>>();
-
-        for (var local in fertilizerLocal) {
-          local['Fertilizer'].forEach((fertilizer) {
-            int ferMethod = fertilizer['FertMethod'] is int? fertilizer['FertMethod']
+        final fertilizerLocal = Provider.of<MqttPayloadProvider>(context, listen: false).fertilizerLocal;
+        for (var localFer in fertilizerLocal) {
+          localFer['Fertilizer'].forEach((fertilizer) {
+            int ferMethod = fertilizer['FertMethod'] is int
+                ? fertilizer['FertMethod']
                 : int.parse(fertilizer['FertMethod']);
+
             if (fertilizer['Status']==1 && ferMethod == 1) {
               //fertilizer time base
               List<String> parts = fertilizer['DurationLeft'].split(':');
@@ -3046,7 +3047,6 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
               //fertilizer proposal time base
               double fcOnTime = convertQtyLeftToDouble(fertilizer['OnTime']);
               double fcOffTime = convertQtyLeftToDouble(fertilizer['OffTime']);
-
               int fcOnTimeRd = fcOnTime.round();
               int fcOffTimeRd = fcOffTime.round();
 
@@ -3071,8 +3071,8 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                 });
               }else if(fcOffTimeRd>0){
                 fcOffTimeRd--;
-                fertilizer['OffTime'] = '$fcOffTimeRd';
-                setState((){
+                setState(() {
+                  fertilizer['OffTime'] = '$fcOffTimeRd';
                   fertilizer['Status'] = 4;
                 });
 
@@ -3165,8 +3165,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
               }
             }
             else{
-              print('ferMethod 6');
-              timer?.cancel();
+              //print('ferMethod 6');
             }
           });
         }
@@ -3177,6 +3176,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
 
     });
   }
+
 
   String formatDuration(List<String> parts) {
     int hours = int.parse(parts[0]);

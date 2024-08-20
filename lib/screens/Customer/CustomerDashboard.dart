@@ -167,11 +167,14 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
           ],
         );
       }else{
+        int? irrigationPauseFlag = 0;
         final filteredScheduledPrograms = filterProgramsByCategory(Provider.of<MqttPayloadProvider>(context).scheduledProgram, crrIrrLine.id);
         final filteredProgramsQueue = filterProgramsQueueByCategory(Provider.of<MqttPayloadProvider>(context).programQueue, crrIrrLine.id);
         final filteredCurrentSchedule = filterCurrentScheduleByCategory(Provider.of<MqttPayloadProvider>(context).currentSchedule, crrIrrLine.id);
         filteredCurrentSchedule.insertAll(0, filterCurrentScheduleByProgramName(Provider.of<MqttPayloadProvider>(context).currentSchedule, 'StandAlone - Manual'));
-        int? irrigationPauseFlag = getIrrigationPauseFlag(crrIrrLine.id, Provider.of<MqttPayloadProvider>(context).payload2408);
+        if(Provider.of<MqttPayloadProvider>(context).payload2408.isNotEmpty){
+          irrigationPauseFlag = getIrrigationPauseFlag(crrIrrLine.id, Provider.of<MqttPayloadProvider>(context).payload2408);
+        }
 
         return Column(
           children: [

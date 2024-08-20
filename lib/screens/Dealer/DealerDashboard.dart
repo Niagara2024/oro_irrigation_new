@@ -55,16 +55,9 @@ class _DealerDashboardState extends State<DealerDashboard> {
 
   void callbackFunction(String message)
   {
-    if(message=='reloadStock'){
-      Navigator.pop(context);
-      Future.delayed(const Duration(milliseconds: 500), () {
-        getProductStock();
-      });
-    }else{
-      Future.delayed(const Duration(milliseconds: 500), () {
-        getCustomerList();
-      });
-    }
+    Future.delayed(const Duration(milliseconds: 500), () {
+      getCustomerList();
+    });
   }
 
   void indicatorViewShow() {
@@ -322,7 +315,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                     minWidth: 600,
                                     headingRowHeight: 40,
                                     dataRowHeight: 40,
-                                    headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
+                                    headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
                                     columns: const [
                                       DataColumn2(
                                           label: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold),),
@@ -392,7 +385,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
                         await showDialog<void>(
                             context: context,
                             builder: (context) => AlertDialog(
-                              content: CreateAccount(callback: callbackFunction, subUsrAccount: false, customerId: 0,),
+                              content: CreateAccount(callback: callbackFunction, subUsrAccount: false, customerId: widget.userId, from: 'Dealer',),
                             ));
                       }),
                     ),

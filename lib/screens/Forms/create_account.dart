@@ -13,10 +13,11 @@ import '../../constants/snack_bar.dart';
 import '../../constants/theme.dart';
 
 class CreateAccount extends StatefulWidget {
-  const CreateAccount({Key? key, required this.callback, required this.subUsrAccount, required this.customerId}) : super(key: key);
+  const CreateAccount({Key? key, required this.callback, required this.subUsrAccount, required this.customerId, required this.from,}) : super(key: key);
   final void Function(String) callback;
   final bool subUsrAccount;
   final int customerId;
+  final String from;
 
   @override
   State<CreateAccount> createState() => _CreateAccountState();
@@ -160,7 +161,7 @@ class _CreateAccountState extends State<CreateAccount> {
 
   Widget _buildHeader() {
     return ListTile(
-      title: Text(userType=='1'? "Create Dealer account      " : "Create customer account", style: myTheme.textTheme.titleLarge),
+      title: Text(widget.from=='Admin'? "Create Dealer account      " : widget.from=='Dealer'? "Create customer account": "Create SubUser account", style: myTheme.textTheme.titleLarge),
       subtitle: Text("Please fill out all details correctly.", style: myTheme.textTheme.titleSmall),
     );
   }
@@ -187,7 +188,7 @@ class _CreateAccountState extends State<CreateAccount> {
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                     border: const OutlineInputBorder(),
-                    labelText: userType=='1'? 'Dealer Name':'Customer Name',
+                    labelText: widget.from=='Admin'? 'Dealer Name':widget.from=='Dealer'?'Customer Name':'SubUser Name',
                     icon: Icon(Icons.person_outline, color: myTheme.primaryColor,),
                   ),
                   inputFormatters: [
@@ -245,7 +246,7 @@ class _CreateAccountState extends State<CreateAccount> {
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                     border: const OutlineInputBorder(),
-                    labelText: userType=='1'? 'Dealer Email':'Customer Email',
+                    labelText: widget.from=='Admin'? 'Dealer Email':widget.from=='Dealer'?'Customer Email':'SubUser Email',
                     icon: Icon(Icons.email_outlined, color: myTheme.primaryColor,),
                   ),
                 ),
@@ -313,7 +314,7 @@ class _CreateAccountState extends State<CreateAccount> {
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                     border: const OutlineInputBorder(),
-                    labelText: userType=='1'? 'Dealer City':'Customer City',
+                    labelText: widget.from=='Admin'? 'Dealer City':widget.from=='Dealer'?'Customer City':'SubUser City',
                     icon: Icon(Icons.location_city, color: myTheme.primaryColor,),
                   ),
                   inputFormatters: [
@@ -429,23 +430,16 @@ class _CreateAccountState extends State<CreateAccount> {
                 MaterialButton(
                   onPressed:() async {
                     if (_formKey.currentState!.validate()) {
-                      String cusType = '';
-                      if(userType=='1'){
-                        cusType = '2';
-                      }else if(userType=='2'){
-                        cusType = '3';
-                      }else{
-                        cusType = '4';
-                      }
+                      String cusType = widget.from=='Admin'? '2':'3';
                       Map<String, Object> body = {
                         'userName': _cusNameController.text,
                         'countryCode': dialCode,
                         'mobileNumber': _cusMobileNoController.text,
-                        'userType': widget.subUsrAccount? 3:cusType,
+                        'userType': cusType,
                         'macAddress': '1234567890',
                         'deviceToken': '12346789abcdefghijklmnopqrstuvwxyz987654321',
                         'mobCctv': '987654321zyxwvutsrqponmlkjihgfedcba123456789',
-                        'createUser': userID,
+                        'createUser': widget.customerId,
                         'address1': _cusAdd1Controller.text,
                         'address2': _cusAdd2Controller.text,
                         'address3': _cusAdd3Controller.text,
@@ -454,7 +448,7 @@ class _CreateAccountState extends State<CreateAccount> {
                         'country': sldCountryID.toString(),
                         'state': sldStateID.toString(),
                         'email': _cusEmailController.text,
-                        'mainUserId': widget.customerId,
+                        'mainUserId': userID,
                       };
                       //print(body);
                       final response = widget.subUsrAccount? await HttpService().postRequest("createUserAccountWithMainUser", body):

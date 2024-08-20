@@ -195,14 +195,8 @@ class _AddProductState extends State<AddProduct> {
               SizedBox(
                 width: 310,
                 child: TextFormField(
-                  validator: (value){
-                    if(value==null ||value.isEmpty){
-                      return 'Please fill out this field';
-                    }
-                    return null;
-                  },
+                  maxLength: 15,
                   controller: ctrlIMI,
-                  maxLength: 20,
                   decoration: InputDecoration(
                     counterText: '',
                     labelText: 'Device ID',
@@ -211,6 +205,18 @@ class _AddProductState extends State<AddProduct> {
                     fillColor: Colors.grey.shade100,
                     contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                   ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9]')),
+                  ],
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please fill out this field';
+                    }
+                    return null;
+                  },
+                  onChanged: (value) {
+                    print(value);
+                  },
                 ),
               ),
               const SizedBox(width: 8),
@@ -283,7 +289,6 @@ class _AddProductState extends State<AddProduct> {
           child: const Text('ADD'),
           onPressed: () async {
             if (sldCatID!=0 && sldModID!=0) {
-
               if (isNotEmpty(ctrlIMI.text.trim()) && isNotEmpty(ctrlDofM.text) && isNotEmpty(ctrlWrM.text)) {
                 if (!isIMEIAlreadyExists(ctrlIMI.text.trim(), addedProductList)) {
                   Map<String, dynamic> productMap = {
@@ -296,7 +301,6 @@ class _AddProductState extends State<AddProduct> {
                     'dateOfManufacturing': ctrlDofM.text,
                     'warrantyMonths': ctrlWrM.text,
                   };
-
                   setState(() {
                     addedProductList.add(productMap);
                     //ctrlIMI.clear();
@@ -337,7 +341,7 @@ class _AddProductState extends State<AddProduct> {
                             minWidth: 600,
                             dataRowHeight: 35.0,
                             headingRowHeight: 25.0,
-                            headingRowColor: MaterialStateProperty.all<Color>(myTheme.primaryColor.withOpacity(0.1)),
+                            headingRowColor: WidgetStateProperty.all<Color>(myTheme.primaryColor.withOpacity(0.1)),
                             columns: const [
                               DataColumn2(
                                   label: Center(child: Text('S.No')),

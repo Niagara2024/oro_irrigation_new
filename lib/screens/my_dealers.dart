@@ -210,7 +210,7 @@ class MyDealersState extends State<MyDealers> {
                           await showDialog<void>(
                               context: context,
                               builder: (context) => AlertDialog(
-                                content: CreateAccount(callback: callbackFunction, subUsrAccount: false, customerId: 0,),
+                                content: CreateAccount(callback: callbackFunction, subUsrAccount: false, customerId: 0, from: 'Dealer',),
                               ));
                   
                         }), // Customize the leading icon

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/SentAndReceived.dart';
@@ -819,7 +818,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               iconDisabledColor: Colors.white,
               focusColor: Colors.transparent,
             ) :
-            Text(mySiteList[siteIndex].master[masterIndex].irrigationLine[0].name, style: const TextStyle(fontSize: 17),),
+            (mySiteList[siteIndex].master[masterIndex].categoryId == 1 ||
+                mySiteList[siteIndex].master[masterIndex].categoryId == 2)?
+            Text(mySiteList[siteIndex].master[masterIndex].irrigationLine[0].name, style: const TextStyle(fontSize: 17),):
+            const SizedBox(),
 
             const SizedBox(width: 15,),
             Container(width: 1, height: 20, color: Colors.white54,),

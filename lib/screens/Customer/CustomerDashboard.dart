@@ -279,7 +279,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                               //src pump
                               provider.sourcePump.isNotEmpty? Padding(
                                 padding: const EdgeInsets.only(top: 15),
-                                child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId,),
+                                child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id,),
                               ):
                               const SizedBox(),
 

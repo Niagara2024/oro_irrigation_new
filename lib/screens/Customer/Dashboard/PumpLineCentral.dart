@@ -95,7 +95,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                   children: [
                     provider.sourcePump.isNotEmpty? Padding(
                       padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                      child: DisplaySourcePump(deviceId: widget.currentSiteData.master[widget.masterIdx].deviceId,),
+                      child: DisplaySourcePump(deviceId: widget.currentSiteData.master[widget.masterIdx].deviceId, currentLineId: widget.crrIrrLine.id,),
                     ):
                     const SizedBox(),
                     provider.irrigationPump.isNotEmpty? Padding(
@@ -117,6 +117,13 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                       child: DisplayIrrigationPump(currentLineId: widget.crrIrrLine.id, deviceId: widget.currentSiteData.master[widget.masterIdx].deviceId,),
                     ):
                     const SizedBox(),
+
+                    if(provider.filtersCentral.isEmpty)
+                      for(int i=0; i<provider.payload2408.length; i++)
+                        provider.payload2408.isNotEmpty?  Padding(
+                          padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                          child: provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(crInx: i):null,
+                        ) : const SizedBox(),
 
                     provider.filtersCentral.isEmpty && provider.fertilizerCentral.isEmpty &&
                         provider.filtersLocal.isEmpty && provider.fertilizerLocal.isEmpty ? SizedBox(
@@ -143,11 +150,14 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                       padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
                       child: DisplayFilter(currentLineId: widget.crrIrrLine.id,),
                     ): const SizedBox(),
-                    for(int i=0; i<provider.payload2408.length; i++)
-                      provider.payload2408.isNotEmpty?  Padding(
-                        padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                        child: provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(crInx: i):null,
-                      ) : const SizedBox(),
+
+                    if(provider.filtersCentral.isNotEmpty)
+                      for(int i=0; i<provider.payload2408.length; i++)
+                        provider.payload2408.isNotEmpty?  Padding(
+                          padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                          child: provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(crInx: i):null,
+                        ) : const SizedBox(),
+
                     provider.fertilizerCentral.isNotEmpty? DisplayCentralFertilizer(currentLineId: widget.crrIrrLine.id,): const SizedBox(),
 
                     //local
@@ -259,8 +269,9 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
 
 
 class DisplaySourcePump extends StatefulWidget {
-  const DisplaySourcePump({Key? key, required this.deviceId}) : super(key: key);
+  const DisplaySourcePump({Key? key, required this.deviceId, required this.currentLineId}) : super(key: key);
   final String deviceId;
+  final String currentLineId;
 
   @override
   State<DisplaySourcePump> createState() => _DisplaySourcePumpState();
@@ -268,29 +279,86 @@ class DisplaySourcePump extends StatefulWidget {
 
 class _DisplaySourcePumpState extends State<DisplaySourcePump> {
 
-  Timer? timer;
-
-  @override
-  void initState() {
-    super.initState();
-    durationUpdatingFunction();
-  }
+  Timer? _timer;
 
   @override
   void dispose() {
-    timer?.cancel();
+    _timer?.cancel();
     super.dispose();
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+      _updatePumpOnDelayTime();
+    });
+  }
+
+  void _updatePumpOnDelayTime() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+      try{
+        final sourcePump = Provider.of<MqttPayloadProvider>(context, listen: false).sourcePump;
+        for (int i = 0; i < sourcePump.length; i++) {
+          if(sourcePump[i]['OnDelayLeft']!=null){
+            List<String> parts = sourcePump[i]['OnDelayLeft'].split(':');
+            int hours = int.parse(parts[0]);
+            int minutes = int.parse(parts[1]);
+            int seconds = int.parse(parts[2]);
+
+            if (seconds > 0) {
+              seconds--;
+            } else {
+              if (minutes > 0) {
+                minutes--;
+                seconds = 59;
+              } else {
+                if (hours > 0) {
+                  hours--;
+                  minutes = 59;
+                  seconds = 59;
+                }
+              }
+            }
+
+            String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+            if(sourcePump[i]['OnDelayLeft']!='00:00:00'){
+              setState(() {
+                sourcePump[i]['OnDelayLeft'] = updatedDurationQtyLeft;
+              });
+            }
+          }
+        }
+      }
+      catch(e){
+        print(e);
+      }
+
+    });
   }
 
 
   @override
   Widget build(BuildContext context) {
     final sourcePump = Provider.of<MqttPayloadProvider>(context).sourcePump;
+
+    _startTimer();
+
+    List<Map<String, dynamic>> filteredPumps=[];
+    if(widget.currentLineId=='all'){
+      filteredPumps = sourcePump.toList().cast<Map<String, dynamic>>();
+    }else{
+      filteredPumps = sourcePump
+          .where((pump) => pump['Location'].contains(widget.currentLineId))
+          .toList()
+          .cast<Map<String, dynamic>>();
+    }
+
     return SizedBox(
-      width: sourcePump.length * 70,
+      width: filteredPumps.length * 70,
       height: 100,
       child: ListView.builder(
-        itemCount: sourcePump.length,
+        itemCount: filteredPumps.length,
         scrollDirection: Axis.horizontal,
         itemBuilder: (BuildContext context, int index) {
           return Column(
@@ -301,11 +369,11 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                     message: 'View more details',
                     child: TextButton(
                       onPressed: () {
-                        bool voltKeyExists = sourcePump[index].containsKey('Voltage');
-                        int signalStrength = voltKeyExists? int.parse(sourcePump[index]['SignalStrength']):0;
-                        int batteryVolt = voltKeyExists? int.parse(sourcePump[index]['Battery']):0;
-                        List<String> voltages = voltKeyExists? sourcePump[index]['Voltage'].split(','):[];
-                        List<String> current = voltKeyExists? sourcePump[index]['Current'].split(','):[];
+                        bool voltKeyExists = filteredPumps[index].containsKey('Voltage');
+                        int signalStrength = voltKeyExists? int.parse(filteredPumps[index]['SignalStrength']):0;
+                        int batteryVolt = voltKeyExists? int.parse(filteredPumps[index]['Battery']):0;
+                        List<String> voltages = voltKeyExists? filteredPumps[index]['Voltage'].split(','):[];
+                        List<String> current = voltKeyExists? filteredPumps[index]['Current'].split(','):[];
 
                         double level = 42.0;
 
@@ -324,8 +392,8 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                           builder: (BuildContext context) {
                             return AlertDialog(
                               title: voltKeyExists? ListTile(
-                                title: Text(sourcePump[index]['SW_Name'] ?? sourcePump[index]['Name']),
-                                subtitle: Text('Version: ${sourcePump[index]['Version']}', style: const TextStyle(fontSize: 10, color: Colors.grey),),
+                                title: Text(filteredPumps[index]['SW_Name'] ?? filteredPumps[index]['Name']),
+                                subtitle: Text('Version: ${filteredPumps[index]['Version']}', style: const TextStyle(fontSize: 10, color: Colors.grey),),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -354,7 +422,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                   ],
                                 ),
                               ):
-                              Text(sourcePump[index]['SW_Name'] ?? sourcePump[index]['Name']),
+                              Text(filteredPumps[index]['SW_Name'] ?? filteredPumps[index]['Name']),
                               content: SizedBox(
                                 width: voltKeyExists?270:100,
                                 height: voltKeyExists?175: 40,
@@ -462,7 +530,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                                     ),
                                                   ),
                                                   TextSpan(
-                                                    text: '${sourcePump[index]['Phase']}',
+                                                    text: '${filteredPumps[index]['Phase']}',
                                                     style: const TextStyle(
                                                       color: Colors.black,
                                                       fontSize: 17,
@@ -523,25 +591,25 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                           color: Colors.green,
                                           textColor: Colors.white,
                                           onPressed: () {
-                                            String payload = '1,${sourcePump[index]['S_No']}';
+                                            String payload = '1,${filteredPumps[index]['S_No']}';
                                             String payLoadFinal = jsonEncode({
                                               "6201": [{"6202": payload}]
                                             });
                                             MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
                                           },
-                                          child: const Text('Start'),
+                                          child: const Text('ON'),
                                         ),
                                         MaterialButton(
                                           color: Colors.redAccent,
                                           textColor: Colors.white,
                                           onPressed: () {
-                                            String payload = '0,${sourcePump[index]['S_No']}';
+                                            String payload = '0,${filteredPumps[index]['S_No']}';
                                             String payLoadFinal = jsonEncode({
                                               "6201": [{"6202": payload}]
                                             });
                                             MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
                                           },
-                                          child: const Text('Stop'),
+                                          child: const Text('OFF'),
                                         ),
                                       ],
                                     ),
@@ -571,11 +639,11 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                       child: SizedBox(
                         width: 70,
                         height: 70,
-                        child: AppImages.getAsset('sourcePump', sourcePump[index]['Status'], ''),
+                        child: AppImages.getAsset('sourcePump', filteredPumps[index]['Status'], ''),
                       ),
                     ),
                   ),
-                  sourcePump[index]['OnDelayLeft'] !='00:00:00'?
+                  filteredPumps[index]['OnDelayLeft'] !='00:00:00'?
                   Positioned(
                     top: 30,
                     left: 7.5,
@@ -598,7 +666,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                               padding: EdgeInsets.only(left: 3, right: 3),
                               child: Divider(height: 0, color: Colors.grey,),
                             ),
-                            Text(sourcePump[index]['OnDelayLeft'],
+                            Text(filteredPumps[index]['OnDelayLeft'],
                               style: const TextStyle(
                               color: Colors.black,
                               fontSize: 10,
@@ -616,7 +684,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
               SizedBox(
                 width: 70,
                 height: 30,
-                child: Text(sourcePump[index]['SW_Name'] ?? sourcePump[index]['Name'],
+                child: Text(filteredPumps[index]['SW_Name'] ?? filteredPumps[index]['Name'],
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                   color: Colors.black,
@@ -631,48 +699,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
     );
   }
 
-  void durationUpdatingFunction() {
-    timer?.cancel();
-    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-      try{
-        final sourcePump = Provider.of<MqttPayloadProvider>(context, listen: false).sourcePump;
-        for (int i = 0; i < sourcePump.length; i++) {
-          if(sourcePump[i]['OnDelayLeft']!=null){
-            List<String> parts = sourcePump[i]['OnDelayLeft'].split(':');
-            int hours = int.parse(parts[0]);
-            int minutes = int.parse(parts[1]);
-            int seconds = int.parse(parts[2]);
 
-            if (seconds > 0) {
-              seconds--;
-            } else {
-              if (minutes > 0) {
-                minutes--;
-                seconds = 59;
-              } else {
-                if (hours > 0) {
-                  hours--;
-                  minutes = 59;
-                  seconds = 59;
-                }
-              }
-            }
-
-            String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-            if(sourcePump[i]['OnDelayLeft']!='00:00:00'){
-              setState(() {
-                sourcePump[i]['OnDelayLeft'] = updatedDurationQtyLeft;
-              });
-            }
-          }
-        }
-      }
-      catch(e){
-        print(e);
-      }
-
-    });
-  }
 }
 
 class DisplayIrrigationPump extends StatefulWidget {
@@ -1003,7 +1030,7 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                                             });
                                             MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
                                           },
-                                          child: const Text('Start'),
+                                          child: const Text('ON'),
                                         ),
                                         MaterialButton(
                                           color: Colors.redAccent,
@@ -1015,7 +1042,7 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                                             });
                                             MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
                                           },
-                                          child: const Text('Stop'),
+                                          child: const Text('OFF'),
                                         ),
                                       ],
                                     ),
@@ -1871,7 +1898,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                           const SizedBox(width: 5.0,),
 
                           fertilizerCentral[fIndex]['Ec'].length!=0?SizedBox(
-                            width: fertilizerCentral[fIndex]['Ec'].length>1? 115 : 57,
+                            width: fertilizerCentral[fIndex]['Ec'].length>1? 115 : 60,
                             height: 30,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2904,7 +2931,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                           VerticalDivider(width: 0,color: Colors.grey.shade300,),
                           const SizedBox(width: 5.0,),
                           fertilizerLocal[fIndex]['Ec'].length!=0?SizedBox(
-                            width: fertilizerLocal[fIndex]['Ec'].length>1? 115 : 57,
+                            width: fertilizerLocal[fIndex]['Ec'].length>1? 115 : 60,
                             height: 30,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

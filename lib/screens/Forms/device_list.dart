@@ -49,7 +49,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   List<ProductStockModel> nodeStockList = <ProductStockModel>[];
 
   late  List<Object> _configTabs = [];
-  late final TabController _tabCont;
+  late TabController _tabCont;
 
   int selectedRadioTile = 0;
   final ValueNotifier<MasterController> _selectedItem = ValueNotifier<MasterController>(MasterController.gem1);
@@ -178,7 +178,9 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
         for (int i=0; i < cntList.length; i++) {
           customerSiteList.add(ProductListWithNode.fromJson(cntList[i]));
           try {
-            MQTTManager().subscribeToTopic('FirmwareToApp/${customerSiteList[i].master[currentMstInx].deviceId}');
+            for(int j=0; j<customerSiteList[i].master.length; j++){
+              MQTTManager().subscribeToTopic('FirmwareToApp/${customerSiteList[i].master[j].deviceId}');
+            }
           } catch (e, stackTrace) {
             print('Error: $e');
             print('Stack Trace: $stackTrace');

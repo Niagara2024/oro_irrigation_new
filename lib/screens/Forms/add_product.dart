@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/prd_cat_model.dart';
 import '../../Models/product_model.dart';
 import '../../constants/http_service.dart';
+import '../../constants/snack_bar.dart';
 import '../product_inventory.dart';
 
 
@@ -26,7 +27,6 @@ class AddProduct extends StatefulWidget {
 }
 
 class _AddProductState extends State<AddProduct> {
-
 
   final _formKey = GlobalKey<FormState>();
 
@@ -130,12 +130,8 @@ class _AddProductState extends State<AddProduct> {
   @override
   Widget build(BuildContext context)
   {
-    double width = MediaQuery.of(context).size.width;
     return Column(
       children: [
-        ListTile(title: const Text('ADD NEW STOCK'),
-          trailing: IconButton(tooltip:'Close', onPressed:() => Navigator.pop(context),
-              icon: const Icon(Icons.clear_outlined, color: Colors.red,)),),
         Padding(
           padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 5.0),
           child: Row(
@@ -145,14 +141,14 @@ class _AddProductState extends State<AddProduct> {
                 requestFocusOnTap: true,
                 controller: ddCatList,
                 errorText: vldErrorCTL ? 'Select category' : null,
-                width: 310,
-                leadingIcon: const Icon(CupertinoIcons.line_horizontal_3_decrease),
+                width: 200,
                 label: const Text('Category'),
                 dropdownMenuEntries: selectedCategory,
-                inputDecorationTheme: const InputDecorationTheme(
+                inputDecorationTheme: InputDecorationTheme(
                   filled: true,
                   contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                  //border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
+                  fillColor: Colors.teal.shade50,
                 ),
                 onSelected: (PrdCateModel? ptdCat) {
                   setState(() {
@@ -168,14 +164,14 @@ class _AddProductState extends State<AddProduct> {
               DropdownMenu<PrdModel>(
                 controller: ddModelList,
                 errorText: vldErrorMDL ? 'Select model' : null,
-                width: 305,
+                width: 205,
                 label: const Text('Model'),
-                leadingIcon: const Icon(CupertinoIcons.line_horizontal_3_decrease),
                 dropdownMenuEntries: selectedModel,
-                inputDecorationTheme: const InputDecorationTheme(
+                inputDecorationTheme: InputDecorationTheme(
                   filled: true,
-                  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                  //border: OutlineInputBorder(),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                  border: const OutlineInputBorder(),
+                  fillColor: Colors.teal.shade50,
                 ),
                 onSelected: (PrdModel? mdl) {
                   setState(() {
@@ -185,24 +181,18 @@ class _AddProductState extends State<AddProduct> {
                   });
                 },
               ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 5.0),
-          child: Row(
-            children: [
+              const SizedBox(width: 8),
               SizedBox(
-                width: 310,
+                width: 200,
                 child: TextFormField(
                   maxLength: 15,
                   controller: ctrlIMI,
                   decoration: InputDecoration(
                     counterText: '',
                     labelText: 'Device ID',
-                    border: const UnderlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     filled: true,
-                    fillColor: Colors.grey.shade100,
+                    fillColor: Colors.teal.shade50,
                     contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                   ),
                   inputFormatters: [
@@ -214,12 +204,15 @@ class _AddProductState extends State<AddProduct> {
                     }
                     return null;
                   },
-                  onChanged: (value) {
-                    print(value);
-                  },
                 ),
               ),
-              const SizedBox(width: 8),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 5.0),
+          child: Row(
+            children: [
               SizedBox(
                 width: 175,
                 child: TextFormField(
@@ -237,17 +230,17 @@ class _AddProductState extends State<AddProduct> {
                   decoration: InputDecoration(
                     counterText: '',
                     filled: true,
-                    fillColor: Colors.grey.shade100,
+                    fillColor: Colors.teal.shade50,
                     errorText: vldErrorWrr ? 'Enter warranty months' : null,
                     labelText: 'warranty months',
-                    border: const UnderlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                   ),
                 ),
               ),
               const SizedBox(width: 8),
               SizedBox(
-                width: 123,
+                width: 125,
                 child: TextFormField(
                   validator: (value){
                     if(value==null || value.isEmpty){
@@ -258,10 +251,10 @@ class _AddProductState extends State<AddProduct> {
                   controller: ctrlDofM,
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: Colors.grey.shade100,
+                    fillColor: Colors.teal.shade50,
                     errorText: vldErrorDT? 'Select Date' : null,
                     labelText: 'Date',
-                    border: const UnderlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                   ),
                   onTap: ()
@@ -280,182 +273,201 @@ class _AddProductState extends State<AddProduct> {
 
                 ),
               ),
+              const SizedBox(width: 20),
+              SizedBox(
+                width: 100,
+                child: MaterialButton(
+                  color: Colors.teal,
+                  textColor: Colors.white,
+                  height: 55,
+                  child: const Row(
+                    children: [
+                      Icon(Icons.add),
+                      SizedBox(width: 8,),
+                      Text('ADD'),
+                    ],
+                  ),
+                  onPressed: () async {
+                    if (sldCatID!=0 && sldModID!=0) {
+                      if (isNotEmpty(ctrlIMI.text.trim()) && isNotEmpty(ctrlDofM.text) && isNotEmpty(ctrlWrM.text)) {
+                        if (!isIMEIAlreadyExists(ctrlIMI.text.trim(), addedProductList)) {
+                          Map<String, Object> body = {"deviceId" : ctrlIMI.text.trim(),};
+                          final response = await HttpService().postRequest("checkProduct", body);
+                          if (response.statusCode == 200)
+                          {
+                            var data = jsonDecode(response.body);
+                            if(data['code']==404){
+                              Map<String, dynamic> productMap = {
+                                "categoryName": ddCatList.text,
+                                "categoryId": sldCatID.toString(),
+                                "modelName": ddModelList.text,
+                                "modelId": sldModID.toString(),
+                                "deviceId": ctrlIMI.text.trim(),
+                                "productDescription": ctrlPrdDis.text,
+                                'dateOfManufacturing': ctrlDofM.text,
+                                'warrantyMonths': ctrlWrM.text,
+                              };
+                              setState(() {
+                                addedProductList.add(productMap);
+                              });
+                            }else{
+                              _showAlertDialog('Alert Message', 'The product id already exists!');
+                            }
+                          }
+                          else{
+                            //_showSnackBar(response.body);
+                          }
+                        } else {
+                          _showAlertDialog('Error!', 'Device id already exists!');
+                        }
+                      }else{
+                        _showAlertDialog('Error!', 'Empty filed not allowed!');
+                      }
+
+                    }
+                    else{
+                      if(sldCatID==0){
+                        setState(() {
+                          vldErrorCTL = true;
+                        });
+                      }else if(sldModID==0){
+                        setState(() {
+                          vldErrorMDL = true;
+                        });
+                      }
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(width: 25),
+              SizedBox(
+                width: 170,
+                child: MaterialButton(
+                  color: Colors.green,
+                  textColor: Colors.white,
+                  height: 55,
+                  child: const Row(
+                    children: [
+                      Icon(Icons.save_as_outlined),
+                      SizedBox(width: 8,),
+                      Text('SAVE TO STOCK'),
+                    ],
+                  ),
+                  onPressed: () async {
+                    if(addedProductList.isNotEmpty)
+                    {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Confirmation'),
+                            content: const Text('Are you sure! You want to save the product to Stock list?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  Navigator.pop(context);
+                                  final prefs = await SharedPreferences.getInstance();
+                                  String userID = (prefs.getString('userId') ?? "");
+                                  Map<String, Object> body = {
+                                    'products': addedProductList,
+                                    'createUser': userID,
+                                  };
+
+                                  final Response response = await HttpService().postRequest("createProduct", body);
+                                  if(response.statusCode == 200)
+                                  {
+                                    var data = jsonDecode(response.body);
+                                    if(data["code"]==200)
+                                    {
+                                      ctrlIMI.clear();
+                                      ctrlPrdDis.clear();
+                                      ctrlDofM.clear();
+                                      ctrlWrM.clear();
+                                      widget.callback('reloadStock');
+                                    }
+                                    else{
+                                      _showAlertDialog('Error', '${data["message"]}\n${data["data"].toString()}');
+                                    }
+                                  }
+                                },
+                                child: const Text('Save'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+
+                    }else{
+                      _showAlertDialog('Alert Message', 'Product Empty!');
+                    }
+                  },
+                ),
+              ),
             ],
           ),
         ),
-        ListTile(trailing: MaterialButton(
-          color: myTheme.primaryColor,
-          textColor: Colors.white,
-          child: const Text('ADD'),
-          onPressed: () async {
-            if (sldCatID!=0 && sldModID!=0) {
-              if (isNotEmpty(ctrlIMI.text.trim()) && isNotEmpty(ctrlDofM.text) && isNotEmpty(ctrlWrM.text)) {
-                if (!isIMEIAlreadyExists(ctrlIMI.text.trim(), addedProductList)) {
-                  Map<String, dynamic> productMap = {
-                    "categoryName": ddCatList.text,
-                    "categoryId": sldCatID.toString(),
-                    "modelName": ddModelList.text,
-                    "modelId": sldModID.toString(),
-                    "deviceId": ctrlIMI.text.trim(),
-                    "productDescription": ctrlPrdDis.text,
-                    'dateOfManufacturing': ctrlDofM.text,
-                    'warrantyMonths': ctrlWrM.text,
-                  };
-                  setState(() {
-                    addedProductList.add(productMap);
-                    //ctrlIMI.clear();
-                  });
-                } else {
-                  _showAlertDialog('Error!', 'IMEI already exists!');
-                }
-              }else{
-                _showAlertDialog('Error!', 'Empty filed not allowed!');
-              }
-
-            }
-            else{
-              if(sldCatID==0){
-                setState(() {
-                  vldErrorCTL = true;
-                });
-              }else if(sldModID==0){
-                setState(() {
-                  vldErrorMDL = true;
-                });
-              }
-            }
-          },
-        )),
+        const SizedBox(height: 16,),
         Expanded(
-          child: Container(
-            color: Colors.blueGrey.shade50,
-            child: Column(
-              children: [
-                Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(
-                          child: DataTable2(
-                            columnSpacing: 12,
-                            horizontalMargin: 12,
-                            minWidth: 600,
-                            dataRowHeight: 35.0,
-                            headingRowHeight: 25.0,
-                            headingRowColor: WidgetStateProperty.all<Color>(myTheme.primaryColor.withOpacity(0.1)),
-                            columns: const [
-                              DataColumn2(
-                                  label: Center(child: Text('S.No')),
-                                  fixedWidth: 32
-                              ),
-                              DataColumn2(
-                                  label: Text('Category'),
-                                  size: ColumnSize.M
-                              ),
-                              DataColumn2(
-                                  label: Text('Model Name'),
-                                  size: ColumnSize.M
-                              ),
-                              DataColumn2(
-                                label: Text('Device Id'),
-                                fixedWidth: 150,
-                              ),
-                              DataColumn2(
-                                label: Center(child: Text('M.Date')),
-                                fixedWidth: 75,
-                              ),
-                              DataColumn2(
-                                label: Center(child: Text('Warranty')),
-                                fixedWidth: 70,
-                              ),
-                              DataColumn2(
-                                label: Center(child: Text('Action')),
-                                fixedWidth: 45,
-                              ),
-                            ],
-                            rows: List<DataRow>.generate(addedProductList.length, (index) => DataRow(cells: [
-                              DataCell(Center(child: Text('${index + 1}',style: const TextStyle(fontSize: 10)))),
-                              DataCell(Text(addedProductList[index]['categoryName'],style: const TextStyle(fontSize: 10))),
-                              DataCell(Text(addedProductList[index]['modelName'],style: const TextStyle(fontSize: 10))),
-                              DataCell(Text('${addedProductList[index]['deviceId']}',style: const TextStyle(fontSize: 10))),
-                              DataCell(Center(child: Text(addedProductList[index]['dateOfManufacturing'],style: const TextStyle(fontSize: 10)))),
-                              DataCell(Center(child: Text('${addedProductList[index]['warrantyMonths']}',style: const TextStyle(fontSize: 10)))),
-                              DataCell(Center(child: IconButton(
-                                tooltip: 'Remove',
-                                icon: const Icon(Icons.delete_outline, color: Colors.red,), // Specify the icon
-                                onPressed: () {
-                                  setState(() {
-                                    addedProductList.removeAt(index);
-                                  });
-                                },
-                              ), ))
-                            ])),
-                          )
-                      ),
-                      ListTile(trailing: MaterialButton(
-                        color: myTheme.primaryColor,
-                        textColor: Colors.white,
-                        child: const Text('SAVE TO STOCK'),
-                        onPressed: () async {
-
-                          if(addedProductList.isNotEmpty)
-                          {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text('Confirmation'),
-                                  content: const Text('Are you sure! You want to save the product to Stock list?'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () async {
-                                        Navigator.pop(context);
-                                        final prefs = await SharedPreferences.getInstance();
-                                        String userID = (prefs.getString('userId') ?? "");
-                                        Map<String, Object> body = {
-                                          'products': addedProductList,
-                                          'createUser': userID,
-                                        };
-
-                                        final Response response = await HttpService().postRequest("createProduct", body);
-                                        if(response.statusCode == 200)
-                                        {
-                                          var data = jsonDecode(response.body);
-                                          if(data["code"]==200)
-                                          {
-                                            ctrlIMI.clear();
-                                            ctrlPrdDis.clear();
-                                            ctrlDofM.clear();
-                                            ctrlWrM.clear();
-                                            widget.callback('reloadStock');
-                                          }
-                                          else{
-                                            _showAlertDialog('Error', '${data["message"]}\n${data["data"].toString()}');
-                                          }
-                                        }
-                                      },
-                                      child: const Text('Save'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-
-                          }else{
-                            _showAlertDialog('Alert Message', 'Product Empty!');
-                          }
-                        },
-                      )),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+          child: DataTable2(
+            columnSpacing: 12,
+            horizontalMargin: 12,
+            minWidth: 600,
+            dataRowHeight: 35.0,
+            headingRowHeight: 25.0,
+            headingRowColor: WidgetStateProperty.all<Color>(myTheme.primaryColor.withOpacity(0.1)),
+            columns: const [
+              DataColumn2(
+                  label: Center(child: Text('S.No')),
+                  fixedWidth: 32
+              ),
+              DataColumn2(
+                  label: Text('Category'),
+                  size: ColumnSize.M
+              ),
+              DataColumn2(
+                  label: Text('Model Name'),
+                  size: ColumnSize.M
+              ),
+              DataColumn2(
+                label: Text('Device Id'),
+                fixedWidth: 150,
+              ),
+              DataColumn2(
+                label: Center(child: Text('M.Date')),
+                fixedWidth: 75,
+              ),
+              DataColumn2(
+                label: Center(child: Text('Warranty')),
+                fixedWidth: 70,
+              ),
+              DataColumn2(
+                label: Center(child: Text('Action')),
+                fixedWidth: 45,
+              ),
+            ],
+            rows: List<DataRow>.generate(addedProductList.length, (index) => DataRow(cells: [
+              DataCell(Center(child: Text('${index + 1}',style: const TextStyle(fontSize: 10)))),
+              DataCell(Text(addedProductList[index]['categoryName'],style: const TextStyle(fontSize: 10))),
+              DataCell(Text(addedProductList[index]['modelName'],style: const TextStyle(fontSize: 10))),
+              DataCell(Text('${addedProductList[index]['deviceId']}',style: const TextStyle(fontSize: 10))),
+              DataCell(Center(child: Text(addedProductList[index]['dateOfManufacturing'],style: const TextStyle(fontSize: 10)))),
+              DataCell(Center(child: Text('${addedProductList[index]['warrantyMonths']}',style: const TextStyle(fontSize: 10)))),
+              DataCell(Center(child: IconButton(
+                tooltip: 'Remove',
+                icon: const Icon(Icons.delete_outline, color: Colors.red,), // Specify the icon
+                onPressed: () {
+                  setState(() {
+                    addedProductList.removeAt(index);
+                  });
+                },
+              ), )),
+            ])),
           ),
         ),
       ],

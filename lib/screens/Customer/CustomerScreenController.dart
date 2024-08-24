@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/screens/Customer/Dashboard/SentAndReceived.dart';
 import 'package:oro_irrigation_new/screens/Customer/WeatherScreen.dart';
+import 'package:popover/popover.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
@@ -1325,26 +1326,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     ),
                   ),
                   const SizedBox(height: 15),
-                  Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: Colors.transparent
-                    ),
-                    width: 45,
-                    height: 45,
-                    child: BadgeButton(
-                      onPressed: () {
-                        if(payload.alarmList.isNotEmpty){
-                          showAlarmBottomSheet(context, payload);
-                        }else{
-                          GlobalSnackBar.show(context, 'Alarm is Empty', 200);
-                        }
-                      },
-                      icon: Icons.alarm,
-                      badgeNumber: payload.alarmList.length,
-
-                    ),
-                  ),
+                  AlarmButton(payload: payload, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId,),
                 ],
               ),
             ):
@@ -1468,26 +1450,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     );
                   }, icon: const Icon(Icons.grid_view, color: Colors.white)),
                 ),
-                Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      color: Colors.transparent
-                  ),
-                  width: 45,
-                  height: 45,
-                  child: BadgeButton(
-                    onPressed: () {
-                      if(payload.alarmList.isNotEmpty){
-                        showAlarmBottomSheet(context, payload);
-                      }else{
-                        GlobalSnackBar.show(context, 'Alarm is Empty', 200);
-                      }
-                    },
-                    icon: Icons.alarm,
-                    badgeNumber: payload.alarmList.length,
-
-                  ),
-                ),
+                AlarmButton(payload: payload, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId,),
               ],
             ),
           ):
@@ -1736,86 +1699,181 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     );
   }
 
-  Future<void>showAlarmBottomSheet(BuildContext context, MqttPayloadProvider provider) async{
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return  SizedBox(
-          height: 300,
-          child: Column(
-            children: [
-              Card(
-                elevation: 5,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(5), topRight: Radius.circular(5)),
-                ),
-                surfaceTintColor: Colors.white,
-                margin: EdgeInsets.zero,
-                child: ListTile(
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(topLeft: Radius.circular(5), topRight: Radius.circular(5)),
-                  ),
-                  tileColor: myTheme.primaryColor,
-                  textColor: Colors.white,
-                  title: const Text('Alarm List'),
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: provider.alarmList.isNotEmpty? DataTable2(
-                  columnSpacing: 12,
-                  horizontalMargin: 12,
-                  minWidth: 600,
-                  dataRowHeight: 45.0,
-                  headingRowHeight: 35.0,
-                  headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
-                  columns: const [
-                    DataColumn2(
-                      label: Text('S-No', style: TextStyle(fontSize: 13),),
-                      fixedWidth: 50,
-                    ),
-                    DataColumn2(
-                        label: Text('', style: TextStyle(fontSize: 13)),
-                        fixedWidth: 40,
-                    ),
-                    DataColumn2(
-                        label: Text('Message', style: TextStyle(fontSize: 13),),
-                        size: ColumnSize.L
-                    ),
-                    DataColumn2(
-                        label: Text('Location', style: TextStyle(fontSize: 13),),
-                        size: ColumnSize.L
-                    ),
-                    DataColumn2(
-                      label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
-                      fixedWidth: 80,
-                    ),
-                  ],
-                  rows: List<DataRow>.generate(provider.alarmList.length, (index) => DataRow(cells: [
-                    DataCell(Text('${index+1}')),
-                    DataCell(Icon(Icons.warning_amber, color: provider.alarmList[index]['Status']==1 ? Colors.orangeAccent : Colors.redAccent,)),
-                    DataCell(Text(getAlarmMessage(provider.alarmList[index]['AlarmType']))),
-                    DataCell(Text(provider.alarmList[index]['Location'])),
-                    DataCell(Center(child: MaterialButton(
-                      color: Colors.redAccent,
-                      textColor: Colors.white,
-                      onPressed: (){
-                        String payload =  '${provider.alarmList[index]['S_No']}';
-                        String payLoadFinal = jsonEncode({
-                          "4100": [{"4101": payload}]
-                        });
-                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${mySiteList[siteIndex].master[masterIndex].deviceId}');
-                      },
-                      child: const Text('Reset'),
-                    ))),
-                  ])),
-                ):
-                const Center(child: Text('Alarm not found'),),
-              )
-            ],
+
+  Widget buildLoadingIndicator(bool isVisible, double width)
+  {
+    return Visibility(
+      visible: isVisible,
+      child: Center(
+        child: Container(
+          color: Colors.white,
+          padding: EdgeInsets.symmetric(horizontal: width / 2 - 25),
+          child: const LoadingIndicator(
+            indicatorType: Indicator.ballPulse,
           ),
-        );
-      },
+        ),
+      ),
+    );
+  }
+
+  void indicatorViewShow() {
+    setState((){
+      visibleLoading = true;
+    });
+  }
+
+  void indicatorViewHide() {
+    if(mounted){
+      setState(() {
+        visibleLoading = false;
+      });
+    }
+  }
+
+}
+
+class AlarmButton extends StatelessWidget {
+  const AlarmButton({Key? key, required this.payload, required this.deviceID}) : super(key: key);
+  final MqttPayloadProvider payload;
+  final String deviceID;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 45,
+      height: 45,
+      decoration: const BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.all(Radius.circular(5)),
+      ),
+      child: BadgeButton(
+        onPressed: (){
+          showPopover(
+            context: context,
+            bodyBuilder: (context) => AlarmListItems(payload: payload, deviceID: deviceID,),
+            onPop: () => print('Popover was popped!'),
+            direction: PopoverDirection.left,
+            width: 600,
+            height: 150,
+            arrowHeight: 15,
+            arrowWidth: 30,
+          );
+        },
+        icon: Icons.alarm,
+        badgeNumber: payload.alarmList.length,
+      ),
+    );
+  }
+}
+
+class BadgeButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  final IconData icon;
+  final int badgeNumber;
+
+  const BadgeButton({
+    Key? key,
+    required this.onPressed,
+    required this.icon,
+    required this.badgeNumber,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        IconButton(
+          tooltip: 'Alarm',
+          onPressed: onPressed,
+          icon: Icon(icon, color: Colors.white,),
+        ),
+        if (badgeNumber > 0)
+          Positioned(
+            right: 0,
+            top: 0,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              constraints: const BoxConstraints(
+                minWidth: 16,
+                minHeight: 16,
+              ),
+              child: Text(
+                badgeNumber.toString(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class AlarmListItems extends StatelessWidget {
+  const AlarmListItems({Key? key, required this.payload, required this.deviceID}) : super(key: key);
+  final MqttPayloadProvider payload;
+  final String deviceID;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: payload.alarmList.isNotEmpty? DataTable2(
+        columnSpacing: 12,
+        horizontalMargin: 12,
+        minWidth: 600,
+        dataRowHeight: 45.0,
+        headingRowHeight: 35.0,
+        headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
+        columns: const [
+          DataColumn2(
+            label: Text('S-No', style: TextStyle(fontSize: 13),),
+            fixedWidth: 50,
+          ),
+          DataColumn2(
+            label: Text('', style: TextStyle(fontSize: 13)),
+            fixedWidth: 40,
+          ),
+          DataColumn2(
+              label: Text('Message', style: TextStyle(fontSize: 13),),
+              size: ColumnSize.L
+          ),
+          DataColumn2(
+              label: Text('Location', style: TextStyle(fontSize: 13),),
+              size: ColumnSize.L
+          ),
+          DataColumn2(
+            label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
+            fixedWidth: 80,
+          ),
+        ],
+        rows: List<DataRow>.generate(payload.alarmList.length, (index) => DataRow(cells: [
+          DataCell(Text('${index+1}')),
+          DataCell(Icon(Icons.warning_amber, color: payload.alarmList[index]['Status']==1 ? Colors.orangeAccent : Colors.redAccent,)),
+          DataCell(Text(getAlarmMessage(payload.alarmList[index]['AlarmType']))),
+          DataCell(Text(payload.alarmList[index]['Location'])),
+          DataCell(Center(child: MaterialButton(
+            color: Colors.redAccent,
+            textColor: Colors.white,
+            onPressed: (){
+              String finalPayload =  '${payload.alarmList[index]['S_No']}';
+              String payLoadFinal = jsonEncode({
+                "4100": [{"4101": finalPayload}]
+              });
+              MQTTManager().publish(payLoadFinal, 'AppToFirmware/$deviceID');
+            },
+            child: const Text('Reset'),
+          ))),
+        ])),
+      ):
+      const Center(child: Text('Alarm not found'),),
     );
   }
 
@@ -1884,89 +1942,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     }
     return msg;
   }
-
-  Widget buildLoadingIndicator(bool isVisible, double width)
-  {
-    return Visibility(
-      visible: isVisible,
-      child: Center(
-        child: Container(
-          color: Colors.white,
-          padding: EdgeInsets.symmetric(horizontal: width / 2 - 25),
-          child: const LoadingIndicator(
-            indicatorType: Indicator.ballPulse,
-          ),
-        ),
-      ),
-    );
-  }
-
-  void indicatorViewShow() {
-    setState((){
-      visibleLoading = true;
-    });
-  }
-
-  void indicatorViewHide() {
-    if(mounted){
-      setState(() {
-        visibleLoading = false;
-      });
-    }
-  }
-
 }
-
-class BadgeButton extends StatelessWidget {
-  final VoidCallback onPressed;
-  final IconData icon;
-  final int badgeNumber;
-
-  const BadgeButton({
-    Key? key,
-    required this.onPressed,
-    required this.icon,
-    required this.badgeNumber,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        IconButton(
-          tooltip: 'Alarm list',
-          onPressed: onPressed,
-          icon: Icon(icon, color: Colors.white,),
-        ),
-        if (badgeNumber > 0)
-          Positioned(
-            right: 0,
-            top: 0,
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              constraints: const BoxConstraints(
-                minWidth: 16,
-                minHeight: 16,
-              ),
-              child: Text(
-                badgeNumber.toString(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
 
 class SideSheetClass extends StatefulWidget {
   const SideSheetClass({Key? key, required this.customerID, required this.nodeList, required this.deviceId, required this.lastSyncDate, required this.deviceName, required this.controllerId}) : super(key: key);

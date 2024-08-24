@@ -299,7 +299,34 @@ class _AdminDashboardState extends State<AdminDashboard> {
                               title: Text('Product Stock(${productStockList.length})', style: const TextStyle(fontSize: 20, color: Colors.black),),
                               trailing : IconButton(tooltip: 'Add new stock', icon: const Icon(Icons.add_box_outlined), color: myTheme.primaryColor, onPressed: () async
                               {
-                                showModalBottomSheet(
+                                AlertDialog alert = AlertDialog(
+                                  title: const Text("Add new stock"),
+                                  content: SizedBox(
+                                    width: 640,
+                                    height: 300,
+                                      child: AddProduct(callback: callbackFunction)
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text("Cancel"),
+                                    ),
+                                  ],
+                                );
+
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return alert;
+                                  },
+                                );
+
+                                /*showModalBottomSheet(
                                   context: context,
                                   builder: (BuildContext context) {
                                     return Container(
@@ -310,7 +337,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                       ),
                                     );
                                   },
-                                );
+                                );*/
                                 //Navigator.push(context, MaterialPageRoute(builder: (context) =>  AddProduct(callback: (String ) {},)),);
                               }),
                             ),

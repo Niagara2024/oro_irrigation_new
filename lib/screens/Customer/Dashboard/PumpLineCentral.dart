@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
+import 'package:popover/popover.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
@@ -353,6 +354,418 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
           .toList()
           .cast<Map<String, dynamic>>();
     }
+
+    return SizedBox(
+      width: filteredPumps.length * 70,
+      height: 100,
+      child: Row(
+        children: List.generate(filteredPumps.length, (index) {
+          final pump = filteredPumps[index];
+          return Column(
+            children: [
+              Stack(
+                children: [
+                  Tooltip(
+                    message: 'View more details',
+                    child: TextButton(
+                      onPressed: () {
+
+                        final RenderBox button = context.findRenderObject() as RenderBox;
+                        final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+                        final position = button.localToGlobal(Offset.zero, ancestor: overlay);
+
+                        bool voltKeyExists = filteredPumps[index].containsKey('Voltage');
+                        int signalStrength = voltKeyExists? int.parse(filteredPumps[index]['SignalStrength']):0;
+                        int batteryVolt = voltKeyExists? int.parse(filteredPumps[index]['Battery']):0;
+                        List<String> voltages = voltKeyExists? filteredPumps[index]['Voltage'].split(','):[];
+                        List<String> current = voltKeyExists? filteredPumps[index]['Current'].split(','):[];
+
+                        double level = 42.0;
+                        List<String> columns = ['-', '-', '-'];
+
+                        if(voltKeyExists){
+                          for (var pair in current) {
+                            List<String> parts = pair.split(':');
+                            int columnIndex = int.parse(parts[0]) - 1;
+                            columns[columnIndex] = parts[1];
+                          }
+                        }
+
+                        showPopover(
+                          context: context,
+                          bodyBuilder: (context) => voltKeyExists?Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              ListTile(
+                                title: Text('Version: ${filteredPumps[index]['Version']}'),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(signalStrength == 0 ? Icons.wifi_off :
+                                    signalStrength >= 1 && signalStrength <= 20 ?
+                                    Icons.network_wifi_1_bar_outlined :
+                                    signalStrength >= 21 && signalStrength <= 40 ?
+                                    Icons.network_wifi_2_bar_outlined :
+                                    signalStrength >= 41 && signalStrength <= 60 ?
+                                    Icons.network_wifi_3_bar_outlined :
+                                    signalStrength >= 61 && signalStrength <= 80 ?
+                                    Icons.network_wifi_3_bar_outlined :
+                                    Icons.wifi, color: Colors.black,),
+                                    const SizedBox(width: 5,),
+                                    Text('$signalStrength%'),
+
+                                    const SizedBox(width: 5,),
+                                    batteryVolt==0?const Icon(Icons.battery_0_bar):
+                                    batteryVolt>0&&batteryVolt<=10?const Icon(Icons.battery_1_bar_rounded):
+                                    batteryVolt>10&&batteryVolt<=30?const Icon(Icons.battery_2_bar_rounded):
+                                    batteryVolt>30&&batteryVolt<=50?const Icon(Icons.battery_3_bar_rounded):
+                                    batteryVolt>50&&batteryVolt<=70?const Icon(Icons.battery_4_bar_rounded):
+                                    batteryVolt>70&&batteryVolt<=90?const Icon(Icons.battery_5_bar_rounded):
+                                    const Icon(Icons.battery_6_bar_rounded),
+                                    Text('$batteryVolt%'),
+                                  ],
+                                ),
+                              ),
+                              const Divider(height: 0),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8, top: 5, bottom: 5),
+                                child: Row(
+                                  children: [
+                                    Column(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        const Text('Voltage :'),
+                                        const SizedBox(height: 3,),
+                                        Container(
+                                          width: 75,
+                                          height: 30,
+                                          decoration: BoxDecoration(
+                                            color:Colors.red.shade50,
+                                            borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                            border: Border.all(color: Colors.red, width: .50,),
+                                          ),
+                                          child: Center(child: Text('R : ${voltages[0]}')),
+                                        ),
+                                        const SizedBox(height: 8,),
+                                        Container(
+                                          width: 75,
+                                          height: 30,
+                                          decoration: BoxDecoration(
+                                            color:Colors.yellow.shade50,
+                                            borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                            border: Border.all(color: Colors.yellow, width: .50,),
+                                          ),
+                                          child: Center(child: Text('Y : ${voltages[1]}')),
+                                        ),
+                                        const SizedBox(height: 8,),
+                                        Container(
+                                          width: 75,
+                                          height: 30,
+                                          decoration: BoxDecoration(
+                                            color:Colors.blue.shade50,
+                                            borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                            border: Border.all(color: Colors.blue, width: .50,),
+                                          ),
+                                          child: Center(child: Text('B : ${voltages[2]}')),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(width: 20,),
+                                    Column(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        const Text('Current :'),
+                                        const SizedBox(height: 3,),
+                                        Container(
+                                          width: 70,
+                                          height: 30,
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal.shade50,
+                                            borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                            border: Border.all(color: Colors.teal, width: 0.50),
+                                          ),
+                                          child: Center(child: Text(columns[0])),  // Display the value for R
+                                        ),
+                                        const SizedBox(height: 8,),
+                                        Container(
+                                          width: 70,
+                                          height: 30,
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal.shade50,
+                                            borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                            border: Border.all(color: Colors.teal, width: 0.50),
+                                          ),
+                                          child: Center(child: Text(columns[1])),  // Display the value for Y
+                                        ),
+                                        const SizedBox(height: 8,),
+                                        Container(
+                                          width: 70,
+                                          height: 30,
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal.shade50,
+                                            borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                            border: Border.all(color: Colors.teal, width: 0.50),
+                                          ),
+                                          child: Center(child: Text(columns[2])),  // Display the value for B
+                                        )
+                                      ],
+                                    ),
+                                    const SizedBox(width: 20,),
+                                    Column(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              const TextSpan(
+                                                text: 'Phase : ',
+                                                style: TextStyle(
+                                                  color: Colors.black45,
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text: '${filteredPumps[index]['Phase']}',
+                                                style: const TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 17,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 3,),
+                                        const Text('Level'),
+                                        const SizedBox(height: 3,),
+                                        Container(
+                                          width: 70,
+                                          height: 80,
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue.shade50,
+                                            borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                            border: Border.all(color: Colors.blue, width: 0.50),
+                                          ),
+                                          child: Stack(
+                                            alignment: Alignment.bottomCenter,
+                                            children: [
+                                              Container(
+                                                width: 70,
+                                                height: 80 * (level / 100),  // Adjust height based on percentage
+                                                decoration: BoxDecoration(
+                                                  color: Colors.blue.shade400,
+                                                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(2)),
+                                                ),
+                                              ),
+                                              // Text displaying the percentage
+                                              Center(
+                                                child: Text(
+                                                  '$level%',
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.blue.shade900,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.only(left: 8, right: 8),
+                                child: Divider(),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Material(
+                                    elevation: 8.0,
+                                    shape: const CircleBorder(),
+                                    child: CircleAvatar(
+                                      radius: 22.0,
+                                      backgroundColor: Colors.green,
+                                      child: IconButton(tooltip: 'ON',
+                                          onPressed: () {
+                                            String payload = '1,${filteredPumps[index]['S_No']}';
+                                            String payLoadFinal = jsonEncode({
+                                              "6201": [{"6202": payload}]
+                                            });
+                                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                          },
+                                          icon: const Icon(Icons.power_settings_new, color: Colors.white,)),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Material(
+                                    elevation: 8.0,
+                                    shape: const CircleBorder(),
+                                    child: CircleAvatar(
+                                      radius: 22.0,
+                                      backgroundColor: Colors.redAccent,
+                                      child: IconButton(
+                                          tooltip: 'OFF',
+                                          onPressed: () {
+                                            String payload = '0,${filteredPumps[index]['S_No']}';
+                                            String payLoadFinal = jsonEncode({
+                                              "6201": [{"6202": payload}]
+                                            });
+                                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                          },
+                                          icon: const Icon(
+                                            Icons.power_settings_new,
+                                            color: Colors.white,)),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                ],
+                              ),
+                            ],
+                          ):
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Material(
+                                    elevation: 8.0,
+                                    shape: const CircleBorder(),
+                                    child: CircleAvatar(
+                                      radius: 22.0,
+                                      backgroundColor: Colors.green,
+                                      child: IconButton(tooltip: 'ON',
+                                          onPressed: () {
+                                            String payload = '1,${filteredPumps[index]['S_No']}';
+                                            String payLoadFinal = jsonEncode({
+                                              "6201": [{"6202": payload}]
+                                            });
+                                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                          },
+                                          icon: const Icon(Icons.power_settings_new, color: Colors.white,)),
+                                    ),
+                                  ),
+                                  Material(
+                                    elevation: 8.0,
+                                    shape: const CircleBorder(),
+                                    child: CircleAvatar(
+                                      radius: 22.0,
+                                      backgroundColor: Colors.redAccent,
+                                      child: IconButton(
+                                          tooltip: 'OFF',
+                                          onPressed: () {
+                                            String payload = '0,${filteredPumps[index]['S_No']}';
+                                            String payLoadFinal = jsonEncode({
+                                              "6201": [{"6202": payload}]
+                                            });
+                                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                          },
+                                          icon: const Icon(
+                                            Icons.power_settings_new,
+                                            color: Colors.white,)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          onPop: () => print('Popover was popped!'),
+                          direction: PopoverDirection.right,
+                          width: voltKeyExists?275:125,
+                          height: voltKeyExists?270: 75,
+                          arrowHeight: 15,
+                          arrowWidth: 30,
+                          barrierColor: Colors.black54,
+                          arrowDxOffset: filteredPumps.length>2? ((position.dy-position.dx)+12)+(index*70)-70:
+                          ((position.dy-position.dx)+12)+(index*70),
+                        );
+                      },
+                      style: ButtonStyle(
+                        padding: WidgetStateProperty.all(EdgeInsets.zero),
+                        minimumSize: WidgetStateProperty.all(Size.zero),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        backgroundColor: WidgetStateProperty.all(Colors.transparent),
+                      ),
+                      child: SizedBox(
+                        width: 70,
+                        height: 70,
+                        child: AppImages.getAsset('irrigationPump', pump['Status'], ''),
+                      ),
+                    ),
+                  ),
+                  pump['OnDelayLeft'] != '00:00:00'
+                      ? Positioned(
+                    top: 30,
+                    left: 7.5,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.greenAccent,
+                        borderRadius: const BorderRadius.all(Radius.circular(2)),
+                        border: Border.all(color: Colors.green, width: .50),
+                      ),
+                      width: 55,
+                      child: Center(
+                        child: ValueListenableBuilder<String>(
+                          valueListenable: Provider.of<DurationNotifier>(context).onDelayLeft,
+                          builder: (context, value, child) {
+                            return Column(
+                              children: [
+                                const Text(
+                                  "On delay",
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 3, right: 3),
+                                  child: Divider(
+                                    height: 0,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                Text(
+                                  value,
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  )
+                      : const SizedBox(),
+                ],
+              ),
+              SizedBox(
+                width: 70,
+                height: 30,
+                child: Text(
+                  pump['SW_Name'] ?? pump['Name'],
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
 
     return SizedBox(
       width: filteredPumps.length * 70,
@@ -777,10 +1190,10 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
     final irrigationPump = Provider.of<MqttPayloadProvider>(context).irrigationPump;
     _startTimer();
 
-    List<Map<String, dynamic>> filteredPumps=[];
-    if(widget.currentLineId=='all'){
+    List<Map<String, dynamic>> filteredPumps = [];
+    if (widget.currentLineId == 'all') {
       filteredPumps = irrigationPump.toList().cast<Map<String, dynamic>>();
-    }else{
+    } else {
       filteredPumps = irrigationPump
           .where((pump) => pump['Location'].contains(widget.currentLineId))
           .toList()
@@ -790,10 +1203,9 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
     return SizedBox(
       width: filteredPumps.length * 70,
       height: 100,
-      child: ListView.builder(
-        itemCount: filteredPumps.length,
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (BuildContext context, int index) {
+      child: Row(
+        children: List.generate(filteredPumps.length, (index) {
+          final pump = filteredPumps[index];
           return Column(
             children: [
               Stack(
@@ -802,6 +1214,11 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                     message: 'View more details',
                     child: TextButton(
                       onPressed: () {
+
+                        final RenderBox button = context.findRenderObject() as RenderBox;
+                        final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+                        final position = button.localToGlobal(Offset.zero, ancestor: overlay);
+
                         bool voltKeyExists = filteredPumps[index].containsKey('Voltage');
                         int signalStrength = voltKeyExists? int.parse(filteredPumps[index]['SignalStrength']):0;
                         int batteryVolt = voltKeyExists? int.parse(filteredPumps[index]['Battery']):0;
@@ -809,7 +1226,6 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                         List<String> current = voltKeyExists? filteredPumps[index]['Current'].split(','):[];
 
                         double level = 42.0;
-
                         List<String> columns = ['-', '-', '-'];
 
                         if(voltKeyExists){
@@ -820,13 +1236,14 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                           }
                         }
 
-                        showDialog(
+                        showPopover(
                           context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: voltKeyExists? ListTile(
-                                title: Text(filteredPumps[index]['SW_Name'] ?? filteredPumps[index]['Name']),
-                                subtitle: Text('Version: ${filteredPumps[index]['Version']}', style: const TextStyle(fontSize: 10, color: Colors.grey),),
+                          bodyBuilder: (context) => voltKeyExists?Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              ListTile(
+                                title: Text('Version: ${filteredPumps[index]['Version']}'),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -854,213 +1271,174 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                                     Text('$batteryVolt%'),
                                   ],
                                 ),
-                              ):
-                              Text(filteredPumps[index]['SW_Name'] ?? filteredPumps[index]['Name']),
-                              content: SizedBox(
-                                width: voltKeyExists?270:100,
-                                height: voltKeyExists?175: 40,
-                                child: Column(
+                              ),
+                              const Divider(height: 0),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8, top: 5, bottom: 5),
+                                child: Row(
                                   children: [
-                                    Row(
+                                    Column(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                       children: [
-                                        voltKeyExists?Column(
-                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            const Text('Voltage :'),
-                                            const SizedBox(height: 3,),
-                                            Container(
-                                              width: 75,
-                                              height: 30,
-                                              decoration: BoxDecoration(
-                                                color:Colors.red.shade50,
-                                                borderRadius: const BorderRadius.all(Radius.circular(2)),
-                                                border: Border.all(color: Colors.red, width: .50,),
-                                              ),
-                                              child: Center(child: Text('R : ${voltages[0]}')),
-                                            ),
-                                            const SizedBox(height: 8,),
-                                            Container(
-                                              width: 75,
-                                              height: 30,
-                                              decoration: BoxDecoration(
-                                                color:Colors.yellow.shade50,
-                                                borderRadius: const BorderRadius.all(Radius.circular(2)),
-                                                border: Border.all(color: Colors.yellow, width: .50,),
-                                              ),
-                                              child: Center(child: Text('Y : ${voltages[1]}')),
-                                            ),
-                                            const SizedBox(height: 8,),
-                                            Container(
-                                              width: 75,
-                                              height: 30,
-                                              decoration: BoxDecoration(
-                                                color:Colors.blue.shade50,
-                                                borderRadius: const BorderRadius.all(Radius.circular(2)),
-                                                border: Border.all(color: Colors.blue, width: .50,),
-                                              ),
-                                              child: Center(child: Text('B : ${voltages[2]}')),
-                                            ),
-                                          ],
-                                        ):
-                                        const SizedBox(),
-
-                                        const SizedBox(width: 20,),
-
-                                        voltKeyExists? Column(
-                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            const Text('Current :'),
-                                            const SizedBox(height: 3,),
-                                            Container(
-                                              width: 70,
-                                              height: 30,
-                                              decoration: BoxDecoration(
-                                                color: Colors.teal.shade50,
-                                                borderRadius: const BorderRadius.all(Radius.circular(2)),
-                                                border: Border.all(color: Colors.teal, width: 0.50),
-                                              ),
-                                              child: Center(child: Text(columns[0])),  // Display the value for R
-                                            ),
-                                            const SizedBox(height: 8,),
-                                            Container(
-                                              width: 70,
-                                              height: 30,
-                                              decoration: BoxDecoration(
-                                                color: Colors.teal.shade50,
-                                                borderRadius: const BorderRadius.all(Radius.circular(2)),
-                                                border: Border.all(color: Colors.teal, width: 0.50),
-                                              ),
-                                              child: Center(child: Text(columns[1])),  // Display the value for Y
-                                            ),
-                                            const SizedBox(height: 8,),
-                                            Container(
-                                              width: 70,
-                                              height: 30,
-                                              decoration: BoxDecoration(
-                                                color: Colors.teal.shade50,
-                                                borderRadius: const BorderRadius.all(Radius.circular(2)),
-                                                border: Border.all(color: Colors.teal, width: 0.50),
-                                              ),
-                                              child: Center(child: Text(columns[2])),  // Display the value for B
-                                            )
-                                          ],
-                                        ):
-                                        const SizedBox(),
-
-                                        const SizedBox(width: 20,),
-
-                                        voltKeyExists? Column(
-                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            RichText(
-                                              text: TextSpan(
-                                                children: [
-                                                  const TextSpan(
-                                                    text: 'Phase : ',
-                                                    style: TextStyle(
-                                                      color: Colors.black45,
-                                                      fontSize: 15,
-                                                    ),
-                                                  ),
-                                                  TextSpan(
-                                                    text: '${filteredPumps[index]['Phase']}',
-                                                    style: const TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 17,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            const SizedBox(height: 3,),
-                                            const Text('Level'),
-                                            const SizedBox(height: 3,),
-                                            Container(
-                                              width: 70,
-                                              height: 80,
-                                              decoration: BoxDecoration(
-                                                color: Colors.blue.shade50,
-                                                borderRadius: const BorderRadius.all(Radius.circular(2)),
-                                                border: Border.all(color: Colors.blue, width: 0.50),
-                                              ),
-                                              child: Stack(
-                                                alignment: Alignment.bottomCenter,
-                                                children: [
-                                                  Container(
-                                                    width: 70,
-                                                    height: 80 * (level / 100),  // Adjust height based on percentage
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.blue.shade400,
-                                                      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(2)),
-                                                    ),
-                                                  ),
-                                                  // Text displaying the percentage
-                                                  Center(
-                                                    child: Text(
-                                                      '$level%',
-                                                      style: TextStyle(
-                                                        fontSize: 16,
-                                                        fontWeight: FontWeight.bold,
-                                                        color: Colors.blue.shade900,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ):
-                                        const SizedBox(),
+                                        const Text('Voltage :'),
+                                        const SizedBox(height: 3,),
+                                        Container(
+                                          width: 75,
+                                          height: 30,
+                                          decoration: BoxDecoration(
+                                            color:Colors.red.shade50,
+                                            borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                            border: Border.all(color: Colors.red, width: .50,),
+                                          ),
+                                          child: Center(child: Text('R : ${voltages[0]}')),
+                                        ),
+                                        const SizedBox(height: 8,),
+                                        Container(
+                                          width: 75,
+                                          height: 30,
+                                          decoration: BoxDecoration(
+                                            color:Colors.yellow.shade50,
+                                            borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                            border: Border.all(color: Colors.yellow, width: .50,),
+                                          ),
+                                          child: Center(child: Text('Y : ${voltages[1]}')),
+                                        ),
+                                        const SizedBox(height: 8,),
+                                        Container(
+                                          width: 75,
+                                          height: 30,
+                                          decoration: BoxDecoration(
+                                            color:Colors.blue.shade50,
+                                            borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                            border: Border.all(color: Colors.blue, width: .50,),
+                                          ),
+                                          child: Center(child: Text('B : ${voltages[2]}')),
+                                        ),
                                       ],
                                     ),
-
-                                    voltKeyExists? const Divider():
-                                    const SizedBox(),
-
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    const SizedBox(width: 20,),
+                                    Column(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                       children: [
-                                        MaterialButton(
-                                          color: Colors.green,
-                                          textColor: Colors.white,
-                                          onPressed: () {
-                                            String payload = '1,${filteredPumps[index]['S_No']}';
-                                            String payLoadFinal = jsonEncode({
-                                              "6201": [{"6202": payload}]
-                                            });
-                                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                          },
-                                          child: const Text('ON'),
+                                        const Text('Current :'),
+                                        const SizedBox(height: 3,),
+                                        Container(
+                                          width: 70,
+                                          height: 30,
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal.shade50,
+                                            borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                            border: Border.all(color: Colors.teal, width: 0.50),
+                                          ),
+                                          child: Center(child: Text(columns[0])),  // Display the value for R
                                         ),
-                                        MaterialButton(
-                                          color: Colors.redAccent,
-                                          textColor: Colors.white,
-                                          onPressed: () {
-                                            String payload = '0,${filteredPumps[index]['S_No']}';
-                                            String payLoadFinal = jsonEncode({
-                                              "6201": [{"6202": payload}]
-                                            });
-                                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                          },
-                                          child: const Text('OFF'),
+                                        const SizedBox(height: 8,),
+                                        Container(
+                                          width: 70,
+                                          height: 30,
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal.shade50,
+                                            borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                            border: Border.all(color: Colors.teal, width: 0.50),
+                                          ),
+                                          child: Center(child: Text(columns[1])),  // Display the value for Y
+                                        ),
+                                        const SizedBox(height: 8,),
+                                        Container(
+                                          width: 70,
+                                          height: 30,
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal.shade50,
+                                            borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                            border: Border.all(color: Colors.teal, width: 0.50),
+                                          ),
+                                          child: Center(child: Text(columns[2])),  // Display the value for B
+                                        )
+                                      ],
+                                    ),
+                                    const SizedBox(width: 20,),
+                                    Column(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              const TextSpan(
+                                                text: 'Phase : ',
+                                                style: TextStyle(
+                                                  color: Colors.black45,
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text: '${filteredPumps[index]['Phase']}',
+                                                style: const TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 17,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 3,),
+                                        const Text('Level'),
+                                        const SizedBox(height: 3,),
+                                        Container(
+                                          width: 70,
+                                          height: 80,
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue.shade50,
+                                            borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                            border: Border.all(color: Colors.blue, width: 0.50),
+                                          ),
+                                          child: Stack(
+                                            alignment: Alignment.bottomCenter,
+                                            children: [
+                                              Container(
+                                                width: 70,
+                                                height: 80 * (level / 100),  // Adjust height based on percentage
+                                                decoration: BoxDecoration(
+                                                  color: Colors.blue.shade400,
+                                                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(2)),
+                                                ),
+                                              ),
+                                              // Text displaying the percentage
+                                              Center(
+                                                child: Text(
+                                                  '$level%',
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.blue.shade900,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ],
                                     ),
                                   ],
                                 ),
                               ),
-                              actions: <Widget>[
-                                MaterialButton(
-                                  color: Colors.grey,
-                                  textColor: Colors.black,
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: const Text('Cancel'),
-                                ),
-                              ],
-                            );
-                          },
+                            ],
+                          ):
+                          const Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('No more data available')
+                            ],
+                          ),
+                          onPop: () => print('Popover was popped!'),
+                          direction: PopoverDirection.right,
+                          width: voltKeyExists?275:125,
+                          height: voltKeyExists?270: 75,
+                          arrowHeight: 15,
+                          arrowWidth: 30,
+                          barrierColor: Colors.black54,
+                          arrowDxOffset: filteredPumps.length>2? ((position.dy-position.dx)+12)+(index*70)-70:
+                          ((position.dy-position.dx)+12)+(index*70),
                         );
                       },
                       style: ButtonStyle(
@@ -1072,19 +1450,19 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                       child: SizedBox(
                         width: 70,
                         height: 70,
-                        child: AppImages.getAsset('irrigationPump', filteredPumps[index]['Status'], ''),
+                        child: AppImages.getAsset('irrigationPump', pump['Status'], ''),
                       ),
                     ),
                   ),
-                  filteredPumps[index]['OnDelayLeft'] !='00:00:00'?
-                  Positioned(
+                  pump['OnDelayLeft'] != '00:00:00'
+                      ? Positioned(
                     top: 30,
                     left: 7.5,
                     child: Container(
                       decoration: BoxDecoration(
-                        color:Colors.greenAccent,
+                        color: Colors.greenAccent,
                         borderRadius: const BorderRadius.all(Radius.circular(2)),
-                        border: Border.all(color: Colors.green, width: .50,),
+                        border: Border.all(color: Colors.green, width: .50),
                       ),
                       width: 55,
                       child: Center(
@@ -1093,45 +1471,55 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                           builder: (context, value, child) {
                             return Column(
                               children: [
-                                const Text("On delay", style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.normal,
-                                )),
+                                const Text(
+                                  "On delay",
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
                                 const Padding(
                                   padding: EdgeInsets.only(left: 3, right: 3),
-                                  child: Divider(height: 0, color: Colors.grey,),
+                                  child: Divider(
+                                    height: 0,
+                                    color: Colors.grey,
+                                  ),
                                 ),
-                                Text(value, style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                )),
+                                Text(
+                                  value,
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ],
                             );
                           },
                         ),
                       ),
                     ),
-                  ):
-                  const SizedBox(),
+                  )
+                      : const SizedBox(),
                 ],
               ),
               SizedBox(
                 width: 70,
                 height: 30,
-                child: Text(filteredPumps[index]['SW_Name'] ?? filteredPumps[index]['Name'],
+                child: Text(
+                  pump['SW_Name'] ?? pump['Name'],
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
+                    color: Colors.black,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
           );
-        },
+        }),
       ),
     );
   }
@@ -3255,4 +3643,42 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
     return flowRate;
   }
 
+}
+
+class ListItems extends StatelessWidget {
+  const ListItems({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: ListView(
+        padding: const EdgeInsets.all(8),
+        children: [
+          InkWell(
+            onTap: () {
+
+            },
+            child: Container(
+              height: 50,
+              color: Colors.amber[100],
+              child: const Center(child: Text('Entry A')),
+            ),
+          ),
+          const Divider(),
+          Container(
+            height: 50,
+            color: Colors.amber[200],
+            child: const Center(child: Text('Entry B')),
+          ),
+          const Divider(),
+          Container(
+            height: 50,
+            color: Colors.amber[300],
+            child: const Center(child: Text('Entry C')),
+          ),
+        ],
+      ),
+    );
+  }
 }

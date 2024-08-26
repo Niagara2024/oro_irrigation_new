@@ -681,8 +681,9 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                           arrowHeight: 15,
                           arrowWidth: 30,
                           barrierColor: Colors.black54,
-                          arrowDxOffset: filteredPumps.length>2? ((position.dy-position.dx)+12)+(index*70)-70:
-                          ((position.dy-position.dx)+12)+(index*70),
+                          arrowDxOffset: filteredPumps.length==1?(position.dx+25)+(index*70)-140:
+                          filteredPumps.length==2?(position.dx+25)+(index*70)-210:
+                          (position.dx+25)+(index*70)-280,
                         );
                       },
                       style: ButtonStyle(
@@ -1236,6 +1237,21 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                           }
                         }
 
+                        int srcCount = 0;
+                        int irgCount = 0;
+                        if (widget.currentLineId == 'all') {
+                          srcCount = Provider.of<MqttPayloadProvider>(context, listen: false).sourcePump.length;
+                          irgCount = Provider.of<MqttPayloadProvider>(context, listen: false).irrigationPump.length;
+                        }else{
+                          srcCount = Provider.of<MqttPayloadProvider>(context, listen: false).sourcePump
+                              .where((pump) => pump['Location'].contains(widget.currentLineId)).toList()
+                              .cast<Map<String, dynamic>>().length;
+
+                          irgCount = Provider.of<MqttPayloadProvider>(context, listen: false).irrigationPump
+                              .where((pump) => pump['Location'].contains(widget.currentLineId)).toList()
+                              .cast<Map<String, dynamic>>().length;
+                        }
+
                         showPopover(
                           context: context,
                           bodyBuilder: (context) => voltKeyExists?Column(
@@ -1427,7 +1443,10 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('No more data available')
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text('No more data'),
+                              )
                             ],
                           ),
                           onPop: () => print('Popover was popped!'),
@@ -1437,8 +1456,20 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                           arrowHeight: 15,
                           arrowWidth: 30,
                           barrierColor: Colors.black54,
-                          arrowDxOffset: filteredPumps.length>2? ((position.dy-position.dx)+12)+(index*70)-70:
-                          ((position.dy-position.dx)+12)+(index*70),
+                          arrowDxOffset: srcCount==0 && irgCount==1? (position.dx+45)+(index*70)-210:
+                          srcCount==1 && irgCount==1? (position.dx+45)+(index*70)-280:
+                          srcCount==2 && irgCount==1? (position.dx+45)+(index*70)-350:
+                          srcCount==3 && irgCount==1? (position.dx+45)+(index*70)-420:
+
+                          srcCount==1 && irgCount==2? (position.dx+45)+(index*70)-350:
+
+
+                          srcCount==2 && irgCount==2? (position.dx+45)+(index*70)-420:
+                          srcCount==2 && irgCount==4? (position.dx+45)+(index*70)-560:
+
+                          srcCount==2 && irgCount==4? (position.dx+45)+(index*70)-560:
+                          ((position.dy-position.dx)+12)+(index*70)-70,
+
                         );
                       },
                       style: ButtonStyle(
@@ -1696,10 +1727,15 @@ class _DisplayFilterState extends State<DisplayFilter> {
                                       child: AppImages.getAsset('filter', filteredCentralFilter[i]['FilterStatus'][flIndex]['Status'],''),
                                     ),
                                     Positioned(
-                                      top: 40,
+                                      top: 55,
                                       left: 7.5,
-                                      child: filteredCentralFilter[i]['DurationLeft']!='00:00:00'? filteredCentralFilter[i]['Status'] == (flIndex+1) ? Container(
-                                        color: Colors.greenAccent,
+                                      child: filteredCentralFilter[i]['DurationLeft']!='00:00:00'? filteredCentralFilter[i]['Status'] == (flIndex+1) ?
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color:Colors.greenAccent,
+                                          borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                          border: Border.all(color: Colors.grey, width: .50,),
+                                        ),
                                         width: 55,
                                         child: Center(
                                           child: Text(filteredCentralFilter[i]['DurationLeft'],
@@ -1860,7 +1896,7 @@ class _DisplayFilterState extends State<DisplayFilter> {
                                   child: AppImages.getAsset('filter', filteredCentralFilter[i]['FilterStatus'][flIndex]['Status'],''),
                                 ),
                                 Positioned(
-                                  top: 40,
+                                  top: 45,
                                   left: 7.5,
                                   child: filteredCentralFilter[i]['DurationLeft']!='00:00:00'? filteredCentralFilter[i]['Status'] == (flIndex+1) ? Container(
                                     color: Colors.greenAccent,
@@ -2710,10 +2746,14 @@ class _LocalFilterState extends State<LocalFilter> {
                                       child: AppImages.getAsset('filter', filteredLocalFilter[i]['FilterStatus'][flIndex]['Status'],''),
                                     ),
                                     Positioned(
-                                      top: 40,
+                                      top: 55,
                                       left: 7.5,
                                       child: filteredLocalFilter[i]['DurationLeft']!='00:00:00'? filteredLocalFilter[i]['Status'] == (flIndex+1) ? Container(
-                                        color: Colors.greenAccent,
+                                        decoration: BoxDecoration(
+                                          color:Colors.greenAccent,
+                                          borderRadius: const BorderRadius.all(Radius.circular(2)),
+                                          border: Border.all(color: Colors.grey, width: .50,),
+                                        ),
                                         width: 55,
                                         child: Center(
                                           child: Text(filteredLocalFilter[i]['DurationLeft'],

@@ -1578,7 +1578,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                       ]
                                     });
                                     MQTTManager().publish(payLoadFinal, 'AppToFirmware/${mySiteList[siteIndex].master[masterIndex].deviceId}');
-                                  }, icon: const Icon(Icons.fact_check_outlined))
+                                  }, icon: const Icon(Icons.fact_check_outlined, color: primaryColorDark,))
                                 ],
                               ),
                             ),
@@ -1750,10 +1750,10 @@ class AlarmButton extends StatelessWidget {
         onPressed: (){
           showPopover(
             context: context,
-            bodyBuilder: (context) => AlarmListItems(payload: payload, deviceID: deviceID,),
+            bodyBuilder: (context) => AlarmListItems(payload:payload, deviceID:deviceID,),
             onPop: () => print('Popover was popped!'),
             direction: PopoverDirection.left,
-            width: 600,
+            width: payload.alarmList.isNotEmpty?600:300,
             height: 150,
             arrowHeight: 15,
             arrowWidth: 30,
@@ -2029,14 +2029,14 @@ class _SideSheetClassState extends State<SideSheetClass> {
                       builder: (context) => NodeHrsLog(userId: widget.customerID, controllerId: widget.controllerId,),
                     ),
                   );
-                }, icon: const Icon(Icons.ssid_chart)),
+                }, icon: const Icon(Icons.ssid_chart, color: primaryColorDark,)),
                 IconButton(tooltip:'Sensor Hourly logs',onPressed: (){
                   Navigator.push(context,
                     MaterialPageRoute(
                       builder: (context) => SensorHourlyLogs(userId: widget.customerID, controllerId: widget.controllerId,),
                     ),
                   );
-                }, icon: const Icon(Icons.sensors)),
+                }, icon: const Icon(Icons.sensors, color: primaryColorDark,)),
               ],
             ),
           ),
@@ -2098,7 +2098,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                       width: 40,
                       child: IconButton(
                         tooltip: 'Set serial for all Nodes',
-                        icon: Icon(Icons.format_list_numbered, color: myTheme.primaryColorDark),
+                        icon: const Icon(Icons.format_list_numbered, color: primaryColorDark),
                         onPressed: () async {
                           showDialog(
                             context: context,
@@ -2141,7 +2141,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                       width: 40,
                       child: IconButton(
                         tooltip: 'Test Communication',
-                        icon: Icon(Icons.network_check, color: myTheme.primaryColorDark),
+                        icon: const Icon(Icons.network_check, color: primaryColorDark),
                         onPressed: () async {
                           String payLoadFinal = jsonEncode({
                             "4500": [{"4501": ""},]
@@ -2206,7 +2206,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                       return ExpansionTile(
                         //initiallyExpanded: true,
                         trailing: widget.nodeList[index].rlyStatus.any((rly) => rly.Status == 2 || rly.Status == 3)? const Icon(Icons.warning, color: Colors.orangeAccent):
-                        const Icon(Icons.info_outline),
+                        const Icon(Icons.info_outline, color: primaryColorDark,),
                         backgroundColor: Colors.teal.shade50,
                         title: Row(
                           children: [
@@ -2248,19 +2248,19 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                   title: const Text('Last feedback', style: TextStyle(fontSize: 10)),
                                   subtitle: Text(
                                     formatDateTime(widget.nodeList[index].lastFeedbackReceivedTime),
-                                    style: TextStyle(fontSize: 11),
+                                    style: const TextStyle(fontSize: 11),
                                   ),
                                   trailing: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(Icons.solar_power_outlined, color: Colors.teal),
+                                      const Icon(Icons.solar_power_outlined, color: primaryColorDark),
                                       const SizedBox(width: 5),
                                       Text(
                                         '${widget.nodeList[index].sVolt} - V',
                                         style: const TextStyle(fontWeight: FontWeight.normal),
                                       ),
                                       const SizedBox(width: 5),
-                                      const Icon(Icons.battery_3_bar_rounded, color: Colors.teal),
+                                      const Icon(Icons.battery_3_bar_rounded, color: primaryColorDark),
                                       const SizedBox(width: 5),
                                       Text(
                                         '${widget.nodeList[index].batVolt} - V',
@@ -2663,7 +2663,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                           ]
                                         });
                                         MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                      }, icon: Icon(Icons.fact_check_outlined, color: Colors.white))
+                                      }, icon: const Icon(Icons.fact_check_outlined, color: primaryColorDark))
                                     ],
                                   ),
                                 ),

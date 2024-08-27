@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../constants/MQTTManager.dart';
 import '../../constants/MyFunction.dart';
+import '../../constants/snack_bar.dart';
 import '../../state_management/MqttPayloadProvider.dart';
 import 'Dashboard/CurrentSchedule.dart';
 import 'Dashboard/DisplayAllLine.dart';
@@ -120,33 +121,9 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
       if(widget.siteData.master[widget.masterInx].irrigationLine[widget.lineIdx].sNo==0){
         return Column(
           children: [
-            lastCommunication.inMinutes >= 10? Padding(
-              padding: const EdgeInsets.only(left: 3, right: 3),
-              child: Container(
-                width: MediaQuery.sizeOf(context).width,
-                decoration: BoxDecoration(
-                  color: Colors.red.shade400,
-                  borderRadius: BorderRadius.circular(03),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(2.0),
-                  child: Center(child: Text('No communication from controller, Please check your controller connection...'.toUpperCase(),
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.normal, color: Colors.white70),)),
-                ),
-              ),
-            ):
+            lastCommunication.inMinutes >= 10? lostCommunication():
             const SizedBox(),
-
-            liveSync? Padding(
-              padding: const EdgeInsets.only(left: 3, right: 3),
-              child: LinearProgressIndicator(
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
-                backgroundColor: Colors.grey[200],
-                minHeight: 4,
-                borderRadius: BorderRadius.circular(5.0),
-              ),
-            ): const SizedBox(),
-
+            liveSync? stoppedAnimation(): const SizedBox(),
             Expanded(
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
@@ -178,21 +155,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
         return Column(
           children: [
-            lastCommunication.inMinutes >= 10? Padding(
-              padding: const EdgeInsets.only(left: 3, right: 3),
-              child: Container(
-                width: MediaQuery.sizeOf(context).width,
-                decoration: BoxDecoration(
-                  color: Colors.red.shade400,
-                  borderRadius: BorderRadius.circular(03),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(2.0),
-                  child: Center(child: Text('No communication from controller, Please check your controller connection...'.toUpperCase(),
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.normal, color: Colors.white70),)),
-                ),
-              ),
-            ):
+            lastCommunication.inMinutes >= 10? lostCommunication():
             const SizedBox(),
 
             irrigationPauseFlag !=0? Padding(
@@ -212,15 +175,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
             ):
             const SizedBox(),
 
-            liveSync? Padding(
-              padding: const EdgeInsets.only(left: 3, right: 3),
-              child: LinearProgressIndicator(
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
-                backgroundColor: Colors.grey[200],
-                minHeight: 4,
-                borderRadius: BorderRadius.circular(5.0),
-              ),
-            ): const SizedBox(),
+            liveSync? stoppedAnimation(): const SizedBox(),
 
             Expanded(
               child: SingleChildScrollView(
@@ -228,7 +183,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    screenWidth > 600 ? buildWideLayout():
+                    screenWidth > 600 ? buildWideLayout(provider):
                     buildNarrowLayout(provider),
                     filteredCurrentSchedule.isNotEmpty? CurrentSchedule(siteData: widget.siteData, customerID: widget.customerID, currentSchedule: filteredCurrentSchedule,):
                     const SizedBox(),
@@ -248,6 +203,36 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     else{
       return const Center(child: Text('Site not configure'));
     }
+  }
+
+  Widget lostCommunication() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 3, right: 3),
+      child: Container(
+        width: MediaQuery.sizeOf(context).width,
+        decoration: BoxDecoration(
+          color: Colors.red.shade400,
+          borderRadius: BorderRadius.circular(03),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: Center(child: Text('No communication from controller, Please check your controller connection...'.toUpperCase(),
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.normal, color: Colors.white70),)),
+        ),
+      ),
+    );
+  }
+
+  Widget stoppedAnimation() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 3, right: 3),
+      child: LinearProgressIndicator(
+        valueColor: const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+        backgroundColor: Colors.grey[200],
+        minHeight: 4,
+        borderRadius: BorderRadius.circular(5.0),
+      ),
+    );
   }
 
   Widget buildNarrowLayout(provider) {
@@ -316,9 +301,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                               //filter
                               provider.filtersCentral.isNotEmpty? Padding(
                                 padding: const EdgeInsets.only(top: 15),
-                                child: DisplayFilter(currentLineId: crrIrrLine.id,),
+                                child: DisplayFilter(currentLineId: crrIrrLine.id, filtersSites: provider.filtersCentral,),
                               ): const SizedBox(),
-
                             ],
                           ):
                           const SizedBox(height: 20),
@@ -398,7 +382,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                                         const SizedBox(),
                                         provider.filtersLocal.isNotEmpty? Padding(
                                           padding: EdgeInsets.only(top: provider.fertilizerLocal.isNotEmpty?38.4:0),
-                                          child: LocalFilter(currentLineId: crrIrrLine.id,),
+                                          child: LocalFilter(currentLineId: crrIrrLine.id, filtersSites: provider.filtersLocal,),
                                         ):
                                         const SizedBox(),
                                         provider.fertilizerLocal.isNotEmpty? DisplayLocalFertilizer(currentLineId: crrIrrLine.id,):
@@ -443,7 +427,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                   surfaceTintColor: Colors.white,
                   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(3))),
                   elevation: 5,
-                  child: DisplayIrrigationLine(irrigationLine: crrIrrLine, currentLineId: crrIrrLine.id, currentMaster: widget.siteData.master[widget.masterInx]),
+                  child: DisplayIrrigationLine(irrigationLine: crrIrrLine, currentLineId: crrIrrLine.id, currentMaster: widget.siteData.master[widget.masterInx], rWidth: 0,),
                 ),
               ),
               Positioned(
@@ -467,7 +451,140 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     );
   }
 
-  Widget buildWideLayout() {
+  Widget buildWideLayout(MqttPayloadProvider provider) {
+
+    if(provider.filtersCentral.isEmpty && provider.filtersLocal.isEmpty
+        && provider.fertilizerCentral.isEmpty && provider.fertilizerLocal.isEmpty){
+
+      int? irrigationPauseFlag = getIrrigationPauseFlag(crrIrrLine.id, Provider.of<MqttPayloadProvider>(context).payload2408);
+
+      return Padding(
+        padding: const EdgeInsets.all(3.0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(
+              color: Colors.grey,
+              width: 0.5,
+            ),
+            borderRadius: const BorderRadius.all(Radius.circular(5)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 9, left: 5, right: 5),
+            child: provider.irrigationPump.isNotEmpty? Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                provider.sourcePump.isNotEmpty? Padding(
+                  padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                  child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id,),
+                ):
+                const SizedBox(),
+                provider.irrigationPump.isNotEmpty? Padding(
+                  padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                  child: SizedBox(
+                    width: 52.50,
+                    height: 70,
+                    child : Stack(
+                      children: [
+                        provider.sourcePump.isNotEmpty? Image.asset('assets/images/dp_sump_src.png'):
+                        Image.asset('assets/images/dp_sump.png'),
+                      ],
+                    ),
+                  ),
+                ):
+                const SizedBox(),
+                provider.irrigationPump.isNotEmpty? Padding(
+                  padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                  child: DisplayIrrigationPump(currentLineId: crrIrrLine.id, deviceId: widget.siteData.master[widget.masterInx].deviceId,),
+                ):
+                const SizedBox(),
+
+                if(provider.filtersCentral.isEmpty)
+                  for(int i=0; i<provider.payload2408.length; i++)
+                    provider.payload2408.isNotEmpty?  Padding(
+                      padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                      child: provider.payload2408[i]['Line'].contains(crrIrrLine.id)? DisplaySensor(crInx: i):null,
+                    ) :
+                    const SizedBox(),
+
+                Expanded(
+                  child: Column(
+                    children: [
+                      Divider(height: 5, color: Colors.grey.shade300),
+                      Container(height: 3, color: Colors.white24),
+                      Divider(height: 0, color: Colors.grey.shade300),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: DisplayIrrigationLine(irrigationLine: crrIrrLine, currentLineId: crrIrrLine.id, currentMaster: widget.siteData.master[widget.masterInx], rWidth: 400,)),
+                          irrigationPauseFlag !=2 ? Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: TextButton(
+                              onPressed: () {
+                                int prFlag = 0;
+                                List<dynamic> records = provider.payload2408;
+                                int sNoToCheck = crrIrrLine.sNo;
+                                var record = records.firstWhere(
+                                      (record) => record['S_No'] == sNoToCheck,
+                                  orElse: () => null,
+                                );
+                                if (record != null) {
+                                  bool isIrrigationPauseFlagZero = record['IrrigationPauseFlag'] == 0;
+                                  if (isIrrigationPauseFlagZero) {
+                                    prFlag = 1;
+                                  } else {
+                                    prFlag = 0;
+                                  }
+                                  String payLoadFinal = jsonEncode({
+                                    "4900": [
+                                      {
+                                        "4901": "$sNoToCheck, $prFlag",
+                                      }
+                                    ]
+                                  });
+                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[widget.masterInx].deviceId}');
+                                } else {
+                                  const GlobalSnackBar(code: 200, message: 'Controller connection lost...');
+                                }
+                              },
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all<Color>(irrigationPauseFlag == 1 ? Colors.green : Colors.orange),
+                                shape: WidgetStateProperty.all<OutlinedBorder>(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  irrigationPauseFlag == 1
+                                      ? const Icon(Icons.play_arrow_outlined, color: Colors.white)
+                                      : const Icon(Icons.pause, color: Colors.white),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    irrigationPauseFlag == 1 ? 'RESUME THE LINE' : 'PAUSE THE LINE',
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ):
+                          const SizedBox(),
+                        ],
+                      ),
+
+                    ],
+                  ),
+                ),
+              ],
+            ):
+            const SizedBox(height: 20),
+          ),
+        ),
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.all(3.0),
@@ -487,14 +604,11 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  PumpLineCentral(currentSiteData: widget.siteData, crrIrrLine:crrIrrLine, masterIdx: widget.masterInx,),
+                  PumpLineCentral(currentSiteData: widget.siteData, crrIrrLine:crrIrrLine, masterIdx: widget.masterInx, provider: provider,),
                   Divider(height: 0, color: Colors.grey.shade300),
                   Container(height: 4, color: Colors.white24),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 05, right: 00),
-                    child: Divider(height: 0, color: Colors.grey.shade300),
-                  ),
-                  DisplayIrrigationLine(irrigationLine: crrIrrLine, currentLineId: crrIrrLine.id, currentMaster: widget.siteData.master[widget.masterInx]),
+                  Divider(height: 0, color: Colors.grey.shade300),
+                  DisplayIrrigationLine(irrigationLine: crrIrrLine, currentLineId: crrIrrLine.id, currentMaster: widget.siteData.master[widget.masterInx], rWidth: 0,),
                 ],
               ),
             ),
@@ -503,6 +617,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
       ),
     );
   }
+
+
 
 
   String getCurrentDateAndTime() {
@@ -539,10 +655,11 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
 
 class DisplayIrrigationLine extends StatefulWidget {
-  const DisplayIrrigationLine({Key? key, required this.irrigationLine, required this.currentLineId, required this.currentMaster}) : super(key: key);
+  const DisplayIrrigationLine({Key? key, required this.irrigationLine, required this.currentLineId, required this.currentMaster, required this.rWidth}) : super(key: key);
   final MasterData currentMaster;
   final IrrigationLine irrigationLine;
   final String currentLineId;
+  final int rWidth;
 
   @override
   State<DisplayIrrigationLine> createState() => _DisplayIrrigationLineState();
@@ -554,7 +671,7 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
   @override
   Widget build(BuildContext context) {
 
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.of(context).size.width-widget.rWidth;
 
     final List<Widget> valveWidgets;
 

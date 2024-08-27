@@ -1244,7 +1244,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                       child: IconButton(
                         tooltip: 'View all Node details',
                         onPressed: () {
-                          //showNodeDetailsBottomSheet(context);
                           Navigator.push(context,
                             MaterialPageRoute(
                               builder: (context) => AllNodeListAndDetails(userID: widget.customerId, customerID: widget.customerId, masterInx: masterIndex, siteData: mySiteList[siteIndex],),
@@ -1442,7 +1441,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   width: 45,
                   height: 45,
                   child: IconButton(tooltip:'View all Node details', onPressed: (){
-                    //showNodeDetailsBottomSheet(context);
                     Navigator.push(context,
                       MaterialPageRoute(
                         builder: (context) => AllNodeListAndDetails(userID: widget.customerId, customerID: widget.customerId, masterInx: masterIndex, siteData: mySiteList[siteIndex],),
@@ -1464,7 +1462,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       ControllerSettings(customerID: widget.customerId, siteData: mySiteList[siteIndex], masterIndex: masterIndex, adDrId: widget.comingFrom=='AdminORDealer'? widget.userId:0, allSiteList: mySiteList,),
     );
   }
-
 
   void sideSheet() {
     showGeneralDialog(
@@ -1499,206 +1496,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       },
     );
   }
-
-  Future<void>showNodeDetailsBottomSheet(BuildContext context) async{
-    //print(mySiteList[siteIndex].nodeList);
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return  SizedBox(
-          height: 600,
-          child: Column(
-            children: [
-              Card(
-                elevation: 5,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(5), topRight: Radius.circular(5)),
-                ),
-                surfaceTintColor: Colors.white,
-                margin: EdgeInsets.zero,
-                child: ListTile(
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(topLeft: Radius.circular(5), topRight: Radius.circular(5)),
-                  ),
-                  tileColor: myTheme.primaryColor,
-                  textColor: Colors.white,
-                  title: const Text('All Node Details', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                  trailing: PopupMenuButton<String>(
-                    icon: const Icon(Icons.filter_list, color: Colors.white,),
-                    onSelected: (value) {
-                      print('Filter option selected: $value');
-                    },
-                    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                      const PopupMenuItem<String>(
-                        value: 'Sort by Active relay',
-                        child: Text('Sort by Active relays'),
-                      ),
-                      const PopupMenuItem<String>(
-                        value: 'Sort by In-Active relays',
-                        child: Text('Sort by In-Active relays'),
-                      ),
-                      const PopupMenuItem<String>(
-                        value: 'Others',
-                        child: Text('Others'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: ListView(
-                  children: [
-                    for (int i = 0; i < mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList.length; i++)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Card(
-                            elevation: 2,
-                            shape: const RoundedRectangleBorder(),
-                            surfaceTintColor: Colors.white,
-                            margin: EdgeInsets.zero,
-                            child: ListTile(
-                              tileColor: myTheme.primaryColor.withOpacity(0.1),
-                              title: Text('${mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].categoryName} - ${mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].deviceId}'),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.solar_power_outlined),
-                                  const SizedBox(width: 5,),
-                                  Text('${mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                  const SizedBox(width: 5,),
-                                  const Icon(Icons.battery_3_bar_rounded),
-                                  Text('${mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                  const SizedBox(width: 5,),
-                                  IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
-                                    String payLoadFinal = jsonEncode({
-                                      "2300": [
-                                        {"2301": "${mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].serialNumber}"},
-                                      ]
-                                    });
-                                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${mySiteList[siteIndex].master[masterIndex].deviceId}');
-                                  }, icon: const Icon(Icons.fact_check_outlined, color: primaryColorDark,))
-                                ],
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Column(
-                              children: [
-                                GridView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus.length,
-                                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 8,
-                                  ),
-                                  itemBuilder: (context, index) {
-                                    return Column(
-                                      children: [
-                                        CircleAvatar(
-                                          backgroundColor: Colors.transparent,
-                                          backgroundImage: mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("SP") ?
-                                          const AssetImage('assets/images/irrigation_pump.png'):
-                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("IP") ?
-                                          const AssetImage('assets/images/irrigation_pump.png'):
-                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("VL") ?
-                                          const AssetImage('assets/images/valve_gray.png'):
-                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("MV") ?
-                                          const AssetImage('assets/images/dp_main_valve.png'):
-                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FL") ?
-                                          const AssetImage('assets/images/dp_filter.png'):
-                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FC") ?
-                                          const AssetImage('assets/images/fert_chanel.png'):
-                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FG") ?
-                                          const AssetImage('assets/images/fogger.png'):
-                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FB") ?
-                                          const AssetImage('assets/images/booster_pump.png'):
-                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("AG") ?
-                                          const AssetImage('assets/images/dp_agitator_gray.png'):
-                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("DV") ?
-                                          const AssetImage('assets/images/downstream_valve.png'):
-                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("SL") ?
-                                          const AssetImage('assets/images/selector.png'):
-                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("FN") ?
-                                          const AssetImage('assets/images/fan.png'):
-                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("LI") ?
-                                          const AssetImage('assets/images/pressure_sensor.png'):
-                                          mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!.contains("LO") ?
-                                          const AssetImage('assets/images/pressure_sensor.png'):
-                                          const AssetImage('assets/images/pressure_sensor.png'),
-                                        ),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            const CircleAvatar(
-                                              radius: 5,
-                                              backgroundColor: Colors.grey,
-                                            ),
-                                            const SizedBox(width: 3),
-                                            Text('${mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].name!}(${mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].rlyStatus[index].rlyNo})', style: const TextStyle(color: Colors.black, fontSize: 10)),
-                                          ],
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                ),
-                                GridView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor.length,
-                                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 8,
-                                  ),
-                                  itemBuilder: (context, index) {
-                                    return Column(
-                                      children: [
-                                        SizedBox(
-                                          width: 40,
-                                          height: 40,
-                                          child: Stack(
-                                            children: [
-                                              AppImages.getAsset('sensor',0, mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor[index].name!),
-                                              Positioned(
-                                                top: 25,
-                                                left: 0,
-                                                child: Container(width: 40, height: 14,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius.circular(3),
-                                                      color: Colors.yellow,
-                                                    ),
-                                                    child: Center(child: Text('${mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor[index].value}', style: const TextStyle(color: Colors.black, fontSize: 10)))
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Text(mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList[i].sensor[index].name!, style: const TextStyle(color: Colors.black, fontSize: 10)),
-                                          ],
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                )
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                  ],
-                ),
-              )
-            ],
-          ),
-        );
-      },
-    );
-  }
-
 
   Widget buildLoadingIndicator(bool isVisible, double width)
   {
@@ -1753,8 +1550,8 @@ class AlarmButton extends StatelessWidget {
             bodyBuilder: (context) => AlarmListItems(payload:payload, deviceID:deviceID,),
             onPop: () => print('Popover was popped!'),
             direction: PopoverDirection.left,
-            width: payload.alarmList.isNotEmpty?600:300,
-            height: 150,
+            width: payload.alarmList.isNotEmpty?550:250,
+            height: payload.alarmList.isNotEmpty?(payload.alarmList.length*75)+20:50,
             arrowHeight: 15,
             arrowWidth: 30,
           );
@@ -1823,58 +1620,55 @@ class AlarmListItems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: payload.alarmList.isNotEmpty? DataTable2(
-        columnSpacing: 12,
-        horizontalMargin: 12,
-        minWidth: 600,
-        dataRowHeight: 45.0,
-        headingRowHeight: 35.0,
-        headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
-        columns: const [
-          DataColumn2(
-            label: Text('S-No', style: TextStyle(fontSize: 13),),
-            fixedWidth: 50,
-          ),
-          DataColumn2(
-            label: Text('', style: TextStyle(fontSize: 13)),
-            fixedWidth: 40,
-          ),
-          DataColumn2(
-              label: Text('Message', style: TextStyle(fontSize: 13),),
-              size: ColumnSize.L
-          ),
-          DataColumn2(
-              label: Text('Location', style: TextStyle(fontSize: 13),),
-              size: ColumnSize.L
-          ),
-          DataColumn2(
-            label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
-            fixedWidth: 80,
-          ),
-        ],
-        rows: List<DataRow>.generate(payload.alarmList.length, (index) => DataRow(cells: [
-          DataCell(Text('${index+1}')),
-          DataCell(Icon(Icons.warning_amber, color: payload.alarmList[index]['Status']==1 ? Colors.orangeAccent : Colors.redAccent,)),
-          DataCell(Text(getAlarmMessage(payload.alarmList[index]['AlarmType']))),
-          DataCell(Text(payload.alarmList[index]['Location'])),
-          DataCell(Center(child: MaterialButton(
-            color: Colors.redAccent,
-            textColor: Colors.white,
-            onPressed: (){
-              String finalPayload =  '${payload.alarmList[index]['S_No']}';
-              String payLoadFinal = jsonEncode({
-                "4100": [{"4101": finalPayload}]
-              });
-              MQTTManager().publish(payLoadFinal, 'AppToFirmware/$deviceID');
-            },
-            child: const Text('Reset'),
-          ))),
-        ])),
-      ):
-      const Center(child: Text('Alarm not found'),),
-    );
+    return payload.alarmList.isNotEmpty? DataTable2(
+      columnSpacing: 12,
+      horizontalMargin: 12,
+      minWidth: 550,
+      dataRowHeight: 45.0,
+      headingRowHeight: 35.0,
+      headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
+      columns: const [
+        DataColumn2(
+          label: Text('S-No', style: TextStyle(fontSize: 13),),
+          fixedWidth: 50,
+        ),
+        DataColumn2(
+          label: Text('', style: TextStyle(fontSize: 13)),
+          fixedWidth: 40,
+        ),
+        DataColumn2(
+            label: Text('Message', style: TextStyle(fontSize: 13),),
+            size: ColumnSize.L
+        ),
+        DataColumn2(
+            label: Text('Location', style: TextStyle(fontSize: 13),),
+            size: ColumnSize.L
+        ),
+        DataColumn2(
+          label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
+          fixedWidth: 80,
+        ),
+      ],
+      rows: List<DataRow>.generate(payload.alarmList.length, (index) => DataRow(cells: [
+        DataCell(Text('${index+1}')),
+        DataCell(Icon(Icons.warning_amber, color: payload.alarmList[index]['Status']==1 ? Colors.orangeAccent : Colors.redAccent,)),
+        DataCell(Text(getAlarmMessage(payload.alarmList[index]['AlarmType']))),
+        DataCell(Text(payload.alarmList[index]['Location'])),
+        DataCell(Center(child: MaterialButton(
+          color: Colors.redAccent,
+          textColor: Colors.white,
+          onPressed: (){
+            String finalPayload =  '${payload.alarmList[index]['S_No']}';
+            String payLoadFinal = jsonEncode({
+              "4100": [{"4101": finalPayload}]
+            });
+            MQTTManager().publish(payLoadFinal, 'AppToFirmware/$deviceID');
+          },
+          child: const Text('Reset'),
+        ))),
+      ])),
+    ):
+    const Center(child: Text('Alarm not found'),);
   }
 
   String getAlarmMessage(int alarmType) {

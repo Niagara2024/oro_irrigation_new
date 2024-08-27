@@ -517,7 +517,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(child: DisplayIrrigationLine(irrigationLine: crrIrrLine, currentLineId: crrIrrLine.id, currentMaster: widget.siteData.master[widget.masterInx], rWidth: 400,)),
+                          Expanded(child: DisplayIrrigationLine(irrigationLine: crrIrrLine, currentLineId: crrIrrLine.id, currentMaster: widget.siteData.master[widget.masterInx], rWidth: (provider.irrigationPump.length+provider.sourcePump.length+1)*70,)),
                           irrigationPauseFlag !=2 ? Padding(
                             padding: const EdgeInsets.all(8),
                             child: TextButton(
@@ -574,7 +574,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                           const SizedBox(),
                         ],
                       ),
-
                     ],
                   ),
                 ),

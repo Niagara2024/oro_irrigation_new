@@ -183,6 +183,11 @@ class ProductInventoryState extends State<ProductInventory> {
             filterProductInventoryList = (jsonDecode(response.body)["data"] as List).map((data) => ProductListModel.fromJson(data)).toList();
           }
         });
+      }else{
+        setState(() {
+          searched = true;
+          filterProductInventoryList = [];
+        });
       }
     } else {
       throw Exception('Failed to load data');
@@ -271,7 +276,6 @@ class ProductInventoryState extends State<ProductInventory> {
                             }
                           },
                           onSubmitted: (value) {
-                            print(value);
                             setState(() {
                               filterActive = true;
                               searchedChipName = value;

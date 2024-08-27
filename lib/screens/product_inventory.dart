@@ -66,6 +66,8 @@ class ProductInventoryState extends State<ProductInventory> {
   final ScrollController _scrollController = ScrollController();
   bool isLoading = false;
 
+  TextEditingController txtFldSearch = TextEditingController();
+
 
   @override
   void initState() {
@@ -233,6 +235,53 @@ class ProductInventoryState extends State<ProductInventory> {
               totalProduct > 30 ?Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  Container(
+                    width: 250,
+                    height: 40,
+                    decoration: BoxDecoration(
+                        color: Colors.white, borderRadius: BorderRadius.circular(5)),
+                    child: Center(
+                      child: TextField(
+                        controller: txtFldSearch,
+                          decoration: InputDecoration(
+                              prefixIcon: const Icon(Icons.search),
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  setState(() {
+                                    searchedChipName = '';
+                                    filterActive = false;
+                                    searched = false;
+                                    filterProductInventoryList.clear();
+                                    txtFldSearch.clear();
+                                  });
+                                },
+                              ),
+                              hintText: 'Search by device id',
+                              border: InputBorder.none),
+                          onChanged: (value) {
+                            if(value.isEmpty){
+                              setState(() {
+                                searchedChipName = '';
+                                filterActive = false;
+                                searched = false;
+                                filterProductInventoryList.clear();
+                                txtFldSearch.clear();
+                              });
+                            }
+                          },
+                          onSubmitted: (value) {
+                            print(value);
+                            setState(() {
+                              filterActive = true;
+                              searchedChipName = value;
+                              fetchFilterData(null, null, value);
+                            });
+                          }
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8,),
                   PopupMenuButton<dynamic>(
                     icon: const Icon(Icons.filter_alt_outlined),
                     tooltip: 'filter by category or model',
@@ -289,46 +338,6 @@ class ProductInventoryState extends State<ProductInventory> {
                       }
                     },
                   ),
-                  const SizedBox(width: 10,),
-                  IconButton(
-                    icon: const Icon(Icons.search),
-                    tooltip: 'search by imei number',
-                    onPressed: () {
-                      setState(() {
-                        showSearch(
-                          context: context,
-                          delegate: SearchPage<String>(
-                            items: jsonDataByImeiNo,
-                            searchLabel: 'Search items',
-                            searchStyle: const TextStyle(color: Colors.white),
-                            itemEndsWith: true,
-                            suggestion: const Center(
-                              child: Text('Filter items by typing'),
-                            ),
-                            failure: const Center(
-                              child: Text('No items found'),
-                            ),
-                            filter: (String term) {
-                              return jsonDataByImeiNo.where((item) => item.toLowerCase().contains(term.toLowerCase())).toList();
-                            },
-                            builder: (String item) {
-                              return ListTile(
-                                title: Text(item),
-                                onTap: () {
-                                  Navigator.of(context).pop(item);
-                                  setState(() {
-                                    filterActive = true;
-                                    searchedChipName = item;
-                                    fetchFilterData(null, null, item);
-                                  });
-                                },
-                              );
-                            },
-                          ),
-                        );
-                      });
-                    },
-                  )
                 ],
               ) :
               Container(),

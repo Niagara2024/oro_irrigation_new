@@ -58,7 +58,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                   children: [
                     widget.provider.sourcePump.isNotEmpty? Padding(
                       padding: EdgeInsets.only(top: widget.provider.fertilizerCentral.isNotEmpty || widget.provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                      child: DisplaySourcePump(deviceId: widget.currentSiteData.master[widget.masterIdx].deviceId, currentLineId: widget.crrIrrLine.id,),
+                      child: DisplaySourcePump(deviceId: widget.currentSiteData.master[widget.masterIdx].deviceId, currentLineId: widget.crrIrrLine.id, spList:  widget.provider.sourcePump,),
                     ):
                     const SizedBox(),
 
@@ -79,7 +79,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
 
                     widget.provider.irrigationPump.isNotEmpty? Padding(
                       padding: EdgeInsets.only(top: widget.provider.fertilizerCentral.isNotEmpty || widget.provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                      child: DisplayIrrigationPump(currentLineId: widget.crrIrrLine.id, deviceId: widget.currentSiteData.master[widget.masterIdx].deviceId,),
+                      child: DisplayIrrigationPump(currentLineId: widget.crrIrrLine.id, deviceId: widget.currentSiteData.master[widget.masterIdx].deviceId, ipList: widget.provider.irrigationPump,),
                     ):
                     const SizedBox(),
 
@@ -225,9 +225,10 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
 
 
 class DisplaySourcePump extends StatefulWidget {
-  const DisplaySourcePump({Key? key, required this.deviceId, required this.currentLineId}) : super(key: key);
+  const DisplaySourcePump({Key? key, required this.deviceId, required this.currentLineId, required this.spList}) : super(key: key);
   final String deviceId;
   final String currentLineId;
+  final List<dynamic> spList;
 
   @override
   State<DisplaySourcePump> createState() => _DisplaySourcePumpState();
@@ -235,29 +236,33 @@ class DisplaySourcePump extends StatefulWidget {
 
 class _DisplaySourcePumpState extends State<DisplaySourcePump> {
 
-  Timer? _timer;
+  Timer? timer;
+
+  @override
+  void initState() {
+    super.initState();
+    for (var ip in widget.spList) {
+      if (ip['DurationLeft'] != '00:00:00') {
+        updatePumpOnDelayTime();
+      }else{
+        timer?.cancel();
+      }
+    }
+  }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    timer?.cancel();
     super.dispose();
   }
 
-  void _startTimer() {
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
-      _updatePumpOnDelayTime();
-    });
-  }
-
-  void _updatePumpOnDelayTime() {
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+  void updatePumpOnDelayTime() {
+    timer?.cancel();
+    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       try{
-        final sourcePump = Provider.of<MqttPayloadProvider>(context, listen: false).sourcePump;
-        for (int i = 0; i < sourcePump.length; i++) {
-          if(sourcePump[i]['OnDelayLeft']!=null){
-            List<String> parts = sourcePump[i]['OnDelayLeft'].split(':');
+        for (var sp in widget.spList) {
+          if (sp['OnDelayLeft'] != null && sp['OnDelayLeft']!='00:00:00') {
+            List<String> parts = sp['OnDelayLeft'].split(':');
             int hours = int.parse(parts[0]);
             int minutes = int.parse(parts[1]);
             int seconds = int.parse(parts[2]);
@@ -278,9 +283,9 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
             }
 
             String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-            if(sourcePump[i]['OnDelayLeft']!='00:00:00'){
+            if (sp['OnDelayLeft'] != '00:00:00') {
               setState(() {
-                sourcePump[i]['OnDelayLeft'] = updatedDurationQtyLeft;
+                sp['OnDelayLeft'] = updatedDurationQtyLeft;
               });
             }
           }
@@ -289,22 +294,18 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
       catch(e){
         print(e);
       }
-
     });
+
   }
 
 
   @override
   Widget build(BuildContext context) {
-    final sourcePump = Provider.of<MqttPayloadProvider>(context).sourcePump;
-
-    _startTimer();
-
     List<Map<String, dynamic>> filteredPumps=[];
     if(widget.currentLineId=='all'){
-      filteredPumps = sourcePump.toList().cast<Map<String, dynamic>>();
+      filteredPumps = widget.spList.toList().cast<Map<String, dynamic>>();
     }else{
-      filteredPumps = sourcePump
+      filteredPumps = widget.spList
           .where((pump) => pump['Location'].contains(widget.currentLineId))
           .toList()
           .cast<Map<String, dynamic>>();
@@ -324,7 +325,6 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                     message: 'View more details',
                     child: TextButton(
                       onPressed: () {
-
                         final RenderBox button = context.findRenderObject() as RenderBox;
                         final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
                         final position = button.localToGlobal(Offset.zero, ancestor: overlay);
@@ -385,7 +385,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                               ),
                               const SizedBox(height: 5,),
                               Container(
-                                width: 300,
+                                width: 315,
                                 height: 25,
                                 color: Colors.transparent,
                                 child: const Row(
@@ -406,7 +406,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                 child: Divider(height: 6,color: Colors.black12),
                               ),
                               Container(
-                                width: 300,
+                                width: 315,
                                 height: 25,
                                 color: Colors.transparent,
                                 child: Row(
@@ -435,7 +435,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                 child: Divider(height: 6,color: Colors.black12),
                               ),
                               Container(
-                                width: 300,
+                                width: 315,
                                 height: 25,
                                 color: Colors.transparent,
                                 child: Row(
@@ -459,12 +459,12 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                   ],
                                 ),
                               ),
-                              const Padding(
+                              /*const Padding(
                                 padding: EdgeInsets.only(left: 8),
                                 child: Divider(height: 6,color: Colors.black12),
                               ),
                               Container(
-                                width: 300,
+                                width: 315,
                                 height: 40,
                                 color: Colors.transparent,
                                 child: Row(
@@ -506,7 +506,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                     ),
                                   ],
                                 ),
-                              ),
+                              ),*/
                               ListTile(
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -588,8 +588,8 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                           ),
                           onPop: () => print('Popover was popped!'),
                           direction: PopoverDirection.right,
-                          width: voltKeyExists?310:150,
-                          height: voltKeyExists?230: 75,
+                          width: voltKeyExists?325:150,
+                          height: voltKeyExists?190: 75,
                           arrowHeight: 15,
                           arrowWidth: 30,
                           barrierColor: Colors.black54,
@@ -684,9 +684,10 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
 }
 
 class DisplayIrrigationPump extends StatefulWidget {
-  const DisplayIrrigationPump({Key? key, required this.currentLineId, required this.deviceId}) : super(key: key);
+  const DisplayIrrigationPump({Key? key, required this.currentLineId, required this.deviceId, required this.ipList}) : super(key: key);
   final String currentLineId;
   final String deviceId;
+  final List<dynamic> ipList;
 
   @override
   State<DisplayIrrigationPump> createState() => _DisplayIrrigationPumpState();
@@ -694,75 +695,76 @@ class DisplayIrrigationPump extends StatefulWidget {
 
 class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
 
-  Timer? _timer;
+  Timer? timer;
+
+  @override
+  void initState() {
+    super.initState();
+    for (var ip in widget.ipList) {
+      if (ip['DurationLeft'] != '00:00:00') {
+        updatePumpOnDelayTime();
+      }else{
+        timer?.cancel();
+      }
+    }
+  }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    timer?.cancel();
     super.dispose();
   }
 
-  void _startTimer() {
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
-      _updatePumpOnDelayTime();
-    });
-  }
+  void updatePumpOnDelayTime() {
+    timer?.cancel();
+    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+      try{
+        for (var ip in widget.ipList) {
+          if (ip['OnDelayLeft'] != null && ip['OnDelayLeft']!='00:00:00') {
+            List<String> parts = ip['OnDelayLeft'].split(':');
+            int hours = int.parse(parts[0]);
+            int minutes = int.parse(parts[1]);
+            int seconds = int.parse(parts[2]);
 
-  void _updatePumpOnDelayTime() {
-    final irrigationPump = Provider.of<MqttPayloadProvider>(context, listen: false).irrigationPump;
-    final onDelayNotifier = Provider.of<DurationNotifier>(context, listen: false);
-    bool allOnDelayLeftZero = true;
-    try {
-      for (int i = 0; i < irrigationPump.length; i++) {
-        if (irrigationPump[i]['OnDelayLeft'] != null) {
-          List<String> parts = irrigationPump[i]['OnDelayLeft'].split(':');
-          int hours = int.parse(parts[0]);
-          int minutes = int.parse(parts[1]);
-          int seconds = int.parse(parts[2]);
-
-          if (seconds > 0) {
-            seconds--;
-          } else {
-            if (minutes > 0) {
-              minutes--;
-              seconds = 59;
+            if (seconds > 0) {
+              seconds--;
             } else {
-              if (hours > 0) {
-                hours--;
-                minutes = 59;
+              if (minutes > 0) {
+                minutes--;
                 seconds = 59;
+              } else {
+                if (hours > 0) {
+                  hours--;
+                  minutes = 59;
+                  seconds = 59;
+                }
               }
             }
-          }
 
-          String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-          if (irrigationPump[i]['OnDelayLeft'] != '00:00:00') {
-            irrigationPump[i]['OnDelayLeft'] = updatedDurationQtyLeft;
-            onDelayNotifier.updateOnDelayTime(updatedDurationQtyLeft);
-            allOnDelayLeftZero = false;
+            String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+            if (ip['OnDelayLeft'] != '00:00:00') {
+              setState(() {
+                ip['OnDelayLeft'] = updatedDurationQtyLeft;
+              });
+            }
           }
         }
       }
-    } catch (e) {
-      print(e);
-    }
+      catch(e){
+        print(e);
+      }
+    });
 
-    if (allOnDelayLeftZero) {
-      _timer?.cancel();
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final irrigationPump = Provider.of<MqttPayloadProvider>(context).irrigationPump;
-    _startTimer();
 
     List<Map<String, dynamic>> filteredPumps = [];
     if (widget.currentLineId == 'all') {
-      filteredPumps = irrigationPump.toList().cast<Map<String, dynamic>>();
+      filteredPumps =  widget.ipList.toList().cast<Map<String, dynamic>>();
     } else {
-      filteredPumps = irrigationPump
+      filteredPumps =  widget.ipList
           .where((pump) => pump['Location'].contains(widget.currentLineId))
           .toList()
           .cast<Map<String, dynamic>>();
@@ -858,7 +860,7 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                               ),
                               const SizedBox(height: 5,),
                               Container(
-                                width: 300,
+                                width: 315,
                                 height: 25,
                                 color: Colors.transparent,
                                 child: const Row(
@@ -879,7 +881,7 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                                 child: Divider(height: 6,color: Colors.black12),
                               ),
                               Container(
-                                width: 300,
+                                width: 315,
                                 height: 25,
                                 color: Colors.transparent,
                                 child: Row(
@@ -908,7 +910,7 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                                 child: Divider(height: 6,color: Colors.black12),
                               ),
                               Container(
-                                width: 300,
+                                width: 315,
                                 height: 25,
                                 color: Colors.transparent,
                                 child: Row(
@@ -932,12 +934,12 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                                   ],
                                 ),
                               ),
-                              const Padding(
+                              /*const Padding(
                                 padding: EdgeInsets.only(left: 8),
                                 child: Divider(height: 6,color: Colors.black12),
                               ),
                               Container(
-                                width: 300,
+                                width: 315,
                                 height: 40,
                                 color: Colors.transparent,
                                 child: Row(
@@ -978,7 +980,7 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                                     ),
                                   ],
                                 ),
-                              ),
+                              ),*/
                             ],
                           ):
                           const Column(
@@ -993,8 +995,8 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                           ),
                           onPop: () => print('Popover was popped!'),
                           direction: PopoverDirection.right,
-                          width: voltKeyExists?310:125,
-                          height: voltKeyExists?190: 75,
+                          width: voltKeyExists?325:125,
+                          height: voltKeyExists?145: 75,
                           arrowHeight: 15,
                           arrowWidth: 30,
                           barrierColor: Colors.black54,
@@ -1028,8 +1030,7 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                       ),
                     ),
                   ),
-                  pump['OnDelayLeft'] != '00:00:00'
-                      ? Positioned(
+                  pump['OnDelayLeft'] != '00:00:00'? Positioned(
                     top: 30,
                     left: 7.5,
                     child: Container(
@@ -1040,37 +1041,31 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                       ),
                       width: 55,
                       child: Center(
-                        child: ValueListenableBuilder<String>(
-                          valueListenable: Provider.of<DurationNotifier>(context).onDelayLeft,
-                          builder: (context, value, child) {
-                            return Column(
-                              children: [
-                                const Text(
-                                  "On delay",
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.normal,
-                                  ),
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 3, right: 3),
-                                  child: Divider(
-                                    height: 0,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                                Text(
-                                  value,
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
+                        child: Column(
+                          children: [
+                            const Text(
+                              "On delay",
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 10,
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(left: 3, right: 3),
+                              child: Divider(
+                                height: 0,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            Text(pump['OnDelayLeft'],
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),

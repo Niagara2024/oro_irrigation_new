@@ -264,7 +264,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                               //src pump
                               provider.sourcePump.isNotEmpty? Padding(
                                 padding: const EdgeInsets.only(top: 15),
-                                child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id,),
+                                child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id, spList: provider.sourcePump,),
                               ):
                               const SizedBox(),
 
@@ -287,7 +287,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                               //i pump
                               provider.irrigationPump.isNotEmpty? Padding(
                                 padding: const EdgeInsets.only(top: 15),
-                                child: DisplayIrrigationPump(currentLineId: crrIrrLine.id, deviceId: widget.siteData.master[widget.masterInx].deviceId,),
+                                child: DisplayIrrigationPump(currentLineId: crrIrrLine.id, deviceId: widget.siteData.master[widget.masterInx].deviceId, ipList: provider.irrigationPump,),
                               ):
                               const SizedBox(),
 
@@ -457,6 +457,12 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
         && provider.fertilizerCentral.isEmpty && provider.fertilizerLocal.isEmpty){
 
       int? irrigationPauseFlag = getIrrigationPauseFlag(crrIrrLine.id, Provider.of<MqttPayloadProvider>(context).payload2408);
+      int rdWidth = 0;
+      if(irrigationPauseFlag !=2){
+        rdWidth = (provider.irrigationPump.length+provider.sourcePump.length+1)*70+175;
+      }else{
+        rdWidth = (provider.irrigationPump.length+provider.sourcePump.length+1)*70;
+      }
 
       return Padding(
         padding: const EdgeInsets.all(3.0),
@@ -477,7 +483,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
               children: [
                 provider.sourcePump.isNotEmpty? Padding(
                   padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                  child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id,),
+                  child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id, spList: provider.sourcePump,),
                 ):
                 const SizedBox(),
                 provider.irrigationPump.isNotEmpty? Padding(
@@ -496,7 +502,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 const SizedBox(),
                 provider.irrigationPump.isNotEmpty? Padding(
                   padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                  child: DisplayIrrigationPump(currentLineId: crrIrrLine.id, deviceId: widget.siteData.master[widget.masterInx].deviceId,),
+                  child: DisplayIrrigationPump(currentLineId: crrIrrLine.id, deviceId: widget.siteData.master[widget.masterInx].deviceId, ipList: provider.irrigationPump,),
                 ):
                 const SizedBox(),
 
@@ -517,7 +523,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(child: DisplayIrrigationLine(irrigationLine: crrIrrLine, currentLineId: crrIrrLine.id, currentMaster: widget.siteData.master[widget.masterInx], rWidth: (provider.irrigationPump.length+provider.sourcePump.length+1)*70,)),
+                          Expanded(child: DisplayIrrigationLine(irrigationLine: crrIrrLine, currentLineId: crrIrrLine.id, currentMaster: widget.siteData.master[widget.masterInx], rWidth: rdWidth,)),
                           irrigationPauseFlag !=2 ? Padding(
                             padding: const EdgeInsets.all(8),
                             child: TextButton(

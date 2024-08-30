@@ -117,7 +117,7 @@ class AppImages {
       case 0:
         return agitatorOFF;
       case 1:
-        return agitatorNotON;
+        return agitatorON;
       case 2:
         return agitatorNotON;
       case 3:

@@ -34,15 +34,20 @@ class _DealerDashboardState extends State<DealerDashboard> {
   Calendar calendarView = Calendar.day;
   List<ProductStockModel> productStockList = <ProductStockModel>[];
   List<CustomerListMDL> myCustomerList = <CustomerListMDL>[];
+  List<CustomerListMDL> filteredCustomerList = [];
   late DataResponse dataResponse;
 
   String selectedValue = 'All';
   List<String> dropdownItems = ['All', 'Last year', 'Last month', 'Last Week'];
   bool visibleLoading = false;
 
+  bool searched = false;
+  TextEditingController txtFldSearch = TextEditingController();
+
   @override
   void initState() {
     super.initState();
+    searched=false;
     dataResponse = DataResponse(graph: {}, total: []);
     indicatorViewShow();
     Future.delayed(const Duration(seconds: 2), () {
@@ -132,6 +137,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
         }
         setState(() {
           myCustomerList.addAll(tempList);
+          filteredCustomerList = myCustomerList;
           tempList=[];
         });
       }
@@ -139,6 +145,8 @@ class _DealerDashboardState extends State<DealerDashboard> {
       //_showSnackBar(response.body);
     }
   }
+
+
 
   @override
   Widget build(BuildContext context)
@@ -378,22 +386,61 @@ class _DealerDashboardState extends State<DealerDashboard> {
                 ),
                 child: Column(
                   children: [
+                    searched?ListTile(
+                      title: TextField(
+                          controller: txtFldSearch,
+                          decoration: InputDecoration(
+                              prefixIcon: const Icon(Icons.search),
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.clear, color: Colors.red,),
+                                onPressed: () {
+                                  searched = false;
+                                  filteredCustomerList = myCustomerList;
+                                  txtFldSearch.clear();
+                                  setState(() {
+                                  });
+                                },
+                              ),
+                              hintText: 'Search by name',
+                              border: InputBorder.none),
+                          onChanged: (value) {
+                            setState(() {
+                              filteredCustomerList = myCustomerList.where((customer) {
+                                return customer.userName.toLowerCase().startsWith(value.toLowerCase());
+                              }).toList();
+                            });
+                          },
+                      ),
+                    ):
                     ListTile(
                       title: const Text('My Customer', style: TextStyle(fontSize: 17)),
-                      trailing: IconButton(tooltip: 'Create Customer account', icon: const Icon(Icons.person_add_outlined), color: myTheme.primaryColor, onPressed: () async
-                      {
-                        await showDialog<void>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              content: CreateAccount(callback: callbackFunction, subUsrAccount: false, customerId: widget.userId, from: 'Dealer',),
-                            ));
-                      }),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          myCustomerList.length>30?IconButton(tooltip: 'Search Customer', icon: const Icon(Icons.search), color: myTheme.primaryColor, onPressed: () async
+                          {
+                            setState(() {
+                              searched=true;
+                            });
+                          }):
+                          const SizedBox(),
+                          IconButton(tooltip: 'Create Customer account', icon: const Icon(Icons.person_add_outlined), color: myTheme.primaryColor, onPressed: () async
+                          {
+                            await showDialog<void>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  content: CreateAccount(callback: callbackFunction, subUsrAccount: false, customerId: widget.userId, from: 'Dealer',),
+                                ));
+                          }),
+                        ],
+                      ),
                     ),
                     const Divider(height: 0),
                     Expanded(
-                        child : myCustomerList.isNotEmpty? ListView.builder(
-                          itemCount: myCustomerList.length,
+                        child : filteredCustomerList.isNotEmpty? ListView.builder(
+                          itemCount:filteredCustomerList.length,
                           itemBuilder: (BuildContext context, int index) {
+                            final customer = filteredCustomerList[index];
                             return ListTile(
                               leading: const CircleAvatar(
                                 backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
@@ -402,7 +449,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  (myCustomerList[index].criticalAlarmCount + myCustomerList[index].serviceRequestCount)>0? BadgeButton(
+                                  (customer.criticalAlarmCount + customer.serviceRequestCount)>0? BadgeButton(
                                     onPressed: () {
                                       showModalBottomSheet(
                                         context: context,
@@ -413,12 +460,12 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                                 width: MediaQuery.sizeOf(context).width,
                                                 color: Colors.teal.shade100,
                                                 height: 30,
-                                                child: Center(child: Text(myCustomerList[index].userName)),
+                                                child: Center(child: Text(customer.userName)),
                                               ),
                                               SizedBox(
                                                 width: MediaQuery.sizeOf(context).width,
                                                 height: MediaQuery.sizeOf(context).height-345,
-                                                child: ServiceRequestsTable(userId: myCustomerList[index].userId),
+                                                child: ServiceRequestsTable(userId: customer.userId),
                                               ),
                                             ],
                                           );
@@ -426,7 +473,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                       );
                                     },
                                     icon: Icons.hail,
-                                    badgeNumber: myCustomerList[index].criticalAlarmCount + myCustomerList[index].serviceRequestCount,
+                                    badgeNumber: customer.criticalAlarmCount + customer.serviceRequestCount,
                                   ):
                                   const SizedBox(),
                                   PopupMenuButton<String>(
@@ -437,11 +484,11 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) => CustomerScreenController(
-                                                customerId: myCustomerList[index].userId,
-                                                customerName: myCustomerList[index].userName,
-                                                mobileNo: '+${myCustomerList[index].countryCode}-${myCustomerList[index].mobileNumber}',
+                                                customerId: customer.userId,
+                                                customerName: customer.userName,
+                                                mobileNo: '+${customer.countryCode}-${customer.mobileNumber}',
                                                 comingFrom: 'AdminORDealer',
-                                                emailId: myCustomerList[index].emailId, userId: widget.userId,),
+                                                emailId: customer.emailId, userId: widget.userId,),
                                             ),
                                           );
                                         }
@@ -485,24 +532,25 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                   ),
                                 ],
                               ),
-                              title: Text(myCustomerList[index].userName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
-                              subtitle: Text('+${myCustomerList[index].countryCode} ${myCustomerList[index].mobileNumber}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal)),
+                              title: Text(customer.userName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
+                              subtitle: Text('+${customer.countryCode} ${customer.mobileNumber}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal)),
                               onTap:() {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: myCustomerList[index].userId, userName: myCustomerList[index].userName, userID: widget.userId, userType: 2, productStockList: productStockList, callback: callbackFunction,)),);
+                                Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: customer.userId, userName: customer.userName, userID: widget.userId, userType: 2, productStockList: productStockList, callback: callbackFunction,)),);
                               },
                             );
                           },
                         ):
-                        const Center(
+                        Center(
                           child: Padding(
-                            padding: EdgeInsets.all(25.0),
+                            padding: const EdgeInsets.all(25.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text('Customers not found.', style: TextStyle(fontSize: 17, fontWeight: FontWeight.normal)),
-                                SizedBox(height: 5),
-                                Text('Add your customer using top of the customer adding button.', style: TextStyle(fontWeight: FontWeight.normal)),
-                                Icon(Icons.person_add_outlined),
+                                const Text('Customers not found.', style: TextStyle(fontSize: 17, fontWeight: FontWeight.normal)),
+                                const SizedBox(height: 5),
+                                !searched? const Text('Add your customer using top of the customer adding button.', style: TextStyle(fontWeight: FontWeight.normal)):
+                                const SizedBox(),
+                                !searched?const Icon(Icons.person_add_outlined):const SizedBox(),
                               ],
                             ),
                           ),

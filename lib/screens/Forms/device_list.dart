@@ -142,6 +142,20 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
     }
   }
 
+  Future<void> removeUnusedProduct(int pId) async
+  {
+    final body = {"userId": widget.customerID, "dealerId": widget.userID ,"productId":pId, "modifyUser": widget.userID};
+    final response = await HttpService().putRequest("removeProductFromCustomer", body);
+    if (response.statusCode == 200)
+    {
+      customerProductList.clear();
+      var data = jsonDecode(response.body);
+      if(data["code"]==200){
+        getMyAllProduct();
+      }
+    }
+  }
+
   Future<void> getMasterProduct() async
   {
     Map<String, Object> body = {"userId" : widget.customerID};
@@ -688,8 +702,6 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
             DataCell(Text(DateFormat('dd-MM-yyyy').format(DateTime.parse(customerProductList[index].modifyDate)))),
             widget.userType==2 ? DataCell(Center(child:
             customerProductList[index].productStatus==2||customerProductList[index].productStatus==3? IconButton(tooltip:'Remove product',onPressed: () {
-              print('${customerProductList[index].productId}');
-
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
@@ -704,9 +716,9 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                         },
                       ),
                       TextButton(
-                        child: Text('Remove'),
+                        child: const Text('Remove'),
                         onPressed: () {
-                          getMyAllProduct();
+                          removeUnusedProduct(customerProductList[index].productId);
                           Navigator.of(context).pop(); // Close the dialog
                         },
                       ),

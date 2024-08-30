@@ -36,6 +36,7 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
     final response = await HttpService().postRequest("getUserSensorHourlyLog", body);
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
+      print(response.body);
       if (data["code"] == 200) {
         try {
           Map<String, dynamic> jsonMap = data;
@@ -49,7 +50,6 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
 
   void filterData(Map<String, dynamic> jsonMap) {
     sensorHourlyLogs = {};
-
     for (var record in jsonMap['data']) {
       for (var hour in record.keys.where((k) => (k as String).startsWith('hour'))) {
         var filteredHourData = (record[hour] as List<dynamic>)
@@ -67,19 +67,14 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
   Widget build(BuildContext context) {
     List<LineSeries<ChartData, String>> msSeriesList = [];
 
-    // Extract all unique sensor IDs from the data
     Set<String> sensorIds = sensorHourlyLogs.values
         .expand((hourData) => hourData)
         .map((data) => data['Id'] as String)
         .toSet();
 
-    // Iterate over all unique sensor IDs to create a series for each
     for (String sensorId in sensorIds) {
       List<ChartData> msChartData = [];
-
       int i = 0;
-
-      // Collect data for this sensor ID across all hours
       for (var hourData in sensorHourlyLogs.values.expand((e) => e)) {
         if (hourData['Id'] == sensorId) {
           msChartData.add(ChartData('${i++}', double.tryParse(hourData['Value'].toString()) ?? 0.0));

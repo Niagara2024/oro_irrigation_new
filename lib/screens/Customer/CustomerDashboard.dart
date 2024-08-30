@@ -623,9 +623,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     );
   }
 
-
-
-
   String getCurrentDateAndTime() {
     var nowDT = DateTime.now();
     return '${DateFormat('MMMM dd, yyyy').format(nowDT)}-${DateFormat('hh:mm:ss').format(nowDT)}';
@@ -655,9 +652,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   List<CurrentScheduleModel> filterCurrentScheduleByProgramName(List<CurrentScheduleModel> cs, String category) {
     return cs.where((cs) => cs.programName.contains(category)).toList();
   }
-
 }
-
 
 class DisplayIrrigationLine extends StatefulWidget {
   const DisplayIrrigationLine({Key? key, required this.irrigationLine, required this.currentLineId, required this.currentMaster, required this.rWidth}) : super(key: key);
@@ -671,7 +666,6 @@ class DisplayIrrigationLine extends StatefulWidget {
 }
 
 class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
-
 
   @override
   Widget build(BuildContext context) {
@@ -740,7 +734,6 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
       ),
     );
   }
-
 }
 
 class MainValveWidget extends StatelessWidget {

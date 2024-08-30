@@ -417,7 +417,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          myCustomerList.length>30?IconButton(tooltip: 'Search Customer', icon: const Icon(Icons.search), color: myTheme.primaryColor, onPressed: () async
+                          myCustomerList.length>25?IconButton(tooltip: 'Search Customer', icon: const Icon(Icons.search), color: myTheme.primaryColor, onPressed: () async
                           {
                             setState(() {
                               searched=true;

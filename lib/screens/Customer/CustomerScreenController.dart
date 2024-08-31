@@ -489,7 +489,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                         updateMaster(siteIndex, masterIdx, 0);
 
                         /*updateSite(newIndex, 0, 0);
-
                         setState(() {
                           _myCurrentMaster = newMaterName!;
                           masterIndex = newIndex;
@@ -538,7 +537,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     iconDisabledColor: Colors.white,
                     focusColor: Colors.transparent,
                   ):
-                  Text(mySiteList[siteIndex].master[masterIndex].irrigationLine[0].name),
+                  Text(mySiteList[siteIndex].master[masterIndex].irrigationLine.isNotEmpty?mySiteList[siteIndex].master[masterIndex].irrigationLine[0].name:'Line empty'),
                   const SizedBox(width: 05,),
                 ],
               ),
@@ -821,7 +820,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             ) :
             (mySiteList[siteIndex].master[masterIndex].categoryId == 1 ||
                 mySiteList[siteIndex].master[masterIndex].categoryId == 2)?
-            Text(mySiteList[siteIndex].master[masterIndex].irrigationLine[0].name, style: const TextStyle(fontSize: 17),):
+            Text(mySiteList[siteIndex].master[masterIndex].irrigationLine.isNotEmpty?mySiteList[siteIndex].master[masterIndex].irrigationLine[0].name:'Line empty', style: const TextStyle(fontSize: 17),):
             const SizedBox(),
 
             const SizedBox(width: 15,),

@@ -7,9 +7,10 @@ import '../CustomerDashboard.dart';
 import 'PumpLineCentral.dart';
 
 class DisplayAllLine extends StatefulWidget {
-  const DisplayAllLine({Key? key, required this.currentMaster, required this.provider}) : super(key: key);
+  const DisplayAllLine({Key? key, required this.currentMaster, required this.provider, required this.userId}) : super(key: key);
   final MasterData currentMaster;
   final MqttPayloadProvider provider;
+  final int userId;
 
   @override
   State<DisplayAllLine> createState() => _DisplayAllLineState();
@@ -50,7 +51,7 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
                           children: [
                             widget.provider.sourcePump.isNotEmpty? Padding(
                               padding: EdgeInsets.only(top:  widget.provider.fertilizerCentral.isNotEmpty ||  widget.provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                              child: DisplaySourcePump(deviceId: widget.currentMaster.deviceId, currentLineId: 'all', spList: widget.provider.sourcePump,),
+                              child: DisplaySourcePump(deviceId: widget.currentMaster.deviceId, currentLineId: 'all', spList: widget.provider.sourcePump, userId: widget.userId,),
                             ):
                             const SizedBox(),
                             widget.provider.irrigationPump.isNotEmpty? Padding(

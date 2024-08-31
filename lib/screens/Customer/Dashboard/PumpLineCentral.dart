@@ -9,16 +9,17 @@ import 'package:provider/provider.dart';
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../constants/AppImages.dart';
 import '../../../constants/MQTTManager.dart';
+import '../../../constants/http_service.dart';
 import '../../../constants/snack_bar.dart';
 import '../../../state_management/DurationNotifier.dart';
 import '../../../state_management/MqttPayloadProvider.dart';
 
 
 class PumpLineCentral extends StatefulWidget {
-  const PumpLineCentral({Key? key, required this.currentSiteData, required this.crrIrrLine, required this.masterIdx, required this.provider}) : super(key: key);
+  const PumpLineCentral({Key? key, required this.currentSiteData, required this.crrIrrLine, required this.masterIdx, required this.provider, required this.userId}) : super(key: key);
   final DashboardModel currentSiteData;
   final IrrigationLine crrIrrLine;
-  final int masterIdx;
+  final int masterIdx, userId;
   final MqttPayloadProvider provider;
 
   @override
@@ -58,7 +59,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                   children: [
                     widget.provider.sourcePump.isNotEmpty? Padding(
                       padding: EdgeInsets.only(top: widget.provider.fertilizerCentral.isNotEmpty || widget.provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                      child: DisplaySourcePump(deviceId: widget.currentSiteData.master[widget.masterIdx].deviceId, currentLineId: widget.crrIrrLine.id, spList:  widget.provider.sourcePump,),
+                      child: DisplaySourcePump(deviceId: widget.currentSiteData.master[widget.masterIdx].deviceId, currentLineId: widget.crrIrrLine.id, spList:  widget.provider.sourcePump, userId: widget.userId,),
                     ):
                     const SizedBox(),
 
@@ -225,10 +226,11 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
 
 
 class DisplaySourcePump extends StatefulWidget {
-  const DisplaySourcePump({Key? key, required this.deviceId, required this.currentLineId, required this.spList}) : super(key: key);
+  const DisplaySourcePump({Key? key, required this.deviceId, required this.currentLineId, required this.spList, required this.userId}) : super(key: key);
   final String deviceId;
   final String currentLineId;
   final List<dynamic> spList;
+  final int userId;
 
   @override
   State<DisplaySourcePump> createState() => _DisplaySourcePumpState();
@@ -515,13 +517,16 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                       color: Colors.green,
                                       textColor: Colors.white,
                                       onPressed: () {
-                                        String payload = '1,${filteredPumps[index]['S_No']}';
+                                        String payload = '${filteredPumps[index]['S_No']},1,1';
                                         String payLoadFinal = jsonEncode({
-                                          "6201": [{"6202": payload}]
+                                          "6200": [{"6201": payload}]
                                         });
                                         MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                        sentUserOperationToServer('${pump['SW_Name'] ?? pump['Name']} Start Manually', payLoadFinal);
+                                        showSnakeBar('Pump of comment sent successfully');
+                                        Navigator.pop(context);
                                       },
-                                      child: const Text('Start by manual',
+                                      child: const Text('Start Manually',
                                         style: TextStyle(color: Colors.white),
                                       ),
                                     ),
@@ -530,13 +535,16 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                       color: Colors.redAccent,
                                       textColor: Colors.white,
                                       onPressed: () {
-                                        String payload = '0,${filteredPumps[index]['S_No']}';
+                                        String payload = '${filteredPumps[index]['S_No']},0,1';
                                         String payLoadFinal = jsonEncode({
-                                          "6201": [{"6202": payload}]
+                                          "6200": [{"6201": payload}]
                                         });
                                         MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                        sentUserOperationToServer('${pump['SW_Name'] ?? pump['Name']} Stop Manually', payLoadFinal);
+                                        showSnakeBar('Pump of comment sent successfully');
+                                        Navigator.pop(context);
                                       },
-                                      child: const Text('Stop by manual',
+                                      child: const Text('Stop Manually',
                                         style: TextStyle(color: Colors.white),
                                       ),
                                     ),
@@ -557,13 +565,16 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                     color: Colors.green,
                                     textColor: Colors.white,
                                     onPressed: () {
-                                      String payload = '1,${filteredPumps[index]['S_No']}';
+                                      String payload = '${filteredPumps[index]['S_No']},1,1';
                                       String payLoadFinal = jsonEncode({
-                                        "6201": [{"6202": payload}]
+                                        "6200": [{"6201": payload}]
                                       });
                                       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                      sentUserOperationToServer('${pump['SW_Name'] ?? pump['Name']} Start Manually', payLoadFinal);
+                                      showSnakeBar('Pump of comment sent successfully');
+                                      Navigator.pop(context);
                                     },
-                                    child: const Text('Start by manual',
+                                    child: const Text('Start Manually',
                                       style: TextStyle(color: Colors.white),
                                     ),
                                   ),
@@ -572,13 +583,16 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                     color: Colors.redAccent,
                                     textColor: Colors.white,
                                     onPressed: () {
-                                      String payload = '0,${filteredPumps[index]['S_No']}';
+                                      String payload = '${filteredPumps[index]['S_No']},0,1';
                                       String payLoadFinal = jsonEncode({
-                                        "6201": [{"6202": payload}]
+                                        "6200": [{"6201": payload}]
                                       });
                                       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                      sentUserOperationToServer('${pump['SW_Name'] ?? pump['Name']} Stop Manually', payLoadFinal);
+                                      showSnakeBar('Pump of comment sent successfully');
+                                      Navigator.pop(context);
                                     },
-                                    child: const Text('Stop by manual',
+                                    child: const Text('Stop Manually',
                                       style: TextStyle(color: Colors.white),
                                     ),
                                   ),
@@ -588,8 +602,8 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                           ),
                           onPop: () => print('Popover was popped!'),
                           direction: PopoverDirection.right,
-                          width: voltKeyExists?325:150,
-                          height: voltKeyExists?190: 75,
+                          width: voltKeyExists?325:140,
+                          height: voltKeyExists?190: 80,
                           arrowHeight: 15,
                           arrowWidth: 30,
                           barrierColor: Colors.black54,
@@ -679,6 +693,26 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
         }),
       ),
     );
+  }
+
+  void showSnakeBar(String msg){
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void sentUserOperationToServer(String msg, String data) async
+  {
+    Map<String, Object> body = {"userId": widget.userId, "controllerId": widget.deviceId, "messageStatus": msg, "data": data, "createUser": widget.userId};
+    final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
+    if (response.statusCode == 200) {
+      print(response.body);
+    } else {
+      throw Exception('Failed to load data');
+    }
   }
 
 }
@@ -1135,9 +1169,9 @@ class DisplaySensor extends StatelessWidget {
                   ),
                   Positioned(
                     top: 42,
-                    left: 10,
+                    left: 5,
                     child: Container(
-                      width: 50,
+                      width: 57,
                       height: 15,
                       decoration: BoxDecoration(
                         color:Colors.yellow,
@@ -1145,12 +1179,11 @@ class DisplaySensor extends StatelessWidget {
                         border: Border.all(color: Colors.grey, width: .50,),
                       ),
                       child: Center(
-                        child: Text('$value', style: const TextStyle(
+                        child: Text(key=='PrsIn' || key=='PrsOut' ?'$value':'$value Lps', style: const TextStyle(
                           color: Colors.black,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
-                        ),
-                        ),
+                        )),
                       ),
                     ),
                   ),
@@ -1870,7 +1903,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                           const SizedBox(width: 5.0,),
 
                           fertilizerCentral[fIndex]['Ec'].length!=0?SizedBox(
-                            width: fertilizerCentral[fIndex]['Ec'].length>1? 115 : 60,
+                            width: fertilizerCentral[fIndex]['Ec'].length>1? 130 : 70,
                             height: 30,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1884,9 +1917,9 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                                       return Row(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Center(child: Text('${fertilizerCentral[fIndex]['Ec'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal))),
-                                          Center(child: Text('${fertilizerCentral[fIndex]['Ec'][index]['Status']}', style: const TextStyle(fontSize: 10))),
-                                          const SizedBox(width: 10,),
+                                          Center(child: Text('${fertilizerCentral[fIndex]['Ec'][index]['Name']} : ', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.normal))),
+                                          Center(child: Text('${fertilizerCentral[fIndex]['Ec'][index]['Status']}0', style: const TextStyle(fontSize: 9))),
+                                          const SizedBox(width: 5,),
                                         ],
                                       );
                                     },
@@ -1901,9 +1934,9 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                                     itemBuilder: (BuildContext context, int index) {
                                       return Row(
                                         children: [
-                                          Center(child: Text('${fertilizerCentral[fIndex]['Ph'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),)),
-                                          Center(child: Text('${fertilizerCentral[fIndex]['Ph'][index]['Status']}', style: const TextStyle(fontSize: 10))),
-                                          const SizedBox(width: 10,),
+                                          Center(child: Text('${fertilizerCentral[fIndex]['Ph'][index]['Name']} : ', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.normal),)),
+                                          Center(child: Text('${fertilizerCentral[fIndex]['Ph'][index]['Status']}0', style: const TextStyle(fontSize: 9))),
+                                          const SizedBox(width: 5,),
                                         ],
                                       );
                                     },
@@ -1921,7 +1954,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                             ),
                             width: (fertilizerCentral[fIndex]['Fertilizer'].length * 65) - (fertilizerCentral[fIndex]['Ec'].length * 70),
                             child: Center(
-                              child: Text(fertilizerCentral[0]['SW_Name'] ?? fertilizerCentral[0]['FertilizerSite'], style: const TextStyle(color: primaryColorDark),),
+                              child: Text(fertilizerCentral[fIndex]['SW_Name'] ?? fertilizerCentral[fIndex]['FertilizerSite'], style: const TextStyle(color: primaryColorDark),),
                             ),
                           ),
                         ],
@@ -2915,7 +2948,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                           VerticalDivider(width: 0,color: Colors.grey.shade300,),
                           const SizedBox(width: 5.0,),
                           fertilizerLocal[fIndex]['Ec'].length!=0?SizedBox(
-                            width: fertilizerLocal[fIndex]['Ec'].length>1? 115 : 60,
+                            width: fertilizerLocal[fIndex]['Ec'].length>1? 130 : 70,
                             height: 30,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2929,9 +2962,9 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                                       return Row(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Center(child: Text('${fertilizerLocal[fIndex]['Ec'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal))),
-                                          Center(child: Text('${fertilizerLocal[fIndex]['Ec'][index]['Status']}', style: const TextStyle(fontSize: 10))),
-                                          const SizedBox(width: 10,),
+                                          Center(child: Text('${fertilizerLocal[fIndex]['Ec'][index]['Name']} : ', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.normal))),
+                                          Center(child: Text('${fertilizerLocal[fIndex]['Ec'][index]['Status']}0', style: const TextStyle(fontSize: 9))),
+                                          const SizedBox(width: 5,),
                                         ],
                                       );
                                     },
@@ -2946,9 +2979,9 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                                     itemBuilder: (BuildContext context, int index) {
                                       return Row(
                                         children: [
-                                          Center(child: Text('${fertilizerLocal[fIndex]['Ph'][index]['Name']} : ', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),)),
-                                          Center(child: Text('${fertilizerLocal[fIndex]['Ph'][index]['Status']}', style: const TextStyle(fontSize: 10))),
-                                          const SizedBox(width: 10,),
+                                          Center(child: Text('${fertilizerLocal[fIndex]['Ph'][index]['Name']} : ', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.normal),)),
+                                          Center(child: Text('${fertilizerLocal[fIndex]['Ph'][index]['Status']}0', style: const TextStyle(fontSize: 9))),
+                                          const SizedBox(width: 5,),
                                         ],
                                       );
                                     },

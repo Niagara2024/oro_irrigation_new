@@ -129,7 +129,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 scrollDirection: Axis.vertical,
                 child: Column(
                   children: [
-                    DisplayAllLine(currentMaster: (widget.siteData.master[widget.masterInx]), provider: provider,),
+                    DisplayAllLine(currentMaster: (widget.siteData.master[widget.masterInx]), provider: provider, userId: widget.userID,),
                     provider.currentSchedule.isNotEmpty? CurrentSchedule(siteData: widget.siteData, customerID: widget.customerID, currentSchedule: provider.currentSchedule,):
                     const SizedBox(),
                     provider.programQueue.isNotEmpty? NextSchedule(siteData: widget.siteData, userID: widget.userID, customerID: widget.customerID, programQueue: provider.programQueue,):
@@ -264,7 +264,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                               //src pump
                               provider.sourcePump.isNotEmpty? Padding(
                                 padding: const EdgeInsets.only(top: 15),
-                                child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id, spList: provider.sourcePump,),
+                                child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id, spList: provider.sourcePump, userId: widget.userID,),
                               ):
                               const SizedBox(),
 
@@ -483,7 +483,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
               children: [
                 provider.sourcePump.isNotEmpty? Padding(
                   padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                  child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id, spList: provider.sourcePump,),
+                  child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id, spList: provider.sourcePump, userId: widget.userID,),
                 ):
                 const SizedBox(),
                 provider.irrigationPump.isNotEmpty? Padding(
@@ -609,7 +609,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  PumpLineCentral(currentSiteData: widget.siteData, crrIrrLine:crrIrrLine, masterIdx: widget.masterInx, provider: provider,),
+                  PumpLineCentral(currentSiteData: widget.siteData, crrIrrLine:crrIrrLine, masterIdx: widget.masterInx, provider: provider, userId: widget.userID,),
                   Divider(height: 0, color: Colors.grey.shade300),
                   Container(height: 4, color: Colors.white24),
                   Divider(height: 0, color: Colors.grey.shade300),

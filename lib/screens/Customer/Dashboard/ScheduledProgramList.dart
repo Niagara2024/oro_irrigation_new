@@ -144,7 +144,7 @@ class ScheduledProgramList extends StatelessWidget {
                                 "2900": [{"2901": payload}]
                               });
                               MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
-                              sentUserOperationToServer('${scheduledPrograms[index].progName} Started by Manual', payLoadFinal);
+                              sentUserOperationToServer('${scheduledPrograms[index].progName} Started Manually', payLoadFinal);
                             },
                             child: const Text('Start by Manual'),
                           ):
@@ -159,7 +159,7 @@ class ScheduledProgramList extends StatelessWidget {
                                 "2900": [{"2901": payload}]
                               });
                               MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
-                              sentUserOperationToServer('${scheduledPrograms[index].progName} Stopped by Manual', payLoadFinal);
+                              sentUserOperationToServer('${scheduledPrograms[index].progName} Stopped Manually', payLoadFinal);
                             },
                             child: const Text('Stop by Manual'),
                           ),
@@ -173,7 +173,7 @@ class ScheduledProgramList extends StatelessWidget {
                                 "2900": [{"2901": payload}]
                               });
                               MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
-                              sentUserOperationToServer('${scheduledPrograms[index].progName} Paused by Manual', payLoadFinal);
+                              sentUserOperationToServer('${scheduledPrograms[index].progName} Paused Manually', payLoadFinal);
                             },
                             child: const Text('Pause'),
                           ),
@@ -524,7 +524,7 @@ class ScheduledProgramList extends StatelessWidget {
 
   void sentUserOperationToServer(String msg, String data) async
   {
-    Map<String, Object> body = {"userId": customerId, "controllerId": siteData.master[masterInx].controllerId, "messageStatus": msg, "data": data, "createUser": customerId};
+    Map<String, Object> body = {"userId": customerId, "controllerId": siteData.master[masterInx].controllerId, "messageStatus": msg, "data": data, "hardware": data, "createUser": customerId};
     final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
     if (response.statusCode == 200) {
       print(response.body);

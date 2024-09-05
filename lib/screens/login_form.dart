@@ -219,13 +219,13 @@ class _LoginFormState extends State<LoginForm> {
                                             await prefs.setString('password', customerInfo["password"].toString());
                                             await prefs.setString('email', customerInfo["email"].toString());
 
-                                            if(customerInfo["userType"]=='1'){
+                                            /*if(customerInfo["userType"]=='1'){
                                               await prefs.setString('LoginType', 'Admin');
                                             }else if(customerInfo["userType"]=='2'){
                                               await prefs.setString('LoginType', 'Dealer');
                                             }else{
                                               await prefs.setString('LoginType', 'Customer');
-                                            }
+                                            }*/
 
                                             if (mounted){
                                               Navigator.pushReplacementNamed(context, '/dashboard');

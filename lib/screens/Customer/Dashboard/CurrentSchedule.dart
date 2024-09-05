@@ -249,10 +249,10 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                 "800": [{"801": payload}]
                               });
                               MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
-                              sentManualModeToServer(0,widget.currentSchedule[index].programName,
+                              sentManualOperationToServer(0,widget.currentSchedule[index].programName,
                                   widget.currentSchedule[index].duration_Qty=='00:00:00'? 3:
-                                  widget.currentSchedule[index].duration_Qty.contains(':')?1: 2);
-                            } : null,
+                                  widget.currentSchedule[index].duration_Qty.contains(':')?1: 2, payLoadFinal);
+                            }: null,
                             child: const Text('Stop'),
                           ):
                           widget.currentSchedule[index].programName.contains('StandAlone') ?
@@ -266,9 +266,9 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                               });
 
                               MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
-                              sentManualModeToServer(widget.currentSchedule[index].programSno,widget.currentSchedule[index].programName,
+                              sentManualOperationToServer(widget.currentSchedule[index].programSno,widget.currentSchedule[index].programName,
                                   widget.currentSchedule[index].duration_Qty=='00:00:00'? 3:
-                                  widget.currentSchedule[index].duration_Qty.contains(':')?1: 2);
+                                  widget.currentSchedule[index].duration_Qty.contains(':')?1: 2, payLoadFinal);
                             },
                             child: const Text('Stop'),
                           ):
@@ -281,6 +281,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                 "3700": [{"3701": payload}]
                               });
                               MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
+                              sentSkipOperationToServer('${widget.currentSchedule[index].programName} Skipped manually', payLoadFinal);
                             } : null,
                             child: const Text('Skip'),
                           )
@@ -400,8 +401,8 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                   "800": [{"801": payload}]
                 });
                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
-                sentManualModeToServer(0,widget.currentSchedule[index].programName, widget.currentSchedule[index].duration_Qty=='00:00:00'? 3:
-                widget.currentSchedule[index].duration_Qty.contains(':')? 1: 2);
+                sentManualOperationToServer(0,widget.currentSchedule[index].programName, widget.currentSchedule[index].duration_Qty=='00:00:00'? 3:
+                widget.currentSchedule[index].duration_Qty.contains(':')? 1: 2, payLoadFinal);
               }: null,
               child: const Text('Stop'),
             ):
@@ -415,11 +416,11 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                   "3900": [{"3901": '0,${widget.currentSchedule[index].programCategory},${widget.currentSchedule[index].programSno},'
                       '${widget.currentSchedule[index].zoneSNo},,,,,,,,,0,'}]
                 });
-                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
 
-                sentManualModeToServer(widget.currentSchedule[index].programSno,widget.currentSchedule[index].programName,
+                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
+                sentManualOperationToServer(widget.currentSchedule[index].programSno,widget.currentSchedule[index].programName,
                     widget.currentSchedule[index].duration_Qty=='00:00:00'? 3:
-                    widget.currentSchedule[index].duration_Qty.contains(':')?1: 2);
+                    widget.currentSchedule[index].duration_Qty.contains(':')?1: 2, payLoadFinal);
               },
               child: const Text('Stop'),
             ):
@@ -432,6 +433,10 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                   "3700": [{"3701": payload}]
                 });
                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
+                sentManualOperationToServer(widget.currentSchedule[index].programSno,widget.currentSchedule[index].programName,
+                    widget.currentSchedule[index].duration_Qty=='00:00:00'? 3:
+                    widget.currentSchedule[index].duration_Qty.contains(':')?1: 2, payLoadFinal);
+
               } : null,
               child: const Text('Skip'),
             ),
@@ -487,9 +492,8 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
     return GemProgramSSReasonCode.fromCode(code).content;
   }
 
-  Future<void>sentManualModeToServer(int sNo, String prgName, int method) async {
+  Future<void>sentManualOperationToServer(int sNo, String prgName, int method, String payLoad) async {
     try {
-
       final body = {
         "userId": widget.customerID,
         "controllerId": widget.siteData.master[0].controllerId,
@@ -499,8 +503,10 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
         "method": method,
         "duration": '00:00:00',
         "flow": '0',
+        "fromDashboard":true,
         "selection": [],
         "createUser": widget.customerID,
+        "hardware": jsonDecode(payLoad),
       };
 
       final response = await HttpService().postRequest("createUserManualOperation", body);
@@ -509,6 +515,17 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
       }
     } catch (e) {
       print('Error: $e');
+    }
+  }
+
+  void sentSkipOperationToServer(String msg, String data) async
+  {
+    Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.siteData.master[0].controllerId, "messageStatus": msg, "data": data, "hardware": data, "createUser": widget.customerID};
+    final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
+    if (response.statusCode == 200) {
+      print(response.body);
+    } else {
+      throw Exception('Failed to load data');
     }
   }
 

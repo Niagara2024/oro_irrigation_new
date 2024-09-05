@@ -6,6 +6,7 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../../Models/DataResponse.dart';
+import '../../Models/Dealer/CustomerAlarmList.dart';
 import '../../Models/customer_list.dart';
 import '../../Models/product_stock.dart';
 import '../../constants/http_service.dart';
@@ -20,10 +21,11 @@ enum Calendar {day, week, month, year}
 typedef CallbackFunction = void Function(String result);
 
 class DealerDashboard extends StatefulWidget {
-  const DealerDashboard({Key? key, required this.userName, required this.countryCode, required this.mobileNo, required this.userId, required this.emailId}) : super(key: key);
+  const DealerDashboard({Key? key, required this.userName, required this.countryCode, required this.mobileNo, required this.userId, required this.emailId, required this.fromLogin}) : super(key: key);
 
   final String userName, countryCode, mobileNo, emailId;
   final int userId;
+  final bool fromLogin;
 
   @override
   State<DealerDashboard> createState() => _DealerDashboardState();
@@ -464,9 +466,15 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                               ),
                                               SizedBox(
                                                 width: MediaQuery.sizeOf(context).width,
-                                                height: MediaQuery.sizeOf(context).height-345,
+                                                height: customer.serviceRequestCount*45,
                                                 child: ServiceRequestsTable(userId: customer.userId),
                                               ),
+                                              customer.criticalAlarmCount>0?SizedBox(
+                                                width: MediaQuery.sizeOf(context).width,
+                                                height: customer.criticalAlarmCount*45+40,
+                                                child: DisplayCriticalAlarm(userId: customer.userId,),
+                                              ):
+                                              const SizedBox(),
                                             ],
                                           );
                                         },
@@ -535,7 +543,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
                               title: Text(customer.userName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
                               subtitle: Text('+${customer.countryCode} ${customer.mobileNumber}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal)),
                               onTap:() {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: customer.userId, userName: customer.userName, userID: widget.userId, userType: 2, productStockList: productStockList, callback: callbackFunction,)),);
+                                Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: customer.userId, userName: customer.userName, userID: widget.userId, userType: widget.fromLogin?2:1, productStockList: productStockList, callback: callbackFunction, customerType: 'Customer',)),);
                               },
                             );
                           },
@@ -689,6 +697,157 @@ class BadgeButton extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class DisplayCriticalAlarm extends StatefulWidget{
+  const DisplayCriticalAlarm({super.key, required this.userId});
+  final int userId;
+
+  @override
+  State<DisplayCriticalAlarm> createState() => _DisplayCriticalAlarmState();
+}
+
+class _DisplayCriticalAlarmState extends State<DisplayCriticalAlarm> {
+
+  List<CriticalAlarmFinal> alarms = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getCriticalAlarmList();
+  }
+
+
+  Future<void> getCriticalAlarmList() async {
+    Map<String, Object> body = {"userId" : widget.userId};
+    final response = await HttpService().postRequest("getUserCriticalAlarmForDealer", body);
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      if (data["code"] == 200) {
+        Map<String, dynamic> jsonMap = jsonDecode(response.body);
+        List<AlarmGroupData> alarmGroupDataList = List<AlarmGroupData>.from(jsonMap['data'].map((item) => AlarmGroupData.fromJson(item)));
+        alarms.clear();
+        for(int i=0; i<alarmGroupDataList.length; i++){
+          for(int j=0; j<alarmGroupDataList[i].master.length; j++){
+            for(int k=0; k<alarmGroupDataList[i].master[j].criticalAlarm.length; k++){
+              String msg = getAlarmMessage(alarmGroupDataList[i].master[j].criticalAlarm[k].alarmType);
+              alarms.add(CriticalAlarmFinal(fmName: alarmGroupDataList[i].groupName, dvcName: alarmGroupDataList[i].master[j].deviceName, location: alarmGroupDataList[i].master[j].criticalAlarm[k].location, message: msg));
+            }
+          }
+        }
+        setState((){
+        });
+      }
+    } else {
+      //_showSnackBar(response.body);
+    }
+  }
+
+  String getAlarmMessage(int alarmType) {
+    String msg = '';
+    switch (alarmType) {
+      case 1:
+        msg ='Low Flow';
+        break;
+      case 2:
+        msg ='High Flow';
+        break;
+      case 3:
+        msg ='No Flow';
+        break;
+      case 4:
+        msg ='Ec High';
+        break;
+      case 5:
+        msg ='Ph Low';
+        break;
+      case 6:
+        msg ='Ph High';
+        break;
+      case 7:
+        msg ='Pressure Low';
+        break;
+      case 8:
+        msg ='Pressure High';
+        break;
+      case 9:
+        msg ='No Power Supply';
+        break;
+      case 10:
+        msg ='No Communication';
+        break;
+      case 11:
+        msg ='Wrong Feedback';
+        break;
+      case 12:
+        msg ='Sump Tank Empty';
+        break;
+      case 13:
+        msg ='Top Tank Full';
+        break;
+      case 13:
+        msg ='Top Tank Full';
+        break;
+      case 14:
+        msg ='Low Battery';
+        break;
+      case 15:
+        msg ='Ec Difference';
+        break;
+      case 16:
+        msg ='Ph Difference';
+        break;
+      case 17:
+        msg ='Pump Off Alarm';
+        break;
+      case 18:
+        msg ='Pressure Switch high';
+        break;
+      default:
+        msg ='alarmType default';
+    }
+    return msg;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DataTable2(
+      columnSpacing: 12,
+      horizontalMargin: 12,
+      minWidth: 600,
+      dataRowHeight: 45.0,
+      headingRowHeight: 40.0,
+      headingRowColor: WidgetStateProperty.all<Color>(Colors.yellow.shade50),
+      columns:  const [
+        DataColumn2(
+          label: Text('Farm', style: TextStyle(fontSize: 13),),
+          size: ColumnSize.M,
+        ),
+        DataColumn2(
+          label: Text('Device', style: TextStyle(fontSize: 13),),
+          size: ColumnSize.M,
+        ),
+        DataColumn2(
+          label: Text('Location', style: TextStyle(fontSize: 13)),
+          size: ColumnSize.S,
+        ),
+        DataColumn2(
+          label: Text('Alarm Message', style: TextStyle(fontSize: 13)),
+          size: ColumnSize.L,
+        ),
+      ],
+      rows: List<DataRow>.generate(alarms.length, (index) {
+
+        return DataRow(cells: [
+          DataCell(Text(alarms[index].fmName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.normal),)),
+          DataCell(Text(alarms[index].dvcName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.normal),)),
+          DataCell(Text(alarms[index].location, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.normal),)),
+          DataCell(Text(alarms[index].message, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.normal),)),
+        ]);
+      }),
     );
   }
 }

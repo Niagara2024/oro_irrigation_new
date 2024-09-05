@@ -24,7 +24,7 @@ class DDModel
     description: json['description'],
     widget: json['widget'],
     widgetTypeId: json['widgetTypeId'],
-    dropdownValues: json['dropdownValues'],
+    dropdownValues: json['dropdownValues']??'',
     categoryName: json['categoryName'] ?? '',
     iconCodePoint: json['iconCodePoint'] ?? '',
     iconFontFamily: json['iconFontFamily'] ?? '',

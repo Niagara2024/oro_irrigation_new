@@ -203,7 +203,7 @@ class _PumpControllerSettingsState extends State<PumpControllerSettings> {
                     child: Column(
                       children: [
                         ListTile(
-                          title: const Text('Form Name'),
+                          title: const Text('Farm Name'),
                           leading: const Icon(Icons.area_chart_outlined),
                           trailing: SizedBox(
                             width: 300,
@@ -459,7 +459,7 @@ class _PumpControllerSettingsState extends State<PumpControllerSettings> {
                         borderSide: const BorderSide(color: Colors.blue, width: 2.0),
                         borderRadius: BorderRadius.circular(10.0),
                       ),
-                      labelText: 'Form name',
+                      labelText: 'Farm name',
                       suffixIcon: const Icon(Icons.edit),
                     ),
                   ),

@@ -26,10 +26,10 @@ enum MasterController {gem1, gem2, gem3, gem4, gem5, gem6, gem7, gem8, gem9, gem
 
 class DeviceList extends StatefulWidget {
   final int customerID, userID, userType;
-  final String userName;
+  final String userName, customerType;
   final List<ProductStockModel> productStockList;
   final void Function(String) callback;
-  const DeviceList({super.key, required this.customerID, required this.userName, required this.userID, required this.userType, required this.productStockList, required this.callback});
+  const DeviceList({super.key, required this.customerID, required this.userName, required this.userID, required this.userType, required this.productStockList, required this.callback, required this.customerType});
 
   @override
   State<DeviceList> createState() => _DeviceListState();
@@ -72,13 +72,14 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   void initState() {
     super.initState();
     print(widget.userType);
-    initFunction();
-  }
+    print(widget.customerType);
 
-  Future<void> initFunction() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final loginType = prefs.getString('LoginType') ?? '';
-    List<Object> configList = (widget.userType == 1) ? ['Product'] : loginType=='Admin'? ['Product', 'Site']: ['Product'] ;
+    List<Object> configList = [];
+    if(widget.userType == 1 && widget.customerType=='Customer'){
+      configList = ['Product', 'Site'];
+    }else{
+      configList = ['Product'];
+    }
     _configTabs = List.generate(configList.length, (index) => configList[index]);
     _tabCont = TabController(length: configList.length, vsync: this);
     _tabCont.addListener(() {
@@ -87,9 +88,13 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
       });
     });
 
-    selectedRadioTile = 0;
-    getCustomerType();
+    initFunction();
+  }
 
+  Future<void> initFunction() async {
+    selectedRadioTile = 0;
+    await Future.delayed(const Duration(microseconds: 500));
+    getCustomerType();
     selectedProduct.clear();
     for(int i=0; i<widget.productStockList.length; i++){
       selectedProduct.add(0);
@@ -128,8 +133,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
     {
       customerProductList.clear();
       var data = jsonDecode(response.body);
-      if(data["code"]==200)
-      {
+      if(data["code"]==200) {
         final cntList = data["data"]['product'] as List;
         for (int i=0; i < cntList.length; i++) {
           customerProductList.add(CustomerProductModel.fromJson(cntList[i]));
@@ -491,7 +495,8 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
         controller: _tabCont,
         children: [
           displayProductList(),
-          displaySiteConfigPage(),
+          _tabCont.length>1?displaySiteConfigPage():
+          const SizedBox(),
         ],
       ),
 
@@ -886,11 +891,20 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                       ),
                                       const SizedBox(width: 8,),
                                       MaterialButton(
-                                        onPressed:() {
+                                        onPressed:() async {
                                           String payLoadFinal = jsonEncode({
                                             "2400": [{"2401": "0"},]
                                           });
+
                                           MQTTManager().publish(payLoadFinal, 'AppToFirmware/${customerSiteList[siteIndex].master[mstIndex].deviceId}');
+
+                                          Map<String, Object> body = {"userId": widget.customerID, "controllerId": customerSiteList[siteIndex].master[mstIndex].deviceId, "messageStatus": 'Cleared node serial from site config', "data": payLoadFinal,"hardware": payLoadFinal, "createUser": widget.userID};
+                                          final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
+                                          if (response.statusCode == 200) {
+                                            print(response.body);
+                                          } else {
+                                            throw Exception('Failed to load data');
+                                          }
                                         },
                                         textColor: Colors.white,
                                         color: Colors.redAccent,
@@ -1117,12 +1131,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                               'interfaceTypeId': customerSiteList[siteIndex].master[mstIndex].nodeList[i].interfaceTypeId, 'interfaceInterval': customerSiteList[siteIndex].master[currentMstInx].nodeList[i].interfaceInterval};
                                             updatedInterface.add(myMap);
                                           }
-                                          Map<String, dynamic> body = {
-                                            "userId": widget.customerID,
-                                            "products": updatedInterface,
-                                            "createUser": widget.userID,
-                                            "controllerId": customerSiteList[siteIndex].master[mstIndex].controllerId,
-                                          };
+                                          
 
                                           List<dynamic> payLoad = [];
                                           payLoad.add('${0},${customerSiteList[siteIndex].master[mstIndex].categoryName},${'1'}, ${'1'}, ${customerSiteList[siteIndex].master[mstIndex].deviceId.toString()},'
@@ -1157,11 +1166,16 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
 
                                           //publish payload to mqtt
                                           MQTTManager().publish(payLoadFinal, 'AppToFirmware/${customerSiteList[siteIndex].master[mstIndex].deviceId}');
-
+                                          
+                                          Map<String, dynamic> body = {
+                                            "userId": widget.customerID,
+                                            "products": updatedInterface,
+                                            "createUser": widget.userID,
+                                            "controllerId": customerSiteList[siteIndex].master[mstIndex].controllerId,
+                                            "hardware": jsonDecode(payLoadFinal),
+                                          };
                                           final response = await HttpService().putRequest("updateUserDeviceNodeList", body);
-                                          //print(body);
-                                          if(response.statusCode == 200)
-                                          {
+                                          if(response.statusCode == 200){
                                             var data = jsonDecode(response.body);
                                             if(data["code"]==200)
                                             {

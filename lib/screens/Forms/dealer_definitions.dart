@@ -85,7 +85,7 @@ class _DealerDefinitionsState extends State<DealerDefinitions> {
       ddList.clear();
       var data = jsonDecode(response.body);
       final cntList = data["data"] as List;
-      print(cntList);
+      print(response.body);
 
       for (int i = 0; i < cntList.length; i++) {
         ddList.add(DDModel.fromJson(cntList[i]));
@@ -284,7 +284,7 @@ class _DealerDefinitionsState extends State<DealerDefinitions> {
                       TextFormField(
                         controller: ddParamValCtl,
                         validator: (value){
-                          if(value==null ||value.isEmpty){
+                          if(value==null || value.isEmpty){
                             return 'Please fill out this field';
                           }
                           return null;
@@ -299,7 +299,7 @@ class _DealerDefinitionsState extends State<DealerDefinitions> {
                       TextFormField(
                         controller: icodePiCtl,
                         validator: (value){
-                          if(value==null ||value.isEmpty){
+                          if(value==null || value.isEmpty){
                             return 'Please fill out this field';
                           }
                           return null;
@@ -314,7 +314,7 @@ class _DealerDefinitionsState extends State<DealerDefinitions> {
                       TextFormField(
                         controller: iffCtl,
                         validator: (value){
-                          if(value==null ||value.isEmpty){
+                          if(value==null || value.isEmpty){
                             return 'Please fill out this field';
                           }
                           return null;

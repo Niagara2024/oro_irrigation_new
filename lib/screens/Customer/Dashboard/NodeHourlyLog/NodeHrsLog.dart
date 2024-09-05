@@ -58,6 +58,7 @@ class _NodeHrsLogState extends State<NodeHrsLog> {
                   nodeDataMap[nodeId] = [];
                 }
                 nodeDataMap[nodeId]!.add(ChartData(
+                  nodeData['DeviceName'],
                   hour,
                   nodeData['BatteryVoltage'].toDouble(),
                   nodeData['SolarVoltage'].toDouble(),
@@ -126,23 +127,26 @@ class _NodeHrsLogState extends State<NodeHrsLog> {
             List<ChartData> chartData = entry.value;
             return SfCartesianChart(
               primaryXAxis: CategoryAxis(),
-              title: ChartTitle(text: 'Node ID: $nodeId'),
+              title: ChartTitle(text: 'Device Name: ${chartData.elementAt(0).deviceName}  -  ID: $nodeId'),
               legend: const Legend(isVisible: true),
               //tooltipBehavior: TooltipBehavior(enable: true),
+              primaryYAxis: NumericAxis(
+                title: AxisTitle(text: 'Percentage'),
+              ),
               series: <LineSeries<ChartData, String>>[
                 LineSeries<ChartData, String>(
                   dataSource: chartData,
                   xValueMapper: (ChartData data, _) => data.hour,
                   yValueMapper: (ChartData data, _) => data.batteryVoltage,
                   name: 'Battery Voltage',
-                  dataLabelSettings: DataLabelSettings(isVisible: true),
+                  dataLabelSettings: const DataLabelSettings(isVisible: true),
                 ),
                 LineSeries<ChartData, String>(
                   dataSource: chartData,
                   xValueMapper: (ChartData data, _) => data.hour,
                   yValueMapper: (ChartData data, _) => data.solarVoltage,
                   name: 'Solar Voltage',
-                  dataLabelSettings: DataLabelSettings(isVisible: true),
+                  dataLabelSettings: const DataLabelSettings(isVisible: true),
                 ),
               ],
             );
@@ -155,9 +159,10 @@ class _NodeHrsLogState extends State<NodeHrsLog> {
 }
 
 class ChartData {
+  final String deviceName;
   final String hour;
   final double batteryVoltage;
   final double solarVoltage;
 
-  ChartData(this.hour, this.batteryVoltage, this.solarVoltage);
+  ChartData(this.deviceName, this.hour, this.batteryVoltage, this.solarVoltage);
 }

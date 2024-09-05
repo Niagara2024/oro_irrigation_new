@@ -25,6 +25,7 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
     getSensorHourlyLogs(widget.userId, widget.controllerId, selectedDate);
   }
 
+
   Future<void> getSensorHourlyLogs(userId, controllerId, selectedDate) async {
     String date = DateFormat('yyyy-MM-dd').format(selectedDate);
     Map<String, Object> body = {
@@ -37,11 +38,10 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
     final response = await HttpService().postRequest("getUserSensorHourlyLog", body);
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      print(response.body);
+     // print(response.body);
       if (data["code"] == 200) {
         try {
-          sensors = (data['data'] as List)
-              .map((item) {
+          sensors = (data['data'] as List).map((item) {
             final Map<String, List<SensorHourlyData>> sensorData = {};
             item['data'].forEach((hour, values) {
               sensorData[hour] = (values as List)
@@ -64,12 +64,27 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
     }
   }
 
+  void _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+        getSensorHourlyLogs(widget.userId, widget.controllerId, selectedDate);
+      });
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
 
     return Scaffold(
-      body: DefaultTabController(
+      body: sensors.isNotEmpty?DefaultTabController(
         length: sensors.length,
         child: Scaffold(
           appBar: AppBar(
@@ -81,6 +96,24 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
               tabs: sensors.map((sensor) => Tab(text: sensor.name)).toList(),
             ),
             title: const Text('Sensor Data Charts'),
+            actions: [
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Text(
+                    "${selectedDate.toLocal()}".split(' ')[0],
+                    style: const TextStyle(fontSize: 14, color: Colors.white),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: IconButton(
+                  icon: const Icon(Icons.calendar_today),
+                  onPressed: () => _selectDate(context),
+                ),
+              ),
+            ],
           ),
           body: TabBarView(
             children: sensors.map((sensor) {
@@ -88,7 +121,8 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
             }).toList(),
           ),
         ),
-      ),
+      ):
+      Scaffold(appBar:AppBar(title: const Text('Sensor Data Charts'),), body: const Center(child: Text('Sensor Hourly log not found'),)),
     );
   }
 

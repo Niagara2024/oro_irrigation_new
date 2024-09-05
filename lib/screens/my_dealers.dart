@@ -231,7 +231,7 @@ class MyDealersState extends State<MyDealers> {
                             title: Text(customerOfDealer[index].userName),
                             subtitle: Text('+${customerOfDealer[index].countryCode} ${customerOfDealer[index].mobileNumber}'),
                             onTap:() {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: customerOfDealer[index].userId, userName: customerOfDealer[index].userName, userID: widget.dealerId, userType: 2, productStockList: productStockList, callback: (String ) {},)),);
+                              //Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: customerOfDealer[index].userId, userName: customerOfDealer[index].userName, userID: widget.dealerId, userType: 2, productStockList: productStockList, callback: (String ) {},)),);
                             },
                           );
                         },

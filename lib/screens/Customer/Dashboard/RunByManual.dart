@@ -465,7 +465,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                   "800": [{"801": payload}]
                 });
                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
-                sentManualModeToServer(programList[ddCurrentPosition].serialNumber, 0, standAloneMethod, '00:00:00', '0', []);
+                sentManualModeToServer(programList[ddCurrentPosition].serialNumber, 0, standAloneMethod, '00:00:00', '0', [], payLoadFinal);
               }
               else{
                 for (var lineOrSq in dashBoardData[0].lineOrSequence) {
@@ -488,7 +488,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                 standaloneSelection.clear();
 
                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
-                sentManualModeToServer(programList[ddCurrentPosition].serialNumber, 0, standAloneMethod, '00:00:00', '0', []);
+                sentManualModeToServer(programList[ddCurrentPosition].serialNumber, 0, standAloneMethod, '00:00:00', '0', [], payLoadFinal);
 
               }
             },
@@ -2130,7 +2130,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
       print(payLoadFinal);
 
       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
-      sentManualModeToServer(0, 1, standAloneMethod, strDuration, strFlow, standaloneSelection);
+      sentManualModeToServer(0, 1, standAloneMethod, strDuration, strFlow, standaloneSelection, payLoadFinal);
     }
   }
 
@@ -2165,11 +2165,11 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
       });
 
       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
-      sentManualModeToServer(programList[ddCurrentPosition].serialNumber, 1, standAloneMethod,strDuration, strFlow, standaloneSelection);
+      sentManualModeToServer(programList[ddCurrentPosition].serialNumber, 1, standAloneMethod,strDuration, strFlow, standaloneSelection, payLoadFinal);
     }
   }
 
-  Future<void>sentManualModeToServer(int sNo, int sFlag, int method, String dur, String flow, List<Map<String, dynamic>> selection) async {
+  Future<void>sentManualModeToServer(int sNo, int sFlag, int method, String dur, String flow, List<Map<String, dynamic>> selection, String payLoad) async {
     try {
       final body = {
         "userId": widget.customerID,
@@ -2180,8 +2180,10 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
         "method": method,
         "duration": dur,
         "flow": flow,
+        "fromDashboard":false,
         "selection": selection,
         "createUser": widget.customerID,
+        "hardware": jsonDecode(payLoad),
       };
       final response = await HttpService().postRequest("createUserManualOperation", body);
       if (response.statusCode == 200) {

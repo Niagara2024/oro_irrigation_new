@@ -189,6 +189,12 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                   ]
                 });
                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.currentSiteData.master[widget.masterIdx].deviceId}');
+                if(irrigationPauseFlag == 1){
+                  sentToServer('Resumed the ${widget.crrIrrLine.name}', payLoadFinal);
+                }else{
+                  sentToServer('Paused the ${widget.crrIrrLine.name}', payLoadFinal);
+                }
+
               } else {
                 const GlobalSnackBar(code: 200, message: 'Controller connection lost...');
               }
@@ -220,6 +226,17 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
       ],
     );
 
+  }
+
+  void sentToServer(String msg, String payLoad) async
+  {
+    Map<String, Object> body = {"userId": widget.userId, "controllerId": widget.currentSiteData.master[widget.masterIdx].deviceId, "messageStatus": msg, "data": payLoad, "hardware": payLoad, "createUser": widget.userId};
+    final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
+    if (response.statusCode == 200) {
+      print(response.body);
+    } else {
+      throw Exception('Failed to load data');
+    }
   }
 
 }
@@ -706,7 +723,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
 
   void sentUserOperationToServer(String msg, String data) async
   {
-    Map<String, Object> body = {"userId": widget.userId, "controllerId": widget.deviceId, "messageStatus": msg, "data": data, "createUser": widget.userId};
+    Map<String, Object> body = {"userId": widget.userId, "controllerId": widget.deviceId, "messageStatus": msg, "data": data, "hardware": data, "createUser": widget.userId};
     final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
     if (response.statusCode == 200) {
       print(response.body);

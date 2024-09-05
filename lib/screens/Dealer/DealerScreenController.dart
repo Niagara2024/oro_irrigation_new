@@ -232,7 +232,7 @@ class _DealerScreenControllerState extends State<DealerScreenController> {
   Widget mainMenu(int index) {
     switch (index) {
       case 0:
-        return DealerDashboard(userName: widget.userName, countryCode: widget.countryCode, mobileNo: widget.mobileNo, userId: widget.userId, emailId: widget.emailId,);
+        return DealerDashboard(userName: widget.userName, countryCode: widget.countryCode, mobileNo: widget.mobileNo, userId: widget.userId, emailId: widget.emailId, fromLogin: widget.fromLogin,);
       case 1:
         return ProductInventory(
           userName: widget.userName,

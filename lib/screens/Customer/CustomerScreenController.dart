@@ -868,6 +868,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     "4900": [{"4901": strPRPayload}]
                   });
                   MQTTManager().publish(payloadFinal, 'AppToFirmware/${mySiteList[siteIndex].master[masterIndex].deviceId}');
+                  if (payload.payload2408.every((record) => record['IrrigationPauseFlag'] == 1)) {
+                    sentToServer('Resumed all line', payloadFinal);
+                  } else {
+                    sentToServer('Paused all line', payloadFinal);
+                  }
                 },
                 style: ButtonStyle(
                   backgroundColor: WidgetStateProperty.all<Color>(payload.payload2408.every((record) => record['IrrigationPauseFlag'] == 1)?Colors.green: Colors.orange),
@@ -1324,7 +1329,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     ),
                   ),
                   const SizedBox(height: 15),
-                  AlarmButton(payload: payload, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId,),
+                  AlarmButton(payload: payload, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId, customerId: widget.customerId,),
                 ],
               ),
             ):
@@ -1447,7 +1452,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     );
                   }, icon: const Icon(Icons.grid_view, color: Colors.white)),
                 ),
-                AlarmButton(payload: payload, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId,),
+                AlarmButton(payload: payload, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId, customerId: widget.customerId,),
               ],
             ),
           ):
@@ -1526,12 +1531,24 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     }
   }
 
+  void sentToServer(String msg, String payLoad) async
+  {
+    Map<String, Object> body = {"userId": widget.customerId, "controllerId": mySiteList[siteIndex].master[masterIndex].deviceId, "messageStatus": msg, "data": payLoad, "hardware": payLoad, "createUser": widget.userId};
+    final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
+    if (response.statusCode == 200) {
+      print(response.body);
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
+
 }
 
 class AlarmButton extends StatelessWidget {
-  const AlarmButton({Key? key, required this.payload, required this.deviceID}) : super(key: key);
+  const AlarmButton({Key? key, required this.payload, required this.deviceID, required this.customerId}) : super(key: key);
   final MqttPayloadProvider payload;
   final String deviceID;
+  final int customerId;
 
   @override
   Widget build(BuildContext context) {
@@ -1546,7 +1563,7 @@ class AlarmButton extends StatelessWidget {
         onPressed: (){
           showPopover(
             context: context,
-            bodyBuilder: (context) => AlarmListItems(payload:payload, deviceID:deviceID,),
+            bodyBuilder: (context) => AlarmListItems(payload:payload, deviceID:deviceID, customerId: customerId,),
             onPop: () => print('Popover was popped!'),
             direction: PopoverDirection.left,
             width: payload.alarmList.isNotEmpty?550:250,
@@ -1613,9 +1630,10 @@ class BadgeButton extends StatelessWidget {
 }
 
 class AlarmListItems extends StatelessWidget {
-  const AlarmListItems({Key? key, required this.payload, required this.deviceID}) : super(key: key);
+  const AlarmListItems({Key? key, required this.payload, required this.deviceID, required this.customerId}) : super(key: key);
   final MqttPayloadProvider payload;
   final String deviceID;
+  final int customerId;
 
   @override
   Widget build(BuildContext context) {
@@ -1662,6 +1680,7 @@ class AlarmListItems extends StatelessWidget {
               "4100": [{"4101": finalPayload}]
             });
             MQTTManager().publish(payLoadFinal, 'AppToFirmware/$deviceID');
+            sentToServer('Rested the ${getAlarmMessage(payload.alarmList[index]['AlarmType'])} alarm', payLoadFinal);
           },
           child: const Text('Reset'),
         ))),
@@ -1734,6 +1753,17 @@ class AlarmListItems extends StatelessWidget {
         msg ='alarmType default';
     }
     return msg;
+  }
+
+  void sentToServer(String msg, String payLoad) async
+  {
+    Map<String, Object> body = {"userId": customerId, "controllerId": deviceID, "messageStatus": msg, "data": payLoad, "hardware": payLoad, "createUser": customerId};
+    final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
+    if (response.statusCode == 200) {
+      print(response.body);
+    } else {
+      throw Exception('Failed to load data');
+    }
   }
 }
 
@@ -1918,6 +1948,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                         ]
                                       });
                                       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                      sentToServer('Set serial for all nodes comment sent successfully', payLoadFinal);
                                       GlobalSnackBar.show(context, 'Sent your comment successfully', 200);
                                       Navigator.of(context).pop();
                                     },
@@ -1940,6 +1971,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                             "4500": [{"4501": ""},]
                           });
                           MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                          sentToServer('Test Communication comment sent successfully', payLoadFinal);
                           GlobalSnackBar.show(context, 'Sent your comment successfully', 200);
                           //Navigator.of(context).pop();
                         },
@@ -2068,10 +2100,9 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                               {"2301": "${widget.nodeList[index].serialNumber}"},
                                             ]
                                           });
-                                          MQTTManager().publish(
-                                              payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                          GlobalSnackBar.show(
-                                              context, 'Your comment sent successfully', 200);
+                                          MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                          sentToServer('Serial set for the ${widget.nodeList[index].deviceName} all Relay', payLoadFinal);
+                                          GlobalSnackBar.show(context, 'Your comment sent successfully', 200);
                                         },
                                         icon: const Icon(Icons.fact_check_outlined, color: Colors.teal),
                                       )
@@ -2281,6 +2312,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                     ]
                                   });
                                   MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                  sentToServer('Set serial for all nodes comment sent successfully', payLoadFinal);
                                   GlobalSnackBar.show(context, 'Your comment sent successfully', 200);
                                   Navigator.of(context).pop();
                                 },
@@ -2303,6 +2335,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                         "4500": [{"4501": ""},]
                       });
                       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                      sentToServer('Test Communication comment sent successfully', payLoadFinal);
                       GlobalSnackBar.show(context, 'Sent your comment successfully', 200);
                       //Navigator.of(context).pop();
                     },
@@ -2456,6 +2489,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                           ]
                                         });
                                         MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                        sentToServer('Serial set for ${widget.nodeList[index].categoryName} comment sent successfully', payLoadFinal);
                                       }, icon: const Icon(Icons.fact_check_outlined, color: primaryColorDark))
                                     ],
                                   ),
@@ -2532,6 +2566,17 @@ class _SideSheetClassState extends State<SideSheetClass> {
     );
   }
 
+  void sentToServer(String msg, String payLoad) async
+  {
+    Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.deviceId, "messageStatus": msg, "data": payLoad, "hardware": payLoad, "createUser": widget.customerID};
+    final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
+    if (response.statusCode == 200) {
+      print(response.body);
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
+
   int getNodeListPosition(int srlNo){
     List<NodeData> nodeList = widget.nodeList;
     for (int i = 0; i < nodeList.length; i++) {
@@ -2543,7 +2588,6 @@ class _SideSheetClassState extends State<SideSheetClass> {
   }
 
   String formatDateTime(String? dateTimeString) {
-    print('dateTimeString:$dateTimeString');
     if (dateTimeString == null) {
       return "No feedback received";
     }

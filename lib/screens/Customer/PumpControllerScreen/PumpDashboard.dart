@@ -19,9 +19,9 @@ import 'PumpControllerSettings.dart';
 import 'PumpLogScreen.dart';
 
 class PumpDashboard extends StatefulWidget {
-  const PumpDashboard({Key? key, required this.siteData, required this.masterIndex, required this.customerId, required this.dealerId}) : super(key: key);
+  const PumpDashboard({Key? key, required this.siteData, required this.masterIndex, required this.customerId, required this.dealerId, required this.siteIndex}) : super(key: key);
   final DashboardModel siteData;
-  final int customerId, masterIndex;
+  final int customerId, masterIndex, siteIndex;
   final int dealerId;
 
   @override

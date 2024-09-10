@@ -283,7 +283,7 @@ class ScheduledProgramList extends StatelessWidget {
                     children: [
                       Expanded(
                         child: LinearProgressIndicator(
-                          value: 20 / 100.0,
+                          value: scheduledPrograms[index].programStatusPercentage / 100.0,
                           borderRadius: const BorderRadius.all(Radius.circular(3)),
                           color: Colors.blue.shade300,
                           backgroundColor: Colors.grey.shade200,
@@ -292,7 +292,7 @@ class ScheduledProgramList extends StatelessWidget {
                       ),
                       const SizedBox(width: 7),
                       Text(
-                        '10%',
+                        '${scheduledPrograms[index].programStatusPercentage}%',
                         style: const TextStyle(fontSize: 12, color: Colors.black45),
                       ),
                     ],
@@ -601,157 +601,6 @@ class _ConditionDialogState extends State<ConditionDialog> {
           ],
         ),
       ),
-      /*content: SizedBox(
-        height: startCondition.condition.isNotEmpty && startCondition.condition.isNotEmpty ? 225 : 100,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            startCondition.condition.isNotEmpty ? Text(
-                'START CONDITION',
-                style: TextStyle(fontSize: 15, color: startCondition.status == 1 ? Colors.green : Colors.red)
-            ) : const SizedBox(),
-            startCondition.condition.isNotEmpty ? Container(
-              decoration: BoxDecoration(
-                color: startCondition.status == 1 ? Colors.green.shade50 : Colors.red.shade50,
-                borderRadius: BorderRadius.circular(5),
-                border: Border.all(
-                  color: startCondition.status == 1 ? Colors.green.shade100 : Colors.red.shade100,
-                  width: 1,
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 5),
-                    Text(startCondition.condition, style: const TextStyle(fontSize: 12)),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        // Set Value Container
-                        Container(
-                          width: 100,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(5),
-                            border: Border.all(
-                              color: Colors.grey.shade400,
-                              width: 1,
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              const Text('Set Value', style: TextStyle(color: Colors.black45)),
-                              Divider(height: 4, color: Colors.grey.shade300),
-                              Text('${startCondition.set}'),
-                            ],
-                          ),
-                        ),
-                        // Actual Value Container
-                        Container(
-                          width: 100,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(5),
-                            border: Border.all(
-                              color: Colors.grey.shade300,
-                              width: 1,
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              const Text('Actual Value', style: TextStyle(color: Colors.black54)),
-                              Divider(height: 4, color: Colors.grey.shade300),
-                              Text('${startCondition.actual}'),
-                            ],
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-            ) : const SizedBox(),
-
-            // Spacer
-            startCondition.condition.isNotEmpty ? const SizedBox(height: 8) : const SizedBox(),
-
-            // Stop Condition
-            stopCondition.condition.isNotEmpty ? Text(
-                'STOP CONDITION',
-                style: TextStyle(fontSize: 15, color: stopCondition.status == 1 ? Colors.green : Colors.red)
-            ) : const SizedBox(),
-            stopCondition.condition.isNotEmpty ? Container(
-              decoration: BoxDecoration(
-                color: stopCondition.status == 1 ? Colors.green.shade50 : Colors.red.shade50,
-                borderRadius: BorderRadius.circular(5),
-                border: Border.all(
-                  color: stopCondition.status == 1 ? Colors.green.shade100 : Colors.red.shade100,
-                  width: 1,
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 5),
-                    Text(stopCondition.condition, style: const TextStyle(fontSize: 12)),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        // Set Value Container
-                        Container(
-                          width: 100,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(5),
-                            border: Border.all(
-                              color: Colors.grey.shade300,
-                              width: 1,
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              const Text('Set Value', style: TextStyle(color: Colors.black54)),
-                              Divider(height: 4, color: Colors.grey.shade300),
-                              Text('${stopCondition.set}'),
-                            ],
-                          ),
-                        ),
-                        // Actual Value Container
-                        Container(
-                          width: 100,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(5),
-                            border: Border.all(
-                              color: Colors.grey.shade300,
-                              width: 1,
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              const Text('Actual Value', style: TextStyle(color: Colors.black54)),
-                              Divider(height: 4, color: Colors.grey.shade300),
-                              Text('${stopCondition.actual}'),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ) : const SizedBox(),
-          ],
-        ),
-      ),*/
       actions: <Widget>[
         TextButton(
           child: const Text('OK'),

@@ -29,6 +29,15 @@ class RunByManual extends StatefulWidget {
 
 class _RunByManualState extends State<RunByManual>  with SingleTickerProviderStateMixin{
 
+  SegmentWithFlow _segmentWithFlow = SegmentWithFlow.manual;
+  String durationValue = '00:00:00';
+  String selectedIrLine = '0';
+  final TextEditingController _hoursController = TextEditingController();
+  final TextEditingController _minutesController = TextEditingController();
+  final TextEditingController _secondsController = TextEditingController();
+  final TextEditingController _flowLiter = TextEditingController();
+
+
   late List<DashboardDataProvider> dashBoardData = [];
   List<ProgramList> programList = [];
   bool visibleLoading = false;
@@ -109,7 +118,6 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
       strFlow = value;
     }
     strSelectedLineOfProgram = sldIrLine;
-    print('segIndex=$segIndex');
     setState(() {
       if(segIndex==0){
         standAloneMethod = 3;
@@ -160,8 +168,26 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
           }else {
             print("'$serialNumber' not found in the list.");
           }
+
+          if(standAloneMethod == 3){
+            _segmentWithFlow = SegmentWithFlow.manual;
+          }else if(standAloneMethod == 1){
+            _segmentWithFlow = SegmentWithFlow.duration;
+          }else{
+            _segmentWithFlow = SegmentWithFlow.flow;
+          }
+
+          int count = strDuration.split(':').length - 1;
+          if(count>1){
+            durationValue = strDuration;
+          }else{
+            durationValue = '$strDuration:00';
+          }
+          _flowLiter.text = strFlow;
+
           await Future.delayed(const Duration(milliseconds: 500));
           scheduleSectionCallbackMethod(serialNumber, ddCurrentPosition);
+
         }catch(e){
           print(e);
         }
@@ -208,9 +234,10 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    return Scaffold(
-      backgroundColor: const Color(0xffefefef),
-      appBar: AppBar(
+    return Container(
+      color: Colors.white,
+      width: 700,
+      /*appBar: AppBar(
         title: Row(
           children: [
             Text(screenWidth>600?widget.siteName:''),
@@ -496,8 +523,8 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
           ),
           const SizedBox(width: 15),
         ],
-      ),
-      body: visibleLoading? Center(
+      ),*/
+      child: visibleLoading? Center(
         child: Visibility(
           visible: visibleLoading,
           child: Container(
@@ -510,11 +537,142 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
       ) :
       screenWidth>600?Column(
         children: [
+          Container(
+            color:Colors.teal.shade100,
+            width: 700,
+            height: 45,
+            child: Row(
+              children: [
+                programList.length>1 ? SizedBox(
+                  width: 170,
+                  child: DropdownButtonFormField(
+                    value: programList.isNotEmpty ? programList[ddCurrentPosition] : null,
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                    ),
+                    focusColor: Colors.transparent,
+                    items: programList.map((item) {
+                      return DropdownMenuItem(
+                        value: item,
+                        child: Text(item.programName,),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      scheduleSectionCallbackMethod(
+                        value!.serialNumber,
+                        programList.indexOf(value),
+                      );
+                    },
+                  ),
+                ):
+                Container(),
+                programList.length>1 ?const VerticalDivider():const SizedBox(),
+
+                Expanded(
+                  flex: 1,
+                  child: ddCurrentPosition!=0? SegmentedButton<SegmentWithFlow>(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStatePropertyAll(myTheme.primaryColor.withOpacity(0.05)),
+                      iconColor: WidgetStateProperty.all(myTheme.primaryColor),
+                    ),
+                    segments: const <ButtonSegment<SegmentWithFlow>>[
+                      ButtonSegment<SegmentWithFlow>(
+                          value: SegmentWithFlow.manual,
+                          label: Text('Timeless'),
+                          icon: Icon(Icons.pan_tool_alt_outlined)),
+                      ButtonSegment<SegmentWithFlow>(
+                          value: SegmentWithFlow.duration,
+                          label: Text('Duration'),
+                          icon: Icon(Icons.timer_outlined)),
+                      ButtonSegment<SegmentWithFlow>(
+                          value: SegmentWithFlow.flow,
+                          label: Text('Flow-Liters'),
+                          icon: Icon(Icons.water_drop_outlined)),
+                    ],
+                    selected: <SegmentWithFlow>{_segmentWithFlow},
+                    onSelectionChanged: (Set<SegmentWithFlow> newSelection) {
+                      setState(() {
+                        _segmentWithFlow = newSelection.first;
+                        segmentSelectionCallbackFunction(_segmentWithFlow.index, durationValue, selectedIrLine);
+                      });
+                    },
+                  ) :
+                  SegmentedButton<SegmentWithFlow>(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStatePropertyAll(myTheme.primaryColor.withOpacity(0.05)),
+                      iconColor: WidgetStateProperty.all(myTheme.primaryColor),
+                    ),
+                    segments: const <ButtonSegment<SegmentWithFlow>>[
+                      ButtonSegment<SegmentWithFlow>(
+                          value: SegmentWithFlow.manual,
+                          label: Text('Timeless'),
+                          icon: Icon(Icons.pan_tool_alt_outlined)),
+                      ButtonSegment<SegmentWithFlow>(
+                          value: SegmentWithFlow.duration,
+                          label: Text('Duration'),
+                          icon: Icon(Icons.timer_outlined)),
+                    ],
+                    selected: <SegmentWithFlow>{_segmentWithFlow},
+                    onSelectionChanged: (Set<SegmentWithFlow> newSelection) {
+                      setState(() {
+                        _segmentWithFlow = newSelection.first;
+                        segmentSelectionCallbackFunction(_segmentWithFlow.index, durationValue, selectedIrLine);
+                      });
+                    },
+                  ),
+                ),
+
+                const SizedBox(width: 8,),
+
+                _segmentWithFlow.index == 1 ? SizedBox(
+                  width: 100,
+                  child: TextButton(
+                    onPressed: () {
+                      _showDurationInputDialog(context);
+                    },
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all<Color>(myTheme.primaryColor.withOpacity(0.2)),
+                      shape: WidgetStateProperty.all<OutlinedBorder>(
+                        RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                      ),
+                    ),
+                    child: Text(durationValue, style: const TextStyle(color: Colors.black, fontSize: 17)),
+                  ),
+                ) :
+                Container(),
+                _segmentWithFlow.index == 2 ? SizedBox(
+                  width: 100,
+                  child: TextField(
+                    maxLength: 7,
+                    controller: _flowLiter,
+                    onChanged: (value) {
+                      setState(() {
+                        segmentSelectionCallbackFunction(_segmentWithFlow.index, value, selectedIrLine);
+                      });
+                    },
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                    ],
+                    decoration: const InputDecoration(
+                      labelText: 'Liters',
+                      counterText: '',
+                    ),
+                  ),
+                ):
+                Container(),
+
+                const SizedBox(width: 8,),
+              ],
+            ),
+          ),
           Expanded(
             child: Row(
               children: [
                 SizedBox(
-                  width: 380,
+                  width: 375,
                   height: double.infinity,
                   child: SingleChildScrollView(
                     child: Column(
@@ -530,28 +688,32 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                                   padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
                                   child: Text('Source Pump'),
                                 ),
-                                SizedBox(
-                                  height: dashBoardData[0].sourcePump.length * 65,
-                                  child : ListView.builder(
-                                    itemCount: dashBoardData[0].sourcePump.length,
-                                    itemBuilder: (context, index) {
-                                      return Column(
+                                Wrap(
+                                  spacing: 8.0,
+                                  runSpacing: 8.0,
+                                  children: dashBoardData[0].sourcePump.map((pump) {
+                                    return ChoiceChip(
+                                      label: Row(
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          CheckboxListTile(
-                                            title: Text(dashBoardData[0].sourcePump[index].name),
-                                            subtitle: Text('Location : ${dashBoardData[0].sourcePump[index].location}',style: const TextStyle(fontWeight: FontWeight.normal),),
-                                            secondary: Image.asset('assets/images/source_pump.png'),
-                                            value: dashBoardData[0].sourcePump[index].selected,
-                                            onChanged: (bool? newValue) {
-                                              setState(() {
-                                                dashBoardData[0].sourcePump[index].selected = newValue!;
-                                              });
-                                            },
-                                          ),
+                                          Text(pump.name),
+                                          const SizedBox(width: 8,),
+                                          Image.asset('assets/images/source_pump.png',width: 20, height: 20,)
                                         ],
-                                      );
-                                    },
-                                  ),
+                                      ),
+                                      selected: pump.selected,
+                                      onSelected: (bool selected) {
+                                        setState(() {
+                                          pump.selected = !pump.selected; // Toggle chip selection
+                                        });
+                                      },
+                                      selectedColor: Colors.teal,
+                                      backgroundColor: Colors.grey.shade300,
+                                      labelStyle: TextStyle(
+                                        color: pump.selected ? Colors.white : Colors.black,
+                                      ),
+                                    );
+                                  }).toList(),
                                 ),
                               ],
                             ),
@@ -568,28 +730,32 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                                   padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
                                   child: Text('Irrigation Pump'),
                                 ),
-                                SizedBox(
-                                  height: dashBoardData[0].irrigationPump.length * 65,
-                                  child: ListView.builder(
-                                    itemCount: dashBoardData[0].irrigationPump.length,
-                                    itemBuilder: (context, index) {
-                                      return Column(
+                                Wrap(
+                                  spacing: 8.0,
+                                  runSpacing: 8.0,
+                                  children: dashBoardData[0].irrigationPump.map((pump) {
+                                    return ChoiceChip(
+                                      label: Row(
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          CheckboxListTile(
-                                            title: Text(dashBoardData[0].irrigationPump[index].name),
-                                            subtitle: Text('Location : ${dashBoardData[0].irrigationPump[index].location}',style: const TextStyle(fontWeight: FontWeight.normal),),
-                                            secondary: Image.asset('assets/images/irrigation_pump.png'),
-                                            value: dashBoardData[0].irrigationPump[index].selected,
-                                            onChanged: (bool? newValue) {
-                                              setState(() {
-                                                dashBoardData[0].irrigationPump[index].selected = newValue!;
-                                              });
-                                            },
-                                          ),
+                                          Text(pump.name),
+                                          const SizedBox(width: 8,),
+                                          Image.asset('assets/images/irrigation_pump.png',width: 20, height: 20,)
                                         ],
-                                      );
-                                    },
-                                  ),
+                                      ),
+                                      selected: pump.selected,
+                                      onSelected: (bool selected) {
+                                        setState(() {
+                                          pump.selected = !pump.selected; // Toggle chip selection
+                                        });
+                                      },
+                                      selectedColor: Colors.teal,
+                                      backgroundColor: Colors.grey.shade300,
+                                      labelStyle: TextStyle(
+                                        color: pump.selected ? Colors.white : Colors.black,
+                                      ),
+                                    );
+                                  }).toList(),
                                 ),
                               ],
                             ),
@@ -605,28 +771,32 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                                   padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
                                   child: Text('Main Valve'),
                                 ),
-                                SizedBox(
-                                  height: dashBoardData[0].mainValve.length  * 65,
-                                  child: ListView.builder(
-                                    itemCount: dashBoardData[0].mainValve.length,
-                                    itemBuilder: (context, index) {
-                                      return Column(
+                                Wrap(
+                                  spacing: 8.0,
+                                  runSpacing: 8.0,
+                                  children: dashBoardData[0].mainValve.map((mv) {
+                                    return ChoiceChip(
+                                      label: Row(
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          CheckboxListTile(
-                                            title: Text(dashBoardData[0].mainValve[index].name),
-                                            subtitle: Text('Location : ${dashBoardData[0].mainValve[index].location}',style: const TextStyle(fontWeight: FontWeight.normal),),
-                                            secondary: Image.asset('assets/images/dp_main_valve.png'),
-                                            value: dashBoardData[0].mainValve[index].selected,
-                                            onChanged: (bool? newValue) {
-                                              setState(() {
-                                                dashBoardData[0].mainValve[index].selected = newValue!;
-                                              });
-                                            },
-                                          ),
+                                          Text(mv.name),
+                                          const SizedBox(width: 8,),
+                                          Image.asset('assets/images/dp_main_valve.png',width: 20, height: 20,)
                                         ],
-                                      );
-                                    },
-                                  ),
+                                      ),
+                                      selected: mv.selected,
+                                      onSelected: (bool selected) {
+                                        setState(() {
+                                          mv.selected = !mv.selected; // Toggle chip selection
+                                        });
+                                      },
+                                      selectedColor: Colors.teal,
+                                      backgroundColor: Colors.grey.shade300,
+                                      labelStyle: TextStyle(
+                                        color: mv.selected ? Colors.white : Colors.black,
+                                      ),
+                                    );
+                                  }).toList(),
                                 ),
                               ],
                             ),
@@ -639,109 +809,53 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Padding(
-                                  padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
+                                  padding: EdgeInsets.only(left: 8.0, right: 8.0),
                                   child: Text('Central Filter Site'),
                                 ),
-                                SizedBox(
-                                  height: dashBoardData[0].centralFilterSite.length * 160,
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.vertical,
-                                    itemCount: dashBoardData[0].centralFilterSite.length,
-                                    itemBuilder: (context, index) {
-                                      List<FilterList> fertilizers = dashBoardData[0].centralFilterSite[index].filter;
-                                      return Card(
-                                        child: Column(
-                                          children: [
-                                            Row(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Padding(
-                                                  padding: const EdgeInsets.only(left: 5),
-                                                  child: SizedBox(
-                                                    width: 60,
-                                                    height: 60,
-                                                    child: Padding(
-                                                      padding: const EdgeInsets.only(top: 8),
-                                                      child: Image.asset('assets/images/central_filtration.png'),
-                                                    ),
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: const EdgeInsets.all(5.0),
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      Text(dashBoardData[0].centralFilterSite[index].name, style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                      Text(dashBoardData[0].centralFilterSite[index].id, style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                      Text('Location : ${dashBoardData[0].centralFilterSite[index].location}', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  const Padding(
-                                                    padding: EdgeInsets.only(right: 8, left: 5, top: 3),
-                                                    child: Text('filter', style: TextStyle(fontSize: 11),),
-                                                  ),
+                                const Divider(height: 8,),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: dashBoardData[0].centralFilterSite.map((site) {
+                                    List<FilterList> filters = site.filter;
 
-                                                  SizedBox(
-                                                      width: MediaQuery.sizeOf(context).width-740,
-                                                      height: 46,
-                                                      child: Column(
-                                                        children: [
-                                                          const Padding(
-                                                            padding: EdgeInsets.only(left: 5, right: 5),
-                                                            child: Divider(),
-                                                          ),
-                                                          SizedBox(
-                                                            width: 310,
-                                                            height: 30,
-                                                            child: ListView.builder(
-                                                              scrollDirection: Axis.horizontal,
-                                                              itemCount: fertilizers.length,
-                                                              itemBuilder: (BuildContext context, int index) {
-                                                                return Row(
-                                                                  children: [
-                                                                    Padding(
-                                                                      padding: const EdgeInsets.only(left: 5),
-                                                                      child: Column(
-                                                                        children: [
-                                                                          InkWell(
-                                                                            child: CircleAvatar(
-                                                                              radius: 15,
-                                                                              backgroundColor: fertilizers[index].selected ? Colors.green : Colors.grey,
-                                                                              child: Text('${index+1}', style: const TextStyle(fontSize: 13, color: Colors.white),),
-                                                                            ),
-                                                                            onTap: (){
-                                                                              setState(() {
-                                                                                fertilizers[index].selected = !fertilizers[index].selected;
-                                                                              });
-                                                                            },
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    )
-                                                                  ],
-                                                                );
-                                                              },
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      )
-                                                  ),
+                                    return Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(site.name),
+                                        ),
+                                        Wrap(
+                                          spacing: 8.0,
+                                          runSpacing: 8.0,
+                                          children: filters.map((filters) {
+                                            return ChoiceChip(
+                                              label: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(filters.name),
+                                                  const SizedBox(width: 8),
+                                                  const Icon(Icons.filter_alt_outlined),
                                                 ],
                                               ),
-                                            ),
-                                          ],
+                                              selected: filters.selected,
+                                              onSelected: (bool selected) {
+                                                setState(() {
+                                                  filters.selected = !filters.selected;
+                                                });
+                                              },
+                                              selectedColor: Colors.teal,
+                                              backgroundColor: Colors.grey.shade300,
+                                              labelStyle: TextStyle(
+                                                color: filters.selected ? Colors.white : Colors.black,
+                                              ),
+                                            );
+                                          }).toList(),
                                         ),
-                                      );
-                                    },
-                                  ),
+                                      ],
+                                    );
+                                  }).toList(),
                                 ),
                               ],
                             ),
@@ -755,109 +869,53 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Padding(
-                                  padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
+                                  padding: EdgeInsets.only(left: 8.0, right: 8.0,),
                                   child: Text('Local Filter Site'),
                                 ),
-                                SizedBox(
-                                  height: dashBoardData[0].localFilterSite.length * 160,
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.vertical,
-                                    itemCount: dashBoardData[0].localFilterSite.length,
-                                    itemBuilder: (context, index) {
-                                      List<FilterList> fertilizers = dashBoardData[0].localFilterSite[index].filter;
-                                      return Card(
-                                        child: Column(
-                                          children: [
-                                            Row(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Padding(
-                                                  padding: const EdgeInsets.only(left: 5),
-                                                  child: SizedBox(
-                                                    width: 60,
-                                                    height: 60,
-                                                    child: Padding(
-                                                      padding: const EdgeInsets.only(top: 8),
-                                                      child: Image.asset('assets/images/filter.png'),
-                                                    ),
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: const EdgeInsets.all(5.0),
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      Text(dashBoardData[0].localFilterSite[index].name, style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                      Text(dashBoardData[0].localFilterSite[index].id, style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                      Text('Location : ${dashBoardData[0].localFilterSite[index].location}', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  const Padding(
-                                                    padding: EdgeInsets.only(right: 8, left: 5, top: 3),
-                                                    child: Text('filter', style: TextStyle(fontSize: 11),),
-                                                  ),
+                                const Divider(height: 8,),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: dashBoardData[0].localFilterSite.map((site) {
+                                    List<FilterList> filters = site.filter;
 
-                                                  SizedBox(
-                                                      width: MediaQuery.sizeOf(context).width-740,
-                                                      height: 46,
-                                                      child: Column(
-                                                        children: [
-                                                          const Padding(
-                                                            padding: EdgeInsets.only(left: 5, right: 5),
-                                                            child: Divider(),
-                                                          ),
-                                                          SizedBox(
-                                                            width: 310,
-                                                            height: 30,
-                                                            child: ListView.builder(
-                                                              scrollDirection: Axis.horizontal,
-                                                              itemCount: fertilizers.length,
-                                                              itemBuilder: (BuildContext context, int index) {
-                                                                return Row(
-                                                                  children: [
-                                                                    Padding(
-                                                                      padding: const EdgeInsets.only(left: 5),
-                                                                      child: Column(
-                                                                        children: [
-                                                                          InkWell(
-                                                                            child: CircleAvatar(
-                                                                              radius: 15,
-                                                                              backgroundColor: fertilizers[index].selected? Colors.green : Colors.grey,
-                                                                              child: Text('${index+1}', style: const TextStyle(fontSize: 13, color: Colors.white),),
-                                                                            ),
-                                                                            onTap: (){
-                                                                              setState(() {
-                                                                                fertilizers[index].selected = !fertilizers[index].selected;
-                                                                              });
-                                                                            },
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    )
-                                                                  ],
-                                                                );
-                                                              },
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      )
-                                                  ),
+                                    return Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(site.name),
+                                        ),
+                                        Wrap(
+                                          spacing: 8.0,
+                                          runSpacing: 8.0,
+                                          children: filters.map((filters) {
+                                            return ChoiceChip(
+                                              label: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(filters.name),
+                                                  const SizedBox(width: 8),
+                                                  const Icon(Icons.filter_alt_outlined),
                                                 ],
                                               ),
-                                            ),
-                                          ],
+                                              selected: filters.selected,
+                                              onSelected: (bool selected) {
+                                                setState(() {
+                                                  filters.selected = !filters.selected;
+                                                });
+                                              },
+                                              selectedColor: Colors.teal,
+                                              backgroundColor: Colors.grey.shade300,
+                                              labelStyle: TextStyle(
+                                                color: filters.selected ? Colors.white : Colors.black,
+                                              ),
+                                            );
+                                          }).toList(),
                                         ),
-                                      );
-                                    },
-                                  ),
+                                      ],
+                                    );
+                                  }).toList(),
                                 ),
                               ],
                             ),
@@ -874,106 +932,49 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                                   padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
                                   child: Text('Central Fertilizer Site'),
                                 ),
-                                SizedBox(
-                                  height: dashBoardData[0].centralFertilizerSite.length * 160,
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.vertical,
-                                    itemCount: dashBoardData[0].centralFertilizerSite.length,
-                                    itemBuilder: (context, index) {
-                                      List<FertilizerChanel> fertilizers = dashBoardData[0].centralFertilizerSite[index].fertilizer;
-                                      return Card(
-                                        child: Column(
-                                          children: [
-                                            Row(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Padding(
-                                                  padding: const EdgeInsets.only(left: 5),
-                                                  child: SizedBox(
-                                                    width: 60,
-                                                    height: 60,
-                                                    child: Padding(
-                                                      padding: const EdgeInsets.only(top: 8),
-                                                      child: Image.asset('assets/images/central_dosing.png'),
-                                                    ),
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: const EdgeInsets.all(5.0),
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      Text(dashBoardData[0].centralFertilizerSite[index].name, style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                      Text(dashBoardData[0].centralFertilizerSite[index].id, style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                      Text('Location : ${dashBoardData[0].centralFertilizerSite[index].location}', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  const Padding(
-                                                    padding: EdgeInsets.only(right: 8, left: 5, top: 3),
-                                                    child: Text('Chanel', style: TextStyle(fontSize: 11),),
-                                                  ),
+                                const Divider(height: 8,),
+                                Column(
+                                  children: dashBoardData[0].centralFertilizerSite.map((site) {
+                                    List<FertilizerChanel> fertilizers = site.fertilizer;
 
-                                                  SizedBox(
-                                                      width: MediaQuery.sizeOf(context).width-740,
-                                                      height: 46,
-                                                      child: Column(
-                                                        children: [
-                                                          const Padding(
-                                                            padding: EdgeInsets.only(left: 5, right: 5),
-                                                            child: Divider(),
-                                                          ),
-                                                          SizedBox(
-                                                            width: 310,
-                                                            height: 30,
-                                                            child: ListView.builder(
-                                                              scrollDirection: Axis.horizontal,
-                                                              itemCount: fertilizers.length,
-                                                              itemBuilder: (BuildContext context, int index) {
-                                                                return Row(
-                                                                  children: [
-                                                                    Padding(
-                                                                      padding: const EdgeInsets.only(left: 5),
-                                                                      child: Column(
-                                                                        children: [
-                                                                          InkWell(
-                                                                            child: CircleAvatar(
-                                                                              radius: 15,
-                                                                              backgroundColor: fertilizers[index].selected? Colors.green : Colors.grey,
-                                                                              child: Text('${index+1}', style: const TextStyle(fontSize: 13, color: Colors.white),),
-                                                                            ),
-                                                                            onTap: (){
-                                                                              setState(() {
-                                                                                fertilizers[index].selected = !fertilizers[index].selected;
-                                                                              });
-                                                                            },
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    )
-                                                                  ],
-                                                                );
-                                                              },
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      )
-                                                  ),
+                                    return Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(site.name),
+                                        ),
+                                        Wrap(
+                                          spacing: 8.0,
+                                          runSpacing: 8.0,
+                                          children: fertilizers.map((filters) {
+                                            return ChoiceChip(
+                                              label: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(filters.name),
+                                                  const SizedBox(width: 8),
+                                                  const Icon(Icons.imagesearch_roller_outlined),
                                                 ],
                                               ),
-                                            ),
-                                          ],
+                                              selected: filters.selected,
+                                              onSelected: (bool selected) {
+                                                setState(() {
+                                                  filters.selected = !filters.selected;
+                                                });
+                                              },
+                                              selectedColor: Colors.teal,
+                                              backgroundColor: Colors.grey.shade300,
+                                              labelStyle: TextStyle(
+                                                color: filters.selected ? Colors.white : Colors.black,
+                                              ),
+                                            );
+                                          }).toList(),
                                         ),
-                                      );
-                                    },
-                                  ),
+                                      ],
+                                    );
+                                  }).toList(),
                                 ),
                               ],
                             ),
@@ -989,106 +990,49 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                                   padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
                                   child: Text('Local Fertilizer Site'),
                                 ),
-                                SizedBox(
-                                  height: dashBoardData[0].localFertilizerSite.length * 160,
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.vertical,
-                                    itemCount: dashBoardData[0].localFertilizerSite.length,
-                                    itemBuilder: (context, index) {
-                                      List<FertilizerChanel> fertilizers = dashBoardData[0].localFertilizerSite[index].fertilizer;
-                                      return Card(
-                                        child: Column(
-                                          children: [
-                                            Row(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Padding(
-                                                  padding: const EdgeInsets.only(left: 5),
-                                                  child: SizedBox(
-                                                    width: 60,
-                                                    height: 60,
-                                                    child: Padding(
-                                                      padding: const EdgeInsets.only(top: 8),
-                                                      child: Image.asset('assets/images/central_dosing.png'),
-                                                    ),
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: const EdgeInsets.all(5.0),
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      Text(dashBoardData[0].localFertilizerSite[index].name, style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                      Text(dashBoardData[0].localFertilizerSite[index].id, style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                      Text('Location : ${dashBoardData[0].localFertilizerSite[index].location}', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  const Padding(
-                                                    padding: EdgeInsets.only(right: 8, left: 5, top: 3),
-                                                    child: Text('Chanel', style: TextStyle(fontSize: 11),),
-                                                  ),
+                                const Divider(height: 8,),
+                                Column(
+                                  children: dashBoardData[0].localFertilizerSite.map((site) {
+                                    List<FertilizerChanel> fertilizers = site.fertilizer;
 
-                                                  SizedBox(
-                                                      width: MediaQuery.sizeOf(context).width-740,
-                                                      height: 46,
-                                                      child: Column(
-                                                        children: [
-                                                          const Padding(
-                                                            padding: EdgeInsets.only(left: 5, right: 5),
-                                                            child: Divider(),
-                                                          ),
-                                                          SizedBox(
-                                                            width: 310,
-                                                            height: 30,
-                                                            child: ListView.builder(
-                                                              scrollDirection: Axis.horizontal,
-                                                              itemCount: fertilizers.length,
-                                                              itemBuilder: (BuildContext context, int index) {
-                                                                return Row(
-                                                                  children: [
-                                                                    Padding(
-                                                                      padding: const EdgeInsets.only(left: 5),
-                                                                      child: Column(
-                                                                        children: [
-                                                                          InkWell(
-                                                                            child: CircleAvatar(
-                                                                              radius: 15,
-                                                                              backgroundColor: fertilizers[index].selected? Colors.green : Colors.grey,
-                                                                              child: Text('${index+1}', style: const TextStyle(fontSize: 13, color: Colors.white),),
-                                                                            ),
-                                                                            onTap: (){
-                                                                              setState(() {
-                                                                                fertilizers[index].selected = !fertilizers[index].selected;
-                                                                              });
-                                                                            },
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    )
-                                                                  ],
-                                                                );
-                                                              },
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      )
-                                                  ),
+                                    return Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(site.name),
+                                        ),
+                                        Wrap(
+                                          spacing: 8.0,
+                                          runSpacing: 8.0,
+                                          children: fertilizers.map((filters) {
+                                            return ChoiceChip(
+                                              label: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(filters.name),
+                                                  const SizedBox(width: 8),
+                                                  const Icon(Icons.imagesearch_roller_outlined),
                                                 ],
                                               ),
-                                            ),
-                                          ],
+                                              selected: filters.selected,
+                                              onSelected: (bool selected) {
+                                                setState(() {
+                                                  filters.selected = !filters.selected;
+                                                });
+                                              },
+                                              selectedColor: Colors.teal,
+                                              backgroundColor: Colors.grey.shade300,
+                                              labelStyle: TextStyle(
+                                                color: filters.selected ? Colors.white : Colors.black,
+                                              ),
+                                            );
+                                          }).toList(),
                                         ),
-                                      );
-                                    },
-                                  ),
+                                      ],
+                                    );
+                                  }).toList(),
                                 ),
                               ],
                             ),
@@ -1104,28 +1048,32 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                                   padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
                                   child: Text('Agitator'),
                                 ),
-                                SizedBox(
-                                  height: dashBoardData[0].agitator.length  * 65,
-                                  child: ListView.builder(
-                                    itemCount: dashBoardData[0].agitator.length,
-                                    itemBuilder: (context, index) {
-                                      return Column(
+                                Wrap(
+                                  spacing: 8.0,
+                                  runSpacing: 8.0,
+                                  children: dashBoardData[0].agitator.map((agt) {
+                                    return ChoiceChip(
+                                      label: Row(
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          CheckboxListTile(
-                                            title: Text(dashBoardData[0].agitator[index].name),
-                                            subtitle: Text('Location : ${dashBoardData[0].agitator[index].location}',style: const TextStyle(fontWeight: FontWeight.normal),),
-                                            secondary: Image.asset('assets/images/agitator.png'),
-                                            value: dashBoardData[0].agitator[index].selected,
-                                            onChanged: (bool? newValue) {
-                                              setState(() {
-                                                dashBoardData[0].agitator[index].selected = newValue!;
-                                              });
-                                            },
-                                          ),
+                                          Text(agt.name),
+                                          const SizedBox(width: 8,),
+                                          Image.asset('assets/images/agitator.png',width: 20, height: 20,)
                                         ],
-                                      );
-                                    },
-                                  ),
+                                      ),
+                                      selected: agt.selected,
+                                      onSelected: (bool selected) {
+                                        setState(() {
+                                          agt.selected = !agt.selected; // Toggle chip selection
+                                        });
+                                      },
+                                      selectedColor: Colors.teal,
+                                      backgroundColor: Colors.grey.shade300,
+                                      labelStyle: TextStyle(
+                                        color: agt.selected ? Colors.white : Colors.black,
+                                      ),
+                                    );
+                                  }).toList(),
                                 ),
                               ],
                             ),
@@ -1141,28 +1089,32 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                                   padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
                                   child: Text('Fan'),
                                 ),
-                                SizedBox(
-                                  height: dashBoardData[0].fan.length  * 65,
-                                  child: ListView.builder(
-                                    itemCount: dashBoardData[0].fan.length,
-                                    itemBuilder: (context, index) {
-                                      return Column(
+                                Wrap(
+                                  spacing: 8.0,
+                                  runSpacing: 8.0,
+                                  children: dashBoardData[0].fan.map((fan) {
+                                    return ChoiceChip(
+                                      label: Row(
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          CheckboxListTile(
-                                            title: Text(dashBoardData[0].fan[index].name),
-                                            subtitle: Text('Location : ${dashBoardData[0].fan[index].location}',style: const TextStyle(fontWeight: FontWeight.normal),),
-                                            secondary: Image.asset('assets/images/fan.png'),
-                                            value: dashBoardData[0].fan[index].selected,
-                                            onChanged: (bool? newValue) {
-                                              setState(() {
-                                                dashBoardData[0].fan[index].selected = newValue!;
-                                              });
-                                            },
-                                          ),
+                                          Text(fan.name),
+                                          const SizedBox(width: 8,),
+                                          Image.asset('assets/images/fan.png',width: 20, height: 20,)
                                         ],
-                                      );
-                                    },
-                                  ),
+                                      ),
+                                      selected: fan.selected,
+                                      onSelected: (bool selected) {
+                                        setState(() {
+                                          fan.selected = !fan.selected; // Toggle chip selection
+                                        });
+                                      },
+                                      selectedColor: Colors.teal,
+                                      backgroundColor: Colors.grey.shade300,
+                                      labelStyle: TextStyle(
+                                        color: fan.selected ? Colors.white : Colors.black,
+                                      ),
+                                    );
+                                  }).toList(),
                                 ),
                               ],
                             ),
@@ -1178,28 +1130,32 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                                   padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
                                   child: Text('Fogger'),
                                 ),
-                                SizedBox(
-                                  height: dashBoardData[0].fogger.length  * 65,
-                                  child: ListView.builder(
-                                    itemCount: dashBoardData[0].fogger.length,
-                                    itemBuilder: (context, index) {
-                                      return Column(
+                                Wrap(
+                                  spacing: 8.0,
+                                  runSpacing: 8.0,
+                                  children: dashBoardData[0].fogger.map((fogger) {
+                                    return ChoiceChip(
+                                      label: Row(
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          CheckboxListTile(
-                                            title: Text(dashBoardData[0].fogger[index].name),
-                                            subtitle: Text('Location : ${dashBoardData[0].fogger[index].location}',style: const TextStyle(fontWeight: FontWeight.normal),),
-                                            secondary: Image.asset('assets/images/fogger.png'),
-                                            value: dashBoardData[0].fogger[index].selected,
-                                            onChanged: (bool? newValue) {
-                                              setState(() {
-                                                dashBoardData[0].fogger[index].selected = newValue!;
-                                              });
-                                            },
-                                          ),
+                                          Text(fogger.name),
+                                          const SizedBox(width: 8,),
+                                          Image.asset('assets/images/fogger.png',width: 20, height: 20,)
                                         ],
-                                      );
-                                    },
-                                  ),
+                                      ),
+                                      selected: fogger.selected,
+                                      onSelected: (bool selected) {
+                                        setState(() {
+                                          fogger.selected = !fogger.selected; // Toggle chip selection
+                                        });
+                                      },
+                                      selectedColor: Colors.teal,
+                                      backgroundColor: Colors.grey.shade300,
+                                      labelStyle: TextStyle(
+                                        color: fogger.selected ? Colors.white : Colors.black,
+                                      ),
+                                    );
+                                  }).toList(),
                                 ),
                               ],
                             ),
@@ -1215,28 +1171,32 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                                   padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
                                   child: Text('Booster Pump'),
                                 ),
-                                SizedBox(
-                                  height: dashBoardData[0].boosterPump.length  * 65,
-                                  child: ListView.builder(
-                                    itemCount: dashBoardData[0].boosterPump.length,
-                                    itemBuilder: (context, index) {
-                                      return Column(
+                                Wrap(
+                                  spacing: 8.0,
+                                  runSpacing: 8.0,
+                                  children: dashBoardData[0].boosterPump.map((bp) {
+                                    return ChoiceChip(
+                                      label: Row(
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          CheckboxListTile(
-                                            title: Text(dashBoardData[0].boosterPump[index].name),
-                                            subtitle: Text('Location : ${dashBoardData[0].boosterPump[index].location}',style: const TextStyle(fontWeight: FontWeight.normal),),
-                                            secondary: Image.asset('assets/images/booster_pump.png'),
-                                            value: dashBoardData[0].boosterPump[index].selected,
-                                            onChanged: (bool? newValue) {
-                                              setState(() {
-                                                dashBoardData[0].boosterPump[index].selected = newValue!;
-                                              });
-                                            },
-                                          ),
+                                          Text(bp.name),
+                                          const SizedBox(width: 8,),
+                                          Image.asset('assets/images/booster_pump.png',width: 20, height: 20,)
                                         ],
-                                      );
-                                    },
-                                  ),
+                                      ),
+                                      selected: bp.selected,
+                                      onSelected: (bool selected) {
+                                        setState(() {
+                                          bp.selected = !bp.selected; // Toggle chip selection
+                                        });
+                                      },
+                                      selectedColor: Colors.teal,
+                                      backgroundColor: Colors.grey.shade300,
+                                      labelStyle: TextStyle(
+                                        color: bp.selected ? Colors.white : Colors.black,
+                                      ),
+                                    );
+                                  }).toList(),
                                 ),
                               ],
                             ),
@@ -1252,28 +1212,32 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                                   padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
                                   child: Text('Selector'),
                                 ),
-                                SizedBox(
-                                  height: dashBoardData[0].selector.length  * 65,
-                                  child: ListView.builder(
-                                    itemCount: dashBoardData[0].selector.length,
-                                    itemBuilder: (context, index) {
-                                      return Column(
+                                Wrap(
+                                  spacing: 8.0,
+                                  runSpacing: 8.0,
+                                  children: dashBoardData[0].selector.map((selector) {
+                                    return ChoiceChip(
+                                      label: Row(
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          CheckboxListTile(
-                                            title: Text(dashBoardData[0].selector[index].name),
-                                            subtitle: Text('Location : ${dashBoardData[0].selector[index].location}',style: const TextStyle(fontWeight: FontWeight.normal),),
-                                            secondary: Image.asset('assets/images/selector.png'),
-                                            value: dashBoardData[0].selector[index].selected,
-                                            onChanged: (bool? newValue) {
-                                              setState(() {
-                                                dashBoardData[0].selector[index].selected = newValue!;
-                                              });
-                                            },
-                                          ),
+                                          Text(selector.name),
+                                          const SizedBox(width: 8,),
+                                          Image.asset('assets/images/booster_pump.png',width: 20, height: 20,)
                                         ],
-                                      );
-                                    },
-                                  ),
+                                      ),
+                                      selected: selector.selected,
+                                      onSelected: (bool selected) {
+                                        setState(() {
+                                          selector.selected = !selector.selected; // Toggle chip selection
+                                        });
+                                      },
+                                      selectedColor: Colors.teal,
+                                      backgroundColor: Colors.grey.shade300,
+                                      labelStyle: TextStyle(
+                                        color: selector.selected ? Colors.white : Colors.black,
+                                      ),
+                                    );
+                                  }).toList(),
                                 ),
                               ],
                             ),
@@ -1286,9 +1250,288 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(right: 5),
-                    child: DisplayLineOrSequence(lineOrSequence: dashBoardData.isNotEmpty ? dashBoardData[0].lineOrSequence : [], programList: programList, programSelectionCallback: scheduleSectionCallbackMethod, ddCurrentPosition: ddCurrentPosition, duration: dashBoardData[0].time, flow: dashBoardData[0].flow, segmentSelectionCallbackFunction: segmentSelectionCallbackFunction, method: dashBoardData[0].method,),
+                    child: DisplayLineOrSequence(lineOrSequence: dashBoardData.isNotEmpty ? dashBoardData[0].lineOrSequence : [], ddCurrentPosition: ddCurrentPosition,),
                   ),
                 ),
+              ],
+            ),
+          ),
+          ListTile(
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(width: 10),
+                MaterialButton(
+                  color: Colors.green,
+                  textColor: Colors.white,
+                  onPressed:() {
+                    standaloneSelection.clear();
+                    if(ddCurrentPosition==0){
+                      List<String> allRelaySrlNo = [];
+                      String strSldValveOrLineSrlNo = '';
+                      String strSldSourcePumpSrlNo ='',strSldIrrigationPumpSrlNo ='',strSldMainValveSrlNo ='',strSldCtrlFilterSrlNo ='',strSldLocFilterSrlNo =''
+                      ,strSldCrlFetFilterSrlNo ='',strSldLocFetFilterSrlNo ='', strSldAgitatorSrlNo ='', strSldFanSrlNo ='', strSldFoggerSrlNo =''
+                      , strSldBoosterPumpSrlNo ='', strSldSelectorSrlNo ='';
+
+                      if(dashBoardData[0].sourcePump.isNotEmpty){
+                        strSldSourcePumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].sourcePump);
+                      }
+                      if(dashBoardData[0].irrigationPump.isNotEmpty){
+                        strSldIrrigationPumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].irrigationPump);
+                      }
+                      if(dashBoardData[0].mainValve.isNotEmpty){
+                        strSldMainValveSrlNo = getSelectedRelaySrlNo(dashBoardData[0].mainValve);
+                      }
+                      if(dashBoardData[0].centralFilterSite.isNotEmpty){
+                        for(int i=0; i<dashBoardData[0].centralFilterSite.length; i++){
+                          String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[i].filter);
+                          if(concatenatedString.isNotEmpty){
+                            strSldCtrlFilterSrlNo += '${concatenatedString}_';
+                          }
+                        }
+                        if (strSldCtrlFilterSrlNo.isNotEmpty && strSldCtrlFilterSrlNo.endsWith('_')) {
+                          strSldCtrlFilterSrlNo = strSldCtrlFilterSrlNo.replaceRange(strSldCtrlFilterSrlNo.length - 1, strSldCtrlFilterSrlNo.length, '');
+                        }
+                      }
+                      if(dashBoardData[0].localFilterSite.isNotEmpty){
+                        for(int i=0; i<dashBoardData[0].localFilterSite.length; i++){
+                          String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].localFilterSite[i].filter);
+                          if(concatenatedString.isNotEmpty){
+                            strSldLocFilterSrlNo += '${concatenatedString}_';
+                          }
+                        }
+                        if (strSldLocFilterSrlNo.isNotEmpty && strSldLocFilterSrlNo.endsWith('_')) {
+                          strSldLocFilterSrlNo = strSldLocFilterSrlNo.replaceRange(strSldLocFilterSrlNo.length - 1, strSldLocFilterSrlNo.length, '');
+                        }
+                      }
+                      if(dashBoardData[0].centralFertilizerSite.isNotEmpty){
+                        for(int i=0; i<dashBoardData[0].centralFertilizerSite.length; i++){
+                          String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFertilizerSite[i].fertilizer);
+                          if(concatenatedString.isNotEmpty){
+                            strSldCrlFetFilterSrlNo += '${concatenatedString}_';
+                          }
+                        }
+                        if (strSldCrlFetFilterSrlNo.isNotEmpty && strSldCrlFetFilterSrlNo.endsWith('_')) {
+                          strSldCrlFetFilterSrlNo = strSldCrlFetFilterSrlNo.replaceRange(strSldCrlFetFilterSrlNo.length - 1, strSldCrlFetFilterSrlNo.length, '');
+                        }
+                      }
+                      if(dashBoardData[0].localFertilizerSite.isNotEmpty){
+                        for(int i=0; i<dashBoardData[0].localFertilizerSite.length; i++){
+                          String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].localFertilizerSite[i].fertilizer);
+                          if(concatenatedString.isNotEmpty){
+                            strSldLocFetFilterSrlNo += '${concatenatedString}_';
+                          }
+                        }
+                        if (strSldLocFetFilterSrlNo.isNotEmpty && strSldLocFetFilterSrlNo.endsWith('_')) {
+                          strSldLocFetFilterSrlNo = strSldLocFetFilterSrlNo.replaceRange(strSldLocFetFilterSrlNo.length - 1, strSldLocFetFilterSrlNo.length, '');
+                        }
+                      }
+                      if(dashBoardData[0].agitator.isNotEmpty){
+                        strSldAgitatorSrlNo = getSelectedRelaySrlNo(dashBoardData[0].agitator);
+                      }
+                      if(dashBoardData[0].fan.isNotEmpty){
+                        strSldFanSrlNo = getSelectedRelaySrlNo(dashBoardData[0].fan);
+                      }
+                      if(dashBoardData[0].fogger.isNotEmpty){
+                        strSldFoggerSrlNo = getSelectedRelaySrlNo(dashBoardData[0].fogger);
+                      }
+                      if(dashBoardData[0].boosterPump.isNotEmpty){
+                        strSldBoosterPumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].boosterPump);
+                      }
+                      if(dashBoardData[0].selector.isNotEmpty){
+                        strSldSelectorSrlNo = getSelectedRelaySrlNo(dashBoardData[0].selector);
+                      }
+
+                      Map<String, List<DashBoardValve>> groupedValves = {};
+                      for (var line in dashBoardData[0].lineOrSequence) {
+                        groupedValves = groupValvesByLocation(line.valves);
+                        groupedValves.forEach((location, valves) {
+                          for (int j = 0; j < valves.length; j++) {
+                            if (valves[j].isOn) {
+                              strSldValveOrLineSrlNo += '${valves[j].sNo}_';
+                              standaloneSelection.add({
+                                'id': valves[j].id,
+                                'sNo': valves[j].sNo,
+                                'name': valves[j].name,
+                                'location': valves[j].location,
+                                'selected': valves[j].isOn,
+                              });
+                            }
+                          }
+                        });
+                      }
+
+                      strSldValveOrLineSrlNo = strSldValveOrLineSrlNo.isNotEmpty ? strSldValveOrLineSrlNo.substring(0, strSldValveOrLineSrlNo.length - 1) : '';
+                      allRelaySrlNo = [
+                        strSldSourcePumpSrlNo,
+                        strSldIrrigationPumpSrlNo,
+                        strSldMainValveSrlNo,
+                        strSldCtrlFilterSrlNo,
+                        strSldValveOrLineSrlNo,
+                        strSldLocFilterSrlNo,
+                        strSldCrlFetFilterSrlNo,
+                        strSldLocFetFilterSrlNo,
+                        strSldAgitatorSrlNo,
+                        strSldFanSrlNo,
+                        strSldFoggerSrlNo,
+                        strSldBoosterPumpSrlNo,
+                        strSldSelectorSrlNo,
+                      ];
+
+                      if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
+                        showDialog<String>(
+                            context: context,
+                            builder: (BuildContext dgContext) => AlertDialog(
+                              title: const Text('StandAlone'),
+                              content: const Text('Valve is not open! Are you sure! You want to Start the Selected Pump?'),
+                              actions: <Widget>[
+                                TextButton(
+                                  onPressed: () => Navigator.pop(dgContext, 'Cancel'),
+                                  child: const Text('No'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    startByStandaloneDefault(allRelaySrlNo);
+                                    Navigator.pop(dgContext, 'OK');
+                                  },
+                                  child: const Text('Yes'),
+                                ),
+                              ],
+                            )
+                        );
+                      }else{
+                        startByStandaloneDefault(allRelaySrlNo);
+                      }
+
+                    }
+                    else{
+                      Map<String, List<DashBoardValve>> groupedValves = {};
+                      String strSldSqnNo = '';
+                      //String strSldSqnLocation = '';
+
+                      String strSldIrrigationPumpId = '';
+                      if(dashBoardData[0].irrigationPump.isNotEmpty){
+                        strSldIrrigationPumpId = getSelectedRelayId(dashBoardData[0].irrigationPump);
+                      }
+
+                      String strSldMainValveId = '';
+                      if(dashBoardData[0].mainValve.isNotEmpty){
+                        strSldMainValveId = getSelectedRelayId(dashBoardData[0].mainValve);
+                      }
+
+                      String strSldCtrlFilterId = '';
+                      String sldCtrlFilterRelayOnOffStatus = '';
+                      if(dashBoardData[0].centralFilterSite.isNotEmpty){
+                        for(int i=0; i<dashBoardData[0].centralFilterSite.length; i++){
+                          String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[i].filter);
+                          if(concatenatedString.isNotEmpty){
+                            strSldCtrlFilterId += '${dashBoardData[0].centralFilterSite[i].id};';
+                            sldCtrlFilterRelayOnOffStatus += '${getRelayOnOffStatus(dashBoardData[0].centralFilterSite[i].filter)};';
+                          }
+                        }
+                        if (strSldCtrlFilterId.isNotEmpty && strSldCtrlFilterId.endsWith(';')) {
+                          strSldCtrlFilterId = strSldCtrlFilterId.replaceRange(strSldCtrlFilterId.length - 1, strSldCtrlFilterId.length, '');
+                        }
+                        if (sldCtrlFilterRelayOnOffStatus.isNotEmpty && sldCtrlFilterRelayOnOffStatus.endsWith(';')) {
+                          sldCtrlFilterRelayOnOffStatus = sldCtrlFilterRelayOnOffStatus.replaceRange(sldCtrlFilterRelayOnOffStatus.length - 1, sldCtrlFilterRelayOnOffStatus.length, '');
+                        }
+                      }
+
+                      String strSldLocFilterId = '';
+                      String sldLocFilterRelayOnOffStatus = '';
+                      if(dashBoardData[0].localFilterSite.isNotEmpty){
+                        for(int i=0; i<dashBoardData[0].localFilterSite.length; i++){
+                          String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].localFilterSite[i].filter);
+                          if(concatenatedString.isNotEmpty){
+                            strSldLocFilterId += '${dashBoardData[0].localFilterSite[i].id};';
+                            sldLocFilterRelayOnOffStatus += '${getRelayOnOffStatus(dashBoardData[0].localFilterSite[i].filter)};';
+                          }
+                        }
+                        if (strSldLocFilterId.isNotEmpty && strSldLocFilterId.endsWith(';')) {
+                          strSldLocFilterId = strSldLocFilterId.replaceRange(strSldLocFilterId.length - 1, strSldLocFilterId.length, '');
+                        }
+                        if (sldLocFilterRelayOnOffStatus.isNotEmpty && sldLocFilterRelayOnOffStatus.endsWith(';')) {
+                          sldLocFilterRelayOnOffStatus = sldLocFilterRelayOnOffStatus.replaceRange(sldLocFilterRelayOnOffStatus.length - 1, sldLocFilterRelayOnOffStatus.length, '');
+                        }
+                      }
+
+                      String  strSldFanId = '';
+                      if(dashBoardData[0].fan.isNotEmpty){
+                        strSldFanId = getSelectedRelayId(dashBoardData[0].fan);
+                      }
+
+                      String  strSldFgrId = '';
+                      if(dashBoardData[0].fogger.isNotEmpty){
+                        strSldFgrId = getSelectedRelayId(dashBoardData[0].fogger);
+                      }
+
+                      for (var lineOrSq in dashBoardData[0].lineOrSequence) {
+                        if(lineOrSq.selected){
+                          strSldSqnNo = lineOrSq.sNo;
+                          standaloneSelection.add({
+                            'id': lineOrSq.id,
+                            'sNo': lineOrSq.sNo,
+                            'name': lineOrSq.name,
+                            'location': lineOrSq.location,
+                            'selected': lineOrSq.selected,
+                          });
+                          break;
+                        }
+                      }
+
+                      if (strSldSqnNo.isEmpty) {
+                        displayAlert(context, 'You must select an zone.');
+                      }else if (strSldIrrigationPumpId.isEmpty) {
+                        displayAlert(context, 'You must select an irrigation pump.');
+                      }else{
+                        sendCommandToControllerAndMqttProgram(dashBoardData[0].headUnits,strSldSqnNo,strSldIrrigationPumpId,strSldMainValveId,strSldCtrlFilterId,
+                            sldCtrlFilterRelayOnOffStatus,strSldLocFilterId,sldLocFilterRelayOnOffStatus,strSldFanId,strSldFgrId);
+                      }
+                    }
+                  },
+                  child: const Text('Start'),
+                ),
+                const SizedBox(width: 10),
+                MaterialButton(
+                  color: Colors.redAccent,
+                  textColor: Colors.white,
+                  onPressed:() async {
+                    if(ddCurrentPosition==0){
+                      String payload = '0,0,0,0';
+                      String payLoadFinal = jsonEncode({
+                        "800": [{"801": payload}]
+                      });
+                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
+                      sentManualModeToServer(programList[ddCurrentPosition].serialNumber, 0, standAloneMethod, '00:00:00', '0', [], payLoadFinal);
+                    }
+                    else{
+                      for (var lineOrSq in dashBoardData[0].lineOrSequence) {
+                        if(lineOrSq.selected){
+                          standaloneSelection.add({
+                            'id': lineOrSq.id,
+                            'sNo': lineOrSq.sNo,
+                            'name': lineOrSq.name,
+                            'location': lineOrSq.location,
+                            'selected': lineOrSq.selected,
+                          });
+                          break;
+                        }
+                      }
+
+                      String payLoadFinal = jsonEncode({
+                        "3900": [{"3901": '0,${programList[ddCurrentPosition].programCategory},${programList[ddCurrentPosition].serialNumber},'
+                            '${standaloneSelection.isNotEmpty?standaloneSelection[0]['sNo']:''},,,,,,,,,0,'}]
+                      });
+                      standaloneSelection.clear();
+
+                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
+                      sentManualModeToServer(programList[ddCurrentPosition].serialNumber, 0, standAloneMethod, '00:00:00', '0', [], payLoadFinal);
+
+                    }
+                  },
+                  child: const Text('Stop'),
+                ),
+                const SizedBox(width: 15),
               ],
             ),
           ),
@@ -2073,7 +2316,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                     ],
                   ),
                 ),
-                DisplayLineOrSequence(lineOrSequence: dashBoardData.isNotEmpty ? dashBoardData[0].lineOrSequence : [], programList: programList, programSelectionCallback: scheduleSectionCallbackMethod, ddCurrentPosition: ddCurrentPosition, duration: dashBoardData[0].time, flow: dashBoardData[0].flow, segmentSelectionCallbackFunction: segmentSelectionCallbackFunction, method: dashBoardData[0].method,),
+                DisplayLineOrSequence(lineOrSequence: dashBoardData.isNotEmpty ? dashBoardData[0].lineOrSequence : [], ddCurrentPosition: ddCurrentPosition,),
               ],
             ),
           ),
@@ -2271,495 +2514,6 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
     return result.isNotEmpty ? result.substring(0, result.length - 1) : '';
   }
 
-
-}
-
-class DisplayLineOrSequence extends StatefulWidget {
-  const DisplayLineOrSequence({super.key, required this.lineOrSequence, required this.programList, required this.programSelectionCallback, required this.ddCurrentPosition, required this.duration, required this.flow, required this.segmentSelectionCallbackFunction, required this.method});
-  final List<LineOrSequence> lineOrSequence;
-  final List<ProgramList> programList;
-  final int ddCurrentPosition, method;
-  final String duration, flow;
-  final void Function(int, int) programSelectionCallback;
-  final void Function(int, String, String) segmentSelectionCallbackFunction;
-
-  @override
-  State<DisplayLineOrSequence> createState() => _DisplayLineOrSequenceState();
-}
-
-class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
-
-  SegmentWithFlow _segmentWithFlow = SegmentWithFlow.manual;
-  String durationValue = '00:00:00';
-  String selectedIrLine = '0';
-
-  final TextEditingController _hoursController = TextEditingController();
-  final TextEditingController _minutesController = TextEditingController();
-  final TextEditingController _secondsController = TextEditingController();
-
-  final TextEditingController _flowLiter = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    if(widget.method == 3){
-      _segmentWithFlow = SegmentWithFlow.manual;
-    }else if(widget.method == 1){
-      _segmentWithFlow = SegmentWithFlow.duration;
-    }else{
-      _segmentWithFlow = SegmentWithFlow.flow;
-    }
-
-    int count = widget.duration.split(':').length - 1;
-    if(count>1){
-      durationValue = widget.duration;
-    }else{
-      durationValue = '${widget.duration}:00';
-    }
-
-    _flowLiter.text = widget.flow;
-
-  }
-
-  @override
-  Widget build(BuildContext context)
-  {
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 8),
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width,
-            height: screenWidth>600? 50: 90,
-            child: screenWidth>600? Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: widget.ddCurrentPosition!=0? SegmentedButton<SegmentWithFlow>(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStatePropertyAll(myTheme.primaryColor.withOpacity(0.05)),
-                      iconColor: MaterialStateProperty.all(myTheme.primaryColor),
-                    ),
-                    segments: const <ButtonSegment<SegmentWithFlow>>[
-                      ButtonSegment<SegmentWithFlow>(
-                          value: SegmentWithFlow.manual,
-                          label: Text('Timeless'),
-                          icon: Icon(Icons.pan_tool_alt_outlined)),
-                      ButtonSegment<SegmentWithFlow>(
-                          value: SegmentWithFlow.duration,
-                          label: Text('Duration'),
-                          icon: Icon(Icons.timer_outlined)),
-                      ButtonSegment<SegmentWithFlow>(
-                          value: SegmentWithFlow.flow,
-                          label: Text('Flow-Liters'),
-                          icon: Icon(Icons.water_drop_outlined)),
-                    ],
-                    selected: <SegmentWithFlow>{_segmentWithFlow},
-                    onSelectionChanged: (Set<SegmentWithFlow> newSelection) {
-                      setState(() {
-                        _segmentWithFlow = newSelection.first;
-                        widget.segmentSelectionCallbackFunction(_segmentWithFlow.index, durationValue, selectedIrLine);
-                      });
-                    },
-                  ) :
-                  SegmentedButton<SegmentWithFlow>(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStatePropertyAll(myTheme.primaryColor.withOpacity(0.05)),
-                      iconColor: MaterialStateProperty.all(myTheme.primaryColor),
-                    ),
-                    segments: const <ButtonSegment<SegmentWithFlow>>[
-                      ButtonSegment<SegmentWithFlow>(
-                          value: SegmentWithFlow.manual,
-                          label: Text('Timeless'),
-                          icon: Icon(Icons.pan_tool_alt_outlined)),
-                      ButtonSegment<SegmentWithFlow>(
-                          value: SegmentWithFlow.duration,
-                          label: Text('Duration'),
-                          icon: Icon(Icons.timer_outlined)),
-                    ],
-                    selected: <SegmentWithFlow>{_segmentWithFlow},
-                    onSelectionChanged: (Set<SegmentWithFlow> newSelection) {
-                      setState(() {
-                        _segmentWithFlow = newSelection.first;
-                        widget.segmentSelectionCallbackFunction(_segmentWithFlow.index, durationValue, selectedIrLine);
-                      });
-                    },
-                  ),
-                ),
-                widget.programList.length>1 ? const SizedBox(
-                  width: 110,
-                  height: 50,
-                  child: Center(child: Text('Schedule By')),
-                ):
-                Container(),
-                widget.programList.length>1 ? SizedBox(
-                  width: 220,
-                  height: 50,
-                  child: DropdownButtonFormField(
-                    value: widget.programList.isNotEmpty ? widget.programList[widget.ddCurrentPosition] : null,
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-                    ),
-                    focusColor: Colors.transparent,
-                    items: widget.programList.map((item) {
-                      return DropdownMenuItem(
-                        value: item,
-                        child: Text(item.programName),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      widget.programSelectionCallback(value!.serialNumber, widget.programList.indexOf(value),);
-                    },
-                  ),
-                ):
-                Container(),
-              ],
-            ):
-            Column(
-              children: [
-                const SizedBox(height: 5,),
-                SizedBox(
-                  width: screenWidth,
-                  height: 35,
-                  child: widget.ddCurrentPosition!=0? SegmentedButton<SegmentWithFlow>(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStatePropertyAll(myTheme.primaryColor.withOpacity(0.05)),
-                      iconColor: MaterialStateProperty.all(myTheme.primaryColor),
-                    ),
-                    segments: const <ButtonSegment<SegmentWithFlow>>[
-                      ButtonSegment<SegmentWithFlow>(
-                          value: SegmentWithFlow.manual,
-                          label: Text('Timeless'),
-                          icon: Icon(Icons.pan_tool_alt_outlined)),
-                      ButtonSegment<SegmentWithFlow>(
-                          value: SegmentWithFlow.duration,
-                          label: Text('Duration'),
-                          icon: Icon(Icons.timer_outlined)),
-                      ButtonSegment<SegmentWithFlow>(
-                          value: SegmentWithFlow.flow,
-                          label: Text('Flow-Liters'),
-                          icon: Icon(Icons.water_drop_outlined)),
-                    ],
-                    selected: <SegmentWithFlow>{_segmentWithFlow},
-                    onSelectionChanged: (Set<SegmentWithFlow> newSelection) {
-                      setState(() {
-                        _segmentWithFlow = newSelection.first;
-                        widget.segmentSelectionCallbackFunction(_segmentWithFlow.index, durationValue, selectedIrLine);
-                      });
-                    },
-                  ) :
-                  SegmentedButton<SegmentWithFlow>(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStatePropertyAll(myTheme.primaryColor.withOpacity(0.05)),
-                      iconColor: MaterialStateProperty.all(myTheme.primaryColor),
-                    ),
-                    segments: const <ButtonSegment<SegmentWithFlow>>[
-                      ButtonSegment<SegmentWithFlow>(
-                          value: SegmentWithFlow.manual,
-                          label: Text('Timeless'),
-                          icon: Icon(Icons.pan_tool_alt_outlined)),
-                      ButtonSegment<SegmentWithFlow>(
-                          value: SegmentWithFlow.duration,
-                          label: Text('Duration'),
-                          icon: Icon(Icons.timer_outlined)),
-                    ],
-                    selected: <SegmentWithFlow>{_segmentWithFlow},
-                    onSelectionChanged: (Set<SegmentWithFlow> newSelection) {
-                      setState(() {
-                        _segmentWithFlow = newSelection.first;
-                        widget.segmentSelectionCallbackFunction(_segmentWithFlow.index, durationValue, selectedIrLine);
-                      });
-                    },
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    widget.programList.length>1 ? const SizedBox(
-                      width: 110,
-                      height: 50,
-                      child: Center(child: Text('Schedule By')),
-                    ):
-                    Container(),
-                    widget.programList.length>1 ? SizedBox(
-                      width: 220,
-                      height: 50,
-                      child: DropdownButtonFormField(
-                        value: widget.programList.isNotEmpty ? widget.programList[widget.ddCurrentPosition] : null,
-                        decoration: const InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-                        ),
-                        focusColor: Colors.transparent,
-                        items: widget.programList.map((item) {
-                          return DropdownMenuItem(
-                            value: item,
-                            child: Text(item.programName),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          widget.programSelectionCallback(value!.serialNumber, widget.programList.indexOf(value),);
-                        },
-                      ),
-                    ):
-                    Container(),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-        _segmentWithFlow.index == 1 ? SizedBox(
-          width: MediaQuery.of(context).size.width,
-          child: ListTile(
-            title: const Text('Set Duration(HH:MM:SS)'),
-            trailing: SizedBox(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      _showDurationInputDialog(context);
-                    },
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(myTheme.primaryColor.withOpacity(0.2)),
-                      shape: MaterialStateProperty.all<OutlinedBorder>(
-                        RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
-                      ),
-                    ),
-                    child: Text(durationValue, style: const TextStyle(color: Colors.black, fontSize: 17)),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ) :
-        Container(),
-        _segmentWithFlow.index == 2 ? SizedBox(
-          width: MediaQuery.of(context).size.width,
-          child: ListTile(
-            title: const Text('Set Flow(Liters)'),
-            trailing: SizedBox(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  SizedBox(
-                      width: 100,
-                      child: TextField(
-                        maxLength: 7,
-                        controller: _flowLiter,
-                        onChanged: (value) {
-                          setState(() {
-                            widget.segmentSelectionCallbackFunction(_segmentWithFlow.index, value, selectedIrLine);
-                          });
-                        },
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                        ],
-                        decoration: const InputDecoration(
-                          labelText: 'Liters',
-                          counterText: '',
-                        ),
-                      ),
-                  )
-                ],
-              ),
-            ),
-          ),
-        ):
-        Container(),
-        Expanded(
-          child: ListView.builder(
-            itemCount: widget.lineOrSequence.length,
-            itemBuilder: (context, index) {
-              LineOrSequence line = widget.lineOrSequence[index];
-              Map<String, List<DashBoardValve>> groupedValves = groupValvesByLocation(line.valves);
-              return Padding(
-                padding: const EdgeInsets.only(left: 5, bottom: 5),
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0), // Adjust the value as needed
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: screenWidth>600? MediaQuery.of(context).size.width-400: MediaQuery.of(context).size.width,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: myTheme.primaryColor.withOpacity(0.1),
-                          borderRadius: const BorderRadius.only(topRight: Radius.circular(5), topLeft: Radius.circular(5)),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 10, top: 10),
-                                child: Text(line.name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.normal)),
-                              ),
-                            ),
-
-                            if (widget.ddCurrentPosition!=0)
-                              VerticalDivider(color: myTheme.primaryColor.withOpacity(0.1)),
-
-                            if(widget.ddCurrentPosition!=0)
-                              Center(
-                                child: SizedBox(
-                                  width: 60,
-                                  child: Transform.scale(
-                                    scale: 0.7,
-                                    child: Switch(
-                                      value: line.selected,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          for (var line in widget.lineOrSequence) {
-                                            line.selected = false;
-                                          }
-                                          line.selected = value;
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              )
-                          ],
-                        ),
-                      ),
-                      for (var valveLocation in groupedValves.keys)
-                        SizedBox(
-                          height: (groupedValves[valveLocation]!.length * 40)+40,
-                          width: screenWidth>600?MediaQuery.sizeOf(context).width-380:MediaQuery.sizeOf(context).width,
-                          child: widget.ddCurrentPosition==0? DataTable2(
-                            columnSpacing: 12,
-                            horizontalMargin: 12,
-                            minWidth: 600,
-                            dataRowHeight: 40.0,
-                            headingRowHeight: 35,
-                            headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
-                            columns: const [
-                              DataColumn2(
-                                  label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
-                                  fixedWidth: 30
-                              ),
-                              DataColumn2(
-                                  label: Center(child: Text('S.No', style: TextStyle(fontSize: 14),)),
-                                  fixedWidth: 50
-                              ),
-                              DataColumn2(
-                                  label: Center(child: Text('Rf.No', style: TextStyle(fontSize: 14),)),
-                                  size: ColumnSize.M
-                              ),
-                              DataColumn2(
-                                  label: Center(child: Text('Valve Id', style: TextStyle(fontSize: 14),)),
-                                  size: ColumnSize.M
-                              ),
-                              DataColumn2(
-                                  label: Center(
-                                    child: Text(
-                                      'Name',
-                                      style: TextStyle(fontSize: 14),
-                                      textAlign: TextAlign.right,
-                                    ),
-                                  ),
-                                  size: ColumnSize.M
-                              ),
-                              DataColumn2(
-                                label: Center(
-                                  child: Text(
-                                    'Valve Status',
-                                    style: TextStyle(fontSize: 14),
-                                    textAlign: TextAlign.right,
-                                  ),
-                                ),
-                                fixedWidth: 100,
-                              ),
-                            ],
-                            rows: List<DataRow>.generate(groupedValves[valveLocation]!.length, (index) => DataRow(cells: [
-                              DataCell(Center(child: Image.asset('assets/images/valve_gray.png',width: 25, height: 25,))),
-                              DataCell(Center(child: Text('${index + 1}', style: const TextStyle(fontWeight: FontWeight.normal)))),
-                              DataCell(Center(child: Text('${groupedValves[valveLocation]![index].sNo}', style: const TextStyle(fontWeight: FontWeight.normal)))),
-                              DataCell(Center(child: Text(groupedValves[valveLocation]![index].id, style: const TextStyle(fontWeight: FontWeight.normal)))),
-                              DataCell(Center(child: Text(groupedValves[valveLocation]![index].name, style: const TextStyle(fontWeight: FontWeight.normal)))),
-                              DataCell(Center(child: Transform.scale(
-                                scale: 0.7,
-                                child: Tooltip(
-                                  message: groupedValves[valveLocation]![index].isOn? 'Close' : 'Open',
-                                  child: Switch(
-                                    hoverColor: Colors.pink.shade100,
-                                    value: groupedValves[valveLocation]![index].isOn,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        groupedValves[valveLocation]![index].isOn = value;
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ))),
-                            ])),
-                          ) :
-                          DataTable2(
-                            columnSpacing: 12,
-                            horizontalMargin: 12,
-                            minWidth: 600,
-                            dataRowHeight: 40.0,
-                            headingRowHeight: 35,
-                            headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
-                            columns: const [
-                              DataColumn2(
-                                  label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
-                                  fixedWidth: 30
-                              ),
-                              DataColumn2(
-                                  label: Center(child: Text('S.No', style: TextStyle(fontSize: 14),)),
-                                  fixedWidth: 50
-                              ),
-                              DataColumn2(
-                                  label: Center(child: Text('Rf.No', style: TextStyle(fontSize: 14),)),
-                                  size: ColumnSize.M
-                              ),
-                              DataColumn2(
-                                  label: Center(child: Text('Valve Id', style: TextStyle(fontSize: 14),)),
-                                  size: ColumnSize.M
-                              ),
-                              DataColumn2(
-                                label: Center(child: Text('Location', style: TextStyle(fontSize: 14),)),
-                                fixedWidth: 100,
-                              ),
-                              DataColumn2(
-                                  label: Center(
-                                    child: Text(
-                                      'Name',
-                                      style: TextStyle(fontSize: 14),
-                                      textAlign: TextAlign.right,
-                                    ),
-                                  ),
-                                  size: ColumnSize.M
-                              ),
-                            ],
-                            rows: List<DataRow>.generate(groupedValves[valveLocation]!.length, (index) => DataRow(cells: [
-                              DataCell(Center(child: Image.asset('assets/images/valve_gray.png',width: 25, height: 25,))),
-                              DataCell(Center(child: Text('${index + 1}', style: const TextStyle(fontWeight: FontWeight.normal)))),
-                              DataCell(Center(child: Text('${groupedValves[valveLocation]![index].sNo}', style: const TextStyle(fontWeight: FontWeight.normal)))),
-                              DataCell(Center(child: Text(groupedValves[valveLocation]![index].id, style: TextStyle(fontWeight: FontWeight.normal)))),
-                              DataCell(Center(child: Text(groupedValves[valveLocation]![index].location, style: TextStyle(fontWeight: FontWeight.normal)))),
-                              DataCell(Center(child: Text(groupedValves[valveLocation]![index].name, style: TextStyle(fontWeight: FontWeight.normal)))),
-                            ])),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
   void _showDurationInputDialog(BuildContext context) {
 
     List<String> timeParts = durationValue.split(':');
@@ -2833,7 +2587,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                   setState(() {
                     durationValue = '${_hoursController.text}:${_minutesController.text}:${_secondsController.text}';
                   });
-                  widget.segmentSelectionCallbackFunction(_segmentWithFlow.index, durationValue , selectedIrLine);
+                  segmentSelectionCallbackFunction(_segmentWithFlow.index, durationValue , selectedIrLine);
                   Navigator.of(context).pop();
                 }
                 else{
@@ -2883,6 +2637,172 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
     }
   }
 
+
+}
+
+class DisplayLineOrSequence extends StatefulWidget {
+  const DisplayLineOrSequence({super.key, required this.lineOrSequence, required this.ddCurrentPosition});
+  final List<LineOrSequence> lineOrSequence;
+  final int ddCurrentPosition;
+
+  @override
+  State<DisplayLineOrSequence> createState() => _DisplayLineOrSequenceState();
+}
+
+class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
+
+
+  @override
+  Widget build(BuildContext context)
+  {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return ListView.builder(
+      itemCount: widget.lineOrSequence.length,
+      itemBuilder: (context, index) {
+        LineOrSequence line = widget.lineOrSequence[index];
+        Map<String, List<DashBoardValve>> groupedValves = groupValvesByLocation(line.valves);
+        return Padding(
+          padding: const EdgeInsets.only(left: 5, bottom: 5),
+          child: Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5.0), // Adjust the value as needed
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: screenWidth>600? MediaQuery.of(context).size.width-400: MediaQuery.of(context).size.width,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: myTheme.primaryColor.withOpacity(0.1),
+                    borderRadius: const BorderRadius.only(topRight: Radius.circular(5), topLeft: Radius.circular(5)),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 10, top: 10),
+                          child: Text(line.name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.normal)),
+                        ),
+                      ),
+
+                      if (widget.ddCurrentPosition!=0)
+                        VerticalDivider(color: myTheme.primaryColor.withOpacity(0.1)),
+
+                      if(widget.ddCurrentPosition!=0)
+                        Center(
+                          child: SizedBox(
+                            width: 60,
+                            child: Transform.scale(
+                              scale: 0.7,
+                              child: Switch(
+                                value: line.selected,
+                                onChanged: (value) {
+                                  setState(() {
+                                    for (var line in widget.lineOrSequence) {
+                                      line.selected = false;
+                                    }
+                                    line.selected = value;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                        )
+                    ],
+                  ),
+                ),
+                for (var valveLocation in groupedValves.keys)
+                  SizedBox(
+                    height: (groupedValves[valveLocation]!.length * 40),
+                    width: screenWidth>600?MediaQuery.sizeOf(context).width-380:MediaQuery.sizeOf(context).width,
+                    child: widget.ddCurrentPosition==0? DataTable2(
+                      columnSpacing: 12,
+                      horizontalMargin: 12,
+                      minWidth: 150,
+                      dataRowHeight: 40.0,
+                      headingRowHeight: 0,
+                      headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
+                      columns: const [
+                        DataColumn2(
+                            label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
+                            fixedWidth: 30
+                        ),
+                        DataColumn2(
+                            label: Text('Name',  style: TextStyle(fontSize: 14),),
+                            size: ColumnSize.M
+                        ),
+                        DataColumn2(
+                          label: Center(
+                            child: Text('Valve Status', textAlign: TextAlign.right,),
+                          ),
+                          fixedWidth: 100,
+                        ),
+                      ],
+                      rows: List<DataRow>.generate(groupedValves[valveLocation]!.length, (index) => DataRow(cells: [
+                        DataCell(Center(child: Image.asset('assets/images/valve_gray.png',width: 25, height: 25,))),
+                        DataCell(Center(child: Text(groupedValves[valveLocation]![index].name, style: const TextStyle(fontWeight: FontWeight.normal)))),
+                        DataCell(Center(child: Transform.scale(
+                          scale: 0.7,
+                          child: Tooltip(
+                            message: groupedValves[valveLocation]![index].isOn? 'Close' : 'Open',
+                            child: Switch(
+                              hoverColor: Colors.pink.shade100,
+                              activeColor: Colors.teal,
+                              value: groupedValves[valveLocation]![index].isOn,
+                              onChanged: (value) {
+                                setState(() {
+                                  groupedValves[valveLocation]![index].isOn = value;
+                                });
+                              },
+                            ),
+                          ),
+                        ))),
+                      ])),
+                    ) :
+                    DataTable2(
+                      columnSpacing: 12,
+                      horizontalMargin: 12,
+                      minWidth: 300,
+                      dataRowHeight: 40.0,
+                      headingRowHeight: 0,
+                      headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
+                      columns: const [
+                        DataColumn2(
+                            label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
+                            fixedWidth: 30
+                        ),
+                        DataColumn2(
+                          label: Center(child: Text('Location', style: TextStyle(fontSize: 14),)),
+                          fixedWidth: 100,
+                        ),
+                        DataColumn2(
+                            label: Center(
+                              child: Text(
+                                'Name',
+                                style: TextStyle(fontSize: 14),
+                                textAlign: TextAlign.right,
+                              ),
+                            ),
+                            size: ColumnSize.M
+                        ),
+                      ],
+                      rows: List<DataRow>.generate(groupedValves[valveLocation]!.length, (index) => DataRow(cells: [
+                        DataCell(Center(child: Image.asset('assets/images/valve_gray.png',width: 25, height: 25,))),
+                        DataCell(Center(child: Text(groupedValves[valveLocation]![index].location, style: TextStyle(fontWeight: FontWeight.normal)))),
+                        DataCell(Center(child: Text(groupedValves[valveLocation]![index].name, style: TextStyle(fontWeight: FontWeight.normal)))),
+                      ])),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   Map<String, List<DashBoardValve>> groupValvesByLocation(List<DashBoardValve> valves) {
     Map<String, List<DashBoardValve>> groupedValves = {};

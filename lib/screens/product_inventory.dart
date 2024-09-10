@@ -74,14 +74,13 @@ class ProductInventoryState extends State<ProductInventory> {
     super.initState();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-        if(currentSet * batchSize <= totalProduct){
+        if(productInventoryList.length <= totalProduct && !isLoading){
           setState(() {
             isLoading = true;
           });
           Future.delayed(const Duration(seconds: 3), () {
-            loadData(currentSet = currentSet+1, batchSize);
+            loadData(getSetNumber(productInventoryList.length), batchSize);
           });
-
         }else{
           //loadMoreData completed
         }
@@ -91,6 +90,11 @@ class ProductInventoryState extends State<ProductInventory> {
     ddCategoryList =  <DropdownMenuEntry<ProductStockModel>>[];
     selectedModel =  <DropdownMenuEntry<PrdModel>>[];
     getUserInfo();
+  }
+
+  int getSetNumber(int length) {
+    int itemsPerSet = 30;
+    return (length ~/ itemsPerSet) + 1;
   }
 
   @override
@@ -106,6 +110,7 @@ class ProductInventoryState extends State<ProductInventory> {
       userID = prefs.getString('userId') ?? "";
       userType = int.parse(prefs.getString('userType') ?? "");
     });
+    productInventoryList.clear();
     loadData(currentSet, batchSize);
     fetchCatModAndImeiData();
     getProductStock();
@@ -114,7 +119,6 @@ class ProductInventoryState extends State<ProductInventory> {
   Future<void> loadData(int set, int limit) async {
     final body = userType == 1 ? {"fromUserId": null, "toUserId": null, "set":set, "limit":limit} :
     {"fromUserId": null, "toUserId": userID, "set":set, "limit":limit};
-    //print(body);
     Response response;
     if(userType == 3){
       response = await HttpService().postRequest("getCustomerProduct", body);
@@ -124,13 +128,11 @@ class ProductInventoryState extends State<ProductInventory> {
 
     if (response.statusCode == 200)
     {
-      if(jsonDecode(response.body)["code"]==200)
-      {
-        setState(()
-        {
+      if(jsonDecode(response.body)["code"]==200){
+        setState((){
           totalProduct = jsonDecode(response.body)["data"]["totalProduct"];
           if(userType != 3){
-            productInventoryList.clear();
+            //productInventoryList.clear();
             List<dynamic> productList = jsonDecode(response.body)["data"]["product"];
             for (int i = 0; i < productList.length; i++) {
               productInventoryList.add(ProductListModel.fromJson(productList[i]));
@@ -424,7 +426,7 @@ class ProductInventoryState extends State<ProductInventory> {
             minWidth: 1200,
             dataRowHeight: 40.0,
             headingRowHeight: 35,
-            headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
+            headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
             columns: const [
               DataColumn2(
                   label: Center(child: Text('S.No')),

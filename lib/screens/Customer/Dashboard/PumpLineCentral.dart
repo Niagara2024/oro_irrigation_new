@@ -320,15 +320,11 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, dynamic>> filteredPumps=[];
-    if(widget.currentLineId=='all'){
-      filteredPumps = widget.spList.toList().cast<Map<String, dynamic>>();
-    }else{
-      filteredPumps = widget.spList
-          .where((pump) => pump['Location'].contains(widget.currentLineId))
-          .toList()
-          .cast<Map<String, dynamic>>();
-    }
+
+    List<Map<String, dynamic>> filteredPumps = widget.spList
+        .where((pump) => widget.currentLineId== 'all' || pump['Location'].contains(widget.currentLineId))
+        .toList()
+        .cast<Map<String, dynamic>>();
 
     return SizedBox(
       width: filteredPumps.length * 70,
@@ -811,15 +807,10 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
   @override
   Widget build(BuildContext context) {
 
-    List<Map<String, dynamic>> filteredPumps = [];
-    if (widget.currentLineId == 'all') {
-      filteredPumps =  widget.ipList.toList().cast<Map<String, dynamic>>();
-    } else {
-      filteredPumps =  widget.ipList
-          .where((pump) => pump['Location'].contains(widget.currentLineId))
-          .toList()
-          .cast<Map<String, dynamic>>();
-    }
+    List<Map<String, dynamic>> filteredPumps = widget.ipList
+        .where((pump) => widget.currentLineId== 'all' || pump['Location'].contains(widget.currentLineId))
+        .toList()
+        .cast<Map<String, dynamic>>();
 
     return SizedBox(
       width: filteredPumps.length * 70,
@@ -1188,8 +1179,8 @@ class DisplaySensor extends StatelessWidget {
                     top: 42,
                     left: 5,
                     child: Container(
-                      width: 57,
-                      height: 15,
+                      width: 60,
+                      height: 17,
                       decoration: BoxDecoration(
                         color:Colors.yellow,
                         borderRadius: const BorderRadius.all(Radius.circular(2)),
@@ -1250,15 +1241,10 @@ class _DisplayFilterState extends State<DisplayFilter> {
   @override
   Widget build(BuildContext context) {
 
-    List<Map<String, dynamic>> filteredCentralFilter=[];
-
-    if(widget.currentLineId=='all'){
-      filteredCentralFilter = widget.filtersSites.cast<Map<String, dynamic>>();
-    }else{
-      filteredCentralFilter = widget.filtersSites.where((filter) =>
-          filter['Location'].contains(widget.currentLineId))
-          .toList().cast<Map<String, dynamic>>();
-    }
+    List<Map<String, dynamic>> filteredCentralFilter = widget.filtersSites
+        .where((pump) => widget.currentLineId== 'all' || pump['Location'].contains(widget.currentLineId))
+        .toList()
+        .cast<Map<String, dynamic>>();
 
     return widget.currentLineId=='all' ?Column(
       children: [
@@ -1671,14 +1657,10 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
   Widget build(BuildContext context) {
     final overallFrtCentral = Provider.of<MqttPayloadProvider>(context).fertilizerCentral;
 
-    List<Map<String, dynamic>> fertilizerCentral =[];
-    if(widget.currentLineId=='all'){
-      fertilizerCentral = Provider.of<MqttPayloadProvider>(context,listen: false).fertilizerCentral.toList().cast<Map<String, dynamic>>();
-    }else{
-      fertilizerCentral = overallFrtCentral
-          .where((cfr) => cfr['Location'].contains(widget.currentLineId)).toList()
-          .cast<Map<String, dynamic>>();
-    }
+    List<Map<String, dynamic>> fertilizerCentral = overallFrtCentral
+        .where((pump) => widget.currentLineId== 'all' || pump['Location'].contains(widget.currentLineId))
+        .toList()
+        .cast<Map<String, dynamic>>();
 
     durationUpdatingFunction();
 
@@ -2279,14 +2261,10 @@ class _LocalFilterState extends State<LocalFilter> {
   @override
   Widget build(BuildContext context) {
 
-    List<Map<String, dynamic>> filteredLocalFilter=[];
-    if(widget.currentLineId=='all'){
-      filteredLocalFilter = widget.filtersSites.cast<Map<String, dynamic>>();
-    }else{
-      filteredLocalFilter = widget.filtersSites.where((filter) =>
-          filter['Location'].contains(widget.currentLineId))
-          .toList().cast<Map<String, dynamic>>();
-    }
+    List<Map<String, dynamic>> filteredLocalFilter = widget.filtersSites
+        .where((pump) => widget.currentLineId== 'all' || pump['Location'].contains(widget.currentLineId))
+        .toList()
+        .cast<Map<String, dynamic>>();
 
     return widget.currentLineId=='all'? Column(
       children: [

@@ -457,11 +457,22 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
         && provider.fertilizerCentral.isEmpty && provider.fertilizerLocal.isEmpty){
 
       int? irrigationPauseFlag = getIrrigationPauseFlag(crrIrrLine.id, Provider.of<MqttPayloadProvider>(context).payload2408);
+
+      List<Map<String, dynamic>> filteredSrcPumps = provider.sourcePump
+          .where((pump) => crrIrrLine.id == 'all' || pump['Location'].contains(crrIrrLine.id))
+          .toList()
+          .cast<Map<String, dynamic>>();
+
+      List<Map<String, dynamic>> filteredIrrPumps = provider.irrigationPump
+          .where((pump) => crrIrrLine.id == 'all' || pump['Location'].contains(crrIrrLine.id))
+          .toList()
+          .cast<Map<String, dynamic>>();
+
       int rdWidth = 0;
       if(irrigationPauseFlag !=2){
-        rdWidth = (provider.irrigationPump.length+provider.sourcePump.length+1)*70+175;
+        rdWidth = ((filteredSrcPumps.length+filteredIrrPumps.length+1)*70)+170;
       }else{
-        rdWidth = (provider.irrigationPump.length+provider.sourcePump.length+1)*70;
+        rdWidth = ((filteredSrcPumps.length+filteredIrrPumps.length+1)*70);
       }
 
       return Padding(
@@ -543,8 +554,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                                     prFlag = 0;
                                   }
                                   String payLoadFinal = jsonEncode({
-                                    "4900": [
-                                      {
+                                    "4900": [{
                                         "4901": "$sNoToCheck, $prFlag",
                                       }
                                     ]

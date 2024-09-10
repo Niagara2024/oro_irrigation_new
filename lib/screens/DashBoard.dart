@@ -26,9 +26,12 @@ class _MainDashBoardState extends State<MainDashBoard> {
   late MQTTManager manager = MQTTManager();
   late MqttServer mqttServer = MqttServer();
 
+  Future<SharedPreferences>? sharedPreferencesFuture;
+
   @override
   void initState() {
     super.initState();
+    sharedPreferencesFuture = SharedPreferences.getInstance();
     Future.delayed(const Duration(milliseconds: 500), () async {
       //html.window.location.reload();
       if (kIsWeb) {
@@ -53,25 +56,19 @@ class _MainDashBoardState extends State<MainDashBoard> {
   }
 
 
-
   @override
   Widget build(BuildContext context)
   {
-    /*final connection = Provider.of<MqttPayloadProvider>(context).mqttConnection;
-    if(!connection){
-      MQTTManager manager = MQTTManager();
-      MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
-      manager.initializeMQTTServer(state: payloadProvider);
-      //manager.connect();
-    }*/
-
-
     return FutureBuilder<SharedPreferences>(
-      future: SharedPreferences.getInstance(),
+      future: sharedPreferencesFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: Text('Loading... Please waite.'));
-        }else{
+          return const Center(child: Text('Loading... Please wait.'));
+        } else {
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
           final sharedPreferences = snapshot.data!;
           final userId = sharedPreferences.getString('userId') ?? '';
           final userName = sharedPreferences.getString('userName') ?? '';
@@ -83,12 +80,23 @@ class _MainDashBoardState extends State<MainDashBoard> {
           return Consumer<ConnectivityService>(
             builder: (context, connectivityService, child) {
               final isConnected = connectivityService.isConnected;
-              return  isConnected ? userId.isNotEmpty? BuildDashboardScreen(userId: int.parse(userId), userType: int.parse(userType), userName: userName, countryCode: countryCode, mobileNo: mobileNo, emailId: emailId,):
-              const LoginForm():
-              const Scaffold(
+              return isConnected? userId.isNotEmpty? BuildDashboardScreen(
+                userId: int.parse(userId),
+                userType: int.parse(userType),
+                userName: userName,
+                countryCode: countryCode,
+                mobileNo: mobileNo,
+                emailId: emailId,
+              )
+                  : const LoginForm()
+                  : const Scaffold(
                 body: Padding(
                   padding: EdgeInsets.all(50.0),
-                  child: Center(child: Image(image: AssetImage('assets/images/no_internet_connection.png'))),
+                  child: Center(
+                    child: Image(
+                        image: AssetImage(
+                            'assets/images/no_internet_connection.png')),
+                  ),
                 ),
               );
             },
@@ -98,18 +106,6 @@ class _MainDashBoardState extends State<MainDashBoard> {
     );
   }
 }
-
-
-/*Consumer<MQTTManager>(
-builder: (context, mqttServer, child) {
-final isConnected = mqttServer.isConnected;
-
-return Text(
-isConnected ? 'Connected to MQTT Broker' : 'Disconnected from MQTT Broker',
-style: const TextStyle(fontSize: 24),
-);
-},
-),*/
 
 
 class BuildDashboardScreen extends StatefulWidget

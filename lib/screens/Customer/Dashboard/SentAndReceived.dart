@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:chat_bubbles/bubbles/bubble_special_one.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_json_viewer/flutter_json_viewer.dart';
 import 'package:intl/intl.dart';
 import 'package:oro_irrigation_new/Models/Customer/Dashboard/SentAndReceivedModel.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -29,6 +31,9 @@ class _SentAndReceivedState extends State<SentAndReceived> {
 
   //weekly calendar
   CalendarFormat _calendarFormat = CalendarFormat.week;
+
+  bool hasPayloadViewPermission = false;
+  TextEditingController passwordController = TextEditingController();
 
 
   @override
@@ -170,10 +175,70 @@ class _SentAndReceivedState extends State<SentAndReceived> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  BubbleSpecialOne(
-                    textStyle: const TextStyle(fontSize: 12),
-                    text: sentAndReceivedList[index].message,
-                    color: Colors.green.shade100,
+                  GestureDetector(
+                    onLongPress: () {
+                      if(!hasPayloadViewPermission){
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Enter Password'),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text('This content is protected.\nPlease enter your password to\nview the payload.',
+                                    style: TextStyle(fontWeight: FontWeight.normal),),
+                                  const SizedBox(height: 8),
+                                  TextField(
+                                    controller: passwordController,
+                                    obscureText: false,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Password',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(); // Close the dialog
+                                  },
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    String enteredPassword = passwordController.text;
+                                    if (enteredPassword == 'oro@321') {
+                                      hasPayloadViewPermission=true;
+                                      Navigator.of(context).pop();
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Access granted. Showing payload...')),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Incorrect password.')),
+                                      );
+                                    }
+                                  },
+                                  child: const Text('Submit'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
+                    },
+                    onTap: (){
+                      if(hasPayloadViewPermission){
+                        getUserSoftwareOrHardwarePayload(sentAndReceivedList[index].sentAndReceivedId);
+                      }
+                    },
+                    child: BubbleSpecialOne(
+                      textStyle: const TextStyle(fontSize: 12),
+                      text: sentAndReceivedList[index].message,
+                      color: Colors.green.shade100,
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(right: 25),
@@ -190,11 +255,71 @@ class _SentAndReceivedState extends State<SentAndReceived> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  BubbleSpecialOne(
-                    text: sentAndReceivedList[index].message,
-                    isSender: false,
-                    color: Colors.blue.shade100,
-                    textStyle: const TextStyle(fontSize: 12),
+                  GestureDetector(
+                    onLongPress: () {
+                      if(!hasPayloadViewPermission){
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Enter Password'),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text('This content is protected.\nPlease enter your password to\nview the payload.',
+                                    style: TextStyle(fontWeight: FontWeight.normal),),
+                                  const SizedBox(height: 8),
+                                  TextField(
+                                    controller: passwordController,
+                                    obscureText: false,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Password',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(); // Close the dialog
+                                  },
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    String enteredPassword = passwordController.text;
+                                    if (enteredPassword == 'oro@321') {
+                                      hasPayloadViewPermission=true;
+                                      Navigator.of(context).pop();
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Access granted. Showing payload...')),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Incorrect password.')),
+                                      );
+                                    }
+                                  },
+                                  child: const Text('Submit'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
+                    },
+                    onTap: (){
+                      if(hasPayloadViewPermission){
+                        getUserSoftwareOrHardwarePayload(sentAndReceivedList[index].sentAndReceivedId);
+                      }
+                    },
+                    child: BubbleSpecialOne(
+                      text: sentAndReceivedList[index].message,
+                      isSender: false,
+                      color: Colors.blue.shade100,
+                      textStyle: const TextStyle(fontSize: 12),
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(left: 25),
@@ -206,8 +331,8 @@ class _SentAndReceivedState extends State<SentAndReceived> {
           }
         },
       ):
-       Center(child: Text('Controller have been no updates or messages on ${DateFormat('dd-MM-yyyy').format(_selectedDay!)}',
-        style: const TextStyle(fontSize: 17,fontWeight: FontWeight.normal),),),
+       const Center(child: Text('Message not found',
+        style: TextStyle(fontSize: 17,fontWeight: FontWeight.normal),),),
     );
   }
 
@@ -237,6 +362,48 @@ class _SentAndReceivedState extends State<SentAndReceived> {
     } catch (e) {
       print('Error: $e');
     }
+  }
+
+  Future<void> getUserSoftwareOrHardwarePayload(int sentAndReceivedId) async {
+    var data = {
+      "userId": widget.customerID,
+      "controllerId": widget.controllerId,
+      "sentAndReceivedId": sentAndReceivedId,
+    };
+
+    try {
+      final getUserSentAndReceivedHardwarePayload = await HttpService().postRequest("getUserSentAndReceivedHardwarePayload", data);
+      final response = jsonDecode(getUserSentAndReceivedHardwarePayload.body);
+      if (getUserSentAndReceivedHardwarePayload.statusCode == 200) {
+        displayJsonData(context, response);
+      } else {
+        log('Failed to load data');
+      }
+    } catch (e, stackTrace) {
+      log("$e");
+      log("stackTrace ==> $stackTrace");
+    }
+  }
+
+  void displayJsonData(BuildContext context, Map<String, dynamic> jsonData) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('JSON Data'),
+          content: SingleChildScrollView(
+            child: JsonViewer(jsonData,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
 }

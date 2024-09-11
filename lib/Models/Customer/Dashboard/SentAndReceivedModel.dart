@@ -7,9 +7,11 @@ class SentAndReceivedModel
     this.message = '',
     this.sentUser = '',
     this.sentMobileNumber = '',
+    this.sentAndReceivedId = 0,
   });
 
   String date, time, messageType, message, sentUser, sentMobileNumber;
+  int sentAndReceivedId;
 
   factory SentAndReceivedModel.fromJson(Map<String, dynamic> json) => SentAndReceivedModel(
     date: json['date'],
@@ -18,6 +20,7 @@ class SentAndReceivedModel
     message: json['message'],
     sentUser: json['sentUser'],
     sentMobileNumber: json['sentMobileNumber'],
+    sentAndReceivedId: json['sentAndReceivedId'],
   );
 
   Map<String, dynamic> toJson() => {
@@ -27,5 +30,6 @@ class SentAndReceivedModel
     'message': message,
     'sentUser': sentUser,
     'sentMobileNumber': sentMobileNumber,
+    'sentAndReceivedId': sentAndReceivedId,
   };
 }

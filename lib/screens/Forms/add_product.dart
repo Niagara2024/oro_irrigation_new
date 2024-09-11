@@ -185,7 +185,7 @@ class _AddProductState extends State<AddProduct> {
               SizedBox(
                 width: 200,
                 child: TextFormField(
-                  maxLength: 15,
+                  maxLength: 12,
                   controller: ctrlIMI,
                   decoration: InputDecoration(
                     counterText: '',

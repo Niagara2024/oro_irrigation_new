@@ -807,27 +807,25 @@ class ProductInventoryState extends State<ProductInventory> {
                         ),
                         const SizedBox(height: 15,),
                         TextFormField(
-                          validator: (value){
-                            if(value==null ||value.isEmpty){
+                          maxLength: 12,
+                          controller: ctrlIMI,
+                          decoration: InputDecoration(
+                            counterText: '',
+                            labelText: 'Device ID',
+                            border: const OutlineInputBorder(),
+                            filled: true,
+                            fillColor: Colors.teal.shade50,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9]')),
+                          ],
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
                               return 'Please fill out this field';
                             }
                             return null;
                           },
-                          maxLength: 20,
-                          decoration: InputDecoration(
-                            counterText: '',
-                            labelText: 'IMEi number',
-                            border: const OutlineInputBorder(),
-                            filled: true,
-                            fillColor: Colors.grey.shade100,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              //valueText = value;
-                            });
-                          },
-                          controller: ctrlIMI,
                         ),
                         const SizedBox(height: 15,),
                         TextFormField(

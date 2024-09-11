@@ -325,20 +325,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                     return alert;
                                   },
                                 );
-
-                                /*showModalBottomSheet(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return Container(
-                                      height: 600,
-                                      color: Colors.white,
-                                      child: Center(
-                                        child: AddProduct(callback: callbackFunction),
-                                      ),
-                                    );
-                                  },
-                                );*/
-                                //Navigator.push(context, MaterialPageRoute(builder: (context) =>  AddProduct(callback: (String ) {},)),);
                               }),
                             ),
                           ),
@@ -359,7 +345,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                     minWidth: 600,
                                     headingRowHeight: 40,
                                     dataRowHeight: 40,
-                                    headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
+                                    headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
                                     columns: const [
                                       DataColumn2(
                                           label: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold),),

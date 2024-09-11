@@ -15,6 +15,7 @@ class MqttPayloadProvider with ChangeNotifier {
   dynamic messageFromHw = '';
   String agmScheduledProgram = '';
 
+  int powerSupply = 0;
   int wifiStrength = 0;
   int batVolt = 0;
   List<dynamic> PrsIn = [];
@@ -74,6 +75,10 @@ class MqttPayloadProvider with ChangeNotifier {
 
           if(data['2400'][0].containsKey('SentTime')) {
             updateLastSync(data['2400'][0]['SentTime']);
+          }
+
+          if(data['2400'][0].containsKey('PowerSupply')) {
+            updatePowerSupply(data['2400'][0]['PowerSupply']);
           }
 
           if(data['2400'][0].containsKey('WifiStrength')) {
@@ -181,6 +186,11 @@ class MqttPayloadProvider with ChangeNotifier {
     if (wifiStrength < 0) {
       wifiStrength = 0;
     }
+    notifyListeners();
+  }
+
+  void updatePowerSupply(int val) {
+    powerSupply = val;
     notifyListeners();
   }
 

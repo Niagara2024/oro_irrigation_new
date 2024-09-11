@@ -155,7 +155,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
         return Column(
           children: [
-            lastCommunication.inMinutes >= 10? lostCommunication():
+            lastCommunication.inMinutes >= 10? lostCommunication():provider.powerSupply == 0? noPowerSupply():
             const SizedBox(),
 
             irrigationPauseFlag !=0? Padding(
@@ -203,6 +203,24 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     else{
       return const Center(child: Text('Site not configure'));
     }
+  }
+
+  Widget noPowerSupply() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 3, right: 3),
+      child: Container(
+        width: MediaQuery.sizeOf(context).width,
+        decoration: BoxDecoration(
+          color: Colors.red.shade400,
+          borderRadius: BorderRadius.circular(03),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: Center(child: Text('No Power Supply to Controller'.toUpperCase(),
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.normal, color: Colors.white70),)),
+        ),
+      ),
+    );
   }
 
   Widget lostCommunication() {

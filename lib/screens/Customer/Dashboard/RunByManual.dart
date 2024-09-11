@@ -236,294 +236,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
     final screenWidth = MediaQuery.of(context).size.width;
     return Container(
       color: Colors.white,
-      width: 700,
-      /*appBar: AppBar(
-        title: Row(
-          children: [
-            Text(screenWidth>600?widget.siteName:''),
-            const Spacer(),
-            const Text('Manual Operation'),
-            const Spacer(),
-          ],
-        ),
-        actions: [
-          IconButton(tooltip: 'Refresh', icon: const Icon(Icons.refresh), onPressed: () async {
-            scheduleSectionCallbackMethod(serialNumber, ddCurrentPosition);
-          }),
-          const SizedBox(width: 10),
-          MaterialButton(
-            color: Colors.green,
-            textColor: Colors.white,
-            onPressed:() {
-              standaloneSelection.clear();
-              if(ddCurrentPosition==0){
-                List<String> allRelaySrlNo = [];
-                String strSldValveOrLineSrlNo = '';
-                String strSldSourcePumpSrlNo ='',strSldIrrigationPumpSrlNo ='',strSldMainValveSrlNo ='',strSldCtrlFilterSrlNo ='',strSldLocFilterSrlNo =''
-                ,strSldCrlFetFilterSrlNo ='',strSldLocFetFilterSrlNo ='', strSldAgitatorSrlNo ='', strSldFanSrlNo ='', strSldFoggerSrlNo =''
-                , strSldBoosterPumpSrlNo ='', strSldSelectorSrlNo ='';
-
-                if(dashBoardData[0].sourcePump.isNotEmpty){
-                  strSldSourcePumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].sourcePump);
-                }
-                if(dashBoardData[0].irrigationPump.isNotEmpty){
-                  strSldIrrigationPumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].irrigationPump);
-                }
-                if(dashBoardData[0].mainValve.isNotEmpty){
-                  strSldMainValveSrlNo = getSelectedRelaySrlNo(dashBoardData[0].mainValve);
-                }
-                if(dashBoardData[0].centralFilterSite.isNotEmpty){
-                  for(int i=0; i<dashBoardData[0].centralFilterSite.length; i++){
-                    String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[i].filter);
-                    if(concatenatedString.isNotEmpty){
-                      strSldCtrlFilterSrlNo += '${concatenatedString}_';
-                    }
-                  }
-                  if (strSldCtrlFilterSrlNo.isNotEmpty && strSldCtrlFilterSrlNo.endsWith('_')) {
-                    strSldCtrlFilterSrlNo = strSldCtrlFilterSrlNo.replaceRange(strSldCtrlFilterSrlNo.length - 1, strSldCtrlFilterSrlNo.length, '');
-                  }
-                }
-                if(dashBoardData[0].localFilterSite.isNotEmpty){
-                  for(int i=0; i<dashBoardData[0].localFilterSite.length; i++){
-                    String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].localFilterSite[i].filter);
-                    if(concatenatedString.isNotEmpty){
-                      strSldLocFilterSrlNo += '${concatenatedString}_';
-                    }
-                  }
-                  if (strSldLocFilterSrlNo.isNotEmpty && strSldLocFilterSrlNo.endsWith('_')) {
-                    strSldLocFilterSrlNo = strSldLocFilterSrlNo.replaceRange(strSldLocFilterSrlNo.length - 1, strSldLocFilterSrlNo.length, '');
-                  }
-                }
-                if(dashBoardData[0].centralFertilizerSite.isNotEmpty){
-                  for(int i=0; i<dashBoardData[0].centralFertilizerSite.length; i++){
-                    String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFertilizerSite[i].fertilizer);
-                    if(concatenatedString.isNotEmpty){
-                      strSldCrlFetFilterSrlNo += '${concatenatedString}_';
-                    }
-                  }
-                  if (strSldCrlFetFilterSrlNo.isNotEmpty && strSldCrlFetFilterSrlNo.endsWith('_')) {
-                    strSldCrlFetFilterSrlNo = strSldCrlFetFilterSrlNo.replaceRange(strSldCrlFetFilterSrlNo.length - 1, strSldCrlFetFilterSrlNo.length, '');
-                  }
-                }
-                if(dashBoardData[0].localFertilizerSite.isNotEmpty){
-                  for(int i=0; i<dashBoardData[0].localFertilizerSite.length; i++){
-                    String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].localFertilizerSite[i].fertilizer);
-                    if(concatenatedString.isNotEmpty){
-                      strSldLocFetFilterSrlNo += '${concatenatedString}_';
-                    }
-                  }
-                  if (strSldLocFetFilterSrlNo.isNotEmpty && strSldLocFetFilterSrlNo.endsWith('_')) {
-                    strSldLocFetFilterSrlNo = strSldLocFetFilterSrlNo.replaceRange(strSldLocFetFilterSrlNo.length - 1, strSldLocFetFilterSrlNo.length, '');
-                  }
-                }
-                if(dashBoardData[0].agitator.isNotEmpty){
-                  strSldAgitatorSrlNo = getSelectedRelaySrlNo(dashBoardData[0].agitator);
-                }
-                if(dashBoardData[0].fan.isNotEmpty){
-                  strSldFanSrlNo = getSelectedRelaySrlNo(dashBoardData[0].fan);
-                }
-                if(dashBoardData[0].fogger.isNotEmpty){
-                  strSldFoggerSrlNo = getSelectedRelaySrlNo(dashBoardData[0].fogger);
-                }
-                if(dashBoardData[0].boosterPump.isNotEmpty){
-                  strSldBoosterPumpSrlNo = getSelectedRelaySrlNo(dashBoardData[0].boosterPump);
-                }
-                if(dashBoardData[0].selector.isNotEmpty){
-                  strSldSelectorSrlNo = getSelectedRelaySrlNo(dashBoardData[0].selector);
-                }
-
-                Map<String, List<DashBoardValve>> groupedValves = {};
-                for (var line in dashBoardData[0].lineOrSequence) {
-                  groupedValves = groupValvesByLocation(line.valves);
-                  groupedValves.forEach((location, valves) {
-                    for (int j = 0; j < valves.length; j++) {
-                      if (valves[j].isOn) {
-                        strSldValveOrLineSrlNo += '${valves[j].sNo}_';
-                        standaloneSelection.add({
-                          'id': valves[j].id,
-                          'sNo': valves[j].sNo,
-                          'name': valves[j].name,
-                          'location': valves[j].location,
-                          'selected': valves[j].isOn,
-                        });
-                      }
-                    }
-                  });
-                }
-
-                strSldValveOrLineSrlNo = strSldValveOrLineSrlNo.isNotEmpty ? strSldValveOrLineSrlNo.substring(0, strSldValveOrLineSrlNo.length - 1) : '';
-                allRelaySrlNo = [
-                  strSldSourcePumpSrlNo,
-                  strSldIrrigationPumpSrlNo,
-                  strSldMainValveSrlNo,
-                  strSldCtrlFilterSrlNo,
-                  strSldValveOrLineSrlNo,
-                  strSldLocFilterSrlNo,
-                  strSldCrlFetFilterSrlNo,
-                  strSldLocFetFilterSrlNo,
-                  strSldAgitatorSrlNo,
-                  strSldFanSrlNo,
-                  strSldFoggerSrlNo,
-                  strSldBoosterPumpSrlNo,
-                  strSldSelectorSrlNo,
-                ];
-
-                if (strSldIrrigationPumpSrlNo.isNotEmpty && strSldValveOrLineSrlNo.isEmpty) {
-                  showDialog<String>(
-                      context: context,
-                      builder: (BuildContext dgContext) => AlertDialog(
-                        title: const Text('StandAlone'),
-                        content: const Text('Valve is not open! Are you sure! You want to Start the Selected Pump?'),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () => Navigator.pop(dgContext, 'Cancel'),
-                            child: const Text('No'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              startByStandaloneDefault(allRelaySrlNo);
-                              Navigator.pop(dgContext, 'OK');
-                            },
-                            child: const Text('Yes'),
-                          ),
-                        ],
-                      )
-                  );
-                }else{
-                  startByStandaloneDefault(allRelaySrlNo);
-                }
-
-              }
-              else{
-                Map<String, List<DashBoardValve>> groupedValves = {};
-                String strSldSqnNo = '';
-                //String strSldSqnLocation = '';
-
-                String strSldIrrigationPumpId = '';
-                if(dashBoardData[0].irrigationPump.isNotEmpty){
-                  strSldIrrigationPumpId = getSelectedRelayId(dashBoardData[0].irrigationPump);
-                }
-
-                String strSldMainValveId = '';
-                if(dashBoardData[0].mainValve.isNotEmpty){
-                  strSldMainValveId = getSelectedRelayId(dashBoardData[0].mainValve);
-                }
-
-                String strSldCtrlFilterId = '';
-                String sldCtrlFilterRelayOnOffStatus = '';
-                if(dashBoardData[0].centralFilterSite.isNotEmpty){
-                  for(int i=0; i<dashBoardData[0].centralFilterSite.length; i++){
-                    String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].centralFilterSite[i].filter);
-                    if(concatenatedString.isNotEmpty){
-                      strSldCtrlFilterId += '${dashBoardData[0].centralFilterSite[i].id};';
-                      sldCtrlFilterRelayOnOffStatus += '${getRelayOnOffStatus(dashBoardData[0].centralFilterSite[i].filter)};';
-                    }
-                  }
-                  if (strSldCtrlFilterId.isNotEmpty && strSldCtrlFilterId.endsWith(';')) {
-                    strSldCtrlFilterId = strSldCtrlFilterId.replaceRange(strSldCtrlFilterId.length - 1, strSldCtrlFilterId.length, '');
-                  }
-                  if (sldCtrlFilterRelayOnOffStatus.isNotEmpty && sldCtrlFilterRelayOnOffStatus.endsWith(';')) {
-                    sldCtrlFilterRelayOnOffStatus = sldCtrlFilterRelayOnOffStatus.replaceRange(sldCtrlFilterRelayOnOffStatus.length - 1, sldCtrlFilterRelayOnOffStatus.length, '');
-                  }
-                }
-
-                String strSldLocFilterId = '';
-                String sldLocFilterRelayOnOffStatus = '';
-                if(dashBoardData[0].localFilterSite.isNotEmpty){
-                  for(int i=0; i<dashBoardData[0].localFilterSite.length; i++){
-                    String concatenatedString = getSelectedRelaySrlNo(dashBoardData[0].localFilterSite[i].filter);
-                    if(concatenatedString.isNotEmpty){
-                      strSldLocFilterId += '${dashBoardData[0].localFilterSite[i].id};';
-                      sldLocFilterRelayOnOffStatus += '${getRelayOnOffStatus(dashBoardData[0].localFilterSite[i].filter)};';
-                    }
-                  }
-                  if (strSldLocFilterId.isNotEmpty && strSldLocFilterId.endsWith(';')) {
-                    strSldLocFilterId = strSldLocFilterId.replaceRange(strSldLocFilterId.length - 1, strSldLocFilterId.length, '');
-                  }
-                  if (sldLocFilterRelayOnOffStatus.isNotEmpty && sldLocFilterRelayOnOffStatus.endsWith(';')) {
-                    sldLocFilterRelayOnOffStatus = sldLocFilterRelayOnOffStatus.replaceRange(sldLocFilterRelayOnOffStatus.length - 1, sldLocFilterRelayOnOffStatus.length, '');
-                  }
-                }
-
-                String  strSldFanId = '';
-                if(dashBoardData[0].fan.isNotEmpty){
-                  strSldFanId = getSelectedRelayId(dashBoardData[0].fan);
-                }
-
-                String  strSldFgrId = '';
-                if(dashBoardData[0].fogger.isNotEmpty){
-                  strSldFgrId = getSelectedRelayId(dashBoardData[0].fogger);
-                }
-
-                for (var lineOrSq in dashBoardData[0].lineOrSequence) {
-                  if(lineOrSq.selected){
-                    strSldSqnNo = lineOrSq.sNo;
-                    standaloneSelection.add({
-                      'id': lineOrSq.id,
-                      'sNo': lineOrSq.sNo,
-                      'name': lineOrSq.name,
-                      'location': lineOrSq.location,
-                      'selected': lineOrSq.selected,
-                    });
-                    break;
-                  }
-                }
-
-                if (strSldSqnNo.isEmpty) {
-                  displayAlert(context, 'You must select an zone.');
-                }else if (strSldIrrigationPumpId.isEmpty) {
-                  displayAlert(context, 'You must select an irrigation pump.');
-                }else{
-                  sendCommandToControllerAndMqttProgram(dashBoardData[0].headUnits,strSldSqnNo,strSldIrrigationPumpId,strSldMainValveId,strSldCtrlFilterId,
-                      sldCtrlFilterRelayOnOffStatus,strSldLocFilterId,sldLocFilterRelayOnOffStatus,strSldFanId,strSldFgrId);
-                }
-              }
-            },
-            child: const Text('Start'),
-          ),
-          const SizedBox(width: 10),
-          MaterialButton(
-            color: Colors.redAccent,
-            textColor: Colors.white,
-            onPressed:() async {
-              if(ddCurrentPosition==0){
-                String payload = '0,0,0,0';
-                String payLoadFinal = jsonEncode({
-                  "800": [{"801": payload}]
-                });
-                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
-                sentManualModeToServer(programList[ddCurrentPosition].serialNumber, 0, standAloneMethod, '00:00:00', '0', [], payLoadFinal);
-              }
-              else{
-                for (var lineOrSq in dashBoardData[0].lineOrSequence) {
-                  if(lineOrSq.selected){
-                    standaloneSelection.add({
-                      'id': lineOrSq.id,
-                      'sNo': lineOrSq.sNo,
-                      'name': lineOrSq.name,
-                      'location': lineOrSq.location,
-                      'selected': lineOrSq.selected,
-                    });
-                    break;
-                  }
-                }
-
-                String payLoadFinal = jsonEncode({
-                  "3900": [{"3901": '0,${programList[ddCurrentPosition].programCategory},${programList[ddCurrentPosition].serialNumber},'
-                      '${standaloneSelection.isNotEmpty?standaloneSelection[0]['sNo']:''},,,,,,,,,0,'}]
-                });
-                standaloneSelection.clear();
-
-                MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
-                sentManualModeToServer(programList[ddCurrentPosition].serialNumber, 0, standAloneMethod, '00:00:00', '0', [], payLoadFinal);
-
-              }
-            },
-            child: const Text('Stop'),
-          ),
-          const SizedBox(width: 15),
-        ],
-      ),*/
+      width: 655,
       child: visibleLoading? Center(
         child: Visibility(
           visible: visibleLoading,
@@ -672,7 +385,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
             child: Row(
               children: [
                 SizedBox(
-                  width: 375,
+                  width: 325,
                   height: double.infinity,
                   child: SingleChildScrollView(
                     child: Column(
@@ -680,40 +393,85 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                       children: [
                         if (ddCurrentPosition==0 && dashBoardData.isNotEmpty)
                           dashBoardData[0].sourcePump.isNotEmpty ? Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.only(left: 8, right: 5, top: 8),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
-                                  child: Text('Source Pump'),
-                                ),
-                                Wrap(
-                                  spacing: 8.0,
-                                  runSpacing: 8.0,
-                                  children: dashBoardData[0].sourcePump.map((pump) {
-                                    return ChoiceChip(
-                                      label: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(pump.name),
-                                          const SizedBox(width: 8,),
-                                          Image.asset('assets/images/source_pump.png',width: 20, height: 20,)
-                                        ],
-                                      ),
-                                      selected: pump.selected,
-                                      onSelected: (bool selected) {
-                                        setState(() {
-                                          pump.selected = !pump.selected; // Toggle chip selection
-                                        });
-                                      },
-                                      selectedColor: Colors.teal,
-                                      backgroundColor: Colors.grey.shade300,
-                                      labelStyle: TextStyle(
-                                        color: pump.selected ? Colors.white : Colors.black,
-                                      ),
-                                    );
-                                  }).toList(),
+                                SizedBox(
+                                  height: dashBoardData[0].sourcePump.length*40+48,
+                                  child: Card(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5.0), // Adjust the value as needed
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          width: MediaQuery.of(context).size.width,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal.shade50, // Background color (optional)
+                                            borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(5.0),
+                                              topRight: Radius.circular(5.0),
+                                            ),
+                                          ),
+                                          child: const Padding(
+                                            padding: EdgeInsets.only(left: 10.0, top: 8.0, bottom: 8.0), // Adjust values as needed
+                                            child: Text(
+                                              'Source Pump',
+                                              textAlign: TextAlign.left,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: dashBoardData[0].sourcePump.length*40,
+                                          child: DataTable2(
+                                            columnSpacing: 12,
+                                            horizontalMargin: 12,
+                                            minWidth: 150,
+                                            dataRowHeight: 40.0,
+                                            headingRowHeight: 0,
+                                            headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
+                                            columns: const [
+                                              DataColumn2(
+                                                  label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
+                                                  fixedWidth: 35,
+                                              ),
+                                              DataColumn2(
+                                                  label: Text('',  style: TextStyle(fontSize: 14),),
+                                                  size: ColumnSize.M
+                                              ),
+                                              DataColumn2(
+                                                label: Center(
+                                                  child: Text('', textAlign: TextAlign.right,),
+                                                ),
+                                                fixedWidth: 70,
+                                              ),
+                                            ],
+                                            rows: List<DataRow>.generate(dashBoardData[0].sourcePump.length, (index) => DataRow(cells: [
+                                              DataCell(Center(child: Image.asset('assets/images/irrigation_pump.png',width: 30, height: 30,))),
+                                              DataCell(Text(dashBoardData[0].sourcePump[index].name, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
+                                              DataCell(Transform.scale(
+                                                scale: 0.7,
+                                                child: Tooltip(
+                                                  message: dashBoardData[0].sourcePump[index].selected? 'Close' : 'Open',
+                                                  child: Switch(
+                                                    hoverColor: Colors.pink.shade100,
+                                                    activeColor: Colors.teal,
+                                                    value: dashBoardData[0].sourcePump[index].selected,
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        dashBoardData[0].sourcePump[index].selected = value;
+                                                      });
+                                                    },
+                                                  ),
+                                                ),
+                                              )),
+                                            ])),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -722,40 +480,85 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
 
                         if (dashBoardData.isNotEmpty)
                           dashBoardData[0].irrigationPump.isNotEmpty ? Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.only(left: 8, right: 5, top: 8),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
-                                  child: Text('Irrigation Pump'),
-                                ),
-                                Wrap(
-                                  spacing: 8.0,
-                                  runSpacing: 8.0,
-                                  children: dashBoardData[0].irrigationPump.map((pump) {
-                                    return ChoiceChip(
-                                      label: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(pump.name),
-                                          const SizedBox(width: 8,),
-                                          Image.asset('assets/images/irrigation_pump.png',width: 20, height: 20,)
-                                        ],
-                                      ),
-                                      selected: pump.selected,
-                                      onSelected: (bool selected) {
-                                        setState(() {
-                                          pump.selected = !pump.selected; // Toggle chip selection
-                                        });
-                                      },
-                                      selectedColor: Colors.teal,
-                                      backgroundColor: Colors.grey.shade300,
-                                      labelStyle: TextStyle(
-                                        color: pump.selected ? Colors.white : Colors.black,
-                                      ),
-                                    );
-                                  }).toList(),
+                                SizedBox(
+                                  height: dashBoardData[0].irrigationPump.length*40+48,
+                                  child: Card(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5.0), // Adjust the value as needed
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          width: MediaQuery.of(context).size.width,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal.shade50, // Background color (optional)
+                                            borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(5.0),
+                                              topRight: Radius.circular(5.0),
+                                            ),
+                                          ),
+                                          child: const Padding(
+                                            padding: EdgeInsets.only(left: 10.0, top: 8.0, bottom: 8.0), // Adjust values as needed
+                                            child: Text(
+                                              'Irrigation Pump',
+                                              textAlign: TextAlign.left,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: dashBoardData[0].irrigationPump.length*40,
+                                          child: DataTable2(
+                                            columnSpacing: 12,
+                                            horizontalMargin: 12,
+                                            minWidth: 150,
+                                            dataRowHeight: 40.0,
+                                            headingRowHeight: 0,
+                                            headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
+                                            columns: const [
+                                              DataColumn2(
+                                                  label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
+                                                  fixedWidth: 35
+                                              ),
+                                              DataColumn2(
+                                                  label: Text('',  style: TextStyle(fontSize: 14),),
+                                                  size: ColumnSize.M
+                                              ),
+                                              DataColumn2(
+                                                label: Center(
+                                                  child: Text('', textAlign: TextAlign.right,),
+                                                ),
+                                                fixedWidth: 70,
+                                              ),
+                                            ],
+                                            rows: List<DataRow>.generate(dashBoardData[0].irrigationPump.length, (index) => DataRow(cells: [
+                                              DataCell(Center(child: Image.asset('assets/images/irrigation_pump.png',width: 30, height: 30,))),
+                                              DataCell(Text(dashBoardData[0].irrigationPump[index].name, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
+                                              DataCell(Transform.scale(
+                                                scale: 0.7,
+                                                child: Tooltip(
+                                                  message: dashBoardData[0].irrigationPump[index].selected? 'Close' : 'Open',
+                                                  child: Switch(
+                                                    hoverColor: Colors.pink.shade100,
+                                                    activeColor: Colors.teal,
+                                                    value: dashBoardData[0].irrigationPump[index].selected,
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        dashBoardData[0].irrigationPump[index].selected = value;
+                                                      });
+                                                    },
+                                                  ),
+                                                ),
+                                              )),
+                                            ])),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -763,40 +566,85 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
 
                         if (dashBoardData.isNotEmpty)
                           dashBoardData[0].mainValve.isNotEmpty ? Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.only(left: 8, right: 5, top: 8),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
-                                  child: Text('Main Valve'),
-                                ),
-                                Wrap(
-                                  spacing: 8.0,
-                                  runSpacing: 8.0,
-                                  children: dashBoardData[0].mainValve.map((mv) {
-                                    return ChoiceChip(
-                                      label: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(mv.name),
-                                          const SizedBox(width: 8,),
-                                          Image.asset('assets/images/dp_main_valve.png',width: 20, height: 20,)
-                                        ],
-                                      ),
-                                      selected: mv.selected,
-                                      onSelected: (bool selected) {
-                                        setState(() {
-                                          mv.selected = !mv.selected; // Toggle chip selection
-                                        });
-                                      },
-                                      selectedColor: Colors.teal,
-                                      backgroundColor: Colors.grey.shade300,
-                                      labelStyle: TextStyle(
-                                        color: mv.selected ? Colors.white : Colors.black,
-                                      ),
-                                    );
-                                  }).toList(),
+                                SizedBox(
+                                  height: dashBoardData[0].mainValve.length*40+48,
+                                  child: Card(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5.0), // Adjust the value as needed
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          width: MediaQuery.of(context).size.width,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal.shade50, // Background color (optional)
+                                            borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(5.0),
+                                              topRight: Radius.circular(5.0),
+                                            ),
+                                          ),
+                                          child: const Padding(
+                                            padding: EdgeInsets.only(left: 10.0, top: 8.0, bottom: 8.0), // Adjust values as needed
+                                            child: Text(
+                                              'Main valve',
+                                              textAlign: TextAlign.left,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: dashBoardData[0].mainValve.length*40,
+                                          child: DataTable2(
+                                            columnSpacing: 12,
+                                            horizontalMargin: 12,
+                                            minWidth: 150,
+                                            dataRowHeight: 40.0,
+                                            headingRowHeight: 0,
+                                            headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
+                                            columns: const [
+                                              DataColumn2(
+                                                  label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
+                                                  fixedWidth: 35,
+                                              ),
+                                              DataColumn2(
+                                                  label: Text('',  style: TextStyle(fontSize: 14),),
+                                                  size: ColumnSize.M
+                                              ),
+                                              DataColumn2(
+                                                label: Center(
+                                                  child: Text('', textAlign: TextAlign.right,),
+                                                ),
+                                                fixedWidth: 70,
+                                              ),
+                                            ],
+                                            rows: List<DataRow>.generate(dashBoardData[0].mainValve.length, (index) => DataRow(cells: [
+                                              DataCell(Center(child: Image.asset('assets/images/dp_main_valve_not_open.png',width: 30, height: 30,))),
+                                              DataCell(Text(dashBoardData[0].mainValve[index].name, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
+                                              DataCell(Transform.scale(
+                                                scale: 0.7,
+                                                child: Tooltip(
+                                                  message: dashBoardData[0].mainValve[index].selected? 'Close' : 'Open',
+                                                  child: Switch(
+                                                    hoverColor: Colors.pink.shade100,
+                                                    activeColor: Colors.teal,
+                                                    value: dashBoardData[0].mainValve[index].selected,
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        dashBoardData[0].mainValve[index].selected = value;
+                                                      });
+                                                    },
+                                                  ),
+                                                ),
+                                              )),
+                                            ])),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -804,7 +652,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
 
                         if (dashBoardData.isNotEmpty)
                           dashBoardData[0].centralFilterSite.isNotEmpty ? Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.only(left: 8, right: 5, top: 8),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -812,46 +660,87 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                                   padding: EdgeInsets.only(left: 8.0, right: 8.0),
                                   child: Text('Central Filter Site'),
                                 ),
-                                const Divider(height: 8,),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: dashBoardData[0].centralFilterSite.map((site) {
                                     List<FilterList> filters = site.filter;
-
                                     return Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.start,
                                       children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(site.name),
-                                        ),
-                                        Wrap(
-                                          spacing: 8.0,
-                                          runSpacing: 8.0,
-                                          children: filters.map((filters) {
-                                            return ChoiceChip(
-                                              label: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Text(filters.name),
-                                                  const SizedBox(width: 8),
-                                                  const Icon(Icons.filter_alt_outlined),
-                                                ],
-                                              ),
-                                              selected: filters.selected,
-                                              onSelected: (bool selected) {
-                                                setState(() {
-                                                  filters.selected = !filters.selected;
-                                                });
-                                              },
-                                              selectedColor: Colors.teal,
-                                              backgroundColor: Colors.grey.shade300,
-                                              labelStyle: TextStyle(
-                                                color: filters.selected ? Colors.white : Colors.black,
-                                              ),
-                                            );
-                                          }).toList(),
+                                        SizedBox(
+                                          height: filters.length*40+48,
+                                          child: Card(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(5.0), // Adjust the value as needed
+                                            ),
+                                            child: Column(
+                                              children: [
+                                                Container(
+                                                  width: MediaQuery.of(context).size.width,
+                                                  height: 40,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.teal.shade50, // Background color (optional)
+                                                    borderRadius: const BorderRadius.only(
+                                                      topLeft: Radius.circular(5.0),
+                                                      topRight: Radius.circular(5.0),
+                                                    ),
+                                                  ),
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.only(left: 10.0, top: 8.0, bottom: 8.0), // Adjust values as needed
+                                                    child: Text(site.name,
+                                                      textAlign: TextAlign.left,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  height: filters.length*40,
+                                                  child: DataTable2(
+                                                    columnSpacing: 12,
+                                                    horizontalMargin: 12,
+                                                    minWidth: 150,
+                                                    dataRowHeight: 40.0,
+                                                    headingRowHeight: 0,
+                                                    headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
+                                                    columns: const [
+                                                      DataColumn2(
+                                                        label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
+                                                        fixedWidth: 35,
+                                                      ),
+                                                      DataColumn2(
+                                                          label: Text('',  style: TextStyle(fontSize: 14),),
+                                                          size: ColumnSize.M
+                                                      ),
+                                                      DataColumn2(
+                                                        label: Center(
+                                                          child: Text('', textAlign: TextAlign.right,),
+                                                        ),
+                                                        fixedWidth: 70,
+                                                      ),
+                                                    ],
+                                                    rows: List<DataRow>.generate(filters.length, (index) => DataRow(cells: [
+                                                      DataCell(Center(child: Image.asset('assets/images/filter.png',width: 30, height: 30,))),
+                                                      DataCell(Text(filters[index].name, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
+                                                      DataCell(Transform.scale(
+                                                        scale: 0.7,
+                                                        child: Tooltip(
+                                                          message: filters[index].selected? 'Close' : 'Open',
+                                                          child: Switch(
+                                                            hoverColor: Colors.pink.shade100,
+                                                            activeColor: Colors.teal,
+                                                            value: filters[index].selected,
+                                                            onChanged: (value) {
+                                                              setState(() {
+                                                                filters[index].selected = value;
+                                                              });
+                                                            },
+                                                          ),
+                                                        ),
+                                                      )),
+                                                    ])),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     );
@@ -864,54 +753,95 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
 
                         if (dashBoardData.isNotEmpty)
                           dashBoardData[0].localFilterSite.isNotEmpty ? Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.only(left: 8, right: 5, top: 8),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Padding(
-                                  padding: EdgeInsets.only(left: 8.0, right: 8.0,),
+                                  padding: EdgeInsets.only(left: 8.0, right: 8.0),
                                   child: Text('Local Filter Site'),
                                 ),
-                                const Divider(height: 8,),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: dashBoardData[0].localFilterSite.map((site) {
                                     List<FilterList> filters = site.filter;
-
                                     return Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.start,
                                       children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(site.name),
-                                        ),
-                                        Wrap(
-                                          spacing: 8.0,
-                                          runSpacing: 8.0,
-                                          children: filters.map((filters) {
-                                            return ChoiceChip(
-                                              label: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Text(filters.name),
-                                                  const SizedBox(width: 8),
-                                                  const Icon(Icons.filter_alt_outlined),
-                                                ],
-                                              ),
-                                              selected: filters.selected,
-                                              onSelected: (bool selected) {
-                                                setState(() {
-                                                  filters.selected = !filters.selected;
-                                                });
-                                              },
-                                              selectedColor: Colors.teal,
-                                              backgroundColor: Colors.grey.shade300,
-                                              labelStyle: TextStyle(
-                                                color: filters.selected ? Colors.white : Colors.black,
-                                              ),
-                                            );
-                                          }).toList(),
+                                        SizedBox(
+                                          height: filters.length*40+48,
+                                          child: Card(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(5.0), // Adjust the value as needed
+                                            ),
+                                            child: Column(
+                                              children: [
+                                                Container(
+                                                  width: MediaQuery.of(context).size.width,
+                                                  height: 40,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.teal.shade50, // Background color (optional)
+                                                    borderRadius: const BorderRadius.only(
+                                                      topLeft: Radius.circular(5.0),
+                                                      topRight: Radius.circular(5.0),
+                                                    ),
+                                                  ),
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.only(left: 10.0, top: 8.0, bottom: 8.0), // Adjust values as needed
+                                                    child: Text(site.name,
+                                                      textAlign: TextAlign.left,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  height: filters.length*40,
+                                                  child: DataTable2(
+                                                    columnSpacing: 12,
+                                                    horizontalMargin: 12,
+                                                    minWidth: 150,
+                                                    dataRowHeight: 40.0,
+                                                    headingRowHeight: 0,
+                                                    headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
+                                                    columns: const [
+                                                      DataColumn2(
+                                                        label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
+                                                        fixedWidth: 35,
+                                                      ),
+                                                      DataColumn2(
+                                                          label: Text('',  style: TextStyle(fontSize: 14),),
+                                                          size: ColumnSize.M
+                                                      ),
+                                                      DataColumn2(
+                                                        label: Center(
+                                                          child: Text('', textAlign: TextAlign.right,),
+                                                        ),
+                                                        fixedWidth: 70,
+                                                      ),
+                                                    ],
+                                                    rows: List<DataRow>.generate(filters.length, (index) => DataRow(cells: [
+                                                      DataCell(Center(child: Image.asset('assets/images/filter.png',width: 30, height: 30,))),
+                                                      DataCell(Text(filters[index].name, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
+                                                      DataCell(Transform.scale(
+                                                        scale: 0.7,
+                                                        child: Tooltip(
+                                                          message: filters[index].selected? 'Close' : 'Open',
+                                                          child: Switch(
+                                                            hoverColor: Colors.pink.shade100,
+                                                            activeColor: Colors.teal,
+                                                            value: filters[index].selected,
+                                                            onChanged: (value) {
+                                                              setState(() {
+                                                                filters[index].selected = value;
+                                                              });
+                                                            },
+                                                          ),
+                                                        ),
+                                                      )),
+                                                    ])),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     );
@@ -924,53 +854,95 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
 
                         if (ddCurrentPosition==0 && dashBoardData.isNotEmpty)
                           dashBoardData[0].centralFertilizerSite.isNotEmpty ? Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.only(left: 8, right: 5, top: 8),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Padding(
-                                  padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
+                                  padding: EdgeInsets.only(left: 8.0, right: 8.0),
                                   child: Text('Central Fertilizer Site'),
                                 ),
-                                const Divider(height: 8,),
                                 Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: dashBoardData[0].centralFertilizerSite.map((site) {
                                     List<FertilizerChanel> fertilizers = site.fertilizer;
-
                                     return Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.start,
                                       children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(site.name),
-                                        ),
-                                        Wrap(
-                                          spacing: 8.0,
-                                          runSpacing: 8.0,
-                                          children: fertilizers.map((filters) {
-                                            return ChoiceChip(
-                                              label: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Text(filters.name),
-                                                  const SizedBox(width: 8),
-                                                  const Icon(Icons.imagesearch_roller_outlined),
-                                                ],
-                                              ),
-                                              selected: filters.selected,
-                                              onSelected: (bool selected) {
-                                                setState(() {
-                                                  filters.selected = !filters.selected;
-                                                });
-                                              },
-                                              selectedColor: Colors.teal,
-                                              backgroundColor: Colors.grey.shade300,
-                                              labelStyle: TextStyle(
-                                                color: filters.selected ? Colors.white : Colors.black,
-                                              ),
-                                            );
-                                          }).toList(),
+                                        SizedBox(
+                                          height: fertilizers.length*40+48,
+                                          child: Card(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(5.0), // Adjust the value as needed
+                                            ),
+                                            child: Column(
+                                              children: [
+                                                Container(
+                                                  width: MediaQuery.of(context).size.width,
+                                                  height: 40,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.teal.shade50, // Background color (optional)
+                                                    borderRadius: const BorderRadius.only(
+                                                      topLeft: Radius.circular(5.0),
+                                                      topRight: Radius.circular(5.0),
+                                                    ),
+                                                  ),
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.only(left: 10.0, top: 8.0, bottom: 8.0), // Adjust values as needed
+                                                    child: Text(site.name,
+                                                      textAlign: TextAlign.left,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  height: fertilizers.length*40,
+                                                  child: DataTable2(
+                                                    columnSpacing: 12,
+                                                    horizontalMargin: 12,
+                                                    minWidth: 150,
+                                                    dataRowHeight: 40.0,
+                                                    headingRowHeight: 0,
+                                                    headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
+                                                    columns: const [
+                                                      DataColumn2(
+                                                        label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
+                                                        fixedWidth: 35,
+                                                      ),
+                                                      DataColumn2(
+                                                          label: Text('',  style: TextStyle(fontSize: 14),),
+                                                          size: ColumnSize.M
+                                                      ),
+                                                      DataColumn2(
+                                                        label: Center(
+                                                          child: Text('', textAlign: TextAlign.right,),
+                                                        ),
+                                                        fixedWidth: 70,
+                                                      ),
+                                                    ],
+                                                    rows: List<DataRow>.generate(fertilizers.length, (index) => DataRow(cells: [
+                                                      DataCell(Center(child: Image.asset('assets/images/irrigation_pump.png',width: 30, height: 30,))),
+                                                      DataCell(Text(fertilizers[index].name, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
+                                                      DataCell(Transform.scale(
+                                                        scale: 0.7,
+                                                        child: Tooltip(
+                                                          message: fertilizers[index].selected? 'Close' : 'Open',
+                                                          child: Switch(
+                                                            hoverColor: Colors.pink.shade100,
+                                                            activeColor: Colors.teal,
+                                                            value: fertilizers[index].selected,
+                                                            onChanged: (value) {
+                                                              setState(() {
+                                                                fertilizers[index].selected = value;
+                                                              });
+                                                            },
+                                                          ),
+                                                        ),
+                                                      )),
+                                                    ])),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     );
@@ -982,53 +954,95 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
 
                         if (ddCurrentPosition==0 && dashBoardData.isNotEmpty)
                           dashBoardData[0].localFertilizerSite.isNotEmpty ? Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.only(left: 8, right: 5, top: 8),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Padding(
-                                  padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
+                                  padding: EdgeInsets.only(left: 8.0, right: 8.0),
                                   child: Text('Local Fertilizer Site'),
                                 ),
-                                const Divider(height: 8,),
                                 Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: dashBoardData[0].localFertilizerSite.map((site) {
                                     List<FertilizerChanel> fertilizers = site.fertilizer;
-
                                     return Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.start,
                                       children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(site.name),
-                                        ),
-                                        Wrap(
-                                          spacing: 8.0,
-                                          runSpacing: 8.0,
-                                          children: fertilizers.map((filters) {
-                                            return ChoiceChip(
-                                              label: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Text(filters.name),
-                                                  const SizedBox(width: 8),
-                                                  const Icon(Icons.imagesearch_roller_outlined),
-                                                ],
-                                              ),
-                                              selected: filters.selected,
-                                              onSelected: (bool selected) {
-                                                setState(() {
-                                                  filters.selected = !filters.selected;
-                                                });
-                                              },
-                                              selectedColor: Colors.teal,
-                                              backgroundColor: Colors.grey.shade300,
-                                              labelStyle: TextStyle(
-                                                color: filters.selected ? Colors.white : Colors.black,
-                                              ),
-                                            );
-                                          }).toList(),
+                                        SizedBox(
+                                          height: fertilizers.length*40+48,
+                                          child: Card(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(5.0), // Adjust the value as needed
+                                            ),
+                                            child: Column(
+                                              children: [
+                                                Container(
+                                                  width: MediaQuery.of(context).size.width,
+                                                  height: 40,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.teal.shade50, // Background color (optional)
+                                                    borderRadius: const BorderRadius.only(
+                                                      topLeft: Radius.circular(5.0),
+                                                      topRight: Radius.circular(5.0),
+                                                    ),
+                                                  ),
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.only(left: 10.0, top: 8.0, bottom: 8.0), // Adjust values as needed
+                                                    child: Text(site.name,
+                                                      textAlign: TextAlign.left,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  height: fertilizers.length*40,
+                                                  child: DataTable2(
+                                                    columnSpacing: 12,
+                                                    horizontalMargin: 12,
+                                                    minWidth: 150,
+                                                    dataRowHeight: 40.0,
+                                                    headingRowHeight: 0,
+                                                    headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
+                                                    columns: const [
+                                                      DataColumn2(
+                                                        label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
+                                                        fixedWidth: 35,
+                                                      ),
+                                                      DataColumn2(
+                                                          label: Text('',  style: TextStyle(fontSize: 14),),
+                                                          size: ColumnSize.M
+                                                      ),
+                                                      DataColumn2(
+                                                        label: Center(
+                                                          child: Text('', textAlign: TextAlign.right,),
+                                                        ),
+                                                        fixedWidth: 70,
+                                                      ),
+                                                    ],
+                                                    rows: List<DataRow>.generate(fertilizers.length, (index) => DataRow(cells: [
+                                                      DataCell(Center(child: Image.asset('assets/images/irrigation_pump.png',width: 30, height: 30,))),
+                                                      DataCell(Text(fertilizers[index].name, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
+                                                      DataCell(Transform.scale(
+                                                        scale: 0.7,
+                                                        child: Tooltip(
+                                                          message: fertilizers[index].selected? 'Close' : 'Open',
+                                                          child: Switch(
+                                                            hoverColor: Colors.pink.shade100,
+                                                            activeColor: Colors.teal,
+                                                            value: fertilizers[index].selected,
+                                                            onChanged: (value) {
+                                                              setState(() {
+                                                                fertilizers[index].selected = value;
+                                                              });
+                                                            },
+                                                          ),
+                                                        ),
+                                                      )),
+                                                    ])),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     );
@@ -1036,44 +1050,90 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                                 ),
                               ],
                             ),
-                          ): Container(),
+                          ):
+                          Container(),
 
                         if (ddCurrentPosition==0 && dashBoardData.isNotEmpty)
                           dashBoardData[0].agitator.isNotEmpty ? Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.only(left: 8, right: 5, top: 8),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
-                                  child: Text('Agitator'),
-                                ),
-                                Wrap(
-                                  spacing: 8.0,
-                                  runSpacing: 8.0,
-                                  children: dashBoardData[0].agitator.map((agt) {
-                                    return ChoiceChip(
-                                      label: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(agt.name),
-                                          const SizedBox(width: 8,),
-                                          Image.asset('assets/images/agitator.png',width: 20, height: 20,)
-                                        ],
-                                      ),
-                                      selected: agt.selected,
-                                      onSelected: (bool selected) {
-                                        setState(() {
-                                          agt.selected = !agt.selected; // Toggle chip selection
-                                        });
-                                      },
-                                      selectedColor: Colors.teal,
-                                      backgroundColor: Colors.grey.shade300,
-                                      labelStyle: TextStyle(
-                                        color: agt.selected ? Colors.white : Colors.black,
-                                      ),
-                                    );
-                                  }).toList(),
+                                SizedBox(
+                                  height: dashBoardData[0].agitator.length*40+48,
+                                  child: Card(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5.0), // Adjust the value as needed
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          width: MediaQuery.of(context).size.width,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal.shade50, // Background color (optional)
+                                            borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(5.0),
+                                              topRight: Radius.circular(5.0),
+                                            ),
+                                          ),
+                                          child: const Padding(
+                                            padding: EdgeInsets.only(left: 10.0, top: 8.0, bottom: 8.0), // Adjust values as needed
+                                            child: Text(
+                                              'Agitator',
+                                              textAlign: TextAlign.left,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: dashBoardData[0].agitator.length*40,
+                                          child: DataTable2(
+                                            columnSpacing: 12,
+                                            horizontalMargin: 12,
+                                            minWidth: 150,
+                                            dataRowHeight: 40.0,
+                                            headingRowHeight: 0,
+                                            headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
+                                            columns: const [
+                                              DataColumn2(
+                                                  label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
+                                                  fixedWidth: 35
+                                              ),
+                                              DataColumn2(
+                                                  label: Text('',  style: TextStyle(fontSize: 14),),
+                                                  size: ColumnSize.M
+                                              ),
+                                              DataColumn2(
+                                                label: Center(
+                                                  child: Text('', textAlign: TextAlign.right,),
+                                                ),
+                                                fixedWidth: 70,
+                                              ),
+                                            ],
+                                            rows: List<DataRow>.generate(dashBoardData[0].agitator.length, (index) => DataRow(cells: [
+                                              DataCell(Center(child: Image.asset('assets/images/dp_agitator_gray.png',width: 30, height: 30,))),
+                                              DataCell(Text(dashBoardData[0].agitator[index].name, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
+                                              DataCell(Transform.scale(
+                                                scale: 0.7,
+                                                child: Tooltip(
+                                                  message: dashBoardData[0].agitator[index].selected? 'Close' : 'Open',
+                                                  child: Switch(
+                                                    hoverColor: Colors.pink.shade100,
+                                                    activeColor: Colors.teal,
+                                                    value: dashBoardData[0].agitator[index].selected,
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        dashBoardData[0].agitator[index].selected = value;
+                                                      });
+                                                    },
+                                                  ),
+                                                ),
+                                              )),
+                                            ])),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -1081,40 +1141,85 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
 
                         if (ddCurrentPosition==0 && dashBoardData.isNotEmpty)
                           dashBoardData[0].fan.isNotEmpty ? Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.only(left: 8, right: 5, top: 8),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
-                                  child: Text('Fan'),
-                                ),
-                                Wrap(
-                                  spacing: 8.0,
-                                  runSpacing: 8.0,
-                                  children: dashBoardData[0].fan.map((fan) {
-                                    return ChoiceChip(
-                                      label: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(fan.name),
-                                          const SizedBox(width: 8,),
-                                          Image.asset('assets/images/fan.png',width: 20, height: 20,)
-                                        ],
-                                      ),
-                                      selected: fan.selected,
-                                      onSelected: (bool selected) {
-                                        setState(() {
-                                          fan.selected = !fan.selected; // Toggle chip selection
-                                        });
-                                      },
-                                      selectedColor: Colors.teal,
-                                      backgroundColor: Colors.grey.shade300,
-                                      labelStyle: TextStyle(
-                                        color: fan.selected ? Colors.white : Colors.black,
-                                      ),
-                                    );
-                                  }).toList(),
+                                SizedBox(
+                                  height: dashBoardData[0].fan.length*40+48,
+                                  child: Card(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5.0), // Adjust the value as needed
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          width: MediaQuery.of(context).size.width,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal.shade50, // Background color (optional)
+                                            borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(5.0),
+                                              topRight: Radius.circular(5.0),
+                                            ),
+                                          ),
+                                          child: const Padding(
+                                            padding: EdgeInsets.only(left: 10.0, top: 8.0, bottom: 8.0), // Adjust values as needed
+                                            child: Text(
+                                              'Fan',
+                                              textAlign: TextAlign.left,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: dashBoardData[0].fan.length*40,
+                                          child: DataTable2(
+                                            columnSpacing: 12,
+                                            horizontalMargin: 12,
+                                            minWidth: 150,
+                                            dataRowHeight: 40.0,
+                                            headingRowHeight: 0,
+                                            headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
+                                            columns: const [
+                                              DataColumn2(
+                                                  label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
+                                                  fixedWidth: 35,
+                                              ),
+                                              DataColumn2(
+                                                  label: Text('',  style: TextStyle(fontSize: 14),),
+                                                  size: ColumnSize.M
+                                              ),
+                                              DataColumn2(
+                                                label: Center(
+                                                  child: Text('', textAlign: TextAlign.right,),
+                                                ),
+                                                fixedWidth: 70,
+                                              ),
+                                            ],
+                                            rows: List<DataRow>.generate(dashBoardData[0].fan.length, (index) => DataRow(cells: [
+                                              DataCell(Center(child: Image.asset('assets/images/irrigation_pump.png',width: 30, height: 30,))),
+                                              DataCell(Text(dashBoardData[0].fan[index].name, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
+                                              DataCell(Transform.scale(
+                                                scale: 0.7,
+                                                child: Tooltip(
+                                                  message: dashBoardData[0].fan[index].selected? 'Close' : 'Open',
+                                                  child: Switch(
+                                                    hoverColor: Colors.pink.shade100,
+                                                    activeColor: Colors.teal,
+                                                    value: dashBoardData[0].fan[index].selected,
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        dashBoardData[0].fan[index].selected = value;
+                                                      });
+                                                    },
+                                                  ),
+                                                ),
+                                              )),
+                                            ])),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -1122,40 +1227,85 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
 
                         if (ddCurrentPosition==0 && dashBoardData.isNotEmpty)
                           dashBoardData[0].fogger.isNotEmpty ? Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.only(left: 8, right: 5, top: 8),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
-                                  child: Text('Fogger'),
-                                ),
-                                Wrap(
-                                  spacing: 8.0,
-                                  runSpacing: 8.0,
-                                  children: dashBoardData[0].fogger.map((fogger) {
-                                    return ChoiceChip(
-                                      label: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(fogger.name),
-                                          const SizedBox(width: 8,),
-                                          Image.asset('assets/images/fogger.png',width: 20, height: 20,)
-                                        ],
-                                      ),
-                                      selected: fogger.selected,
-                                      onSelected: (bool selected) {
-                                        setState(() {
-                                          fogger.selected = !fogger.selected; // Toggle chip selection
-                                        });
-                                      },
-                                      selectedColor: Colors.teal,
-                                      backgroundColor: Colors.grey.shade300,
-                                      labelStyle: TextStyle(
-                                        color: fogger.selected ? Colors.white : Colors.black,
-                                      ),
-                                    );
-                                  }).toList(),
+                                SizedBox(
+                                  height: dashBoardData[0].fan.length*40+48,
+                                  child: Card(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5.0), // Adjust the value as needed
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          width: MediaQuery.of(context).size.width,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal.shade50, // Background color (optional)
+                                            borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(5.0),
+                                              topRight: Radius.circular(5.0),
+                                            ),
+                                          ),
+                                          child: const Padding(
+                                            padding: EdgeInsets.only(left: 10.0, top: 8.0, bottom: 8.0), // Adjust values as needed
+                                            child: Text(
+                                              'Fogger',
+                                              textAlign: TextAlign.left,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: dashBoardData[0].fogger.length*40,
+                                          child: DataTable2(
+                                            columnSpacing: 12,
+                                            horizontalMargin: 12,
+                                            minWidth: 150,
+                                            dataRowHeight: 40.0,
+                                            headingRowHeight: 0,
+                                            headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
+                                            columns: const [
+                                              DataColumn2(
+                                                  label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
+                                                  fixedWidth: 35,
+                                              ),
+                                              DataColumn2(
+                                                  label: Text('',  style: TextStyle(fontSize: 14),),
+                                                  size: ColumnSize.M
+                                              ),
+                                              DataColumn2(
+                                                label: Center(
+                                                  child: Text('', textAlign: TextAlign.right,),
+                                                ),
+                                                fixedWidth: 70,
+                                              ),
+                                            ],
+                                            rows: List<DataRow>.generate(dashBoardData[0].fogger.length, (index) => DataRow(cells: [
+                                              DataCell(Center(child: Image.asset('assets/images/irrigation_pump.png',width: 30, height: 30,))),
+                                              DataCell(Text(dashBoardData[0].fogger[index].name, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
+                                              DataCell(Transform.scale(
+                                                scale: 0.7,
+                                                child: Tooltip(
+                                                  message: dashBoardData[0].fogger[index].selected? 'Close' : 'Open',
+                                                  child: Switch(
+                                                    hoverColor: Colors.pink.shade100,
+                                                    activeColor: Colors.teal,
+                                                    value: dashBoardData[0].fogger[index].selected,
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        dashBoardData[0].fogger[index].selected = value;
+                                                      });
+                                                    },
+                                                  ),
+                                                ),
+                                              )),
+                                            ])),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -1163,40 +1313,85 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
 
                         if (ddCurrentPosition==0 && dashBoardData.isNotEmpty)
                           dashBoardData[0].boosterPump.isNotEmpty ? Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.only(left: 8, right: 5, top: 8),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
-                                  child: Text('Booster Pump'),
-                                ),
-                                Wrap(
-                                  spacing: 8.0,
-                                  runSpacing: 8.0,
-                                  children: dashBoardData[0].boosterPump.map((bp) {
-                                    return ChoiceChip(
-                                      label: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(bp.name),
-                                          const SizedBox(width: 8,),
-                                          Image.asset('assets/images/booster_pump.png',width: 20, height: 20,)
-                                        ],
-                                      ),
-                                      selected: bp.selected,
-                                      onSelected: (bool selected) {
-                                        setState(() {
-                                          bp.selected = !bp.selected; // Toggle chip selection
-                                        });
-                                      },
-                                      selectedColor: Colors.teal,
-                                      backgroundColor: Colors.grey.shade300,
-                                      labelStyle: TextStyle(
-                                        color: bp.selected ? Colors.white : Colors.black,
-                                      ),
-                                    );
-                                  }).toList(),
+                                SizedBox(
+                                  height: dashBoardData[0].boosterPump.length*40+48,
+                                  child: Card(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5.0), // Adjust the value as needed
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          width: MediaQuery.of(context).size.width,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal.shade50, // Background color (optional)
+                                            borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(5.0),
+                                              topRight: Radius.circular(5.0),
+                                            ),
+                                          ),
+                                          child: const Padding(
+                                            padding: EdgeInsets.only(left: 10.0, top: 8.0, bottom: 8.0), // Adjust values as needed
+                                            child: Text(
+                                              'Booster pump',
+                                              textAlign: TextAlign.left,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: dashBoardData[0].boosterPump.length*40,
+                                          child: DataTable2(
+                                            columnSpacing: 12,
+                                            horizontalMargin: 12,
+                                            minWidth: 150,
+                                            dataRowHeight: 40.0,
+                                            headingRowHeight: 0,
+                                            headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
+                                            columns: const [
+                                              DataColumn2(
+                                                  label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
+                                                  fixedWidth: 35,
+                                              ),
+                                              DataColumn2(
+                                                  label: Text('',  style: TextStyle(fontSize: 14),),
+                                                  size: ColumnSize.M
+                                              ),
+                                              DataColumn2(
+                                                label: Center(
+                                                  child: Text('', textAlign: TextAlign.right,),
+                                                ),
+                                                fixedWidth: 70,
+                                              ),
+                                            ],
+                                            rows: List<DataRow>.generate(dashBoardData[0].boosterPump.length, (index) => DataRow(cells: [
+                                              DataCell(Center(child: Image.asset('assets/images/booster_pump.png',width: 30, height: 30,))),
+                                              DataCell(Text(dashBoardData[0].boosterPump[index].name, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
+                                              DataCell(Transform.scale(
+                                                scale: 0.7,
+                                                child: Tooltip(
+                                                  message: dashBoardData[0].boosterPump[index].selected? 'Close' : 'Open',
+                                                  child: Switch(
+                                                    hoverColor: Colors.pink.shade100,
+                                                    activeColor: Colors.teal,
+                                                    value: dashBoardData[0].boosterPump[index].selected,
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        dashBoardData[0].boosterPump[index].selected = value;
+                                                      });
+                                                    },
+                                                  ),
+                                                ),
+                                              )),
+                                            ])),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -1204,40 +1399,85 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
 
                         if (ddCurrentPosition==0 && dashBoardData.isNotEmpty)
                           dashBoardData[0].selector.isNotEmpty ? Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.only(left: 8, right: 5, top: 8),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
-                                  child: Text('Selector'),
-                                ),
-                                Wrap(
-                                  spacing: 8.0,
-                                  runSpacing: 8.0,
-                                  children: dashBoardData[0].selector.map((selector) {
-                                    return ChoiceChip(
-                                      label: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(selector.name),
-                                          const SizedBox(width: 8,),
-                                          Image.asset('assets/images/booster_pump.png',width: 20, height: 20,)
-                                        ],
-                                      ),
-                                      selected: selector.selected,
-                                      onSelected: (bool selected) {
-                                        setState(() {
-                                          selector.selected = !selector.selected; // Toggle chip selection
-                                        });
-                                      },
-                                      selectedColor: Colors.teal,
-                                      backgroundColor: Colors.grey.shade300,
-                                      labelStyle: TextStyle(
-                                        color: selector.selected ? Colors.white : Colors.black,
-                                      ),
-                                    );
-                                  }).toList(),
+                                SizedBox(
+                                  height: dashBoardData[0].selector.length*40+48,
+                                  child: Card(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5.0), // Adjust the value as needed
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          width: MediaQuery.of(context).size.width,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal.shade50, // Background color (optional)
+                                            borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(5.0),
+                                              topRight: Radius.circular(5.0),
+                                            ),
+                                          ),
+                                          child: const Padding(
+                                            padding: EdgeInsets.only(left: 10.0, top: 8.0, bottom: 8.0), // Adjust values as needed
+                                            child: Text(
+                                              'Selector',
+                                              textAlign: TextAlign.left,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: dashBoardData[0].selector.length*40,
+                                          child: DataTable2(
+                                            columnSpacing: 12,
+                                            horizontalMargin: 12,
+                                            minWidth: 150,
+                                            dataRowHeight: 40.0,
+                                            headingRowHeight: 0,
+                                            headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
+                                            columns: const [
+                                              DataColumn2(
+                                                  label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
+                                                  fixedWidth: 35,
+                                              ),
+                                              DataColumn2(
+                                                  label: Text('',  style: TextStyle(fontSize: 14),),
+                                                  size: ColumnSize.M
+                                              ),
+                                              DataColumn2(
+                                                label: Center(
+                                                  child: Text('', textAlign: TextAlign.right,),
+                                                ),
+                                                fixedWidth: 70,
+                                              ),
+                                            ],
+                                            rows: List<DataRow>.generate(dashBoardData[0].selector.length, (index) => DataRow(cells: [
+                                              DataCell(Center(child: Image.asset('assets/images/selector.png',width: 30, height: 30,))),
+                                              DataCell(Text(dashBoardData[0].selector[index].name, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
+                                              DataCell(Transform.scale(
+                                                scale: 0.7,
+                                                child: Tooltip(
+                                                  message: dashBoardData[0].selector[index].selected? 'Close' : 'Open',
+                                                  child: Switch(
+                                                    hoverColor: Colors.pink.shade100,
+                                                    activeColor: Colors.teal,
+                                                    value: dashBoardData[0].selector[index].selected,
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        dashBoardData[0].selector[index].selected = value;
+                                                      });
+                                                    },
+                                                  ),
+                                                ),
+                                              )),
+                                            ])),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -1246,8 +1486,13 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                     ),
                   ),
                 ),
-                const VerticalDivider(width: 5),
-                Expanded(
+                const Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: VerticalDivider(width: 5),
+                ),
+                SizedBox(
+                  width: 325,
+                  height: double.infinity,
                   child: Padding(
                     padding: const EdgeInsets.only(right: 5),
                     child: DisplayLineOrSequence(lineOrSequence: dashBoardData.isNotEmpty ? dashBoardData[0].lineOrSequence : [], ddCurrentPosition: ddCurrentPosition,),
@@ -1261,6 +1506,46 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
               mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(width: 10),
+                MaterialButton(
+                  color: Colors.redAccent,
+                  textColor: Colors.white,
+                  onPressed:() async {
+                    if(ddCurrentPosition==0){
+                      String payload = '0,0,0,0';
+                      String payLoadFinal = jsonEncode({
+                        "800": [{"801": payload}]
+                      });
+                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
+                      sentManualModeToServer(programList[ddCurrentPosition].serialNumber, 0, standAloneMethod, '00:00:00', '0', [], payLoadFinal);
+                    }
+                    else{
+                      for (var lineOrSq in dashBoardData[0].lineOrSequence) {
+                        if(lineOrSq.selected){
+                          standaloneSelection.add({
+                            'id': lineOrSq.id,
+                            'sNo': lineOrSq.sNo,
+                            'name': lineOrSq.name,
+                            'location': lineOrSq.location,
+                            'selected': lineOrSq.selected,
+                          });
+                          break;
+                        }
+                      }
+
+                      String payLoadFinal = jsonEncode({
+                        "3900": [{"3901": '0,${programList[ddCurrentPosition].programCategory},${programList[ddCurrentPosition].serialNumber},'
+                            '${standaloneSelection.isNotEmpty?standaloneSelection[0]['sNo']:''},,,,,,,,,0,'}]
+                      });
+                      standaloneSelection.clear();
+
+                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
+                      sentManualModeToServer(programList[ddCurrentPosition].serialNumber, 0, standAloneMethod, '00:00:00', '0', [], payLoadFinal);
+
+                    }
+                  },
+                  child: const Text('Stop Manually'),
+                ),
+                const SizedBox(width: 16),
                 MaterialButton(
                   color: Colors.green,
                   textColor: Colors.white,
@@ -1489,47 +1774,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                       }
                     }
                   },
-                  child: const Text('Start'),
-                ),
-                const SizedBox(width: 10),
-                MaterialButton(
-                  color: Colors.redAccent,
-                  textColor: Colors.white,
-                  onPressed:() async {
-                    if(ddCurrentPosition==0){
-                      String payload = '0,0,0,0';
-                      String payLoadFinal = jsonEncode({
-                        "800": [{"801": payload}]
-                      });
-                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
-                      sentManualModeToServer(programList[ddCurrentPosition].serialNumber, 0, standAloneMethod, '00:00:00', '0', [], payLoadFinal);
-                    }
-                    else{
-                      for (var lineOrSq in dashBoardData[0].lineOrSequence) {
-                        if(lineOrSq.selected){
-                          standaloneSelection.add({
-                            'id': lineOrSq.id,
-                            'sNo': lineOrSq.sNo,
-                            'name': lineOrSq.name,
-                            'location': lineOrSq.location,
-                            'selected': lineOrSq.selected,
-                          });
-                          break;
-                        }
-                      }
-
-                      String payLoadFinal = jsonEncode({
-                        "3900": [{"3901": '0,${programList[ddCurrentPosition].programCategory},${programList[ddCurrentPosition].serialNumber},'
-                            '${standaloneSelection.isNotEmpty?standaloneSelection[0]['sNo']:''},,,,,,,,,0,'}]
-                      });
-                      standaloneSelection.clear();
-
-                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
-                      sentManualModeToServer(programList[ddCurrentPosition].serialNumber, 0, standAloneMethod, '00:00:00', '0', [], payLoadFinal);
-
-                    }
-                  },
-                  child: const Text('Stop'),
+                  child: const Text('Start Manually'),
                 ),
                 const SizedBox(width: 15),
               ],
@@ -2525,7 +2770,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Set Duration'),
+          title: const Text('Standalone duration'),
           content: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -2573,14 +2818,18 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () {
+            MaterialButton(
+              color: Colors.redAccent,
+              textColor: Colors.white,
+              onPressed:() async {
                 Navigator.of(context).pop();
               },
               child: const Text('Cancel'),
             ),
-            ElevatedButton(
-              onPressed: () {
+            MaterialButton(
+              color: Colors.teal,
+              textColor: Colors.white,
+              onPressed:() async {
                 if (_validateTime(_hoursController.text, 'hours') &&
                     _validateTime(_minutesController.text, 'minutes') &&
                     _validateTime(_secondsController.text, 'seconds')) {
@@ -2610,7 +2859,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                   );
                 }
               },
-              child: const Text('OK'),
+              child: const Text('Set duration'),
             ),
           ],
         );
@@ -2710,7 +2959,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                               ),
                             ),
                           ),
-                        )
+                        ),
                     ],
                   ),
                 ),
@@ -2724,7 +2973,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                       minWidth: 150,
                       dataRowHeight: 40.0,
                       headingRowHeight: 0,
-                      headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
+                      headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.05)),
                       columns: const [
                         DataColumn2(
                             label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
@@ -2738,13 +2987,13 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                           label: Center(
                             child: Text('Valve Status', textAlign: TextAlign.right,),
                           ),
-                          fixedWidth: 100,
+                          fixedWidth: 70,
                         ),
                       ],
                       rows: List<DataRow>.generate(groupedValves[valveLocation]!.length, (index) => DataRow(cells: [
                         DataCell(Center(child: Image.asset('assets/images/valve_gray.png',width: 25, height: 25,))),
-                        DataCell(Center(child: Text(groupedValves[valveLocation]![index].name, style: const TextStyle(fontWeight: FontWeight.normal)))),
-                        DataCell(Center(child: Transform.scale(
+                        DataCell(Text(groupedValves[valveLocation]![index].name, style: const TextStyle(fontWeight: FontWeight.normal))),
+                        DataCell(Transform.scale(
                           scale: 0.7,
                           child: Tooltip(
                             message: groupedValves[valveLocation]![index].isOn? 'Close' : 'Open',
@@ -2759,7 +3008,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                               },
                             ),
                           ),
-                        ))),
+                        )),
                       ])),
                     ) :
                     DataTable2(
@@ -2775,7 +3024,7 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                             fixedWidth: 30
                         ),
                         DataColumn2(
-                          label: Center(child: Text('Location', style: TextStyle(fontSize: 14),)),
+                          label: Center(child: Text('', style: TextStyle(fontSize: 14),)),
                           fixedWidth: 100,
                         ),
                         DataColumn2(

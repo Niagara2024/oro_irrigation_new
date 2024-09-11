@@ -1,14 +1,10 @@
 import 'dart:convert';
-import 'dart:html';
 
 import 'package:chat_bubbles/bubbles/bubble_special_one.dart';
-import 'package:chat_bubbles/bubbles/bubble_special_two.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:oro_irrigation_new/Models/Customer/Dashboard/SentAndReceivedModel.dart';
-import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../../../constants/http_service.dart';
@@ -210,8 +206,8 @@ class _SentAndReceivedState extends State<SentAndReceived> {
           }
         },
       ):
-      const Center(child: Text('Controller have been no updates or messages from the controller today',
-        style: TextStyle(fontSize: 17,fontWeight: FontWeight.normal),),),
+       Center(child: Text('Controller have been no updates or messages on ${DateFormat('dd-MM-yyyy').format(_selectedDay!)}',
+        style: const TextStyle(fontSize: 17,fontWeight: FontWeight.normal),),),
     );
   }
 

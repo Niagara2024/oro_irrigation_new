@@ -662,7 +662,8 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                                 ),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: dashBoardData[0].centralFilterSite.map((site) {
+                                  children: List.generate(dashBoardData[0].centralFilterSite.length, (siteIndex) {
+                                    final site = dashBoardData[0].centralFilterSite[siteIndex];
                                     List<FilterList> filters = site.filter;
                                     return Column(
                                       children: [
@@ -728,6 +729,13 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                                                             activeColor: Colors.teal,
                                                             value: filters[index].selected,
                                                             onChanged: (value) {
+                                                              for (var i = 0; i < dashBoardData[0].centralFilterSite.length; i++) {
+                                                                if (i != siteIndex) {
+                                                                  for (var filter in dashBoardData[0].centralFilterSite[i].filter) {
+                                                                    filter.selected = false;
+                                                                  }
+                                                                }
+                                                              }
                                                               setState(() {
                                                                 filters[index].selected = value;
                                                               });
@@ -919,7 +927,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                                                       ),
                                                     ],
                                                     rows: List<DataRow>.generate(fertilizers.length, (index) => DataRow(cells: [
-                                                      DataCell(Center(child: Image.asset('assets/images/irrigation_pump.png',width: 30, height: 30,))),
+                                                      DataCell(Center(child: Image.asset('assets/images/fert_chanel.png',width: 30, height: 30,))),
                                                       DataCell(Text(fertilizers[index].name, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
                                                       DataCell(Transform.scale(
                                                         scale: 0.7,
@@ -1019,7 +1027,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                                                       ),
                                                     ],
                                                     rows: List<DataRow>.generate(fertilizers.length, (index) => DataRow(cells: [
-                                                      DataCell(Center(child: Image.asset('assets/images/irrigation_pump.png',width: 30, height: 30,))),
+                                                      DataCell(Center(child: Image.asset('assets/images/fert_chanel.png',width: 30, height: 30,))),
                                                       DataCell(Text(fertilizers[index].name, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14))),
                                                       DataCell(Transform.scale(
                                                         scale: 0.7,

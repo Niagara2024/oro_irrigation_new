@@ -1751,18 +1751,15 @@ class AlarmListItems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(payload.alarmList);
     return payload.alarmList.isNotEmpty? DataTable2(
       columnSpacing: 12,
       horizontalMargin: 12,
       minWidth: 550,
       dataRowHeight: 45.0,
       headingRowHeight: 35.0,
-      headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
+      headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
       columns: const [
-        DataColumn2(
-          label: Text('S-No', style: TextStyle(fontSize: 13),),
-          fixedWidth: 50,
-        ),
         DataColumn2(
           label: Text('', style: TextStyle(fontSize: 13)),
           fixedWidth: 40,
@@ -1773,7 +1770,11 @@ class AlarmListItems extends StatelessWidget {
         ),
         DataColumn2(
             label: Text('Location', style: TextStyle(fontSize: 13),),
-            size: ColumnSize.L
+            size: ColumnSize.M
+        ),
+        DataColumn2(
+            label: Text('Date-time', style: TextStyle(fontSize: 13),),
+            size: ColumnSize.M
         ),
         DataColumn2(
           label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
@@ -1781,10 +1782,10 @@ class AlarmListItems extends StatelessWidget {
         ),
       ],
       rows: List<DataRow>.generate(payload.alarmList.length, (index) => DataRow(cells: [
-        DataCell(Text('${index+1}')),
         DataCell(Icon(Icons.warning_amber, color: payload.alarmList[index]['Status']==1 ? Colors.orangeAccent : Colors.redAccent,)),
         DataCell(Text(getAlarmMessage(payload.alarmList[index]['AlarmType']))),
         DataCell(Text(payload.alarmList[index]['Location'])),
+        const DataCell(Text('now')),
         DataCell(Center(child: MaterialButton(
           color: Colors.redAccent,
           textColor: Colors.white,
@@ -1841,9 +1842,6 @@ class AlarmListItems extends StatelessWidget {
         break;
       case 12:
         msg ='Sump Tank Empty';
-        break;
-      case 13:
-        msg ='Top Tank Full';
         break;
       case 13:
         msg ='Top Tank Full';

@@ -94,7 +94,6 @@ class _ControllerSettingsState extends State<ControllerSettings> {
       "controllerId": widget.siteData.master[widget.masterIndex].controllerId
     });
     if (response.statusCode == 200) {
-      print(response.body);
       var data = jsonDecode(response.body);
       if (data["code"] == 200) {
         txtEcSiteName.text = data["data"][0]['groupName'];
@@ -146,7 +145,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
         : Scaffold(
             backgroundColor: Colors.white,
             body: DefaultTabController(
-              length: 3, // Number of tabs
+              length: 4,
               child: Column(
                 children: [
                   const TabBar(
@@ -157,6 +156,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                       Tab(text: 'General'),
                       Tab(text: 'Preference'),
                       Tab(text: 'Names'),
+                      Tab(text: 'View Settings'),
                     ],
                   ),
                   Expanded(
@@ -166,13 +166,14 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                           padding: const EdgeInsets.all(8.0),
                           child: buildGeneralContent(screenWidth),
                         ),
-                        const Center(child: Text('Tab 3 Content')),
+                        const Center(child: Text('Tab 2 Content')),
                         Center(
                             child: Names(
                                 userID: widget.customerID,
                                 customerID: widget.customerID,
                                 controllerId: widget.siteData.master[0].controllerId,
                               imeiNo: widget.siteData.master[0].deviceId,)),
+                        const Center(child: Text('Tab 4 Content')),
                       ],
                     ),
                   ),

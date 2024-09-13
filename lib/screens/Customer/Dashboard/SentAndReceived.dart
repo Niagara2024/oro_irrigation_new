@@ -231,7 +231,7 @@ class _SentAndReceivedState extends State<SentAndReceived> {
                     },
                     onTap: (){
                       if(hasPayloadViewPermission){
-                        getUserSoftwareOrHardwarePayload(sentAndReceivedList[index].sentAndReceivedId);
+                        getUserSoftwareOrHardwarePayload(sentAndReceivedList[index].sentAndReceivedId,'Hardware payload',sentAndReceivedList[index].message);
                       }
                     },
                     child: BubbleSpecialOne(
@@ -311,7 +311,7 @@ class _SentAndReceivedState extends State<SentAndReceived> {
                     },
                     onTap: (){
                       if(hasPayloadViewPermission){
-                        getUserSoftwareOrHardwarePayload(sentAndReceivedList[index].sentAndReceivedId);
+                        getUserSoftwareOrHardwarePayload(sentAndReceivedList[index].sentAndReceivedId,'Software payload', sentAndReceivedList[index].message);
                       }
                     },
                     child: BubbleSpecialOne(
@@ -364,18 +364,19 @@ class _SentAndReceivedState extends State<SentAndReceived> {
     }
   }
 
-  Future<void> getUserSoftwareOrHardwarePayload(int sentAndReceivedId) async {
+  Future<void> getUserSoftwareOrHardwarePayload(int sentAndReceivedId, String aTitle, String pyTitle) async {
     var data = {
       "userId": widget.customerID,
       "controllerId": widget.controllerId,
       "sentAndReceivedId": sentAndReceivedId,
     };
-
     try {
       final getUserSentAndReceivedHardwarePayload = await HttpService().postRequest("getUserSentAndReceivedHardwarePayload", data);
       final response = jsonDecode(getUserSentAndReceivedHardwarePayload.body);
       if (getUserSentAndReceivedHardwarePayload.statusCode == 200) {
-        displayJsonData(context, response);
+        if(response['code']==200){
+          displayJsonData(context, response['data']['message'], aTitle, pyTitle);
+        }
       } else {
         log('Failed to load data');
       }
@@ -385,14 +386,20 @@ class _SentAndReceivedState extends State<SentAndReceived> {
     }
   }
 
-  void displayJsonData(BuildContext context, Map<String, dynamic> jsonData) {
+  void displayJsonData(BuildContext context, Map<String, dynamic> jsonData, String aTitle, String pyTitle,) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('JSON Data'),
+          title: Text(aTitle),
           content: SingleChildScrollView(
-            child: JsonViewer(jsonData,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(pyTitle, style: const TextStyle(color: Colors.teal),),
+                const Divider(),
+                JsonViewer(jsonData,),
+              ],
             ),
           ),
           actions: [

@@ -20,12 +20,12 @@ class MqttPayloadProvider with ChangeNotifier {
   int batVolt = 0;
   List<dynamic> PrsIn = [];
   List<dynamic> PrsOut = [];
-  List<dynamic> filtersCentral = [];
-  List<dynamic> filtersLocal = [];
+  List<dynamic> centralFilter = [];
+  List<dynamic> localFilter = [];
   List<dynamic> sourcePump = [];
   List<dynamic> irrigationPump = [];
-  List<dynamic> fertilizerCentral = [];
-  List<dynamic> fertilizerLocal = [];
+  List<dynamic> centralFertilizer = [];
+  List<dynamic> localFertilizer = [];
   List<dynamic> waterMeter = [];
   List<dynamic> alarmList = [];
   List<dynamic> payload2408 = [];
@@ -113,22 +113,22 @@ class MqttPayloadProvider with ChangeNotifier {
           //print('upcomingProgram:${upcomingProgram}');
           if (data['2400'][0].containsKey('2405')) {
             List<dynamic> filtersJson = data['2400'][0]['2405'];
-            filtersCentral = [];
-            filtersLocal = [];
+            centralFilter = [];
+            localFilter = [];
 
             for (var filter in filtersJson) {
               if (filter['Type'] == 1) {
-                filtersCentral.add(filter);
+                centralFilter.add(filter);
               } else if (filter['Type'] == 2) {
-                filtersLocal.add(filter);
+                localFilter.add(filter);
               }
             }
           }
 
           if (data['2400'][0].containsKey('2406')) {
             List<dynamic> fertilizer = data['2400'][0]['2406'];
-            fertilizerCentral = fertilizer.where((item) => item['Type'] == 1).toList();
-            fertilizerLocal = fertilizer.where((item) => item['Type'] == 2).toList();
+            centralFertilizer = fertilizer.where((item) => item['Type'] == 1).toList();
+            localFertilizer = fertilizer.where((item) => item['Type'] == 2).toList();
           }
 
           if (data['2400'][0].containsKey('2407')) {
@@ -251,14 +251,14 @@ class MqttPayloadProvider with ChangeNotifier {
       Map<String, dynamic> data = jsonDecode(payload);
       if (data['2400'][0].containsKey('2405')) {
         List<dynamic> filtersJson = data['2400'][0]['2405'];
-        filtersCentral = [];
-        filtersLocal = [];
+        centralFilter = [];
+        localFilter = [];
 
         for (var filter in filtersJson) {
           if (filter['Type'] == 1) {
-            filtersCentral.add(filter);
+            centralFilter.add(filter);
           } else if (filter['Type'] == 2) {
-            filtersLocal.add(filter);
+            localFilter.add(filter);
           }
         }
       }
@@ -273,8 +273,8 @@ class MqttPayloadProvider with ChangeNotifier {
       Map<String, dynamic> data = jsonDecode(payload);
       if (data['2400'][0].containsKey('2406')) {
         List<dynamic> fertilizer = data['2400'][0]['2406'];
-        fertilizerCentral = fertilizer.where((item) => item['Type'] == 1).toList();
-        fertilizerLocal = fertilizer.where((item) => item['Type'] == 2).toList();
+        centralFertilizer = fertilizer.where((item) => item['Type'] == 1).toList();
+        localFertilizer = fertilizer.where((item) => item['Type'] == 2).toList();
       }
       notifyListeners();
     } catch (e) {

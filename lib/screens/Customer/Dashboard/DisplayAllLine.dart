@@ -46,12 +46,12 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       widget.provider.sourcePump.isNotEmpty? Padding(
-                        padding: EdgeInsets.only(top:  widget.provider.fertilizerCentral.isNotEmpty ||  widget.provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                        padding: EdgeInsets.only(top:  widget.provider.centralFertilizer.isNotEmpty ||  widget.provider.localFertilizer.isNotEmpty? 38.4:0),
                         child: DisplaySourcePump(deviceId: widget.currentMaster.deviceId, currentLineId: 'all', spList: widget.provider.sourcePump, userId: widget.userId, controllerId: widget.currentMaster.controllerId,),
                       ):
                       const SizedBox(),
                       widget.provider.irrigationPump.isNotEmpty? Padding(
-                        padding: EdgeInsets.only(top: widget.provider.fertilizerCentral.isNotEmpty || widget.provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                        padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
                         child: SizedBox(
                           width: 52.50,
                           height: 70,
@@ -66,13 +66,13 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
                       const SizedBox(),
 
                       widget.provider.irrigationPump.isNotEmpty? Padding(
-                        padding: EdgeInsets.only(top: widget.provider.fertilizerCentral.isNotEmpty || widget.provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                        padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
                         child: DisplayIrrigationPump(currentLineId: 'all', deviceId: widget.currentMaster.deviceId, ipList: widget.provider.irrigationPump,),
                       ):
                       const SizedBox(),
 
-                      widget.provider.filtersCentral.isEmpty && widget.provider.fertilizerCentral.isEmpty &&
-                          widget.provider.filtersLocal.isEmpty && widget.provider.fertilizerLocal.isEmpty ? SizedBox(
+                      widget.provider.centralFilter.isEmpty && widget.provider.centralFertilizer.isEmpty &&
+                          widget.provider.localFilter.isEmpty && widget.provider.localFertilizer.isEmpty ? SizedBox(
                         width: 4.5,
                         height: 100,
                         child: Row(
@@ -92,18 +92,18 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
                       const SizedBox(),
 
 
-                      widget.provider.filtersCentral.isNotEmpty? Padding(
-                        padding: EdgeInsets.only(top: widget.provider.fertilizerCentral.isNotEmpty || widget.provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                        child: DisplayFilter(currentLineId: 'all', filtersSites: widget.provider.filtersCentral,),
+                      widget.provider.centralFilter.isNotEmpty? Padding(
+                        padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
+                        child: DisplayFilter(currentLineId: 'all', filtersSites: widget.provider.centralFilter,),
                       ):
                       const SizedBox(),
 
                       for(int i=0; i<widget.provider.payload2408.length; i++)
                         widget.provider.payload2408.isNotEmpty?  Padding(
-                          padding: EdgeInsets.only(top: widget.provider.fertilizerCentral.isNotEmpty || widget.provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                          padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
                           child: DisplaySensor(crInx: i),
                         ) : const SizedBox(),
-                      widget.provider.fertilizerCentral.isNotEmpty? const DisplayCentralFertilizer(currentLineId: 'all',):
+                      widget.provider.centralFertilizer.isNotEmpty? const DisplayCentralFertilizer(currentLineId: 'all',):
                       const SizedBox(),
 
                       //local
@@ -114,7 +114,7 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              (widget.provider.fertilizerCentral.isNotEmpty || widget.provider.filtersCentral.isNotEmpty) && widget.provider.fertilizerLocal.isNotEmpty? SizedBox(
+                              (widget.provider.centralFertilizer.isNotEmpty || widget.provider.centralFilter.isNotEmpty) && widget.provider.localFertilizer.isNotEmpty? SizedBox(
                                 width: 4.5,
                                 height: 150,
                                 child: Row(
@@ -132,12 +132,12 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
                                 ),
                               ):
                               const SizedBox(),
-                              widget.provider.filtersLocal.isNotEmpty? Padding(
-                                padding: EdgeInsets.only(top: widget.provider.fertilizerLocal.isNotEmpty?38.4:0),
-                                child:  LocalFilter(currentLineId: 'all', filtersSites: widget.provider.filtersLocal,),
+                              widget.provider.localFilter.isNotEmpty? Padding(
+                                padding: EdgeInsets.only(top: widget.provider.localFertilizer.isNotEmpty?38.4:0),
+                                child:  LocalFilter(currentLineId: 'all', filtersSites: widget.provider.localFilter,),
                               ):
                               const SizedBox(),
-                              widget.provider.fertilizerLocal.isNotEmpty? const DisplayLocalFertilizer(currentLineId: 'all',):
+                              widget.provider.localFertilizer.isNotEmpty? const DisplayLocalFertilizer(currentLineId: 'all',):
                               const SizedBox(),
                             ],
                           ),

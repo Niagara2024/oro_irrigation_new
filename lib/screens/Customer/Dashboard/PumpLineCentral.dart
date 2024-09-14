@@ -58,13 +58,13 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     widget.provider.sourcePump.isNotEmpty? Padding(
-                      padding: EdgeInsets.only(top: widget.provider.fertilizerCentral.isNotEmpty || widget.provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                      padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
                       child: DisplaySourcePump(deviceId: widget.currentSiteData.master[widget.masterIdx].deviceId, currentLineId: widget.crrIrrLine.id, spList:  widget.provider.sourcePump, userId: widget.userId, controllerId: widget.currentSiteData.master[widget.masterIdx].controllerId,),
                     ):
                     const SizedBox(),
 
                     widget.provider.irrigationPump.isNotEmpty? Padding(
-                      padding: EdgeInsets.only(top: widget.provider.fertilizerCentral.isNotEmpty || widget.provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                      padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
                       child: SizedBox(
                         width: 52.50,
                         height: 70,
@@ -79,21 +79,21 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                     const SizedBox(),
 
                     widget.provider.irrigationPump.isNotEmpty? Padding(
-                      padding: EdgeInsets.only(top: widget.provider.fertilizerCentral.isNotEmpty || widget.provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                      padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
                       child: DisplayIrrigationPump(currentLineId: widget.crrIrrLine.id, deviceId: widget.currentSiteData.master[widget.masterIdx].deviceId, ipList: widget.provider.irrigationPump,),
                     ):
                     const SizedBox(),
 
-                    if(widget.provider.filtersCentral.isEmpty)
+                    if(widget.provider.centralFilter.isEmpty)
                       for(int i=0; i<widget.provider.payload2408.length; i++)
                         widget.provider.payload2408.isNotEmpty?  Padding(
-                          padding: EdgeInsets.only(top: widget.provider.fertilizerCentral.isNotEmpty || widget.provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                          padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
                           child: widget.provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(crInx: i):null,
                         ) :
                         const SizedBox(),
 
-                    widget.provider.filtersCentral.isEmpty && widget.provider.fertilizerCentral.isEmpty &&
-                        widget.provider.filtersLocal.isEmpty && widget.provider.fertilizerLocal.isEmpty ? SizedBox(
+                    widget.provider.centralFilter.isEmpty && widget.provider.centralFertilizer.isEmpty &&
+                        widget.provider.localFilter.isEmpty && widget.provider.localFertilizer.isEmpty ? SizedBox(
                       width: 4.5,
                       height: 100,
                       child: Row(
@@ -113,19 +113,19 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                     const SizedBox(),
 
 
-                    widget.provider.filtersCentral.isNotEmpty? Padding(
-                      padding: EdgeInsets.only(top: widget.provider.fertilizerCentral.isNotEmpty || widget.provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                      child: DisplayFilter(currentLineId: widget.crrIrrLine.id, filtersSites: widget.provider.filtersCentral,),
+                    widget.provider.centralFilter.isNotEmpty? Padding(
+                      padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
+                      child: DisplayFilter(currentLineId: widget.crrIrrLine.id, filtersSites: widget.provider.centralFilter,),
                     ): const SizedBox(),
 
-                    if(widget.provider.filtersCentral.isNotEmpty)
+                    if(widget.provider.centralFilter.isNotEmpty)
                       for(int i=0; i<widget.provider.payload2408.length; i++)
                         widget.provider.payload2408.isNotEmpty?  Padding(
-                          padding: EdgeInsets.only(top: widget.provider.fertilizerCentral.isNotEmpty || widget.provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                          padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
                           child: widget.provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(crInx: i):null,
                         ) : const SizedBox(),
 
-                    widget.provider.fertilizerCentral.isNotEmpty? DisplayCentralFertilizer(currentLineId: widget.crrIrrLine.id,): const SizedBox(),
+                    widget.provider.centralFertilizer.isNotEmpty? DisplayCentralFertilizer(currentLineId: widget.crrIrrLine.id,): const SizedBox(),
 
                     //local
                     widget.provider.irrigationPump.isNotEmpty? Column(
@@ -135,7 +135,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            (widget.provider.fertilizerCentral.isNotEmpty || widget.provider.filtersCentral.isNotEmpty) && widget.provider.fertilizerLocal.isNotEmpty?
+                            (widget.provider.centralFertilizer.isNotEmpty || widget.provider.centralFilter.isNotEmpty) && widget.provider.localFertilizer.isNotEmpty?
                             SizedBox(
                               width: 4.5,
                               height: 150,
@@ -154,12 +154,12 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                               ),
                             ):
                             const SizedBox(),
-                            widget.provider.filtersLocal.isNotEmpty? Padding(
-                              padding: EdgeInsets.only(top: widget.provider.fertilizerLocal.isNotEmpty?38.4:0),
-                              child: LocalFilter(currentLineId: widget.crrIrrLine.id, filtersSites: widget.provider.filtersLocal,),
+                            widget.provider.localFilter.isNotEmpty? Padding(
+                              padding: EdgeInsets.only(top: widget.provider.localFertilizer.isNotEmpty?38.4:0),
+                              child: LocalFilter(currentLineId: widget.crrIrrLine.id, filtersSites: widget.provider.localFilter,),
                             ):
                             const SizedBox(),
-                            widget.provider.fertilizerLocal.isNotEmpty? DisplayLocalFertilizer(currentLineId: widget.crrIrrLine.id,):
+                            widget.provider.localFertilizer.isNotEmpty? DisplayLocalFertilizer(currentLineId: widget.crrIrrLine.id,):
                             const SizedBox(),
                           ],
                         ),
@@ -1607,7 +1607,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
 
   @override
   Widget build(BuildContext context) {
-    final overallFrtCentral = Provider.of<MqttPayloadProvider>(context).fertilizerCentral;
+    final overallFrtCentral = Provider.of<MqttPayloadProvider>(context).centralFertilizer;
 
     List<Map<String, dynamic>> fertilizerCentral = overallFrtCentral
         .where((pump) => widget.currentLineId== 'all' || pump['Location'].contains(widget.currentLineId))
@@ -1968,7 +1968,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
     timer?.cancel();
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       try{
-        final fertilizerCentral = Provider.of<MqttPayloadProvider>(context, listen: false).fertilizerCentral;
+        final fertilizerCentral = Provider.of<MqttPayloadProvider>(context, listen: false).centralFertilizer;
         for (var central in fertilizerCentral) {
           central['Fertilizer'].forEach((fertilizer) {
             int ferMethod = fertilizer['FertMethod'] is int
@@ -2645,11 +2645,11 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
   @override
   Widget build(BuildContext context) {
 
-    final overallFrtLocal = Provider.of<MqttPayloadProvider>(context).fertilizerLocal;
+    final overallFrtLocal = Provider.of<MqttPayloadProvider>(context).localFertilizer;
 
     List<Map<String, dynamic>> fertilizerLocal =[];
     if(widget.currentLineId=='all'){
-      fertilizerLocal = Provider.of<MqttPayloadProvider>(context,listen: false).fertilizerLocal.toList().cast<Map<String, dynamic>>();
+      fertilizerLocal = Provider.of<MqttPayloadProvider>(context,listen: false).localFertilizer.toList().cast<Map<String, dynamic>>();
     }else{
       fertilizerLocal = overallFrtLocal
           .where((lfr) => lfr['Location'].contains(widget.currentLineId)).toList()
@@ -3009,7 +3009,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
     timer?.cancel();
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       try{
-        final fertilizerLocal = Provider.of<MqttPayloadProvider>(context, listen: false).fertilizerLocal;
+        final fertilizerLocal = Provider.of<MqttPayloadProvider>(context, listen: false).localFertilizer;
         for (var localFer in fertilizerLocal) {
           localFer['Fertilizer'].forEach((fertilizer) {
             int ferMethod = fertilizer['FertMethod'] is int

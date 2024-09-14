@@ -62,15 +62,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   String _myCurrentIrrLine= 'No Line Available';
 
   String fromWhere = '';
-
   bool appbarBottomOpen = false;
-  bool _isHovered1 = false;
-  bool _isHovered2 = false;
-  bool _isHovered3 = false;
-  bool _isHovered4 = false;
-  bool _isHovered5 = false;
-
-  final ValueNotifier<String> liveSyncNotifier = ValueNotifier<String>('2024-07-20 - 14:30');
 
 
 
@@ -1108,37 +1100,58 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               destinations: const [
                 NavigationRailDestination(
                   padding: EdgeInsets.only(top: 5),
-                  icon: Icon(Icons.dashboard_outlined),
+                  icon: Tooltip(
+                    message: 'Dashboard',
+                    child: Icon(Icons.dashboard_outlined),
+                  ),
                   selectedIcon: Icon(Icons.dashboard_outlined, color: Colors.white,),
                   label: Text(''),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.devices_other),
+                  icon: Tooltip(
+                    message: 'All my devices',
+                    child: Icon(Icons.devices_other),
+                  ),
                   selectedIcon: Icon(Icons.devices_other, color: Colors.white),
                   label: Text(''),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.question_answer_outlined),
+                  icon: Tooltip(
+                    message: 'Sent & Received',
+                    child: Icon(Icons.question_answer_outlined),
+                  ),
                   selectedIcon: Icon(Icons.question_answer_outlined, color: Colors.white,),
                   label: Text(''),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.receipt_outlined),
+                  icon: Tooltip(
+                    message: 'Controller Logs',
+                    child: Icon(Icons.receipt_outlined),
+                  ),
                   selectedIcon: Icon(Icons.receipt_outlined, color: Colors.white,),
                   label: Text(''),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(CupertinoIcons.cloud_sun_bolt),
+                  icon: Tooltip(
+                    message: 'Weather',
+                    child: Icon(CupertinoIcons.cloud_sun_bolt),
+                  ),
                   selectedIcon: Icon(CupertinoIcons.cloud_sun_bolt, color: Colors.white,),
                   label: Text(''),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.request_page_outlined),
-                  selectedIcon: Icon(Icons.request_page_outlined, color: Colors.white,),
+                  icon: Tooltip(
+                    message: 'Service request',
+                    child: Icon(Icons.support_agent),
+                  ),
+                  selectedIcon: Icon(Icons.support_agent, color: Colors.white,),
                   label: Text(''),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.settings_outlined),
+                  icon: Tooltip(
+                    message: 'Settings',
+                    child: Icon(Icons.settings_outlined),
+                  ),
                   selectedIcon: Icon(Icons.settings_outlined, color: Colors.white,),
                   label: Text(''),
                 ),
@@ -1713,6 +1726,7 @@ class BadgeButton extends StatelessWidget {
           tooltip: 'Alarm',
           onPressed: onPressed,
           icon: Icon(icon, color: Colors.white,),
+          hoverColor: Colors.cyan,
         ),
         if (badgeNumber > 0)
           Positioned(

@@ -66,7 +66,6 @@ dependencies:
   calendar_view: ^1.2.0
   device_info_plus: ^10.1.0
   universal_html: ^2.2.4
-  flutter_json_viewer: ^1.0.1
 
 
 dev_dependencies:

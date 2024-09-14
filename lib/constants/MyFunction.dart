@@ -12,12 +12,12 @@ class MyFunction {
     payloadProvider.PrsOut=[];
     payloadProvider.programQueue.clear();
     payloadProvider.scheduledProgram.clear();
-    payloadProvider.filtersCentral=[];
-    payloadProvider.filtersLocal=[];
+    payloadProvider.centralFilter=[];
+    payloadProvider.localFilter=[];
     payloadProvider.sourcePump=[];
     payloadProvider.irrigationPump=[];
-    payloadProvider.fertilizerCentral=[];
-    payloadProvider.fertilizerLocal=[];
+    payloadProvider.centralFertilizer=[];
+    payloadProvider.localFertilizer=[];
     payloadProvider.waterMeter=[];
     payloadProvider.wifiStrength = 0;
     payloadProvider.alarmList = [];

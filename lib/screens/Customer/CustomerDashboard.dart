@@ -144,13 +144,13 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
           ],
         );
       }else{
-        int? irrigationPauseFlag = 0;
+        int? irrigationFlag = 0;
         final filteredScheduledPrograms = filterProgramsByCategory(Provider.of<MqttPayloadProvider>(context).scheduledProgram, crrIrrLine.id);
         final filteredProgramsQueue = filterProgramsQueueByCategory(Provider.of<MqttPayloadProvider>(context).programQueue, crrIrrLine.id);
         final filteredCurrentSchedule = filterCurrentScheduleByCategory(Provider.of<MqttPayloadProvider>(context).currentSchedule, crrIrrLine.id);
         filteredCurrentSchedule.insertAll(0, filterCurrentScheduleByProgramName(Provider.of<MqttPayloadProvider>(context).currentSchedule, 'StandAlone - Manual'));
         if(Provider.of<MqttPayloadProvider>(context).payload2408.isNotEmpty){
-          irrigationPauseFlag = getIrrigationPauseFlag(crrIrrLine.id, Provider.of<MqttPayloadProvider>(context).payload2408);
+          irrigationFlag = getIrrigationPauseFlag(crrIrrLine.id, Provider.of<MqttPayloadProvider>(context).payload2408);
         }
 
         return Column(
@@ -158,7 +158,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
             lastCommunication.inMinutes >= 10? lostCommunication():provider.powerSupply == 0? noPowerSupply():
             const SizedBox(),
 
-            irrigationPauseFlag !=0? Padding(
+            irrigationFlag !=0? Padding(
               padding: const EdgeInsets.only(left: 3, right: 3),
               child: Container(
                 width: MediaQuery.sizeOf(context).width,
@@ -168,7 +168,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(2.0),
-                  child: Center(child: Text(getContentByCode(irrigationPauseFlag!).toUpperCase(),
+                  child: Center(child: Text(getContentByCode(irrigationFlag!).toUpperCase(),
                     style: const TextStyle(fontSize: 15, fontWeight: FontWeight.normal, color: Colors.black54),)),
                 ),
               ),
@@ -183,7 +183,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    screenWidth > 600 ? buildWideLayout(provider):
+                    screenWidth > 600 ? buildWideLayout(provider, irrigationFlag!):
                     buildNarrowLayout(provider),
                     filteredCurrentSchedule.isNotEmpty? CurrentSchedule(siteData: widget.siteData, customerID: widget.customerID, currentSchedule: filteredCurrentSchedule,):
                     const SizedBox(),
@@ -469,12 +469,10 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     );
   }
 
-  Widget buildWideLayout(MqttPayloadProvider provider) {
+  Widget buildWideLayout(MqttPayloadProvider provider, int irrigationFlag) {
 
-    if(provider.filtersCentral.isEmpty && provider.filtersLocal.isEmpty
-        && provider.fertilizerCentral.isEmpty && provider.fertilizerLocal.isEmpty){
-
-      int? irrigationPauseFlag = getIrrigationPauseFlag(crrIrrLine.id, Provider.of<MqttPayloadProvider>(context).payload2408);
+    if(provider.centralFilter.isEmpty && provider.localFilter.isEmpty
+        && provider.centralFertilizer.isEmpty && provider.localFertilizer.isEmpty){
 
       List<Map<String, dynamic>> filteredSrcPumps = provider.sourcePump
           .where((pump) => crrIrrLine.id == 'all' || pump['Location'].contains(crrIrrLine.id))
@@ -487,7 +485,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
           .cast<Map<String, dynamic>>();
 
       int rdWidth = 0;
-      if(irrigationPauseFlag !=2){
+      if(irrigationFlag !=2){
         rdWidth = ((filteredSrcPumps.length+filteredIrrPumps.length+1)*70)+170;
       }else{
         rdWidth = ((filteredSrcPumps.length+filteredIrrPumps.length+1)*70);
@@ -511,12 +509,12 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 provider.sourcePump.isNotEmpty? Padding(
-                  padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                  padding: EdgeInsets.only(top: provider.localFertilizer.isNotEmpty || provider.localFertilizer.isNotEmpty? 38.4:0),
                   child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id, spList: provider.sourcePump, userId: widget.userID, controllerId: widget.siteData.master[widget.masterInx].controllerId,),
                 ):
                 const SizedBox(),
                 provider.irrigationPump.isNotEmpty? Padding(
-                  padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                  padding: EdgeInsets.only(top: provider.localFertilizer.isNotEmpty || provider.localFertilizer.isNotEmpty? 38.4:0),
                   child: SizedBox(
                     width: 52.50,
                     height: 70,
@@ -530,15 +528,15 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 ):
                 const SizedBox(),
                 provider.irrigationPump.isNotEmpty? Padding(
-                  padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                  padding: EdgeInsets.only(top: provider.localFertilizer.isNotEmpty || provider.localFertilizer.isNotEmpty? 38.4:0),
                   child: DisplayIrrigationPump(currentLineId: crrIrrLine.id, deviceId: widget.siteData.master[widget.masterInx].deviceId, ipList: provider.irrigationPump,),
                 ):
                 const SizedBox(),
 
-                if(provider.filtersCentral.isEmpty)
+                if(provider.centralFilter.isEmpty)
                   for(int i=0; i<provider.payload2408.length; i++)
                     provider.payload2408.isNotEmpty?  Padding(
-                      padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
+                      padding: EdgeInsets.only(top: provider.localFertilizer.isNotEmpty || provider.localFertilizer.isNotEmpty? 38.4:0),
                       child: provider.payload2408[i]['Line'].contains(crrIrrLine.id)? DisplaySensor(crInx: i):null,
                     ) :
                     const SizedBox(),
@@ -553,7 +551,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(child: DisplayIrrigationLine(irrigationLine: crrIrrLine, currentLineId: crrIrrLine.id, currentMaster: widget.siteData.master[widget.masterInx], rWidth: rdWidth,)),
-                          irrigationPauseFlag !=2 ? Padding(
+                          irrigationFlag !=2 ? Padding(
                             padding: const EdgeInsets.all(8),
                             child: TextButton(
                               onPressed: () {
@@ -583,7 +581,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                                 }
                               },
                               style: ButtonStyle(
-                                backgroundColor: WidgetStateProperty.all<Color>(irrigationPauseFlag == 1 ? Colors.green : Colors.orange),
+                                backgroundColor: WidgetStateProperty.all<Color>(irrigationFlag == 1 ? Colors.green : Colors.orange),
                                 shape: WidgetStateProperty.all<OutlinedBorder>(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(5),
@@ -593,12 +591,12 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  irrigationPauseFlag == 1
+                                  irrigationFlag == 1
                                       ? const Icon(Icons.play_arrow_outlined, color: Colors.white)
                                       : const Icon(Icons.pause, color: Colors.white),
                                   const SizedBox(width: 5),
                                   Text(
-                                    irrigationPauseFlag == 1 ? 'RESUME THE LINE' : 'PAUSE THE LINE',
+                                    irrigationFlag == 1 ? 'RESUME THE LINE' : 'PAUSE THE LINE',
                                     style: const TextStyle(color: Colors.white),
                                   ),
                                 ],

@@ -1,10 +1,10 @@
 import 'dart:convert';
+import 'dart:core';
 import 'dart:developer';
 
 import 'package:chat_bubbles/bubbles/bubble_special_one.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_json_viewer/flutter_json_viewer.dart';
 import 'package:intl/intl.dart';
 import 'package:oro_irrigation_new/Models/Customer/Dashboard/SentAndReceivedModel.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -378,6 +378,7 @@ class _SentAndReceivedState extends State<SentAndReceived> {
         if(response['code']==200){
           final message = response?['data']?['message'];
           if (message != null) {
+            print(response['data']['message']);
             displayJsonData(context, response['data']['message'] ?? 'Empty message', aTitle, pyTitle);
           }else{
             showDialog(
@@ -415,13 +416,16 @@ class _SentAndReceivedState extends State<SentAndReceived> {
         return AlertDialog(
           title: Text(aTitle),
           content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(pyTitle, style: const TextStyle(color: Colors.teal),),
-                const Divider(),
-                JsonViewer(jsonData,),
-              ],
+            child: SizedBox(
+              width: 500,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(pyTitle, style: const TextStyle(color: Colors.teal),),
+                  const Divider(),
+                  Text(jsonEncode(jsonData), style: const TextStyle(color: Colors.black54),),
+                ],
+              ),
             ),
           ),
           actions: [

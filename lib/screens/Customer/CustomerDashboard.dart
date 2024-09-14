@@ -282,7 +282,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                               //src pump
                               provider.sourcePump.isNotEmpty? Padding(
                                 padding: const EdgeInsets.only(top: 15),
-                                child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id, spList: provider.sourcePump, userId: widget.userID,),
+                                child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id, spList: provider.sourcePump, userId: widget.userID, controllerId: widget.siteData.master[widget.masterInx].controllerId,),
                               ):
                               const SizedBox(),
 
@@ -512,7 +512,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
               children: [
                 provider.sourcePump.isNotEmpty? Padding(
                   padding: EdgeInsets.only(top: provider.fertilizerCentral.isNotEmpty || provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                  child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id, spList: provider.sourcePump, userId: widget.userID,),
+                  child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id, spList: provider.sourcePump, userId: widget.userID, controllerId: widget.siteData.master[widget.masterInx].controllerId,),
                 ):
                 const SizedBox(),
                 provider.irrigationPump.isNotEmpty? Padding(

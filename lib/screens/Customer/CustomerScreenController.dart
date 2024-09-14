@@ -1647,7 +1647,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   void sentToServer(String msg, String payLoad) async
   {
-    Map<String, Object> body = {"userId": widget.customerId, "controllerId": mySiteList[siteIndex].master[masterIndex].deviceId, "messageStatus": msg, "data": payLoad, "hardware": jsonDecode(payLoad), "createUser": widget.userId};
+    Map<String, Object> body = {"userId": widget.customerId, "controllerId": mySiteList[siteIndex].master[masterIndex].deviceId, "messageStatus": msg, "hardware": jsonDecode(payLoad), "createUser": widget.userId};
     final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
     if (response.statusCode == 200) {
       print(response.body);
@@ -2680,7 +2680,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
 
   void sentToServer(String msg, String payLoad) async
   {
-    Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.deviceId, "messageStatus": msg, "data": payLoad, "hardware": jsonDecode(payLoad), "createUser": widget.customerID};
+    Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.deviceId, "messageStatus": msg, "hardware": jsonDecode(payLoad), "createUser": widget.customerID};
     final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
     if (response.statusCode == 200) {
       print(response.body);

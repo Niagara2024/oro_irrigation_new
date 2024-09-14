@@ -209,12 +209,13 @@ class _SentAndReceivedState extends State<SentAndReceived> {
                                 TextButton(
                                   onPressed: () {
                                     String enteredPassword = passwordController.text;
-                                    if (enteredPassword == 'oro@321') {
+                                    if (enteredPassword == 'Oro@321') {
                                       hasPayloadViewPermission=true;
                                       Navigator.of(context).pop();
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(content: Text('Access granted. Showing payload...')),
                                       );
+                                      getUserSoftwareOrHardwarePayload(sentAndReceivedList[index].sentAndReceivedId,'Hardware payload',sentAndReceivedList[index].message);
                                     } else {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(content: Text('Incorrect password.')),
@@ -289,7 +290,7 @@ class _SentAndReceivedState extends State<SentAndReceived> {
                                 TextButton(
                                   onPressed: () {
                                     String enteredPassword = passwordController.text;
-                                    if (enteredPassword == 'oro@321') {
+                                    if (enteredPassword == 'Oro@321') {
                                       hasPayloadViewPermission=true;
                                       Navigator.of(context).pop();
                                       ScaffoldMessenger.of(context).showSnackBar(
@@ -375,7 +376,28 @@ class _SentAndReceivedState extends State<SentAndReceived> {
       final response = jsonDecode(getUserSentAndReceivedHardwarePayload.body);
       if (getUserSentAndReceivedHardwarePayload.statusCode == 200) {
         if(response['code']==200){
-          displayJsonData(context, response['data']['message'], aTitle, pyTitle);
+          final message = response?['data']?['message'];
+          if (message != null) {
+            displayJsonData(context, response['data']['message'] ?? 'Empty message', aTitle, pyTitle);
+          }else{
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text(aTitle),
+                  content: const Text("No data available."),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text("Close"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+          }
         }
       } else {
         log('Failed to load data');

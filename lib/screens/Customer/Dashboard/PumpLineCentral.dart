@@ -59,7 +59,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                   children: [
                     widget.provider.sourcePump.isNotEmpty? Padding(
                       padding: EdgeInsets.only(top: widget.provider.fertilizerCentral.isNotEmpty || widget.provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                      child: DisplaySourcePump(deviceId: widget.currentSiteData.master[widget.masterIdx].deviceId, currentLineId: widget.crrIrrLine.id, spList:  widget.provider.sourcePump, userId: widget.userId,),
+                      child: DisplaySourcePump(deviceId: widget.currentSiteData.master[widget.masterIdx].deviceId, currentLineId: widget.crrIrrLine.id, spList:  widget.provider.sourcePump, userId: widget.userId, controllerId: widget.currentSiteData.master[widget.masterIdx].controllerId,),
                     ):
                     const SizedBox(),
 
@@ -230,7 +230,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
 
   void sentToServer(String msg, String payLoad) async
   {
-    Map<String, Object> body = {"userId": widget.userId, "controllerId": widget.currentSiteData.master[widget.masterIdx].deviceId, "messageStatus": msg, "data": payLoad, "hardware": payLoad, "createUser": widget.userId};
+    Map<String, Object> body = {"userId": widget.userId, "controllerId": widget.currentSiteData.master[widget.masterIdx].controllerId, "messageStatus": msg, "hardware": jsonDecode(payLoad), "createUser": widget.userId};
     final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
     if (response.statusCode == 200) {
       print(response.body);
@@ -243,11 +243,11 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
 
 
 class DisplaySourcePump extends StatefulWidget {
-  const DisplaySourcePump({Key? key, required this.deviceId, required this.currentLineId, required this.spList, required this.userId}) : super(key: key);
+  const DisplaySourcePump({Key? key, required this.deviceId, required this.currentLineId, required this.spList, required this.userId, required this.controllerId}) : super(key: key);
   final String deviceId;
   final String currentLineId;
   final List<dynamic> spList;
-  final int userId;
+  final int userId, controllerId;
 
   @override
   State<DisplaySourcePump> createState() => _DisplaySourcePumpState();
@@ -474,54 +474,6 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                   ],
                                 ),
                               ),
-                              /*const Padding(
-                                padding: EdgeInsets.only(left: 8),
-                                child: Divider(height: 6,color: Colors.black12),
-                              ),
-                              Container(
-                                width: 315,
-                                height: 40,
-                                color: Colors.transparent,
-                                child: Row(
-                                  children: [
-                                    const SizedBox(width:100, child: Text('Water Level', style: TextStyle(color: Colors.black54),),),
-                                    const Spacer(),
-                                    Container(
-                                      width: 40,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                        color: Colors.blue.shade50,
-                                        borderRadius: const BorderRadius.all(Radius.circular(2)),
-                                        border: Border.all(color: Colors.blue, width: 0.50),
-                                      ),
-                                      child: Stack(
-                                        alignment: Alignment.bottomCenter,
-                                        children: [
-                                          Container(
-                                            width: 40,
-                                            height: 40 * (level / 100),  // Adjust height based on percentage
-                                            decoration: BoxDecoration(
-                                              color: Colors.blue.shade400,
-                                              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(2)),
-                                            ),
-                                          ),
-                                          // Text displaying the percentage
-                                          Center(
-                                            child: Text(
-                                              '$level%',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.blue.shade900,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),*/
                               ListTile(
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -719,7 +671,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
 
   void sentUserOperationToServer(String msg, String data) async
   {
-    Map<String, Object> body = {"userId": widget.userId, "controllerId": widget.deviceId, "messageStatus": msg, "data": data, "hardware": data, "createUser": widget.userId};
+    Map<String, Object> body = {"userId": widget.userId, "controllerId": widget.controllerId, "messageStatus": msg, "data": data, "hardware": data, "createUser": widget.userId};
     final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
     if (response.statusCode == 200) {
       print(response.body);
@@ -1916,8 +1868,8 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                                       return Row(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Center(child: Text('${fertilizerCentral[fIndex]['Ec'][index]['Name']} : ', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.normal))),
-                                          Center(child: Text('${fertilizerCentral[fIndex]['Ec'][index]['Status']}0', style: const TextStyle(fontSize: 9))),
+                                          const Center(child: Text('Ec : ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.normal))),
+                                          Center(child: Text('${fertilizerCentral[fIndex]['Ec'][index]['Status']}0', style: const TextStyle(fontSize: 11))),
                                           const SizedBox(width: 5,),
                                         ],
                                       );
@@ -1933,8 +1885,8 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                                     itemBuilder: (BuildContext context, int index) {
                                       return Row(
                                         children: [
-                                          Center(child: Text('${fertilizerCentral[fIndex]['Ph'][index]['Name']} : ', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.normal),)),
-                                          Center(child: Text('${fertilizerCentral[fIndex]['Ph'][index]['Status']}0', style: const TextStyle(fontSize: 9))),
+                                          const Center(child: Text('pH : ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.normal),)),
+                                          Center(child: Text('${fertilizerCentral[fIndex]['Ph'][index]['Status']}0', style: const TextStyle(fontSize: 11))),
                                           const SizedBox(width: 5,),
                                         ],
                                       );
@@ -2957,8 +2909,8 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                                       return Row(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Center(child: Text('${fertilizerLocal[fIndex]['Ec'][index]['Name']} : ', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.normal))),
-                                          Center(child: Text('${fertilizerLocal[fIndex]['Ec'][index]['Status']}0', style: const TextStyle(fontSize: 9))),
+                                          const Center(child: Text('Ec : ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.normal))),
+                                          Center(child: Text('${fertilizerLocal[fIndex]['Ec'][index]['Status']}0', style: const TextStyle(fontSize: 11))),
                                           const SizedBox(width: 5,),
                                         ],
                                       );
@@ -2974,8 +2926,8 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                                     itemBuilder: (BuildContext context, int index) {
                                       return Row(
                                         children: [
-                                          Center(child: Text('${fertilizerLocal[fIndex]['Ph'][index]['Name']} : ', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.normal),)),
-                                          Center(child: Text('${fertilizerLocal[fIndex]['Ph'][index]['Status']}0', style: const TextStyle(fontSize: 9))),
+                                          Center(child: Text('pH : ', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.normal),)),
+                                          Center(child: Text('${fertilizerLocal[fIndex]['Ph'][index]['Status']}0', style: const TextStyle(fontSize: 11))),
                                           const SizedBox(width: 5,),
                                         ],
                                       );

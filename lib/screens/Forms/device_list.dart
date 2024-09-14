@@ -898,7 +898,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
 
                                           MQTTManager().publish(payLoadFinal, 'AppToFirmware/${customerSiteList[siteIndex].master[mstIndex].deviceId}');
 
-                                          Map<String, Object> body = {"userId": widget.customerID, "controllerId": customerSiteList[siteIndex].master[mstIndex].deviceId, "messageStatus": 'Cleared node serial from site config', "data": payLoadFinal,"hardware": payLoadFinal, "createUser": widget.userID};
+                                          Map<String, Object> body = {"userId": widget.customerID, "controllerId": customerSiteList[siteIndex].master[mstIndex].deviceId, "messageStatus": 'Cleared node serial from site config', "hardware": jsonDecode(payLoadFinal), "createUser": widget.userID};
                                           final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
                                           if (response.statusCode == 200) {
                                             print(response.body);
@@ -1161,8 +1161,6 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                                               {"101": stringWithoutSpace},
                                             ]
                                           });
-
-                                          //print(payLoadFinal);
 
                                           //publish payload to mqtt
                                           MQTTManager().publish(payLoadFinal, 'AppToFirmware/${customerSiteList[siteIndex].master[mstIndex].deviceId}');

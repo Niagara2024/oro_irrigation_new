@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -48,12 +49,15 @@ class _ControllerSettingsState extends State<ControllerSettings> {
 
   final TextEditingController txtEcSiteName = TextEditingController();
   final TextEditingController txtEcGroupName = TextEditingController();
-  String modelName = '', deviceId = '', categoryName = '';
+  String modelName = '', deviceId = '', categoryName = '', controllerVersion='', newVersion='';
   int groupId = 0;
 
   String? _selectedTimeZone;
   String _currentDate = '';
   String _currentTime = '';
+
+  double opacity = 1.0;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -61,6 +65,21 @@ class _ControllerSettingsState extends State<ControllerSettings> {
     getLanguage();
     getControllerInfo();
     getSubUserList();
+  }
+
+  @override
+  void dispose() {
+    // Cancel the timer when the widget is disposed
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void timerFunction(){
+    _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+      setState(() {
+        opacity = opacity == 1.0 ? 0.0 : 1.0;
+      });
+    });
   }
 
   void callbackFunction(String message) {
@@ -94,6 +113,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
       "controllerId": widget.siteData.master[widget.masterIndex].controllerId
     });
     if (response.statusCode == 200) {
+      print(response.body);
       var data = jsonDecode(response.body);
       if (data["code"] == 200) {
         txtEcSiteName.text = data["data"][0]['groupName'];
@@ -103,7 +123,15 @@ class _ControllerSettingsState extends State<ControllerSettings> {
           modelName = data["data"][0]['modelName'];
           categoryName = data["data"][0]['categoryName'];
           groupId = data["data"][0]['groupId'];
+          controllerVersion = data["data"][0]['hwVersion'];
+          newVersion = data["data"][0]['availableHwVersion'];
           _updateCurrentDateTime(data["data"][0]['timeZone']);
+          if(controllerVersion!=newVersion){
+            timerFunction();
+          }else{
+            _timer?.cancel();
+          }
+
         });
       }
     }
@@ -275,6 +303,16 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                               ),
                               const Divider(),
                               ListTile(
+                                title: const Text('Version'),
+                                leading: const Icon(Icons.perm_device_info),
+                                trailing: Text(
+                                  controllerVersion,
+                                  style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              /*ListTile(
                                 title: const Text('Language'),
                                 leading: const Icon(Icons.language),
                                 trailing: DropdownButton(
@@ -292,7 +330,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                                   },
                                   value: _mySelection,
                                 ),
-                              ),
+                              ),*/
                               const Divider(),
                             ],
                           ),
@@ -416,33 +454,59 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                     height: 50,
                     width: MediaQuery.sizeOf(context).width,
                     child: ListTile(
-                      trailing: MaterialButton(
-                        color: Colors.green,
-                        textColor: Colors.white,
-                        onPressed: () async {
-                          Map<String, Object> body = {
-                            'userId': widget.customerID,
-                            'controllerId':
-                                widget.siteData.master[0].controllerId,
-                            'deviceName': txtEcGroupName.text,
-                            'groupId': groupId,
-                            'groupName': txtEcSiteName.text,
-                            'modifyUser': widget.customerID,
-                            'timeZone': _selectedTimeZone ?? '',
-                          };
-                          final Response response = await HttpService()
-                              .putRequest("updateUserMasterDetails", body);
-                          if (response.statusCode == 200) {
-                            var data = jsonDecode(response.body);
-                            if (data["code"] == 200) {
-                              if (context.mounted) {
-                                GlobalSnackBar.show(context, data["message"],
-                                    response.statusCode);
+                      title: controllerVersion != newVersion? Row(children: [
+                        const Text('New version available',),
+                        const SizedBox(width: 16,),
+                        TextButton(
+                          onPressed: () {
+                          },
+                          child: AnimatedOpacity(
+                            opacity: opacity,
+                            duration: const Duration(seconds: 1),
+                            child: Text('Update - $newVersion'),
+                          ),
+                        ),
+                      ],):null,
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          MaterialButton(
+                            color: Colors.teal,
+                            textColor: Colors.white,
+                            onPressed: () async {
+                            },
+                            child: const Text('Restart the controller'),
+                          ),
+                          const SizedBox(width: 16,),
+                          MaterialButton(
+                            color: Colors.green,
+                            textColor: Colors.white,
+                            onPressed: () async {
+                              Map<String, Object> body = {
+                                'userId': widget.customerID,
+                                'controllerId':
+                                    widget.siteData.master[0].controllerId,
+                                'deviceName': txtEcGroupName.text,
+                                'groupId': groupId,
+                                'groupName': txtEcSiteName.text,
+                                'modifyUser': widget.customerID,
+                                'timeZone': _selectedTimeZone ?? '',
+                              };
+                              final Response response = await HttpService()
+                                  .putRequest("updateUserMasterDetails", body);
+                              if (response.statusCode == 200) {
+                                var data = jsonDecode(response.body);
+                                if (data["code"] == 200) {
+                                  if (context.mounted) {
+                                    GlobalSnackBar.show(context, data["message"],
+                                        response.statusCode);
+                                  }
+                                }
                               }
-                            }
-                          }
-                        },
-                        child: const Text('Restore'),
+                            },
+                            child: const Text('Save Changes'),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -746,7 +810,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                   ),
                   SizedBox(
                     height: 70,
-                    child: subUsers.length > 0
+                    child: subUsers.isNotEmpty
                         ? ListView.builder(
                             scrollDirection: Axis.horizontal,
                             itemCount: subUsers.length,

@@ -47,7 +47,7 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
                     children: [
                       widget.provider.sourcePump.isNotEmpty? Padding(
                         padding: EdgeInsets.only(top:  widget.provider.fertilizerCentral.isNotEmpty ||  widget.provider.fertilizerLocal.isNotEmpty? 38.4:0),
-                        child: DisplaySourcePump(deviceId: widget.currentMaster.deviceId, currentLineId: 'all', spList: widget.provider.sourcePump, userId: widget.userId,),
+                        child: DisplaySourcePump(deviceId: widget.currentMaster.deviceId, currentLineId: 'all', spList: widget.provider.sourcePump, userId: widget.userId, controllerId: widget.currentMaster.controllerId,),
                       ):
                       const SizedBox(),
                       widget.provider.irrigationPump.isNotEmpty? Padding(

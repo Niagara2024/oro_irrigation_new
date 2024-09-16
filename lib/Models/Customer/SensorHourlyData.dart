@@ -20,19 +20,28 @@ class AllMySensor {
 
 
 class SensorHourlyData {
-  final String? name; // Add this to store the sensor name
+  final String? name;
   final String id;
   final double value;
-  final String hour; // Add this to store the hour key
+  final String hour;
 
-  SensorHourlyData({required this.id, required this.value, required this.hour, this.name});
+
+  SensorHourlyData({required this.id, required this.value, required this.hour, required this.name,});
 
   factory SensorHourlyData.fromJson(Map<String, dynamic> json) {
+
+    String snrName = '';
+    if (json['Valve'] == null || json['Valve'].toString().isEmpty) {
+      snrName = '${json['Name']}';
+    } else {
+      snrName = '${json['Name']}(${json['Valve']})';
+    }
+
     return SensorHourlyData(
-      name: json['Name'], // Parse the sensor name
+      name: snrName,
       id: json['Id'],
       value: double.tryParse(json['Value']) ?? 0.0,
-      hour: json['hour'], // Make sure to include hour
+      hour: json['hour'],
     );
   }
 
@@ -41,7 +50,7 @@ class SensorHourlyData {
       'Name': name,
       'Id': id,
       'Value': value,
-      'hour': hour, // Include hour in the JSON representation
+      'hour': hour,
     };
   }
 }

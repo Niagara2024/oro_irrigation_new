@@ -38,7 +38,7 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
     final response = await HttpService().postRequest("getUserSensorHourlyLog", body);
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-     // print(response.body);
+     print(response.body);
       if (data["code"] == 200) {
         try {
           sensors = (data['data'] as List).map((item) {
@@ -47,13 +47,12 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
               sensorData[hour] = (values as List)
                   .map((sensorItem) => SensorHourlyData.fromJson({
                 ...sensorItem,
-                'hour': hour, // Add the hour to each item
+                'hour': hour,
               }))
                   .toList();
             });
             return AllMySensor(name: item['name'], data: sensorData);
-          })
-              .toList();
+          }).toList();
 
           setState(() {
           });
@@ -126,7 +125,7 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
     );
   }
 
-  Row buildLineChart(Map<String, List<SensorHourlyData>> sensorData, String sensorName) {
+  Row buildLineChart(Map<String, List<SensorHourlyData>> sensorData, String snrName) {
     final Set<String> allHours = {};
     sensorData.values.expand((hourlyData) => hourlyData).forEach((data) {
       allHours.add(data.hour);
@@ -140,7 +139,7 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
       groupedByName.putIfAbsent(sensorName, () => []).add(data);
     });
 
-    final List<Color> sensorColors = [Colors.blue, Colors.red, Colors.green, Colors.orange]; // Example colors
+    final List<Color> sensorColors = [Colors.blue, Colors.red, Colors.green, Colors.orange];
 
     final List<LineSeries<SensorHourlyData, String>> series = [];
     int colorIndex = 0;
@@ -150,9 +149,8 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
       colorIndex++;
 
       final dataPoints = sortedHours.map((hour) {
-        final data = sensorValues.firstWhere(
-              (d) => d.hour == hour,
-          orElse: () => SensorHourlyData(id: '', value: 0.0, hour: hour, name: sensorName),
+        final data = sensorValues.firstWhere((d) => d.hour == hour,
+          orElse: () => SensorHourlyData(id: '', value: 0.0, hour: hour, name: sensorName,),
         );
         return data;
       }).toList();
@@ -173,22 +171,6 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
       ));
     });
 
-    // Include the 'Hour' column
-    /*final List<DataRow> rows = sortedHours.map((hour) {
-      int sensorIndex = 0;
-      return DataRow(cells: [
-        DataCell(Text(hour, style: const TextStyle(fontSize: 13, color: Colors.black54),)), // Hour column
-        ...groupedByName.entries.map((sensorEntry) {
-          final data = sensorEntry.value.firstWhere(
-                (d) => d.hour == hour,
-            orElse: () => SensorHourlyData(id: '', value: 0.0, hour: hour),
-          );
-          final sensorColor = sensorColors[sensorIndex % sensorColors.length];
-          sensorIndex++;
-          return DataCell(Text(data.value.toString(), style: TextStyle(color: sensorColor)));
-        }).toList(),
-      ]);
-    }).toList();*/
 
     return Row(
       children: [
@@ -200,9 +182,9 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
               axisLine: const AxisLine(width: 0),
             ),
             primaryYAxis: NumericAxis(
-              title: AxisTitle(text: 'Sensor Values'),
+              title: AxisTitle(text: getSensorUnit(snrName)),
             ),
-            title: ChartTitle(text: 'Line chart'),
+            //title: ChartTitle(text: 'Line chart'),
             legend: const Legend(isVisible: true, position: LegendPosition.right),
             tooltipBehavior: TooltipBehavior(enable: true),
             series: series,
@@ -210,6 +192,26 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
         ),
       ],
     );
+  }
+
+  static String getSensorUnit(String type) {
+    if(type.contains('Moisture')||type.contains('Pressure')){
+      return 'Bar';
+    }else if(type.contains('Humidity')){
+      return 'Percentage (%)';
+    }else if(type.contains('Co2')){
+      return 'Parts per million(ppm)';
+    }else if(type.contains('Temperature')){
+      return 'Celsius (°C)';
+    }else if(type.contains('EC')||type.contains('PH')){
+      return 'Siemens per meter (S/m)';
+    }else if(type.contains('Power')){
+      return 'Volts';
+    }else if(type.contains('Water')){
+      return 'Cubic Meters (m³)';
+    }else{
+      return 'Sensor value';
+    }
   }
 
 }

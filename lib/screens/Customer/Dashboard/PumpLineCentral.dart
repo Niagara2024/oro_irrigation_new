@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../constants/AppImages.dart';
 import '../../../constants/MQTTManager.dart';
+import '../../../constants/MyFunction.dart';
 import '../../../constants/http_service.dart';
 import '../../../constants/snack_bar.dart';
 import '../../../state_management/DurationNotifier.dart';
@@ -112,7 +113,6 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                     ):
                     const SizedBox(),
 
-
                     widget.provider.centralFilter.isNotEmpty? Padding(
                       padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
                       child: DisplayFilter(currentLineId: widget.crrIrrLine.id, filtersSites: widget.provider.centralFilter,),
@@ -154,11 +154,13 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                               ),
                             ):
                             const SizedBox(),
+
                             widget.provider.localFilter.isNotEmpty? Padding(
-                              padding: EdgeInsets.only(top: widget.provider.localFertilizer.isNotEmpty?38.4:0),
+                              padding: EdgeInsets.only(top: widget.provider.localFilter.isNotEmpty?38.4:0),
                               child: LocalFilter(currentLineId: widget.crrIrrLine.id, filtersSites: widget.provider.localFilter,),
                             ):
                             const SizedBox(),
+
                             widget.provider.localFertilizer.isNotEmpty? DisplayLocalFertilizer(currentLineId: widget.crrIrrLine.id,):
                             const SizedBox(),
                           ],
@@ -367,11 +369,16 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              ListTile(
-                                title: Text('Version: ${filteredPumps[index]['Version']}'),
-                                trailing: Row(
+                              Container(
+                                width: 340,
+                                height: 35,
+                                color: Colors.teal.shade50,
+                                child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
+                                    const SizedBox(width: 8,),
+                                    Text('Version: ${filteredPumps[index]['Version']}'),
+                                    const Spacer(),
                                     Icon(signalStrength == 0 ? Icons.wifi_off :
                                     signalStrength >= 1 && signalStrength <= 20 ?
                                     Icons.network_wifi_1_bar_outlined :
@@ -394,25 +401,25 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                     batteryVolt>70&&batteryVolt<=90?const Icon(Icons.battery_5_bar_rounded):
                                     const Icon(Icons.battery_6_bar_rounded),
                                     Text('$batteryVolt%'),
+
+                                    const SizedBox(width: 8,),
                                   ],
                                 ),
-                                tileColor: Colors.teal.shade50,
                               ),
                               const SizedBox(height: 5,),
                               Container(
                                 width: 315,
                                 height: 25,
                                 color: Colors.transparent,
-                                child: const Row(
+                                child: Row(
                                   children: [
-                                    SizedBox(width:100, child: Text('Phase', style: TextStyle(color: Colors.black54),),),
-                                    //'${filteredPumps[index]['Phase']}'
-                                    Spacer(),
-                                    CircleAvatar(radius: 7,),
-                                    VerticalDivider(color: Colors.transparent,),
-                                    CircleAvatar(radius: 7,),
-                                    VerticalDivider(color: Colors.transparent,),
-                                    CircleAvatar(radius: 7,),
+                                    const SizedBox(width:100, child: Text('Phase', style: TextStyle(color: Colors.black54),),),
+                                    const Spacer(),
+                                    CircleAvatar(radius: 7, backgroundColor: int.parse(filteredPumps[index]['Phase'])>0? Colors.green: null,),
+                                    const VerticalDivider(color: Colors.transparent,),
+                                    CircleAvatar(radius: 7, backgroundColor: int.parse(filteredPumps[index]['Phase'])>1? Colors.green: null,),
+                                    const VerticalDivider(color: Colors.transparent,),
+                                    CircleAvatar(radius: 7, backgroundColor: int.parse(filteredPumps[index]['Phase'])>2? Colors.green: null,),
                                   ],
                                 ),
                               ),
@@ -426,22 +433,22 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                 color: Colors.transparent,
                                 child: Row(
                                   children: [
-                                    const SizedBox(width:100, child: Text('Voltage', style: TextStyle(color: Colors.black54),),),
+                                    const SizedBox(width:80, child: Text('Voltage', style: TextStyle(color: Colors.black54),),),
                                     const Padding(
                                       padding: EdgeInsets.only(bottom: 2,top: 2),
                                       child: VerticalDivider(color: Colors.red, thickness: 1.5,),
                                     ),
-                                    SizedBox(width: 50, child: Text('R : ${voltages[0]}'),),
+                                    SizedBox(width: 60, child: Text('RY : ${voltages[0]}'),),
                                     const Padding(
                                       padding: EdgeInsets.only(bottom: 2,top: 2),
                                       child: VerticalDivider(color: Colors.yellow,thickness: 1.5,),
                                     ),
-                                    SizedBox(width: 50, child: Text('Y : ${voltages[1]}'),),
+                                    SizedBox(width: 60, child: Text('YB : ${voltages[1]}'),),
                                     const Padding(
                                       padding: EdgeInsets.only(bottom: 2,top: 2),
                                       child: VerticalDivider(color: Colors.blue,thickness: 1.5,),
                                     ),
-                                    SizedBox(width: 50, child: Text('B : ${voltages[2]}'),),
+                                    SizedBox(width: 60, child: Text('BR : ${voltages[2]}'),),
                                   ],
                                 ),
                               ),
@@ -474,49 +481,96 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                   ],
                                 ),
                               ),
-                              ListTile(
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
+                              const Padding(
+                                padding: EdgeInsets.only(left: 8),
+                                child: Divider(height: 6,color: Colors.black12),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  MaterialButton(
+                                    color: Colors.green,
+                                    textColor: Colors.white,
+                                    onPressed: () {
+                                      String payload = '${filteredPumps[index]['S_No']},1,1';
+                                      String payLoadFinal = jsonEncode({
+                                        "6200": [{"6201": payload}]
+                                      });
+                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                      sentUserOperationToServer('${pump['SW_Name'] ?? pump['Name']} Start Manually', payLoadFinal);
+                                      showSnakeBar('Pump of comment sent successfully');
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('Start Manually',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16,),
+                                  MaterialButton(
+                                    color: Colors.redAccent,
+                                    textColor: Colors.white,
+                                    onPressed: () {
+                                      String payload = '${filteredPumps[index]['S_No']},0,1';
+                                      String payLoadFinal = jsonEncode({
+                                        "6200": [{"6201": payload}]
+                                      });
+                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                      sentUserOperationToServer('${pump['SW_Name'] ?? pump['Name']} Stop Manually', payLoadFinal);
+                                      showSnakeBar('Pump of comment sent successfully');
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('Stop Manually',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16,),
+                                ],
+                              ),
+                              const SizedBox(height: 5,),
+                              int.parse(filteredPumps[index]['OnOffReason'])>0 ? Container(
+                                width: 340,
+                                height: 45,
+                                color: Colors.red.shade100,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
+                                    const SizedBox(width: 8,),
+                                    Expanded(
+                                        child:
+                                        Column(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            int.parse(filteredPumps[index]['OnOffReason'])==8 || int.parse(filteredPumps[index]['OnOffReason'])==9 ?
+                                            Text('Reason (Set : ${filteredPumps[index]['SetValue']}. Actual : ${filteredPumps[index]['ActualValue']})',style: const TextStyle(fontSize: 13,),): const Text('Reason',style: TextStyle(fontSize: 13,),),
+                                            Text(getContentByCode(int.parse(filteredPumps[index]['OnOffReason'])), style: const TextStyle(fontSize: 11,)),
+                                          ],
+                                        ),
+                                    ),
+                                    int.parse(filteredPumps[index]['OnOffReason'])==8 || int.parse(filteredPumps[index]['OnOffReason'])==9?
                                     MaterialButton(
-                                      color: Colors.green,
+                                      color: Colors.orange,
                                       textColor: Colors.white,
                                       onPressed: () {
-                                        String payload = '${filteredPumps[index]['S_No']},1,1';
+                                        String payload = '${filteredPumps[index]['S_No']},1';
                                         String payLoadFinal = jsonEncode({
-                                          "6200": [{"6201": payload}]
+                                          "6300": [{"6301": payload}]
                                         });
                                         MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
                                         sentUserOperationToServer('${pump['SW_Name'] ?? pump['Name']} Start Manually', payLoadFinal);
                                         showSnakeBar('Pump of comment sent successfully');
                                         Navigator.pop(context);
                                       },
-                                      child: const Text('Start Manually',
+                                      child: const Text('Reset',
                                         style: TextStyle(color: Colors.white),
                                       ),
-                                    ),
-                                    const SizedBox(width: 16,),
-                                    MaterialButton(
-                                      color: Colors.redAccent,
-                                      textColor: Colors.white,
-                                      onPressed: () {
-                                        String payload = '${filteredPumps[index]['S_No']},0,1';
-                                        String payLoadFinal = jsonEncode({
-                                          "6200": [{"6201": payload}]
-                                        });
-                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                        sentUserOperationToServer('${pump['SW_Name'] ?? pump['Name']} Stop Manually', payLoadFinal);
-                                        showSnakeBar('Pump of comment sent successfully');
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text('Stop Manually',
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    ),
+                                    ): const SizedBox(),
+                                    const SizedBox(width: 5,),
                                   ],
                                 ),
-                                tileColor: Colors.grey.shade100,
-                              ),
+                              ):
+                              const SizedBox(),
                             ],
                           ):
                           Column(
@@ -568,7 +622,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                           onPop: () => print('Popover was popped!'),
                           direction: PopoverDirection.right,
                           width: voltKeyExists?325:140,
-                          height: voltKeyExists?190: 80,
+                          height: voltKeyExists?int.parse(filteredPumps[index]['OnOffReason'])>0?210:170:80,
                           arrowHeight: 15,
                           arrowWidth: 30,
                           barrierColor: Colors.black54,
@@ -638,6 +692,21 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                     ),
                   )
                       : const SizedBox(),
+                  pump.containsKey('OnOffReason') && pump['OnOffReason'] != null && int.tryParse(pump['OnOffReason']) != null && int.parse(pump['OnOffReason']) > 0
+                      ? const Positioned(
+                    top: 10,
+                    left: 37.5,
+                    child: CircleAvatar(
+                      radius: 11,
+                      backgroundColor: Colors.orange,
+                      child: Icon(
+                        Icons.running_with_errors,
+                        size: 17,
+                        color: Colors.white,
+                      ),
+                    ),
+                  )
+                      : const SizedBox(),
                 ],
               ),
               SizedBox(
@@ -678,6 +747,10 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
     } else {
       throw Exception('Failed to load data');
     }
+  }
+
+  String getContentByCode(int code) {
+    return PumpReasonCode.fromCode(code).content;
   }
 
 }

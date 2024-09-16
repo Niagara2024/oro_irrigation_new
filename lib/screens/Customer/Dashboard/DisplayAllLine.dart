@@ -50,6 +50,7 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
                         child: DisplaySourcePump(deviceId: widget.currentMaster.deviceId, currentLineId: 'all', spList: widget.provider.sourcePump, userId: widget.userId, controllerId: widget.currentMaster.controllerId,),
                       ):
                       const SizedBox(),
+
                       widget.provider.irrigationPump.isNotEmpty? Padding(
                         padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
                         child: SizedBox(
@@ -91,7 +92,6 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
                       ):
                       const SizedBox(),
 
-
                       widget.provider.centralFilter.isNotEmpty? Padding(
                         padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
                         child: DisplayFilter(currentLineId: 'all', filtersSites: widget.provider.centralFilter,),
@@ -132,11 +132,51 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
                                 ),
                               ):
                               const SizedBox(),
+
+                              widget.provider.localFertilizer.isEmpty && widget.provider.localFilter.isNotEmpty? SizedBox(
+                                width: 4.5,
+                                height: 150,
+                                child: Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 42),
+                                      child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
+                                    ),
+                                    const SizedBox(width: 4.5,),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 45),
+                                      child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
+                                    ),
+                                  ],
+                                ),
+                              ):
+                              const SizedBox(),
+
                               widget.provider.localFilter.isNotEmpty? Padding(
-                                padding: EdgeInsets.only(top: widget.provider.localFertilizer.isNotEmpty?38.4:0),
+                                padding: EdgeInsets.only(top: widget.provider.localFilter.isNotEmpty?38.4:0),
                                 child:  LocalFilter(currentLineId: 'all', filtersSites: widget.provider.localFilter,),
                               ):
                               const SizedBox(),
+
+                              widget.provider.localFertilizer.isEmpty && widget.provider.localFilter.isNotEmpty? SizedBox(
+                                width: 4.5,
+                                height: 150,
+                                child: Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 45),
+                                      child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
+                                    ),
+                                    const SizedBox(width: 4.5,),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 42),
+                                      child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
+                                    ),
+                                  ],
+                                ),
+                              ):
+                              const SizedBox(),
+
                               widget.provider.localFertilizer.isNotEmpty? const DisplayLocalFertilizer(currentLineId: 'all',):
                               const SizedBox(),
                             ],
@@ -153,10 +193,7 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
 
             Divider(height: 0, color: Colors.grey.shade300),
             Container(height: 4, color: Colors.white24),
-            Padding(
-              padding: const EdgeInsets.only(left: 05, right: 00),
-              child: Divider(height: 0, color: Colors.grey.shade300),
-            ),
+            Divider(height: 0, color: Colors.grey.shade300),
 
             DisplayIrrigationLine(irrigationLine: widget.currentMaster.irrigationLine[0], currentLineId: 'all', currentMaster: widget.currentMaster, rWidth: 0,)
           ],

@@ -957,7 +957,7 @@ class SensorStatus {
       name: json['Name'],
       swName: json['SW_Name'],
       angIpNo: json['AngIpNo'],
-      pulseIpNo: json['PulseIpNo'],
+      pulseIpNo: json['DigIpNo'],
       value: json['Value'],
       latLong: json['Lat_Long'],
     );

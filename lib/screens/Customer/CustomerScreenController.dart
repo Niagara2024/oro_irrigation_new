@@ -1276,6 +1276,29 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     width: 45,
                     height: 45,
                     child: IconButton(
+                      tooltip: 'View all Node details',
+                      onPressed: () {
+                        Navigator.push(context,
+                          MaterialPageRoute(
+                            builder: (context) => AllNodeListAndDetails(userID: widget.customerId, customerID: widget.customerId, masterInx: masterIndex, siteData: mySiteList[siteIndex],),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.view_list_outlined),
+                      color: Colors.white,
+                      iconSize: 24.0,
+                      hoverColor: Colors.cyan,
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.transparent
+                    ),
+                    width: 45,
+                    height: 45,
+                    child: IconButton(
                       tooltip: 'Manual Mode',
                       onPressed: () {
 
@@ -1326,29 +1349,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                           );*/
                       },
                       icon: const Icon(Icons.touch_app_outlined),
-                      color: Colors.white,
-                      iconSize: 24.0,
-                      hoverColor: Colors.cyan,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: Colors.transparent
-                    ),
-                    width: 45,
-                    height: 45,
-                    child: IconButton(
-                      tooltip: 'View all Node details',
-                      onPressed: () {
-                        Navigator.push(context,
-                          MaterialPageRoute(
-                            builder: (context) => AllNodeListAndDetails(userID: widget.customerId, customerID: widget.customerId, masterInx: masterIndex, siteData: mySiteList[siteIndex],),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.view_list_outlined),
                       color: Colors.white,
                       iconSize: 24.0,
                       hoverColor: Colors.cyan,
@@ -2325,13 +2325,14 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                         },
                                       ),
                                     ),
-                                    const Padding(
+                                    widget.nodeList[index].sensor.isNotEmpty? const Padding(
                                       padding: EdgeInsets.only(left: 8, right: 8),
                                       child: Divider(
                                         thickness: 0.5,
                                       ),
-                                    ),
-                                    SizedBox(
+                                    ):
+                                    const SizedBox(),
+                                    widget.nodeList[index].sensor.isNotEmpty? SizedBox(
                                       width: double.infinity,
                                       height: calculateGridHeight(widget.nodeList[index].sensor.length),
                                       child: GridView.builder(
@@ -2365,7 +2366,8 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                           );
                                         },
                                       ),
-                                    ),
+                                    ):
+                                    const SizedBox(),
                                   ],
                                 ),
                               ],

@@ -117,7 +117,7 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
           ),
           body: TabBarView(
             children: sensors.map((sensor) {
-              return buildLineChart(sensor.data);
+              return buildLineChart(sensor.data, sensor.name);
             }).toList(),
           ),
         ),
@@ -126,7 +126,7 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
     );
   }
 
-  Row buildLineChart(Map<String, List<SensorHourlyData>> sensorData) {
+  Row buildLineChart(Map<String, List<SensorHourlyData>> sensorData, String sensorName) {
     final Set<String> allHours = {};
     sensorData.values.expand((hourlyData) => hourlyData).forEach((data) {
       allHours.add(data.hour);
@@ -174,7 +174,7 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
     });
 
     // Include the 'Hour' column
-    final List<DataRow> rows = sortedHours.map((hour) {
+    /*final List<DataRow> rows = sortedHours.map((hour) {
       int sensorIndex = 0;
       return DataRow(cells: [
         DataCell(Text(hour, style: const TextStyle(fontSize: 13, color: Colors.black54),)), // Hour column
@@ -188,7 +188,7 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
           return DataCell(Text(data.value.toString(), style: TextStyle(color: sensorColor)));
         }).toList(),
       ]);
-    }).toList();
+    }).toList();*/
 
     return Row(
       children: [
@@ -208,37 +208,6 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
             series: series,
           ),
         ),
-        /*const Padding(
-          padding: EdgeInsets.only(top: 8, bottom: 8),
-          child: VerticalDivider(width: 0,),
-        ),
-        SizedBox(
-          width: groupedByName.length*50+60,
-          height: MediaQuery.of(context).size.height,
-          child: Column(
-            children: [
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text('In Table'),
-              ),
-              Expanded(
-                child: DataTable2(
-                  columnSpacing: 12,
-                  horizontalMargin: 12,
-                  minWidth: 500,
-                  dataRowHeight: 45.0,
-                  headingRowHeight: 0.0,
-                  headingRowColor: WidgetStateProperty.all<Color>(Colors.transparent),
-                  columns: [
-                    const DataColumn2(label: Text('Hour',),fixedWidth: 60), // Hour header
-                    ...groupedByName.keys.map((_) => const DataColumn2(label: Text(''), fixedWidth: 50)), // Empty sensor headers
-                  ],
-                  rows: rows,
-                ),
-              ),
-            ],
-          ),
-        ),*/
       ],
     );
   }

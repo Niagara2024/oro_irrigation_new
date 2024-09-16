@@ -132,7 +132,6 @@ enum PumpReasonCode {
   reason19(19, 'Motor off due to RTC 5'),
   reason20(20, 'Motor off due to RTC 6'),
   reason21(21, 'Motor off due to auto mobile key off'),
-
   reason22(22, 'Motor on due to cyclic time'),
   reason23(23, 'Motor on due to RTC 1'),
   reason24(24, 'Motor on due to RTC 2'),

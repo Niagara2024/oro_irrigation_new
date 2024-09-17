@@ -10,6 +10,7 @@ class OverAllUse extends ChangeNotifier{
   int userId = 21;
   int createUser = 21;
   int controllerId = 10;
+  bool showTab = false;
 
   void editTimeAll(){
     hrs = 0;

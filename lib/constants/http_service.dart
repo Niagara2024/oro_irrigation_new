@@ -5,15 +5,16 @@ import 'package:http/http.dart' as http;
 
 class HttpService
 {
-  final String baseURL = "http://192.168.1.141:3000/api/v1/";//development
+  //final String baseURL = "http://192.168.68.141:3000/api/v1/";//development
+  final String baseURL = "http://13.235.254.21:3000/api/v1/";//cloud
   Future<http.Response> postRequest(String action, Map<String, dynamic> data) async
   {
+    print('action:$action');
     var headers = {
       'Content-Type':'application/json',
       "action": action
     };
     var body = json.encode(data);
-
     return await http.post(Uri.parse(baseURL),
         headers : headers,
         body: body
@@ -27,7 +28,6 @@ class HttpService
       "action": action
     };
     var body = json.encode(data);
-
     return await http.put(Uri.parse(baseURL),
         headers : headers,
         body: body

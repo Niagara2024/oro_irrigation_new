@@ -40,10 +40,10 @@ class _AddSettingCategoryState extends State<AddSettingCategory> {
     super.initState();
     ddValues =  <DropdownMenuEntry<GlobalSettings>>[];
     getSettingCategoryByActiveList();
-    getsettingCategoryList();
+    getSettingCategoryList();
   }
 
-  Future<void> getsettingCategoryList() async
+  Future<void> getSettingCategoryList() async
   {
     Map<String, Object> body = {};
     final response = await HttpService().postRequest("getSettingCategory", body);
@@ -186,7 +186,7 @@ class _AddSettingCategoryState extends State<AddSettingCategory> {
                                       if(data["code"]==200)
                                       {
                                         _showSnackBar(data["message"]);
-                                        getsettingCategoryList();
+                                        getSettingCategoryList();
                                       }
                                       else{
                                         _showSnackBar(data["message"]);
@@ -244,7 +244,7 @@ class _AddSettingCategoryState extends State<AddSettingCategory> {
                                 controller: dropdownSettingsList,
                                 errorText: showDdError ? 'Select Settings category Type' : null,
                                 hintText: 'Settings Category',
-                                width: MediaQuery.sizeOf(context).width/3.32,
+                                width: MediaQuery.sizeOf(context).width/3.6,
                                 //label: const Text('Category'),
                                 dropdownMenuEntries: ddValues,
                                 inputDecorationTheme: const InputDecorationTheme(
@@ -364,7 +364,7 @@ class _AddSettingCategoryState extends State<AddSettingCategory> {
                                     settingsTypeCtl.clear();
 
                                     _showSnackBar(data["message"]);
-                                    getsettingCategoryList();
+                                    getSettingCategoryList();
                                   }
                                   else{
                                     _showSnackBar(data["message"]);

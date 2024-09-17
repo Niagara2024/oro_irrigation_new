@@ -18,3 +18,20 @@ class GlobalSettings
   );
 
 }
+
+class DDCategoryList
+{
+  DDCategoryList({
+    this.unitCategoryId = 0,
+    this.categoryName = '',
+  });
+
+  int unitCategoryId;
+  String categoryName;
+
+  factory DDCategoryList.fromJson(Map<String, dynamic> json) => DDCategoryList(
+    unitCategoryId: json['unitCategoryId'],
+    categoryName: json['categoryName'],
+  );
+
+}

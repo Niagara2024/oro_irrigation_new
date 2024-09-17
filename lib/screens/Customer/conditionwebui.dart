@@ -133,7 +133,6 @@ class _ConditionwebUIState extends State<ConditionwebUI>
       conditionselectionstr = '${usedprogramdropdownstrarr[0]} $value';
       zonestr = name;
     }
-    print('conditionselectionstr:  $conditionselectionstr');
     return conditionselectionstr;
   }
 
@@ -249,8 +248,6 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                         label: Text('Level'),
                         icon: Icon(Icons.water_outlined)),
                   ],
-
-
                   selected: <Calendar>{selectedSegment},
                   onSelectionChanged: (Set<Calendar> newSelection) {
                     setState(() {
@@ -311,48 +308,54 @@ class _ConditionwebUIState extends State<ConditionwebUI>
           children: [
             Expanded(
               child: DataTable2(
-                  headingRowColor: MaterialStateProperty.all<Color>(primaryColorDark),
+                  headingRowColor:
+                  MaterialStateProperty.all<Color>(primaryColorDark),
                   columnSpacing: 12,
                   horizontalMargin: 12,
                   minWidth: 1000,
                   border: TableBorder.all(),
                   columns: [
                     for (int i = 0; i < conditionhdrlist.length; i++)
-                      i == 0 ?
-                      DataColumn2(
+                      i == 0
+                          ? DataColumn2(
                         fixedWidth: 60,
                         label: Center(
                             child: Text(
                               conditionhdrlist[i].toString(),
                               style: TextStyle(
                                   fontSize: _fontSizeheading(),
-                                  fontWeight: FontWeight.bold,color: Colors.white
-                              ),
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
                               softWrap: true,
                             )),
-                      ):
-                      i == 2 || i == 3 || i == 4 || i == 6 || i == 7 || i == 8?
-                      DataColumn2(
+                      )
+                          : i == 2 ||
+                          i == 3 ||
+                          i == 4 ||
+                          i == 6 ||
+                          i == 7 ||
+                          i == 8
+                          ? DataColumn2(
                         fixedWidth: 100,
                         label: Center(
                             child: Text(
                               conditionhdrlist[i].toString(),
                               style: TextStyle(
                                   fontSize: _fontSizeheading(),
-                                  fontWeight: FontWeight.bold,color: Colors.white
-                              ),
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
                               softWrap: true,
                             )),
-                      ):
-                      DataColumn2(
+                      )
+                          : DataColumn2(
                         size: ColumnSize.M,
                         label: Center(
                             child: Text(
                               conditionhdrlist[i].toString(),
                               style: TextStyle(
                                   fontSize: _fontSizeheading(),
-                                  fontWeight: FontWeight.bold,color: Colors.white
-                              ),
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
                               softWrap: true,
                             )),
                       ),
@@ -362,14 +365,13 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                           (index) => DataRow(
                         color: MaterialStateColor.resolveWith((states) {
                           if (index == Selectindexrow) {
-                            return primaryColorDark.withOpacity(0.5); // Selected row color
+                            return primaryColorDark
+                                .withOpacity(0.5); // Selected row color
                           }
-                          return primaryColorDark.withOpacity(0.05) ;
+                          return primaryColorDark.withOpacity(0.05);
                         }),
                         cells: [
-                          for (int i = 0;
-                          i < conditionhdrlist.length;
-                          i++)
+                          for (int i = 0; i < conditionhdrlist.length; i++)
                             if (conditionhdrlist[i] == 'Enable')
                               DataCell(
                                 onTap: () {
@@ -381,22 +383,21 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                                   child: Transform.scale(
                                     scale: 0.75,
                                     child: Switch(
-                                      value: conditionLibrary![index]
-                                          .enable ??
+                                      value:
+                                      conditionLibrary![index].enable ??
                                           false,
                                       onChanged: ((value) {
                                         setState(() {
                                           Selectindexrow = index;
-                                          conditionLibrary![index]
-                                              .enable = value;
+                                          conditionLibrary![index].enable =
+                                              value;
                                         });
                                       }),
                                     ),
                                   ),
                                 ),
                               )
-                            else if (conditionhdrlist[i] ==
-                                'Notification')
+                            else if (conditionhdrlist[i] == 'Notification')
                               DataCell(
                                 onTap: () {
                                   setState(() {
@@ -558,8 +559,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                                                         style: TextStyle(
                                                             fontSize: _fontSizelabel()),
                                                       )))
-                                            else if (conditionhdrlist[i] ==
-                                                  'Used Program')
+                                            else if (conditionhdrlist[i] == 'Used Program')
                                                 DataCell(onTap: () {
                                                   setState(() {
                                                     Selectindexrow = index;
@@ -612,9 +612,31 @@ class _ConditionwebUIState extends State<ConditionwebUI>
   Widget buildconditionselection(String? title, int index) {
     changeval();
     String conditiontrue = conditionLibrary![index].conditionIsTrueWhen!;
-
     bool containsOnlyNumbers = RegExp(r'^[0-9]+$').hasMatch(dropdownvalues);
     bool containsOnlyOperators = RegExp(r'^[&|^]+$').hasMatch(dropdownvalues);
+    List<String>? Moiturelist = [
+      "",
+      "Moisture Sensor reading is higher than",
+      "Moisture Sensor reading is lower than",
+    ];
+    List<String> levelList = [
+      "",
+      "Level Sensor reading is higher than",
+      "Level Sensor reading is lower than",
+    ];
+    List<String>? dropdownflist = _conditionModel.data!.dropdown!;
+
+    if (selectedSegment == Calendar.Program) {
+      dropdownflist = _conditionModel.data!.dropdown!
+          .where(
+              (item) => !item.contains("Moisture") && !item.contains("Level"))
+          .toList();
+    } else if (selectedSegment == Calendar.Moisture) {
+      dropdownflist = Moiturelist;
+    } else {
+      dropdownflist = levelList;
+    }
+    print("dropdownflist$dropdownflist");
 
     if ((usedprogramdropdownstr.contains('Combined') == true)) {
       if (conditionList.contains(usedprogramdropdownstr2)) {
@@ -682,7 +704,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
             if (Selectindexrow != null)
             //First Dropdown values
               DropdownButton(
-                items: _conditionModel.data!.dropdown?.map((String? items) {
+                items: dropdownflist?.map((String? items) {
                   return DropdownMenuItem(
                     value: items,
                     child: Container(
@@ -712,7 +734,7 @@ class _ConditionwebUIState extends State<ConditionwebUI>
             if (usedprogramdropdownstr.contains('Combined') == false &&
                 usedprogramdropdownlist?.length != 0)
               DropdownButton(
-                hint: Text('--/--'),
+                hint: Text(''),
                 items: usedprogramdropdownlist?.map((UserNames items) {
                   return DropdownMenuItem(
                     value: '${items.name}',
@@ -879,7 +901,8 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                           conditionLibrary![Selectindexrow].program = '0';
                         }
                       }
-                    } else if (usedprogramdropdownstr.contains('Moisture')) {
+                    }
+                    else if (usedprogramdropdownstr.contains('Moisture')) {
                       conditionLibrary![Selectindexrow].conditionIsTrueWhen =
                           conditionselection(usedprogramdropdownstr,
                               usedprogramdropdownstr2, dropdownvalues);
@@ -901,7 +924,8 @@ class _ConditionwebUIState extends State<ConditionwebUI>
                           conditionLibrary![Selectindexrow].program = '0';
                         }
                       }
-                    } else if (usedprogramdropdownstr.contains('Level')) {
+                    }
+                    else if (usedprogramdropdownstr.contains('Level')) {
                       conditionLibrary![Selectindexrow].conditionIsTrueWhen =
                           conditionselection(usedprogramdropdownstr,
                               usedprogramdropdownstr2, dropdownvalues);
@@ -1033,9 +1057,6 @@ class _ConditionwebUIState extends State<ConditionwebUI>
       "moisture": moistureJson,
       "level": levelJson
     };
-    print('\n\n\n\n 3');
-    print(finaljson);
-    print('\n\n\n\n  3');
     String Mqttsenddata = toMqttformat(conditionLibrary);
     Map<String, Object> body = {
       "userId": widget.userId,
@@ -1050,11 +1071,10 @@ class _ConditionwebUIState extends State<ConditionwebUI>
         context, jsonDataresponse['message'], response.statusCode);
 
     String payLoadFinal = jsonEncode({
-      "700": [
-        {"708": Mqttsenddata},
+      "1000": [
+        {"1001": Mqttsenddata},
       ]
     });
-
     MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.imeiNo}');
   }
 
@@ -1139,6 +1159,8 @@ class _ConditionwebUIState extends State<ConditionwebUI>
           conditionIsTrueWhenvalue = "3,0,0,0";
         }
       }
+
+
       //  Combine =
       else if (data[i].conditionIsTrueWhen!.contains('condition')) {
         String operator = data[i].dropdownValue!;
@@ -1171,7 +1193,9 @@ class _ConditionwebUIState extends State<ConditionwebUI>
       '${data[i].sNo},${data[i].name},$enablevalue,${data[i].duration}:00,${data[i].fromTime}:00,${data[i].untilTime}:00,$Notifigation,$conditionIsTrueWhenvalue;';
       // S_No,Name,ConditonOnOff,ScanTime,StartTime,StopTime,NotificationOnOff,ConditionCategory,Object_Condition1,Operator,SetValue_Condition2
     }
+    print(Mqttdata);
     return Mqttdata;
+
   }
 
   double? _fontSizeheading() {

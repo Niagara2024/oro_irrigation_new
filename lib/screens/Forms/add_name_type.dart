@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
@@ -60,7 +61,43 @@ class _AddNameTypeState extends State<AddNameType> {
   Widget build(BuildContext context)
   {
     final mediaQuery = MediaQuery.of(context);
-    //final Color color = Colors.primaries[contactList.length % Colors.primaries.length];
+
+    /*return Container(
+      color: myTheme.primaryColor.withOpacity(0.2),
+      child: DataTable2(
+        columnSpacing: 12,
+        horizontalMargin: 12,
+        minWidth: 550,
+        dataRowHeight: 50.0,
+        headingRowHeight: 35.0,
+        headingRowColor: MaterialStateProperty.all<Color>(myTheme.primaryColor.withOpacity(0.2)),
+        columns: const [
+          DataColumn2(
+              label: Text('Name', style: TextStyle(fontSize: 13),),
+              fixedWidth: 150,
+          ),
+          DataColumn2(
+              label: Center(child: Text('Description', style: TextStyle(fontSize: 13),)),
+              size: ColumnSize.M
+          ),
+          DataColumn2(
+              label: Center(child: Text('Action', style: TextStyle(fontSize: 13),)),
+              fixedWidth: 110
+          ),
+        ],
+        rows: List<DataRow>.generate(nameTypeList.length, (index) => DataRow(cells: [
+          DataCell(Text(nameTypeList[index].name,)),
+          DataCell(Center(child: Text(nameTypeList[index].nameDescription))),
+          DataCell(Center(child: Row(
+            children: [
+              IconButton(tooltip:'Edit',onPressed: (){}, icon: Icon(Icons.edit_outlined)),
+
+            ],
+          ))),
+        ])),
+      ),
+    );*/
+
     return Container(
       color:  Colors.blueGrey.shade50,
       child: Row(

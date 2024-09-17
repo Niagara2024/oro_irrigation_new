@@ -20,6 +20,29 @@ class _LocalDosingTableState extends State<LocalDosingTable> {
   ScrollController scrollController = ScrollController();
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        var configPvd = Provider.of<ConfigMakerProvider>(context,listen: false);
+        configPvd.sourcePumpFunctionality(['editsourcePumpSelection',false]);
+        configPvd.irrigationPumpFunctionality(['editIrrigationPumpSelection',false]);
+        configPvd.centralDosingFunctionality(['c_dosingSelectAll',false]);
+        configPvd.centralDosingFunctionality(['c_dosingSelection',false]);
+        configPvd.centralFiltrationFunctionality(['centralFiltrationSelection',false]);
+        configPvd.centralFiltrationFunctionality(['centralFiltrationSelectAll',false]);
+        configPvd.irrigationLinesFunctionality(['editIrrigationSelection',false]);
+        configPvd.irrigationLinesFunctionality(['editIrrigationSelectAll',false]);
+        configPvd.localDosingFunctionality(['edit_l_DosingSelectAll',false]);
+        configPvd.localDosingFunctionality(['edit_l_DosingSelection',false]);
+        configPvd.localFiltrationFunctionality(['edit_l_filtrationSelection',false]);
+        configPvd.localFiltrationFunctionality(['edit_l_filtrationSelectALL',false]);
+        configPvd.cancelSelection();
+      });
+    }
+  }
+  @override
   Widget build(BuildContext context) {
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraint){

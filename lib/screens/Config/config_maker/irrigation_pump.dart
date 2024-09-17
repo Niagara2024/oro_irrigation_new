@@ -22,6 +22,29 @@ class _IrrigationPumpTableState extends State<IrrigationPumpTable> {
   ScrollController scrollController = ScrollController();
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        var configPvd = Provider.of<ConfigMakerProvider>(context,listen: false);
+        configPvd.sourcePumpFunctionality(['editsourcePumpSelection',false]);
+        configPvd.irrigationPumpFunctionality(['editIrrigationPumpSelection',false]);
+        configPvd.centralDosingFunctionality(['c_dosingSelectAll',false]);
+        configPvd.centralDosingFunctionality(['c_dosingSelection',false]);
+        configPvd.centralFiltrationFunctionality(['centralFiltrationSelection',false]);
+        configPvd.centralFiltrationFunctionality(['centralFiltrationSelectAll',false]);
+        configPvd.irrigationLinesFunctionality(['editIrrigationSelection',false]);
+        configPvd.irrigationLinesFunctionality(['editIrrigationSelectAll',false]);
+        configPvd.localDosingFunctionality(['edit_l_DosingSelectAll',false]);
+        configPvd.localDosingFunctionality(['edit_l_DosingSelection',false]);
+        configPvd.localFiltrationFunctionality(['edit_l_filtrationSelection',false]);
+        configPvd.localFiltrationFunctionality(['edit_l_filtrationSelectALL',false]);
+        configPvd.cancelSelection();
+      });
+    }
+  }
+  @override
   Widget build(BuildContext context) {
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraint){
@@ -89,7 +112,7 @@ class _IrrigationPumpTableState extends State<IrrigationPumpTable> {
                       }else{
                         return AlertDialog(
                           backgroundColor: myTheme.primaryColor,
-                          shape: RoundedRectangleBorder(
+                          shape: const RoundedRectangleBorder(
                               borderRadius: BorderRadius.all(Radius.circular(0))
                           ),
                           title: Text('Add Batch of Pumps with Same Properties',style: TextStyle(color: Colors.white,fontSize: 14),),
@@ -187,7 +210,8 @@ class _IrrigationPumpTableState extends State<IrrigationPumpTable> {
                   topBtmRgt('ORO','pump'),
                   topBtmRgt('ORO Pump','Plus'),
                   topBtmRgt('Relay','count'),
-                  topBtmRgt('Level','Type'),
+                  topBtmRgt('Level','Type(${configPvd.totalLevelSensor})'),
+                  topBtmRgt('Pressure','Sensor(${configPvd.total_p_sensor})'),
                   topBtmRgt('Top','tank(high)'),
                   topBtmRgt('Top','tank(low)'),
                   topBtmRgt('Sump','tank(high)'),
@@ -297,7 +321,7 @@ class _IrrigationPumpTableState extends State<IrrigationPumpTable> {
                                   ),
                                   width: double.infinity,
                                   height: 50,
-                                  child: configPvd.irrigationPumpUpdated[index]['oro_pump_plus'] == true ? MyDropDown(initialValue: configPvd.irrigationPumpUpdated[index]['levelType'], itemList: ['-','ADC level','RS485 level','float level'], pvdName: 'editLevelType_ip', index: index) : notAvailable
+                                  child: configPvd.irrigationPumpUpdated[index]['oro_pump_plus'] == true ? MyDropDown(initialValue: configPvd.irrigationPumpUpdated[index]['levelType'], itemList: (configPvd.totalLevelSensor == 0 && ['ADC level','both'].contains(configPvd.irrigationPumpUpdated[index]['levelType'])) ? ['-','ADC level','float level','both'] : configPvd.totalLevelSensor == 0 ? ['-','float level'] : ['-','ADC level','float level','both'], pvdName: 'editLevelType_ip', index: index) : notAvailable
                               ),
                             ),
                             Expanded(
@@ -307,10 +331,26 @@ class _IrrigationPumpTableState extends State<IrrigationPumpTable> {
                                 ),
                                 width: double.infinity,
                                 height: 50,
-                                child: (configPvd.irrigationPumpUpdated[index]['levelType'] != 'float level') ?
+                                child: (!configPvd.irrigationPumpUpdated[index]['oro_pump_plus'] || (configPvd.total_p_sensor == 0 && !configPvd.irrigationPumpUpdated[index]['oro_pump_plus']) || (configPvd.total_p_sensor == 0 && configPvd.irrigationPumpUpdated[index]['pressureSensor'].isEmpty)) ?
                                 notAvailable :
                                 Checkbox(
-                                    value: configPvd.irrigationPumpUpdated[index]['TopTankHigh'].isEmpty ? false : true,
+                                    value: configPvd.irrigationPumpUpdated[index]['pressureSensor'].isEmpty ? false : true,
+                                    onChanged: (value){
+                                      configPvd.irrigationPumpFunctionality(['editPressureSensor',index,value]);
+                                    }),
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    border: Border(right: BorderSide(width: 1))
+                                ),
+                                width: double.infinity,
+                                height: 50,
+                                child: (!['float level','both'].contains(configPvd.irrigationPumpUpdated[index]['levelType']) || !configPvd.irrigationPumpUpdated[index]['oro_pump_plus']) ?
+                                notAvailable :
+                                Checkbox(
+                                    value: (configPvd.irrigationPumpUpdated[index]['TopTankHigh'] == null || configPvd.irrigationPumpUpdated[index]['TopTankHigh'].isEmpty) ? false : true,
                                     onChanged: (value){
                                       configPvd.irrigationPumpFunctionality(['editTopTankHigh',index,value]);
                                     }),
@@ -323,10 +363,10 @@ class _IrrigationPumpTableState extends State<IrrigationPumpTable> {
                                 ),
                                 width: double.infinity,
                                 height: 50,
-                                child: (configPvd.irrigationPumpUpdated[index]['levelType'] != 'float level') ?
+                                child: (!['float level','both'].contains(configPvd.irrigationPumpUpdated[index]['levelType']) || !configPvd.irrigationPumpUpdated[index]['oro_pump_plus']) ?
                                 notAvailable :
                                 Checkbox(
-                                    value: configPvd.irrigationPumpUpdated[index]['TopTankLow'].isEmpty ? false : true,
+                                    value: (configPvd.irrigationPumpUpdated[index]['TopTankLow'] == null || configPvd.irrigationPumpUpdated[index]['TopTankLow'].isEmpty) ? false : true,
                                     onChanged: (value){
                                       configPvd.irrigationPumpFunctionality(['editTopTankLow',index,value]);
                                     }),
@@ -339,10 +379,10 @@ class _IrrigationPumpTableState extends State<IrrigationPumpTable> {
                                 ),
                                 width: double.infinity,
                                 height: 50,
-                                child: (configPvd.irrigationPumpUpdated[index]['levelType'] != 'float level') ?
+                                child: (!['float level','both'].contains(configPvd.irrigationPumpUpdated[index]['levelType']) || !configPvd.irrigationPumpUpdated[index]['oro_pump_plus']) ?
                                 notAvailable :
                                 Checkbox(
-                                    value: configPvd.irrigationPumpUpdated[index]['SumpTankHigh'].isEmpty ? false : true,
+                                    value: (configPvd.irrigationPumpUpdated[index]['SumpTankHigh'] == null || configPvd.irrigationPumpUpdated[index]['SumpTankHigh'].isEmpty) ? false : true,
                                     onChanged: (value){
                                       configPvd.irrigationPumpFunctionality(['editSumpTankHigh',index,value]);
                                     }),
@@ -355,10 +395,10 @@ class _IrrigationPumpTableState extends State<IrrigationPumpTable> {
                                 ),
                                 width: double.infinity,
                                 height: 50,
-                                child: (configPvd.irrigationPumpUpdated[index]['levelType'] != 'float level') ?
+                                child: (!['float level','both'].contains(configPvd.irrigationPumpUpdated[index]['levelType']) || !configPvd.irrigationPumpUpdated[index]['oro_pump_plus']) ?
                                 notAvailable :
                                 Checkbox(
-                                    value: configPvd.irrigationPumpUpdated[index]['SumpTankLow'].isEmpty ? false : true,
+                                    value: (configPvd.irrigationPumpUpdated[index]['SumpTankLow'] == null ||configPvd.irrigationPumpUpdated[index]['SumpTankLow'].isEmpty)   ? false : true,
                                     onChanged: (value){
                                       configPvd.irrigationPumpFunctionality(['editSumpTankLow',index,value]);
                                     }),

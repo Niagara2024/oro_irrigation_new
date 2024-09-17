@@ -51,11 +51,11 @@ class _AnalogSensorConstantState extends State<AnalogSensorConstant> {
                       children: [
                         expandedCustomCell(Text('${constantPvd.analogSensorUpdated[index]['id']}'),),
                         expandedCustomCell(Text('${constantPvd.analogSensorUpdated[index]['name']}'),),
-                        expandedCustomCell(MyDropDown(initialValue: constantPvd.analogSensorUpdated[index]['type'], itemList: ['Soil Moisture','Soil Temperature','Rainfall','Windspeed','Wind Direction','Leaf Wetness','Humidity','Lux Sensor','Co2 Sensor','LDR'], pvdName: 'analogSensor/type', index: index),),
+                        expandedCustomCell(MyDropDown(initialValue: constantPvd.analogSensorUpdated[index]['type'], itemList: ['Soil Moisture','Soil Temperature','Rainfall','Windspeed','Wind Direction','Leaf Wetness','Humidity','Lux Sensor','Co2 Sensor','LDR','Radiation set'], pvdName: 'analogSensor/type', index: index),),
                         expandedCustomCell(MyDropDown(initialValue: constantPvd.analogSensorUpdated[index]['units'], itemList: ['bar','dS/m'], pvdName: 'analogSensor/units', index: index),),
                         expandedCustomCell(MyDropDown(initialValue: constantPvd.analogSensorUpdated[index]['base'], itemList: ['Current','Voltage'], pvdName: 'analogSensor/base', index: index),),
-                        expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.analogSensorUpdated[index]['minimum'], constantPvd: constantPvd, purpose: 'analogSensor_minimum_v/${index}/6', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
-                        expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.analogSensorUpdated[index]['maximum'], constantPvd: constantPvd, purpose: 'analogSensor_maximum_v/${index}/7', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
+                        expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.analogSensorUpdated[index]['minimum'], constantPvd: constantPvd, purpose: 'analogSensor_minimum_v/${index}/6', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],)),
+                        expandedCustomCell(TextFieldForConstant(index: -1, initialValue: constantPvd.analogSensorUpdated[index]['maximum'], constantPvd: constantPvd, purpose: 'analogSensor_maximum_v/${index}/7', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],)),
                       ],
                     ),
                   );
@@ -74,116 +74,273 @@ class AnalogSensorConstant_M extends StatefulWidget {
 }
 
 class _AnalogSensorConstant_MState extends State<AnalogSensorConstant_M> {
-  int selectedSensor = 0;
+  int selectedAnalogSensor = 0;
   @override
   Widget build(BuildContext context) {
     var constantPvd = Provider.of<ConstantProvider>(context,listen: true);
-    var overAllPvd = Provider.of<OverAllUse>(context,listen: true);
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
+    if(constantPvd.analogSensorUpdated.isEmpty){
+      return Container();
+    }
+    return Container(
+      padding: EdgeInsets.all(10),
+      color: Color(0xfff3f3f3),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
+          SizedBox(height: 5,),
           Container(
-              margin: EdgeInsets.only(bottom: 8),
-              height: 30,
-              color: myTheme.primaryColor,
-              width : double.infinity,
-              child: Center(child: Text('Select sensor',style: TextStyle(color: Colors.white),))
-          ),
-          Container(
-            padding: EdgeInsets.only(left: 10),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.white
+            ),
             width: double.infinity,
-            height: 50,
-            child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: constantPvd.analogSensor.length,
-                itemBuilder: (BuildContext context,int index){
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Container(
-                        width: 60,
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              width: 60,
-                              height: 40,
-                              child: GestureDetector(
-                                onTap: (){
-                                  setState(() {
-                                    selectedSensor = index;
-                                  });
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: index == 0 ? BorderRadius.only(topLeft: Radius.circular(20)) : constantPvd.analogSensor.length -1 == index ? BorderRadius.only(topRight: Radius.circular(20)) : BorderRadius.circular(5),
-                                    color: selectedSensor == index ? myTheme.primaryColor : Colors.blue.shade100,
-                                  ),
-                                  child: Center(child: Text('${index + 1}',style: TextStyle(color: selectedSensor == index ? Colors.white : null),)),
-                                ),
-                              ),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(width: 3,),
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      color: Colors.black
-                                  ),
-                                ),
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      color: Colors.black
-                                  ),
-                                ),
-                                SizedBox(width: 3,),
-                              ],
-                            )
-                          ],
-                        ),
+            height: 60,
+            child: Center(
+              child: ListTile(
+                title: Text('Pump'),
+                leading: SizedBox(
+                  width: 30,
+                  height: 30,
+                  child: Image.asset('assets/images/analog_sensor.png'),
+                ),
+                trailing:  PopupMenuButton<int>(
+                  child: Text('${selectedAnalogSensor + 1}',style: TextStyle(fontSize: 20),),
+                  itemBuilder: (context) => [
+                    for(var i = 0;i < constantPvd.analogSensorUpdated.length;i++)
+                      PopupMenuItem(
+                          value: i,
+                          child: Text('${i+1}')
                       ),
-                      if(constantPvd.analogSensor.length - 1 != index)
-                        Text('-')
-                    ],
-                  );
-                }),
-          ),
-          Container(
-              margin: EdgeInsets.only(bottom: 8),
-              height: 30,
-              color: myTheme.primaryColor,
-              width : double.infinity,
-              child: Center(child: Text('Analog sensor ${selectedSensor + 1}',style: TextStyle(color: Colors.white),))
-          ),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                // color: Color(0XFFF3F3F3)
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  // mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    returnMyListTile('ID', Text('${constantPvd.analogSensor[selectedSensor][0]}',style: TextStyle(fontSize: 14))),
-                    returnMyListTile('Name', Text('${constantPvd.analogSensor[selectedSensor][1]}',style: TextStyle(fontSize: 14))),
-                    returnMyListTile('TYPE', fixedContainer(MyDropDown(initialValue: constantPvd.analogSensor[selectedSensor][2], itemList: ['Pressure IN','Pressure OUT','EC','PH','Level','Valve Pressure','Soil Moisture','Soil Temperature'], pvdName: 'analogSensor/type', index: selectedSensor),)),
-                    returnMyListTile('UNITS', fixedContainer(MyDropDown(initialValue: constantPvd.analogSensor[selectedSensor][3], itemList: ['Bar','dS/m'], pvdName: 'analogSensor/units', index: selectedSensor),)),
-                    returnMyListTile('DATA SOURCE', fixedContainer(MyDropDown(initialValue: constantPvd.analogSensor[selectedSensor][5], itemList: ['Current','Voltage'], pvdName: 'analogSensor/base', index: selectedSensor),)),
-                    returnMyListTile('MINIMUM', TextFieldForConstant(index: -1, initialValue: constantPvd.analogSensor[selectedSensor][6], constantPvd: constantPvd, purpose: 'analogSensor_minimum_v/${selectedSensor}/6', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
-                    returnMyListTile('MAXIMUM', TextFieldForConstant(index: -1, initialValue: constantPvd.analogSensor[selectedSensor][7], constantPvd: constantPvd, purpose: 'analogSensor_maximum_v/${selectedSensor}/7', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
                   ],
+                  offset: Offset(0, 50),
+                  color: Colors.white,
+                  elevation: 2,
+                  // on selected we show the dialog box
+                  onSelected: (value) {
+                    setState(() {
+                      selectedAnalogSensor = value;
+                    });
+                  },
                 ),
               ),
             ),
-          )
+          ),
+          SizedBox(height: 5,),
+          Expanded(
+            child: GridView.count(
+              crossAxisCount: 2,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              childAspectRatio: MediaQuery.sizeOf(context).width/210,
+
+              children: <Widget>[
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.production_quantity_limits,color: myTheme.primaryColor,),
+                          Text('Type',style: TextStyle(color: myTheme.primaryColor),),
+                        ],
+                      ),
+                      DropdownButton(
+                        focusColor: Colors.transparent,
+                        // style: ioText,
+                        value: constantPvd.analogSensorUpdated[selectedAnalogSensor]['type'],
+                        underline: Container(),
+                        items: ['Soil Moisture','Soil Temperature','Rainfall','Windspeed','Wind Direction','Leaf Wetness','Humidity','Lux Sensor','Co2 Sensor','LDR','Radiation set'].map((dynamic items) {
+                          return DropdownMenuItem(
+                            value: items,
+                            child: Container(
+                                child: Text(items,style: TextStyle(fontSize: 11,color: Colors.black),)
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          constantPvd.analogSensorFunctionality(['analogSensor/type',selectedAnalogSensor,value!]);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.ev_station,color: myTheme.primaryColor,),
+                          Text('Units',style: TextStyle(color: myTheme.primaryColor),),
+                        ],
+                      ),
+                      DropdownButton(
+                        focusColor: Colors.transparent,
+                        // style: ioText,
+                        value: constantPvd.analogSensorUpdated[selectedAnalogSensor]['units'],
+                        underline: Container(),
+                        items: ['bar','dS/m'].map((dynamic items) {
+                          return DropdownMenuItem(
+                            value: items,
+                            child: Container(
+                                child: Text(items,style: TextStyle(fontSize: 11,color: Colors.black),)
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          constantPvd.analogSensorFunctionality(['analogSensor/units',selectedAnalogSensor,value!]);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.perm_identity,color: myTheme.primaryColor,),
+                          Text('Base',style: TextStyle(color: myTheme.primaryColor),),
+                        ],
+                      ),
+                      DropdownButton(
+                        focusColor: Colors.transparent,
+                        // style: ioText,
+                        value: constantPvd.analogSensorUpdated[selectedAnalogSensor]['base'],
+                        underline: Container(),
+                        items: ['Current','Voltage'].map((dynamic items) {
+                          return DropdownMenuItem(
+                            value: items,
+                            child: Container(
+                                child: Text(items,style: TextStyle(fontSize: 11,color: Colors.black),)
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          constantPvd.analogSensorFunctionality(['analogSensor/base',selectedAnalogSensor,value!]);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.perm_identity,color: myTheme.primaryColor,),
+                          Text('Minimum',style: TextStyle(color: myTheme.primaryColor),),
+                        ],
+                      ),
+                      SizedBox(
+                          width: double.infinity,
+                          height: 60,
+                          child: TextFieldForConstant(index: -1, initialValue: constantPvd.analogSensorUpdated[selectedAnalogSensor]['minimum'], constantPvd: constantPvd, purpose: 'analogSensor_minimum_v/${selectedAnalogSensor}/6', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],)
+                      )
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.perm_identity,color: myTheme.primaryColor,),
+                          Text('Maximum',style: TextStyle(color: myTheme.primaryColor),),
+                        ],
+                      ),
+                      SizedBox(
+                          width: double.infinity,
+                          height: 60,
+                          child: TextFieldForConstant(index: -1, initialValue: constantPvd.analogSensorUpdated[selectedAnalogSensor]['maximum'], constantPvd: constantPvd, purpose: 'analogSensor_maximum_v/${selectedAnalogSensor}/7', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],)
+                      )
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.green.shade50,
+                            Colors.white,
+                          ]
+                      )
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.local_activity_outlined,color: myTheme.primaryColor,),
+                          Text('Name',style: TextStyle(color: myTheme.primaryColor),),
+                        ],
+                      ),
+                      Text('${constantPvd.waterMeterUpdated[selectedAnalogSensor]['name']}')
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.green.shade50,
+                            Colors.white,
+                          ]
+                      )
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.location_pin,color: myTheme.primaryColor,),
+                          Text('Id',style: TextStyle(color: myTheme.primaryColor),),
+                        ],
+                      ),
+                      Text('${constantPvd.waterMeterUpdated[selectedAnalogSensor]['id']}')
+
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

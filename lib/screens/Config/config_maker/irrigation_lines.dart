@@ -41,6 +41,29 @@ class _IrrigationLineTableState extends State<IrrigationLineTable> {
     _scrollable2 = LinkedScrollControllerGroup();
     _horizontalScroll1 = _scrollable2.addAndGet();
     _horizontalScroll2 = _scrollable2.addAndGet();
+    @override
+    void initState() {
+      // TODO: implement initState
+      super.initState();
+      if (mounted) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          var configPvd = Provider.of<ConfigMakerProvider>(context,listen: false);
+          configPvd.sourcePumpFunctionality(['editsourcePumpSelection',false]);
+          configPvd.irrigationPumpFunctionality(['editIrrigationPumpSelection',false]);
+          configPvd.centralDosingFunctionality(['c_dosingSelectAll',false]);
+          configPvd.centralDosingFunctionality(['c_dosingSelection',false]);
+          configPvd.centralFiltrationFunctionality(['centralFiltrationSelection',false]);
+          configPvd.centralFiltrationFunctionality(['centralFiltrationSelectAll',false]);
+          configPvd.irrigationLinesFunctionality(['editIrrigationSelection',false]);
+          configPvd.irrigationLinesFunctionality(['editIrrigationSelectAll',false]);
+          configPvd.localDosingFunctionality(['edit_l_DosingSelectAll',false]);
+          configPvd.localDosingFunctionality(['edit_l_DosingSelection',false]);
+          configPvd.localFiltrationFunctionality(['edit_l_filtrationSelection',false]);
+          configPvd.localFiltrationFunctionality(['edit_l_filtrationSelectALL',false]);
+          configPvd.cancelSelection();
+        });
+      }
+    }
   }
 
   @override
@@ -183,6 +206,8 @@ class _IrrigationLineTableState extends State<IrrigationLineTable> {
                                         ),
                                       ),
                                     ),
+
+                                  const SizedBox(height: 100,)
                                 ],
                               ),
                             ),
@@ -583,10 +608,12 @@ class _IrrigationLineTableState extends State<IrrigationLineTable> {
                                                 //   height: 50,
                                                 //   child: Center(child: TextFieldForFlexibleConfig(index: i, initialValue: '${configPvd.irrigationLines[i]['ORO_level']}', config: configPvd, purpose: 'irrigationLinesFunctionality/0roLevel',)),
                                                 // ),
+
                                               ],
                                             ),
                                           ),
                                         ),
+                                      const SizedBox(height: 100,)
                                     ],
                                   ),
                                 ),

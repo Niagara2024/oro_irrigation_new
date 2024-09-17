@@ -11,6 +11,8 @@ class ProgramList {
   final String scheduleType;
   final String firstSequence;
   final String duration;
+  final String programCategory;
+
 
   ProgramList({
     required this.programId,
@@ -25,9 +27,11 @@ class ProgramList {
     required this.scheduleType,
     required this.firstSequence,
     required this.duration,
+    required this.programCategory,
   });
 
   factory ProgramList.fromJson(Map<String, dynamic> json) {
+    //print('Program list :$json');
     return ProgramList(
       programId: json['programId'],
       serialNumber: json['serialNumber'],
@@ -41,6 +45,7 @@ class ProgramList {
       scheduleType: json['scheduleType'],
       firstSequence: json['firstSequence'],
       duration: json['duration'],
+      programCategory: json['programCategory'],
     );
   }
 }

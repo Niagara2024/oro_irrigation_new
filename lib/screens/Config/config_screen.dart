@@ -37,11 +37,9 @@ class _ConfigScreenState extends State<ConfigScreen> with SingleTickerProviderSt
         NavigationRail(
           selectedIndex: nvRSelection,
           onDestinationSelected: (int index) {
-            // Handle item selection
             setState(() {
               nvRSelection = index;
             });
-
           },
           labelType: NavigationRailLabelType.all,
           destinations: const [
@@ -79,11 +77,11 @@ class _ConfigScreenState extends State<ConfigScreen> with SingleTickerProviderSt
         Expanded(
           child: Center(
             child: nvRSelection == 0 ?
-            Names(userID: widget.userID,  customerID: widget.customerID, controllerId: widget.controllerId):
+            Names(userID: widget.userID,  customerID: widget.customerID, controllerId: widget.controllerId, imeiNo: '',):
             nvRSelection == 1 ?
             PreferencesScreen(customerID: widget.customerID, controllerID: widget.controllerId, userID: widget.userID, deviceId: widget.imeiNumber):
             nvRSelection == 2 ?
-            ConstantInConfig(userId: widget.userID, customerId: widget.customerID, controllerId: widget.controllerId, deviceId: widget.imeiNumber):
+            ConstantInConfig(userId: widget.userID, customerId: widget.customerID, deviceId: widget.imeiNumber, controllerId: widget.controllerId,):
             nvRSelection == 3 ?
             DealerDefinitionInConfig(userId: widget.userID,  customerId: widget.customerID, controllerId: widget.controllerId, imeiNo: widget.imeiNumber,):
             nvRSelection == 4 ?
@@ -106,7 +104,7 @@ class ConfigPage extends StatelessWidget
   Widget build(BuildContext context)
   {
    if(label.toString()=='Names'){
-      return Names(userID: userID,  customerID: customerID, controllerId: controllerId);
+      return Names(userID: userID,  customerID: customerID, controllerId: controllerId, imeiNo: '',);
     }else if(label.toString()=='Dealer definition'){
       return DealerDefinitionInConfig(userId: userID,  customerId: customerID, controllerId: controllerId, imeiNo: imeiNumber);
     }else if(label.toString()=='Preferences'){
@@ -114,7 +112,7 @@ class ConfigPage extends StatelessWidget
     }else if(label.toString()=='Data acquisition'){
       return DataAcquisitionMain(customerID: customerID, controllerID: controllerId, userId: userID, deviceID: imeiNumber);
     }else if(label.toString()=='Constant'){
-      return ConstantInConfig(userId: userID, customerId: customerID, controllerId: controllerId, deviceId: imeiNumber);
+      return ConstantInConfig(userId: userID, customerId: customerID, deviceId: imeiNumber, controllerId: controllerId,);
     }
 
     return Center(child: Text('Page of $label'));

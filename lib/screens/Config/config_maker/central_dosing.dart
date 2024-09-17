@@ -21,7 +21,29 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
 
   bool selectButton = false;
   ScrollController scrollController = ScrollController();
-
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        var configPvd = Provider.of<ConfigMakerProvider>(context,listen: false);
+        configPvd.sourcePumpFunctionality(['editsourcePumpSelection',false]);
+        configPvd.irrigationPumpFunctionality(['editIrrigationPumpSelection',false]);
+        configPvd.centralDosingFunctionality(['c_dosingSelectAll',false]);
+        configPvd.centralDosingFunctionality(['c_dosingSelection',false]);
+        configPvd.centralFiltrationFunctionality(['centralFiltrationSelection',false]);
+        configPvd.centralFiltrationFunctionality(['centralFiltrationSelectAll',false]);
+        configPvd.irrigationLinesFunctionality(['editIrrigationSelection',false]);
+        configPvd.irrigationLinesFunctionality(['editIrrigationSelectAll',false]);
+        configPvd.localDosingFunctionality(['edit_l_DosingSelectAll',false]);
+        configPvd.localDosingFunctionality(['edit_l_DosingSelection',false]);
+        configPvd.localFiltrationFunctionality(['edit_l_filtrationSelection',false]);
+        configPvd.localFiltrationFunctionality(['edit_l_filtrationSelectALL',false]);
+        configPvd.cancelSelection();
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: true);
@@ -208,7 +230,7 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
             Container(
               child: Row(
                 children: [
-                  topBtmLftRgt('#', '(${configPvd.totalCentralDosing})'),
+                  topBtmLftRgt('Site', '(${configPvd.totalCentralDosing})'),
                   topBtmRgt('Booster','(${configPvd.totalBooster})'),
                   topBtmRgt('Ec','(${configPvd.totalEcSensor})'),
                   topBtmRgt('Ph','(${configPvd.totalPhSensor})'),
@@ -268,10 +290,10 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
                                   width: double.infinity,
                                   child : configPvd.totalBooster == 0 && configPvd.centralDosingUpdated[index]['boosterPump'] == '' ?
                                   Container(
-                                    padding: EdgeInsets.all(5),
-                                    width: 80,
-                                   height: 50,
-                                    child: notAvailable
+                                      padding: EdgeInsets.all(5),
+                                      width: 80,
+                                      height: 50,
+                                      child: notAvailable
                                   ) : Center(
                                     child: TextFieldForFlexibleConfig(index: index, initialValue: '${configPvd.centralDosingUpdated[index]['boosterPump']}', config: configPvd, purpose: 'centralDosingFunctionality/editBoosterPump',),
                                   )
@@ -286,10 +308,10 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
                                   width: double.infinity,
                                   child : configPvd.totalEcSensor == 0 && configPvd.centralDosingUpdated[index]['ec'] == '' ?
                                   Container(
-                                    padding: EdgeInsets.all(5),
-                                    width: 80,
-                                   height: 50,
-                                    child: notAvailable
+                                      padding: EdgeInsets.all(5),
+                                      width: 80,
+                                      height: 50,
+                                      child: notAvailable
                                   ) : Center(
                                       child: TextFieldForFlexibleConfig(index: index, initialValue: '${configPvd.centralDosingUpdated[index]['ec']}', config: configPvd, purpose: 'centralDosingFunctionality/editEcSensor',)
                                   )
@@ -304,10 +326,10 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
                                   width: double.infinity,
                                   child : configPvd.totalPhSensor == 0 && configPvd.centralDosingUpdated[index]['ph'] == '' ?
                                   Container(
-                                    padding: EdgeInsets.all(5),
-                                    width: 80,
-                                   height: 50,
-                                    child: notAvailable
+                                      padding: EdgeInsets.all(5),
+                                      width: 80,
+                                      height: 50,
+                                      child: notAvailable
                                   ) : Center(
                                       child: TextFieldForFlexibleConfig(index: index, initialValue: '${configPvd.centralDosingUpdated[index]['ph']}', config: configPvd, purpose: 'centralDosingFunctionality/editPhSensor',)
                                   )
@@ -340,7 +362,7 @@ class _CentralDosingTableState extends State<CentralDosingTable> {
                                       for(var i = 0; i< configPvd.centralDosingUpdated[index]['injector'].length;i ++)
                                         Container(
                                           child: Center(child: Text('${i+1}')),
-                                         height: 50,
+                                          height: 50,
                                           decoration:  BoxDecoration(
                                               border: Border(
                                                   bottom: BorderSide(width: i == configPvd.centralDosingUpdated[index]['injector'].length - 1 ? 0 : 1)

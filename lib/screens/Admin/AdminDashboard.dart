@@ -15,7 +15,7 @@ import '../Forms/add_product.dart';
 import '../Forms/create_account.dart';
 import '../Forms/device_list.dart';
 
-enum Calendar {day, week, month, year}
+enum Calendar {all, year}
 typedef CallbackFunction = void Function(String result);
 
 class AdminDashboard extends StatefulWidget {
@@ -29,21 +29,21 @@ class AdminDashboard extends StatefulWidget {
 
 class _AdminDashboardState extends State<AdminDashboard> {
 
-  Calendar calendarView = Calendar.day;
+  Calendar calendarView = Calendar.all;
   List<ProductStockModel> productStockList = <ProductStockModel>[];
   List<CustomerListMDL> myCustomerList = <CustomerListMDL>[];
   late DataResponse dataResponse;
 
-  String selectedValue = 'All';
-  List<String> dropdownItems = ['All', 'Last year', 'Last month', 'Last Week'];
   bool visibleLoading = false;
+
+  int totalSales = 0;
 
   @override
   void initState() {
     super.initState();
     dataResponse = DataResponse(graph: {}, total: []);
     indicatorViewShow();
-    getProductSalesReport();
+    getProductSalesReport("All");
     getProductStock();
     getCustomerList();
   }
@@ -78,20 +78,26 @@ class _AdminDashboardState extends State<AdminDashboard> {
     }
   }
 
-  Future<void> getProductSalesReport() async {
-    Map<String, Object> body = {"userId": widget.userId, "userType": 1, "type": "All"};
+
+  Future<void> getProductSalesReport(String type) async {
+    Map<String, Object> body = {"userId": widget.userId, "userType": 1, "type": type, "year": 2024};
     final response = await HttpService().postRequest("getProductSalesReport", body);
     if (response.statusCode == 200) {
+      print(response.body);
       var data = jsonDecode(response.body);
       if (data is Map<String, dynamic> && data["code"] == 200) {
         try {
+          totalSales=0;
           dataResponse = DataResponse.fromJson(data);
+          for (int i = 0; i < dataResponse.total!.length; i++) {
+            totalSales += dataResponse.total![i].totalProduct;
+          }
         }catch (e) {
           print('Error parsing data response: $e');
         }
       }
       indicatorViewHide();
-    } else {
+    }else{
       //_showSnackBar(response.body);
     }
   }
@@ -212,42 +218,35 @@ class _AdminDashboardState extends State<AdminDashboard> {
                               children: [
                                 SegmentedButton<Calendar>(
                                   style: ButtonStyle(
-                                    backgroundColor: MaterialStatePropertyAll(myTheme.primaryColor.withOpacity(0.1)),
-                                    iconColor: MaterialStateProperty.all(myTheme.primaryColor),
+                                    backgroundColor: WidgetStatePropertyAll(myTheme.primaryColor.withOpacity(0.1)),
+                                    iconColor: WidgetStateProperty.all(myTheme.primaryColor),
                                   ),
                                   segments: const <ButtonSegment<Calendar>>[
                                     ButtonSegment<Calendar>(
-                                        value: Calendar.day,
+                                        value: Calendar.all,
                                         label: Text('All'),
                                         icon: Icon(Icons.calendar_view_day)),
                                     ButtonSegment<Calendar>(
-                                        value: Calendar.week,
-                                        label: Text('Week'),
-                                        icon: Icon(Icons.calendar_view_week)),
-                                    ButtonSegment<Calendar>(
-                                        value: Calendar.month,
-                                        label: Text('Month'),
-                                        icon: Icon(Icons.calendar_view_month)),
-                                    ButtonSegment<Calendar>(
                                         value: Calendar.year,
                                         label: Text('Year'),
-                                        icon: Icon(Icons.calendar_today)),
+                                        icon: Icon(Icons.calendar_view_month)),
                                   ],
                                   selected: <Calendar>{calendarView},
                                   onSelectionChanged: (Set<Calendar> newSelection) {
                                     setState(() {
-                                      // By default there is only a single segment that can be
-                                      // selected at one time, so its value is always the first
-                                      // item in the selected set.
                                       calendarView = newSelection.first;
+                                      String sldName = calendarView.name[0].toUpperCase() + calendarView.name.substring(1);
+                                      getProductSalesReport(sldName);
                                     });
                                   },
                                 ),
+                                const SizedBox(width: 16,),
+                                Text('Total Sales : $totalSales', style: const TextStyle(fontSize: 15),)
                               ],
                             ),
                           ),
-                          const Expanded(
-                            child: MySalesChart(),
+                          Expanded(
+                            child: MySalesChart(graph: dataResponse.graph,),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(bottom: 8.0),
@@ -258,13 +257,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
                               runAlignment: WrapAlignment.spaceBetween,
                               children: List.generate(
                                 dataResponse.total!.length, (index) => Chip(
-                                avatar: CircleAvatar(backgroundColor: index==0? Colors.cyan : index==1? Colors.pink: index==2 ? Colors.purple : index==3 ? Colors.orange :
-                                index==4? Colors.deepPurple : index==5? Colors.red: index==6 ? Colors.yellow : index==7 ? Colors.black54 :
-                                index==8 ? Colors.purple: index==9 ? Colors.redAccent: index == 10? Colors.blueGrey : index == 11?
-                                Colors.lightGreen : index == 12?Colors.purpleAccent:Colors.brown),
+                                avatar: CircleAvatar(backgroundColor: dataResponse.total![index].color),
                                 elevation: 3,
                                 shape: const LinearBorder(),
-                                label: Text('${dataResponse.total![index].categoryName} - ${dataResponse.total![index].totalProduct}',
+                                label: Text('${dataResponse.total![index].categoryName} - ${index+1}',
                                   style: const TextStyle(fontSize: 11),
                                 ),
                                 visualDensity: VisualDensity.compact,
@@ -372,16 +368,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                     ],
                                     rows: List<DataRow>.generate(productStockList.length, (index) => DataRow(cells: [
                                       DataCell(Text('${index+1}')),
-                                      DataCell(Row(children: [CircleAvatar(radius: 17,
-                                        backgroundImage: productStockList[index].categoryName == 'ORO SWITCH'
-                                            || productStockList[index].categoryName == 'ORO SENSE'?
-                                        const AssetImage('assets/images/oro_switch.png'):
-                                        productStockList[index].categoryName == 'ORO LEVEL'?
-                                        const AssetImage('assets/images/oro_sense.png'):
-                                        productStockList[index].categoryName == 'OROGEM'?
-                                        const AssetImage('assets/images/oro_gem.png'): const AssetImage('assets/images/oro_rtu.png'),
-                                        backgroundColor: Colors.transparent,
-                                      ), const SizedBox(width: 10,), Text(productStockList[index].categoryName)],)),
+                                      DataCell(Text(productStockList[index].categoryName)),
                                       DataCell(Text(productStockList[index].model)),
                                       DataCell(Text(productStockList[index].imeiNo)),
                                       DataCell(Text(productStockList[index].dtOfMnf)),
@@ -429,67 +416,26 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                 backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
                                 backgroundColor: Colors.transparent,
                               ),
-                              trailing: PopupMenuButton<String>(
-                                onSelected: (String value) {
-                                  setState(() {
-                                    if(value=='View'){
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => DealerScreenController(
-                                            userName: myCustomerList[index].userName,
-                                            countryCode: myCustomerList[index].countryCode,
-                                            mobileNo: myCustomerList[index].mobileNumber,
-                                            fromLogin: false,
-                                            userId: myCustomerList[index].userId,
-                                            emailId: myCustomerList[index].emailId,
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  });
-                                },
-                                icon: const Icon(Icons.more_vert),
-                                itemBuilder: (BuildContext context) {
-                                  return [
-                                    const PopupMenuItem<String>(
-                                      value: 'View',
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.view_quilt_outlined, color: Colors.black),
-                                          SizedBox(width: 8),
-                                          Text('View Dealer Dashboard'),
-                                        ],
-                                      ),
-                                    ),
-                                    const PopupMenuItem<String>(
-                                      value: 'Edit',
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.edit_outlined, color: Colors.blue),
-                                          SizedBox(width: 8),
-                                          Text('Edit Account'),
-                                        ],
-                                      ),
-                                    ),
-                                    const PopupMenuItem<String>(
-                                      value: 'Delete',
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.delete, color: Colors.redAccent),
-                                          SizedBox(width: 8),
-                                          Text('Delete Account'),
-                                        ],
-                                      ),
-                                    ),
-                                  ];
-                                },
-                              ),
                               title: Text(myCustomerList[index].userName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
                               subtitle: Text('+${myCustomerList[index].countryCode} ${myCustomerList[index].mobileNumber}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal)),
                               onTap:() {
                                 Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: myCustomerList[index].userId, userName: myCustomerList[index].userName, userID: widget.userId, userType: 1, productStockList: productStockList, callback: callbackFunction, customerType: 'Dealer',)),);
                               },
+                              trailing: IconButton(tooltip: 'View Dashboard', onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => DealerScreenController(
+                                      userName: myCustomerList[index].userName,
+                                      countryCode: myCustomerList[index].countryCode,
+                                      mobileNo: myCustomerList[index].mobileNumber,
+                                      fromLogin: false,
+                                      userId: myCustomerList[index].userId,
+                                      emailId: myCustomerList[index].emailId,
+                                    ),
+                                  ),
+                                );
+                              }, icon: const Icon(Icons.space_dashboard_outlined),),
                             );
                           },
                         ):
@@ -520,78 +466,75 @@ class _AdminDashboardState extends State<AdminDashboard> {
 }
 
 class MySalesChart extends StatefulWidget {
-  const MySalesChart({Key? key}) : super(key: key);
+  const MySalesChart({Key? key, required this.graph}) : super(key: key);
+  final Map<String, List<Category>>? graph;
 
   @override
   _MySalesChartState createState() => _MySalesChartState();
 }
 
 class _MySalesChartState extends State<MySalesChart> {
-  late List<_ChartData> data;
-  late TooltipBehavior _tooltip;
+  List<BarSeries<Category, String>> seriesList = [];
+  int? selectedSeriesIndex = 0;
 
   @override
-  void initState() {
-    data = [
-      _ChartData('2019', 15, 8, 10, 12, 23),
-      _ChartData('2020', 30, 15, 24, 15, 12),
-      _ChartData('2021', 6, 4, 10, 17, 32),
-      _ChartData('2022', 14, 2, 17, 25, 10),
-      _ChartData('2023', 14, 2, 17, 25, 27)
-    ];
-    _tooltip = TooltipBehavior(enable: true);
-    super.initState();
+  void didUpdateWidget(MySalesChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.graph != widget.graph) {
+      selectedSeriesIndex = 0;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return SfCartesianChart(
-        primaryXAxis: CategoryAxis(),
-        primaryYAxis: NumericAxis(minimum: 0, maximum: 40, interval: 10),
-        tooltipBehavior: _tooltip,
-        series: <ChartSeries<_ChartData, String>>[
-          ColumnSeries<_ChartData, String>(
-              dataSource: data,
-              xValueMapper: (_ChartData data, _) => data.period,
-              yValueMapper: (_ChartData data, _) => data.gem,
-              name: 'GEM',
-              color: Colors.blue.shade300),
-          ColumnSeries<_ChartData, String>(
-              dataSource: data,
-              xValueMapper: (_ChartData data, _) => data.period,
-              yValueMapper: (_ChartData data, _) => data.sRtu,
-              name: 'Smart RTU',
-              color: Colors.green.shade300),
-          ColumnSeries<_ChartData, String>(
-              dataSource: data,
-              xValueMapper: (_ChartData data, _) => data.period,
-              yValueMapper: (_ChartData data, _) => data.rtu,
-              name: 'RTU',
-              color: Colors.orange.shade300),
-          ColumnSeries<_ChartData, String>(
-              dataSource: data,
-              xValueMapper: (_ChartData data, _) => data.period,
-              yValueMapper: (_ChartData data, _) => data.oSwitch,
-              name: 'ORO Switch',
-              color: Colors.pink.shade300),
-          ColumnSeries<_ChartData, String>(
-              dataSource: data,
-              xValueMapper: (_ChartData data, _) => data.period,
-              yValueMapper: (_ChartData data, _) => data.oSpot,
-              name: 'ORO Spot',
-              color: Colors.deepPurpleAccent.shade100),
-        ]);
-  }
-}
 
-class _ChartData {
-  _ChartData(this.period, this.gem, this.sRtu, this.rtu, this.oSwitch, this.oSpot);
-  final String period;
-  final int gem;
-  final int sRtu;
-  final int rtu;
-  final int oSwitch;
-  final int oSpot;
+    List<BarSeries<Category, String>> seriesList = [];
+
+    for (var entry in widget.graph!.entries) {
+      String month = entry.key;
+      List<Category> categories = entry.value;
+
+      seriesList.add(
+        BarSeries<Category, String>(
+          dataSource: categories,
+          xValueMapper: (Category category, _) => category.categoryName,
+          yValueMapper: (Category category, _) => category.totalProduct,
+          pointColorMapper: (Category category, _) => category.color,
+          name: month,
+          dataLabelSettings: const DataLabelSettings(isVisible: true,),
+          isVisible: selectedSeriesIndex == null || selectedSeriesIndex == seriesList.length,
+
+        ),
+      );
+    }
+
+    return SfCartesianChart(
+      primaryYAxis: NumericAxis(),
+      primaryXAxis: CategoryAxis(
+        labelStyle: const TextStyle(
+          color: Colors.transparent,
+        ),
+      ),
+      enableAxisAnimation: true,
+      legend: const Legend(
+        isVisible: true,
+        toggleSeriesVisibility: false,
+      ),
+      series: seriesList,
+      tooltipBehavior: TooltipBehavior(enable: true),
+      isTransposed: true,
+      onLegendTapped: (LegendTapArgs args) {
+        setState(() {
+          if (selectedSeriesIndex == args.seriesIndex) {
+            selectedSeriesIndex = null;
+          } else {
+            selectedSeriesIndex = args.seriesIndex;
+          }
+        });
+      },
+    );
+
+  }
 }
 
 

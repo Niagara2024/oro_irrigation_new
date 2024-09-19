@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:oro_irrigation_new/constants/theme.dart';
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../Models/language.dart';
 import '../../../constants/http_service.dart';
@@ -455,7 +456,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                     width: MediaQuery.sizeOf(context).width,
                     child: ListTile(
                       title: controllerVersion != newVersion? Row(children: [
-                        const Text('New version available',),
+                        const Text('New version available for this controller',style: TextStyle(color: primaryColorMedium),),
                         const SizedBox(width: 16,),
                         TextButton(
                           onPressed: () {

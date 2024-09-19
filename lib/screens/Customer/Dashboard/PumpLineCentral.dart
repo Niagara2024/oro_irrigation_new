@@ -370,7 +370,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Container(
-                                width: 340,
+                                width: 352,
                                 height: 35,
                                 color: Colors.teal.shade50,
                                 child: Row(
@@ -408,7 +408,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                               ),
                               const SizedBox(height: 5,),
                               Container(
-                                width: 315,
+                                width: 340,
                                 height: 25,
                                 color: Colors.transparent,
                                 child: Row(
@@ -428,7 +428,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                 child: Divider(height: 6,color: Colors.black12),
                               ),
                               Container(
-                                width: 315,
+                                width: 340,
                                 height: 25,
                                 color: Colors.transparent,
                                 child: Row(
@@ -438,17 +438,17 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                       padding: EdgeInsets.only(bottom: 2,top: 2),
                                       child: VerticalDivider(color: Colors.red, thickness: 1.5,),
                                     ),
-                                    SizedBox(width: 60, child: Text('RY : ${voltages[0]}'),),
+                                    SizedBox(width: 70, child: Text('RY : ${voltages[0]}'),),
                                     const Padding(
                                       padding: EdgeInsets.only(bottom: 2,top: 2),
                                       child: VerticalDivider(color: Colors.yellow,thickness: 1.5,),
                                     ),
-                                    SizedBox(width: 60, child: Text('YB : ${voltages[1]}'),),
+                                    SizedBox(width: 70, child: Text('YB : ${voltages[1]}'),),
                                     const Padding(
                                       padding: EdgeInsets.only(bottom: 2,top: 2),
                                       child: VerticalDivider(color: Colors.blue,thickness: 1.5,),
                                     ),
-                                    SizedBox(width: 60, child: Text('BR : ${voltages[2]}'),),
+                                    SizedBox(width: 70, child: Text('BR : ${voltages[2]}'),),
                                   ],
                                 ),
                               ),
@@ -457,27 +457,27 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                 child: Divider(height: 6,color: Colors.black12),
                               ),
                               Container(
-                                width: 315,
+                                width: 340,
                                 height: 25,
                                 color: Colors.transparent,
                                 child: Row(
                                   children: [
-                                    const SizedBox(width:100, child: Text('Current', style: TextStyle(color: Colors.black54),),),
+                                    const SizedBox(width:80, child: Text('Current', style: TextStyle(color: Colors.black54),),),
                                     const Padding(
                                       padding: EdgeInsets.only(bottom: 2,top: 2),
                                       child: VerticalDivider(color: Colors.transparent,),
                                     ),
-                                    SizedBox(width: 50, child: Center(child: Text(columns[0])),),
+                                    SizedBox(width: 60, child: Center(child: Text(columns[0])),),
                                     const Padding(
                                       padding: EdgeInsets.only(bottom: 2,top: 2),
                                       child: VerticalDivider(color: Colors.transparent,),
                                     ),
-                                    SizedBox(width: 50, child: Center(child: Text(columns[1])),),
+                                    SizedBox(width: 65, child: Center(child: Text(columns[1])),),
                                     const Padding(
                                       padding: EdgeInsets.only(bottom: 2,top: 2),
                                       child: VerticalDivider(color: Colors.transparent,),
                                     ),
-                                    SizedBox(width: 50, child: Center(child: Text(columns[2])),),
+                                    SizedBox(width: 65, child: Center(child: Text(columns[2])),),
                                   ],
                                 ),
                               ),
@@ -528,7 +528,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                               ),
                               const SizedBox(height: 5,),
                               int.parse(filteredPumps[index]['OnOffReason'])>0 ? Container(
-                                width: 340,
+                                width: 354,
                                 height: 45,
                                 color: Colors.red.shade100,
                                 child: Row(
@@ -621,7 +621,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                           ),
                           onPop: () => print('Popover was popped!'),
                           direction: PopoverDirection.right,
-                          width: voltKeyExists?325:140,
+                          width: voltKeyExists?340:140,
                           height: voltKeyExists?int.parse(filteredPumps[index]['OnOffReason'])>0?210:170:80,
                           arrowHeight: 15,
                           arrowWidth: 30,
@@ -1073,8 +1073,9 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                           srcCount==3 && irgCount==1? (position.dx+45)+(index*70)-420:
 
                           srcCount==1 && irgCount==2? (position.dx+45)+(index*70)-350:
-
                           srcCount==2 && irgCount==2? (position.dx+45)+(index*70)-420:
+                          srcCount==3 && irgCount==2? (position.dx+45)+(index*70)-490:
+
                           srcCount==2 && irgCount==4? (position.dx+45)+(index*70)-560:
 
                           srcCount==4 && irgCount==2? (position.dx+45)+(index*70)-560:

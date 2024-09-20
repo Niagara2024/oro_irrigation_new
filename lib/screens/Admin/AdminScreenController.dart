@@ -240,9 +240,7 @@ class _AdminScreenControllerState extends State<AdminScreenController> {
       case 0:
         return AdminDashboard(userName: widget.userName, countryCode: widget.countryCode, mobileNo: widget.mobileNo, userId: widget.userId,);
       case 1:
-        return ProductInventory(
-          userName: widget.userName,
-        );
+        return ProductInventory(userName: widget.userName, userId: widget.userId, userType: 1,);
       case 2:
         return const AllEntry();
       case 3:

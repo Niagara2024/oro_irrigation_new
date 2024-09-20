@@ -22,7 +22,6 @@ typedef CallbackFunction = void Function(String result);
 
 class DealerScreenController extends StatefulWidget {
   const DealerScreenController({Key? key, required this.userName, required this.countryCode, required this.mobileNo, required this.fromLogin, required this.userId, required this.emailId}) : super(key: key);
-
   final String userName, countryCode, mobileNo, emailId;
   final bool fromLogin;
   final int userId;
@@ -232,11 +231,9 @@ class _DealerScreenControllerState extends State<DealerScreenController> {
   Widget mainMenu(int index) {
     switch (index) {
       case 0:
-        return DealerDashboard(userName: widget.userName, countryCode: widget.countryCode, mobileNo: widget.mobileNo, userId: widget.userId, emailId: widget.emailId, fromLogin: widget.fromLogin,);
+        return DealerDashboard(userName: widget.userName, countryCode: widget.countryCode, mobileNo: widget.mobileNo, userId: widget.userId, emailId: widget.emailId, fromLogin: widget.fromLogin, userType: 2,);
       case 1:
-        return ProductInventory(
-          userName: widget.userName,
-        );
+        return ProductInventory(userName: widget.userName, userId: widget.userId, userType: 2,);
       case 2:
         return MyPreference(userID: widget.userId);
       default:

@@ -18,8 +18,9 @@ import '../constants/theme.dart';
 enum SampleItem { itemOne, itemTwo}
 
 class ProductInventory extends StatefulWidget {
-  const ProductInventory({Key? key, required this.userName}) : super(key: key);
+  const ProductInventory({Key? key, required this.userName, required this.userId, required this.userType,}) : super(key: key);
   final String userName;
+  final int userId, userType;
 
   @override
   State<ProductInventory> createState() => ProductInventoryState();
@@ -27,8 +28,6 @@ class ProductInventory extends StatefulWidget {
 
 class ProductInventoryState extends State<ProductInventory> {
 
-  String userID = '0';
-  int userType = 0;
   List<ProductListModel> productInventoryList = [];
   List<ProductListModel> filterProductInventoryList = [];
 
@@ -47,7 +46,7 @@ class ProductInventoryState extends State<ProductInventory> {
   int currentSet = 1;
 
 
-  String jsonOptions = '';
+  String jsonOptions = '', loggedUserType ='0', loggedUserId='0';
   late Map<String, dynamic> jsonDataMap;
 
   bool visibleLoading = false;
@@ -69,24 +68,20 @@ class ProductInventoryState extends State<ProductInventory> {
   TextEditingController txtFldSearch = TextEditingController();
 
 
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-        if(productInventoryList.length <= totalProduct && !isLoading){
+      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 100) {
+        if (totalProduct > productInventoryList.length && !isLoading) {
           setState(() {
             isLoading = true;
           });
-          Future.delayed(const Duration(seconds: 3), () {
-            loadData(getSetNumber(productInventoryList.length), batchSize);
-          });
-        }else{
-          //loadMoreData completed
+          loadMoreData();
         }
       }
     });
-
     ddCategoryList =  <DropdownMenuEntry<ProductStockModel>>[];
     selectedModel =  <DropdownMenuEntry<PrdModel>>[];
     getUserInfo();
@@ -97,6 +92,19 @@ class ProductInventoryState extends State<ProductInventory> {
     return (length ~/ itemsPerSet) + 1;
   }
 
+
+  void loadMoreData() async {
+    try {
+      await Future.delayed(const Duration(seconds: 3), () {
+        loadData(getSetNumber(productInventoryList.length), batchSize);
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -104,26 +112,41 @@ class ProductInventoryState extends State<ProductInventory> {
   }
 
   Future<void> getUserInfo() async {
-    indicatorViewShow();
+
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userID = prefs.getString('userId') ?? "";
-      userType = int.parse(prefs.getString('userType') ?? "");
-    });
+    loggedUserType = (prefs.getString('userType') ?? "");
+    loggedUserId = (prefs.getString('userId') ?? "");
+
+    indicatorViewShow();
     productInventoryList.clear();
     loadData(currentSet, batchSize);
     fetchCatModAndImeiData();
-    getProductStock();
   }
 
   Future<void> loadData(int set, int limit) async {
-    final body = userType == 1 ? {"fromUserId": null, "toUserId": null, "set":set, "limit":limit} :
-    {"fromUserId": null, "toUserId": userID, "set":set, "limit":limit};
+
+    Map<String, dynamic> body;
     Response response;
-    if(userType == 3){
+
+    if(loggedUserType=='3' || widget.userType==3){
+      body = {"fromUserId":null, "toUserId": widget.userId, "set":set, "limit":limit};
+    }else{
+      if(loggedUserType==widget.userType.toString()){
+        body = {"fromUserId": widget.userId, "toUserId": null, "set":set, "limit":limit};
+      }else{
+        body = {"fromUserId": loggedUserId, "toUserId": widget.userId, "set":set, "limit":limit};
+      }
+    }
+
+    if(widget.userType == 3){
       response = await HttpService().postRequest("getCustomerProduct", body);
     }else{
       response = await HttpService().postRequest("getProduct", body);
+    }
+
+    if(set==1){
+      productInventoryList.clear();
+      productInventoryListCus.clear();
     }
 
     if (response.statusCode == 200)
@@ -131,8 +154,7 @@ class ProductInventoryState extends State<ProductInventory> {
       if(jsonDecode(response.body)["code"]==200){
         setState((){
           totalProduct = jsonDecode(response.body)["data"]["totalProduct"];
-          if(userType != 3){
-            //productInventoryList.clear();
+          if(widget.userType != 3){
             List<dynamic> productList = jsonDecode(response.body)["data"]["product"];
             for (int i = 0; i < productList.length; i++) {
               productInventoryList.add(ProductListModel.fromJson(productList[i]));
@@ -144,18 +166,32 @@ class ProductInventoryState extends State<ProductInventory> {
           isLoading = false;
           indicatorViewHide();
         });
+      }else{
+        isLoading = false;
+        indicatorViewHide();
       }
+      isLoading = false;
       indicatorViewHide();
     }
     else {
-      //_showSnackBar(response.body);
       isLoading = false;
       indicatorViewHide();
     }
   }
 
   Future<void> fetchCatModAndImeiData() async {
-    final body = userType == 1 ? {"fromUserId": null, "toUserId": null} : {"fromUserId": null, "toUserId": userID};
+
+    Map<String, dynamic> body;
+    if(loggedUserType=='3' || widget.userType==3){
+      body = {"fromUserId":null, "toUserId": widget.userId,};
+    }else{
+      if(loggedUserType==widget.userType.toString()){
+        body = {"fromUserId": widget.userId, "toUserId": null,};
+      }else{
+        body = {"fromUserId": loggedUserId, "toUserId": widget.userId,};
+      }
+    }
+
     final response = await HttpService().postRequest("getFilterCategoryModelAndImei", body);
     if (response.statusCode == 200) {
       final jsonDCode = json.decode(response.body)["data"];
@@ -171,7 +207,18 @@ class ProductInventoryState extends State<ProductInventory> {
   }
 
   Future<void> fetchFilterData(dynamic categoryId, dynamic modelId, dynamic deviceId) async {
-    final body = userType == 1 ? {"fromUserId": null, "toUserId": null, "categoryId": categoryId, "modelId": modelId, "deviceId": deviceId} : {"fromUserId": null, "toUserId": userID, "categoryId": categoryId, "modelId": modelId, "deviceId": deviceId};
+
+    Map<String, dynamic> body;
+    if(loggedUserType=='3' || widget.userType==3){
+      body = {"fromUserId":null, "toUserId": widget.userId, "categoryId": categoryId, "modelId": modelId, "deviceId": deviceId};
+    }else{
+      if(loggedUserType==widget.userType.toString()){
+        body = {"fromUserId": widget.userId, "toUserId": null, "categoryId": categoryId, "modelId": modelId, "deviceId": deviceId};
+      }else{
+        body = {"fromUserId": loggedUserId, "toUserId": widget.userId, "categoryId": categoryId, "modelId": modelId, "deviceId": deviceId};
+      }
+    }
+
     final response = await HttpService().postRequest("getFilteredProduct", body);
     if (response.statusCode == 200)
     {
@@ -179,7 +226,7 @@ class ProductInventoryState extends State<ProductInventory> {
       {
         setState(() {
           searched = true;
-          if(userType==3){
+          if(widget.userType==3){
             filterProductInventoryListCus = (jsonDecode(response.body)["data"] as List).map((data) => CustomerProductModel.fromJson(data)).toList();
           }else{
             filterProductInventoryList = (jsonDecode(response.body)["data"] as List).map((data) => ProductListModel.fromJson(data)).toList();
@@ -196,35 +243,6 @@ class ProductInventoryState extends State<ProductInventory> {
     }
   }
 
-  Future<void> getProductStock() async {
-    Map<String, dynamic> body = {"fromUserId" : null, "toUserId" : userID};
-    final response = await HttpService().postRequest("getProductStock", body);
-    if (response.statusCode == 200)
-    {
-      productStockList.clear();
-      var data = jsonDecode(response.body);
-      if(data["code"]==200)
-      {
-        final cntList = data["data"] as List;
-        for (int i=0; i < cntList.length; i++) {
-          productStockList.add(ProductStockModel.fromJson(cntList[i]));
-        }
-      }
-
-      ddCategoryList =  <DropdownMenuEntry<ProductStockModel>>[];
-      for (final ProductStockModel index in productStockList) {
-        ddCategoryList.add(DropdownMenuEntry<ProductStockModel>(value: index, label: index.imeiNo));
-      }
-
-      setState(() {
-        ddCategoryList;
-      });
-
-    }
-    else{
-      //_showSnackBar(response.body);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -232,14 +250,14 @@ class ProductInventoryState extends State<ProductInventory> {
     final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: myTheme.primaryColor.withOpacity(0.02),
-      appBar: userType != 3 ? AppBar(
+      appBar: widget.userType != 3 ? AppBar(
         automaticallyImplyLeading: false,
         title: const Text('Product Inventory'),
         actions: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              totalProduct > 30 ?Row(
+              totalProduct > 25 ?Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
@@ -362,7 +380,7 @@ class ProductInventoryState extends State<ProductInventory> {
           ),
         ),
       ):
-      userType == 3? buildCustomerDataTable(screenWidth) :
+      widget.userType == 3? buildCustomerDataTable(screenWidth) :
       Padding(
         padding: const EdgeInsets.only(left: 2),
         child: Column(
@@ -478,7 +496,7 @@ class ProductInventoryState extends State<ProductInventory> {
               DataCell(Center(child: Text('${filterProductInventoryList[index].warrantyMonths}'))),
               DataCell(
                   Center(
-                    child: userType == 1? Row(
+                    child: widget.userType == 1? Row(
                       children: [
                         CircleAvatar(radius: 5,
                           backgroundColor:
@@ -520,7 +538,7 @@ class ProductInventoryState extends State<ProductInventory> {
               ),
               DataCell(Center(child: widget.userName==filterProductInventoryList[index].latestBuyer? Text('-'):Text(filterProductInventoryList[index].latestBuyer))),
               const DataCell(Center(child: Text('25-09-2023'))),
-              userType == 1 ? DataCell(Center(child: IconButton(tooltip:'Edit product', onPressed: () {
+              widget.userType == 1 ? DataCell(Center(child: IconButton(tooltip:'Edit product', onPressed: () {
                 getModelByActiveList(context, filterProductInventoryList[index].categoryId, filterProductInventoryList[index].categoryName,
                     filterProductInventoryList[index].modelName, filterProductInventoryList[index].modelId, filterProductInventoryList[index].deviceId,
                     filterProductInventoryList[index].warrantyMonths, filterProductInventoryList[index].productId);
@@ -540,7 +558,7 @@ class ProductInventoryState extends State<ProductInventory> {
               DataCell(Center(child: Text('${productInventoryList[index].warrantyMonths}', style: const TextStyle(fontSize: 12)))),
               DataCell(
                   Center(
-                    child: userType == 1? Row(
+                    child: widget.userType == 1? Row(
                       children: [
                         CircleAvatar(radius: 5,
                           backgroundColor:
@@ -582,7 +600,7 @@ class ProductInventoryState extends State<ProductInventory> {
               ),
               DataCell(Center(child: widget.userName==productInventoryList[index].latestBuyer? Text('-'):Text(productInventoryList[index].latestBuyer, style: const TextStyle(fontSize: 12)))),
               const DataCell(Center(child: Text('25-09-2023', style: const TextStyle(fontSize: 12)))),
-              userType == 1 ? DataCell(Center(child: IconButton(tooltip:'Edit product', onPressed: () {
+              widget.userType == 1 ? DataCell(Center(child: IconButton(tooltip:'Edit product', onPressed: () {
                 getModelByActiveList(context, productInventoryList[index].categoryId, productInventoryList[index].categoryName,
                     productInventoryList[index].modelName, productInventoryList[index].modelId, productInventoryList[index].deviceId,
                     productInventoryList[index].warrantyMonths, productInventoryList[index].productId);
@@ -872,7 +890,7 @@ class ProductInventoryState extends State<ProductInventory> {
                 onPressed: () async {
                   if (formKey.currentState!.validate())
                   {
-                    final body = {"productId": productId, "modelId": mdlId, "deviceId": ctrlIMI.text.trim(), "warrantyMonths": ctrlWrM.text, 'modifyUser': userID};
+                    final body = {"productId": productId, "modelId": mdlId, "deviceId": ctrlIMI.text.trim(), "warrantyMonths": ctrlWrM.text, 'modifyUser': widget.userId};
                     final response = await HttpService().putRequest("updateProduct", body);
                     if (response.statusCode == 200)
                     {
@@ -987,16 +1005,14 @@ class ProductInventoryState extends State<ProductInventory> {
                 textColor: Colors.white,
                 child: const Text('Replace'),
                 onPressed: () async {
-                  final body = {"userId": customerId, "oldDeviceId": imeiNo, "newDeviceId": rplImeiNo, 'modifyUser': userID};
+                  final body = {"userId": customerId, "oldDeviceId": imeiNo, "newDeviceId": rplImeiNo, 'modifyUser': widget.userId};
                   final response = await HttpService().postRequest("replaceProduct", body);
                   if (response.statusCode == 200)
                   {
                     if(jsonDecode(response.body)["code"]==200)
                     {
-                      getProductStock();
                       loadData(currentSet, batchSize);
                       _showSnackBar(jsonDecode(response.body)["message"]);
-
                     }else{
                       _showSnackBar(jsonDecode(response.body)["message"]);
                     }

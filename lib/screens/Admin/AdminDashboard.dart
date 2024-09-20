@@ -83,7 +83,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
     Map<String, Object> body = {"userId": widget.userId, "userType": 1, "type": type, "year": 2024};
     final response = await HttpService().postRequest("getProductSalesReport", body);
     if (response.statusCode == 200) {
-      print(response.body);
       var data = jsonDecode(response.body);
       if (data is Map<String, dynamic> && data["code"] == 200) {
         try {
@@ -104,7 +103,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   Future<void> getProductStock() async
   {
-    Map<String, dynamic> body = {"fromUserId" : null, "toUserId" : null};
+    Map<String, dynamic> body = {"fromUserId" : null, "toUserId" : widget.userId};
     final response = await HttpService().postRequest("getProductStock", body);
     if (response.statusCode == 200)
     {
@@ -175,7 +174,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
               ),
             ],),
-          const SizedBox(width: 10)
+          const SizedBox(width: 10),
         ],
         //scrolledUnderElevation: 5.0,
         //shadowColor: Theme.of(context).colorScheme.shadow,
@@ -264,7 +263,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                   style: const TextStyle(fontSize: 11),
                                 ),
                                 visualDensity: VisualDensity.compact,
-                                // Customize Chip properties based on your needs
                               ),
                               ),
                             ),
@@ -497,7 +495,8 @@ class _MySalesChartState extends State<MySalesChart> {
       seriesList.add(
         BarSeries<Category, String>(
           dataSource: categories,
-          xValueMapper: (Category category, _) => category.categoryName,
+          xValueMapper: (Category category, int index) => (index + 1).toString(),
+          //xValueMapper: (Category category, _) => category.categoryName,
           yValueMapper: (Category category, _) => category.totalProduct,
           pointColorMapper: (Category category, _) => category.color,
           name: month,
@@ -512,7 +511,7 @@ class _MySalesChartState extends State<MySalesChart> {
       primaryYAxis: NumericAxis(),
       primaryXAxis: CategoryAxis(
         labelStyle: const TextStyle(
-          color: Colors.transparent,
+          color: Colors.black45,
         ),
       ),
       enableAxisAnimation: true,
@@ -521,7 +520,7 @@ class _MySalesChartState extends State<MySalesChart> {
         toggleSeriesVisibility: false,
       ),
       series: seriesList,
-      tooltipBehavior: TooltipBehavior(enable: true),
+      tooltipBehavior: TooltipBehavior(enable: false),
       isTransposed: true,
       onLegendTapped: (LegendTapArgs args) {
         setState(() {

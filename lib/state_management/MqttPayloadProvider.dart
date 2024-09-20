@@ -139,7 +139,6 @@ class MqttPayloadProvider with ChangeNotifier {
 
           if (data['2400'][0].containsKey('2408')) {
             payload2408 = data['2400'][0]['2408'];
-            //print('payload2408:$payload2408');
           }
 
           if (data['2400'][0].containsKey('2409')) {
@@ -280,6 +279,16 @@ class MqttPayloadProvider with ChangeNotifier {
     } catch (e) {
       print('Error parsing JSON: $e');
     }
+  }
+
+  void updateAlarmPayload(List<AlarmData> payload) {
+    alarmList = payload;
+    notifyListeners();
+  }
+
+  void updatePayload2408(List<Payload2408> payload) {
+    payload2408 = payload;
+    notifyListeners();
   }
 
   void updatePumpControllerLive(List<CM> pl) {

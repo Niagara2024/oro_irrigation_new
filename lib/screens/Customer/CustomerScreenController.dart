@@ -116,7 +116,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     {
       mySiteList.clear();
       var data = jsonDecode(response.body);
-      //print(response.body);
+      print(response.body);
       if(data["code"]==200)
       {
         final jsonData = data["data"] as List;
@@ -199,7 +199,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     if(mySiteList[siteIndex].master[masterIndex].categoryId==1 ||
         mySiteList[siteIndex].master[masterIndex].categoryId==2) {
       //gem or gem+ controller
-      payloadProvider.updateWifiStrength(mySiteList[siteIndex].master[masterIndex].gemLive[0].WifiStrength);
+      payloadProvider.updateWifiStrength(mySiteList[siteIndex].master[masterIndex].gemLive[0].wifiStrength);
       payloadProvider.updateLastSync('${mySiteList[siteIndex].master[masterIndex].liveSyncDate} ${mySiteList[siteIndex].master[masterIndex].liveSyncTime}');
 
       List<dynamic> ndlLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList.map((ndl) => ndl.toJson()).toList();
@@ -208,6 +208,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       List<dynamic> spLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].scheduledProgramList.map((sp) => sp.toJson()).toList();
       List<ScheduledProgram> sp = spLst.map((sp) => ScheduledProgram.fromJson(sp)).toList();
       payloadProvider.updateScheduledProgram(sp);
+
+      payloadProvider.updateAlarmPayload(mySiteList[siteIndex].master[masterIndex].gemLive[0].alarmList);
+      //payloadProvider.updatePayload2408(mySiteList[siteIndex].master[masterIndex].gemLive[0].payload2408List);
+
 
       if(payloadProvider.lastCommunication.inMinutes>=10){
         mySiteList[siteIndex].master[masterIndex].gemLive[0].currentSchedule=[];
@@ -293,7 +297,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           });
           payloadProvider.updateFertilizerPayload(fertilizerPayloadFinal);
         }
-
       }
     }
     else{
@@ -357,15 +360,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           List<CM> pl = provider.pumpLiveList;
           mySiteList[siteIndex].master[masterIndex].pumpLive = pl;
         }
-
-        // var liveMessage = json['liveMessage'] != null ? json['liveMessage'] as List : [];
-        // List<CM> pumpLiveList = liveMessage.isNotEmpty? liveMessage.map((live) => CM.fromJson(live)).toList(): [];
-        //
-        // final pcLivePayload = Provider.of<MqttPayloadProvider>(context).pumpControllerLive;
-        // Map<String, dynamic> json = jsonDecode(pcLivePayload);
-        // List<CM> pumpLiveList = json.isNotEmpty? json.map((live) => CM.fromJson(live)).toList() : [];
-        //
-        // mySiteList[siteIndex].master[masterIndex].pumpLive = pumpLiveList;
 
       }
 
@@ -910,7 +904,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => MyGemini(),
+                    builder: (context) => const MyGemini(),
                   ),
                 );
               }, icon: const CircleAvatar(
@@ -1514,7 +1508,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           ):
               const SizedBox(),
         ],)):
-      _selectedIndex == 1 ? ProductInventory(userName: widget.customerName):
+      _selectedIndex == 1 ? ProductInventory(userName: widget.customerName, userId: widget.customerId, userType: 3,):
       _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId, from: 'Gem',):
       _selectedIndex == 3 ? IrrigationAndPumpLog(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,):
       _selectedIndex == 4 ? WeatherScreen(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId,):
@@ -1952,7 +1946,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
         borderRadius: BorderRadius.zero,
       ),
       height: screenHeight,
-      width: 400,
+      width: 440,
       child: Column(
         children: [
           Row(
@@ -2109,19 +2103,19 @@ class _SideSheetClassState extends State<SideSheetClass> {
             ),
           ),
           SizedBox(
-            width: 400,
+            width: 440,
             height: screenHeight-170,
             child: Column(
               children: [
                 SizedBox(
-                  width:400,
+                  width:440,
                   height: 35,
                   child: DataTable2(
                       columnSpacing: 12,
                       horizontalMargin: 12,
-                      minWidth: 325,
+                      minWidth: 440,
                       headingRowHeight: 35.0,
-                      headingRowColor: MaterialStateProperty.all<Color>(myTheme.primaryColorDark.withOpacity(0.3)),
+                      headingRowColor: WidgetStateProperty.all<Color>(myTheme.primaryColorDark.withOpacity(0.3)),
                       columns: const [
                         DataColumn2(
                             label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
@@ -2142,7 +2136,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                         ),
                         DataColumn2(
                           label: Text('Info', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),),
-                          fixedWidth: 40,
+                          fixedWidth: 80,
                         ),
                       ],
                       rows: List<DataRow>.generate(0,(index) => const DataRow(cells: [],),
@@ -2156,8 +2150,17 @@ class _SideSheetClassState extends State<SideSheetClass> {
                     itemBuilder: (context, index) {
                       return ExpansionTile(
                         //initiallyExpanded: true,
-                        trailing: widget.nodeList[index].rlyStatus.any((rly) => rly.Status == 2 || rly.Status == 3)? const Icon(Icons.warning, color: Colors.orangeAccent):
-                        const Icon(Icons.info_outline, color: primaryColorDark,),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            widget.nodeList[index].rlyStatus.any((rly) => rly.Status == 2 || rly.Status == 3)? const Icon(Icons.warning, color: Colors.orangeAccent):
+                            const Icon(Icons.info_outline, color: primaryColorDark,),
+                            IconButton(
+                              onPressed: () {},
+                              icon: const Icon(Icons.edit_outlined),
+                            ),
+                          ],
+                        ),
                         backgroundColor: Colors.teal.shade50,
                         title: Row(
                           children: [
@@ -2538,7 +2541,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                 minWidth: 325,
                 dataRowHeight: 40.0,
                 headingRowHeight: 35.0,
-                headingRowColor: MaterialStateProperty.all<Color>(myTheme.primaryColorDark.withOpacity(0.2)),
+                headingRowColor: WidgetStateProperty.all<Color>(myTheme.primaryColorDark.withOpacity(0.2)),
                 columns: const [
                   DataColumn2(
                       label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),)),
@@ -2580,110 +2583,116 @@ class _SideSheetClassState extends State<SideSheetClass> {
                       Text(widget.nodeList[index].deviceId, style: const TextStyle(fontWeight: FontWeight.normal,fontSize: 11, color: Colors.black)),
                     ],
                   )),
-                  DataCell(Center(child: IconButton(tooltip: 'View Relay status',
-                    icon: widget.nodeList[index].rlyStatus.any((rly) => rly.Status == 2 || rly.Status == 3)? const Icon(Icons.warning, color: Colors.orangeAccent):
-                    Icon(Icons.info_outline, color: myTheme.primaryColorDark), // Icon to display
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return SizedBox(
-                            width: double.infinity,
-                            height: 270,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: <Widget>[
-                                ListTile(
-                                  tileColor: myTheme.primaryColor,
-                                  textColor: Colors.white,
-                                  leading: const Icon(Icons.developer_board_rounded, color: Colors.white),
-                                  title: Text('${widget.nodeList[index].categoryName} - ${widget.nodeList[index].deviceId}'),
-                                  subtitle: Text(formatDateTime(widget.nodeList[index].lastFeedbackReceivedTime)),
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(Icons.solar_power_outlined, color: Colors.white),
-                                      const SizedBox(width: 5,),
-                                      Text('${widget.nodeList[index].sVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                      const SizedBox(width: 5,),
-                                      const Icon(Icons.battery_3_bar_rounded, color: Colors.white),
-                                      const SizedBox(width: 5,),
-                                      Text('${widget.nodeList[index].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
-                                      const SizedBox(width: 5,),
-                                      IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
-                                        String payLoadFinal = jsonEncode({
-                                          "2300": [
-                                            {"2301": "${widget.nodeList[index].serialNumber}"},
-                                          ]
-                                        });
-                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                        sentToServer('Serial set for ${widget.nodeList[index].categoryName} comment sent successfully', payLoadFinal);
-                                      }, icon: const Icon(Icons.fact_check_outlined, color: primaryColorDark))
-                                    ],
-                                  ),
-                                ),
-                                Column(
-                                  children: [
-                                    const SizedBox(
-                                      width: double.infinity,
-                                      height : 40,
-                                      child: Row(
+                  DataCell(Center(child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(tooltip: 'View Relay status',
+                        icon: widget.nodeList[index].rlyStatus.any((rly) => rly.Status == 2 || rly.Status == 3)? const Icon(Icons.warning, color: Colors.orangeAccent):
+                        Icon(Icons.info_outline, color: myTheme.primaryColorDark), // Icon to display
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return SizedBox(
+                                width: double.infinity,
+                                height: 270,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    ListTile(
+                                      tileColor: myTheme.primaryColor,
+                                      textColor: Colors.white,
+                                      leading: const Icon(Icons.developer_board_rounded, color: Colors.white),
+                                      title: Text('${widget.nodeList[index].categoryName} - ${widget.nodeList[index].deviceId}'),
+                                      subtitle: Text(formatDateTime(widget.nodeList[index].lastFeedbackReceivedTime)),
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          SizedBox(width: 10),
-                                          CircleAvatar(radius: 5,backgroundColor: Colors.green,),
-                                          SizedBox(width: 5),
-                                          Text('ON'),
-                                          SizedBox(width: 20),
-                                          CircleAvatar(radius: 5,backgroundColor: Colors.black45),
-                                          SizedBox(width: 5),
-                                          Text('OFF'),
-                                          SizedBox(width: 20),
-                                          CircleAvatar(radius: 5,backgroundColor: Colors.orange),
-                                          SizedBox(width: 5),
-                                          Text('ON IN OFF'),
-                                          SizedBox(width: 20),
-                                          CircleAvatar(radius: 5,backgroundColor: Colors.redAccent),
-                                          SizedBox(width: 5),
-                                          Text('OFF IN ON'),
+                                          const Icon(Icons.solar_power_outlined, color: Colors.white),
+                                          const SizedBox(width: 5,),
+                                          Text('${widget.nodeList[index].sVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                          const SizedBox(width: 5,),
+                                          const Icon(Icons.battery_3_bar_rounded, color: Colors.white),
+                                          const SizedBox(width: 5,),
+                                          Text('${widget.nodeList[index].batVolt} Volt', style: const TextStyle(fontWeight: FontWeight.normal),),
+                                          const SizedBox(width: 5,),
+                                          IconButton(tooltip : 'Serial set for all Relay', onPressed: (){
+                                            String payLoadFinal = jsonEncode({
+                                              "2300": [
+                                                {"2301": "${widget.nodeList[index].serialNumber}"},
+                                              ]
+                                            });
+                                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                            sentToServer('Serial set for ${widget.nodeList[index].categoryName} comment sent successfully', payLoadFinal);
+                                          }, icon: const Icon(Icons.fact_check_outlined, color: primaryColorDark))
                                         ],
                                       ),
                                     ),
-                                    const SizedBox(height: 5),
-                                    SizedBox(
-                                      width: double.infinity,
-                                      height : widget.nodeList[index].rlyStatus.length > 8? 160 : 80,
-                                      child: GridView.builder(
-                                        itemCount: widget.nodeList[index].rlyStatus.length, // Number of items in the grid
-                                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: 8,
-                                          crossAxisSpacing: 05.0,
-                                          mainAxisSpacing: 05.0,
-                                        ),
-                                        itemBuilder: (BuildContext context, int indexGv) {
-                                          print(widget.nodeList[index].rlyStatus[indexGv].name);
-                                          return Column(
+                                    Column(
+                                      children: [
+                                        const SizedBox(
+                                          width: double.infinity,
+                                          height : 40,
+                                          child: Row(
                                             children: [
-                                              CircleAvatar(
-                                                backgroundColor: widget.nodeList[index].rlyStatus[indexGv].Status==0 ? Colors.grey :
-                                                widget.nodeList[index].rlyStatus[indexGv].Status==1 ? Colors.green :
-                                                widget.nodeList[index].rlyStatus[indexGv].Status==2 ? Colors.orange :
-                                                widget.nodeList[index].rlyStatus[indexGv].Status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
-                                                child: Text((widget.nodeList[index].rlyStatus[indexGv].rlyNo).toString(), style: const TextStyle(color: Colors.white)),
-                                              ),
-                                              Text((widget.nodeList[index].rlyStatus[indexGv].name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                              SizedBox(width: 10),
+                                              CircleAvatar(radius: 5,backgroundColor: Colors.green,),
+                                              SizedBox(width: 5),
+                                              Text('ON'),
+                                              SizedBox(width: 20),
+                                              CircleAvatar(radius: 5,backgroundColor: Colors.black45),
+                                              SizedBox(width: 5),
+                                              Text('OFF'),
+                                              SizedBox(width: 20),
+                                              CircleAvatar(radius: 5,backgroundColor: Colors.orange),
+                                              SizedBox(width: 5),
+                                              Text('ON IN OFF'),
+                                              SizedBox(width: 20),
+                                              CircleAvatar(radius: 5,backgroundColor: Colors.redAccent),
+                                              SizedBox(width: 5),
+                                              Text('OFF IN ON'),
                                             ],
-                                          );
-                                        },
-                                      ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 5),
+                                        SizedBox(
+                                          width: double.infinity,
+                                          height : widget.nodeList[index].rlyStatus.length > 8? 160 : 80,
+                                          child: GridView.builder(
+                                            itemCount: widget.nodeList[index].rlyStatus.length, // Number of items in the grid
+                                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: 8,
+                                              crossAxisSpacing: 05.0,
+                                              mainAxisSpacing: 05.0,
+                                            ),
+                                            itemBuilder: (BuildContext context, int indexGv) {
+                                              print(widget.nodeList[index].rlyStatus[indexGv].name);
+                                              return Column(
+                                                children: [
+                                                  CircleAvatar(
+                                                    backgroundColor: widget.nodeList[index].rlyStatus[indexGv].Status==0 ? Colors.grey :
+                                                    widget.nodeList[index].rlyStatus[indexGv].Status==1 ? Colors.green :
+                                                    widget.nodeList[index].rlyStatus[indexGv].Status==2 ? Colors.orange :
+                                                    widget.nodeList[index].rlyStatus[indexGv].Status==3 ? Colors.redAccent : Colors.black12, // Avatar background color
+                                                    child: Text((widget.nodeList[index].rlyStatus[indexGv].rlyNo).toString(), style: const TextStyle(color: Colors.white)),
+                                                  ),
+                                                  Text((widget.nodeList[index].rlyStatus[indexGv].name).toString(), style: const TextStyle(color: Colors.black, fontSize: 10)),
+                                                ],
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
+                              );
+                            },
                           );
                         },
-                      );
-                    },
+                      ),
+                      IconButton(onPressed: (){}, icon: Icon(Icons.edit)),
+                    ],
                   ))),
                 ])),
               ),

@@ -136,8 +136,9 @@ class LiveData {
   List<ScheduledProgram> scheduledProgramList;
   List<ProgramQueue> queProgramList;
   List<CurrentScheduleModel> currentSchedule;
- // List<SensorData> sensorList;
-  int WifiStrength;
+  List<Payload2408> payload2408List;
+  List<AlarmData> alarmList;
+  int wifiStrength;
 
   LiveData({
     required this.nodeList,
@@ -147,7 +148,9 @@ class LiveData {
     required this.scheduledProgramList,
     required this.queProgramList,
     required this.currentSchedule,
-    required this.WifiStrength,
+    required this.payload2408List,
+    required this.alarmList,
+    required this.wifiStrength,
   });
 
   factory LiveData.fromJson(Map<String, dynamic> json) {
@@ -173,6 +176,13 @@ class LiveData {
     var pumpData = json['2407'] as List;
     List<PumpData> pumpList = pumpData.isNotEmpty? pumpData.map((pmp) => PumpData.fromJson(pmp)).toList(): [];
 
+    var payload2408 = json['2408'] as List;
+    List<Payload2408> payload2408List = payload2408.isNotEmpty? payload2408.map((payload) => Payload2408.fromJson(payload)).toList(): [];
+
+    var alamData = json['2409'] as List;
+    List<AlarmData> alamList = alamData.isNotEmpty? alamData.map((alm) => AlarmData.fromJson(alm)).toList(): [];
+
+
     return LiveData(
       nodeList: nodeList,
       pumpList: pumpList,
@@ -181,7 +191,9 @@ class LiveData {
       scheduledProgramList: programList,
       queProgramList: pInQ,
       currentSchedule: currentSchedule,
-      WifiStrength: json['WifiStrength'],
+      payload2408List: payload2408List,
+      alarmList: alamList,
+      wifiStrength: json['WifiStrength'],
     );
   }
 
@@ -194,8 +206,9 @@ class LiveData {
       '2405': filterList.map((e) => e.toJson()).toList(),
       '2406': fertilizerSiteList.map((e) => e.toJson()).toList(),
       '2407': pumpList.map((e) => e.toJson()).toList(),
-      //'2408': sensorList.map((e) => e.toJson()).toList(),
-      'WifiStrength': WifiStrength,
+      '2408': payload2408List.map((e) => e.toJson()).toList(),
+      '2409': alarmList.map((e) => e.toJson()).toList(),
+      'WifiStrength': wifiStrength,
     };
   }
 }
@@ -922,14 +935,6 @@ class RelayStatus {
     );
   }
 
-  /*Map<String, dynamic> toJson() {
-    return {
-      'S_No': S_No,
-      'Name': name,
-      'RlyNo': rlyNo,
-      'Status': status,
-    };
-  }*/
 }
 
 class SensorStatus {
@@ -965,22 +970,6 @@ class SensorStatus {
 
 }
 
-/*class SensorStatus {
-  final String? name;
-  final String? value;
-
-  SensorStatus({
-    required this.name,
-    required this.value,
-  });
-
-  factory SensorStatus.fromJson(Map<String, dynamic> json) {
-    return SensorStatus(
-      name: json['Name'],
-      value: json['Value'],
-    );
-  }
-}*/
 
 class Filter {
   final int type;
@@ -1335,25 +1324,99 @@ class Booster {
   }
 }
 
-/*class PumpCLive {
-  List<CM> cM;
+class AlarmData {
+  final String sNo;
+  final String location;
+  final int alarmType;
+  final String alarmSet;
+  final String alarmActual;
+  final int status;
 
-  PumpCLive({
-    required this.cM,
+  AlarmData({
+    required this.sNo,
+    required this.location,
+    required this.alarmType,
+    required this.alarmSet,
+    required this.alarmActual,
+    required this.status,
   });
 
-  factory PumpCLive.fromJson(Map<String, dynamic> json) {
-    return PumpCLive(
-      cM: List<CM>.from(json['cM'].map((x) => CM.fromJson(x))),
+  factory AlarmData.fromJson(Map<String, dynamic> json) {
+    return AlarmData(
+      sNo: json['S_No'],
+      location: json['Location'],
+      alarmType: json['AlarmType'],
+      alarmSet: json['AlarmSet'],
+      alarmActual: json['AlarmActual'],
+      status: json['Status'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'cM': List<dynamic>.from(cM.map((x) => x.toJson())),
+      'S_No': sNo,
+      'Location': location,
+      'AlarmType': alarmType,
+      'AlarmSet': alarmSet,
+      'AlarmActual': alarmActual,
+      'Status': status,
     };
   }
-}*/
+}
+
+class Payload2408 {
+  final int sNo;
+  final String line;
+  final String swName;
+  final String prsIn;
+  final String prsOut;
+  final String dpValue;
+  final String waterMeter;
+  final int irrigationPauseFlag;
+  final int dosingPauseFlag;
+
+  Payload2408({
+    required this.sNo,
+    required this.line,
+    required this.swName,
+    required this.prsIn,
+    required this.prsOut,
+    required this.dpValue,
+    required this.waterMeter,
+    required this.irrigationPauseFlag,
+    required this.dosingPauseFlag,
+  });
+
+  factory Payload2408.fromJson(Map<String, dynamic> json) {
+    return Payload2408(
+      sNo: json['S_No'],
+      line: json['Line'],
+      swName: json['SW_Name'] ?? '',
+      prsIn: json['PrsIn'],
+      prsOut: json['PrsOut'],
+      dpValue: json['DpValue'],
+      waterMeter: json['Watermeter'],
+      irrigationPauseFlag: json['IrrigationPauseFlag'],
+      dosingPauseFlag: json['DosingPauseFlag'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'S_No': sNo,
+      'Line': line,
+      'SW_Name': swName,
+      'PrsIn': prsIn,
+      'PrsOut': prsOut,
+      'DpValue': dpValue,
+      'Watermeter': waterMeter,
+      'IrrigationPauseFlag': irrigationPauseFlag,
+      'DosingPauseFlag': dosingPauseFlag,
+    };
+  }
+}
+
+
 
 abstract class CM {
   CM();

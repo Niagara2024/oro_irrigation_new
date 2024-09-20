@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../../Models/DataResponse.dart';
@@ -17,14 +18,13 @@ import '../Forms/create_account.dart';
 import '../Forms/device_list.dart';
 import 'ServiceRequestsTable.dart';
 
-enum Calendar {day, week, month, year}
+enum Calendar {all, year}
 typedef CallbackFunction = void Function(String result);
 
 class DealerDashboard extends StatefulWidget {
-  const DealerDashboard({Key? key, required this.userName, required this.countryCode, required this.mobileNo, required this.userId, required this.emailId, required this.fromLogin}) : super(key: key);
-
+  const DealerDashboard({Key? key, required this.userName, required this.countryCode, required this.mobileNo, required this.userId, required this.emailId, required this.fromLogin, required this.userType}) : super(key: key);
   final String userName, countryCode, mobileNo, emailId;
-  final int userId;
+  final int userId, userType;
   final bool fromLogin;
 
   @override
@@ -33,7 +33,7 @@ class DealerDashboard extends StatefulWidget {
 
 class _DealerDashboardState extends State<DealerDashboard> {
 
-  Calendar calendarView = Calendar.day;
+  Calendar calendarView = Calendar.all;
   List<ProductStockModel> productStockList = <ProductStockModel>[];
   List<CustomerListMDL> myCustomerList = <CustomerListMDL>[];
   List<CustomerListMDL> filteredCustomerList = [];
@@ -42,9 +42,11 @@ class _DealerDashboardState extends State<DealerDashboard> {
   String selectedValue = 'All';
   List<String> dropdownItems = ['All', 'Last year', 'Last month', 'Last Week'];
   bool visibleLoading = false;
+  int totalSales = 0;
 
   bool searched = false;
   TextEditingController txtFldSearch = TextEditingController();
+
 
   @override
   void initState() {
@@ -53,7 +55,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
     dataResponse = DataResponse(graph: {}, total: []);
     indicatorViewShow();
     Future.delayed(const Duration(seconds: 2), () {
-      getProductSalesReport();
+      getProductSalesReport('All');
       getProductStock();
       getCustomerList();
     });
@@ -83,27 +85,33 @@ class _DealerDashboardState extends State<DealerDashboard> {
     }
   }
 
-  Future<void> getProductSalesReport() async {
-    Map<String, Object> body = {"userId": widget.userId, "userType": 2, "type": "All"};
+  Future<void> getProductSalesReport(String type) async {
+    Map<String, Object> body = {"userId": widget.userId, "userType": 2, "type": type, "year": 2024};
+    print(body);
     final response = await HttpService().postRequest("getProductSalesReport", body);
     if (response.statusCode == 200) {
+      print(response.body);
       var data = jsonDecode(response.body);
       if (data is Map<String, dynamic> && data["code"] == 200) {
         try {
+          totalSales=0;
           dataResponse = DataResponse.fromJson(data);
+          for (int i = 0; i < dataResponse.total!.length; i++) {
+            totalSales += dataResponse.total![i].totalProduct;
+          }
         }catch (e) {
           print('Error parsing data response: $e');
         }
       }
       indicatorViewHide();
-    } else {
+    }else{
       //_showSnackBar(response.body);
     }
   }
 
   Future<void> getProductStock() async
   {
-    Map<String, dynamic> body = {"fromUserId" : null, "toUserId" : widget.userId};
+    Map<String, dynamic> body = {"fromUserId": null, "toUserId": widget.userId,};
     final response = await HttpService().postRequest("getProductStock", body);
     if (response.statusCode == 200)
     {
@@ -147,8 +155,6 @@ class _DealerDashboardState extends State<DealerDashboard> {
       //_showSnackBar(response.body);
     }
   }
-
-
 
   @override
   Widget build(BuildContext context)
@@ -221,42 +227,35 @@ class _DealerDashboardState extends State<DealerDashboard> {
                               children: [
                                 SegmentedButton<Calendar>(
                                   style: ButtonStyle(
-                                    backgroundColor: MaterialStatePropertyAll(myTheme.primaryColor.withOpacity(0.1)),
-                                    iconColor: MaterialStateProperty.all(myTheme.primaryColor),
+                                    backgroundColor: WidgetStatePropertyAll(myTheme.primaryColor.withOpacity(0.1)),
+                                    iconColor: WidgetStateProperty.all(myTheme.primaryColor),
                                   ),
                                   segments: const <ButtonSegment<Calendar>>[
                                     ButtonSegment<Calendar>(
-                                        value: Calendar.day,
+                                        value: Calendar.all,
                                         label: Text('All'),
                                         icon: Icon(Icons.calendar_view_day)),
                                     ButtonSegment<Calendar>(
-                                        value: Calendar.week,
-                                        label: Text('Week'),
-                                        icon: Icon(Icons.calendar_view_week)),
-                                    ButtonSegment<Calendar>(
-                                        value: Calendar.month,
-                                        label: Text('Month'),
-                                        icon: Icon(Icons.calendar_view_month)),
-                                    ButtonSegment<Calendar>(
                                         value: Calendar.year,
                                         label: Text('Year'),
-                                        icon: Icon(Icons.calendar_today)),
+                                        icon: Icon(Icons.calendar_view_month)),
                                   ],
                                   selected: <Calendar>{calendarView},
                                   onSelectionChanged: (Set<Calendar> newSelection) {
                                     setState(() {
-                                      // By default there is only a single segment that can be
-                                      // selected at one time, so its value is always the first
-                                      // item in the selected set.
                                       calendarView = newSelection.first;
+                                      String sldName = calendarView.name[0].toUpperCase() + calendarView.name.substring(1);
+                                      getProductSalesReport(sldName);
                                     });
                                   },
                                 ),
+                                const SizedBox(width: 16,),
+                                Text('Total Sales : $totalSales', style: const TextStyle(fontSize: 15),)
                               ],
                             ),
                           ),
-                          const Expanded(
-                            child: MySalesChart(),
+                          Expanded(
+                            child: MySalesChart(graph: dataResponse.graph,),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(bottom: 8.0),
@@ -267,17 +266,13 @@ class _DealerDashboardState extends State<DealerDashboard> {
                               runAlignment: WrapAlignment.spaceBetween,
                               children: List.generate(
                                 dataResponse.total!.length, (index) => Chip(
-                                avatar: CircleAvatar(backgroundColor: index==0? Colors.cyan : index==1? Colors.pink: index==2 ? Colors.purple : index==3 ? Colors.orange :
-                                index==4? Colors.deepPurple : index==5? Colors.red: index==6 ? Colors.yellow : index==7 ? Colors.black54 :
-                                index==8 ? Colors.purple: index==9 ? Colors.redAccent: index == 10? Colors.blueGrey : index == 11?
-                                Colors.lightGreen : index == 12?Colors.purpleAccent:Colors.brown),
+                                avatar: CircleAvatar(backgroundColor: dataResponse.total![index].color),
                                 elevation: 3,
                                 shape: const LinearBorder(),
                                 label: Text('${dataResponse.total![index].categoryName} - ${dataResponse.total![index].totalProduct}',
                                   style: const TextStyle(fontSize: 11),
                                 ),
                                 visualDensity: VisualDensity.compact,
-                                // Customize Chip properties based on your needs
                               ),
                               ),
                             ),
@@ -576,67 +571,75 @@ class _DealerDashboardState extends State<DealerDashboard> {
 }
 
 class MySalesChart extends StatefulWidget {
-  const MySalesChart({Key? key}) : super(key: key);
+  const MySalesChart({Key? key, required this.graph}) : super(key: key);
+  final Map<String, List<Category>>? graph;
 
   @override
   _MySalesChartState createState() => _MySalesChartState();
 }
 
 class _MySalesChartState extends State<MySalesChart> {
-  late List<_ChartData> data;
-  late TooltipBehavior _tooltip;
+  List<BarSeries<Category, String>> seriesList = [];
+  int? selectedSeriesIndex = 0;
 
   @override
-  void initState() {
-    data = [
-      _ChartData('2019', 15, 8, 10, 12, 23),
-      _ChartData('2020', 30, 15, 24, 15, 12),
-      _ChartData('2021', 6, 4, 10, 17, 32),
-      _ChartData('2022', 14, 2, 17, 25, 10),
-      _ChartData('2023', 14, 2, 17, 25, 27)
-    ];
-    _tooltip = TooltipBehavior(enable: true);
-    super.initState();
+  void didUpdateWidget(MySalesChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.graph != widget.graph) {
+      selectedSeriesIndex = 0;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+
+    List<BarSeries<Category, String>> seriesList = [];
+
+    for (var entry in widget.graph!.entries) {
+      String month = entry.key;
+      List<Category> categories = entry.value;
+
+      seriesList.add(
+        BarSeries<Category, String>(
+          dataSource: categories,
+          xValueMapper: (Category category, int index) => (index + 1).toString(),
+          //xValueMapper: (Category category, _) => category.categoryName,
+          yValueMapper: (Category category, _) => category.totalProduct,
+          pointColorMapper: (Category category, _) => category.color,
+          name: month,
+          dataLabelSettings: const DataLabelSettings(isVisible: true,),
+          isVisible: selectedSeriesIndex == null || selectedSeriesIndex == seriesList.length,
+
+        ),
+      );
+    }
+
     return SfCartesianChart(
-        primaryXAxis: CategoryAxis(),
-        primaryYAxis: NumericAxis(minimum: 0, maximum: 40, interval: 10),
-        tooltipBehavior: _tooltip,
-        series: <ChartSeries<_ChartData, String>>[
-          ColumnSeries<_ChartData, String>(
-              dataSource: data,
-              xValueMapper: (_ChartData data, _) => data.period,
-              yValueMapper: (_ChartData data, _) => data.gem,
-              name: 'GEM',
-              color: Colors.blue.shade300),
-          ColumnSeries<_ChartData, String>(
-              dataSource: data,
-              xValueMapper: (_ChartData data, _) => data.period,
-              yValueMapper: (_ChartData data, _) => data.sRtu,
-              name: 'Smart RTU',
-              color: Colors.green.shade300),
-          ColumnSeries<_ChartData, String>(
-              dataSource: data,
-              xValueMapper: (_ChartData data, _) => data.period,
-              yValueMapper: (_ChartData data, _) => data.rtu,
-              name: 'RTU',
-              color: Colors.orange.shade300),
-          ColumnSeries<_ChartData, String>(
-              dataSource: data,
-              xValueMapper: (_ChartData data, _) => data.period,
-              yValueMapper: (_ChartData data, _) => data.oSwitch,
-              name: 'ORO Switch',
-              color: Colors.pink.shade300),
-          ColumnSeries<_ChartData, String>(
-              dataSource: data,
-              xValueMapper: (_ChartData data, _) => data.period,
-              yValueMapper: (_ChartData data, _) => data.oSpot,
-              name: 'ORO Spot',
-              color: Colors.deepPurpleAccent.shade100),
-        ]);
+      primaryYAxis: NumericAxis(),
+      primaryXAxis: CategoryAxis(
+        labelStyle: const TextStyle(
+          color: Colors.black45,
+        ),
+      ),
+      enableAxisAnimation: true,
+      legend: const Legend(
+        isVisible: true,
+        toggleSeriesVisibility: false,
+      ),
+      series: seriesList,
+      tooltipBehavior: TooltipBehavior(enable: false),
+      isTransposed: true,
+      onLegendTapped: (LegendTapArgs args) {
+        setState(() {
+          if (selectedSeriesIndex == args.seriesIndex) {
+            selectedSeriesIndex = null;
+          } else {
+            selectedSeriesIndex = args.seriesIndex;
+          }
+        });
+      },
+    );
+
   }
 }
 

@@ -1394,7 +1394,9 @@ class Payload2408 {
       swName: json['SW_Name'] ?? '',
       prsIn: json['PrsIn'],
       prsOut: json['PrsOut'],
-      dpValue: json['DpValue'],
+      dpValue: json['DpValue'] != null
+          ? json['DpValue'].toString()
+          : '',
       waterMeter: json['Watermeter'],
       irrigationPauseFlag: json['IrrigationPauseFlag'],
       dosingPauseFlag: json['DosingPauseFlag'],

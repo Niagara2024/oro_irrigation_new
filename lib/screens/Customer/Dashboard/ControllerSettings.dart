@@ -8,6 +8,7 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../../Models/language.dart';
+import '../../../Models/notification_list_model.dart';
 import '../../../constants/http_service.dart';
 import '../../../constants/snack_bar.dart';
 import '../../Config/names_form.dart';
@@ -60,17 +61,19 @@ class _ControllerSettingsState extends State<ControllerSettings> {
   double opacity = 1.0;
   Timer? _timer;
 
+  List<NotificationListModel> notifications = [];
+
   @override
   void initState() {
     super.initState();
     getLanguage();
     getControllerInfo();
     getSubUserList();
+    getNotificationList();
   }
 
   @override
   void dispose() {
-    // Cancel the timer when the widget is disposed
     _timer?.cancel();
     super.dispose();
   }
@@ -152,6 +155,24 @@ class _ControllerSettingsState extends State<ControllerSettings> {
     }
   }
 
+  Future<void> getNotificationList() async {
+    final response =   await HttpService().postRequest("getUserPushNotificationType", {"userId": widget.customerID, "controllerId": widget.siteData.master[0].controllerId});
+    if (response.statusCode == 200) {
+      languageList.clear();
+      var data = jsonDecode(response.body);
+      if (data["code"] == 200) {
+        notifications = parseNotifications(response.body);
+      }
+    }
+  }
+
+  List<NotificationListModel> parseNotifications(String responseBody) {
+    final parsed = json.decode(responseBody);
+    return (parsed['data'] as List)
+        .map((notification) => NotificationListModel.fromJson(notification))
+        .toList();
+  }
+
   final List<String> _timeZones = tz.timeZoneDatabase.locations.keys.toList();
 
   void _updateCurrentDateTime(String timeZone) {
@@ -174,16 +195,18 @@ class _ControllerSettingsState extends State<ControllerSettings> {
         : Scaffold(
             backgroundColor: Colors.white,
             body: DefaultTabController(
-              length: 4,
+              length: 5,
               child: Column(
                 children: [
-                  const TabBar(
-                    indicatorColor: Colors.pinkAccent,
+                  TabBar(
+                    indicatorColor: Colors.teal,
                     labelColor: Colors.black,
                     unselectedLabelColor: Colors.grey,
-                    tabs: [
+                    dividerColor: Colors.teal.shade100,
+                    tabs: const [
                       Tab(text: 'General'),
                       Tab(text: 'Preference'),
+                      Tab(text: 'Notification'),
                       Tab(text: 'Names'),
                       Tab(text: 'View Settings'),
                     ],
@@ -196,13 +219,14 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                           child: buildGeneralContent(screenWidth),
                         ),
                         const Center(child: Text('Tab 2 Content')),
+                        buildNotifications(),
                         Center(
                             child: Names(
-                                userID: widget.customerID,
-                                customerID: widget.customerID,
-                                controllerId: widget.siteData.master[0].controllerId,
+                              userID: widget.customerID,
+                              customerID: widget.customerID,
+                              controllerId: widget.siteData.master[0].controllerId,
                               imeiNo: widget.siteData.master[0].deviceId,)),
-                        const Center(child: Text('Tab 4 Content')),
+                        const Center(child: Text('Tab 5 Content')),
                       ],
                     ),
                   ),
@@ -211,6 +235,90 @@ class _ControllerSettingsState extends State<ControllerSettings> {
             ),
           );
   }
+
+  Widget buildNotifications() {
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            itemCount: (notifications.length / 3).ceil(), // Grouping items in rows of 3
+            itemBuilder: (context, index) {
+              int startIndex = index * 3; // Each row starts with a multiple of 3
+              return Padding(
+                padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    buildNotificationCard(startIndex),
+                    if (startIndex + 1 < notifications.length)
+                      buildNotificationCard(startIndex + 1),
+                    if (startIndex + 2 < notifications.length)
+                      buildNotificationCard(startIndex + 2),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+        ListTile(trailing: MaterialButton(
+          color: Colors.green,
+          textColor: Colors.white,
+          onPressed:() async {
+            List<int> selectedIds = notifications.where((notification) => notification.selected).map((notification) => notification.pushNotificationId).toList();
+            if(selectedIds.isNotEmpty){
+              final response = await HttpService().putRequest("updateUserPushNotificationType",
+                  {"userId": widget.customerID, "controllerId": widget.siteData.master[0].controllerId, "pushNotificationType": selectedIds, "modifyUser": widget.customerID,});
+              if (response.statusCode == 200) {
+                var data = jsonDecode(response.body);
+                if (data["code"] == 200) {
+                  GlobalSnackBar.show(context, data["message"], 200);
+                }
+              }
+            }else{
+              GlobalSnackBar.show(context, "Notification setting saved successfully", 200);
+            }
+          },
+          child: const Text('Save'),
+        ),),
+      ],
+    );
+  }
+
+  Widget buildNotificationCard(int index) {
+    final notification = notifications[index];
+    return Expanded(
+      child: Card(
+        margin: const EdgeInsets.all(5.0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5.0),
+          side: BorderSide(color: Colors.teal.shade50, width: 0.5)
+        ),
+        color: Colors.teal.shade50,
+        child: ListTile(
+          title: Text(notification.notificationName),
+          subtitle: Text(notification.notificationDescription, style: const TextStyle(fontSize: 12, color: Colors.black54)),
+          trailing: Transform.scale(
+            scale: 0.7,
+            child: Tooltip(
+              message: notification.selected? 'Disable' : 'Enable',
+              child: Switch(
+                hoverColor: Colors.pink.shade100,
+                activeColor: Colors.teal,
+                value: notification.selected,
+                onChanged: (bool value) {
+                  setState(() {
+                    notification.selected = value;
+                  });
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
 
   Widget buildLoadingIndicator(bool isVisible, double width) {
     return Visibility(
@@ -226,8 +334,8 @@ class _ControllerSettingsState extends State<ControllerSettings> {
   }
 
   Widget buildGeneralContent(screenWidth) {
-    return screenWidth > 600
-        ? Container(
+
+    return screenWidth > 600 ? Container(
             color: Colors.white,
             child: SingleChildScrollView(
               child: Column(
@@ -254,7 +362,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                                   ),
                                 ),
                               ),
-                              const Divider(),
+                              Divider(color: Colors.grey.shade200,),
                               ListTile(
                                 title: const Text('Controller Name'),
                                 leading: const Icon(Icons.developer_board),
@@ -269,7 +377,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                                   ),
                                 ),
                               ),
-                              const Divider(),
+                              Divider(color: Colors.grey.shade200,),
                               ListTile(
                                 title: const Text('Device Category'),
                                 leading: const Icon(Icons.category_outlined),
@@ -280,7 +388,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                                       fontWeight: FontWeight.bold),
                                 ),
                               ),
-                              const Divider(),
+                              Divider(color: Colors.grey.shade200,),
                               ListTile(
                                 title: const Text('Model'),
                                 leading: const Icon(Icons.model_training),
@@ -291,7 +399,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                                       fontWeight: FontWeight.bold),
                                 ),
                               ),
-                              const Divider(),
+                              Divider(color: Colors.grey.shade200,),
                               ListTile(
                                 title: const Text('Device ID'),
                                 leading: const Icon(Icons.numbers_outlined),
@@ -302,7 +410,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                                       fontWeight: FontWeight.bold),
                                 ),
                               ),
-                              const Divider(),
+                              Divider(color: Colors.grey.shade200,),
                               ListTile(
                                 title: const Text('Version'),
                                 leading: const Icon(Icons.perm_device_info),
@@ -332,13 +440,13 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                                   value: _mySelection,
                                 ),
                               ),*/
-                              const Divider(),
+                              Divider(color: Colors.grey.shade300,),
                             ],
                           ),
                         ),
-                        const Padding(
-                          padding: EdgeInsets.only(bottom: 15),
-                          child: VerticalDivider(width: 0),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 15),
+                          child: VerticalDivider(width: 0, color: Colors.grey.shade200),
                         ),
                         Flexible(
                           flex: 1,
@@ -378,7 +486,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                                   }).toList(),
                                 ),
                               ),
-                              const Divider(),
+                              Divider(color: Colors.grey.shade200,),
                               ListTile(
                                 title: const Text('UTC'),
                                 leading: const Icon(Icons.timer_outlined),
@@ -400,7 +508,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                                   }).toList(),
                                 ),
                               ),
-                              const Divider(),
+                              Divider(color: Colors.grey.shade200,),
                               ListTile(
                                 title: const Text('Current Date'),
                                 leading: Icon(Icons.date_range),
@@ -411,7 +519,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                                       fontWeight: FontWeight.bold),
                                 ),
                               ),
-                              const Divider(),
+                              Divider(color: Colors.grey.shade200,),
                               ListTile(
                                 title: const Text('Current UTC Time'),
                                 leading: const Icon(Icons.date_range),
@@ -422,7 +530,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                                       fontWeight: FontWeight.bold),
                                 ),
                               ),
-                              const Divider(),
+                              Divider(color: Colors.grey.shade200,),
                               const ListTile(
                                 title: Text('Time Format'),
                                 leading: Icon(Icons.date_range),
@@ -433,7 +541,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                                       fontWeight: FontWeight.bold),
                                 ),
                               ),
-                              const Divider(),
+                              Divider(color: Colors.grey.shade200,),
                               const ListTile(
                                 title: Text('Unit'),
                                 leading: Icon(Icons.ac_unit_rounded),
@@ -444,7 +552,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                                       fontWeight: FontWeight.bold),
                                 ),
                               ),
-                              const Divider(),
+                              Divider(color: Colors.grey.shade300,),
                             ],
                           ),
                         ),
@@ -536,9 +644,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                             icon: const Icon(Icons.add))
                         : null,
                   ),
-                  const Divider(
-                    height: 0,
-                  ),
+                  Divider(height:0, color: Colors.grey.shade300,),
                   SizedBox(
                     height: 70,
                     child: subUsers.isNotEmpty
@@ -923,12 +1029,10 @@ class _ControllerSettingsState extends State<ControllerSettings> {
 
   Future<void> sendUpdatedPermission(List<Map<String, dynamic>> uptJson, int suId) async
   {
-    print({"userId": widget.customerID, "masterList": uptJson, "sharedUser": suId, "createUser": widget.customerID,});
     final response = await HttpService().postRequest("createUserSharedController",
         {"userId": widget.customerID, "masterList": uptJson, "sharedUser": suId, "createUser": widget.customerID,});
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      print(response.body);
       if (data["code"] == 200) {
         GlobalSnackBar.show(context, data["message"], 200);
         Navigator.of(context).pop();
@@ -1262,3 +1366,5 @@ class MasterItem {
     );
   }
 }
+
+

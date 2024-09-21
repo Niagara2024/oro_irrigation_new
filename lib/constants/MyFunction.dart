@@ -25,7 +25,7 @@ class MyFunction {
   }
 }
 
-enum GemProgramSSReasonCode {
+enum GemProgramStartStopReasonCode {
   rs1(1, 'Running As Per Schedule'),
   rs2(2, 'Turned On Manually'),
   rs3(3, 'Started By Condition'),
@@ -64,11 +64,11 @@ enum GemProgramSSReasonCode {
   final int code;
   final String content;
 
-  const GemProgramSSReasonCode(this.code, this.content);
+  const GemProgramStartStopReasonCode(this.code, this.content);
 
-  static GemProgramSSReasonCode fromCode(int code) {
-    return GemProgramSSReasonCode.values.firstWhere((e) => e.code == code,
-      orElse: () => GemProgramSSReasonCode.unknown,
+  static GemProgramStartStopReasonCode fromCode(int code) {
+    return GemProgramStartStopReasonCode.values.firstWhere((e) => e.code == code,
+      orElse: () => GemProgramStartStopReasonCode.unknown,
     );
   }
 }
@@ -87,6 +87,7 @@ enum GemLineSSReasonCode {
   lss11(11, 'The Line Paused By Pressure High'),
   lss12(12, 'The Line Paused By No Power Supply'),
   lss13(13, 'The Line Paused By No Communication'),
+  lss14(14, 'The Line Paused By Pump In Another Irrigation Line'),
   unknown(0, 'Unknown content');
 
   final int code;

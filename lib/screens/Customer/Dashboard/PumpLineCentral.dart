@@ -89,7 +89,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                       for(int i=0; i<widget.provider.payload2408.length; i++)
                         widget.provider.payload2408.isNotEmpty?  Padding(
                           padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
-                          child: widget.provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(crInx: i):null,
+                          child: widget.provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(payload2408: widget.provider.payload2408, index: i,):null,
                         ) :
                         const SizedBox(),
 
@@ -122,7 +122,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                       for(int i=0; i<widget.provider.payload2408.length; i++)
                         widget.provider.payload2408.isNotEmpty?  Padding(
                           padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
-                          child: widget.provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(crInx: i):null,
+                          child: widget.provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(payload2408: widget.provider.payload2408, index: i,):null,
                         ) : const SizedBox(),
 
                     widget.provider.centralFertilizer.isNotEmpty? DisplayCentralFertilizer(currentLineId: widget.crrIrrLine.id,): const SizedBox(),
@@ -1001,53 +1001,6 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                                   ],
                                 ),
                               ),
-                              /*const Padding(
-                                padding: EdgeInsets.only(left: 8),
-                                child: Divider(height: 6,color: Colors.black12),
-                              ),
-                              Container(
-                                width: 315,
-                                height: 40,
-                                color: Colors.transparent,
-                                child: Row(
-                                  children: [
-                                    const SizedBox(width:100, child: Text('Level', style: TextStyle(color: Colors.black54)),),
-                                    const Spacer(),
-                                    Container(
-                                      width: 40,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                        color: Colors.blue.shade50,
-                                        borderRadius: const BorderRadius.all(Radius.circular(2)),
-                                        border: Border.all(color: Colors.blue, width: 0.50),
-                                      ),
-                                      child: Stack(
-                                        alignment: Alignment.bottomCenter,
-                                        children: [
-                                          Container(
-                                            width: 40,
-                                            height: 40 * (level / 100),  // Adjust height based on percentage
-                                            decoration: BoxDecoration(
-                                              color: Colors.blue.shade400,
-                                              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(2)),
-                                            ),
-                                          ),
-                                          Center(
-                                            child: Text(
-                                              '$level%',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.blue.shade900,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),*/
                             ],
                           ):
                           const Column(
@@ -1165,29 +1118,89 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
 
 
 class DisplaySensor extends StatelessWidget {
-  const DisplaySensor({Key? key, required this.crInx}) : super(key: key);
-  final int crInx;
+  const DisplaySensor({Key? key, required this.payload2408, required this.index,}) : super(key: key);
+  final List<dynamic> payload2408;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
-    MqttPayloadProvider provider = Provider.of<MqttPayloadProvider>(context,listen: false);
-    Map<String, dynamic> jsonData = provider.payload2408[crInx];
     double totalWidth = 0;
 
-    for( var key in jsonData.keys){
-      dynamic value = jsonData[key];
-      if((key=='PrsIn'||key=='PrsOut'||key=='Watermeter') && value!='-'){
-        if(value!='-'){
-          totalWidth += 70;
-        }
-      }
+    var data = payload2408[index];
+    Payload2408 payload;
+
+    if (data is Map<String, dynamic>) {
+      payload = Payload2408.fromJson(data);
+    } else if (data is Payload2408) {
+      payload = data;
+    } else {
+      return const SizedBox();
     }
 
-    return jsonData.isNotEmpty ? SizedBox(
+    if (payload.prsIn != '-') {
+      totalWidth += 70;
+    }
+
+    if (payload.prsOut != '-') {
+      totalWidth += 70;
+    }
+
+    if (payload.waterMeter != '-') {
+      totalWidth += 70;
+    }
+
+    return SizedBox(
+      width: totalWidth,
+      child: (payload.prsIn != '-' || payload.prsOut != '-' || payload.waterMeter != '-')
+          ? Column(
+        children: [
+          Stack(
+            children: [
+              SizedBox(
+                width: 70,
+                height: 70,
+                child: payload.prsIn != '-' || payload.prsOut != '-'
+                    ? Image.asset('assets/images/dp_prs_sensor.png')
+                    : Image.asset('assets/images/dp_flowmeter.png'),
+              ),
+              Positioned(
+                top: 42,
+                left: 5,
+                child: Container(
+                  width: 60,
+                  height: 17,
+                  decoration: BoxDecoration(
+                    color: Colors.yellow,
+                    borderRadius: const BorderRadius.all(Radius.circular(2)),
+                    border: Border.all(
+                      color: Colors.grey,
+                      width: .50,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      payload.prsIn != '-' ? payload.prsIn : payload.prsOut != '-' ? payload.prsOut : '${payload.waterMeter} Lps',
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      )
+          : const SizedBox(),
+    );
+
+   /* return payload2408.isNotEmpty ? SizedBox(
       width: totalWidth,
       height: 85,
       child: ListView.builder(
-        itemCount: jsonData.keys.length,
+        itemCount: payload2408.keys.length,
         scrollDirection: Axis.horizontal,
         itemBuilder: (BuildContext context, int index) {
           String key = jsonData.keys.elementAt(index);
@@ -1228,7 +1241,7 @@ class DisplaySensor extends StatelessWidget {
           const SizedBox();
         },
       ),
-    ) : const SizedBox();
+    ) : const SizedBox();*/
   }
 }
 

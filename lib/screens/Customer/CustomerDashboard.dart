@@ -121,7 +121,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
       if(widget.siteData.master[widget.masterInx].irrigationLine[widget.lineIdx].sNo==0){
         return Column(
           children: [
-            lastCommunication.inMinutes >= 10? lostCommunication():
+            lastCommunication.inMinutes >= 10? lostCommunication():provider.powerSupply == 0? noPowerSupply():
             const SizedBox(),
             liveSync? stoppedAnimation(): const SizedBox(),
             Expanded(
@@ -313,7 +313,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                               for(int i=0; i<provider.payload2408.length; i++)
                                 provider.payload2408.isNotEmpty?  Padding(
                                   padding: const EdgeInsets.only(top: 15),
-                                  child: provider.payload2408[i]['Line'].contains(crrIrrLine.id)? DisplaySensor(crInx: i):null,
+                                  child: provider.payload2408[i]['Line'].contains(crrIrrLine.id)? DisplaySensor(payload2408: provider.payload2408, index: i,):null,
                                 ) : const SizedBox(),
 
                               //filter
@@ -537,7 +537,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                   for(int i=0; i<provider.payload2408.length; i++)
                     provider.payload2408.isNotEmpty?  Padding(
                       padding: EdgeInsets.only(top: provider.localFertilizer.isNotEmpty || provider.localFertilizer.isNotEmpty? 38.4:0),
-                      child: provider.payload2408[i]['Line'].contains(crrIrrLine.id)? DisplaySensor(crInx: i):null,
+                      child: provider.payload2408[i]['Line'].contains(crrIrrLine.id)? DisplaySensor(payload2408: provider.payload2408, index: i,):null,
                     ) :
                     const SizedBox(),
 

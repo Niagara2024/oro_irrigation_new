@@ -101,7 +101,7 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
                       for(int i=0; i<widget.provider.payload2408.length; i++)
                         widget.provider.payload2408.isNotEmpty?  Padding(
                           padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
-                          child: DisplaySensor(crInx: i),
+                          child: DisplaySensor(payload2408: widget.provider.payload2408, index: i,),
                         ) : const SizedBox(),
                       widget.provider.centralFertilizer.isNotEmpty? const DisplayCentralFertilizer(currentLineId: 'all',):
                       const SizedBox(),

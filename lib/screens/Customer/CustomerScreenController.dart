@@ -210,7 +210,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       payloadProvider.updateScheduledProgram(sp);
 
       payloadProvider.updateAlarmPayload(mySiteList[siteIndex].master[masterIndex].gemLive[0].alarmList);
-      //payloadProvider.updatePayload2408(mySiteList[siteIndex].master[masterIndex].gemLive[0].payload2408List);
+      payloadProvider.updatePayload2408(mySiteList[siteIndex].master[masterIndex].gemLive[0].payload2408List);
 
 
       if(payloadProvider.lastCommunication.inMinutes>=10){
@@ -465,12 +465,12 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     underline: Container(),
                     items: (mySiteList[siteIndex].master ?? []).map((master) {
                       return DropdownMenuItem(
-                        value: master.categoryName,
-                        child: Text(master.categoryName, style: const TextStyle(color: Colors.white, fontSize: 16),),
+                        value: master.deviceName,
+                        child: Text(master.deviceName, style: const TextStyle(color: Colors.white, fontSize: 16),),
                       );
                     }).toList(),
-                    onChanged: (newMaterName) {
-                      int masterIdx = mySiteList[siteIndex].master.indexWhere((master) => master.categoryName == newMaterName);
+                    onChanged: (newDeviceName) {
+                      int masterIdx = mySiteList[siteIndex].master.indexWhere((master) => master.deviceName == newDeviceName);
                       if (masterIdx != -1 && mySiteList[siteIndex].master.length > 1) {
                         masterIndex = masterIdx;
                         lineIndex = 0;
@@ -707,6 +707,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   Widget buildWideLayout(screenWidth, payload) {
 
+    //print('payload.runtimeType:${payload.payload2408.runtimeType}');
+    //print('payload:${payload}');
+
     return Scaffold(
       appBar: AppBar(
         leading: const Padding(
@@ -760,12 +763,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               items: (mySiteList[siteIndex].master ?? []).map((master) {
                 return DropdownMenuItem(
                   value: master.categoryName,
-                  child: Text(master.categoryName, style: const TextStyle(color: Colors.white, fontSize: 17),),
+                  child: Text(master.deviceName, style: const TextStyle(color: Colors.white, fontSize: 17),),
                 );
               }).toList(),
-              onChanged: (newMaterName) {
-                int masterIdx = mySiteList[siteIndex].master.indexWhere((master)
-                => master.categoryName == newMaterName);
+              onChanged: (newCategoryName) {
+                int masterIdx = mySiteList[siteIndex].master.indexWhere((master)=> master.categoryName == newCategoryName);
                 if (masterIdx != -1 && mySiteList[siteIndex].master.length > 1) {
                   masterIndex = masterIdx;
                   lineIndex = 0;
@@ -859,7 +861,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               const SizedBox(),
               const SizedBox(width: 10,),
 
-              mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1? TextButton(
+              mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1 && (payload.payload2408.runtimeType==List<dynamic>) ? TextButton(
                 onPressed: () {
                   String strPRPayload = '';
                   for (int i = 0; i < payload.payload2408.length; i++) {
@@ -904,7 +906,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const MyGemini(),
+                    builder: (context) => MyGemini(),
                   ),
                 );
               }, icon: const CircleAvatar(
@@ -1902,6 +1904,63 @@ class _SideSheetClassState extends State<SideSheetClass> {
 
   String lastSyncData = '';
 
+  Future<void> showEditProductDialog(BuildContext context, String nodeName, int nodeId, int index) async {
+    final TextEditingController nodeNameController = TextEditingController(text: nodeName);
+    final formKey = GlobalKey<FormState>();
+
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Change Node Name'),
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              controller: nodeNameController,
+              maxLength: 15,
+              decoration: const InputDecoration(hintText: "Enter node name"),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Node name cannot be empty';
+                }
+                return null;
+              },
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Save'),
+              onPressed: () async {
+                if (formKey.currentState!.validate()) {
+                  Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.controllerId, "nodeControllerId": nodeId, "deviceName": nodeNameController.text, "createUser": widget.customerID};
+                  print(body);
+                  final response = await HttpService().putRequest("updateUserNodeDetails", body);
+                  if (response.statusCode == 200) {
+                    print(response.body);
+                    setState(() {
+                      widget.nodeList[index].deviceName = nodeNameController.text;
+                    });
+                    GlobalSnackBar.show(context, 'Node name updated successfully', 200);
+                    Navigator.of(context).pop();
+                  } else {
+                    Navigator.of(context).pop();
+                    throw Exception('Failed to load data');
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -1946,7 +2005,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
         borderRadius: BorderRadius.zero,
       ),
       height: screenHeight,
-      width: 440,
+      width: 400,
       child: Column(
         children: [
           Row(
@@ -2103,17 +2162,17 @@ class _SideSheetClassState extends State<SideSheetClass> {
             ),
           ),
           SizedBox(
-            width: 440,
+            width: 400,
             height: screenHeight-170,
             child: Column(
               children: [
                 SizedBox(
-                  width:440,
+                  width:400,
                   height: 35,
                   child: DataTable2(
                       columnSpacing: 12,
                       horizontalMargin: 12,
-                      minWidth: 440,
+                      minWidth: 400,
                       headingRowHeight: 35.0,
                       headingRowColor: WidgetStateProperty.all<Color>(myTheme.primaryColorDark.withOpacity(0.3)),
                       columns: const [
@@ -2136,7 +2195,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                         ),
                         DataColumn2(
                           label: Text('Info', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.black),),
-                          fixedWidth: 80,
+                          fixedWidth: 100,
                         ),
                       ],
                       rows: List<DataRow>.generate(0,(index) => const DataRow(cells: [],),
@@ -2156,7 +2215,9 @@ class _SideSheetClassState extends State<SideSheetClass> {
                             widget.nodeList[index].rlyStatus.any((rly) => rly.Status == 2 || rly.Status == 3)? const Icon(Icons.warning, color: Colors.orangeAccent):
                             const Icon(Icons.info_outline, color: primaryColorDark,),
                             IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                showEditProductDialog(context, widget.nodeList[index].deviceName, widget.nodeList[index].controllerId, index);
+                              },
                               icon: const Icon(Icons.edit_outlined),
                             ),
                           ],
@@ -2164,9 +2225,9 @@ class _SideSheetClassState extends State<SideSheetClass> {
                         backgroundColor: Colors.teal.shade50,
                         title: Row(
                           children: [
-                            SizedBox(width: 35, child: Text('${widget.nodeList[index].serialNumber}', style: const TextStyle(fontSize: 13),)),
+                            SizedBox(width: 30, child: Text('${widget.nodeList[index].serialNumber}', style: const TextStyle(fontSize: 13),)),
                             SizedBox(
-                              width:55,
+                              width:50,
                               child: Center(child: CircleAvatar(radius: 7, backgroundColor:
                               widget.nodeList[index].status == 1? Colors.green.shade400:
                               widget.nodeList[index].status == 2? Colors.grey:
@@ -2175,15 +2236,16 @@ class _SideSheetClassState extends State<SideSheetClass> {
                               Colors.grey,
                               )),
                             ),
-                            SizedBox(width: 45, child: Center(child: Text('${widget.nodeList[index].referenceNumber}', style: const TextStyle(fontSize: 13),))),
+                            SizedBox(width: 40, child: Center(child: Text('${widget.nodeList[index].referenceNumber}', style: const TextStyle(fontSize: 13),))),
                             SizedBox(
-                              width: 169,
+                              width: 142,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  Text(widget.nodeList[index].categoryName, style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 13)),
+                                  Text(widget.nodeList[index].deviceName, style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 13)),
                                   Text(widget.nodeList[index].deviceId, style: const TextStyle(fontWeight: FontWeight.normal,fontSize: 11, color: Colors.black)),
+                                  Text(widget.nodeList[index].categoryName, style: const TextStyle(fontWeight: FontWeight.normal,fontSize: 11, color: Colors.black)),
                                 ],
                               ),
                             ),

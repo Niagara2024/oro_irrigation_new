@@ -489,7 +489,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
   }
 
   String getContentByCode(int code) {
-    return GemProgramSSReasonCode.fromCode(code).content;
+    return GemProgramStartStopReasonCode.fromCode(code).content;
   }
 
   Future<void>sentManualOperationToServer(int sNo, String prgName, int method, String payLoad) async {

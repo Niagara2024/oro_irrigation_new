@@ -210,7 +210,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       payloadProvider.updateScheduledProgram(sp);
 
       payloadProvider.updateAlarmPayload(mySiteList[siteIndex].master[masterIndex].gemLive[0].alarmList);
-      payloadProvider.updatePayload2408(mySiteList[siteIndex].master[masterIndex].gemLive[0].payload2408List);
+      //payloadProvider.updatePayload2408(mySiteList[siteIndex].master[masterIndex].gemLive[0].payload2408List);
 
 
       if(payloadProvider.lastCommunication.inMinutes>=10){

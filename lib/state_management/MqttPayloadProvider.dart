@@ -287,10 +287,6 @@ class MqttPayloadProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void updatePayload2408(List<Payload2408> payload) {
-    payload2408 = payload;
-    notifyListeners();
-  }
 
   void updatePumpControllerLive(List<CM> pl) {
     _pumpLiveList = pl;

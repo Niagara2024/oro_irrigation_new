@@ -1031,6 +1031,7 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
 
                           srcCount==2 && irgCount==4? (position.dx+45)+(index*70)-560:
 
+                          srcCount==4 && irgCount==1? (position.dx+45)+(index*70)-490:
                           srcCount==4 && irgCount==2? (position.dx+45)+(index*70)-560:
 
                           srcCount==2 && irgCount==4? (position.dx+45)+(index*70)-560:

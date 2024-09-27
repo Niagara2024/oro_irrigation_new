@@ -245,7 +245,6 @@ class MqttPayloadProvider with ChangeNotifier {
     }
   }
 
-
   void updateFilterPayload(String payload) {
     try {
       Map<String, dynamic> data = jsonDecode(payload);
@@ -275,6 +274,18 @@ class MqttPayloadProvider with ChangeNotifier {
         List<dynamic> fertilizer = data['2400'][0]['2406'];
         centralFertilizer = fertilizer.where((item) => item['Type'] == 1).toList();
         localFertilizer = fertilizer.where((item) => item['Type'] == 2).toList();
+      }
+      notifyListeners();
+    } catch (e) {
+      print('Error parsing JSON: $e');
+    }
+  }
+
+  void updateFlowMeterPayload(String payload) {
+    try {
+      Map<String, dynamic> data = jsonDecode(payload);
+      if (data['2400'][0].containsKey('2410')) {
+        waterMeter = data['2400'][0]['2410'];
       }
       notifyListeners();
     } catch (e) {

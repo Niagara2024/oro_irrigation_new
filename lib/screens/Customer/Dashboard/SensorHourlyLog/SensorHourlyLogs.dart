@@ -196,7 +196,7 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
 
   static String getSensorUnit(String type) {
     if(type.contains('Moisture')||type.contains('Pressure')){
-      return 'Bar';
+      return 'Values in Bar';
     }else if(type.contains('Humidity')){
       return 'Percentage (%)';
     }else if(type.contains('Co2')){

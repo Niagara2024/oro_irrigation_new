@@ -85,7 +85,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                     ):
                     const SizedBox(),
 
-                    if(widget.provider.centralFilter.isEmpty)
+                    if(widget.provider.centralFilter.isEmpty || widget.provider.localFertilizer.isNotEmpty)
                       for(int i=0; i<widget.provider.payload2408.length; i++)
                         widget.provider.payload2408.isNotEmpty?  Padding(
                           padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
@@ -117,13 +117,6 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                       padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
                       child: DisplayFilter(currentLineId: widget.crrIrrLine.id, filtersSites: widget.provider.centralFilter,),
                     ): const SizedBox(),
-
-                    if(widget.provider.centralFilter.isNotEmpty)
-                      for(int i=0; i<widget.provider.payload2408.length; i++)
-                        widget.provider.payload2408.isNotEmpty?  Padding(
-                          padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
-                          child: widget.provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(payload2408: widget.provider.payload2408, index: i,):null,
-                        ) : const SizedBox(),
 
                     widget.provider.centralFertilizer.isNotEmpty? DisplayCentralFertilizer(currentLineId: widget.crrIrrLine.id,): const SizedBox(),
 
@@ -1150,99 +1143,68 @@ class DisplaySensor extends StatelessWidget {
       totalWidth += 70;
     }
 
+
     return SizedBox(
       width: totalWidth,
+      height: 85,
       child: (payload.prsIn != '-' || payload.prsOut != '-' || payload.waterMeter != '-')
-          ? Column(
+          ? ListView(
+        scrollDirection: Axis.horizontal,
         children: [
-          Stack(
-            children: [
-              SizedBox(
-                width: 70,
-                height: 70,
-                child: payload.prsIn != '-' || payload.prsOut != '-'
-                    ? Image.asset('assets/images/dp_prs_sensor.png')
-                    : Image.asset('assets/images/dp_flowmeter.png'),
-              ),
-              Positioned(
-                top: 42,
-                left: 5,
-                child: Container(
-                  width: 60,
-                  height: 17,
-                  decoration: BoxDecoration(
-                    color: Colors.yellow,
-                    borderRadius: const BorderRadius.all(Radius.circular(2)),
-                    border: Border.all(
-                      color: Colors.grey,
-                      width: .50,
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      payload.prsIn != '-' ? payload.prsIn : payload.prsOut != '-' ? payload.prsOut : '${payload.waterMeter} Lps',
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          if (payload.prsIn != '-')
+            buildSensorWidget('PrsIn', payload.prsIn, 'assets/images/dp_prs_sensor.png'),
+
+          if (payload.prsOut != '-')
+            buildSensorWidget('PrsOut', payload.prsOut, 'assets/images/dp_prs_sensor.png'),
+
+          if (payload.waterMeter != '-')
+            buildSensorWidget('WaterMeter', '${payload.waterMeter} Lps', 'assets/images/dp_flowmeter.png'),
         ],
       )
           : const SizedBox(),
     );
+  }
 
-   /* return payload2408.isNotEmpty ? SizedBox(
-      width: totalWidth,
-      height: 85,
-      child: ListView.builder(
-        itemCount: payload2408.keys.length,
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (BuildContext context, int index) {
-          String key = jsonData.keys.elementAt(index);
-          dynamic value = jsonData[key];
-          return (key=='PrsIn'||key=='PrsOut'||key=='Watermeter') && value!='-' ? Column(
-            children: [
-              Stack(
-                children: [
-                  SizedBox(
-                    width: 70,
-                    height: 70,
-                    child: key=='PrsIn' || key=='PrsOut' ? Image.asset('assets/images/dp_prs_sensor.png') : Image.asset('assets/images/dp_flowmeter.png'),
+  Widget buildSensorWidget(String key, String value, String imagePath) {
+    return Column(
+      children: [
+        Stack(
+          children: [
+            SizedBox(
+              width: 70,
+              height: 70,
+              child: Image.asset(imagePath),
+            ),
+            Positioned(
+              top: 42,
+              left: 5,
+              child: Container(
+                width: 60,
+                height: 17,
+                decoration: BoxDecoration(
+                  color: Colors.yellow,
+                  borderRadius: const BorderRadius.all(Radius.circular(2)),
+                  border: Border.all(
+                    color: Colors.grey,
+                    width: .50,
                   ),
-                  Positioned(
-                    top: 42,
-                    left: 5,
-                    child: Container(
-                      width: 60,
-                      height: 17,
-                      decoration: BoxDecoration(
-                        color:Colors.yellow,
-                        borderRadius: const BorderRadius.all(Radius.circular(2)),
-                        border: Border.all(color: Colors.grey, width: .50,),
-                      ),
-                      child: Center(
-                        child: Text(key=='PrsIn' || key=='PrsOut' ?'$value':'$value Lps', style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        )),
-                      ),
+                ),
+                child: Center(
+                  child: Text(
+                    value,
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ],
+                ),
               ),
-            ],
-          ):
-          const SizedBox();
-        },
-      ),
-    ) : const SizedBox();*/
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }
 

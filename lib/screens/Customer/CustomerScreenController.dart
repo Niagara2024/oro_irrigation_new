@@ -1689,7 +1689,7 @@ class AlarmButton extends StatelessWidget {
             bodyBuilder: (context) => AlarmListItems(payload:payload, deviceID:deviceID, customerId: customerId,),
             onPop: () => print('Popover was popped!'),
             direction: PopoverDirection.left,
-            width: payload.alarmList.isNotEmpty?550:250,
+            width: payload.alarmList.isNotEmpty?600:250,
             height: payload.alarmList.isNotEmpty?(payload.alarmList.length*45)+20:50,
             arrowHeight: 15,
             arrowWidth: 30,
@@ -1765,7 +1765,7 @@ class AlarmListItems extends StatelessWidget {
     return payload.alarmList.isNotEmpty? DataTable2(
       columnSpacing: 12,
       horizontalMargin: 12,
-      minWidth: 550,
+      minWidth: 600,
       dataRowHeight: 45.0,
       headingRowHeight: 35.0,
       headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
@@ -1784,7 +1784,7 @@ class AlarmListItems extends StatelessWidget {
         ),
         DataColumn2(
             label: Text('Date-time', style: TextStyle(fontSize: 13),),
-            size: ColumnSize.M
+            size: ColumnSize.L
         ),
         DataColumn2(
           label: Center(child: Text('', style: TextStyle(fontSize: 13),)),
@@ -1795,7 +1795,7 @@ class AlarmListItems extends StatelessWidget {
         DataCell(Icon(Icons.warning_amber, color: payload.alarmList[index]['Status']==1 ? Colors.orangeAccent : Colors.redAccent,)),
         DataCell(Text(getAlarmMessage(payload.alarmList[index]['AlarmType']))),
         DataCell(Text(payload.alarmList[index]['Location'])),
-        const DataCell(Text('now')),
+        DataCell(Text('${payload.alarmList[index]['Date']} - ${payload.alarmList[index]['AlarmRaisedTime']}')),
         DataCell(Center(child: MaterialButton(
           color: Colors.redAccent,
           textColor: Colors.white,

@@ -32,9 +32,9 @@ class SensorHourlyData {
 
     String snrName = '';
     if (json['Valve'] == null || json['Valve'].toString().isEmpty) {
-      snrName = '${json['Name']}';
+      snrName = '${json['Name'] ?? json['Id']}';
     } else {
-      snrName = '${json['Name']}(${json['Valve']})';
+      snrName = '${json['Name'] ?? json['Id']}(${json['Valve']})';
     }
 
     return SensorHourlyData(

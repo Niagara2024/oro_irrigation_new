@@ -744,7 +744,7 @@ class IrrigationLine {
   String type;
   List<MainValve> mainValve;
   List<Valve> valve;
-  //List<PressureSensor> pressureSensor;
+  List<PressureSensor> waterMeter;
 
   IrrigationLine({
     required this.sNo,
@@ -755,7 +755,7 @@ class IrrigationLine {
     required this.type,
     required this.mainValve,
     required this.valve,
-    //required this.pressureSensor,
+    required this.waterMeter,
   });
 
   factory IrrigationLine.fromJson(Map<String, dynamic> json) {
@@ -766,6 +766,9 @@ class IrrigationLine {
     var valveData = json['valve'] as List;
     List<Valve> valveDataList = valveData.isNotEmpty? valveData.map((vl) => Valve.fromJson(vl)).toList() : [];
 
+    var wmData = json['waterMeter'] as List;
+    List<PressureSensor> wmDataList = wmData.isNotEmpty? wmData.map((vl) => PressureSensor.fromJson(vl)).toList() : [];
+
     return IrrigationLine(
       sNo: json['sNo'],
       id: json['id'],
@@ -775,7 +778,7 @@ class IrrigationLine {
       type: json['type'],
       mainValve: mainValveList,
       valve: valveDataList,
-      //pressureSensor: (json['pressureSensor'] as List).map((i) => PressureSensor.fromJson(i)).toList(),
+      waterMeter: wmDataList,
     );
   }
 

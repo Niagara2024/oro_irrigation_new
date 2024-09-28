@@ -390,6 +390,7 @@ class ScheduledProgram {
   final Condition startCondition;
   final Condition stopCondition;
   final int pauseResumeReason;
+  final String zoneList;
 
   ScheduledProgram({
     required this.sNo,
@@ -407,10 +408,10 @@ class ScheduledProgram {
     required this.startCondition,
     required this.stopCondition,
     required this.pauseResumeReason,
+    required this.zoneList,
   });
 
   factory ScheduledProgram.fromJson(Map<String, dynamic> json) {
-    //print(json);
     bool hasLoadingKey = json.containsKey('isLoading');
     bool hasPPRisInt = json['ProgPauseResume'].runtimeType==int?true:false;
     bool hasPOOisInt = json['ProgOnOff'].runtimeType==int?true:false;
@@ -435,6 +436,7 @@ class ScheduledProgram {
           ? Condition.fromJson(json['StopCondition'])
           : Condition.empty(),
       pauseResumeReason: json['PauseResumeReason'],
+      zoneList: /*json['ZoneList']*/"Sequence 1.1_Sequence 1.2_Sequence 1.3_Sequence 1.4_Sequence 1.5",
     );
   }
 
@@ -455,6 +457,7 @@ class ScheduledProgram {
       'StartCondition': startCondition.toJson(),
       'StopCondition': stopCondition.toJson(),
       'PauseResumeReason': pauseResumeReason,
+      'ZoneList': zoneList,
     };
   }
 

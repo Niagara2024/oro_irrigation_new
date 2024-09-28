@@ -418,36 +418,63 @@ class ScheduledProgramList extends StatelessWidget {
                     },
                     child: Text(getButtonName(int.parse(scheduledPrograms[index].progPauseResume))),
                   ),
-                  const SizedBox(width: 5),
-                  IconButton(
-                    tooltip: 'Edit program',
-                    icon: const Icon(Icons.edit_outlined),
-                    onPressed: () {
-                      String prgType = '';
-                      bool conditionL = false;
-                      if (scheduledPrograms[index].progCategory.contains('IL')) {
-                        prgType = 'Irrigation Program';
-                      } else {
-                        prgType = 'Agitator Program';
-                      }
-                      if (siteData.master[masterInx].conditionLibraryCount > 0) {
-                        conditionL = true;
-                      }
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => IrrigationProgram(
-                            deviceId: siteData.master[masterInx].deviceId,
-                            userId: customerId,
-                            controllerId: siteData.master[masterInx].controllerId,
-                            serialNumber: scheduledPrograms[index].sNo,
-                            programType: prgType,
-                            conditionsLibraryIsNotEmpty: conditionL,
+                  const Spacer(),
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert),
+                    onSelected: (String result) {
+                      if(result=='Edit program'){
+                        String prgType = '';
+                        bool conditionL = false;
+                        if (scheduledPrograms[index].progCategory.contains('IL')) {
+                          prgType = 'Irrigation Program';
+                        } else {
+                          prgType = 'Agitator Program';
+                        }
+                        if (siteData.master[masterInx].conditionLibraryCount > 0) {
+                          conditionL = true;
+                        }
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => IrrigationProgram(
+                              deviceId: siteData.master[masterInx].deviceId,
+                              userId: customerId,
+                              controllerId: siteData.master[masterInx].controllerId,
+                              serialNumber: scheduledPrograms[index].sNo,
+                              programType: prgType,
+                              conditionsLibraryIsNotEmpty: conditionL,
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      }
                     },
+                    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                      const PopupMenuItem<String>(
+                        value: 'Edit program',
+                        child: Text('Edit program'),
+                      ),
+                      PopupMenuItem<String>(
+                        value: 'Change to',
+                        child: ClickableSubmenu(
+                          title: 'Change to',
+                          submenuItems: scheduledPrograms[index].zoneList.split('_'),
+                          onItemSelected: (selectedItem, selectedIndex) {
+                            String payload = '${scheduledPrograms[index].sNo},${selectedIndex+1}';
+                            String payLoadFinal = jsonEncode({
+                              "6700": [
+                                {"6701": payload}
+                              ]
+                            });
+                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
+                            sentUserOperationToServer(
+                              '${scheduledPrograms[index].progName} ${'Change to $selectedItem'}',
+                              payLoadFinal,
+                            );
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               )),
@@ -698,5 +725,61 @@ class _ConditionDialogState extends State<ConditionDialog> {
 
   List<ScheduledProgram> filterProgramsBySNo(List<ScheduledProgram> prg, int sNo) {
     return prg.where((program) => program.sNo == sNo).toList();
+  }
+}
+
+class ClickableSubmenu extends StatelessWidget {
+  final String title;
+  final List<String> submenuItems;
+  final Function(String selectedItem, int selectedIndex) onItemSelected;
+
+  const ClickableSubmenu({super.key,
+    required this.title,
+    required this.submenuItems,
+    required this.onItemSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        _showSubmenu(context);
+      },
+      child: Row(
+        children: [
+          Text(title),
+          const Icon(Icons.arrow_right),
+        ],
+      ),
+    );
+  }
+
+  void _showSubmenu(BuildContext context) {
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(Offset(button.size.width, 0), ancestor: overlay),
+        button.localToGlobal(Offset(button.size.width, button.size.height), ancestor: overlay),
+      ),
+      Offset.zero & overlay.size,
+    );
+
+    showMenu<String>(
+      context: context,
+      position: position,
+      items: submenuItems.map((String item) {
+        return PopupMenuItem<String>(
+          value: item,
+          child: Text(item),
+        );
+      }).toList(),
+    ).then((String? selectedItem) {
+      if (selectedItem != null) {
+        int selectedIndex = submenuItems.indexOf(selectedItem);
+        onItemSelected(selectedItem, selectedIndex);
+      }
+    });
   }
 }

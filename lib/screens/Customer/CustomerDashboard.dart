@@ -522,6 +522,27 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                       children: [
                         provider.sourcePump.isNotEmpty? Image.asset('assets/images/dp_sump_src.png'):
                         Image.asset('assets/images/dp_sump.png'),
+                        Positioned(
+                          top: 35,
+                          left: 7.5,
+                          child: Container(
+                            width: 30,
+                            height: 17,
+                            decoration: BoxDecoration(
+                              color:Colors.yellow,
+                              borderRadius: const BorderRadius.all(Radius.circular(2)),
+                              border: Border.all(color: Colors.grey, width: .50,),
+                            ),
+                            child: Center(
+                              child: Text('10%', style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),

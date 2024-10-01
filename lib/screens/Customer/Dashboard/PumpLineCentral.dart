@@ -43,6 +43,18 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
 
     int? irrigationPauseFlag = getIrrigationPauseFlag(widget.crrIrrLine.id, widget.provider.payload2408);
 
+    List<dynamic> levelList = [];
+    var matchingItem = widget.provider.payload2408.firstWhere(
+          (item) => item['Line'] == widget.crrIrrLine.id,
+      orElse: () => null,
+    );
+
+    if (matchingItem != null) {
+      levelList = matchingItem['Level'];
+    } else {
+      print('No matching Line found');
+    }
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -66,35 +78,50 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
 
                     widget.provider.irrigationPump.isNotEmpty? Padding(
                       padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
-                      child: SizedBox(
-                        width: 52.50,
-                        height: 70,
-                        child : Stack(
-                          children: [
-                            widget.provider.sourcePump.isNotEmpty? Image.asset('assets/images/dp_sump_src.png'):
-                            Image.asset('assets/images/dp_sump.png'),
-                            Positioned(
-                              top: 35,
-                              left: 7.5,
-                              child: Container(
-                                width: 30,
-                                height: 17,
-                                decoration: BoxDecoration(
-                                  color:Colors.yellow,
-                                  borderRadius: const BorderRadius.all(Radius.circular(2)),
-                                  border: Border.all(color: Colors.grey, width: .50,),
-                                ),
-                                child: Center(
-                                  child: Text('10%', style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
+                      child: InkWell(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Level List'),
+                                content: levelList.isNotEmpty?Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: levelList.map((levelItem) {
+                                    return ListTile(
+                                      title: Text(levelItem['SW_Name']),
+                                      trailing: Column(
+                                        children: [
+                                          Text('Percent: ${levelItem['LevelPercent']}%'),
+                                          Text('Value: ${levelItem['Value']}',)
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                ):
+                                const Text('No level available'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(); // Close the dialog
+                                    },
+                                    child: const Text('Close'),
                                   ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: SizedBox(
+                          width: 52.50,
+                          height: 70,
+                          child: Stack(
+                            children: [
+                              widget.provider.sourcePump.isNotEmpty
+                                  ? Image.asset('assets/images/dp_sump_src.png')
+                                  : Image.asset('assets/images/dp_sump.png'),
+                            ],
+                          ),
                         ),
                       ),
                     ):

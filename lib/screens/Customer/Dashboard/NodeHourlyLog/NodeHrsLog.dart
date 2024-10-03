@@ -38,7 +38,6 @@ class _NodeHrsLogState extends State<NodeHrsLog> {
     final response = await HttpService().postRequest("getUserNodeStatusHourlyLog", body);
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      print(response.body);
       if (data["code"] == 200) {
         final jsonData = data["data"] as List;
         try {
@@ -47,7 +46,7 @@ class _NodeHrsLogState extends State<NodeHrsLog> {
 
           for (var hourEntry in hourlyData){
             String hour = hourEntry.key;
-            if (hour.startsWith('hour')){
+            if (!hour.startsWith('date')){
               List<dynamic> nodeList = hourEntry.value;
               if (nodeList.isNotEmpty){
                 nodeList.removeAt(0);

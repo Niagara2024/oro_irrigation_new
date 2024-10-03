@@ -18,6 +18,7 @@ class SensorHourlyLogs extends StatefulWidget {
 class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
   DateTime selectedDate = DateTime.now();
   List<AllMySensor> sensors = [];
+  List<bool> selectedSegments = [true, false];
 
   @override
   void initState() {
@@ -87,12 +88,54 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
         length: sensors.length,
         child: Scaffold(
           appBar: AppBar(
-            bottom: TabBar(
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.grey,
-              indicatorColor: Colors.teal,
-              isScrollable: true,
-              tabs: sensors.map((sensor) => Tab(text: sensor.name)).toList(),
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(45),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TabBar(
+                      labelColor: Colors.white,
+                      unselectedLabelColor: Colors.grey,
+                      indicatorColor: Colors.teal,
+                      isScrollable: true,
+                      tabs: sensors.map((sensor) => Tab(text: sensor.name)).toList(),
+                    ),
+                  ),
+                  ToggleButtons(
+                    isSelected: selectedSegments,
+                    onPressed: (int index) {
+                      setState(() {
+                        for (int i = 0; i < selectedSegments.length; i++) {
+                          selectedSegments[i] = i == index; // Set selected segment to true and others to false
+                        }
+                        if (index == 0) {
+                          // Action for first segment
+                        } else if (index == 1) {
+                          // Action for second segment
+                        }
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(5.0),
+                    constraints: const BoxConstraints(minHeight: 30, minWidth: 60),
+                    selectedColor: Colors.white,
+                    borderColor: Colors.teal,
+                    selectedBorderColor: Colors.teal,
+                    fillColor: Colors.teal,
+                    color: Colors.grey,
+                    children: const [
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Icon(Icons.auto_graph_outlined),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Icon(Icons.list_alt),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 10,),
+                ],
+              ),
             ),
             title: const Text('Sensor Data Charts'),
             actions: [
@@ -116,7 +159,7 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
           ),
           body: TabBarView(
             children: sensors.map((sensor) {
-              return buildLineChart(sensor.data, sensor.name);
+              return selectedSegments[1]? buildDataTable(sensor.data):buildLineChart(sensor.data, sensor.name);
             }).toList(),
           ),
         ),
@@ -162,6 +205,7 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
         yValueMapper: (SensorHourlyData data, _) => data.value,
         color: color,
         dataLabelSettings: const DataLabelSettings(isVisible: true),
+        dataLabelMapper: (SensorHourlyData data, _) => '${data.value}',
         markerSettings: const MarkerSettings(isVisible: true),
         dashArray: [4, 4],
         width: 1.5,
@@ -170,7 +214,6 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
         ),
       ));
     });
-
 
     return Row(
       children: [
@@ -184,7 +227,6 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
             primaryYAxis: NumericAxis(
               title: AxisTitle(text: getSensorUnit(snrName)),
             ),
-            //title: ChartTitle(text: 'Line chart'),
             legend: const Legend(isVisible: true, position: LegendPosition.right),
             tooltipBehavior: TooltipBehavior(enable: true),
             series: series,
@@ -194,9 +236,20 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
     );
   }
 
+
+  Widget buildDataTable(Map<String, List<SensorHourlyData>> sensorData) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: SensorDataTable(sensorData: sensorData,),
+    );
+  }
+
+
   static String getSensorUnit(String type) {
-    if(type.contains('Moisture')||type.contains('Pressure')){
-      return 'Values in Bar';
+    if(type.contains('Moisture')||type.contains('SM')){
+      return 'Values in Cb';
+    }else if(type.contains('Pressure')){
+      return 'Values in bar';
     }else if(type.contains('Humidity')){
       return 'Percentage (%)';
     }else if(type.contains('Co2')){
@@ -214,4 +267,70 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
     }
   }
 
+  /*static String getUnit(String type) {
+    if(type.contains('Moisture')||type.contains('SM')){
+      return 'Cb';
+    }else if(type.contains('Pressure')){
+      return 'bar';
+    }else if(type.contains('Humidity')){
+      return '%';
+    }else if(type.contains('Co2')){
+      return 'ppm';
+    }else if(type.contains('Temperature')){
+      return '°C';
+    }else if(type.contains('EC')||type.contains('PH')){
+      return 'S/m';
+    }else if(type.contains('Power')){
+      return 'v';
+    }else if(type.contains('Water')){
+      return 'm³';
+    }else{
+      return 'S';
+    }
+  }*/
+}
+
+
+class SensorDataTable extends StatelessWidget {
+  final Map<String, List<SensorHourlyData>> sensorData;
+
+  const SensorDataTable({Key? key, required this.sensorData}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final sensorNames = <String>{};
+    for (var hourlyData in sensorData.values) {
+      for (var sensor in hourlyData) {
+        sensorNames.add(sensor.name ?? 'Unnamed');
+      }
+    }
+
+    final List<DataColumn> columns = [
+      const DataColumn(label: Text('Sensor Name')),
+      ...sensorData.keys.map((hour) => DataColumn(label: Text(hour))).toList(),
+    ];
+
+    final sensorValues = <String, List<String>>{};
+    for (var hour in sensorData.keys) {
+      for (var sensor in sensorData[hour]!) {
+        sensorValues.putIfAbsent(sensor.name ?? 'Unnamed', () => List.filled(sensorData.keys.length, ''));
+        final index = sensorData.keys.toList().indexOf(hour);
+        sensorValues[sensor.name ?? 'Unnamed']![index] = sensor.value.toString();
+      }
+    }
+
+    // Create rows for each sensor
+    final List<DataRow> rows = sensorValues.entries.map((entry) {
+      final List<DataCell> cells = [DataCell(Text(entry.key))];
+
+      cells.addAll(entry.value.map((value) => DataCell(Text(value))));
+
+      return DataRow(cells: cells);
+    }).toList();
+
+    return DataTable(
+      columns: columns,
+      rows: rows,
+    );
+  }
 }

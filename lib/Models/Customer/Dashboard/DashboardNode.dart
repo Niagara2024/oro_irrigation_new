@@ -182,7 +182,6 @@ class LiveData {
     var alamData = json['2409'] as List;
     List<AlarmData> alamList = alamData.isNotEmpty? alamData.map((alm) => AlarmData.fromJson(alm)).toList(): [];
 
-
     return LiveData(
       nodeList: nodeList,
       pumpList: pumpList,
@@ -418,7 +417,7 @@ class ScheduledProgram {
 
     return ScheduledProgram(
       sNo: json['SNo'],
-      progCategory: json['ProgCategory'],
+      progCategory: json['ProgCategory'] ?? 'null',
       progName: json['ProgName'],
       totalZone: json['TotalZone'],
       startDate: json['StartDate'],
@@ -474,8 +473,8 @@ class Condition {
   final String sNo;
   final int status;
   final String condition;
-  final int set;
-  final int? actual;
+  final String? set;
+  final String? actual;
   final List<Condition> combined;
 
   Condition({
@@ -493,8 +492,12 @@ class Condition {
         sNo: json['S_No'] ?? '',
         status: json['Status'] ?? 0,
         condition: json['Condition'] ?? '',
-        set: json['Set'] ?? 0,
-        actual: json['Actual'] ?? 0,
+        set: json['Set'] == null ? null
+            : json['Set'] is int ? json['Set'].toString()
+            : json['Set'] as String?,
+        actual: json['Actual'] == null ? null
+            : json['Actual'] is int ? json['Actual'].toString()
+            : json['Actual'] as String?,
         combined: json['Combined'] != null && (json['Combined'] as List).isNotEmpty
             ? (json['Combined'] as List).map((e) => Condition.fromJson(e)).toList()
             : [],
@@ -509,8 +512,8 @@ class Condition {
       sNo: '',
       status: 0,
       condition: '',
-      set: 0,
-      actual: 0,
+      set: null,
+      actual: null,
       combined: [],
     );
   }

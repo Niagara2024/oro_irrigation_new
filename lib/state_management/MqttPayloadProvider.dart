@@ -52,6 +52,8 @@ class MqttPayloadProvider with ChangeNotifier {
   List<CM> _pumpLiveList = [];
   List<CM> get pumpLiveList => _pumpLiveList;
 
+  List<dynamic> unitList = [];
+
   void editMySchedule(ScheduleViewProvider instance){
     mySchedule = instance;
     notifyListeners();
@@ -302,6 +304,10 @@ class MqttPayloadProvider with ChangeNotifier {
   void updatePumpControllerLive(List<CM> pl) {
     _pumpLiveList = pl;
     notifyListeners();
+  }
+
+  void saveUnits(List<dynamic> units) {
+    unitList = units;
   }
 
   void setAppConnectionState(MQTTConnectionState state) {

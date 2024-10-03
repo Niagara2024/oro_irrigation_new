@@ -534,15 +534,15 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                         builder: (BuildContext context) {
                           return AlertDialog(
                             title: const Text('Level List'),
-                            content: levelList.isNotEmpty?Column(
+                            content: levelList.isNotEmpty? Column(
                               mainAxisSize: MainAxisSize.min,
                               children: levelList.map((levelItem) {
                                 return ListTile(
-                                  title: Text(levelItem['SW_Name']),
+                                  title: Text(levelItem['SW_Name'], style: const TextStyle(fontSize: 14),),
                                   trailing: Column(
                                     children: [
                                       Text('Percent: ${levelItem['LevelPercent']}%'),
-                                      Text('Value: ${levelItem['Value']}',)
+                                      Text('${getUnitByParameter(context, 'Level Sensor', levelItem['Value'])}',),
                                     ],
                                   ),
                                 );

@@ -121,6 +121,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       {
         final jsonData = data["data"] as List;
         try {
+          MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
+          payloadProvider.saveUnits(jsonData[0]['master'][0]['units']);
           mySiteList = jsonData.map((json) => DashboardModel.fromJson(json)).toList();
           indicatorViewHide();
           if(mySiteList.isNotEmpty){
@@ -360,9 +362,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           List<CM> pl = provider.pumpLiveList;
           mySiteList[siteIndex].master[masterIndex].pumpLive = pl;
         }
-
       }
-
     }
 
     return Consumer<MqttPayloadProvider>(
@@ -708,7 +708,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   Widget buildWideLayout(screenWidth, payload) {
 
     //print('payload.runtimeType:${payload.payload2408.runtimeType}');
-    //print('payload:${payload}');
+    print('payload:${payload}');
 
     return Scaffold(
       appBar: AppBar(

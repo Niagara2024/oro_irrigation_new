@@ -265,3 +265,37 @@ String getImageForProduct(String product) {
       return '${baseImgPath}dl_humidity_sensor.png';
   }
 }
+
+String? getUnitByParameter(context, String parameter, String value) {
+  MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
+
+  try {
+    Map<String, dynamic>? unitMap = payloadProvider.unitList.firstWhere(
+          (unit) => unit['parameter'] == parameter,  orElse: () => null,
+    );
+
+    if (unitMap == null) {
+      return '';
+    }
+
+    if (unitMap['parameter'] == 'Level Sensor') {
+      String? unitValue = unitMap['value'];
+      if (unitValue == 'feet' || unitValue == 'inches') {
+        double meterValue = double.tryParse(value) ?? 0.0; // Defaults to 0.0 if parsing fails
+        double convertedValue = convertMetersToFeet(meterValue.toString());
+        String finalVal = convertedValue.toStringAsFixed(2);
+        return '$unitValue: $finalVal';
+      }
+    }
+  } catch (e) {
+    print(e);
+    return 'Error: $e';
+  }
+
+  return null;
+}
+
+double convertMetersToFeet(String meterValue) {
+  double meters = double.parse(meterValue);
+  return meters * 3.28084;
+}

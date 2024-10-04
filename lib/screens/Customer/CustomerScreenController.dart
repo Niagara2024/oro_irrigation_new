@@ -708,7 +708,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
   Widget buildWideLayout(screenWidth, payload) {
 
     //print('payload.runtimeType:${payload.payload2408.runtimeType}');
-    print('payload:${payload}');
+    //print('payload:${payload}');
 
     return Scaffold(
       appBar: AppBar(
@@ -1664,7 +1664,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       throw Exception('Failed to load data');
     }
   }
-
 }
 
 class AlarmButton extends StatelessWidget {

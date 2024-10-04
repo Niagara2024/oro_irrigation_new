@@ -106,20 +106,15 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
                     onPressed: (int index) {
                       setState(() {
                         for (int i = 0; i < selectedSegments.length; i++) {
-                          selectedSegments[i] = i == index; // Set selected segment to true and others to false
-                        }
-                        if (index == 0) {
-                          // Action for first segment
-                        } else if (index == 1) {
-                          // Action for second segment
+                          selectedSegments[i] = i == index;
                         }
                       });
                     },
                     borderRadius: BorderRadius.circular(5.0),
                     constraints: const BoxConstraints(minHeight: 30, minWidth: 60),
                     selectedColor: Colors.white,
-                    borderColor: Colors.teal,
-                    selectedBorderColor: Colors.teal,
+                    borderColor: Colors.white.withOpacity(0.3),
+                    selectedBorderColor: Colors.white.withOpacity(0.3),
                     fillColor: Colors.teal,
                     color: Colors.grey,
                     children: const [
@@ -159,7 +154,7 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
           ),
           body: TabBarView(
             children: sensors.map((sensor) {
-              return selectedSegments[1]? buildDataTable(sensor.data):buildLineChart(sensor.data, sensor.name);
+              return selectedSegments[1]? buildDataTable(sensor.data, sensor.name):buildLineChart(sensor.data, sensor.name);
             }).toList(),
           ),
         ),
@@ -202,10 +197,10 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
         name: sensorName,
         dataSource: dataPoints,
         xValueMapper: (SensorHourlyData data, _) => data.hour,
-        yValueMapper: (SensorHourlyData data, _) => data.value,
+        yValueMapper: (SensorHourlyData data, _) => data.value.round(),
         color: color,
         dataLabelSettings: const DataLabelSettings(isVisible: true),
-        dataLabelMapper: (SensorHourlyData data, _) => '${data.value}',
+        dataLabelMapper: (SensorHourlyData data, _) => '${data.value.round()}',
         markerSettings: const MarkerSettings(isVisible: true),
         dashArray: [4, 4],
         width: 1.5,
@@ -237,10 +232,10 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
   }
 
 
-  Widget buildDataTable(Map<String, List<SensorHourlyData>> sensorData) {
+  Widget buildDataTable(Map<String, List<SensorHourlyData>> sensorData, String snrName) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: SensorDataTable(sensorData: sensorData,),
+      child: SensorDataTable(sensorData: sensorData, snrName: snrName,),
     );
   }
 
@@ -293,8 +288,9 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
 
 class SensorDataTable extends StatelessWidget {
   final Map<String, List<SensorHourlyData>> sensorData;
+  final String snrName;
 
-  const SensorDataTable({Key? key, required this.sensorData}) : super(key: key);
+  const SensorDataTable({Key? key, required this.sensorData, required this.snrName}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -315,11 +311,10 @@ class SensorDataTable extends StatelessWidget {
       for (var sensor in sensorData[hour]!) {
         sensorValues.putIfAbsent(sensor.name ?? 'Unnamed', () => List.filled(sensorData.keys.length, ''));
         final index = sensorData.keys.toList().indexOf(hour);
-        sensorValues[sensor.name ?? 'Unnamed']![index] = sensor.value.toString();
+        sensorValues[sensor.name ?? 'Unnamed']![index] = sensor.value.round().toString();
       }
     }
 
-    // Create rows for each sensor
     final List<DataRow> rows = sensorValues.entries.map((entry) {
       final List<DataCell> cells = [DataCell(Text(entry.key))];
 
@@ -328,9 +323,51 @@ class SensorDataTable extends StatelessWidget {
       return DataRow(cells: cells);
     }).toList();
 
-    return DataTable(
-      columns: columns,
-      rows: rows,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 35,
+          height: MediaQuery.sizeOf(context).height,
+          child: Center(
+            child: RotatedBox(
+              quarterTurns: 3,
+              child: Text(getSensorUnit(snrName),
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+          ),
+        ),
+        const VerticalDivider(width: 0,),
+        DataTable(
+          columns: columns,
+          rows: rows,
+        ),
+      ],
     );
+  }
+
+  static String getSensorUnit(String type) {
+    if(type.contains('Moisture')||type.contains('SM')){
+      return 'Values in Cb';
+    }else if(type.contains('Pressure')){
+      return 'Values in bar';
+    }else if(type.contains('Humidity')){
+      return 'Percentage (%)';
+    }else if(type.contains('Co2')){
+      return 'Parts per million(ppm)';
+    }else if(type.contains('Temperature')){
+      return 'Celsius (°C)';
+    }else if(type.contains('EC')||type.contains('PH')){
+      return 'Siemens per meter (S/m)';
+    }else if(type.contains('Power')){
+      return 'Volts';
+    }else if(type.contains('Water')){
+      return 'Cubic Meters (m³)';
+    }else{
+      return 'Sensor value';
+    }
   }
 }

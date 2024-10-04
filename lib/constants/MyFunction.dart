@@ -280,12 +280,25 @@ String? getUnitByParameter(context, String parameter, String value) {
 
     if (unitMap['parameter'] == 'Level Sensor') {
       String? unitValue = unitMap['value'];
-      if (unitValue == 'feet' || unitValue == 'inches') {
-        double meterValue = double.tryParse(value) ?? 0.0; // Defaults to 0.0 if parsing fails
-        double convertedValue = convertMetersToFeet(meterValue.toString());
-        String finalVal = convertedValue.toStringAsFixed(2);
-        return '$unitValue: $finalVal';
+
+      if (unitValue == 'm') {
+        return 'meter: $value';
       }
+
+      if (unitValue == 'feet') {
+        double meterValue = double.tryParse(value) ?? 0.0;
+        double convertedValue = convertMetersToFeet(meterValue);
+        String finalVal = convertedValue.toStringAsFixed(2);
+        return '$finalVal $unitValue';
+      }
+
+      if (unitValue == 'inch' || unitValue == 'inches') {
+        double meterValue = double.tryParse(value) ?? 0.0;
+        double convertedValue = convertMetersToInches(meterValue);
+        String finalVal = convertedValue.toStringAsFixed(2);
+        return '$finalVal $unitValue';
+      }
+
     }
   } catch (e) {
     print(e);
@@ -295,7 +308,10 @@ String? getUnitByParameter(context, String parameter, String value) {
   return null;
 }
 
-double convertMetersToFeet(String meterValue) {
-  double meters = double.parse(meterValue);
+double convertMetersToFeet(double meters) {
   return meters * 3.28084;
+}
+
+double convertMetersToInches(double meters) {
+  return meters * 39.3701;
 }

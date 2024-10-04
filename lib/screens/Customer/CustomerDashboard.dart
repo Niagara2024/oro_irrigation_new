@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../constants/MQTTManager.dart';
 import '../../constants/MyFunction.dart';
+import '../../constants/http_service.dart';
 import '../../constants/snack_bar.dart';
 import '../../state_management/MqttPayloadProvider.dart';
 import 'Dashboard/CurrentSchedule.dart';
@@ -624,6 +625,11 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                                     ]
                                   });
                                   MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[widget.masterInx].deviceId}');
+                                  if(irrigationFlag == 1){
+                                    sentToServer('Resumed the ${crrIrrLine.name}', payLoadFinal);
+                                  }else{
+                                    sentToServer('Paused the ${crrIrrLine.name}', payLoadFinal);
+                                  }
                                 } else {
                                   const GlobalSnackBar(code: 200, message: 'Controller connection lost...');
                                 }
@@ -725,6 +731,17 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
   List<CurrentScheduleModel> filterCurrentScheduleByProgramName(List<CurrentScheduleModel> cs, String category) {
     return cs.where((cs) => cs.programName.contains(category)).toList();
+  }
+
+  void sentToServer(String msg, String payLoad) async
+  {
+    Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.siteData.master[widget.masterInx].deviceId, "messageStatus": msg, "hardware": jsonDecode(payLoad), "createUser": widget.userID};
+    final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
+    if (response.statusCode == 200) {
+      print(response.body);
+    } else {
+      throw Exception('Failed to load data');
+    }
   }
 }
 

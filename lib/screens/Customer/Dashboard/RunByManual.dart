@@ -2672,6 +2672,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
         "controllerId": widget.controllerID,
         "serialNumber": sNo,
         "programName": programList[ddCurrentPosition].programName,
+        "sequenceName": null,
         "startFlag": sFlag,
         "method": method,
         "duration": dur,
@@ -2893,8 +2894,6 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
         return false;
     }
   }
-
-
 }
 
 class DisplayLineOrSequence extends StatefulWidget {

@@ -968,7 +968,7 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                               ),
                               const SizedBox(height: 5,),
                               Container(
-                                width: 315,
+                                width: 340,
                                 height: 25,
                                 color: Colors.transparent,
                                 child: const Row(
@@ -989,27 +989,27 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                                 child: Divider(height: 6,color: Colors.black12),
                               ),
                               Container(
-                                width: 315,
+                                width: 340,
                                 height: 25,
                                 color: Colors.transparent,
                                 child: Row(
                                   children: [
-                                    const SizedBox(width:100, child: Text('Voltage', style: TextStyle(color: Colors.black54)),),
+                                    const SizedBox(width:80, child: Text('Voltage', style: TextStyle(color: Colors.black54)),),
                                     const Padding(
                                       padding: EdgeInsets.only(bottom: 2,top: 2),
                                       child: VerticalDivider(color: Colors.red, thickness: 1.5,),
                                     ),
-                                    SizedBox(width: 50, child: Text('R : ${voltages[0]}'),),
+                                    SizedBox(width: 70, child: Text('RY : ${voltages[0]}'),),
                                     const Padding(
                                       padding: EdgeInsets.only(bottom: 2,top: 2),
                                       child: VerticalDivider(color: Colors.yellow,thickness: 1.5,),
                                     ),
-                                    SizedBox(width: 50, child: Text('Y : ${voltages[1]}'),),
+                                    SizedBox(width: 70, child: Text('YB : ${voltages[1]}'),),
                                     const Padding(
                                       padding: EdgeInsets.only(bottom: 2,top: 2),
                                       child: VerticalDivider(color: Colors.blue,thickness: 1.5,),
                                     ),
-                                    SizedBox(width: 50, child: Text('B : ${voltages[2]}'),),
+                                    SizedBox(width: 70, child: Text('BR: ${voltages[2]}'),),
                                   ],
                                 ),
                               ),
@@ -1018,27 +1018,27 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                                 child: Divider(height: 6,color: Colors.black12),
                               ),
                               Container(
-                                width: 315,
+                                width: 340,
                                 height: 25,
                                 color: Colors.transparent,
                                 child: Row(
                                   children: [
-                                    const SizedBox(width:100, child: Text('Current', style: TextStyle(color: Colors.black54)),),
+                                    const SizedBox(width:80, child: Text('Current', style: TextStyle(color: Colors.black54)),),
                                     const Padding(
                                       padding: EdgeInsets.only(bottom: 2,top: 2),
                                       child: VerticalDivider(color: Colors.transparent,),
                                     ),
-                                    SizedBox(width: 50, child: Center(child: Text(columns[0])),),
+                                    SizedBox(width: 60, child: Center(child: Text(columns[0])),),
                                     const Padding(
                                       padding: EdgeInsets.only(bottom: 2,top: 2),
                                       child: VerticalDivider(color: Colors.transparent,),
                                     ),
-                                    SizedBox(width: 50, child: Center(child: Text(columns[1])),),
+                                    SizedBox(width: 65, child: Center(child: Text(columns[1])),),
                                     const Padding(
                                       padding: EdgeInsets.only(bottom: 2,top: 2),
                                       child: VerticalDivider(color: Colors.transparent,),
                                     ),
-                                    SizedBox(width: 50, child: Center(child: Text(columns[2])),),
+                                    SizedBox(width: 65, child: Center(child: Text(columns[2])),),
                                   ],
                                 ),
                               ),
@@ -1056,7 +1056,7 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                           ),
                           onPop: () => print('Popover was popped!'),
                           direction: PopoverDirection.right,
-                          width: voltKeyExists?325:125,
+                          width: voltKeyExists?340:125,
                           height: voltKeyExists?145: 75,
                           arrowHeight: 15,
                           arrowWidth: 30,

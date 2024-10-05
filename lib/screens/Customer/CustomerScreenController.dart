@@ -1395,127 +1395,150 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   Widget buildScreen(screenWidth, payload)
   {
-    return Padding(
-      padding: screenWidth>600? const EdgeInsets.all(8.0):
-      const EdgeInsets.all(0),
-      child:
-      _selectedIndex == 0 ? SizedBox(child: Column(children: [
-          Expanded(child: CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: mySiteList[siteIndex], masterInx: masterIndex, lineIdx: lineIndex,)),
-          screenWidth<600? Container(
-            height: 60,
-            color: Colors.teal.shade500,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      color: Colors.transparent
-                  ),
-                  width: 45,
-                  height: 45,
-                  child: IconButton(
-                    tooltip: 'refresh',
-                    icon: const Icon(Icons.refresh, color: Colors.white,),
-                    onPressed: onRefreshClicked,
-                  ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      color: Colors.transparent
-                  ),
-                  width: 45,
-                  height: 45,
-                  child: IconButton(
-                    tooltip: '${payload.wifiStrength} %',
-                    icon: Icon(payload.wifiStrength == 0? Icons.wifi_off:
-                    payload.wifiStrength >= 1 && payload.wifiStrength <= 20 ? Icons.network_wifi_1_bar_outlined:
-                    payload.wifiStrength >= 21 && payload.wifiStrength <= 40 ? Icons.network_wifi_2_bar_outlined:
-                    payload.wifiStrength >= 41 && payload.wifiStrength <= 60 ? Icons.network_wifi_3_bar_outlined:
-                    payload.wifiStrength >= 61 && payload.wifiStrength <= 80 ? Icons.network_wifi_3_bar_outlined:
-                    Icons.wifi, color: Colors.white,),
-                    onPressed: null,
-                  ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      color: Colors.transparent
-                  ),
-                  width: 45,
-                  height: 45,
-                  child: IconButton(
-                    tooltip: 'Manual Mode',
-                    icon: const Icon(Icons.touch_app_outlined, color: Colors.white),
-                    onPressed: () async {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => RunByManual(siteID: mySiteList[siteIndex].userGroupId,
-                              siteName: mySiteList[siteIndex].groupName,
-                              controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
-                              customerID: widget.customerId,
-                              imeiNo: mySiteList[siteIndex].master[masterIndex].deviceId,
-                              callbackFunction: callbackFunction),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      color: Colors.transparent
-                  ),
-                  width: 45,
-                  height: 45,
-                  child: IconButton(
-                    tooltip: 'Planning',
-                    icon: const Icon(Icons.list_alt, color: Colors.white),
-                    onPressed: () async {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ProgramSchedule(
-                            customerID: widget.customerId,
-                            controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
-                            siteName: mySiteList[siteIndex].groupName,
-                            imeiNumber: mySiteList[siteIndex].master[masterIndex].deviceId,
-                            userId: widget.customerId,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      color: Colors.transparent
-                  ),
-                  width: 45,
-                  height: 45,
-                  child: IconButton(tooltip:'View all Node details', onPressed: (){
-                    Navigator.push(context,
-                      MaterialPageRoute(
-                        builder: (context) => AllNodeListAndDetails(userID: widget.customerId, customerID: widget.customerId, masterInx: masterIndex, siteData: mySiteList[siteIndex],),
-                      ),
-                    );
-                  }, icon: const Icon(Icons.grid_view, color: Colors.white)),
-                ),
-                AlarmButton(payload: payload, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId, customerId: widget.customerId,),
-              ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        payload.powerSupply == 0?Container(
+          height: 22.0,
+          decoration: const BoxDecoration(
+            color: Colors.redAccent,
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
+          ),
+          child: Center(
+            child: Text('No Power Supply to Controller'.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12.0,
+              ),
             ),
-          ):
-              const SizedBox(),
-        ],)):
-      _selectedIndex == 1 ? ProductInventory(userName: widget.customerName, userId: widget.customerId, userType: 3,):
-      _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId, from: 'Gem',):
-      _selectedIndex == 3 ? IrrigationAndPumpLog(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,):
-      _selectedIndex == 4 ? WeatherScreen(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId,):
-      _selectedIndex == 5 ? TicketHomePage(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,):
-      ControllerSettings(customerID: widget.customerId, siteData: mySiteList[siteIndex], masterIndex: masterIndex, adDrId: widget.comingFrom=='AdminORDealer'? widget.userId:0, allSiteList: mySiteList,),
+          ),
+        ):
+        const SizedBox(),
+        Expanded(
+          child: Padding(
+            padding: screenWidth>600? const EdgeInsets.all(8.0):
+            const EdgeInsets.all(0),
+            child:
+            _selectedIndex == 0 ? SizedBox(child: Column(children: [
+                Expanded(child: CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: mySiteList[siteIndex], masterInx: masterIndex, lineIdx: lineIndex,)),
+                screenWidth<600? Container(
+                  height: 60,
+                  color: Colors.teal.shade500,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            color: Colors.transparent
+                        ),
+                        width: 45,
+                        height: 45,
+                        child: IconButton(
+                          tooltip: 'refresh',
+                          icon: const Icon(Icons.refresh, color: Colors.white,),
+                          onPressed: onRefreshClicked,
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            color: Colors.transparent
+                        ),
+                        width: 45,
+                        height: 45,
+                        child: IconButton(
+                          tooltip: '${payload.wifiStrength} %',
+                          icon: Icon(payload.wifiStrength == 0? Icons.wifi_off:
+                          payload.wifiStrength >= 1 && payload.wifiStrength <= 20 ? Icons.network_wifi_1_bar_outlined:
+                          payload.wifiStrength >= 21 && payload.wifiStrength <= 40 ? Icons.network_wifi_2_bar_outlined:
+                          payload.wifiStrength >= 41 && payload.wifiStrength <= 60 ? Icons.network_wifi_3_bar_outlined:
+                          payload.wifiStrength >= 61 && payload.wifiStrength <= 80 ? Icons.network_wifi_3_bar_outlined:
+                          Icons.wifi, color: Colors.white,),
+                          onPressed: null,
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            color: Colors.transparent
+                        ),
+                        width: 45,
+                        height: 45,
+                        child: IconButton(
+                          tooltip: 'Manual Mode',
+                          icon: const Icon(Icons.touch_app_outlined, color: Colors.white),
+                          onPressed: () async {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => RunByManual(siteID: mySiteList[siteIndex].userGroupId,
+                                    siteName: mySiteList[siteIndex].groupName,
+                                    controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
+                                    customerID: widget.customerId,
+                                    imeiNo: mySiteList[siteIndex].master[masterIndex].deviceId,
+                                    callbackFunction: callbackFunction),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            color: Colors.transparent
+                        ),
+                        width: 45,
+                        height: 45,
+                        child: IconButton(
+                          tooltip: 'Planning',
+                          icon: const Icon(Icons.list_alt, color: Colors.white),
+                          onPressed: () async {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProgramSchedule(
+                                  customerID: widget.customerId,
+                                  controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
+                                  siteName: mySiteList[siteIndex].groupName,
+                                  imeiNumber: mySiteList[siteIndex].master[masterIndex].deviceId,
+                                  userId: widget.customerId,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            color: Colors.transparent
+                        ),
+                        width: 45,
+                        height: 45,
+                        child: IconButton(tooltip:'View all Node details', onPressed: (){
+                          Navigator.push(context,
+                            MaterialPageRoute(
+                              builder: (context) => AllNodeListAndDetails(userID: widget.customerId, customerID: widget.customerId, masterInx: masterIndex, siteData: mySiteList[siteIndex],),
+                            ),
+                          );
+                        }, icon: const Icon(Icons.grid_view, color: Colors.white)),
+                      ),
+                      AlarmButton(payload: payload, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId, customerId: widget.customerId,),
+                    ],
+                  ),
+                ):
+                    const SizedBox(),
+              ],)):
+            _selectedIndex == 1 ? ProductInventory(userName: widget.customerName, userId: widget.customerId, userType: 3,):
+            _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId, from: 'Gem',):
+            _selectedIndex == 3 ? IrrigationAndPumpLog(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,):
+            _selectedIndex == 4 ? WeatherScreen(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId,):
+            _selectedIndex == 5 ? TicketHomePage(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,):
+            ControllerSettings(customerID: widget.customerId, siteData: mySiteList[siteIndex], masterIndex: masterIndex, adDrId: widget.comingFrom=='AdminORDealer'? widget.userId:0, allSiteList: mySiteList,),
+          ),
+        ),
+      ],
     );
   }
 

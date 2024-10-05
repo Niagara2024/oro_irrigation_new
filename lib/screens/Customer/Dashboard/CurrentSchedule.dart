@@ -249,7 +249,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                 "800": [{"801": payload}]
                               });
                               MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
-                              sentManualOperationToServer(0,widget.currentSchedule[index].programName,
+                              sendToServer(0,widget.currentSchedule[index].programName,widget.currentSchedule[index].zoneName,
                                   widget.currentSchedule[index].duration_Qty=='00:00:00'? 3:
                                   widget.currentSchedule[index].duration_Qty.contains(':')?1: 2, payLoadFinal);
                             }: null,
@@ -266,7 +266,8 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                               });
 
                               MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
-                              sentManualOperationToServer(widget.currentSchedule[index].programSno,widget.currentSchedule[index].programName,
+                              sendToServer(widget.currentSchedule[index].programSno,widget.currentSchedule[index].programName,
+                                  widget.currentSchedule[index].zoneName,
                                   widget.currentSchedule[index].duration_Qty=='00:00:00'? 3:
                                   widget.currentSchedule[index].duration_Qty.contains(':')?1: 2, payLoadFinal);
                             },
@@ -281,7 +282,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                                 "3700": [{"3701": payload}]
                               });
                               MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
-                              sentSkipOperationToServer('${widget.currentSchedule[index].programName} Skipped manually', payLoadFinal);
+                              sendSkipOperationToServer('${widget.currentSchedule[index].programName} - ${widget.currentSchedule[index].zoneName} skipped manually', payLoadFinal);
                             } : null,
                             child: const Text('Skip'),
                           )
@@ -401,12 +402,13 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                   "800": [{"801": payload}]
                 });
                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
-                sentManualOperationToServer(0,widget.currentSchedule[index].programName, widget.currentSchedule[index].duration_Qty=='00:00:00'? 3:
+                sendToServer(0,widget.currentSchedule[index].programName, widget.currentSchedule[index].zoneName,
+                    widget.currentSchedule[index].duration_Qty=='00:00:00'? 3:
                 widget.currentSchedule[index].duration_Qty.contains(':')? 1: 2, payLoadFinal);
               }: null,
               child: const Text('Stop'),
             ):
-            widget.currentSchedule[index].programName.contains('StandAlone') ?
+            widget.currentSchedule[index].programName.contains('StandAlone')?
             MaterialButton(
               color: Colors.redAccent,
               textColor: Colors.white,
@@ -418,7 +420,8 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                 });
 
                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
-                sentManualOperationToServer(widget.currentSchedule[index].programSno,widget.currentSchedule[index].programName,
+                sendToServer(widget.currentSchedule[index].programSno,widget.currentSchedule[index].programName,
+                    widget.currentSchedule[index].zoneName,
                     widget.currentSchedule[index].duration_Qty=='00:00:00'? 3:
                     widget.currentSchedule[index].duration_Qty.contains(':')?1: 2, payLoadFinal);
               },
@@ -433,10 +436,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
                   "3700": [{"3701": payload}]
                 });
                 MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[0].deviceId}');
-                sentManualOperationToServer(widget.currentSchedule[index].programSno,widget.currentSchedule[index].programName,
-                    widget.currentSchedule[index].duration_Qty=='00:00:00'? 3:
-                    widget.currentSchedule[index].duration_Qty.contains(':')?1: 2, payLoadFinal);
-
+                sendSkipOperationToServer('${widget.currentSchedule[index].programName} - ${widget.currentSchedule[index].zoneName} skipped manually', payLoadFinal);
               } : null,
               child: const Text('Skip'),
             ),
@@ -492,13 +492,14 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
     return GemProgramStartStopReasonCode.fromCode(code).content;
   }
 
-  Future<void>sentManualOperationToServer(int sNo, String prgName, int method, String payLoad) async {
+  Future<void>sendToServer(int sNo, String prgName, String sqName, int method, String payLoad) async {
     try {
       final body = {
         "userId": widget.customerID,
         "controllerId": widget.siteData.master[0].controllerId,
         "serialNumber": sNo,
         "programName": prgName,
+        "sequenceName": sqName,
         "startFlag": 0,
         "method": method,
         "duration": '00:00:00',
@@ -518,7 +519,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
     }
   }
 
-  void sentSkipOperationToServer(String msg, String data) async
+  void sendSkipOperationToServer(String msg, String data) async
   {
     Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.siteData.master[0].controllerId, "messageStatus": msg, "hardware": jsonDecode(data), "createUser": widget.customerID};
     final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);

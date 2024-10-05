@@ -467,7 +467,7 @@ class ScheduledProgramList extends StatelessWidget {
                             });
                             MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
                             sentUserOperationToServer(
-                              '${scheduledPrograms[index].progName} ${'Change to $selectedItem'}',
+                              '${scheduledPrograms[index].progName} ${'Changed to $selectedItem'}',
                               payLoadFinal,
                             );
                             Navigator.pop(context);

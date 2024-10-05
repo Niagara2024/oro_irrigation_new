@@ -50,56 +50,51 @@ class _SentAndReceivedState extends State<SentAndReceived> {
     return screenWidth>600? SizedBox(
       width: MediaQuery.sizeOf(context).width,
       height: MediaQuery.sizeOf(context).height,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-       children: [
-         Row(
-           crossAxisAlignment: CrossAxisAlignment.start,
-           children: [
-             SizedBox(
-               width: 350,
-               height: 400,
-               child: TableCalendar(
-                   firstDay: DateTime.utc(2010, 10, 16),
-                   lastDay: DateTime.utc(2030, 3, 14),
-                   focusedDay: _focusedDay,
-                   selectedDayPredicate: (day) {
-                     return isSameDay(_selectedDay, day);
-                   },
-                   enabledDayPredicate: (day) {
-                     return day.isBefore(DateTime.now()) || isSameDay(day, DateTime.now());
-                   },
-                   onDaySelected: (selectedDay, focusedDay) {
-                     setState(() {
-                       _selectedDay = selectedDay;
-                       _focusedDay = focusedDay;
-                       getLogs(widget.controllerId, DateFormat('yyyy-MM-dd').format(_focusedDay));
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 350,
+            height: 400,
+            child: TableCalendar(
+                firstDay: DateTime.utc(2010, 10, 16),
+                lastDay: DateTime.utc(2030, 3, 14),
+                focusedDay: _focusedDay,
+                selectedDayPredicate: (day) {
+                  return isSameDay(_selectedDay, day);
+                },
+                enabledDayPredicate: (day) {
+                  return day.isBefore(DateTime.now()) || isSameDay(day, DateTime.now());
+                },
+                onDaySelected: (selectedDay, focusedDay) {
+                  setState(() {
+                    _selectedDay = selectedDay;
+                    _focusedDay = focusedDay;
+                    getLogs(widget.controllerId, DateFormat('yyyy-MM-dd').format(_focusedDay));
 
-                     });
-                   },
-                   calendarStyle: const CalendarStyle(
-                     todayDecoration: BoxDecoration(
-                       color: Colors.teal,
-                       shape: BoxShape.circle,
-                     ),
-                     selectedDecoration: BoxDecoration(
-                       color: Colors.deepOrange,
-                       shape: BoxShape.circle,
-                     ),
-                     disabledTextStyle: TextStyle(color: Colors.grey),  // To make the disabled dates greyed out
-                   ),
-                   headerStyle: const HeaderStyle(
-                     formatButtonVisible: false,
-                     titleCentered: true,
-                   )
-               ),
-             ),
-             const SizedBox(width: 5,),
-             Container(width: 0.5, height: widget.from=='Gem'? MediaQuery.sizeOf(context).height-77: MediaQuery.sizeOf(context).height-120, color: Colors.teal.shade200,),
-             msgListBox(screenWidth),
-           ],
-         )
-       ],
+                  });
+                },
+                calendarStyle: const CalendarStyle(
+                  todayDecoration: BoxDecoration(
+                    color: Colors.teal,
+                    shape: BoxShape.circle,
+                  ),
+                  selectedDecoration: BoxDecoration(
+                    color: Colors.deepOrange,
+                    shape: BoxShape.circle,
+                  ),
+                  disabledTextStyle: TextStyle(color: Colors.grey),  // To make the disabled dates greyed out
+                ),
+                headerStyle: const HeaderStyle(
+                  formatButtonVisible: false,
+                  titleCentered: true,
+                )
+            ),
+          ),
+          const SizedBox(width: 5,),
+          Container(width: 0.5, height: widget.from=='Gem'? MediaQuery.sizeOf(context).height-77: MediaQuery.sizeOf(context).height-120, color: Colors.teal.shade200,),
+          msgListBox(screenWidth),
+        ],
       ),
     ):
     SizedBox(

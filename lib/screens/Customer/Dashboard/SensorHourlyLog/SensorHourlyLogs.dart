@@ -345,7 +345,7 @@ class SensorDataTable extends StatelessWidget {
           child: Center(
             child: RotatedBox(
               quarterTurns: 3,
-              child: Text(getSensorUnit(snrName),
+              child: Text(getSensorUnit(snrName, context),
                 style: const TextStyle(fontSize: 16),
               ),
             ),
@@ -360,11 +360,20 @@ class SensorDataTable extends StatelessWidget {
     );
   }
 
-  static String getSensorUnit(String type) {
+  static String getSensorUnit(String type, BuildContext context) {
     if(type.contains('Moisture')||type.contains('SM')){
       return 'Values in Cb';
     }else if(type.contains('Pressure')){
       return 'Values in bar';
+    }else if(type.contains('Level')){
+      MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
+      Map<String, dynamic>? unitMap = payloadProvider.unitList.firstWhere(
+            (unit) => unit['parameter'] == 'Level Sensor',  orElse: () => null,
+      );
+      if (unitMap != null) {
+        return 'Values in ${unitMap['value']}';
+      }
+      return 'Values in meter';
     }else if(type.contains('Humidity')){
       return 'Percentage (%)';
     }else if(type.contains('Co2')){

@@ -414,11 +414,28 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                               ListTile(
                                 title: const Text('Version'),
                                 leading: const Icon(Icons.perm_device_info),
-                                trailing: Text(
-                                  controllerVersion,
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      controllerVersion,
+                                      style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    controllerVersion != newVersion? const SizedBox(width: 16,):
+                                    const SizedBox(),
+                                    controllerVersion != newVersion? TextButton(
+                                      onPressed: () {
+                                      },
+                                      child: AnimatedOpacity(
+                                        opacity: opacity,
+                                        duration: const Duration(seconds: 2),
+                                        child: Text('Available Version- $newVersion'),
+                                      ),
+                                    ):
+                                    const SizedBox(),
+                                  ],
                                 ),
                               ),
                               /*ListTile(
@@ -563,19 +580,6 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                     height: 50,
                     width: MediaQuery.sizeOf(context).width,
                     child: ListTile(
-                      title: controllerVersion != newVersion? Row(children: [
-                        const Text('New version available for this controller',style: TextStyle(color: primaryColorMedium),),
-                        const SizedBox(width: 16,),
-                        TextButton(
-                          onPressed: () {
-                          },
-                          child: AnimatedOpacity(
-                            opacity: opacity,
-                            duration: const Duration(seconds: 1),
-                            child: Text('Update - $newVersion'),
-                          ),
-                        ),
-                      ],):null,
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [

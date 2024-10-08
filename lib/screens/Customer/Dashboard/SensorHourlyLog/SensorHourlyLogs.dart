@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../../../../Models/Customer/SensorHourlyData.dart';
 import '../../../../constants/http_service.dart';
+import '../../../../state_management/MqttPayloadProvider.dart';
 
 class SensorHourlyLogs extends StatefulWidget {
   const SensorHourlyLogs({Key? key, required this.userId, required this.controllerId}) : super(key: key);
@@ -220,7 +222,7 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
               axisLine: const AxisLine(width: 0),
             ),
             primaryYAxis: NumericAxis(
-              title: AxisTitle(text: getSensorUnit(snrName)),
+              title: AxisTitle(text: getSensorUnit(snrName, context)),
             ),
             legend: const Legend(isVisible: true, position: LegendPosition.right),
             tooltipBehavior: TooltipBehavior(enable: true),
@@ -240,11 +242,20 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
   }
 
 
-  static String getSensorUnit(String type) {
+  static String getSensorUnit(String type, context) {
     if(type.contains('Moisture')||type.contains('SM')){
       return 'Values in Cb';
     }else if(type.contains('Pressure')){
       return 'Values in bar';
+    }else if(type.contains('Level')){
+      MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
+      Map<String, dynamic>? unitMap = payloadProvider.unitList.firstWhere(
+            (unit) => unit['parameter'] == 'Level Sensor',  orElse: () => null,
+      );
+      if (unitMap != null) {
+        return 'Values in ${unitMap['value']}';
+      }
+      return 'Values in meter';
     }else if(type.contains('Humidity')){
       return 'Percentage (%)';
     }else if(type.contains('Co2')){

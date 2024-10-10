@@ -435,7 +435,7 @@ class ScheduledProgram {
           ? Condition.fromJson(json['StopCondition'])
           : Condition.empty(),
       pauseResumeReason: json['PauseResumeReason'],
-      zoneList: /*json['ZoneList']*/"Sequence 1.1_Sequence 1.2_Sequence 1.3_Sequence 1.4_Sequence 1.5",
+      zoneList: json['ZoneList'],
     );
   }
 

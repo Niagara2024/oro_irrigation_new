@@ -1695,7 +1695,6 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
                       }else{
                         startByStandaloneDefault(allRelaySrlNo);
                       }
-
                     }
                     else{
                       Map<String, List<DashBoardValve>> groupedValves = {};
@@ -2667,12 +2666,13 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
 
   Future<void>sentManualModeToServer(int sNo, int sFlag, int method, String dur, String flow, List<Map<String, dynamic>> selection, String payLoad) async {
     try {
+
       final body = {
         "userId": widget.customerID,
         "controllerId": widget.controllerID,
         "serialNumber": sNo,
         "programName": programList[ddCurrentPosition].programName,
-        "sequenceName": null,
+        "sequenceName": sNo==0 ? null : selection.isNotEmpty ? selection.last['name'] : '',
         "startFlag": sFlag,
         "method": method,
         "duration": dur,
@@ -2955,6 +2955,8 @@ class _DisplayLineOrSequenceState extends State<DisplayLineOrSequence> {
                               scale: 0.7,
                               child: Switch(
                                 value: line.selected,
+                                hoverColor: Colors.pink.shade100,
+                                activeColor: Colors.teal,
                                 onChanged: (value) {
                                   setState(() {
                                     for (var line in widget.lineOrSequence) {

@@ -1395,9 +1395,27 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   Widget buildScreen(screenWidth, payload)
   {
+    Duration lastCommunication = payload.lastCommunication;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+
+        lastCommunication.inMinutes >= 10 && payload.powerSupply == 0?Container(
+          height: 22.0,
+          decoration: const BoxDecoration(
+            color: Colors.redAccent,
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
+          ),
+          child: Center(
+            child: Text('No communication and power Supply to Controller'.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12.0,
+              ),
+            ),
+          ),
+        ):
         payload.powerSupply == 0?Container(
           height: 22.0,
           decoration: const BoxDecoration(
@@ -1405,7 +1423,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             borderRadius: BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
           ),
           child: Center(
-            child: Text('No Power Supply to Controller'.toUpperCase(),
+            child: Text('No power Supply to Controller'.toUpperCase(),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 12.0,
@@ -1414,6 +1432,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           ),
         ):
         const SizedBox(),
+
         Expanded(
           child: Padding(
             padding: screenWidth>600? const EdgeInsets.all(8.0):

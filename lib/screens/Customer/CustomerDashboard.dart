@@ -72,9 +72,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
       var screenWidth = MediaQuery.of(context).size.width;
       final provider = Provider.of<MqttPayloadProvider>(context);
 
-      var liveSync = provider.liveSync;
-      Duration lastCommunication = provider.lastCommunication;
-
       try{
         for (var items in provider.nodeList) {
           if (items is Map<String, dynamic>){
@@ -122,9 +119,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
       if(widget.siteData.master[widget.masterInx].irrigationLine[widget.lineIdx].sNo==0){
         return Column(
           children: [
-            lastCommunication.inMinutes >= 10? lostCommunication():
-            const SizedBox(),
-            liveSync? stoppedAnimation(): const SizedBox(),
+
+            provider.liveSync? stoppedAnimation(): const SizedBox(),
             Expanded(
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
@@ -156,8 +152,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
         return Column(
           children: [
-            lastCommunication.inMinutes >= 10? lostCommunication():
-            const SizedBox(),
 
             irrigationFlag !=0? Padding(
               padding: const EdgeInsets.only(left: 3, right: 3),
@@ -176,7 +170,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
             ):
             const SizedBox(),
 
-            liveSync? stoppedAnimation(): const SizedBox(),
+            provider.liveSync? stoppedAnimation(): const SizedBox(),
 
             Expanded(
               child: SingleChildScrollView(
@@ -204,24 +198,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     else{
       return const Center(child: Text('Site not configure'));
     }
-  }
-
-  Widget lostCommunication() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 3, right: 3),
-      child: Container(
-        width: MediaQuery.sizeOf(context).width,
-        decoration: BoxDecoration(
-          color: Colors.red.shade400,
-          borderRadius: BorderRadius.circular(03),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(2.0),
-          child: Center(child: Text('No communication from controller, Please check your controller connection...'.toUpperCase(),
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.normal, color: Colors.white70),)),
-        ),
-      ),
-    );
   }
 
   Widget stoppedAnimation() {

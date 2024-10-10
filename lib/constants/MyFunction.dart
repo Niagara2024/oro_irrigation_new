@@ -308,6 +308,15 @@ String? getUnitByParameter(context, String parameter, String value) {
   return null;
 }
 
+String changeDateFormat(String dateString) {
+  if(dateString!='-'){
+    DateTime date = DateTime.parse(dateString);
+    return DateFormat('dd-MM-yyyy').format(date);
+  }else{
+    return '-';
+  }
+}
+
 double convertMetersToFeet(double meters) {
   return meters * 3.28084;
 }

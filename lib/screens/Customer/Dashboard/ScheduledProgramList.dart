@@ -122,9 +122,9 @@ class ScheduledProgramList extends StatelessWidget {
                               const SizedBox(height: 3,),
                               Text('${scheduledPrograms[index].totalZone}'),
                               const SizedBox(height: 3,),
-                              Text('${scheduledPrograms[index].startDate} : ${convert24HourTo12Hour(scheduledPrograms[index].startTime)}'),
+                              Text('${changeDateFormat(scheduledPrograms[index].startDate)} : ${convert24HourTo12Hour(scheduledPrograms[index].startTime)}'),
                               const SizedBox(height: 3,),
-                              Text(scheduledPrograms[index].endDate)
+                              Text(changeDateFormat(scheduledPrograms[index].endDate))
                             ],
                           ),
                         ],
@@ -231,7 +231,7 @@ class ScheduledProgramList extends StatelessWidget {
               size: ColumnSize.M,
             ),
             const DataColumn2(
-              label: Text('Status || Reason', style: TextStyle(fontSize: 13)),
+              label: Text('Status or Reason', style: TextStyle(fontSize: 13)),
               size: ColumnSize.L,
             ),
             const DataColumn2(
@@ -329,7 +329,7 @@ class ScheduledProgramList extends StatelessWidget {
                             ],
                           ),
                         ),
-                        RichText(
+                        scheduledPrograms[index].pauseResumeReason!=30?RichText(
                           text: TextSpan(
                             children: [
                               const TextSpan(
@@ -348,7 +348,8 @@ class ScheduledProgramList extends StatelessWidget {
                               ),
                             ],
                           ),
-                        ),
+                        ):
+                        const SizedBox(),
                       ],
                     ),
                   ),
@@ -367,8 +368,8 @@ class ScheduledProgramList extends StatelessWidget {
                 ],
               )),
               DataCell(Center(child: Text('${scheduledPrograms[index].totalZone}'))),
-              DataCell(Center(child: Text('${scheduledPrograms[index].startDate} : ${convert24HourTo12Hour(scheduledPrograms[index].startTime)}'))),
-              DataCell(Center(child: Text(scheduledPrograms[index].endDate))),
+              DataCell(Center(child: Text('${changeDateFormat(scheduledPrograms[index].startDate)} : ${convert24HourTo12Hour(scheduledPrograms[index].startTime)}'))),
+              DataCell(Center(child: Text(changeDateFormat(scheduledPrograms[index].endDate)))),
               DataCell(Row(
                 children: [
                   Tooltip(

@@ -123,6 +123,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
         try {
           MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
           payloadProvider.saveUnits(jsonData[0]['master'][0]['units']);
+          payloadProvider.ncConnection(true);
           mySiteList = jsonData.map((json) => DashboardModel.fromJson(json)).toList();
           indicatorViewHide();
           if(mySiteList.isNotEmpty){
@@ -1402,7 +1403,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       children: [
 
         lastCommunication.inMinutes >= 10 && payload.powerSupply == 0?Container(
-          height: 22.0,
+          height: 20.0,
           decoration: const BoxDecoration(
             color: Colors.redAccent,
             borderRadius: BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
@@ -1417,13 +1418,30 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           ),
         ):
         payload.powerSupply == 0?Container(
-          height: 22.0,
+          height: 20.0,
           decoration: const BoxDecoration(
             color: Colors.redAccent,
             borderRadius: BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
           ),
           child: Center(
             child: Text('No power Supply to Controller'.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12.0,
+              ),
+            ),
+          ),
+        ):
+        const SizedBox(),
+
+        payload.nodeAndControllerConnection==false?Container(
+          height: 20.0,
+          decoration: const BoxDecoration(
+            color: Colors.redAccent,
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(0),topRight: Radius.circular(0)),
+          ),
+          child: Center(
+            child: Text('Node Connections not liked properly with the Controller'.toUpperCase(),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 12.0,
@@ -2022,6 +2040,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
               widget.nodeList[position].rlyStatus = rlyStatusList;
             } else {
               print('${item['SNo']} The serial number not found');
+              Provider.of<MqttPayloadProvider>(context).ncConnection(false);
             }
           } catch (e) {
             print('Error updating node properties: $e');

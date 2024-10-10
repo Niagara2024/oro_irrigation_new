@@ -300,6 +300,9 @@ String? getUnitByParameter(context, String parameter, String value) {
       }
 
     }
+    else{
+      return unitMap['value'];
+    }
   } catch (e) {
     print(e);
     return 'Error: $e';

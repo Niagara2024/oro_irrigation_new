@@ -54,6 +54,8 @@ class MqttPayloadProvider with ChangeNotifier {
 
   List<dynamic> unitList = [];
 
+  bool nodeAndControllerConnection = true;
+
   void editMySchedule(ScheduleViewProvider instance){
     mySchedule = instance;
     notifyListeners();
@@ -181,6 +183,10 @@ class MqttPayloadProvider with ChangeNotifier {
   void liveSyncCall(ls){
     liveSync= ls;
     notifyListeners();
+  }
+
+  void ncConnection(connection){
+    nodeAndControllerConnection = connection;
   }
 
   void updateWifiStrength(int nds) {

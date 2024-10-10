@@ -431,7 +431,7 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                                       child: AnimatedOpacity(
                                         opacity: opacity,
                                         duration: const Duration(seconds: 2),
-                                        child: Text('Available Version- $newVersion'),
+                                        child: Text('New Version available - $newVersion', style: const TextStyle(color: Colors.black54),),
                                       ),
                                     ):
                                     const SizedBox(),

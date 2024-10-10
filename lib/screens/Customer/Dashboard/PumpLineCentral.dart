@@ -1200,20 +1200,22 @@ class DisplaySensor extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         children: [
           if (payload.prsIn != '-')
-            buildSensorWidget('PrsIn', payload.prsIn, 'assets/images/dp_prs_sensor.png'),
+            buildSensorWidget('${payload.prsIn} ${getUnitByParameter(context, 'Pressure Sensor', payload.waterMeter)}', 'assets/images/dp_prs_sensor.png'),
 
           if (payload.prsOut != '-')
-            buildSensorWidget('PrsOut', payload.prsOut, 'assets/images/dp_prs_sensor.png'),
+            buildSensorWidget('${payload.prsOut} ${getUnitByParameter(context, 'Pressure Sensor', payload.waterMeter)}', 'assets/images/dp_prs_sensor.png'),
 
           if (payload.waterMeter != '-')
-            buildSensorWidget('WaterMeter', '${payload.waterMeter} Lps', 'assets/images/dp_flowmeter.png'),
+            buildSensorWidget('${payload.waterMeter} ${getUnitByParameter(context, 'Water Meter', payload.waterMeter)}', 'assets/images/dp_flowmeter.png'),
         ],
       )
           : const SizedBox(),
     );
   }
 
-  Widget buildSensorWidget(String key, String value, String imagePath) {
+
+
+  Widget buildSensorWidget(String value, String imagePath) {
     return Column(
       children: [
         Stack(

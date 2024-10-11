@@ -1206,7 +1206,7 @@ class DisplaySensor extends StatelessWidget {
             buildSensorWidget('${payload.prsOut} ${getUnitByParameter(context, 'Pressure Sensor', payload.waterMeter)}', 'assets/images/dp_prs_sensor.png'),
 
           if (payload.waterMeter != '-')
-            buildSensorWidget('${payload.waterMeter} ${getUnitByParameter(context, 'Water Meter', payload.waterMeter)}', 'assets/images/dp_flowmeter.png'),
+            buildSensorWidget('${getUnitByParameter(context, 'Water Meter', payload.waterMeter)}', 'assets/images/dp_flowmeter.png'),
         ],
       )
           : const SizedBox(),

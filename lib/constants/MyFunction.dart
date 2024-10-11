@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -266,49 +267,54 @@ String getImageForProduct(String product) {
   }
 }
 
-String? getUnitByParameter(context, String parameter, String value) {
+String? getUnitByParameter(BuildContext context, String parameter, String value) {
   MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
 
   try {
     Map<String, dynamic>? unitMap = payloadProvider.unitList.firstWhere(
-          (unit) => unit['parameter'] == parameter,  orElse: () => null,
+          (unit) => unit['parameter'] == parameter,
+      orElse: () => null,
     );
 
-    if (unitMap == null) {
-      return '';
-    }
+    if (unitMap == null) return '';
 
-    if (unitMap['parameter'] == 'Level Sensor') {
-      String? unitValue = unitMap['value'];
+    double parsedValue = double.tryParse(value) ?? 0.0;
 
-      if (unitValue == 'm') {
-        return 'meter: $value';
+    if (parameter == 'Level Sensor') {
+      switch (unitMap['value']) {
+        case 'm':
+          return 'meter: $value';
+        case 'feet':
+          return '${convertMetersToFeet(parsedValue).toStringAsFixed(2)} feet';
+        default:
+          return '${convertMetersToInches(parsedValue).toStringAsFixed(2)} inches';
       }
-
-      if (unitValue == 'feet') {
-        double meterValue = double.tryParse(value) ?? 0.0;
-        double convertedValue = convertMetersToFeet(meterValue);
-        String finalVal = convertedValue.toStringAsFixed(2);
-        return '$finalVal $unitValue';
-      }
-
-      if (unitValue == 'inch' || unitValue == 'inches') {
-        double meterValue = double.tryParse(value) ?? 0.0;
-        double convertedValue = convertMetersToInches(meterValue);
-        String finalVal = convertedValue.toStringAsFixed(2);
-        return '$finalVal $unitValue';
-      }
-
     }
-    else{
-      return unitMap['value'];
+    else if (unitMap['parameter'] == 'Pressure Sensor') {
+      double barValue = double.tryParse(value) ?? 0.0;
+      if (unitMap['value'] == 'bar') {
+        return '$value ${unitMap['value']}';
+      } else if (unitMap['value'] == 'kPa') {
+        double convertedValue = convertBarToKPa(barValue);
+        return '${convertedValue.toStringAsFixed(2)} kPa';
+      }
     }
+    else if (parameter == 'Water Meter') {
+      double lps = parsedValue;
+      switch (unitMap['value']) {
+        case 'l/s':
+          return '$value l/s';
+        case 'l/h':
+          return '${(lps * 3600).toStringAsFixed(2)} l/h';
+        default:
+          return '${(lps * 0.001).toStringAsFixed(4)} m³/s';
+      }
+    }
+    return unitMap['value'];
   } catch (e) {
-    print(e);
+    print('Error: $e');
     return 'Error: $e';
   }
-
-  return null;
 }
 
 String changeDateFormat(String dateString) {
@@ -326,4 +332,8 @@ double convertMetersToFeet(double meters) {
 
 double convertMetersToInches(double meters) {
   return meters * 39.3701;
+}
+
+double convertBarToKPa(double bar) {
+  return bar * 100;
 }

@@ -101,8 +101,9 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                   }
                 }
               }else{
-                print('${items['SNo']} The serial number not found');
-                Provider.of<MqttPayloadProvider>(context).ncConnection(false);
+                if(items['SNo']!=0){
+                  Provider.of<MqttPayloadProvider>(context).ncConnection(false);
+                }
               }
             } catch (e) {
               print('Error updating node properties: $e');

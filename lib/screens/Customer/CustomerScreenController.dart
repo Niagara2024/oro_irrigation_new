@@ -12,7 +12,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/Customer/Dashboard/DashboardNode.dart';
 import '../../Models/Customer/Dashboard/ProgramList.dart';
-import '../../constants/AppImages.dart';
 import '../../constants/MQTTManager.dart';
 import '../../constants/MyFunction.dart';
 import '../../constants/http_service.dart';
@@ -208,6 +207,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       List<dynamic> ndlLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList.map((ndl) => ndl.toJson()).toList();
       payloadProvider.updateNodeList(ndlLst);
 
+      List<dynamic> allPumps = mySiteList[siteIndex].master[masterIndex].gemLive[0].pumpList.map((pl) => pl.toJson()).toList();
+
       List<dynamic> spLst = mySiteList[siteIndex].master[masterIndex].gemLive[0].scheduledProgramList.map((sp) => sp.toJson()).toList();
       List<ScheduledProgram> sp = spLst.map((sp) => ScheduledProgram.fromJson(sp)).toList();
       payloadProvider.updateScheduledProgram(sp);
@@ -221,17 +222,13 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
         mySiteList[siteIndex].master[masterIndex].gemLive[0].queProgramList=[];
 
         //pump-------------------------------------------------
-        String pumpList= jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].pumpList.map((pump) => pump.toJson()).toList());
-        List<dynamic> jsonPumpList = jsonDecode(pumpList);
-        for (var item in jsonPumpList) {
-          if (item["Status"] != 0) {
-            item["Status"] = 0;
+        List<PumpData> pumpList = allPumps.map((pl) => PumpData.fromJson(pl)).toList();
+        for (var item in pumpList) {
+          if (item.status!= 0) {
+            item.status= 0;
           }
         }
-        String pumpPayloadFinal = jsonEncode({
-          "2400": [{"2407": jsonPumpList.toList()}]
-        });
-        payloadProvider.updatePumpPayload(pumpPayloadFinal);
+        payloadProvider.updatePumpPayload(pumpList);
 
         //filter-----------------------------------------------
         String filterList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].filterList.map((filter) => filter.toJson()).toList());
@@ -277,12 +274,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           payloadProvider.updateProgramQueue(pq);
 
           //pump-------------------------------------------------
-          String pumpList= jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].pumpList.map((pump) => pump.toJson()).toList());
-          List<dynamic> jsonPumpList = jsonDecode(pumpList);
-          String pumpPayloadFinal = jsonEncode({
-            "2400": [{"2407": jsonPumpList.toList()}]
-          });
-          payloadProvider.updatePumpPayload(pumpPayloadFinal);
+          List<PumpData> pumpList = allPumps.map((pl) => PumpData.fromJson(pl)).toList();
+          payloadProvider.updatePumpPayload(pumpList);
 
           //filter------------------------------------
           String filterList = jsonEncode(mySiteList[siteIndex].master[masterIndex].gemLive[0].filterList.map((filter) => filter.toJson()).toList());
@@ -1820,7 +1813,6 @@ class AlarmListItems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(payload.alarmList);
     return payload.alarmList.isNotEmpty? DataTable2(
       columnSpacing: 12,
       horizontalMargin: 12,
@@ -1851,89 +1843,26 @@ class AlarmListItems extends StatelessWidget {
         ),
       ],
       rows: List<DataRow>.generate(payload.alarmList.length, (index) => DataRow(cells: [
-        DataCell(Icon(Icons.warning_amber, color: payload.alarmList[index]['Status']==1 ? Colors.orangeAccent : Colors.redAccent,)),
-        DataCell(Text(getAlarmMessage(payload.alarmList[index]['AlarmType']))),
-        DataCell(Text(payload.alarmList[index]['Location'])),
-        DataCell(Text('${payload.alarmList[index]['Date']} - ${payload.alarmList[index]['AlarmRaisedTime']}')),
+        DataCell(Icon(Icons.warning_amber, color: payload.alarmList[index].status==1 ? Colors.orangeAccent : Colors.redAccent,)),
+        DataCell(Text(getAlarmMessage(payload.alarmList[index].alarmType))),
+        DataCell(Text(payload.alarmList[index].location)),
+        DataCell(Text('${payload.alarmList[index].date} - ${payload.alarmList[index].time}')),
         DataCell(Center(child: MaterialButton(
           color: Colors.redAccent,
           textColor: Colors.white,
           onPressed: (){
-            String finalPayload =  '${payload.alarmList[index]['S_No']}';
+            String finalPayload =  '${payload.alarmList[index].sNo}';
             String payLoadFinal = jsonEncode({
               "4100": [{"4101": finalPayload}]
             });
             MQTTManager().publish(payLoadFinal, 'AppToFirmware/$deviceID');
-            sentToServer('Rested the ${getAlarmMessage(payload.alarmList[index]['AlarmType'])} alarm', payLoadFinal);
+            sentToServer('Rested the ${getAlarmMessage(payload.alarmList[index].alarmType)} alarm', payLoadFinal);
           },
           child: const Text('Reset'),
         ))),
       ])),
     ):
     const Center(child: Text('Alarm not found'),);
-  }
-
-  String getAlarmMessage(int alarmType) {
-    String msg = '';
-    switch (alarmType) {
-      case 1:
-        msg ='Low Flow';
-        break;
-      case 2:
-        msg ='High Flow';
-        break;
-      case 3:
-        msg ='No Flow';
-        break;
-      case 4:
-        msg ='Ec High';
-        break;
-      case 5:
-        msg ='Ph Low';
-        break;
-      case 6:
-        msg ='Ph High';
-        break;
-      case 7:
-        msg ='Pressure Low';
-        break;
-      case 8:
-        msg ='Pressure High';
-        break;
-      case 9:
-        msg ='No Power Supply';
-        break;
-      case 10:
-        msg ='No Communication';
-        break;
-      case 11:
-        msg ='Wrong Feedback';
-        break;
-      case 12:
-        msg ='Sump Tank Empty';
-        break;
-      case 13:
-        msg ='Top Tank Full';
-        break;
-      case 14:
-        msg ='Low Battery';
-        break;
-      case 15:
-        msg ='Ec Difference';
-        break;
-      case 16:
-        msg ='Ph Difference';
-        break;
-      case 17:
-        msg ='Pump Off Alarm';
-        break;
-      case 18:
-        msg ='Pressure Switch high';
-        break;
-      default:
-        msg ='alarmType default';
-    }
-    return msg;
   }
 
   void sentToServer(String msg, String payLoad) async

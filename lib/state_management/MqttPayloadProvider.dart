@@ -22,12 +22,14 @@ class MqttPayloadProvider with ChangeNotifier {
   List<dynamic> PrsOut = [];
   List<dynamic> centralFilter = [];
   List<dynamic> localFilter = [];
-  List<dynamic> sourcePump = [];
-  List<dynamic> irrigationPump = [];
+
+  List<PumpData> sourcePump = [];
+  List<PumpData> irrigationPump = [];
+
   List<dynamic> centralFertilizer = [];
   List<dynamic> localFertilizer = [];
   List<dynamic> waterMeter = [];
-  List<dynamic> alarmList = [];
+  List<AlarmData> alarmList = [];
   List<dynamic> payload2408 = [];
 
   List<dynamic> _nodeList = [];
@@ -137,8 +139,8 @@ class MqttPayloadProvider with ChangeNotifier {
 
           if (data['2400'][0].containsKey('2407')) {
             List<dynamic> pumps = data['2400'][0]['2407'];
-            sourcePump = pumps.where((item) => item['Type'] == 1).toList();
-            irrigationPump = pumps.where((item) => item['Type'] == 2).toList();
+            List<PumpData> pumpList = pumps.map((pl) => PumpData.fromJson(pl)).toList();
+            updatePumpPayload(pumpList);
           }
 
           if (data['2400'][0].containsKey('2408')) {
@@ -146,7 +148,9 @@ class MqttPayloadProvider with ChangeNotifier {
           }
 
           if (data['2400'][0].containsKey('2409')) {
-            alarmList = data['2400'][0]['2409'];
+            List<dynamic> almList = data['2400'][0]['2409'];
+            List<AlarmData> alm = almList.map((alm) => AlarmData.fromJson(alm)).toList();
+            updateAlarmPayload(alm);
           }
 
           if (data['2400'][0].containsKey('2410')) {
@@ -237,16 +241,10 @@ class MqttPayloadProvider with ChangeNotifier {
   }
 
 
-  void updatePumpPayload(String payload) {
+  void updatePumpPayload(List<PumpData> pumps) {
     try {
-      Map<String, dynamic> data = jsonDecode(payload);
-      if (data.containsKey('2400') && data['2400'] != null && data['2400'].isNotEmpty) {
-        if (data['2400'][0].containsKey('2407')) {
-          List<dynamic> pumps = data['2400'][0]['2407'];
-          sourcePump = pumps.where((item) => item['Type'] == 1).toList();
-          irrigationPump = pumps.where((item) => item['Type'] == 2).toList();
-        }
-      }
+      sourcePump = pumps.where((item) => item.type == 1).toList();
+      irrigationPump = pumps.where((item) => item.type == 2).toList();
       notifyListeners();
     } catch (e) {
       print('Error parsing JSON: $e');

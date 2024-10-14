@@ -158,6 +158,9 @@ class LiveData {
     var nodeData = json['2401'] as List;
     List<NodeData> nodeList = nodeData.isNotEmpty? nodeData.map((node) => NodeData.fromJson(node)).toList() : [];
 
+    var pumpData = json['2407'] as List;
+    List<PumpData> pumpList = pumpData.isNotEmpty? pumpData.map((pmp) => PumpData.fromJson(pmp)).toList(): [];
+
     var rPrg = json['2402'] as List;
     List<CurrentScheduleModel> currentSchedule = rPrg.isNotEmpty? rPrg.map((cSch) => CurrentScheduleModel.fromJson(cSch)).toList() : [];
 
@@ -172,9 +175,6 @@ class LiveData {
 
     var fertilizerData = json['2406'] as List;
     List<FertilizerSite> fertilizerSiteList = fertilizerData.isNotEmpty? fertilizerData.map((fertilizer) => FertilizerSite.fromJson(fertilizer)).toList(): [];
-
-    var pumpData = json['2407'] as List;
-    List<PumpData> pumpList = pumpData.isNotEmpty? pumpData.map((pmp) => PumpData.fromJson(pmp)).toList(): [];
 
     var payload2408 = json['2408'] as List;
     List<Payload2408> payload2408List = payload2408.isNotEmpty? payload2408.map((payload) => Payload2408.fromJson(payload)).toList(): [];
@@ -298,12 +298,21 @@ class NodeData {
 }
 
 class PumpData {
+  int sNo;
   int type;
   String name;
   String ? swName;
   String location;
   int status;
   String reason;
+  String setValue;
+  String actualValue;
+  String phase;
+  String voltage;
+  String current;
+  String signalStrength;
+  String battery;
+  String version;
   List<dynamic> waterMeter;
   List<dynamic> pressure;
   List<dynamic> level;
@@ -313,13 +322,23 @@ class PumpData {
   String onDelayLeft;
   String program;
 
+
   PumpData({
+    required this.sNo,
     required this.type,
     required this.name,
     required this.swName,
     required this.location,
     required this.status,
     required this.reason,
+    required this.setValue,
+    required this.actualValue,
+    required this.phase,
+    required this.voltage,
+    required this.current,
+    required this.signalStrength,
+    required this.battery,
+    required this.version,
     required this.waterMeter,
     required this.pressure,
     required this.level,
@@ -336,12 +355,21 @@ class PumpData {
     String location = json['Location'] ?? '-';
     bool hasOnOffReasonKey = json.containsKey('OnOffReason');
     return PumpData(
+      sNo: json['S_No'],
       type: type,
       name: json['Name'],
       swName: json['SW_Name'],
       location: location,
       status: json['Status'],
       reason: hasOnOffReasonKey? json['OnOffReason']:json['Reason'].toString(),
+      setValue: json['SetValue'],
+      actualValue: json['ActualValue'],
+      phase: json['Phase'],
+      voltage: json['Voltage'],
+      current: json['Current'],
+      signalStrength: json['SignalStrength'],
+      battery: json['Battery'],
+      version: json['Version'],
       waterMeter: json['Watermeter'],
       pressure: json['Pressure'],
       level: json['Level'],
@@ -355,12 +383,21 @@ class PumpData {
 
   Map<String, dynamic> toJson() {
     return {
+      'S_No': sNo,
       'Type': type,
       'Name': name,
       'SW_Name': swName,
       'Location': location,
       'Status': status,
       'Reason': reason,
+      'SetValue': setValue,
+      'ActualValue': actualValue,
+      'Phase': phase,
+      'Voltage': voltage,
+      'Current': current,
+      'SignalStrength': signalStrength,
+      'Battery': battery,
+      'Version': version,
       'Watermeter': waterMeter,
       'Pressure': pressure,
       'Level': level,
@@ -1340,6 +1377,8 @@ class AlarmData {
   final String alarmSet;
   final String alarmActual;
   final int status;
+  final String date;
+  final String time;
 
   AlarmData({
     required this.sNo,
@@ -1348,6 +1387,8 @@ class AlarmData {
     required this.alarmSet,
     required this.alarmActual,
     required this.status,
+    required this.date,
+    required this.time,
   });
 
   factory AlarmData.fromJson(Map<String, dynamic> json) {
@@ -1358,6 +1399,8 @@ class AlarmData {
       alarmSet: json['AlarmSet'],
       alarmActual: json['AlarmActual'],
       status: json['Status'],
+      date: json['Date'],
+      time: json['AlarmRaisedTime'],
     );
   }
 
@@ -1369,6 +1412,8 @@ class AlarmData {
       'AlarmSet': alarmSet,
       'AlarmActual': alarmActual,
       'Status': status,
+      'Date': date,
+      'AlarmRaisedTime': time,
     };
   }
 }

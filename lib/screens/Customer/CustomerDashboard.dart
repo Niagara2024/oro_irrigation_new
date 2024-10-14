@@ -266,7 +266,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                               //i pump
                               provider.irrigationPump.isNotEmpty? Padding(
                                 padding: const EdgeInsets.only(top: 15),
-                                child: DisplayIrrigationPump(currentLineId: crrIrrLine.id, deviceId: widget.siteData.master[widget.masterInx].deviceId, ipList: provider.irrigationPump,),
+                                child: DisplayIrrigationPump(currentLineId: crrIrrLine.id, deviceId: widget.siteData.master[widget.masterInx].deviceId, ipList: provider.irrigationPump, userId: widget.userID, controllerId: widget.siteData.master[widget.masterInx].controllerId,),
                               ):
                               const SizedBox(),
 
@@ -436,12 +436,12 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
         && provider.centralFertilizer.isEmpty && provider.localFertilizer.isEmpty){
 
       List<Map<String, dynamic>> filteredSrcPumps = provider.sourcePump
-          .where((pump) => crrIrrLine.id == 'all' || pump['Location'].contains(crrIrrLine.id))
+          .where((pump) => crrIrrLine.id == 'all' || pump.location.contains(crrIrrLine.id))
           .toList()
           .cast<Map<String, dynamic>>();
 
       List<Map<String, dynamic>> filteredIrrPumps = provider.irrigationPump
-          .where((pump) => crrIrrLine.id == 'all' || pump['Location'].contains(crrIrrLine.id))
+          .where((pump) => crrIrrLine.id == 'all' || pump.location.contains(crrIrrLine.id))
           .toList()
           .cast<Map<String, dynamic>>();
 
@@ -538,7 +538,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 const SizedBox(),
                 provider.irrigationPump.isNotEmpty? Padding(
                   padding: EdgeInsets.only(top: provider.localFertilizer.isNotEmpty || provider.localFertilizer.isNotEmpty? 38.4:0),
-                  child: DisplayIrrigationPump(currentLineId: crrIrrLine.id, deviceId: widget.siteData.master[widget.masterInx].deviceId, ipList: provider.irrigationPump,),
+                  child: DisplayIrrigationPump(currentLineId: crrIrrLine.id, deviceId: widget.siteData.master[widget.masterInx].deviceId, ipList: provider.irrigationPump, userId: widget.userID, controllerId: widget.siteData.master[widget.masterInx].controllerId,),
                 ):
                 const SizedBox(),
 

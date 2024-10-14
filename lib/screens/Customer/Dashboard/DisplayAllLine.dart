@@ -21,6 +21,18 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
   @override
   Widget build(BuildContext context) {
 
+    List<dynamic> levelList = [];
+    var matchingItem = widget.provider.payload2408.firstWhere(
+          (item) => item['Line'] == 'All',
+      orElse: () => null,
+    );
+
+    if (matchingItem != null) {
+      levelList = matchingItem['Level'];
+    } else {
+      print('No matching Line found');
+    }
+
     return Padding(
       padding: const EdgeInsets.all(3.0),
       child: Container(
@@ -53,6 +65,57 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
 
                       widget.provider.irrigationPump.isNotEmpty? Padding(
                         padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
+                        child: InkWell(
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Level List'),
+                                  content: levelList.isNotEmpty?Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: levelList.map((levelItem) {
+                                      return ListTile(
+                                        title: Text(levelItem['SW_Name']),
+                                        trailing: Column(
+                                          children: [
+                                            Text('Percent: ${levelItem['LevelPercent']}%'),
+                                            Text('Value: ${levelItem['Value']}',)
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ):
+                                  const Text('No level available'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop(); // Close the dialog
+                                      },
+                                      child: const Text('Close'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          child: SizedBox(
+                            width: 52.50,
+                            height: 70,
+                            child: Stack(
+                              children: [
+                                widget.provider.sourcePump.isNotEmpty
+                                    ? Image.asset('assets/images/dp_sump_src.png')
+                                    : Image.asset('assets/images/dp_sump.png'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ):
+                      const SizedBox(),
+
+                     /* widget.provider.irrigationPump.isNotEmpty? Padding(
+                        padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
                         child: SizedBox(
                           width: 52.50,
                           height: 70,
@@ -64,11 +127,11 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
                           ),
                         ),
                       ):
-                      const SizedBox(),
+                      const SizedBox(),*/
 
                       widget.provider.irrigationPump.isNotEmpty? Padding(
                         padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
-                        child: DisplayIrrigationPump(currentLineId: 'all', deviceId: widget.currentMaster.deviceId, ipList: widget.provider.irrigationPump,),
+                        child: DisplayIrrigationPump(currentLineId: 'all', deviceId: widget.currentMaster.deviceId, ipList: widget.provider.irrigationPump, userId: widget.userId, controllerId: widget.currentMaster.controllerId,),
                       ):
                       const SizedBox(),
 

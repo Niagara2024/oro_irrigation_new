@@ -267,6 +267,134 @@ String getImageForProduct(String product) {
   }
 }
 
+Widget buildFilterImage(int cIndex, int status) {
+  String imageName = 'dp_filter';
+
+  switch (status) {
+    case 0:
+      imageName += '.png';
+      break;
+    case 1:
+      imageName += '_g.png';
+      break;
+    case 2:
+      imageName += '_y.png';
+      break;
+    default:
+      imageName += '_r.png';
+  }
+
+  return Image.asset('assets/images/$imageName');
+
+}
+
+Widget buildFertilizerImage(int cIndex, int status, int cheLength, List agitatorList) {
+  String imageName;
+  if(cIndex == cheLength - 1){
+    if(agitatorList.isNotEmpty){
+      imageName='dp_fert_channel_last_aj';
+    }else{
+      imageName='dp_fert_channel_last';
+    }
+  }else{
+    if(agitatorList.isNotEmpty){
+      if(cIndex==0){
+        imageName='dp_fert_channel_first_aj';
+      }else{
+        imageName='dp_fert_channel_center_aj';
+      }
+    }else{
+      imageName='dp_fert_channel_center';
+    }
+  }
+
+  switch (status) {
+    case 0:
+      imageName += '.png';
+      break;
+    case 1:
+      imageName += '_g.png';
+      break;
+    case 2:
+      imageName += '_y.png';
+      break;
+    case 3:
+      imageName += '_r.png';
+      break;
+    case 4:
+      imageName += '.png';
+      break;
+    default:
+      imageName += '.png';
+  }
+
+  return Image.asset('assets/images/$imageName');
+
+}
+
+String getAlarmMessage(int alarmType) {
+  String msg = '';
+  switch (alarmType) {
+    case 1:
+      msg ='Low Flow';
+      break;
+    case 2:
+      msg ='High Flow';
+      break;
+    case 3:
+      msg ='No Flow';
+      break;
+    case 4:
+      msg ='Ec High';
+      break;
+    case 5:
+      msg ='Ph Low';
+      break;
+    case 6:
+      msg ='Ph High';
+      break;
+    case 7:
+      msg ='Pressure Low';
+      break;
+    case 8:
+      msg ='Pressure High';
+      break;
+    case 9:
+      msg ='No Power Supply';
+      break;
+    case 10:
+      msg ='No Communication';
+      break;
+    case 11:
+      msg ='Wrong Feedback';
+      break;
+    case 12:
+      msg ='Sump Tank Empty';
+      break;
+    case 13:
+      msg ='Top Tank Full';
+      break;
+    case 14:
+      msg ='Low Battery';
+      break;
+    case 15:
+      msg ='Ec Difference';
+      break;
+    case 16:
+      msg ='Ph Difference';
+      break;
+    case 17:
+      msg ='Pump Off Alarm';
+      break;
+    case 18:
+      msg ='Pressure Switch high';
+      break;
+    default:
+      msg ='alarmType default';
+  }
+  return msg;
+}
+
 String? getUnitByParameter(BuildContext context, String parameter, String value) {
   MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
 
@@ -307,7 +435,7 @@ String? getUnitByParameter(BuildContext context, String parameter, String value)
         case 'l/h':
           return '${(lps * 3600).toStringAsFixed(2)} l/h';
         default:
-          return '${(lps * 0.001).toStringAsFixed(4)} m³/s';
+          return '${(lps * 0.001).toStringAsFixed(2)} m³/s';
       }
     }
     return unitMap['value'];

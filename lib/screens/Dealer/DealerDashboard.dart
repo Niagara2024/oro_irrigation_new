@@ -3,17 +3,16 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../../Models/DataResponse.dart';
 import '../../Models/Dealer/CustomerAlarmList.dart';
 import '../../Models/customer_list.dart';
 import '../../Models/product_stock.dart';
+import '../../constants/MyFunction.dart';
 import '../../constants/http_service.dart';
 import '../../constants/theme.dart';
 import '../Customer/CustomerScreenController.dart';
-import '../Forms/add_product.dart';
 import '../Forms/create_account.dart';
 import '../Forms/device_list.dart';
 import 'ServiceRequestsTable.dart';
@@ -459,11 +458,12 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                                 height: 30,
                                                 child: Center(child: Text(customer.userName)),
                                               ),
-                                              SizedBox(
+                                              customer.serviceRequestCount>0?SizedBox(
                                                 width: MediaQuery.sizeOf(context).width,
-                                                height: customer.serviceRequestCount*45,
+                                                height: (customer.serviceRequestCount*45)+45,
                                                 child: ServiceRequestsTable(userId: customer.userId),
-                                              ),
+                                              ):
+                                              const SizedBox(),
                                               customer.criticalAlarmCount>0?SizedBox(
                                                 width: MediaQuery.sizeOf(context).width,
                                                 height: customer.criticalAlarmCount*45+40,
@@ -643,16 +643,6 @@ class _MySalesChartState extends State<MySalesChart> {
   }
 }
 
-class _ChartData {
-  _ChartData(this.period, this.gem, this.sRtu, this.rtu, this.oSwitch, this.oSpot);
-  final String period;
-  final int gem;
-  final int sRtu;
-  final int rtu;
-  final int oSwitch;
-  final int oSpot;
-}
-
 
 class BadgeButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -718,7 +708,6 @@ class _DisplayCriticalAlarmState extends State<DisplayCriticalAlarm> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getCriticalAlarmList();
   }
@@ -747,72 +736,6 @@ class _DisplayCriticalAlarmState extends State<DisplayCriticalAlarm> {
     } else {
       //_showSnackBar(response.body);
     }
-  }
-
-  String getAlarmMessage(int alarmType) {
-    String msg = '';
-    switch (alarmType) {
-      case 1:
-        msg ='Low Flow';
-        break;
-      case 2:
-        msg ='High Flow';
-        break;
-      case 3:
-        msg ='No Flow';
-        break;
-      case 4:
-        msg ='Ec High';
-        break;
-      case 5:
-        msg ='Ph Low';
-        break;
-      case 6:
-        msg ='Ph High';
-        break;
-      case 7:
-        msg ='Pressure Low';
-        break;
-      case 8:
-        msg ='Pressure High';
-        break;
-      case 9:
-        msg ='No Power Supply';
-        break;
-      case 10:
-        msg ='No Communication';
-        break;
-      case 11:
-        msg ='Wrong Feedback';
-        break;
-      case 12:
-        msg ='Sump Tank Empty';
-        break;
-      case 13:
-        msg ='Top Tank Full';
-        break;
-      case 13:
-        msg ='Top Tank Full';
-        break;
-      case 14:
-        msg ='Low Battery';
-        break;
-      case 15:
-        msg ='Ec Difference';
-        break;
-      case 16:
-        msg ='Ph Difference';
-        break;
-      case 17:
-        msg ='Pump Off Alarm';
-        break;
-      case 18:
-        msg ='Pressure Switch high';
-        break;
-      default:
-        msg ='alarmType default';
-    }
-    return msg;
   }
 
   @override

@@ -129,7 +129,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
 
                     widget.provider.irrigationPump.isNotEmpty? Padding(
                       padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
-                      child: DisplayIrrigationPump(currentLineId: widget.crrIrrLine.id, deviceId: widget.currentSiteData.master[widget.masterIdx].deviceId, ipList: widget.provider.irrigationPump,),
+                      child: DisplayIrrigationPump(currentLineId: widget.crrIrrLine.id, deviceId: widget.currentSiteData.master[widget.masterIdx].deviceId, ipList: widget.provider.irrigationPump, userId: widget.userId, controllerId: widget.currentSiteData.master[widget.masterIdx].controllerId,),
                     ):
                     const SizedBox(),
 
@@ -289,7 +289,7 @@ class DisplaySourcePump extends StatefulWidget {
   const DisplaySourcePump({Key? key, required this.deviceId, required this.currentLineId, required this.spList, required this.userId, required this.controllerId}) : super(key: key);
   final String deviceId;
   final String currentLineId;
-  final List<dynamic> spList;
+  final List<PumpData> spList;
   final int userId, controllerId;
 
   @override
@@ -304,7 +304,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
   void initState() {
     super.initState();
     for (var ip in widget.spList) {
-      if (ip['DurationLeft'] != '00:00:00') {
+      if (ip.onDelayLeft != '00:00:00') {
         updatePumpOnDelayTime();
       }else{
         timer?.cancel();
@@ -323,8 +323,8 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       try{
         for (var sp in widget.spList) {
-          if (sp['OnDelayLeft'] != null && sp['OnDelayLeft']!='00:00:00') {
-            List<String> parts = sp['OnDelayLeft'].split(':');
+          if (sp.onDelayLeft!='00:00:00') {
+            List<String> parts = sp.onDelayLeft.split(':');
             int hours = int.parse(parts[0]);
             int minutes = int.parse(parts[1]);
             int seconds = int.parse(parts[2]);
@@ -345,9 +345,9 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
             }
 
             String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-            if (sp['OnDelayLeft'] != '00:00:00') {
+            if (sp.onDelayLeft != '00:00:00') {
               setState(() {
-                sp['OnDelayLeft'] = updatedDurationQtyLeft;
+                sp.onDelayLeft = updatedDurationQtyLeft;
               });
             }
           }
@@ -364,10 +364,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
   @override
   Widget build(BuildContext context) {
 
-    List<Map<String, dynamic>> filteredPumps = widget.spList
-        .where((pump) => widget.currentLineId== 'all' || pump['Location'].contains(widget.currentLineId))
-        .toList()
-        .cast<Map<String, dynamic>>();
+    List<PumpData> filteredPumps = filterPumpsByLocation(widget.spList, widget.currentLineId);
 
     return SizedBox(
       width: filteredPumps.length * 70,
@@ -387,13 +384,12 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                         final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
                         final position = button.localToGlobal(Offset.zero, ancestor: overlay);
 
-                        bool voltKeyExists = filteredPumps[index].containsKey('Voltage');
-                        int signalStrength = voltKeyExists? int.parse(filteredPumps[index]['SignalStrength']):0;
-                        int batteryVolt = voltKeyExists? int.parse(filteredPumps[index]['Battery']):0;
-                        List<String> voltages = voltKeyExists? filteredPumps[index]['Voltage'].split(','):[];
-                        List<String> current = voltKeyExists? filteredPumps[index]['Current'].split(','):[];
+                        bool voltKeyExists = filteredPumps[index].voltage.isNotEmpty;
+                        int signalStrength = voltKeyExists? int.parse(filteredPumps[index].signalStrength):0;
+                        int batteryVolt = voltKeyExists? int.parse(filteredPumps[index].battery):0;
+                        List<String> voltages = voltKeyExists? filteredPumps[index].voltage.split(','):[];
+                        List<String> current = voltKeyExists? filteredPumps[index].current.split(','):[];
 
-                        double level = 42.0;
                         List<String> columns = ['-', '-', '-'];
 
                         if(voltKeyExists){
@@ -418,7 +414,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     const SizedBox(width: 8,),
-                                    Text('Version: ${filteredPumps[index]['Version']}'),
+                                    Text('Version: ${filteredPumps[index].version}'),
                                     const Spacer(),
                                     Icon(signalStrength == 0 ? Icons.wifi_off :
                                     signalStrength >= 1 && signalStrength <= 20 ?
@@ -456,11 +452,11 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                   children: [
                                     const SizedBox(width:100, child: Text('Phase', style: TextStyle(color: Colors.black54),),),
                                     const Spacer(),
-                                    CircleAvatar(radius: 7, backgroundColor: int.parse(filteredPumps[index]['Phase'])>0? Colors.green: null,),
+                                    CircleAvatar(radius: 7, backgroundColor: int.parse(filteredPumps[index].phase)>0? Colors.green: null,),
                                     const VerticalDivider(color: Colors.transparent,),
-                                    CircleAvatar(radius: 7, backgroundColor: int.parse(filteredPumps[index]['Phase'])>1? Colors.green: null,),
+                                    CircleAvatar(radius: 7, backgroundColor: int.parse(filteredPumps[index].phase)>1? Colors.green: null,),
                                     const VerticalDivider(color: Colors.transparent,),
-                                    CircleAvatar(radius: 7, backgroundColor: int.parse(filteredPumps[index]['Phase'])>2? Colors.green: null,),
+                                    CircleAvatar(radius: 7, backgroundColor: int.parse(filteredPumps[index].phase)>2? Colors.green: null,),
                                   ],
                                 ),
                               ),
@@ -533,12 +529,12 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                     color: Colors.green,
                                     textColor: Colors.white,
                                     onPressed: () {
-                                      String payload = '${filteredPumps[index]['S_No']},1,1';
+                                      String payload = '${filteredPumps[index].sNo},1,1';
                                       String payLoadFinal = jsonEncode({
                                         "6200": [{"6201": payload}]
                                       });
                                       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                      sentUserOperationToServer('${pump['SW_Name'] ?? pump['Name']} Start Manually', payLoadFinal);
+                                      sentUserOperationToServer('${pump.swName?? pump.name} Start Manually', payLoadFinal);
                                       showSnakeBar('Pump of comment sent successfully');
                                       Navigator.pop(context);
                                     },
@@ -551,12 +547,12 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                     color: Colors.redAccent,
                                     textColor: Colors.white,
                                     onPressed: () {
-                                      String payload = '${filteredPumps[index]['S_No']},0,1';
+                                      String payload = '${filteredPumps[index].sNo},0,1';
                                       String payLoadFinal = jsonEncode({
                                         "6200": [{"6201": payload}]
                                       });
                                       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                      sentUserOperationToServer('${pump['SW_Name'] ?? pump['Name']} Stop Manually', payLoadFinal);
+                                      sentUserOperationToServer('${pump.swName ?? pump.name} Stop Manually', payLoadFinal);
                                       showSnakeBar('Pump of comment sent successfully');
                                       Navigator.pop(context);
                                     },
@@ -568,7 +564,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                 ],
                               ),
                               const SizedBox(height: 5,),
-                              int.parse(filteredPumps[index]['OnOffReason'])>0 ? Container(
+                              int.parse(filteredPumps[index].reason)>0 ? Container(
                                 width: 354,
                                 height: 45,
                                 color: Colors.red.shade100,
@@ -583,23 +579,23 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                           mainAxisAlignment: MainAxisAlignment.start,
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            int.parse(filteredPumps[index]['OnOffReason'])==8 || int.parse(filteredPumps[index]['OnOffReason'])==9 ?
-                                            Text('Reason (Set : ${filteredPumps[index]['SetValue']}. Actual : ${filteredPumps[index]['ActualValue']})',style: const TextStyle(fontSize: 13,),): const Text('Reason',style: TextStyle(fontSize: 13,),),
-                                            Text(getContentByCode(int.parse(filteredPumps[index]['OnOffReason'])), style: const TextStyle(fontSize: 11,)),
+                                            int.parse(filteredPumps[index].reason)==8 || int.parse(filteredPumps[index].reason)==9 ?
+                                            Text('Reason (Set : ${filteredPumps[index].setValue}. Actual : ${filteredPumps[index].actualValue})',style: const TextStyle(fontSize: 13,),): const Text('Reason',style: TextStyle(fontSize: 13,),),
+                                            Text(getContentByCode(int.parse(filteredPumps[index].reason)), style: const TextStyle(fontSize: 11,)),
                                           ],
                                         ),
                                     ),
-                                    int.parse(filteredPumps[index]['OnOffReason'])==8 || int.parse(filteredPumps[index]['OnOffReason'])==9?
+                                    int.parse(filteredPumps[index].reason)==8 || int.parse(filteredPumps[index].reason)==9?
                                     MaterialButton(
                                       color: Colors.orange,
                                       textColor: Colors.white,
                                       onPressed: () {
-                                        String payload = '${filteredPumps[index]['S_No']},1';
+                                        String payload = '${filteredPumps[index].sNo},1';
                                         String payLoadFinal = jsonEncode({
                                           "6300": [{"6301": payload}]
                                         });
                                         MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                        sentUserOperationToServer('${pump['SW_Name'] ?? pump['Name']} Start Manually', payLoadFinal);
+                                        sentUserOperationToServer('${pump.swName ?? pump.name} Start Manually', payLoadFinal);
                                         showSnakeBar('Pump of comment sent successfully');
                                         Navigator.pop(context);
                                       },
@@ -625,12 +621,12 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                     color: Colors.green,
                                     textColor: Colors.white,
                                     onPressed: () {
-                                      String payload = '${filteredPumps[index]['S_No']},1,1';
+                                      String payload = '${filteredPumps[index].sNo},1,1';
                                       String payLoadFinal = jsonEncode({
                                         "6200": [{"6201": payload}]
                                       });
                                       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                      sentUserOperationToServer('${pump['SW_Name'] ?? pump['Name']} Start Manually', payLoadFinal);
+                                      sentUserOperationToServer('${pump.swName ?? pump.name} Start Manually', payLoadFinal);
                                       showSnakeBar('Pump of comment sent successfully');
                                       Navigator.pop(context);
                                     },
@@ -643,12 +639,12 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                     color: Colors.redAccent,
                                     textColor: Colors.white,
                                     onPressed: () {
-                                      String payload = '${filteredPumps[index]['S_No']},0,1';
+                                      String payload = '${filteredPumps[index].sNo},0,1';
                                       String payLoadFinal = jsonEncode({
                                         "6200": [{"6201": payload}]
                                       });
                                       MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                      sentUserOperationToServer('${pump['SW_Name'] ?? pump['Name']} Stop Manually', payLoadFinal);
+                                      sentUserOperationToServer('${pump.swName ?? pump.name} Stop Manually', payLoadFinal);
                                       showSnakeBar('Pump of comment sent successfully');
                                       Navigator.pop(context);
                                     },
@@ -663,7 +659,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                           onPop: () => print('Popover was popped!'),
                           direction: PopoverDirection.right,
                           width: voltKeyExists?340:140,
-                          height: voltKeyExists?int.parse(filteredPumps[index]['OnOffReason'])>0?210:170:80,
+                          height: voltKeyExists?int.parse(filteredPumps[index].reason)>0?210:170:80,
                           arrowHeight: 15,
                           arrowWidth: 30,
                           barrierColor: Colors.black54,
@@ -682,11 +678,11 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                       child: SizedBox(
                         width: 70,
                         height: 70,
-                        child: AppImages.getAsset('irrigationPump', pump['Status'], ''),
+                        child: AppImages.getAsset('irrigationPump', pump.status, ''),
                       ),
                     ),
                   ),
-                  pump['OnDelayLeft'] != '00:00:00'? Positioned(
+                  pump.onDelayLeft != '00:00:00'? Positioned(
                     top: 30,
                     left: 7.5,
                     child: Container(
@@ -733,7 +729,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                     ),
                   )
                       : const SizedBox(),
-                  pump.containsKey('OnOffReason') && pump['OnOffReason'] != null && int.tryParse(pump['OnOffReason']) != null && int.parse(pump['OnOffReason']) > 0
+                  int.tryParse(pump.reason) != null && int.parse(pump.reason) > 0
                       ? const Positioned(
                     top: 10,
                     left: 37.5,
@@ -754,7 +750,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                 width: 70,
                 height: 30,
                 child: Text(
-                  pump['SW_Name'] ?? pump['Name'],
+                  pump.swName ?? pump.name,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: Colors.black,
@@ -768,6 +764,14 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
         }),
       ),
     );
+  }
+
+  List<PumpData> filterPumpsByLocation(List<PumpData> pumps, String currentLocation) {
+    if (currentLocation == 'all') {
+      return pumps;
+    } else {
+      return pumps.where((pump) => pump.location.contains(currentLocation)).toList();
+    }
   }
 
   void showSnakeBar(String msg){
@@ -797,10 +801,11 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
 }
 
 class DisplayIrrigationPump extends StatefulWidget {
-  const DisplayIrrigationPump({Key? key, required this.currentLineId, required this.deviceId, required this.ipList}) : super(key: key);
+  const DisplayIrrigationPump({Key? key, required this.currentLineId, required this.deviceId, required this.ipList, required this.userId, required this.controllerId}) : super(key: key);
   final String currentLineId;
   final String deviceId;
-  final List<dynamic> ipList;
+  final List<PumpData> ipList;
+  final int userId, controllerId;
 
   @override
   State<DisplayIrrigationPump> createState() => _DisplayIrrigationPumpState();
@@ -814,7 +819,7 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
   void initState() {
     super.initState();
     for (var ip in widget.ipList) {
-      if (ip['DurationLeft'] != '00:00:00') {
+      if (ip.onDelayLeft != '00:00:00') {
         updatePumpOnDelayTime();
       }else{
         timer?.cancel();
@@ -833,8 +838,8 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       try{
         for (var ip in widget.ipList) {
-          if (ip['OnDelayLeft'] != null && ip['OnDelayLeft']!='00:00:00') {
-            List<String> parts = ip['OnDelayLeft'].split(':');
+          if (ip.onDelayLeft!='00:00:00') {
+            List<String> parts = ip.onDelayLeft.split(':');
             int hours = int.parse(parts[0]);
             int minutes = int.parse(parts[1]);
             int seconds = int.parse(parts[2]);
@@ -855,9 +860,9 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
             }
 
             String updatedDurationQtyLeft = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-            if (ip['OnDelayLeft'] != '00:00:00') {
+            if (ip.onDelayLeft != '00:00:00') {
               setState(() {
-                ip['OnDelayLeft'] = updatedDurationQtyLeft;
+                ip.onDelayLeft = updatedDurationQtyLeft;
               });
             }
           }
@@ -867,16 +872,12 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
         print(e);
       }
     });
-
   }
 
   @override
   Widget build(BuildContext context) {
 
-    List<Map<String, dynamic>> filteredPumps = widget.ipList
-        .where((pump) => widget.currentLineId== 'all' || pump['Location'].contains(widget.currentLineId))
-        .toList()
-        .cast<Map<String, dynamic>>();
+    List<PumpData> filteredPumps = filterPumpsByLocation(widget.ipList, widget.currentLineId);
 
     return SizedBox(
       width: filteredPumps.length * 70,
@@ -897,13 +898,12 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                         final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
                         final position = button.localToGlobal(Offset.zero, ancestor: overlay);
 
-                        bool voltKeyExists = filteredPumps[index].containsKey('Voltage');
-                        int signalStrength = voltKeyExists? int.parse(filteredPumps[index]['SignalStrength']):0;
-                        int batteryVolt = voltKeyExists? int.parse(filteredPumps[index]['Battery']):0;
-                        List<String> voltages = voltKeyExists? filteredPumps[index]['Voltage'].split(','):[];
-                        List<String> current = voltKeyExists? filteredPumps[index]['Current'].split(','):[];
+                        bool voltKeyExists = filteredPumps[index].voltage.isNotEmpty;
+                        int signalStrength = voltKeyExists? int.parse(filteredPumps[index].signalStrength):0;
+                        int batteryVolt = voltKeyExists? int.parse(filteredPumps[index].battery):0;
+                        List<String> voltages = voltKeyExists? filteredPumps[index].voltage.split(','):[];
+                        List<String> current = voltKeyExists? filteredPumps[index].current.split(','):[];
 
-                        double level = 42.0;
                         List<String> columns = ['-', '-', '-'];
 
                         if(voltKeyExists){
@@ -921,11 +921,11 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                           irgCount = Provider.of<MqttPayloadProvider>(context, listen: false).irrigationPump.length;
                         }else{
                           srcCount = Provider.of<MqttPayloadProvider>(context, listen: false).sourcePump
-                              .where((pump) => pump['Location'].contains(widget.currentLineId)).toList()
+                              .where((pump) => pump.location.contains(widget.currentLineId)).toList()
                               .cast<Map<String, dynamic>>().length;
 
                           irgCount = Provider.of<MqttPayloadProvider>(context, listen: false).irrigationPump
-                              .where((pump) => pump['Location'].contains(widget.currentLineId)).toList()
+                              .where((pump) => pump.location.contains(widget.currentLineId)).toList()
                               .cast<Map<String, dynamic>>().length;
                         }
 
@@ -936,7 +936,7 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               ListTile(
-                                title: Text('Version: ${filteredPumps[index]['Version']}'),
+                                title: Text('Version: ${filteredPumps[index].version}'),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -1042,6 +1042,51 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                                   ],
                                 ),
                               ),
+                              const SizedBox(height: 5,),
+                              int.parse(filteredPumps[index].reason)>0 ? Container(
+                                width: 355,
+                                height: 45,
+                                color: Colors.red.shade100,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    const SizedBox(width: 8,),
+                                    Expanded(
+                                      child:
+                                      Column(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          int.parse(filteredPumps[index].reason)==8 || int.parse(filteredPumps[index].reason)==9 ?
+                                          Text('Reason (Set : ${filteredPumps[index].setValue}. Actual : ${filteredPumps[index].actualValue})',style: const TextStyle(fontSize: 13,),): const Text('Reason',style: TextStyle(fontSize: 13,),),
+                                          Text(getContentByCode(int.parse(filteredPumps[index].reason)), style: const TextStyle(fontSize: 11,)),
+                                        ],
+                                      ),
+                                    ),
+                                    int.parse(filteredPumps[index].reason)==8 || int.parse(filteredPumps[index].reason)==9?
+                                    MaterialButton(
+                                      color: Colors.orange,
+                                      textColor: Colors.white,
+                                      onPressed: () {
+                                        String payload = '${filteredPumps[index].sNo},1';
+                                        String payLoadFinal = jsonEncode({
+                                          "6300": [{"6301": payload}]
+                                        });
+                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                        sentUserOperationToServer('${pump.swName ?? pump.name} Start Manually', payLoadFinal);
+                                        showSnakeBar('Pump of comment sent successfully');
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text('Reset',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ): const SizedBox(),
+                                    const SizedBox(width: 5,),
+                                  ],
+                                ),
+                              ):
+                              const SizedBox(),
                             ],
                           ):
                           const Column(
@@ -1057,7 +1102,7 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                           onPop: () => print('Popover was popped!'),
                           direction: PopoverDirection.right,
                           width: voltKeyExists?340:125,
-                          height: voltKeyExists?145: 75,
+                          height: voltKeyExists?int.parse(filteredPumps[index].reason)>0?175:145:80,
                           arrowHeight: 15,
                           arrowWidth: 30,
                           barrierColor: Colors.black54,
@@ -1089,11 +1134,11 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                       child: SizedBox(
                         width: 70,
                         height: 70,
-                        child: AppImages.getAsset('irrigationPump', pump['Status'], ''),
+                        child: AppImages.getAsset('irrigationPump', pump.status, ''),
                       ),
                     ),
                   ),
-                  pump['OnDelayLeft'] != '00:00:00'? Positioned(
+                  pump.onDelayLeft != '00:00:00'? Positioned(
                     top: 30,
                     left: 7.5,
                     child: Container(
@@ -1121,7 +1166,7 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                                 color: Colors.grey,
                               ),
                             ),
-                            Text(pump['OnDelayLeft'],
+                            Text(pump.onDelayLeft,
                               style: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 10,
@@ -1134,13 +1179,28 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                     ),
                   )
                       : const SizedBox(),
+                  int.tryParse(pump.reason) != null && int.parse(pump.reason) > 0
+                      ? const Positioned(
+                    top: 10,
+                    left: 37.5,
+                    child: CircleAvatar(
+                      radius: 11,
+                      backgroundColor: Colors.orange,
+                      child: Icon(
+                        Icons.running_with_errors,
+                        size: 17,
+                        color: Colors.white,
+                      ),
+                    ),
+                  )
+                      : const SizedBox(),
                 ],
               ),
               SizedBox(
                 width: 70,
                 height: 30,
                 child: Text(
-                  pump['SW_Name'] ?? pump['Name'],
+                  pump.swName ?? pump.name,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: Colors.black,
@@ -1156,7 +1216,40 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
     );
   }
 
+  List<PumpData> filterPumpsByLocation(List<PumpData> pumps, String currentLocation) {
+    if (currentLocation == 'all') {
+      return pumps;
+    } else {
+      return pumps.where((pump) => pump.location.contains(currentLocation)).toList();
+    }
+  }
+
+  String getContentByCode(int code) {
+    return PumpReasonCode.fromCode(code).content;
+  }
+
+  void showSnakeBar(String msg){
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void sentUserOperationToServer(String msg, String data) async
+  {
+    Map<String, Object> body = {"userId": widget.userId, "controllerId": widget.controllerId, "messageStatus": msg, "data": data, "hardware": data, "createUser": widget.userId};
+    final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
+    if (response.statusCode == 200) {
+      print(response.body);
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
+
 }
+
 
 
 class DisplaySensor extends StatelessWidget {
@@ -1200,16 +1293,15 @@ class DisplaySensor extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         children: [
           if (payload.prsIn != '-')
-            buildSensorWidget('${payload.prsIn} ${getUnitByParameter(context, 'Pressure Sensor', payload.waterMeter)}', 'assets/images/dp_prs_sensor.png'),
+            buildSensorWidget('${getUnitByParameter(context, 'Pressure Sensor', payload.waterMeter)}', 'assets/images/dp_prs_sensor.png'),
 
           if (payload.prsOut != '-')
-            buildSensorWidget('${payload.prsOut} ${getUnitByParameter(context, 'Pressure Sensor', payload.waterMeter)}', 'assets/images/dp_prs_sensor.png'),
+            buildSensorWidget('${getUnitByParameter(context, 'Pressure Sensor', payload.waterMeter)}', 'assets/images/dp_prs_sensor.png'),
 
           if (payload.waterMeter != '-')
             buildSensorWidget('${getUnitByParameter(context, 'Water Meter', payload.waterMeter)}', 'assets/images/dp_flowmeter.png'),
         ],
-      )
-          : const SizedBox(),
+      ) : const SizedBox(),
     );
   }
 
@@ -1840,7 +1932,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                               height: 120,
                               child: Stack(
                                 children: [
-                                  buildFertCheImage(index, fertilizer['Status'], fertilizerCentral[fIndex]['Fertilizer'].length, fertilizerCentral[fIndex]['Agitator']),
+                                  buildFertilizerImage(index, fertilizer['Status'], fertilizerCentral[fIndex]['Fertilizer'].length, fertilizerCentral[fIndex]['Agitator']),
                                   Positioned(
                                     top: 52,
                                     left: 6,
@@ -2018,50 +2110,6 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
           ),
       ],
     );
-  }
-
-  Widget buildFertCheImage(int cIndex, int status, int cheLength, List agitatorList) {
-    String imageName;
-    if(cIndex == cheLength - 1){
-      if(agitatorList.isNotEmpty){
-        imageName='dp_fert_channel_last_aj';
-      }else{
-        imageName='dp_fert_channel_last';
-      }
-    }else{
-      if(agitatorList.isNotEmpty){
-        if(cIndex==0){
-          imageName='dp_fert_channel_first_aj';
-        }else{
-          imageName='dp_fert_channel_center_aj';
-        }
-      }else{
-        imageName='dp_fert_channel_center';
-      }
-    }
-
-    switch (status) {
-      case 0:
-        imageName += '.png';
-        break;
-      case 1:
-        imageName += '_g.png';
-        break;
-      case 2:
-        imageName += '_y.png';
-        break;
-      case 3:
-        imageName += '_r.png';
-        break;
-      case 4:
-        imageName += '.png';
-        break;
-      default:
-        imageName += '.png';
-    }
-
-    return Image.asset('assets/images/$imageName');
-
   }
 
   void durationUpdatingFunction() {
@@ -2650,26 +2698,7 @@ class _LocalFilterState extends State<LocalFilter> {
     );
   }
 
-  Widget buildFilterImage(int cIndex, int status) {
-    String imageName = 'dp_filter';
 
-    switch (status) {
-      case 0:
-        imageName += '.png';
-        break;
-      case 1:
-        imageName += '_g.png';
-        break;
-      case 2:
-        imageName += '_y.png';
-        break;
-      default:
-        imageName += '_r.png';
-    }
-
-    return Image.asset('assets/images/$imageName');
-
-  }
 
   void durationUpdatingFunction() {
     timer?.cancel();
@@ -2882,7 +2911,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                               height: 120,
                               child: Stack(
                                 children: [
-                                  buildFertCheImage(index, fertilizer['Status'], fertilizerLocal[fIndex]['Fertilizer'].length, fertilizerLocal[fIndex]['Agitator']),
+                                  buildFertilizerImage(index, fertilizer['Status'], fertilizerLocal[fIndex]['Fertilizer'].length, fertilizerLocal[fIndex]['Agitator']),
                                   Positioned(
                                     top: 52,
                                     left: 6,
@@ -3026,7 +3055,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                                     itemBuilder: (BuildContext context, int index) {
                                       return Row(
                                         children: [
-                                          Center(child: Text('pH : ', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.normal),)),
+                                          const Center(child: Text('pH : ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.normal),)),
                                           Center(child: Text('${fertilizerLocal[fIndex]['Ph'][index]['Status']}0', style: const TextStyle(fontSize: 11))),
                                           const SizedBox(width: 5,),
                                         ],
@@ -3059,50 +3088,6 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
           ),
       ],
     );
-  }
-
-  Widget buildFertCheImage(int cIndex, int status, int cheLength, List agitatorList) {
-    String imageName;
-    if(cIndex == cheLength - 1){
-      if(agitatorList.isNotEmpty){
-        imageName='dp_fert_channel_last_aj';
-      }else{
-        imageName='dp_fert_channel_last';
-      }
-    }else{
-      if(agitatorList.isNotEmpty){
-        if(cIndex==0){
-          imageName='dp_fert_channel_first_aj';
-        }else{
-          imageName='dp_fert_channel_center_aj';
-        }
-      }else{
-        imageName='dp_fert_channel_center';
-      }
-    }
-
-    switch (status) {
-      case 0:
-        imageName += '.png';
-        break;
-      case 1:
-        imageName += '_g.png';
-        break;
-      case 2:
-        imageName += '_y.png';
-        break;
-      case 3:
-        imageName += '_r.png';
-        break;
-      case 4:
-        imageName += '.png';
-        break;
-      default:
-        imageName += '.png';
-    }
-
-    return Image.asset('assets/images/$imageName');
-
   }
 
   void durationUpdatingFunction() {

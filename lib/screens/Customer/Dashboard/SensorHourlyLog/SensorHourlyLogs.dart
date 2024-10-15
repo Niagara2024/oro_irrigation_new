@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../../../../Models/Customer/SensorHourlyData.dart';
+import '../../../../constants/MyFunction.dart';
 import '../../../../constants/http_service.dart';
 import '../../../../state_management/MqttPayloadProvider.dart';
 
@@ -41,7 +42,6 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
     final response = await HttpService().postRequest("getUserSensorHourlyLog", body);
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-     print(response.body);
       if (data["code"] == 200) {
         try {
           sensors = (data['data'] as List).map((item) {
@@ -51,8 +51,7 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
                   .map((sensorItem) => SensorHourlyData.fromJson({
                 ...sensorItem,
                 'hour': hour,
-              }))
-                  .toList();
+              })).toList();
             });
             return AllMySensor(name: item['name'], data: sensorData);
           }).toList();
@@ -80,7 +79,6 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
       });
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -195,14 +193,24 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
         return data;
       }).toList();
 
+
       series.add(LineSeries<SensorHourlyData, String>(
         name: sensorName,
         dataSource: dataPoints,
         xValueMapper: (SensorHourlyData data, _) => data.hour,
-        yValueMapper: (SensorHourlyData data, _) => data.value.round(),
+        yValueMapper: (SensorHourlyData data, _) {
+          String? result = getUnitByParameter(context, snrName, data.value.toString());
+          String? numericString = result?.replaceAll(RegExp(r'[^\d.]+'), '');
+          double? value = double.tryParse(numericString!);
+          return value ?? 0.0;
+        },
         color: color,
         dataLabelSettings: const DataLabelSettings(isVisible: true),
-        dataLabelMapper: (SensorHourlyData data, _) => '${data.value.round()}',
+        dataLabelMapper: (SensorHourlyData data, _) {
+          String? result = getUnitByParameter(context, snrName, data.value.toString());
+          String? numericString = result?.replaceAll(RegExp(r'[^\d.]+'), '');
+          return '$numericString';
+        },
         markerSettings: const MarkerSettings(isVisible: true),
         dashArray: [4, 4],
         width: 1.5,
@@ -241,59 +249,6 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
     );
   }
 
-
-  static String getSensorUnit(String type, context) {
-    if(type.contains('Moisture')||type.contains('SM')){
-      return 'Values in Cb';
-    }else if(type.contains('Pressure')){
-      return 'Values in bar';
-    }else if(type.contains('Level')){
-      MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
-      Map<String, dynamic>? unitMap = payloadProvider.unitList.firstWhere(
-            (unit) => unit['parameter'] == 'Level Sensor',  orElse: () => null,
-      );
-      if (unitMap != null) {
-        return 'Values in ${unitMap['value']}';
-      }
-      return 'Values in meter';
-    }else if(type.contains('Humidity')){
-      return 'Percentage (%)';
-    }else if(type.contains('Co2')){
-      return 'Parts per million(ppm)';
-    }else if(type.contains('Temperature')){
-      return 'Celsius (°C)';
-    }else if(type.contains('EC')||type.contains('PH')){
-      return 'Siemens per meter (S/m)';
-    }else if(type.contains('Power')){
-      return 'Volts';
-    }else if(type.contains('Water')){
-      return 'Cubic Meters (m³)';
-    }else{
-      return 'Sensor value';
-    }
-  }
-
-  /*static String getUnit(String type) {
-    if(type.contains('Moisture')||type.contains('SM')){
-      return 'Cb';
-    }else if(type.contains('Pressure')){
-      return 'bar';
-    }else if(type.contains('Humidity')){
-      return '%';
-    }else if(type.contains('Co2')){
-      return 'ppm';
-    }else if(type.contains('Temperature')){
-      return '°C';
-    }else if(type.contains('EC')||type.contains('PH')){
-      return 'S/m';
-    }else if(type.contains('Power')){
-      return 'v';
-    }else if(type.contains('Water')){
-      return 'm³';
-    }else{
-      return 'S';
-    }
-  }*/
 }
 
 
@@ -322,14 +277,18 @@ class SensorDataTable extends StatelessWidget {
       for (var sensor in sensorData[hour]!) {
         sensorValues.putIfAbsent(sensor.name ?? 'Unnamed', () => List.filled(sensorData.keys.length, ''));
         final index = sensorData.keys.toList().indexOf(hour);
-        sensorValues[sensor.name ?? 'Unnamed']![index] = sensor.value.round().toString();
+        sensorValues[sensor.name ?? 'Unnamed']![index] = sensor.value.toString();
       }
     }
 
     final List<DataRow> rows = sensorValues.entries.map((entry) {
       final List<DataCell> cells = [DataCell(Text(entry.key))];
 
-      cells.addAll(entry.value.map((value) => DataCell(Text(value))));
+      cells.addAll(entry.value.map((value) {
+        String? result = getUnitByParameter(context, snrName, value.toString());
+        String? numericString = result?.replaceAll(RegExp(r'[^\d.]+'), '');
+        return DataCell(Text(numericString!));
+      }));
 
       return DataRow(cells: cells);
     }).toList();
@@ -360,34 +319,4 @@ class SensorDataTable extends StatelessWidget {
     );
   }
 
-  static String getSensorUnit(String type, BuildContext context) {
-    if(type.contains('Moisture')||type.contains('SM')){
-      return 'Values in Cb';
-    }else if(type.contains('Pressure')){
-      return 'Values in bar';
-    }else if(type.contains('Level')){
-      MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
-      Map<String, dynamic>? unitMap = payloadProvider.unitList.firstWhere(
-            (unit) => unit['parameter'] == 'Level Sensor',  orElse: () => null,
-      );
-      if (unitMap != null) {
-        return 'Values in ${unitMap['value']}';
-      }
-      return 'Values in meter';
-    }else if(type.contains('Humidity')){
-      return 'Percentage (%)';
-    }else if(type.contains('Co2')){
-      return 'Parts per million(ppm)';
-    }else if(type.contains('Temperature')){
-      return 'Celsius (°C)';
-    }else if(type.contains('EC')||type.contains('PH')){
-      return 'Siemens per meter (S/m)';
-    }else if(type.contains('Power')){
-      return 'Volts';
-    }else if(type.contains('Water')){
-      return 'Cubic Meters (m³)';
-    }else{
-      return 'Sensor value';
-    }
-  }
 }

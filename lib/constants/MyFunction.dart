@@ -454,6 +454,37 @@ String changeDateFormat(String dateString) {
   }
 }
 
+String getSensorUnit(String type, BuildContext context) {
+  if(type.contains('Moisture')||type.contains('SM')){
+    return 'Values in Cb';
+  }else if(type.contains('Pressure')){
+    return 'Values in bar';
+  }else if(type.contains('Level')){
+    MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
+    Map<String, dynamic>? unitMap = payloadProvider.unitList.firstWhere(
+          (unit) => unit['parameter'] == 'Level Sensor',  orElse: () => null,
+    );
+    if (unitMap != null) {
+      return 'Values in ${unitMap['value']}';
+    }
+    return 'Values in meter';
+  }else if(type.contains('Humidity')){
+    return 'Percentage (%)';
+  }else if(type.contains('Co2')){
+    return 'Parts per million(ppm)';
+  }else if(type.contains('Temperature')){
+    return 'Celsius (°C)';
+  }else if(type.contains('EC')||type.contains('PH')){
+    return 'Siemens per meter (S/m)';
+  }else if(type.contains('Power')){
+    return 'Volts';
+  }else if(type.contains('Water')){
+    return 'Cubic Meters (m³)';
+  }else{
+    return 'Sensor value';
+  }
+}
+
 double convertMetersToFeet(double meters) {
   return meters * 3.28084;
 }

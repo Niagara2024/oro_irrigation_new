@@ -443,6 +443,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                   ),
                 );
               }
+
               return PopupMenuItem(
                 value: index,
                 child: AnimatedBuilder(
@@ -455,7 +456,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                           _selectedItem.value = value!;
                           selectedRadioTile = value.index;
                         },
-                        subtitle: Text(myMasterControllerList[index].model),
+                        subtitle: Text(myMasterControllerList[index].imeiNo),
                       );
                     },
                     child: Text(myMasterControllerList[index].categoryName)
@@ -463,6 +464,8 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                 ),
               );
             },);
+
+
           },
         ),
         const SizedBox(width: 20,),
@@ -762,99 +765,97 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                 elevation: 10,
                 tooltip: 'Add New Master controller',
                 child: Center(
-                    child: MaterialButton(
-                      onPressed:null,
-                      textColor: Colors.white,
-                      child: Row(
-                        children: [
-                          Icon(Icons.add, color: myTheme.primaryColor),
-                          const SizedBox(width: 3),
-                          Text('New Master Device',style: TextStyle(color: myTheme.primaryColor)),
-                        ],
-                      ),
+                  child: MaterialButton(
+                    onPressed: null, // Consider setting an action for this button
+                    textColor: Colors.white,
+                    child: Row(
+                      children: [
+                        Icon(Icons.add, color: myTheme.primaryColor),
+                        const SizedBox(width: 3),
+                        Text(
+                          'New Master Device',
+                          style: TextStyle(color: myTheme.primaryColor),
+                        ),
+                      ],
                     ),
+                  ),
                 ),
                 onCanceled: () {
-                  checkboxValue = false;
+                  checkboxValue = false; // Update checkbox state if needed
                 },
                 itemBuilder: (context) {
-                  return List.generate(myMasterControllerList.length+1 ,(index) {
-                    if(myMasterControllerList.isEmpty){
-                      return const PopupMenuItem(
+                  if (myMasterControllerList.isEmpty) {
+                    return [
+                      const PopupMenuItem(
                         child: Text('No master controller available to create site'),
-                      );
-                    }
-                    else if(myMasterControllerList.length == index){
-                      return PopupMenuItem(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            MaterialButton(
-                              color: Colors.red,
-                              textColor: Colors.white,
-                              child: const Text('CANCEL'),
-                              onPressed: () {
-                                setState(() {
-                                  Navigator.pop(context);
-                                });
-                              },
-                            ),
-                            MaterialButton(
-                              color: Colors.green,
-                              textColor: Colors.white,
-                              child: const Text('ADD'),
-                              onPressed: () async {
-                                Navigator.pop(context);
-                                Map<String, dynamic> body = {
-                                  "userId": widget.customerID,
-                                  "dealerId": widget.userID,
-                                  "productId": myMasterControllerList[selectedRadioTile].productId,
-                                  "categoryName": myMasterControllerList[selectedRadioTile].categoryName,
-                                  "createUser": widget.userID,
-                                  "groupName": customerSiteList[currentSiteInx].groupName,
-                                  "groupId": customerSiteList[currentSiteInx].userGroupId,
-                                };
-                                final response = await HttpService().postRequest("createUserDeviceListWithGroup", body);
-                                if(response.statusCode == 200)
-                                {
-                                  var data = jsonDecode(response.body);
-                                  if(data["code"]==200)
-                                  {
-                                    getCustomerSite();
-                                    getMasterProduct();
-                                    //getNodeStockList();
-                                    _showSnackBar(data["message"]);
-                                  }
-                                  else{
-                                    _showSnackBar(data["message"]);
-                                  }
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                      );
-                    }
+                      ),
+                    ];
+                  }
+
+                  return List.generate(myMasterControllerList.length, (index) {
                     return PopupMenuItem(
                       value: index,
-                      child: AnimatedBuilder(
-                          animation: _selectedItem,
-                          builder: (context, child) {
-                            return RadioListTile(
-                              value: MasterController.values[index],
-                              groupValue: _selectedItem.value,
-                              title: child,  onChanged: (value) {
-                              _selectedItem.value = value!;
-                              selectedRadioTile = value.index;
+                      child: Column(
+                        children: [
+                          RadioListTile<int>(
+                            value: index,
+                            groupValue: selectedRadioTile,
+                            title: Text(myMasterControllerList[index].categoryName),
+                            subtitle: Text(myMasterControllerList[index].imeiNo),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedRadioTile = value!;
+                              });
                             },
-                              subtitle: Text(myMasterControllerList[index].model),
-                            );
-                          },
-                          child: Text(myMasterControllerList[index].categoryName)
-
+                          ),
+                          // Optionally include a cancel and add button
+                          if (index == myMasterControllerList.length - 1) ...[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                MaterialButton(
+                                  color: Colors.red,
+                                  textColor: Colors.white,
+                                  child: const Text('CANCEL'),
+                                  onPressed: () {
+                                    Navigator.pop(context); // Close the menu
+                                  },
+                                ),
+                                MaterialButton(
+                                  color: Colors.green,
+                                  textColor: Colors.white,
+                                  child: const Text('ADD'),
+                                  onPressed: () async {
+                                    Navigator.pop(context); // Close the menu
+                                    Map<String, dynamic> body = {
+                                      "userId": widget.customerID,
+                                      "dealerId": widget.userID,
+                                      "productId": myMasterControllerList[selectedRadioTile].productId,
+                                      "categoryName": myMasterControllerList[selectedRadioTile].categoryName,
+                                      "createUser": widget.userID,
+                                      "groupName": customerSiteList[currentSiteInx].groupName,
+                                      "groupId": customerSiteList[currentSiteInx].userGroupId,
+                                    };
+                                    final response = await HttpService().postRequest("createUserDeviceListWithGroup", body);
+                                    if (response.statusCode == 200) {
+                                      var data = jsonDecode(response.body);
+                                      if (data["code"] == 200) {
+                                        getCustomerSite();
+                                        getMasterProduct();
+                                        _showSnackBar(data["message"]);
+                                      } else {
+                                        _showSnackBar(data["message"]);
+                                      }
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
                       ),
                     );
-                  },);
+                  });
                 },
               ),
               const SizedBox(width: 10,),

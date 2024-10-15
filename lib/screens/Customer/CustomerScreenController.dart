@@ -31,6 +31,7 @@ import 'Dashboard/ResetVerssion.dart';
 import 'Dashboard/RunByManual.dart';
 import 'Dashboard/SensorHourlyLog/SensorHourlyLogs.dart';
 import 'Dashboard/TicketHomePage.dart';
+import 'Dashboard/UserChatScreen.dart';
 import 'ProgramSchedule.dart';
 import 'PumpControllerScreen/PumpDashboard.dart';
 
@@ -699,10 +700,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     );
   }
 
-  Widget buildWideLayout(screenWidth, payload) {
-
-    //print('payload.runtimeType:${payload.payload2408.runtimeType}');
-    //print('payload:${payload}');
+  Widget buildWideLayout(screenWidth,MqttPayloadProvider payload) {
 
     return Scaffold(
       appBar: AppBar(
@@ -921,6 +919,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                             leading: const Icon(Icons.info_outline),
                             title: const Text('App info'),
                             onTap: () {
+                              Navigator.push(context, MaterialPageRoute(builder:(context) => UserChatScreen(userId: widget.userId, dealerId: 0, userName: widget.customerName)));
                               Navigator.pop(context);
                             },
                           ),

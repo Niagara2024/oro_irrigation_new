@@ -104,7 +104,6 @@ class MasterData {
       );
     }else{
       //pump controller
-      //print(json['liveMessage']);
       var liveMessage = json['liveMessage'] != null ? json['liveMessage'] as List : [];
       List<CM> pumpLiveList = liveMessage.isNotEmpty? liveMessage.map((live) => CM.fromJson(live)).toList(): [];
 
@@ -350,34 +349,51 @@ class PumpData {
   });
 
   factory PumpData.fromJson(Map<String, dynamic> json) {
+
     String onDelay = json['OnDelay'] ?? '00:00:00';
     int type = json['Type'] ?? 0;
     String location = json['Location'] ?? '-';
-    bool hasOnOffReasonKey = json.containsKey('OnOffReason');
+
+    List<dynamic> waterMeter = json.containsKey('Watermeter') && json['Watermeter'] != null
+        ? List<dynamic>.from(json['Watermeter'])
+        : [];
+    List<dynamic> pressure = json.containsKey('Pressure') && json['Pressure'] != null
+        ? List<dynamic>.from(json['Pressure'])
+        : [];
+    List<dynamic> level = json.containsKey('Level') && json['Level'] != null
+        ? List<dynamic>.from(json['Level'])
+        : [];
+
+    String reason = json.containsKey('OnOffReason') && json['OnOffReason'] != null
+        ? json['OnOffReason']
+        : json.containsKey('Reason') && json['Reason'] != null
+        ? json['Reason'].toString()
+        : '0';
+
     return PumpData(
-      sNo: json['S_No'],
+      sNo: json['S_No'] ?? 0,
       type: type,
-      name: json['Name'],
-      swName: json['SW_Name'],
+      name: json['Name'] ?? 'Unknown',
+      swName: json['SW_Name'] ?? '',
       location: location,
-      status: json['Status'],
-      reason: hasOnOffReasonKey? json['OnOffReason']:json['Reason'].toString(),
-      setValue: json['SetValue'],
-      actualValue: json['ActualValue'],
-      phase: json['Phase'],
-      voltage: json['Voltage'],
-      current: json['Current'],
-      signalStrength: json['SignalStrength'],
-      battery: json['Battery'],
-      version: json['Version'],
-      waterMeter: json['Watermeter'],
-      pressure: json['Pressure'],
-      level: json['Level'],
+      status: json['Status'] ?? 0,
+      reason: reason,
+      setValue: json['SetValue'] ?? '',
+      actualValue: json['ActualValue'] ?? '',
+      phase: json['Phase'] ?? '',
+      voltage: json['Voltage'] ?? '',
+      current: json['Current'] ?? '',
+      signalStrength: json['SignalStrength'] ?? '',
+      battery: json['Battery'] ?? '',
+      version: json['Version'] ?? '',
+      waterMeter: waterMeter,
+      pressure: pressure,
+      level: level,
       float: [],
       onDelay: onDelay,
-      onDelayCompleted: json['OnDelayCompleted'],
-      onDelayLeft: json['OnDelayLeft'],
-      program: json['Program'],
+      onDelayCompleted: json['OnDelayCompleted'] ?? '',
+      onDelayLeft: json['OnDelayLeft'] ?? '',
+      program: json['Program'] ?? '',
     );
   }
 
@@ -802,7 +818,6 @@ class IrrigationLine {
   });
 
   factory IrrigationLine.fromJson(Map<String, dynamic> json) {
-    print(json);
     var mainValve = json['mainValve'] as List;
     List<MainValve> mainValveList = mainValve.isNotEmpty? mainValve.map((mv) => MainValve.fromJson(mv)).toList() : [];
 

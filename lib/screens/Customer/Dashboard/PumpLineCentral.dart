@@ -388,15 +388,29 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                         int signalStrength = voltKeyExists? int.parse(filteredPumps[index].signalStrength):0;
                         int batteryVolt = voltKeyExists? int.parse(filteredPumps[index].battery):0;
                         List<String> voltages = voltKeyExists? filteredPumps[index].voltage.split(','):[];
-                        List<String> current = voltKeyExists? filteredPumps[index].current.split(','):[];
+                        List<String> currents = voltKeyExists? filteredPumps[index].current.split(','):[];
 
                         List<String> columns = ['-', '-', '-'];
 
-                        if(voltKeyExists){
-                          for (var pair in current) {
-                            List<String> parts = pair.split(':');
-                            int columnIndex = int.parse(parts[0]) - 1;
-                            columns[columnIndex] = parts[1];
+                        if (voltKeyExists) {
+                          for (var pair in currents) {
+                            String sanitizedPair = pair.trim().replaceAll(RegExp(r'^"|"$'), '');
+                            List<String> parts = sanitizedPair.split(':');
+                            if (parts.length != 2) {
+                              print('Error: Pair "$sanitizedPair" does not have the expected format');
+                              continue;
+                            }
+
+                            try {
+                              int columnIndex = int.parse(parts[0].trim()) - 1;
+                              if (columnIndex >= 0 && columnIndex < columns.length) {
+                                columns[columnIndex] = parts[1].trim();
+                              } else {
+                                print('Error: Column index $columnIndex is out of bounds');
+                              }
+                            } catch (e) {
+                              print('Error parsing column index from "$sanitizedPair": $e');
+                            }
                           }
                         }
 
@@ -902,15 +916,29 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                         int signalStrength = voltKeyExists? int.parse(filteredPumps[index].signalStrength):0;
                         int batteryVolt = voltKeyExists? int.parse(filteredPumps[index].battery):0;
                         List<String> voltages = voltKeyExists? filteredPumps[index].voltage.split(','):[];
-                        List<String> current = voltKeyExists? filteredPumps[index].current.split(','):[];
+                        List<String> currents = voltKeyExists? filteredPumps[index].current.split(','):[];
 
                         List<String> columns = ['-', '-', '-'];
 
-                        if(voltKeyExists){
-                          for (var pair in current) {
-                            List<String> parts = pair.split(':');
-                            int columnIndex = int.parse(parts[0]) - 1;
-                            columns[columnIndex] = parts[1];
+                        if (voltKeyExists) {
+                          for (var pair in currents) {
+                            String sanitizedPair = pair.trim().replaceAll(RegExp(r'^"|"$'), '');
+                            List<String> parts = sanitizedPair.split(':');
+                            if (parts.length != 2) {
+                              print('Error: Pair "$sanitizedPair" does not have the expected format');
+                              continue;
+                            }
+
+                            try {
+                              int columnIndex = int.parse(parts[0].trim()) - 1;
+                              if (columnIndex >= 0 && columnIndex < columns.length) {
+                                columns[columnIndex] = parts[1].trim();
+                              } else {
+                                print('Error: Column index $columnIndex is out of bounds');
+                              }
+                            } catch (e) {
+                              print('Error parsing column index from "$sanitizedPair": $e');
+                            }
                           }
                         }
 
@@ -1115,6 +1143,8 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                           srcCount==2 && irgCount==2? (position.dx+45)+(index*70)-420:
                           srcCount==3 && irgCount==2? (position.dx+45)+(index*70)-490:
 
+                          srcCount==2 && irgCount==3? (position.dx+45)+(index*70)-490:
+
                           srcCount==2 && irgCount==4? (position.dx+45)+(index*70)-560:
 
                           srcCount==4 && irgCount==1? (position.dx+45)+(index*70)-490:
@@ -1305,8 +1335,6 @@ class DisplaySensor extends StatelessWidget {
     );
   }
 
-
-
   Widget buildSensorWidget(String value, String imagePath) {
     return Column(
       children: [
@@ -1319,9 +1347,9 @@ class DisplaySensor extends StatelessWidget {
             ),
             Positioned(
               top: 42,
-              left: 5,
+              left: 1,
               child: Container(
-                width: 60,
+                width: 68,
                 height: 17,
                 decoration: BoxDecoration(
                   color: Colors.yellow,

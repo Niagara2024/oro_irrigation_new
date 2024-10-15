@@ -13,6 +13,7 @@ import '../../constants/MyFunction.dart';
 import '../../constants/http_service.dart';
 import '../../constants/theme.dart';
 import '../Customer/CustomerScreenController.dart';
+import '../Customer/Dashboard/UserChatScreen.dart';
 import '../Forms/create_account.dart';
 import '../Forms/device_list.dart';
 import 'ServiceRequestsTable.dart';
@@ -373,7 +374,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
               ),
             ),
             SizedBox(
-              width: 300,
+              width: 330,
               child: Card(
                 elevation: 5,
                 surfaceTintColor: Colors.white,
@@ -445,6 +446,18 @@ class _DealerDashboardState extends State<DealerDashboard> {
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
+                                  IconButton(
+                                    tooltip: 'chart',
+                                    onPressed: (){
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => UserChatScreen(userId: customer.userId, dealerId: customer.userId, userName: customer.userName,),
+                                        ),
+                                      );
+                                    },
+                                    icon: const Icon(Icons.question_answer_rounded),
+                                  ),
                                   (customer.criticalAlarmCount + customer.serviceRequestCount)>0? BadgeButton(
                                     onPressed: () {
                                       showModalBottomSheet(
@@ -479,59 +492,22 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                     badgeNumber: customer.criticalAlarmCount + customer.serviceRequestCount,
                                   ):
                                   const SizedBox(),
-                                  PopupMenuButton<String>(
-                                    onSelected: (String value) {
-                                      setState(() {
-                                        if(value=='View'){
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => CustomerScreenController(
-                                                customerId: customer.userId,
-                                                customerName: customer.userName,
-                                                mobileNo: '+${customer.countryCode}-${customer.mobileNumber}',
-                                                comingFrom: 'AdminORDealer',
-                                                emailId: customer.emailId, userId: widget.userId,),
-                                            ),
-                                          );
-                                        }
-                                      });
+                                  IconButton(
+                                    tooltip: 'View dashboard',
+                                    onPressed: (){
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => CustomerScreenController(
+                                            customerId: customer.userId,
+                                            customerName: customer.userName,
+                                            mobileNo: '+${customer.countryCode}-${customer.mobileNumber}',
+                                            comingFrom: 'AdminORDealer',
+                                            emailId: customer.emailId, userId: widget.userId,),
+                                        ),
+                                      );
                                     },
-                                    icon: const Icon(Icons.more_vert),
-                                    itemBuilder: (BuildContext context) {
-                                      return [
-                                        const PopupMenuItem<String>(
-                                          value: 'View',
-                                          child: Row(
-                                            children: [
-                                              Icon(Icons.view_quilt_outlined, color: Colors.black),
-                                              SizedBox(width: 8),
-                                              Text('View Customer Dashboard'),
-                                            ],
-                                          ),
-                                        ),
-                                        const PopupMenuItem<String>(
-                                          value: 'Edit',
-                                          child: Row(
-                                            children: [
-                                              Icon(Icons.edit_outlined, color: Colors.blue),
-                                              SizedBox(width: 8),
-                                              Text('Edit Account'),
-                                            ],
-                                          ),
-                                        ),
-                                        const PopupMenuItem<String>(
-                                          value: 'Delete',
-                                          child: Row(
-                                            children: [
-                                              Icon(Icons.delete, color: Colors.redAccent),
-                                              SizedBox(width: 8),
-                                              Text('Delete Account'),
-                                            ],
-                                          ),
-                                        ),
-                                      ];
-                                    },
+                                    icon: const Icon(Icons.view_quilt_rounded),
                                   ),
                                 ],
                               ),

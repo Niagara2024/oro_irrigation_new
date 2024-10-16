@@ -32,19 +32,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   List<RelayStatus> rlyStatusList = [];
   bool showNoHwCm = false;
 
-  @override
-  void initState() {
-    super.initState();
-    liveSync();
-  }
-
-  void liveSync(){
-    Future.delayed(const Duration(seconds: 2), () {
-      String payLoadFinal = jsonEncode({"3000": [{"3001": ""}]});
-      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.siteData.master[widget.masterInx].deviceId}');
-    });
-  }
-
   int? getIrrigationPauseFlag(String line, List<dynamic> payload2408) {
     for (var data in payload2408) {
       if (data["Line"] == line) {
@@ -102,7 +89,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 }
               }else{
                 if(items['SNo']!=0){
-                  Provider.of<MqttPayloadProvider>(context).ncConnection(false);
+                  print(items['DeviceId']);
+                  Provider.of<MqttPayloadProvider>(context).nodeConnection(false);
                 }
               }
             } catch (e) {

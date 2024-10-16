@@ -39,11 +39,10 @@ class _DealerDashboardState extends State<DealerDashboard> {
   List<CustomerListMDL> filteredCustomerList = [];
   late DataResponse dataResponse;
 
-  String selectedValue = 'All';
-  List<String> dropdownItems = ['All', 'Last year', 'Last month', 'Last Week'];
-  bool visibleLoading = false;
-  int totalSales = 0;
+  bool gettingSR = false;
+  bool gettingCL = false;
 
+  int totalSales = 0;
   bool searched = false;
   TextEditingController txtFldSearch = TextEditingController();
 
@@ -52,13 +51,12 @@ class _DealerDashboardState extends State<DealerDashboard> {
   void initState() {
     super.initState();
     searched=false;
+    gettingSR = true;
+    gettingCL = true;
     dataResponse = DataResponse(graph: {}, total: []);
-    indicatorViewShow();
-    Future.delayed(const Duration(seconds: 2), () {
-      getProductSalesReport('All');
-      getProductStock();
-      getCustomerList();
-    });
+    getProductSalesReport('All');
+    getProductStock();
+    getCustomerList();
 
   }
 
@@ -69,28 +67,10 @@ class _DealerDashboardState extends State<DealerDashboard> {
     });
   }
 
-  void indicatorViewShow() {
-    if(mounted){
-      setState(() {
-        visibleLoading = true;
-      });
-    }
-  }
-
-  void indicatorViewHide() {
-    if(mounted){
-      setState(() {
-        visibleLoading = false;
-      });
-    }
-  }
-
   Future<void> getProductSalesReport(String type) async {
     Map<String, Object> body = {"userId": widget.userId, "userType": 2, "type": type, "year": 2024};
-    print(body);
     final response = await HttpService().postRequest("getProductSalesReport", body);
     if (response.statusCode == 200) {
-      print(response.body);
       var data = jsonDecode(response.body);
       if (data is Map<String, dynamic> && data["code"] == 200) {
         try {
@@ -99,11 +79,17 @@ class _DealerDashboardState extends State<DealerDashboard> {
           for (int i = 0; i < dataResponse.total!.length; i++) {
             totalSales += dataResponse.total![i].totalProduct;
           }
+          setState(() {
+            gettingSR = false;
+          });
         }catch (e) {
           print('Error parsing data response: $e');
         }
+      }else{
+        setState(() {
+          gettingSR = false;
+        });
       }
-      indicatorViewHide();
     }else{
       //_showSnackBar(response.body);
     }
@@ -137,7 +123,6 @@ class _DealerDashboardState extends State<DealerDashboard> {
     final response = await HttpService().postRequest("getUserList", body);
     if (response.statusCode == 200) {
       myCustomerList.clear();
-      //print(response.body);
       var data = jsonDecode(response.body);
       if (data["code"] == 200) {
         final cntList = data["data"] as List;
@@ -145,10 +130,17 @@ class _DealerDashboardState extends State<DealerDashboard> {
         for (int i = 0; i < cntList.length; i++) {
           tempList.add(CustomerListMDL.fromJson(cntList[i]));
         }
+
+        myCustomerList.addAll(tempList);
+        filteredCustomerList = myCustomerList;
+        tempList=[];
+
         setState(() {
-          myCustomerList.addAll(tempList);
-          filteredCustomerList = myCustomerList;
-          tempList=[];
+          gettingCL = false;
+        });
+      }else{
+        setState(() {
+          gettingCL = false;
         });
       }
     } else {
@@ -159,9 +151,6 @@ class _DealerDashboardState extends State<DealerDashboard> {
   @override
   Widget build(BuildContext context)
   {
-    double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
-
     return Scaffold(
       backgroundColor: myTheme.primaryColor.withOpacity(0.01),
       appBar: AppBar(
@@ -189,18 +178,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
         //scrolledUnderElevation: 5.0,
         //shadowColor: Theme.of(context).colorScheme.shadow,
       ),
-      body: visibleLoading? Visibility(
-        visible: visibleLoading,
-        child: Container(
-          height: height,
-          color: Colors.transparent,
-          padding: EdgeInsets.fromLTRB(width/2 - 60, 0, width/2 - 60, 0),
-          child: const LoadingIndicator(
-            indicatorType: Indicator.ballPulse,
-          ),
-        ),
-      ):
-      Padding(
+      body: Padding(
         padding: const EdgeInsets.all(3.0),
         child: Row(
           children: [
@@ -227,18 +205,26 @@ class _DealerDashboardState extends State<DealerDashboard> {
                               children: [
                                 SegmentedButton<Calendar>(
                                   style: ButtonStyle(
-                                    backgroundColor: WidgetStatePropertyAll(myTheme.primaryColor.withOpacity(0.1)),
+                                    backgroundColor: WidgetStateProperty.all(myTheme.primaryColor.withOpacity(0.1)),
                                     iconColor: WidgetStateProperty.all(myTheme.primaryColor),
                                   ),
                                   segments: const <ButtonSegment<Calendar>>[
                                     ButtonSegment<Calendar>(
-                                        value: Calendar.all,
-                                        label: Text('All'),
-                                        icon: Icon(Icons.calendar_view_day)),
+                                      value: Calendar.all,
+                                      label: SizedBox(
+                                        width: 45,
+                                        child: Text('All', textAlign: TextAlign.center),
+                                      ),
+                                      icon: Icon(Icons.calendar_view_day),
+                                    ),
                                     ButtonSegment<Calendar>(
-                                        value: Calendar.year,
-                                        label: Text('Year'),
-                                        icon: Icon(Icons.calendar_view_month)),
+                                      value: Calendar.year,
+                                      label: SizedBox(
+                                        width: 45,
+                                        child: Text('Year', textAlign: TextAlign.center),
+                                      ),
+                                      icon: Icon(Icons.calendar_view_month),
+                                    ),
                                   ],
                                   selected: <Calendar>{calendarView},
                                   onSelectionChanged: (Set<Calendar> newSelection) {
@@ -250,12 +236,24 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                   },
                                 ),
                                 const SizedBox(width: 16,),
-                                Text('Total Sales : $totalSales', style: const TextStyle(fontSize: 15),)
+                                Text.rich(
+                                  TextSpan(
+                                    text: 'Total Sales: ', // Regular text
+                                    style: const TextStyle(fontSize: 15),
+                                    children: <TextSpan>[
+                                      TextSpan(
+                                        text: '$totalSales',
+                                        style: const TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                           Expanded(
-                            child: MySalesChart(graph: dataResponse.graph,),
+                            child: gettingSR?const Center(child: SizedBox(width:40,child: LoadingIndicator(indicatorType: Indicator.ballPulse))):
+                            MySalesChart(graph: dataResponse.graph,),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(bottom: 8.0),
@@ -375,38 +373,41 @@ class _DealerDashboardState extends State<DealerDashboard> {
             ),
             SizedBox(
               width: 330,
+              height: MediaQuery.sizeOf(context).height,
               child: Card(
                 elevation: 5,
                 surfaceTintColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5.0), // Adjust the radius as needed
                 ),
-                child: Column(
+                child: gettingCL?
+                const Center(child: SizedBox(width:40,child: LoadingIndicator(indicatorType: Indicator.ballPulse))):
+                Column(
                   children: [
                     searched?ListTile(
                       title: TextField(
-                          controller: txtFldSearch,
-                          decoration: InputDecoration(
-                              prefixIcon: const Icon(Icons.search),
-                              suffixIcon: IconButton(
-                                icon: const Icon(Icons.clear, color: Colors.red,),
-                                onPressed: () {
-                                  searched = false;
-                                  filteredCustomerList = myCustomerList;
-                                  txtFldSearch.clear();
-                                  setState(() {
-                                  });
-                                },
-                              ),
-                              hintText: 'Search by name',
-                              border: InputBorder.none),
-                          onChanged: (value) {
-                            setState(() {
-                              filteredCustomerList = myCustomerList.where((customer) {
-                                return customer.userName.toLowerCase().startsWith(value.toLowerCase());
-                              }).toList();
-                            });
-                          },
+                        controller: txtFldSearch,
+                        decoration: InputDecoration(
+                            prefixIcon: const Icon(Icons.search),
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.clear, color: Colors.red,),
+                              onPressed: () {
+                                searched = false;
+                                filteredCustomerList = myCustomerList;
+                                txtFldSearch.clear();
+                                setState(() {
+                                });
+                              },
+                            ),
+                            hintText: 'Search by name',
+                            border: InputBorder.none),
+                        onChanged: (value) {
+                          setState(() {
+                            filteredCustomerList = myCustomerList.where((customer) {
+                              return customer.userName.toLowerCase().startsWith(value.toLowerCase());
+                            }).toList();
+                          });
+                        },
                       ),
                     ):
                     ListTile(

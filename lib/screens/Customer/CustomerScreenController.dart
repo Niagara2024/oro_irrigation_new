@@ -107,7 +107,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     });
   }
 
-
   Future<void> getCustomerSite(userId) async
   {
     Map<String, Object> body = {"userId" : userId ?? 0};
@@ -116,14 +115,13 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     {
       mySiteList.clear();
       var data = jsonDecode(response.body);
-      print(response.body);
       if(data["code"]==200)
       {
         final jsonData = data["data"] as List;
         try {
           MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
           payloadProvider.saveUnits(jsonData[0]['master'][0]['units']);
-          payloadProvider.ncConnection(true);
+          payloadProvider.nodeConnection(true);
           mySiteList = jsonData.map((json) => DashboardModel.fromJson(json)).toList();
           indicatorViewHide();
           if(mySiteList.isNotEmpty){
@@ -700,7 +698,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     );
   }
 
-  Widget buildWideLayout(screenWidth,MqttPayloadProvider payload) {
+  Widget buildWideLayout(screenWidth, MqttPayloadProvider payload) {
 
     return Scaffold(
       appBar: AppBar(
@@ -1386,7 +1384,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     );
   }
 
-  Widget buildScreen(screenWidth, payload)
+  Widget buildScreen(screenWidth, MqttPayloadProvider payload)
   {
     Duration lastCommunication = payload.lastCommunication;
 
@@ -1433,7 +1431,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             borderRadius: BorderRadius.only(topLeft: Radius.circular(0),topRight: Radius.circular(0)),
           ),
           child: Center(
-            child: Text('Node Connections not liked properly with the Controller'.toUpperCase(),
+            child: Text('Some node missing or not liked properly with the Controller'.toUpperCase(),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 12.0,
@@ -1966,9 +1964,9 @@ class _SideSheetClassState extends State<SideSheetClass> {
               List<dynamic> rlyList = item['RlyStatus'];
               List<RelayStatus> rlyStatusList = rlyList.isNotEmpty? rlyList.map((rl) => RelayStatus.fromJson(rl)).toList() : [];
               widget.nodeList[position].rlyStatus = rlyStatusList;
-            } else {
+            }else {
               if(item['SNo']!=0){
-                Provider.of<MqttPayloadProvider>(context).ncConnection(false);
+                Provider.of<MqttPayloadProvider>(context).nodeConnection(false);
               }
             }
           } catch (e) {

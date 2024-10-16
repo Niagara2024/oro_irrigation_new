@@ -34,15 +34,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
   List<CustomerListMDL> myCustomerList = <CustomerListMDL>[];
   late DataResponse dataResponse;
 
-  bool visibleLoading = false;
 
   int totalSales = 0;
+
+  bool gettingSR = false;
+  bool gettingCL = false;
 
   @override
   void initState() {
     super.initState();
+    gettingSR = true;
+    gettingCL = true;
     dataResponse = DataResponse(graph: {}, total: []);
-    indicatorViewShow();
     getProductSalesReport("All");
     getProductStock();
     getCustomerList();
@@ -62,22 +65,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
     }
   }
 
-  void indicatorViewShow() {
-    if(mounted){
-      setState(() {
-        visibleLoading = true;
-      });
-    }
-  }
-
-  void indicatorViewHide() {
-    if(mounted){
-      setState(() {
-        visibleLoading = false;
-      });
-    }
-  }
-
 
   Future<void> getProductSalesReport(String type) async {
     Map<String, Object> body = {"userId": widget.userId, "userType": 1, "type": type, "year": 2024};
@@ -91,11 +78,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
           for (int i = 0; i < dataResponse.total!.length; i++) {
             totalSales += dataResponse.total![i].totalProduct;
           }
+          setState(() {
+            gettingSR = false;
+          });
         }catch (e) {
           print('Error parsing data response: $e');
         }
+      }else{
+        setState(() {
+          gettingSR = false;
+        });
       }
-      indicatorViewHide();
     }else{
       //_showSnackBar(response.body);
     }
@@ -136,9 +129,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
         for (int i = 0; i < cntList.length; i++) {
           tempList.add(CustomerListMDL.fromJson(cntList[i]));
         }
+        myCustomerList.addAll(tempList);
+        tempList=[];
         setState(() {
-          myCustomerList.addAll(tempList);
-          tempList=[];
+          gettingCL = false;
+        });
+      }else{
+        setState(() {
+          gettingCL = false;
         });
       }
     } else {
@@ -149,9 +147,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   Widget build(BuildContext context)
   {
-    double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
-
     return Scaffold(
       backgroundColor: myTheme.primaryColor.withOpacity(0.01),
       appBar: AppBar(
@@ -179,18 +174,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         //scrolledUnderElevation: 5.0,
         //shadowColor: Theme.of(context).colorScheme.shadow,
       ),
-      body: visibleLoading? Visibility(
-        visible: visibleLoading,
-        child: Container(
-          height: height,
-          color: Colors.transparent,
-          padding: EdgeInsets.fromLTRB(width/2 - 60, 0, width/2 - 60, 0),
-          child: const LoadingIndicator(
-            indicatorType: Indicator.ballPulse,
-          ),
-        ),
-      ):
-      Padding(
+      body: Padding(
         padding: const EdgeInsets.all(3.0),
         child: Row(
           children: [
@@ -217,18 +201,26 @@ class _AdminDashboardState extends State<AdminDashboard> {
                               children: [
                                 SegmentedButton<Calendar>(
                                   style: ButtonStyle(
-                                    backgroundColor: WidgetStatePropertyAll(myTheme.primaryColor.withOpacity(0.1)),
+                                    backgroundColor: WidgetStateProperty.all(myTheme.primaryColor.withOpacity(0.1)),
                                     iconColor: WidgetStateProperty.all(myTheme.primaryColor),
                                   ),
                                   segments: const <ButtonSegment<Calendar>>[
                                     ButtonSegment<Calendar>(
-                                        value: Calendar.all,
-                                        label: Text('All'),
-                                        icon: Icon(Icons.calendar_view_day)),
+                                      value: Calendar.all,
+                                      label: SizedBox(
+                                        width: 45,
+                                        child: Text('All', textAlign: TextAlign.center),
+                                      ),
+                                      icon: Icon(Icons.calendar_view_day),
+                                    ),
                                     ButtonSegment<Calendar>(
-                                        value: Calendar.year,
-                                        label: Text('Year'),
-                                        icon: Icon(Icons.calendar_view_month)),
+                                      value: Calendar.year,
+                                      label: SizedBox(
+                                        width: 45,
+                                        child: Text('Year', textAlign: TextAlign.center),
+                                      ),
+                                      icon: Icon(Icons.calendar_view_month),
+                                    ),
                                   ],
                                   selected: <Calendar>{calendarView},
                                   onSelectionChanged: (Set<Calendar> newSelection) {
@@ -240,12 +232,24 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                   },
                                 ),
                                 const SizedBox(width: 16,),
-                                Text('Total Sales : $totalSales', style: const TextStyle(fontSize: 15),)
+                                Text.rich(
+                                  TextSpan(
+                                    text: 'Total Sales: ', // Regular text
+                                    style: const TextStyle(fontSize: 15),
+                                    children: <TextSpan>[
+                                      TextSpan(
+                                        text: '$totalSales',
+                                        style: const TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                           Expanded(
-                            child: MySalesChart(graph: dataResponse.graph,),
+                            child: gettingSR?const Center(child: SizedBox(width:40,child: LoadingIndicator(indicatorType: Indicator.ballPulse))):
+                            MySalesChart(graph: dataResponse.graph,),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(bottom: 8.0),
@@ -296,8 +300,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                 AlertDialog alert = AlertDialog(
                                   title: const Text("Add new stock"),
                                   content: SizedBox(
-                                    width: 640,
-                                    height: 300,
+                                      width: 640,
+                                      height: 300,
                                       child: AddProduct(callback: callbackFunction)
                                   ),
                                   shape: RoundedRectangleBorder(
@@ -384,14 +388,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ),
             ),
             SizedBox(
-              width: 270,
+              width: 300,
+              height: MediaQuery.sizeOf(context).height,
               child: Card(
                 elevation: 5,
                 surfaceTintColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5.0), // Adjust the radius as needed
                 ),
-                child: Column(
+                child: gettingCL?
+                const Center(child: SizedBox(width:40,child: LoadingIndicator(indicatorType: Indicator.ballPulse))):
+                Column(
                   children: [
                     ListTile(
                       title: const Text('My Dealer', style: TextStyle(fontSize: 17)),

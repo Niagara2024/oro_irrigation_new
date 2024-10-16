@@ -189,7 +189,7 @@ class MqttPayloadProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void ncConnection(connection){
+  void nodeConnection(connection){
     nodeAndControllerConnection = connection;
   }
 

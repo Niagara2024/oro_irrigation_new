@@ -1134,7 +1134,10 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                           arrowHeight: 15,
                           arrowWidth: 30,
                           barrierColor: Colors.black54,
-                          arrowDxOffset: srcCount==0 && irgCount==1? (position.dx+45)+(index*70)-210:
+                          arrowDxOffset:
+                          srcCount==0 && irgCount==1? (position.dx+45)+(index*70)-210:
+                          srcCount==0 && irgCount==2? (position.dx+45)+(index*70)-280:
+
                           srcCount==1 && irgCount==1? (position.dx+45)+(index*70)-280:
                           srcCount==2 && irgCount==1? (position.dx+45)+(index*70)-350:
                           srcCount==3 && irgCount==1? (position.dx+45)+(index*70)-420:
@@ -1152,7 +1155,6 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
 
                           srcCount==2 && irgCount==4? (position.dx+45)+(index*70)-560:
                           ((position.dy-position.dx)+12)+(index*70)-70,
-
                         );
                       },
                       style: ButtonStyle(

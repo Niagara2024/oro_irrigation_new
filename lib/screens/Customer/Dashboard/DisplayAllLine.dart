@@ -114,21 +114,6 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
                       ):
                       const SizedBox(),
 
-                     /* widget.provider.irrigationPump.isNotEmpty? Padding(
-                        padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
-                        child: SizedBox(
-                          width: 52.50,
-                          height: 70,
-                          child : Stack(
-                            children: [
-                              widget.provider.sourcePump.isNotEmpty? Image.asset('assets/images/dp_sump_src.png'):
-                              Image.asset('assets/images/dp_sump.png'),
-                            ],
-                          ),
-                        ),
-                      ):
-                      const SizedBox(),*/
-
                       widget.provider.irrigationPump.isNotEmpty? Padding(
                         padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
                         child: DisplayIrrigationPump(currentLineId: 'all', deviceId: widget.currentMaster.deviceId, ipList: widget.provider.irrigationPump, userId: widget.userId, controllerId: widget.currentMaster.controllerId,),
@@ -161,11 +146,32 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
                       ):
                       const SizedBox(),
 
-                      for(int i=0; i<widget.provider.payload2408.length; i++)
+                      (widget.provider.localFertilizer.isEmpty && widget.provider.centralFertilizer.isEmpty) &&
+                          (widget.provider.centralFilter.isNotEmpty || widget.provider.localFilter.isNotEmpty) ? SizedBox(
+                        width: 4.5,
+                        height: 120,
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 7),
+                              child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
+                            ),
+                            const SizedBox(width: 4.5,),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 3),
+                              child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
+                            ),
+                          ],
+                        ),
+                      ):
+                      const SizedBox(),
+
+                      /*for(int i=0; i<widget.provider.payload2408.length; i++)
                         widget.provider.payload2408.isNotEmpty?  Padding(
                           padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
                           child: DisplaySensor(payload2408: widget.provider.payload2408, index: i,),
-                        ) : const SizedBox(),
+                        ) : const SizedBox(),*/
+
                       widget.provider.centralFertilizer.isNotEmpty? const DisplayCentralFertilizer(currentLineId: 'all',):
                       const SizedBox(),
 

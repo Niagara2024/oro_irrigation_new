@@ -73,6 +73,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     print('coming userId: ${widget.userId}');
     print('coming customerId: ${widget.customerId}');
     indicatorViewShow();
+    getSharedSite(widget.customerId, 'null');
     getCustomerSite(widget.customerId);
   }
 
@@ -107,6 +108,39 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     });
   }
 
+  Future<void> getSharedSite(userId, sharedUserId) async
+  {
+    Map<String, Object> body = {"userId" : userId ?? 0, "sharedUserId" : sharedUserId};
+    final response = await HttpService().postRequest("getSharedUserDeviceList", body);
+    if (response.statusCode == 200)
+    {
+      var data = jsonDecode(response.body);
+      print(response.body);
+      if(data["code"]==200)
+      {
+        final jsonData = data["data"] as List;
+        try {
+          MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
+          payloadProvider.saveUnits(jsonData[0]['master'][0]['units']);
+          payloadProvider.nodeConnection(true);
+          mySiteList = jsonData.map((json) => DashboardModel.fromJson(json)).toList();
+          indicatorViewHide();
+          if(mySiteList.isNotEmpty){
+            fromWhere = 'init';
+            updateSite(0,0,0);
+            getProgramList();
+          }
+        } catch (e) {
+          print('Error: $e');
+          indicatorViewHide();
+        }
+      }
+    }
+    else{
+      indicatorViewHide();
+    }
+  }
+
   Future<void> getCustomerSite(userId) async
   {
     Map<String, Object> body = {"userId" : userId ?? 0};
@@ -115,6 +149,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     {
       mySiteList.clear();
       var data = jsonDecode(response.body);
+      print(response.body);
       if(data["code"]==200)
       {
         final jsonData = data["data"] as List;
@@ -1372,7 +1407,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     ),
                   ),
                   const SizedBox(height: 15),
-                  AlarmButton(payload: payload, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId, customerId: widget.customerId,),
+                  AlarmButton(payload: payload, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId, customerId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,),
                 ],
               ),
             ):
@@ -1551,7 +1586,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                           );
                         }, icon: const Icon(Icons.grid_view, color: Colors.white)),
                       ),
-                      AlarmButton(payload: payload, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId, customerId: widget.customerId,),
+                      AlarmButton(payload: payload, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId, customerId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,),
                     ],
                   ),
                 ):
@@ -1706,8 +1741,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
   void sentToServer(String msg, String payLoad) async
   {
-    Map<String, Object> body = {"userId": widget.customerId, "controllerId": mySiteList[siteIndex].master[masterIndex].deviceId, "messageStatus": msg, "hardware": jsonDecode(payLoad), "createUser": widget.userId};
-    final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
+    Map<String, Object> body = {"userId": widget.customerId, "controllerId": mySiteList[siteIndex].master[masterIndex].controllerId, "messageStatus": msg, "hardware": jsonDecode(payLoad), "createUser": widget.userId};
+    final response = await HttpService().postRequest("createUserSentAndReceivedMessageManually", body);
     if (response.statusCode == 200) {
       print(response.body);
     } else {
@@ -1717,10 +1752,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 }
 
 class AlarmButton extends StatelessWidget {
-  const AlarmButton({Key? key, required this.payload, required this.deviceID, required this.customerId}) : super(key: key);
+  const AlarmButton({Key? key, required this.payload, required this.deviceID, required this.customerId, required this.controllerId}) : super(key: key);
   final MqttPayloadProvider payload;
   final String deviceID;
-  final int customerId;
+  final int customerId, controllerId;
 
   @override
   Widget build(BuildContext context) {
@@ -1735,7 +1770,7 @@ class AlarmButton extends StatelessWidget {
         onPressed: (){
           showPopover(
             context: context,
-            bodyBuilder: (context) => AlarmListItems(payload:payload, deviceID:deviceID, customerId: customerId,),
+            bodyBuilder: (context) => AlarmListItems(payload:payload, deviceID:deviceID, customerId: customerId, controllerId: controllerId,),
             onPop: () => print('Popover was popped!'),
             direction: PopoverDirection.left,
             width: payload.alarmList.isNotEmpty?600:250,
@@ -1803,10 +1838,10 @@ class BadgeButton extends StatelessWidget {
 }
 
 class AlarmListItems extends StatelessWidget {
-  const AlarmListItems({Key? key, required this.payload, required this.deviceID, required this.customerId}) : super(key: key);
+  const AlarmListItems({Key? key, required this.payload, required this.deviceID, required this.customerId, required this.controllerId}) : super(key: key);
   final MqttPayloadProvider payload;
   final String deviceID;
-  final int customerId;
+  final int customerId, controllerId;
 
   @override
   Widget build(BuildContext context) {
@@ -1864,8 +1899,8 @@ class AlarmListItems extends StatelessWidget {
 
   void sentToServer(String msg, String payLoad) async
   {
-    Map<String, Object> body = {"userId": customerId, "controllerId": deviceID, "messageStatus": msg, "data": payLoad, "hardware": jsonDecode(payLoad), "createUser": customerId};
-    final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
+    Map<String, Object> body = {"userId": customerId, "controllerId": controllerId, "messageStatus": msg, "data": payLoad, "hardware": jsonDecode(payLoad), "createUser": customerId};
+    final response = await HttpService().postRequest("createUserSentAndReceivedMessageManually", body);
     if (response.statusCode == 200) {
       print(response.body);
     } else {
@@ -1954,16 +1989,22 @@ class _SideSheetClassState extends State<SideSheetClass> {
       for (var item in nodeList) {
         if (item is Map<String, dynamic>) {
           try {
-            int position = getNodeListPosition(item['SNo']);
+            int position = getNodeListPosition(item['serialNumber']);
             if (position != -1) {
               widget.nodeList[position].status = item['Status'];
               widget.nodeList[position].batVolt = item['BatVolt'];
               widget.nodeList[position].sVolt = item['SVolt'];
               widget.nodeList[position].lastFeedbackReceivedTime = item['LastFeedbackReceivedTime'];
+
               widget.nodeList[position].rlyStatus = [];
-              List<dynamic> rlyList = item['RlyStatus'];
-              List<RelayStatus> rlyStatusList = rlyList.isNotEmpty? rlyList.map((rl) => RelayStatus.fromJson(rl)).toList() : [];
-              widget.nodeList[position].rlyStatus = rlyStatusList;
+
+              List<RelayStatus> rlyList = item['RlyStatus'];
+              widget.nodeList[position].rlyStatus = rlyList;
+
+              /*List<dynamic> snrList = item['Sensor'];
+              List<SensorStatus> snrStatusList = snrList.isNotEmpty? snrList.map((rl) => SensorStatus.fromJson(rl)).toList() : [];
+              widget.nodeList[position].sensor = snrStatusList;*/
+
             }else {
               if(item['SNo']!=0){
                 Provider.of<MqttPayloadProvider>(context).nodeConnection(false);
@@ -2334,10 +2375,10 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                       child: GridView.builder(
                                         itemCount: widget.nodeList[index].rlyStatus.length, // Number of items in the grid
                                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: 7,
+                                          crossAxisCount: 6,
                                           crossAxisSpacing: 5.0,
                                           mainAxisSpacing: 5.0,
-                                          childAspectRatio: 1.2,
+                                          childAspectRatio: 1.45,
                                         ),
                                         itemBuilder: (BuildContext context, int indexGv) {
                                           return Column(
@@ -2367,10 +2408,12 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                                 ),
                                               ),
                                               Text(
-                                                (widget.nodeList[index].rlyStatus[indexGv].name)
+                                                (widget.nodeList[index].rlyStatus[indexGv].swName!.isNotEmpty
+                                                    ? widget.nodeList[index].rlyStatus[indexGv].swName
+                                                    : widget.nodeList[index].rlyStatus[indexGv].name)
                                                     .toString(),
                                                 style:
-                                                const TextStyle(color: Colors.black, fontSize: 10),
+                                                const TextStyle(color: Colors.black, fontSize: 8),
                                               ),
                                             ],
                                           );
@@ -2390,10 +2433,10 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                       child: GridView.builder(
                                         itemCount: widget.nodeList[index].sensor.length, // Number of items in the grid
                                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: 7,
+                                          crossAxisCount: 6,
                                           crossAxisSpacing: 5.0,
                                           mainAxisSpacing: 5.0,
-                                          childAspectRatio: 1.2,
+                                          childAspectRatio: 1.45,
                                         ),
                                         itemBuilder: (BuildContext context, int indexSnr) {
                                           return Column(
@@ -2407,12 +2450,15 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                                       ? 'A-${widget.nodeList[index].sensor[indexSnr].angIpNo}'
                                                       : 'P-${widget.nodeList[index].sensor[indexSnr].pulseIpNo}')
                                                       .toString(),
-                                                  style: const TextStyle(color: Colors.white, fontSize: 11),
+                                                  style: const TextStyle(color: Colors.white, fontSize: 10),
                                                 ),
                                               ),
                                               Text(
-                                                (widget.nodeList[index].sensor[indexSnr].name).toString(),
-                                                style: const TextStyle(color: Colors.black, fontSize: 10),
+                                                (widget.nodeList[index].sensor[indexSnr].swName!.isNotEmpty
+                                                    ? widget.nodeList[index].sensor[indexSnr].swName
+                                                    : widget.nodeList[index].sensor[indexSnr].name)
+                                                    .toString(),
+                                                style: const TextStyle(color: Colors.black, fontSize: 8),
                                               ),
                                             ],
                                           );
@@ -2715,7 +2761,6 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                               mainAxisSpacing: 05.0,
                                             ),
                                             itemBuilder: (BuildContext context, int indexGv) {
-                                              print(widget.nodeList[index].rlyStatus[indexGv].name);
                                               return Column(
                                                 children: [
                                                   CircleAvatar(
@@ -2754,8 +2799,8 @@ class _SideSheetClassState extends State<SideSheetClass> {
 
   void sentToServer(String msg, String payLoad) async
   {
-    Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.deviceId, "messageStatus": msg, "hardware": jsonDecode(payLoad), "createUser": widget.customerID};
-    final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
+    Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.controllerId, "messageStatus": msg, "hardware": jsonDecode(payLoad), "createUser": widget.customerID};
+    final response = await HttpService().postRequest("createUserSentAndReceivedMessageManually", body);
     if (response.statusCode == 200) {
       print(response.body);
     } else {
@@ -2800,7 +2845,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
   }
 
   double calculateGridHeight(int itemCount) {
-    int rows = (itemCount / 7).ceil();
+    int rows = (itemCount / 6).ceil();
     return rows * 45;
   }
 

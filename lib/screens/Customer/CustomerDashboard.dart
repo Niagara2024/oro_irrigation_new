@@ -73,6 +73,10 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                   statusMap = {for (var item in rlyStatuses) item.S_No:item.Status};
                 }
 
+                /*List<RelayStatus> rlyList = items['RlyStatus'];
+                widget.siteData.master[widget.masterInx].gemLive[0].nodeList[0].rlyStatus = rlyList;
+                widget.siteData.master[widget.masterInx].;*/
+
                 for (var line in widget.siteData.master[widget.masterInx].irrigationLine) {
                   // Update mainValves
                   for (var mainValve in line.mainValve) {
@@ -84,6 +88,34 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                   for (var valve in line.valve) {
                     if (statusMap.containsKey(valve.sNo)) {
                       valve.status = statusMap[valve.sNo]!;
+                    }
+                  }
+
+                  // Update Water Meter
+                  for (var wm in line.waterMeter) {
+                    if (statusMap.containsKey(wm.sNo)) {
+                      wm.value = statusMap[wm.value]!;
+                    }
+                  }
+
+                  // Update Pressure Sensor
+                  for (var ps in line.pressureSensor) {
+                    if (statusMap.containsKey(ps.sNo)) {
+                      ps.value = statusMap[ps.value]!;
+                    }
+                  }
+
+                  // Update Pressure Sensor
+                  for (var ls in line.levelSensor) {
+                    if (statusMap.containsKey(ls.sNo)) {
+                      ls.value = statusMap[ls.value]!;
+                    }
+                  }
+
+                  // Update Moisture Sensor
+                  for (var ms in line.moistureSensor) {
+                    if (statusMap.containsKey(ms.sNo)) {
+                      ms.value = statusMap[ms.value]!;
                     }
                   }
                 }
@@ -259,11 +291,11 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                               const SizedBox(),
 
                               //sensor
-                              for(int i=0; i<provider.payload2408.length; i++)
+                              /*for(int i=0; i<provider.payload2408.length; i++)
                                 provider.payload2408.isNotEmpty?  Padding(
                                   padding: const EdgeInsets.only(top: 15),
                                   child: provider.payload2408[i]['Line'].contains(crrIrrLine.id)? DisplaySensor(payload2408: provider.payload2408, index: i,):null,
-                                ) : const SizedBox(),
+                                ) : const SizedBox(),*/
 
                               //filter
                               provider.filtersCentral.isNotEmpty? Padding(
@@ -530,13 +562,13 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 ):
                 const SizedBox(),
 
-                if(provider.centralFilter.isEmpty)
+                /*if(provider.centralFilter.isEmpty)
                   for(int i=0; i<provider.payload2408.length; i++)
                     provider.payload2408.isNotEmpty?  Padding(
                       padding: EdgeInsets.only(top: provider.localFertilizer.isNotEmpty || provider.localFertilizer.isNotEmpty? 38.4:0),
                       child: provider.payload2408[i]['Line'].contains(crrIrrLine.id)? DisplaySensor(payload2408: provider.payload2408, index: i,):null,
                     ) :
-                    const SizedBox(),
+                    const SizedBox(),*/
 
                 Expanded(
                   child: Column(
@@ -684,7 +716,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   void sentToServer(String msg, String payLoad) async
   {
     Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.siteData.master[widget.masterInx].deviceId, "messageStatus": msg, "hardware": jsonDecode(payLoad), "createUser": widget.userID};
-    final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
+    final response = await HttpService().postRequest("createUserSentAndReceivedMessageManually", body);
     if (response.statusCode == 200) {
       print(response.body);
     } else {
@@ -716,14 +748,24 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
     if(widget.currentLineId=='all'){
       valveWidgets = [
         for (var line in widget.currentMaster.irrigationLine) ...[
+          ...line.waterMeter.map((wm) => WaterMeterWidget(wm: wm)).toList(),
+          ...line.pressureSensor.map((ps) => PressureSensorWidget(ps: ps)).toList(),
+          ...line.levelSensor.map((ls) => LevelSensorWidget(ls: ls)).toList(),
           ...line.mainValve.map((mv) => MainValveWidget(mv: mv, status: mv.status)).toList(),
           ...line.valve.map((vl) => ValveWidget(vl: vl, status: vl.status)).toList(),
+          ...line.agitator.map((ag) => AgitatorWidget(ag: ag, status: ag.status)).toList(),
+          ...line.moistureSensor.map((ms) => MoistureSensorWidget(ms: ms)).toList(),
         ]
       ];
     }else{
       valveWidgets = [
+        ...widget.irrigationLine.waterMeter.map((wm) => WaterMeterWidget(wm: wm)).toList(),
+        ...widget.irrigationLine.pressureSensor.map((ps) => PressureSensorWidget(ps: ps)).toList(),
+        ...widget.irrigationLine.levelSensor.map((ls) => LevelSensorWidget(ls: ls)).toList(),
         ...widget.irrigationLine.mainValve.map((mv) => MainValveWidget(mv: mv, status: mv.status,)).toList(),
         ...widget.irrigationLine.valve.map((vl) => ValveWidget(vl: vl, status: vl.status,)).toList(),
+        ...widget.irrigationLine.agitator.map((ag) => AgitatorWidget(ag: ag, status: ag.status)).toList(),
+        ...widget.irrigationLine.moistureSensor.map((ms) => MoistureSensorWidget(ms: ms)).toList(),
       ];
     }
 
@@ -775,6 +817,192 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
   }
 }
 
+class WaterMeterWidget extends StatelessWidget {
+  final WaterMeter wm;
+  const WaterMeterWidget({super.key, required this.wm});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 150,
+      margin: const EdgeInsets.only(left: 4, right: 4),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const SizedBox(
+            width: 10,
+            height: 3,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                VerticalDivider(width: 0,),
+                SizedBox(width: 4,),
+                VerticalDivider(width: 0,),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 10, right: 10),
+            child: Container(
+              width: 150,
+              height: 17,
+              decoration: BoxDecoration(
+                color: Colors.yellow,
+                borderRadius: const BorderRadius.all(Radius.circular(2)),
+                border: Border.all(
+                  color: Colors.grey,
+                  width: .50,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  '${getUnitByParameter(context, 'Water Meter', wm.value.toString())}',
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Image.asset(
+            width: 35,
+            height: 35,
+            'assets/images/water_meter.png',
+          ),
+          Text(wm.name.isNotEmpty? wm.name:wm.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10, color: Colors.black54),),
+        ],
+      ),
+    );
+  }
+}
+
+class PressureSensorWidget extends StatelessWidget {
+  final PressureSensor ps;
+  const PressureSensorWidget({super.key, required this.ps});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 150,
+      margin: const EdgeInsets.only(left: 4, right: 4),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const SizedBox(
+            width: 10,
+            height: 3,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                VerticalDivider(width: 0,),
+                SizedBox(width: 4,),
+                VerticalDivider(width: 0,),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 10, right: 10),
+            child: Container(
+              width: 150,
+              height: 17,
+              decoration: BoxDecoration(
+                color: Colors.yellow,
+                borderRadius: const BorderRadius.all(Radius.circular(2)),
+                border: Border.all(
+                  color: Colors.grey,
+                  width: .50,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  '${getUnitByParameter(context, 'Pressure Sensor', ps.value.toString())}',
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Image.asset(
+            width: 35,
+            height: 35,
+            'assets/images/pressure_sensor.png',
+          ),
+          Text(ps.name.isNotEmpty? ps.name:ps.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10, color: Colors.black54),),
+        ],
+      ),
+    );
+  }
+}
+
+class LevelSensorWidget extends StatelessWidget {
+  final LevelSensor ls;
+  const LevelSensorWidget({super.key, required this.ls});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 150,
+      margin: const EdgeInsets.only(left: 4, right: 4),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(
+            width: 10,
+            height: 3,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                VerticalDivider(width: 0,),
+                SizedBox(width: 4,),
+                VerticalDivider(width: 0,),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 10, right: 10),
+            child: Container(
+              width: 150,
+              height: 17,
+              decoration: BoxDecoration(
+                color: Colors.yellow,
+                borderRadius: const BorderRadius.all(Radius.circular(2)),
+                border: Border.all(
+                  color: Colors.grey,
+                  width: .50,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  '${getUnitByParameter(context, 'Level Sensor', ls.value.toString())}',
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Image.asset(
+            width: 35,
+            height: 35,
+            'assets/images/level_sensor.png',
+          ),
+          Text(ls.name.isNotEmpty? ls.name:ls.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10, color: Colors.black54),),
+        ],
+      ),
+    );
+  }
+}
+
 class MainValveWidget extends StatelessWidget {
   final MainValve mv;
   final int status;
@@ -787,7 +1015,7 @@ class MainValveWidget extends StatelessWidget {
       width: 150,
       margin: const EdgeInsets.only(left: 4, right: 4),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           screenWidth>600? const SizedBox(
             width: 150,
@@ -812,7 +1040,7 @@ class MainValveWidget extends StatelessWidget {
             'assets/images/dp_main_valve_closed.png',
           ),
           const SizedBox(height: 5),
-          Text(mv.name.isNotEmpty? mv.name:mv.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10),),
+          Text(mv.name.isNotEmpty? mv.name:mv.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10, color: Colors.black54),),
         ],
       ),
     );
@@ -823,6 +1051,50 @@ class ValveWidget extends StatelessWidget {
   final Valve vl;
   final int status;
   const ValveWidget({super.key, required this.vl, required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    return Container(
+      width: 150,
+      margin: const EdgeInsets.only(left: 2, right: 2),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          screenWidth>600? const SizedBox(
+            width: 150,
+            height: 15,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                VerticalDivider(width: 0,),
+                SizedBox(width: 4,),
+                VerticalDivider(width: 0,),
+              ],
+            ),
+          ):
+          const SizedBox(),
+          Image.asset(
+            width: 35,
+            height: 35,
+            status == 0? 'assets/images/valve_gray.png':
+            status == 1? 'assets/images/valve_green.png':
+            status == 2? 'assets/images/valve_orange.png':
+            'assets/images/valve_red.png',
+          ),
+          const SizedBox(height: 4),
+          Text(vl.name.isNotEmpty? vl.name:vl.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10, color: Colors.black54),),
+        ],
+      ),
+    );
+  }
+}
+
+class AgitatorWidget extends StatelessWidget {
+  final LineAgitator ag;
+  final int status;
+  const AgitatorWidget({super.key, required this.ag, required this.status});
 
   @override
   Widget build(BuildContext context) {
@@ -850,13 +1122,75 @@ class ValveWidget extends StatelessWidget {
           Image.asset(
             width: 35,
             height: 35,
-            status == 0? 'assets/images/valve_gray.png':
-            status == 1? 'assets/images/valve_green.png':
-            status == 2? 'assets/images/valve_orange.png':
-            'assets/images/valve_red.png',
+            status == 0? 'assets/images/dp_agitator_gray.png':
+            status == 1? 'assets/images/dp_agitator_green.png':
+            status == 2? 'assets/images/dp_agitator_yellow.png':
+            'assets/images/dp_agitator_red.png',
           ),
           const SizedBox(height: 4),
-          Text(vl.name.isNotEmpty? vl.name:vl.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10),),
+          Text(ag.name.isNotEmpty? ag.name:ag.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10),),
+        ],
+      ),
+    );
+  }
+}
+
+class MoistureSensorWidget extends StatelessWidget {
+  final MoistureSensor ms;
+  const MoistureSensorWidget({super.key, required this.ms});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 150,
+      margin: const EdgeInsets.only(left: 4, right: 4),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const SizedBox(
+            width: 10,
+            height: 3,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                VerticalDivider(width: 0,),
+                SizedBox(width: 4,),
+                VerticalDivider(width: 0,),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 10, right: 10),
+            child: Container(
+              width: 150,
+              height: 17,
+              decoration: BoxDecoration(
+                color: Colors.yellow,
+                borderRadius: const BorderRadius.all(Radius.circular(2)),
+                border: Border.all(
+                  color: Colors.grey,
+                  width: .50,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  '${getUnitByParameter(context, 'Moisture Sensor', ms.value.toString())}',
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Image.asset(
+            width: 35,
+            height: 35,
+            'assets/images/moisture_sensor.png',
+          ),
+          Text(ms.name.isNotEmpty? ms.name:ms.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10, color: Colors.black54),),
         ],
       ),
     );

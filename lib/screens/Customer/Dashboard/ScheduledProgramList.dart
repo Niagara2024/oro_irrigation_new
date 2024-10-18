@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:oro_irrigation_new/screens/Customer/IrrigationProgram/irrigation_program_main.dart';
 import 'package:provider/provider.dart';
 import '../../../Models/Customer/Dashboard/DashboardNode.dart';
@@ -24,11 +25,17 @@ class ScheduledProgramList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    final hwConformationMsg = Provider.of<MqttPayloadProvider>(context).messageFromHw;
-    /*if(hwConformationMsg!=null){
-      GlobalSnackBar.show(context, hwConformationMsg['Message'], int.parse(hwConformationMsg['Code']));
-      Provider.of<MqttPayloadProvider>(context).messageFromHw = null;
-    }*/
+    final spaPayload = Provider.of<MqttPayloadProvider>(context).spa;
+
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if(spaPayload.toString().isNotEmpty){
+        MyFunction().clearAg(context);
+        String message = spaPayload['Message'];
+        String code = spaPayload['Code'];
+        GlobalSnackBar.show(context, message, int.parse(code));
+      }
+    });
+
 
     scheduledPrograms.sort((a, b) {
       DateTime dateTimeA = a.getDateTime();
@@ -553,7 +560,7 @@ class ScheduledProgramList extends StatelessWidget {
   void sentUserOperationToServer(String msg, String data) async
   {
     Map<String, Object> body = {"userId": customerId, "controllerId": siteData.master[masterInx].controllerId, "messageStatus": msg, "hardware": jsonDecode(data), "createUser": customerId};
-    final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
+    final response = await HttpService().postRequest("createUserSentAndReceivedMessageManually", body);
     if (response.statusCode == 200) {
       print(response.body);
     } else {

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:oro_irrigation_new/state_management/scheule_view_provider.dart';
 import '../Models/Customer/Dashboard/DashboardNode.dart';
+import '../constants/snack_bar.dart';
 
 enum MQTTConnectionState { connected, disconnected, connecting}
 
@@ -12,8 +13,7 @@ class MqttPayloadProvider with ChangeNotifier {
   late ScheduleViewProvider mySchedule;
 
   bool mqttConnection = false;
-  dynamic messageFromHw = '';
-  String agmScheduledProgram = '';
+  dynamic spa = '';
 
   int powerSupply = 0;
   int wifiStrength = 0;
@@ -68,14 +68,14 @@ class MqttPayloadProvider with ChangeNotifier {
       Map<String, dynamic> data = jsonDecode(payload);
 
       if(data.containsKey('4200')){
-        messageFromHw = data['4200'][0]['4201'];
-        if(messageFromHw['PayloadCode']=='2900'){
-          agmScheduledProgram = messageFromHw['PayloadCode'];
+        if(data['4200'][0]['4201']['PayloadCode']=='2900'){
+          spa = data['4200'][0]['4201'];
+          notifyListeners();
         }
       }
       else if(data.containsKey('2400')){
         print('Gem controller payload :$payload');
-        if (data.containsKey('2400') && data['2400'] != null && data['2400'].isNotEmpty) {
+       if (data.containsKey('2400') && data['2400'] != null && data['2400'].isNotEmpty) {
           dashBoardPayload = payload;
           liveSyncCall(false);
 
@@ -170,7 +170,6 @@ class MqttPayloadProvider with ChangeNotifier {
           List<CM> pumpLiveList = liveMessage.isNotEmpty? liveMessage.map((live) => CM.fromJson(live)).toList(): [];
           updatePumpControllerLive(pumpLiveList);
         }
-
       }
       notifyListeners();
     } catch (e) {

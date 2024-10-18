@@ -522,7 +522,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
   void sendSkipOperationToServer(String msg, String data) async
   {
     Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.siteData.master[0].controllerId, "messageStatus": msg, "hardware": jsonDecode(data), "createUser": widget.customerID};
-    final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
+    final response = await HttpService().postRequest("createUserSentAndReceivedMessageManually", body);
     if (response.statusCode == 200) {
       print(response.body);
     } else {

@@ -24,6 +24,11 @@ class MyFunction {
     payloadProvider.alarmList = [];
     payloadProvider.payload2408 = [];
   }
+
+  void clearAg(context){
+    MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
+    payloadProvider.spa = '';
+  }
 }
 
 enum GemProgramStartStopReasonCode {
@@ -438,7 +443,7 @@ String? getUnitByParameter(BuildContext context, String parameter, String value)
           return '${(lps * 0.001).toStringAsFixed(2)} m³/s';
       }
     }
-    return unitMap['value'];
+    return '$parsedValue ${unitMap['value']}';
   } catch (e) {
     print('Error: $e');
     return 'Error: $e';

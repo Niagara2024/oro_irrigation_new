@@ -801,9 +801,14 @@ class IrrigationLine {
   String name;
   String location;
   String type;
+  List<WaterMeter> waterMeter;
+  List<PressureSensor> pressureSensor;
+  List<LevelSensor> levelSensor;
   List<MainValve> mainValve;
   List<Valve> valve;
-  List<PressureSensor> waterMeter;
+  List<LineAgitator> agitator;
+  List<MoistureSensor> moistureSensor;
+
 
   IrrigationLine({
     required this.sNo,
@@ -815,6 +820,10 @@ class IrrigationLine {
     required this.mainValve,
     required this.valve,
     required this.waterMeter,
+    required this.agitator,
+    required this.pressureSensor,
+    required this.levelSensor,
+    required this.moistureSensor,
   });
 
   factory IrrigationLine.fromJson(Map<String, dynamic> json) {
@@ -825,7 +834,20 @@ class IrrigationLine {
     List<Valve> valveDataList = valveData.isNotEmpty? valveData.map((vl) => Valve.fromJson(vl)).toList() : [];
 
     var wmData = json['waterMeter'] as List;
-    List<PressureSensor> wmDataList = wmData.isNotEmpty? wmData.map((vl) => PressureSensor.fromJson(vl)).toList() : [];
+    List<WaterMeter> wmDataList = wmData.isNotEmpty? wmData.map((vl) => WaterMeter.fromJson(vl)).toList() : [];
+
+    var psData = json['pressureSensor'] as List;
+    List<PressureSensor> psDataList = psData.isNotEmpty? psData.map((vl) => PressureSensor.fromJson(vl)).toList() : [];
+
+    var lsData = json['levelSensor'] as List;
+    List<LevelSensor> lsDataList = lsData.isNotEmpty? lsData.map((vl) => LevelSensor.fromJson(vl)).toList() : [];
+
+    bool hasOnAgKey = json.containsKey('agitator');
+    var agiData = hasOnAgKey? json['agitator']:[];
+    List<LineAgitator> agitatorList = agiData.isNotEmpty? agiData.map((vl) => LineAgitator.fromJson(vl)).toList() : [];
+
+    var msData = json['moistureSensor'] as List;
+    List<MoistureSensor> moistureList = msData.isNotEmpty? msData.map((msl) => MoistureSensor.fromJson(msl)).toList() : [];
 
     return IrrigationLine(
       sNo: json['sNo'],
@@ -837,9 +859,89 @@ class IrrigationLine {
       mainValve: mainValveList,
       valve: valveDataList,
       waterMeter: wmDataList,
+      pressureSensor: psDataList,
+      levelSensor: lsDataList,
+      agitator: agitatorList,
+      moistureSensor: moistureList,
     );
   }
 
+}
+
+class WaterMeter {
+  final int sNo;
+  final String id;
+  final String name;
+  final int status;
+  String location;
+  int value;
+
+  WaterMeter({
+    required this.sNo,
+    required this.id,
+    required this.name,
+    required this.status,
+    required this.location,
+    required this.value,
+  });
+
+  factory WaterMeter.fromJson(Map<String, dynamic> json) {
+    return WaterMeter(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      status: json['status'],
+      location: json['location'],
+      value: json['value'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'sNo': sNo,
+      'id': id,
+      'name': name,
+      'status': status,
+      'location': location,
+      'value': value,
+    };
+  }
+}
+
+class LineAgitator {
+  final int sNo;
+  final String id;
+  final String name;
+  final int status;
+  String location;
+
+  LineAgitator({
+    required this.sNo,
+    required this.id,
+    required this.name,
+    required this.status,
+    required this.location,
+  });
+
+  factory LineAgitator.fromJson(Map<String, dynamic> json) {
+    return LineAgitator(
+      sNo: json['sNo'],
+      id: json['id'],
+      name: json['name'],
+      status: json['status'],
+      location: json['location'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'sNo': sNo,
+      'id': id,
+      'name': name,
+      'status': status,
+      'location': location,
+    };
+  }
 }
 
 class MainValve {
@@ -938,6 +1040,7 @@ class PressureSensor {
   String location;
   String type;
   int status;
+  int value;
 
   PressureSensor({
     required this.sNo,
@@ -947,6 +1050,7 @@ class PressureSensor {
     required this.location,
     required this.type,
     required this.status,
+    required this.value,
   });
 
   factory PressureSensor.fromJson(Map<String, dynamic> json) {
@@ -958,6 +1062,7 @@ class PressureSensor {
       location: json['location'],
       type: json['type'],
       status: json['status'],
+      value: json['value'],
     );
   }
 
@@ -970,6 +1075,107 @@ class PressureSensor {
       'location': location,
       'type': type,
       'status': status,
+      'value': value,
+    };
+  }
+}
+
+class LevelSensor {
+  int sNo;
+  String id;
+  String hid;
+  String name;
+  String location;
+  String type;
+  int status;
+  int value;
+  int percentage;
+
+  LevelSensor({
+    required this.sNo,
+    required this.id,
+    required this.hid,
+    required this.name,
+    required this.location,
+    required this.type,
+    required this.status,
+    required this.value,
+    required this.percentage,
+  });
+
+  factory LevelSensor.fromJson(Map<String, dynamic> json) {
+    return LevelSensor(
+      sNo: json['sNo'],
+      id: json['id'],
+      hid: json['hid'],
+      name: json['name'],
+      location: json['location'],
+      type: json['type'],
+      status: json['status'],
+      value: json['value'],
+      percentage: json['percentage'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'sNo': sNo,
+      'id': id,
+      'hid': hid,
+      'name': name,
+      'location': location,
+      'type': type,
+      'status': status,
+      'value': value,
+      'percentage': percentage,
+    };
+  }
+}
+
+class MoistureSensor {
+  int sNo;
+  String id;
+  String hid;
+  String name;
+  String location;
+  String type;
+  int status;
+  int value;
+
+  MoistureSensor({
+    required this.sNo,
+    required this.id,
+    required this.hid,
+    required this.name,
+    required this.location,
+    required this.type,
+    required this.status,
+    required this.value,
+  });
+
+  factory MoistureSensor.fromJson(Map<String, dynamic> json) {
+    return MoistureSensor(
+      sNo: json['sNo'],
+      id: json['id'],
+      hid: json['hid'],
+      name: json['name'],
+      location: json['location'],
+      type: json['type'],
+      status: json['status'],
+      value: json['value'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'sNo': sNo,
+      'id': id,
+      'hid': hid,
+      'name': name,
+      'location': location,
+      'type': type,
+      'status': status,
+      'value': value,
     };
   }
 }
@@ -977,12 +1183,14 @@ class PressureSensor {
 class RelayStatus {
   final int? S_No;
   final String? name;
+  String? swName;
   final int? rlyNo;
   final int? Status;
 
   RelayStatus({
     required this.S_No,
     required this.name,
+    required this.swName,
     required this.rlyNo,
     required this.Status,
   });
@@ -991,6 +1199,7 @@ class RelayStatus {
     return RelayStatus(
       S_No: json['S_No'],
       name: json['Name'],
+      swName: json['SW_Name'] ?? '',
       rlyNo: json['RlyNo'],
       Status: json['Status'],
     );
@@ -1021,7 +1230,7 @@ class SensorStatus {
     return SensorStatus(
       sNo: json['S_No'],
       name: json['Name'],
-      swName: json['SW_Name'],
+      swName: json['SW_Name'] ?? '',
       angIpNo: json['AngIpNo'],
       pulseIpNo: json['DigIpNo'],
       value: json['Value'],
@@ -1360,6 +1569,8 @@ class Agitator {
     };
   }
 }
+
+
 
 class Booster {
   final String name;

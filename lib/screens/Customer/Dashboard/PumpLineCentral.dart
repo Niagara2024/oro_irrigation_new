@@ -133,13 +133,13 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                     ):
                     const SizedBox(),
 
-                    if(widget.provider.centralFilter.isEmpty || widget.provider.localFertilizer.isNotEmpty)
+                    /*if(widget.provider.centralFilter.isEmpty || widget.provider.localFertilizer.isNotEmpty)
                       for(int i=0; i<widget.provider.payload2408.length; i++)
                         widget.provider.payload2408.isNotEmpty?  Padding(
                           padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
                           child: widget.provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(payload2408: widget.provider.payload2408, index: i,):null,
                         ) :
-                        const SizedBox(),
+                        const SizedBox(),*/
 
                     widget.provider.centralFilter.isEmpty && widget.provider.centralFertilizer.isEmpty &&
                         widget.provider.localFilter.isEmpty && widget.provider.localFertilizer.isEmpty ? SizedBox(
@@ -165,6 +165,26 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                       padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
                       child: DisplayFilter(currentLineId: widget.crrIrrLine.id, filtersSites: widget.provider.centralFilter,),
                     ): const SizedBox(),
+
+                    (widget.provider.localFertilizer.isEmpty && widget.provider.centralFertilizer.isEmpty) &&
+                        (widget.provider.centralFilter.isNotEmpty || widget.provider.localFilter.isNotEmpty) ? SizedBox(
+                      width: 4.5,
+                      height: 120,
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 7),
+                            child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
+                          ),
+                          const SizedBox(width: 4.5,),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 3),
+                            child: VerticalDivider(width: 0, color: Colors.grey.shade300,),
+                          ),
+                        ],
+                      ),
+                    ):
+                    const SizedBox(),
 
                     widget.provider.centralFertilizer.isNotEmpty? DisplayCentralFertilizer(currentLineId: widget.crrIrrLine.id,): const SizedBox(),
 
@@ -274,7 +294,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
   void sentToServer(String msg, String payLoad) async
   {
     Map<String, Object> body = {"userId": widget.userId, "controllerId": widget.currentSiteData.master[widget.masterIdx].controllerId, "messageStatus": msg, "hardware": jsonDecode(payLoad), "createUser": widget.userId};
-    final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
+    final response = await HttpService().postRequest("createUserSentAndReceivedMessageManually", body);
     if (response.statusCode == 200) {
       print(response.body);
     } else {
@@ -679,7 +699,10 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                           barrierColor: Colors.black54,
                           arrowDxOffset: filteredPumps.length==1?(position.dx+25)+(index*70)-140:
                           filteredPumps.length==2?(position.dx+25)+(index*70)-210:
+                          filteredPumps.length==3?(position.dx+25)+(index*70)-280:
                           filteredPumps.length==4?(position.dx+25)+(index*70)-350:
+                          filteredPumps.length==5?(position.dx+25)+(index*70)-420:
+                          filteredPumps.length==6?(position.dx+25)+(index*70)-490:
                           (position.dx+25)+(index*70)-280,
                         );
                       },
@@ -767,7 +790,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                   pump.swName ?? pump.name,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    color: Colors.black,
+                    color: Colors.black54,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
@@ -800,7 +823,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
   void sentUserOperationToServer(String msg, String data) async
   {
     Map<String, Object> body = {"userId": widget.userId, "controllerId": widget.controllerId, "messageStatus": msg, "data": data, "hardware": data, "createUser": widget.userId};
-    final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
+    final response = await HttpService().postRequest("createUserSentAndReceivedMessageManually", body);
     if (response.statusCode == 200) {
       print(response.body);
     } else {
@@ -1147,11 +1170,14 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                           srcCount==3 && irgCount==2? (position.dx+45)+(index*70)-490:
 
                           srcCount==2 && irgCount==3? (position.dx+45)+(index*70)-490:
-
                           srcCount==2 && irgCount==4? (position.dx+45)+(index*70)-560:
 
                           srcCount==4 && irgCount==1? (position.dx+45)+(index*70)-490:
                           srcCount==4 && irgCount==2? (position.dx+45)+(index*70)-560:
+
+                          srcCount==5 && irgCount==1? (position.dx+45)+(index*70)-560:
+
+                          srcCount==6 && irgCount==2? (position.dx+45)+(index*70)-700:
 
                           srcCount==2 && irgCount==4? (position.dx+45)+(index*70)-560:
                           ((position.dy-position.dx)+12)+(index*70)-70,
@@ -1235,7 +1261,7 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                   pump.swName ?? pump.name,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    color: Colors.black,
+                    color: Colors.black54,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1272,7 +1298,7 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
   void sentUserOperationToServer(String msg, String data) async
   {
     Map<String, Object> body = {"userId": widget.userId, "controllerId": widget.controllerId, "messageStatus": msg, "data": data, "hardware": data, "createUser": widget.userId};
-    final response = await HttpService().postRequest("createUserManualOperationInDashboard", body);
+    final response = await HttpService().postRequest("createUserSentAndReceivedMessageManually", body);
     if (response.statusCode == 200) {
       print(response.body);
     } else {
@@ -1529,7 +1555,7 @@ class _DisplayFilterState extends State<DisplayFilter> {
                                   height: 20,
                                   child: Center(
                                     child: Text(filteredCentralFilter[i]['FilterStatus'][flIndex]['SW_Name'] ?? filteredCentralFilter[i]['FilterStatus'][flIndex]['Name'], style: const TextStyle(
-                                      color: Colors.black,
+                                      color: Colors.black54,
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -2047,7 +2073,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                       ),
                       fertilizerCentral[fIndex]['Agitator'].isNotEmpty ? SizedBox(
                         width: 59,
-                        height: 101,
+                        height: 34,
                         child: AppImages.getAsset('agitator', fertilizerCentral[fIndex]['Agitator'][0]['Status'],''),
                       ) :
                       const SizedBox(),
@@ -3026,7 +3052,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                       ),
                       fertilizerLocal[fIndex]['Agitator'].isNotEmpty ? SizedBox(
                         width: 59,
-                        height: 101,
+                        height: 34,
                         child: AppImages.getAsset('agitator', fertilizerLocal[fIndex]['Agitator'][0]['Status'],''),
                       ) :
                       const SizedBox(),

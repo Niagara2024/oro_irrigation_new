@@ -135,7 +135,7 @@ class LiveData {
   List<ScheduledProgram> scheduledProgramList;
   List<ProgramQueue> queProgramList;
   List<CurrentScheduleModel> currentSchedule;
-  List<Payload2408> payload2408List;
+  List<IrrigationLinePLD> irrigationLine;
   List<AlarmData> alarmList;
   int wifiStrength;
 
@@ -147,7 +147,7 @@ class LiveData {
     required this.scheduledProgramList,
     required this.queProgramList,
     required this.currentSchedule,
-    required this.payload2408List,
+    required this.irrigationLine,
     required this.alarmList,
     required this.wifiStrength,
   });
@@ -176,7 +176,7 @@ class LiveData {
     List<FertilizerSite> fertilizerSiteList = fertilizerData.isNotEmpty? fertilizerData.map((fertilizer) => FertilizerSite.fromJson(fertilizer)).toList(): [];
 
     var payload2408 = json['2408'] as List;
-    List<Payload2408> payload2408List = payload2408.isNotEmpty? payload2408.map((payload) => Payload2408.fromJson(payload)).toList(): [];
+    List<IrrigationLinePLD> irrigationLine = payload2408.isNotEmpty? payload2408.map((payload) => IrrigationLinePLD.fromJson(payload)).toList(): [];
 
     var alamData = json['2409'] as List;
     List<AlarmData> alamList = alamData.isNotEmpty? alamData.map((alm) => AlarmData.fromJson(alm)).toList(): [];
@@ -189,7 +189,7 @@ class LiveData {
       scheduledProgramList: programList,
       queProgramList: pInQ,
       currentSchedule: currentSchedule,
-      payload2408List: payload2408List,
+      irrigationLine: irrigationLine,
       alarmList: alamList,
       wifiStrength: json['WifiStrength'],
     );
@@ -204,7 +204,7 @@ class LiveData {
       '2405': filterList.map((e) => e.toJson()).toList(),
       '2406': fertilizerSiteList.map((e) => e.toJson()).toList(),
       '2407': pumpList.map((e) => e.toJson()).toList(),
-      '2408': payload2408List.map((e) => e.toJson()).toList(),
+      '2408': irrigationLine.map((e) => e.toJson()).toList(),
       '2409': alarmList.map((e) => e.toJson()).toList(),
       'WifiStrength': wifiStrength,
     };
@@ -808,6 +808,8 @@ class IrrigationLine {
   List<Valve> valve;
   List<LineAgitator> agitator;
   List<MoistureSensor> moistureSensor;
+  List<PressureSwitch> pressureSwitch;
+
 
 
   IrrigationLine({
@@ -824,6 +826,7 @@ class IrrigationLine {
     required this.pressureSensor,
     required this.levelSensor,
     required this.moistureSensor,
+    required this.pressureSwitch,
   });
 
   factory IrrigationLine.fromJson(Map<String, dynamic> json) {
@@ -843,11 +846,16 @@ class IrrigationLine {
     List<LevelSensor> lsDataList = lsData.isNotEmpty? lsData.map((vl) => LevelSensor.fromJson(vl)).toList() : [];
 
     bool hasOnAgKey = json.containsKey('agitator');
-    var agiData = hasOnAgKey? json['agitator']:[];
-    List<LineAgitator> agitatorList = agiData.isNotEmpty? agiData.map((vl) => LineAgitator.fromJson(vl)).toList() : [];
+    var agiData = hasOnAgKey ? json['agitator'] as List<dynamic> : [];
+    List<LineAgitator> agitatorList = agiData.isNotEmpty
+        ? agiData.map((lAg) => LineAgitator.fromJson(lAg as Map<String, dynamic>)).toList()
+        : [];
 
     var msData = json['moistureSensor'] as List;
     List<MoistureSensor> moistureList = msData.isNotEmpty? msData.map((msl) => MoistureSensor.fromJson(msl)).toList() : [];
+
+    var pswData = json['pressureSwitch'] as List;
+    List<PressureSwitch> pressureSwitchList = pswData.isNotEmpty? pswData.map((msl) => PressureSwitch.fromJson(msl)).toList() : [];
 
     return IrrigationLine(
       sNo: json['sNo'],
@@ -863,6 +871,7 @@ class IrrigationLine {
       levelSensor: lsDataList,
       agitator: agitatorList,
       moistureSensor: moistureList,
+      pressureSwitch: pressureSwitchList,
     );
   }
 
@@ -874,7 +883,7 @@ class WaterMeter {
   final String name;
   final int status;
   String location;
-  int value;
+  String value;
 
   WaterMeter({
     required this.sNo,
@@ -892,7 +901,7 @@ class WaterMeter {
       name: json['name'],
       status: json['status'],
       location: json['location'],
-      value: json['value'],
+      value: json['value'].toString(),
     );
   }
 
@@ -1180,6 +1189,54 @@ class MoistureSensor {
   }
 }
 
+class PressureSwitch {
+  int sNo;
+  String id;
+  String hid;
+  String name;
+  String location;
+  String type;
+  int status;
+  int value;
+
+  PressureSwitch({
+    required this.sNo,
+    required this.id,
+    required this.hid,
+    required this.name,
+    required this.location,
+    required this.type,
+    required this.status,
+    required this.value,
+  });
+
+  factory PressureSwitch.fromJson(Map<String, dynamic> json) {
+    return PressureSwitch(
+      sNo: json['sNo'],
+      id: json['id'],
+      hid: json['hid'],
+      name: json['name'],
+      location: json['location'],
+      type: json['type'],
+      status: json['status'],
+      value: json['value'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'sNo': sNo,
+      'id': id,
+      'hid': hid,
+      'name': name,
+      'location': location,
+      'type': type,
+      'status': status,
+      'value': value,
+    };
+  }
+}
+
 class RelayStatus {
   final int? S_No;
   final String? name;
@@ -1380,15 +1437,15 @@ class FertilizerSite {
 
     String ecSet = '0', phSet = '0';
 
-    if(json['EcSet'].runtimeType==int) {
+    if (json['EcSet'] is int || json['EcSet'] is double) {
       ecSet = json['EcSet'].toString();
-    }else{
+    } else {
       ecSet = json['EcSet'];
     }
 
-    if(json['PhSet'].runtimeType==int) {
+    if (json['PhSet'] is int || json['PhSet'] is double) {
       phSet = json['PhSet'].toString();
-    }else{
+    } else {
       phSet = json['PhSet'];
     }
 
@@ -1571,7 +1628,6 @@ class Agitator {
 }
 
 
-
 class Booster {
   final String name;
   final int status;
@@ -1644,7 +1700,7 @@ class AlarmData {
   }
 }
 
-class Payload2408 {
+class IrrigationLinePLD {
   final int sNo;
   final String line;
   final String swName;
@@ -1654,8 +1710,9 @@ class Payload2408 {
   final String waterMeter;
   final int irrigationPauseFlag;
   final int dosingPauseFlag;
+  final List<Level> level;
 
-  Payload2408({
+  IrrigationLinePLD({
     required this.sNo,
     required this.line,
     required this.swName,
@@ -1665,10 +1722,17 @@ class Payload2408 {
     required this.waterMeter,
     required this.irrigationPauseFlag,
     required this.dosingPauseFlag,
+    required this.level,
   });
 
-  factory Payload2408.fromJson(Map<String, dynamic> json) {
-    return Payload2408(
+  factory IrrigationLinePLD.fromJson(Map<String, dynamic> json) {
+
+    var levelList = json['Level'] as List<dynamic>?;
+    List<Level> parsedLevels = levelList != null
+        ? levelList.map((item) => Level.fromJson(item)).toList()
+        : [];
+
+    return IrrigationLinePLD(
       sNo: json['S_No'],
       line: json['Line'],
       swName: json['SW_Name'] ?? '',
@@ -1680,6 +1744,7 @@ class Payload2408 {
       waterMeter: json['Watermeter'],
       irrigationPauseFlag: json['IrrigationPauseFlag'],
       dosingPauseFlag: json['DosingPauseFlag'],
+      level: parsedLevels,
     );
   }
 
@@ -1697,6 +1762,38 @@ class Payload2408 {
     };
   }
 
+}
+
+class Level {
+  final String name;
+  final String value;
+  final int levelPercent;
+  final String swName;
+
+  Level({
+    required this.name,
+    required this.value,
+    required this.levelPercent,
+    required this.swName,
+  });
+
+  factory Level.fromJson(Map<String, dynamic> json) {
+    return Level(
+      name: json['Name'],
+      value: json['Value'],
+      levelPercent: json['LevelPercent'],
+      swName: json['SW_Name'] ?? ''
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'Name': name,
+      'Value': value,
+      'LevelPercent': levelPercent,
+      'SW_Name': swName,
+    };
+  }
 }
 
 

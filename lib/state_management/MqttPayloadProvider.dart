@@ -30,7 +30,7 @@ class MqttPayloadProvider with ChangeNotifier {
   List<dynamic> localFertilizer = [];
   List<dynamic> waterMeter = [];
   List<AlarmData> alarmList = [];
-  List<dynamic> payload2408 = [];
+  List<IrrigationLinePLD> payloadIrrLine = [];
 
   List<dynamic> _nodeList = [];
   List<dynamic> get nodeList => _nodeList;
@@ -144,7 +144,9 @@ class MqttPayloadProvider with ChangeNotifier {
           }
 
           if (data['2400'][0].containsKey('2408')) {
-            payload2408 = data['2400'][0]['2408'];
+            List<dynamic> irrLine = data['2400'][0]['2408'];
+            List<IrrigationLinePLD> lineList = irrLine.map((il) => IrrigationLinePLD.fromJson(il)).toList();
+            updatePayload2408(lineList);
           }
 
           if (data['2400'][0].containsKey('2409')) {
@@ -300,6 +302,11 @@ class MqttPayloadProvider with ChangeNotifier {
 
   void updateAlarmPayload(List<AlarmData> payload) {
     alarmList = payload;
+    notifyListeners();
+  }
+
+  void updatePayload2408(List<IrrigationLinePLD> payload) {
+    payloadIrrLine = payload;
     notifyListeners();
   }
 

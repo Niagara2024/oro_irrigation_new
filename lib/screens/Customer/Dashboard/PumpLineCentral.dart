@@ -29,10 +29,10 @@ class PumpLineCentral extends StatefulWidget {
 
 class _PumpLineCentralState extends State<PumpLineCentral> {
 
-  int? getIrrigationPauseFlag(String line, List<dynamic> payload2408) {
+  int? getIrrigationPauseFlag(String line, List<IrrigationLinePLD> payload2408) {
     for (var data in payload2408) {
-      if (data["Line"] == line) {
-        return data["IrrigationPauseFlag"];
+      if (data.line== line) {
+        return data.irrigationPauseFlag;
       }
     }
     return null;
@@ -41,19 +41,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
   @override
   Widget build(BuildContext context) {
 
-    int? irrigationPauseFlag = getIrrigationPauseFlag(widget.crrIrrLine.id, widget.provider.payload2408);
-
-    List<dynamic> levelList = [];
-    var matchingItem = widget.provider.payload2408.firstWhere(
-          (item) => item['Line'] == widget.crrIrrLine.id,
-      orElse: () => null,
-    );
-
-    if (matchingItem != null) {
-      levelList = matchingItem['Level'];
-    } else {
-      print('No matching Line found');
-    }
+    int? irrigationPauseFlag = getIrrigationPauseFlag(widget.crrIrrLine.id, widget.provider.payloadIrrLine);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,15 +73,15 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                             builder: (BuildContext context) {
                               return AlertDialog(
                                 title: const Text('Level List'),
-                                content: levelList.isNotEmpty?Column(
+                                content: widget.provider.payloadIrrLine[0].level.isNotEmpty?Column(
                                   mainAxisSize: MainAxisSize.min,
-                                  children: levelList.map((levelItem) {
+                                  children: widget.provider.payloadIrrLine[0].level.map((levelItem) {
                                     return ListTile(
-                                      title: Text(levelItem['SW_Name']),
+                                      title: Text(levelItem.swName),
                                       trailing: Column(
                                         children: [
-                                          Text('Percent: ${levelItem['LevelPercent']}%'),
-                                          Text('Value: ${levelItem['Value']}',)
+                                          Text('Percent: ${levelItem.levelPercent}%'),
+                                          Text('Value: ${levelItem.value}',)
                                         ],
                                       ),
                                     );
@@ -240,7 +228,7 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
           padding: const EdgeInsets.all(8),
           child: TextButton(
             onPressed: () {
-              List<dynamic> records = widget.provider.payload2408;
+              List<dynamic> records = widget.provider.payloadIrrLine;
               var record = records.firstWhere((record) => record['S_No'] == widget.crrIrrLine.sNo,
                 orElse: () => null,
               );
@@ -1158,29 +1146,8 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
                           arrowWidth: 30,
                           barrierColor: Colors.black54,
                           arrowDxOffset:
-                          srcCount==0 && irgCount==1? (position.dx+45)+(index*70)-210:
-                          srcCount==0 && irgCount==2? (position.dx+45)+(index*70)-280:
-
-                          srcCount==1 && irgCount==1? (position.dx+45)+(index*70)-280:
-                          srcCount==2 && irgCount==1? (position.dx+45)+(index*70)-350:
-                          srcCount==3 && irgCount==1? (position.dx+45)+(index*70)-420:
-
-                          srcCount==1 && irgCount==2? (position.dx+45)+(index*70)-350:
-                          srcCount==2 && irgCount==2? (position.dx+45)+(index*70)-420:
-                          srcCount==3 && irgCount==2? (position.dx+45)+(index*70)-490:
-
-                          srcCount==2 && irgCount==3? (position.dx+45)+(index*70)-490:
-                          srcCount==2 && irgCount==4? (position.dx+45)+(index*70)-560:
-
-                          srcCount==4 && irgCount==1? (position.dx+45)+(index*70)-490:
-                          srcCount==4 && irgCount==2? (position.dx+45)+(index*70)-560:
-
-                          srcCount==5 && irgCount==1? (position.dx+45)+(index*70)-560:
-
-                          srcCount==6 && irgCount==2? (position.dx+45)+(index*70)-700:
-
-                          srcCount==2 && irgCount==4? (position.dx+45)+(index*70)-560:
-                          ((position.dy-position.dx)+12)+(index*70)-70,
+                          (position.dx + 45) + (index * 70) - calculateOffset(srcCount, irgCount) ??
+                              ((position.dy - position.dx) + 12) + (index * 70) - 70,
                         );
                       },
                       style: ButtonStyle(
@@ -1274,6 +1241,15 @@ class _DisplayIrrigationPumpState extends State<DisplayIrrigationPump> {
     );
   }
 
+  int calculateOffset(int srcCount, int irgCount) {
+    const baseOffset = 210;
+
+    int irgOffset = (irgCount - 1) * 70;
+    int srcOffset = srcCount * 70;
+
+    return baseOffset + irgOffset + srcOffset;
+  }
+
   List<PumpData> filterPumpsByLocation(List<PumpData> pumps, String currentLocation) {
     if (currentLocation == 'all') {
       return pumps;
@@ -1320,11 +1296,11 @@ class DisplaySensor extends StatelessWidget {
     double totalWidth = 0;
 
     var data = payload2408[index];
-    Payload2408 payload;
+    IrrigationLinePLD payload;
 
     if (data is Map<String, dynamic>) {
-      payload = Payload2408.fromJson(data);
-    } else if (data is Payload2408) {
+      payload = IrrigationLinePLD.fromJson(data);
+    } else if (data is IrrigationLinePLD) {
       payload = data;
     } else {
       return const SizedBox();
@@ -2071,12 +2047,24 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                           },
                         ),
                       ),
-                      fertilizerCentral[fIndex]['Agitator'].isNotEmpty ? SizedBox(
-                        width: 59,
-                        height: 34,
-                        child: AppImages.getAsset('agitator', fertilizerCentral[fIndex]['Agitator'][0]['Status'],''),
-                      ) :
-                      const SizedBox(),
+                      fertilizerCentral[fIndex]['Agitator'].isNotEmpty
+                          ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: fertilizerCentral[fIndex]['Agitator'].map<Widget>((agitator) {
+                          return Column(
+                            children: [
+                              SizedBox(
+                                width: 59,
+                                height: 34,
+                                child: AppImages.getAsset('agitator', agitator['Status'], '',),
+                              ),
+                              Center(child: Text(agitator['Name'], style: const TextStyle(fontSize: 10, color: Colors.black54),)),
+                            ],
+                          );
+                        }).toList(), // Convert the map result to a list of widgets
+                      )
+                          : const SizedBox(),
+
                     ],
                   ),
                 ),
@@ -2117,7 +2105,13 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           const Center(child: Text('Ec : ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.normal))),
-                                          Center(child: Text('${fertilizerCentral[fIndex]['Ec'][index]['Status']}0', style: const TextStyle(fontSize: 11))),
+                                          Center(
+                                            child: Text(
+                                              double.parse('${fertilizerCentral[fIndex]['Ec'][index]['Status']}')
+                                                  .toStringAsFixed(2),
+                                              style: const TextStyle(fontSize: 11),
+                                            ),
+                                          ),
                                           const SizedBox(width: 5,),
                                         ],
                                       );
@@ -2134,7 +2128,13 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                                       return Row(
                                         children: [
                                           const Center(child: Text('pH : ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.normal),)),
-                                          Center(child: Text('${fertilizerCentral[fIndex]['Ph'][index]['Status']}0', style: const TextStyle(fontSize: 11))),
+                                          Center(
+                                            child: Text(
+                                              double.parse('${fertilizerCentral[fIndex]['Ph'][index]['Status']}')
+                                                  .toStringAsFixed(2),
+                                              style: const TextStyle(fontSize: 11),
+                                            ),
+                                          ),
                                           const SizedBox(width: 5,),
                                         ],
                                       );
@@ -3095,7 +3095,13 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           const Center(child: Text('Ec : ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.normal))),
-                                          Center(child: Text('${fertilizerLocal[fIndex]['Ec'][index]['Status']}0', style: const TextStyle(fontSize: 11))),
+                                          Center(
+                                            child: Text(
+                                              double.parse('${fertilizerLocal[fIndex]['Ec'][index]['Status']}')
+                                                  .toStringAsFixed(2),
+                                              style: const TextStyle(fontSize: 11),
+                                            ),
+                                          ),
                                           const SizedBox(width: 5,),
                                         ],
                                       );
@@ -3112,7 +3118,13 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                                       return Row(
                                         children: [
                                           const Center(child: Text('pH : ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.normal),)),
-                                          Center(child: Text('${fertilizerLocal[fIndex]['Ph'][index]['Status']}0', style: const TextStyle(fontSize: 11))),
+                                          Center(
+                                            child: Text(
+                                              double.parse('${fertilizerLocal[fIndex]['Ph'][index]['Status']}')
+                                                  .toStringAsFixed(2),
+                                              style: const TextStyle(fontSize: 11),
+                                            ),
+                                          ),
                                           const SizedBox(width: 5,),
                                         ],
                                       );

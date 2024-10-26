@@ -32,10 +32,10 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   List<RelayStatus> rlyStatusList = [];
   bool showNoHwCm = false;
 
-  int? getIrrigationPauseFlag(String line, List<dynamic> payload2408) {
+  int? getIrrigationPauseFlag(String line, List<IrrigationLinePLD> payload2408) {
     for (var data in payload2408) {
-      if (data["Line"] == line) {
-        return data["IrrigationPauseFlag"];
+      if (data.line == line) {
+        return data.irrigationPauseFlag;
       }
     }
     return null;
@@ -65,12 +65,23 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
             try {
               int position = getNodePositionInNodeList(widget.masterInx, items['DeviceId']);
               if (position != -1) {
-                List<dynamic> rlyStatuses = items['RlyStatus'];
-                Map<int, int> statusMap = {};
+
+                //output relay
+                List<dynamic> rlyStatus = items['RlyStatus'];
+                Map<int, int> rlyStatusMap = {};
                 try{
-                  statusMap = {for (var item in rlyStatuses) item['S_No']:item['Status']};
+                  rlyStatusMap = {for (var item in rlyStatus) item['S_No']:item['Status']};
                 }catch(e){
-                  statusMap = {for (var item in rlyStatuses) item.S_No:item.Status};
+                  rlyStatusMap = {for (var item in rlyStatus) item.S_No:item.Status};
+                }
+
+                //input
+                List<dynamic> sensorStatus = items['Sensor'];
+                Map<int, dynamic> sensorStatusMap = {};
+                try{
+                  sensorStatusMap = {for (var item in sensorStatus) item['S_No']:item['Status']};
+                }catch(e){
+                  sensorStatusMap = {for (var item in sensorStatus) item.sNo:item.value};
                 }
 
                 /*List<RelayStatus> rlyList = items['RlyStatus'];
@@ -80,45 +91,49 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 for (var line in widget.siteData.master[widget.masterInx].irrigationLine) {
                   // Update mainValves
                   for (var mainValve in line.mainValve) {
-                    if (statusMap.containsKey(mainValve.sNo)) {
-                      mainValve.status = statusMap[mainValve.sNo]!;
+                    if (rlyStatusMap.containsKey(mainValve.sNo)) {
+                      mainValve.status = rlyStatusMap[mainValve.sNo]!;
                     }
                   }
                   // Update valves
                   for (var valve in line.valve) {
-                    if (statusMap.containsKey(valve.sNo)) {
-                      valve.status = statusMap[valve.sNo]!;
+                    if (rlyStatusMap.containsKey(valve.sNo)) {
+                      valve.status = rlyStatusMap[valve.sNo]!;
                     }
                   }
 
-                  // Update Water Meter
-                  for (var wm in line.waterMeter) {
-                    if (statusMap.containsKey(wm.sNo)) {
-                      wm.value = statusMap[wm.value]!;
+                  if(sensorStatus.isNotEmpty)
+                  {
+                    for (var wm in line.waterMeter) {
+                      if (sensorStatusMap.containsKey(wm.sNo)) {
+                        wm.value = sensorStatusMap[wm.sNo]!;
+                      }
+                    }
+
+                    for (var ps in line.pressureSensor) {
+                      if (sensorStatusMap.containsKey(ps.sNo)) {
+                        ps.value = sensorStatusMap[ps.sNo]!;
+                      }
+                    }
+
+                    // Update Pressure Sensor
+                    for (var ls in line.levelSensor) {
+                      if (sensorStatusMap.containsKey(ls.sNo)) {
+                        ls.value = sensorStatusMap[ls.sNo]!;
+                      }
+                    }
+
+                    // Update Moisture Sensor
+                    for (var ms in line.moistureSensor) {
+                      if (sensorStatusMap.containsKey(ms.sNo)) {
+                        ms.value = sensorStatusMap[ms.sNo]!;
+                      }
                     }
                   }
 
-                  // Update Pressure Sensor
-                  for (var ps in line.pressureSensor) {
-                    if (statusMap.containsKey(ps.sNo)) {
-                      ps.value = statusMap[ps.value]!;
-                    }
-                  }
-
-                  // Update Pressure Sensor
-                  for (var ls in line.levelSensor) {
-                    if (statusMap.containsKey(ls.sNo)) {
-                      ls.value = statusMap[ls.value]!;
-                    }
-                  }
-
-                  // Update Moisture Sensor
-                  for (var ms in line.moistureSensor) {
-                    if (statusMap.containsKey(ms.sNo)) {
-                      ms.value = statusMap[ms.value]!;
-                    }
-                  }
                 }
+
+                Provider.of<MqttPayloadProvider>(context).nodeConnection(true);
               }else{
                 if(items['SNo']!=0){
                   print(items['DeviceId']);
@@ -168,8 +183,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
         final filteredProgramsQueue = filterProgramsQueueByCategory(Provider.of<MqttPayloadProvider>(context).programQueue, crrIrrLine.id);
         final filteredCurrentSchedule = filterCurrentScheduleByCategory(Provider.of<MqttPayloadProvider>(context).currentSchedule, crrIrrLine.id);
         filteredCurrentSchedule.insertAll(0, filterCurrentScheduleByProgramName(Provider.of<MqttPayloadProvider>(context).currentSchedule, 'StandAlone - Manual'));
-        if(Provider.of<MqttPayloadProvider>(context).payload2408.isNotEmpty){
-          irrigationFlag = getIrrigationPauseFlag(crrIrrLine.id, Provider.of<MqttPayloadProvider>(context).payload2408);
+        if(Provider.of<MqttPayloadProvider>(context).payloadIrrLine.isNotEmpty){
+          irrigationFlag = getIrrigationPauseFlag(crrIrrLine.id, Provider.of<MqttPayloadProvider>(context).payloadIrrLine);
         }
 
         return Column(
@@ -465,7 +480,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
           .toList()
           .cast<Map<String, dynamic>>();
 
-      List<dynamic> levelList = [];
+     /* List<dynamic> levelList = [];
       var matchingItem = provider.payload2408.firstWhere(
             (item) => item['Line'] == crrIrrLine.id,
         orElse: () => null,
@@ -475,7 +490,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
         levelList = matchingItem['Level'];
       } else {
         print('No matching Line found');
-      }
+      }*/
 
       int rdWidth = 0;
       if(irrigationFlag !=2){
@@ -506,6 +521,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                   child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id, spList: provider.sourcePump, userId: widget.userID, controllerId: widget.siteData.master[widget.masterInx].controllerId,),
                 ):
                 const SizedBox(),
+
                 provider.irrigationPump.isNotEmpty? Padding(
                   padding: EdgeInsets.only(top: provider.localFertilizer.isNotEmpty || provider.localFertilizer.isNotEmpty? 38.4:0),
                   child: InkWell(
@@ -515,15 +531,15 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                         builder: (BuildContext context) {
                           return AlertDialog(
                             title: const Text('Level List'),
-                            content: levelList.isNotEmpty? Column(
+                            content: provider.payloadIrrLine[0].level.isNotEmpty? Column(
                               mainAxisSize: MainAxisSize.min,
-                              children: levelList.map((levelItem) {
+                              children: provider.payloadIrrLine[0].level.map((levelItem) {
                                 return ListTile(
-                                  title: Text(levelItem['SW_Name'], style: const TextStyle(fontSize: 14),),
+                                  title: Text(levelItem.swName, style: const TextStyle(fontSize: 14),),
                                   trailing: Column(
                                     children: [
-                                      Text('Percent: ${levelItem['LevelPercent']}%'),
-                                      Text('${getUnitByParameter(context, 'Level Sensor', levelItem['Value'])}',),
+                                      Text('Percent: ${levelItem.levelPercent}%'),
+                                      Text('${getUnitByParameter(context, 'Level Sensor', levelItem.value)}',),
                                     ],
                                   ),
                                 );
@@ -556,6 +572,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                   ),
                 ):
                 const SizedBox(),
+
                 provider.irrigationPump.isNotEmpty? Padding(
                   padding: EdgeInsets.only(top: provider.localFertilizer.isNotEmpty || provider.localFertilizer.isNotEmpty? 38.4:0),
                   child: DisplayIrrigationPump(currentLineId: crrIrrLine.id, deviceId: widget.siteData.master[widget.masterInx].deviceId, ipList: provider.irrigationPump, userId: widget.userID, controllerId: widget.siteData.master[widget.masterInx].controllerId,),
@@ -585,7 +602,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                             child: TextButton(
                               onPressed: () {
                                 int prFlag = 0;
-                                List<dynamic> records = provider.payload2408;
+                                List<dynamic> records = provider.payloadIrrLine;
                                 int sNoToCheck = crrIrrLine.sNo;
                                 var record = records.firstWhere(
                                       (record) => record['S_No'] == sNoToCheck,
@@ -748,6 +765,7 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
     if(widget.currentLineId=='all'){
       valveWidgets = [
         for (var line in widget.currentMaster.irrigationLine) ...[
+          ...line.pressureSwitch.map((psw) => PressureSwitchWidget(psw: psw)).toList(),
           ...line.waterMeter.map((wm) => WaterMeterWidget(wm: wm)).toList(),
           ...line.pressureSensor.map((ps) => PressureSensorWidget(ps: ps)).toList(),
           ...line.levelSensor.map((ls) => LevelSensorWidget(ls: ls)).toList(),
@@ -759,6 +777,7 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
       ];
     }else{
       valveWidgets = [
+        ...widget.irrigationLine.pressureSwitch.map((psw) => PressureSwitchWidget(psw: psw)).toList(),
         ...widget.irrigationLine.waterMeter.map((wm) => WaterMeterWidget(wm: wm)).toList(),
         ...widget.irrigationLine.pressureSensor.map((ps) => PressureSensorWidget(ps: ps)).toList(),
         ...widget.irrigationLine.levelSensor.map((ls) => LevelSensorWidget(ls: ls)).toList(),
@@ -812,6 +831,68 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
             return Container(child: valveWidgets[index]);
           },
         ),
+      ),
+    );
+  }
+}
+
+class PressureSwitchWidget extends StatelessWidget {
+  final PressureSwitch psw;
+  const PressureSwitchWidget({super.key, required this.psw});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 150,
+      margin: const EdgeInsets.only(left: 4, right: 4),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const SizedBox(
+            width: 10,
+            height: 3,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                VerticalDivider(width: 0,),
+                SizedBox(width: 4,),
+                VerticalDivider(width: 0,),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 10, right: 10),
+            child: Container(
+              width: 50,
+              height: 17,
+              decoration: BoxDecoration(
+                color: Colors.yellow,
+                borderRadius: const BorderRadius.all(Radius.circular(2)),
+                border: Border.all(
+                  color: Colors.grey,
+                  width: .50,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  psw.value==0?'High':'--',
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Image.asset(
+            width: 35,
+            height: 35,
+            'assets/images/pressure_switch.png',
+          ),
+          Text(psw.name.isNotEmpty? psw.name:psw.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10, color: Colors.black54),),
+        ],
       ),
     );
   }
@@ -1103,7 +1184,7 @@ class AgitatorWidget extends StatelessWidget {
       width: 150,
       margin: const EdgeInsets.only(left: 2, right: 2),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           screenWidth>600? const SizedBox(
             width: 150,
@@ -1119,15 +1200,15 @@ class AgitatorWidget extends StatelessWidget {
             ),
           ):
           const SizedBox(),
-          Image.asset(
-            width: 35,
-            height: 35,
-            status == 0? 'assets/images/dp_agitator_gray.png':
-            status == 1? 'assets/images/dp_agitator_green.png':
-            status == 2? 'assets/images/dp_agitator_yellow.png':
-            'assets/images/dp_agitator_red.png',
-          ),
           const SizedBox(height: 4),
+          Image.asset(
+            width: 59,
+            height: 34,
+            status == 0? 'assets/images/dp_agitator_right.png':
+            status == 1? 'assets/images/dp_agitator_right_g.png':
+            status == 2? 'assets/images/dp_agitator_right_y.png':
+            'assets/images/dp_agitator_right_r.png',
+          ),
           Text(ag.name.isNotEmpty? ag.name:ag.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10),),
         ],
       ),

@@ -290,7 +290,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
         title: Text(widget.userName),
         actions: [
         PopupMenuButton(
-          tooltip: _tabCont.index==0 ?'Add Product' : 'Create new site',
+          tooltip: _tabCont.index==0 ?'Add new product' : 'Create new site',
           child: MaterialButton(
             onPressed:null,
             textColor: Colors.white,
@@ -635,17 +635,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
           ],
           rows: List<DataRow>.generate(customerProductList.length, (index) => DataRow(cells: [
             DataCell(Text('${index+1}')),
-            DataCell(Row(children: [ CircleAvatar(
-              radius: 17,
-              backgroundColor: Colors.transparent,
-              backgroundImage: customerProductList[index].categoryName == 'ORO SWITCH'
-                  || customerProductList[index].categoryName == 'OROSENSE'?
-              AssetImage('assets/images/oro_switch.png'):
-              customerProductList[index].categoryName == 'ORO LEVEL'?
-              AssetImage('assets/images/oro_sense.png'):
-              customerProductList[index].categoryName == 'OROGEM'?
-              AssetImage('assets/images/oro_gem.png'): AssetImage('assets/images/oro_rtu.png'),
-            ), const SizedBox(width: 10,), Text(customerProductList[index].categoryName)],)),
+            DataCell(Row(children: [Text(customerProductList[index].categoryName)],)),
             DataCell(Text(customerProductList[index].model)),
             DataCell(Text(customerProductList[index].deviceId)),
             //DataCell(widget.userType==2 ? Text(widget.customerProductList[index].siteName) : widget.customerProductList[index].buyer == widget.userName? const Text('-') : Text(widget.customerProductList[index].buyer)),

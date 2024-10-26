@@ -21,17 +21,6 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
   @override
   Widget build(BuildContext context) {
 
-    List<dynamic> levelList = [];
-    var matchingItem = widget.provider.payload2408.firstWhere(
-          (item) => item['Line'] == 'All',
-      orElse: () => null,
-    );
-
-    if (matchingItem != null) {
-      levelList = matchingItem['Level'];
-    } else {
-      print('No matching Line found');
-    }
 
     return Padding(
       padding: const EdgeInsets.all(3.0),
@@ -72,15 +61,15 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
                               builder: (BuildContext context) {
                                 return AlertDialog(
                                   title: const Text('Level List'),
-                                  content: levelList.isNotEmpty?Column(
+                                  content: widget.provider.payloadIrrLine[0].level.isNotEmpty?Column(
                                     mainAxisSize: MainAxisSize.min,
-                                    children: levelList.map((levelItem) {
+                                    children: widget.provider.payloadIrrLine[0].level.map((levelItem) {
                                       return ListTile(
-                                        title: Text(levelItem['SW_Name']),
+                                        title: Text(levelItem.swName),
                                         trailing: Column(
                                           children: [
-                                            Text('Percent: ${levelItem['LevelPercent']}%'),
-                                            Text('Value: ${levelItem['Value']}',)
+                                            Text('Percent: ${levelItem.levelPercent}%'),
+                                            Text('Value: ${levelItem.value}',)
                                           ],
                                         ),
                                       );

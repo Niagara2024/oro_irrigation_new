@@ -248,7 +248,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       payloadProvider.updateScheduledProgram(sp);
 
       payloadProvider.updateAlarmPayload(mySiteList[siteIndex].master[masterIndex].gemLive[0].alarmList);
-      //payloadProvider.updatePayload2408(mySiteList[siteIndex].master[masterIndex].gemLive[0].payload2408List);
+      payloadProvider.updatePayload2408(mySiteList[siteIndex].master[masterIndex].gemLive[0].irrigationLine);
 
 
       if(payloadProvider.lastCommunication.inMinutes>=10){
@@ -886,28 +886,28 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               const SizedBox(),
               const SizedBox(width: 10,),
 
-              mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1 && (payload.payload2408.runtimeType==List<dynamic>) ? TextButton(
+              mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1? TextButton(
                 onPressed: () {
                   String strPRPayload = '';
-                  for (int i = 0; i < payload.payload2408.length; i++) {
-                    if (payload.payload2408.every((record) => record['IrrigationPauseFlag'] == 1)) {
-                      strPRPayload += '${payload.payload2408[i]['S_No']},0;';
+                  for (int i = 0; i < payload.payloadIrrLine.length; i++) {
+                    if (payload.payloadIrrLine.every((record) => record.irrigationPauseFlag == 1)) {
+                      strPRPayload += '${payload.payloadIrrLine[i].sNo},0;';
                     } else {
-                      strPRPayload += '${payload.payload2408[i]['S_No']},1;';
+                      strPRPayload += '${payload.payloadIrrLine[i].sNo},1;';
                     }
                   }
                   String payloadFinal = jsonEncode({
                     "4900": [{"4901": strPRPayload}]
                   });
                   MQTTManager().publish(payloadFinal, 'AppToFirmware/${mySiteList[siteIndex].master[masterIndex].deviceId}');
-                  if (payload.payload2408.every((record) => record['IrrigationPauseFlag'] == 1)) {
+                  if (payload.payloadIrrLine.every((record) => record.irrigationPauseFlag == 1)) {
                     sentToServer('Resumed all line', payloadFinal);
                   } else {
                     sentToServer('Paused all line', payloadFinal);
                   }
                 },
                 style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all<Color>(payload.payload2408.every((record) => record['IrrigationPauseFlag'] == 1)?Colors.green: Colors.orange),
+                  backgroundColor: WidgetStateProperty.all<Color>(payload.payloadIrrLine.every((record) => record.irrigationPauseFlag == 1)?Colors.green: Colors.orange),
                   shape: WidgetStateProperty.all<OutlinedBorder>(
                     RoundedRectangleBorder(borderRadius: BorderRadius.circular(5),),
                   ),
@@ -915,11 +915,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    payload.payload2408.every((record) => record['IrrigationPauseFlag'] == 1)
+                    payload.payloadIrrLine.every((record) => record.irrigationPauseFlag == 1)
                         ? const Icon(Icons.play_arrow_outlined, color: Colors.white)
                         : const Icon(Icons.pause, color: Colors.white),
                     const SizedBox(width: 5),
-                    Text(payload.payload2408.every((record) => record['IrrigationPauseFlag'] == 1) ? 'RESUME ALL LINE' : 'PAUSE ALL LINE',
+                    Text(payload.payloadIrrLine.every((record) => record.irrigationPauseFlag == 1) ? 'RESUME ALL LINE' : 'PAUSE ALL LINE',
                         style: const TextStyle(color: Colors.white)),
                   ],
                 ),
@@ -1429,9 +1429,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
         lastCommunication.inMinutes >= 10 && payload.powerSupply == 0?Container(
           height: 20.0,
-          decoration: const BoxDecoration(
-            color: Colors.redAccent,
-            borderRadius: BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
+          decoration: BoxDecoration(
+            color: Colors.red.shade300,
+            borderRadius: const BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
           ),
           child: Center(
             child: Text('No communication and power Supply to Controller'.toUpperCase(),
@@ -1444,9 +1444,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
         ):
         payload.powerSupply == 0?Container(
           height: 20.0,
-          decoration: const BoxDecoration(
-            color: Colors.redAccent,
-            borderRadius: BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
+          decoration: BoxDecoration(
+            color: Colors.red.shade300,
+            borderRadius: const BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
           ),
           child: Center(
             child: Text('No power Supply to Controller'.toUpperCase(),

@@ -22,7 +22,7 @@ class MyFunction {
     payloadProvider.waterMeter=[];
     payloadProvider.wifiStrength = 0;
     payloadProvider.alarmList = [];
-    payloadProvider.payload2408 = [];
+    payloadProvider.payloadIrrLine = [];
   }
 
   void clearAg(context){
@@ -462,9 +462,11 @@ String changeDateFormat(String dateString) {
 String getSensorUnit(String type, BuildContext context) {
   if(type.contains('Moisture')||type.contains('SM')){
     return 'Values in Cb';
-  }else if(type.contains('Pressure')){
+  }
+  else if(type.contains('Pressure')){
     return 'Values in bar';
-  }else if(type.contains('Level')){
+  }
+  else if(type.contains('Level')){
     MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
     Map<String, dynamic>? unitMap = payloadProvider.unitList.firstWhere(
           (unit) => unit['parameter'] == 'Level Sensor',  orElse: () => null,
@@ -473,9 +475,11 @@ String getSensorUnit(String type, BuildContext context) {
       return 'Values in ${unitMap['value']}';
     }
     return 'Values in meter';
-  }else if(type.contains('Humidity')){
+  }
+  else if(type.contains('Humidity')){
     return 'Percentage (%)';
-  }else if(type.contains('Co2')){
+  }
+  else if(type.contains('Co2')){
     return 'Parts per million(ppm)';
   }else if(type.contains('Temperature')){
     return 'Celsius (°C)';

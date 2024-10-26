@@ -350,7 +350,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
             size: ColumnSize.S,
           ),
           DataColumn2(
-            label: Center(child: Text('Total (D/FL)', style: TextStyle(fontSize: 13),)),
+            label: Center(child: Text('Set (Dur/Flw)', style: TextStyle(fontSize: 13),)),
             fixedWidth: 100,
           ),
           DataColumn2(

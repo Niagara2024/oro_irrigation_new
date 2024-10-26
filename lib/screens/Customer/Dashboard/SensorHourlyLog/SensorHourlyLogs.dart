@@ -199,17 +199,29 @@ class _SensorHourlyLogsState extends State<SensorHourlyLogs> {
         dataSource: dataPoints,
         xValueMapper: (SensorHourlyData data, _) => data.hour,
         yValueMapper: (SensorHourlyData data, _) {
-          String? result = getUnitByParameter(context, snrName, data.value.toString());
-          String? numericString = result?.replaceAll(RegExp(r'[^\d.]+'), '');
-          double? value = double.tryParse(numericString!);
-          return value ?? 0.0;
+
+          if(snrName=='EC Sensor' || snrName=='PH Sensor'){
+            return data.value;
+          }else{
+            String? result = getUnitByParameter(context, snrName, data.value.toString());
+            String? numericString = result?.replaceAll(RegExp(r'[^\d.]+'), '');
+            double? value = double.tryParse(numericString!);
+            return value ?? 0.0;
+          }
+
         },
         color: color,
         dataLabelSettings: const DataLabelSettings(isVisible: true),
         dataLabelMapper: (SensorHourlyData data, _) {
-          String? result = getUnitByParameter(context, snrName, data.value.toString());
-          String? numericString = result?.replaceAll(RegExp(r'[^\d.]+'), '');
-          return '$numericString';
+
+          if(snrName=='EC Sensor' || snrName=='PH Sensor'){
+            return data.value.toString();
+          }else{
+            String? result = getUnitByParameter(context, snrName, data.value.toString());
+            String? numericString = result?.replaceAll(RegExp(r'[^\d.]+'), '');
+            return '$numericString';
+          }
+
         },
         markerSettings: const MarkerSettings(isVisible: true),
         dashArray: [4, 4],

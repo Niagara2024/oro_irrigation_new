@@ -172,16 +172,7 @@ class MyDealersState extends State<MyDealers> {
                               ],
                               rows: List<DataRow>.generate(productStockList.length, (index) => DataRow(cells: [
                                 DataCell(Text('${index+1}')),
-                                DataCell(Row(children: [CircleAvatar(radius: 17,
-                                  backgroundImage: productStockList[index].categoryName == 'ORO SWITCH'
-                                      || productStockList[index].categoryName == 'ORO SENSE'?
-                                  AssetImage('assets/images/oro_switch.png'):
-                                  productStockList[index].categoryName == 'ORO LEVEL'?
-                                  AssetImage('assets/images/oro_sense.png'):
-                                  productStockList[index].categoryName == 'OROGEM'?
-                                  AssetImage('assets/images/oro_gem.png'):AssetImage('assets/images/oro_rtu.png'),
-                                  backgroundColor: Colors.transparent,
-                                ), SizedBox(width: 10,), Text(productStockList[index].categoryName)],)),
+                                DataCell(Row(children: [Text(productStockList[index].categoryName)],)),
                                 DataCell(Text(productStockList[index].model)),
                                 DataCell(Text(productStockList[index].imeiNo)),
                                 DataCell(Text(productStockList[index].dtOfMnf)),

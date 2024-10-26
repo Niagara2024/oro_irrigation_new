@@ -185,8 +185,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
             Expanded(
               child: Column(
                 children: [
-                  SizedBox(
-                    height : 325,
+                  Expanded(
                     child: Card(
                       elevation: 5,
                       surfaceTintColor: Colors.white,
@@ -279,7 +278,10 @@ class _DealerDashboardState extends State<DealerDashboard> {
                       ),
                     ),
                   ),
-                  Expanded(
+                  SizedBox(
+                    height: productStockList.isEmpty
+                        ? 200
+                        : (150 + productStockList.length * 40.0).clamp(150.0, 325.0), // Minimum 100, maximum 325
                     child: Card(
                       elevation: 5,
                       surfaceTintColor: Colors.white,
@@ -298,7 +300,10 @@ class _DealerDashboardState extends State<DealerDashboard> {
                               ),
                             ),
                             child: ListTile(
-                              title: Text('Product Stock(${productStockList.length})', style: const TextStyle(fontSize: 20, color: Colors.black),),
+                              title: Text(
+                                'Product Stock(${productStockList.length})',
+                                style: const TextStyle(fontSize: 20, color: Colors.black),
+                              ),
                             ),
                           ),
                           Expanded(
@@ -310,49 +315,88 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                   bottomRight: Radius.circular(10),
                                 ),
                               ),
-                              child: productStockList.isNotEmpty ? Padding(
+                              child: productStockList.isNotEmpty
+                                  ? Padding(
                                 padding: const EdgeInsets.all(5.0),
                                 child: DataTable2(
-                                    columnSpacing: 12,
-                                    horizontalMargin: 12,
-                                    minWidth: 600,
-                                    headingRowHeight: 40,
-                                    dataRowHeight: 40,
-                                    headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
-                                    columns: const [
-                                      DataColumn2(
-                                          label: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold),),
-                                          fixedWidth: 50
+                                  columnSpacing: 12,
+                                  horizontalMargin: 12,
+                                  minWidth: 600,
+                                  border: TableBorder.all(color: Colors.teal.shade100),
+                                  headingRowHeight: 40,
+                                  dataRowHeight: 40,
+                                  headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
+                                  columns: const [
+                                    DataColumn2(
+                                      label: Text(
+                                        'S.No',
+                                        style: TextStyle(fontWeight: FontWeight.bold),
                                       ),
-                                      DataColumn(
-                                        label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold),),
+                                      fixedWidth: 50,
+                                    ),
+                                    DataColumn(
+                                      label: Text(
+                                        'Category',
+                                        style: TextStyle(fontWeight: FontWeight.bold),
                                       ),
-                                      DataColumn(
-                                        label: Text('Model', style: TextStyle(fontWeight: FontWeight.bold),),
+                                    ),
+                                    DataColumn(
+                                      label: Text(
+                                        'Model',
+                                        style: TextStyle(fontWeight: FontWeight.bold),
                                       ),
-                                      DataColumn2(
-                                        label: Text('IMEI', style: TextStyle(fontWeight: FontWeight.bold),),
-                                        size: ColumnSize.L,
+                                    ),
+                                    DataColumn2(
+                                      label: Text(
+                                        'IMEI',
+                                        style: TextStyle(fontWeight: FontWeight.bold),
                                       ),
-                                      DataColumn2(
-                                        label: Text('M.Date', style: TextStyle(fontWeight: FontWeight.bold),),
-                                        fixedWidth: 95,
+                                      size: ColumnSize.L,
+                                    ),
+                                    DataColumn2(
+                                      label: Center(
+                                        child: Text(
+                                          'M.Date',
+                                          style: TextStyle(fontWeight: FontWeight.bold),
+                                        ),
                                       ),
-                                      DataColumn2(
-                                        label: Center(child: Text('Warranty', style: TextStyle(fontWeight: FontWeight.bold),)),
-                                        fixedWidth: 100,
+                                      fixedWidth: 125,
+                                    ),
+                                    DataColumn2(
+                                      label: Center(
+                                        child: Text(
+                                          'Warranty',
+                                          style: TextStyle(fontWeight: FontWeight.bold),
+                                        ),
                                       ),
-                                    ],
-                                    rows: List<DataRow>.generate(productStockList.length, (index) => DataRow(cells: [
-                                      DataCell(Text('${index+1}')),
-                                      DataCell(Row(children: [Text(productStockList[index].categoryName)],)),
-                                      DataCell(Text(productStockList[index].model)),
-                                      DataCell(Text(productStockList[index].imeiNo)),
-                                      DataCell(Text(productStockList[index].dtOfMnf)),
-                                      DataCell(Center(child: Text('${productStockList[index].warranty}'))),
-                                    ]))),
-                              ) :
-                              const Center(child: Text('SOLD OUT', style: TextStyle(fontSize: 20),)),
+                                      fixedWidth: 100,
+                                    ),
+                                  ],
+                                  rows: List<DataRow>.generate(
+                                    productStockList.length,
+                                        (index) => DataRow(
+                                      cells: [
+                                        DataCell(Text('${index + 1}')),
+                                        DataCell(
+                                          Row(
+                                            children: [Text(productStockList[index].categoryName)],
+                                          ),
+                                        ),
+                                        DataCell(Text(productStockList[index].model)),
+                                        DataCell(Text(productStockList[index].imeiNo)),
+                                        DataCell(Center(child: Text(productStockList[index].dtOfMnf))),
+                                        DataCell(Center(child: Text('${productStockList[index].warranty}'))),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              )
+                                  : const Center(
+                                child: Text(
+                                  'SOLD OUT',
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                              ),
                             ),
                           ),
                         ],

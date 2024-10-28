@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:oro_irrigation_new/screens/Forms/contacts.dart';
 import 'Forms/notification_type.dart';
@@ -65,38 +64,6 @@ class _AllEntryState extends State<AllEntry> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    /*return DefaultTabController(
-      length: _tabCont.length, // Number of tabs
-      child: Column(
-        children: [
-          TabBar(
-            controller: _tabCont,
-            isScrollable: true,
-            indicatorColor: myTheme.primaryColor,
-            labelColor: Colors.black,
-            unselectedLabelColor: Colors.grey,
-            tabs: [
-              ...myObjectList.map(
-                    (label) => Tab(
-                  child: Text(label.toString()),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: MediaQuery.sizeOf(context).height-110,
-            child: TabBarView(
-              controller: _tabCont,
-              children: [
-                ...myObjectList.map(
-                      (label) => tabWidgets[label] ?? Center(child: Text('Page of $label')),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );*/
     return Scaffold(
       appBar: AppBar(
         title: const Text('Master'),

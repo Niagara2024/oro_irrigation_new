@@ -7,9 +7,8 @@ import '../constants/MQTTManager.dart';
 import '../constants/MqttServer.dart';
 import '../state_management/MqttPayloadProvider.dart';
 import '../state_management/ConnectivityService.dart';
-import 'Admin/AdminScreenController.dart';
+import 'Admin&Dealer/BaseScreenController.dart';
 import 'Customer/CustomerScreenController.dart';
-import 'Dealer/DealerScreenController.dart';
 import 'login_form.dart';
 
 class MainDashBoard extends StatefulWidget
@@ -134,21 +133,13 @@ class _BuildDashboardScreenState extends State<BuildDashboardScreen> {
 
   Widget mainScreen(int userType) {
     switch (userType) {
-      case 0||1:
-        return AdminScreenController(
+      case 0||1||2:
+        return BaseScreenController(
           userName: widget.userName,
           countryCode: widget.countryCode,
           mobileNo: widget.mobileNo,
           fromLogin: true,
           userId: widget.userId, userType: userType,);
-      case 2:
-        return DealerScreenController(
-          userName: widget.userName,
-          countryCode: widget.countryCode,
-          mobileNo: widget.mobileNo,
-          fromLogin: true,
-          userId: widget.userId,
-          emailId: widget.emailId,);
       case 3:
         return CustomerScreenController(
           customerId: widget.userId,

@@ -266,7 +266,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                 avatar: CircleAvatar(backgroundColor: dataResponse.total![index].color),
                                 elevation: 3,
                                 shape: const LinearBorder(),
-                                label: Text('${dataResponse.total![index].categoryName} - ${dataResponse.total![index].totalProduct}',
+                                label: Text('${index+1} - ${dataResponse.total![index].categoryName}',
                                   style: const TextStyle(fontSize: 11),
                                 ),
                                 visualDensity: VisualDensity.compact,
@@ -300,9 +300,20 @@ class _DealerDashboardState extends State<DealerDashboard> {
                               ),
                             ),
                             child: ListTile(
-                              title: Text(
-                                'Product Stock(${productStockList.length})',
-                                style: const TextStyle(fontSize: 20, color: Colors.black),
+
+                              title: RichText(
+                                text: TextSpan(
+                                  text: 'Product Stock : ', // Regular text
+                                  style: const TextStyle(fontSize: 20, color: Colors.black), // Default style
+                                  children: [
+                                    TextSpan(
+                                      text: productStockList.length < 10
+                                          ? '(${productStockList.length.toString().padLeft(2, '0')})'
+                                          : '(${productStockList.length.toString()})',
+                                      style: const TextStyle(fontSize: 17, color: Colors.black54),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -446,7 +457,18 @@ class _DealerDashboardState extends State<DealerDashboard> {
                       ),
                     ):
                     ListTile(
-                      title: const Text('My Customer', style: TextStyle(fontSize: 17)),
+                      title: RichText(
+                        text: TextSpan(
+                          text: 'My Customers : ', // Regular text
+                          style: const TextStyle(fontSize: 17, color: Colors.black), // Default style
+                          children: [
+                            TextSpan(
+                              text: '(${myCustomerList.length})',
+                              style: const TextStyle(fontSize: 15, color: Colors.black54),
+                            ),
+                          ],
+                        ),
+                      ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -470,9 +492,9 @@ class _DealerDashboardState extends State<DealerDashboard> {
                     ),
                     const Divider(height: 0),
                     Expanded(
-                        child : filteredCustomerList.isNotEmpty? ListView.builder(
-                          itemCount:filteredCustomerList.length,
-                          itemBuilder: (BuildContext context, int index) {
+                        child: filteredCustomerList.isNotEmpty? ListView.separated(
+                          itemCount: filteredCustomerList.length,
+                          itemBuilder: (context, index) {
                             final customer = filteredCustomerList[index];
                             return ListTile(
                               leading: const CircleAvatar(
@@ -554,6 +576,15 @@ class _DealerDashboardState extends State<DealerDashboard> {
                               },
                             );
                           },
+                          separatorBuilder: (context, index) {
+                            return const Divider(
+                              color: Colors.black26,
+                              thickness: 0.3,
+                              indent: 16,
+                              endIndent: 0,
+                              height: 0,
+                            );
+                          },
                         ):
                         Center(
                           child: Padding(
@@ -569,7 +600,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
                               ],
                             ),
                           ),
-                        )
+                        ),
                     ),
                   ],
                 ),

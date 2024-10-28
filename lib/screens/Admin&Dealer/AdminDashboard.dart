@@ -10,10 +10,10 @@ import '../../Models/customer_list.dart';
 import '../../Models/product_stock.dart';
 import '../../constants/http_service.dart';
 import '../../constants/theme.dart';
-import '../Dealer/DealerScreenController.dart';
 import '../Forms/add_product.dart';
 import '../Forms/create_account.dart';
 import '../Forms/device_list.dart';
+import 'BaseScreenController.dart';
 
 enum Calendar {all, year}
 typedef CallbackFunction = void Function(String result);
@@ -266,7 +266,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                     avatar: CircleAvatar(backgroundColor: dataResponse.total![index].color),
                                     elevation: 3,
                                     shape: const LinearBorder(),
-                                    label: Text('${dataResponse.total![index].categoryName} - ${index+1}',
+                                    label: Text('${index+1} - ${dataResponse.total![index].categoryName}',
                                       style: const TextStyle(fontSize: 11),
                                     ),
                                     visualDensity: VisualDensity.compact,
@@ -321,13 +321,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => DealerScreenController(
+                                            builder: (context) => BaseScreenController(
                                               userName: myCustomerList[index].userName,
                                               countryCode: myCustomerList[index].countryCode,
                                               mobileNo: myCustomerList[index].mobileNumber,
                                               fromLogin: false,
                                               userId: myCustomerList[index].userId,
-                                              emailId: myCustomerList[index].emailId,
+                                              emailId: myCustomerList[index].emailId, userType: 2,
                                             ),
                                           ),
                                         );

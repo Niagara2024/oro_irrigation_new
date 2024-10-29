@@ -154,9 +154,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       {
         final jsonData = data["data"] as List;
         try {
-          MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
-          payloadProvider.saveUnits(jsonData[0]['master'][0]['units']);
-          payloadProvider.nodeConnection(true);
+          if(jsonData[0]['master'][0]['categoryId']==1||jsonData[0]['master'][0]['categoryId']==2){
+            MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
+            payloadProvider.saveUnits(jsonData[0]['master'][0]['units']);
+            payloadProvider.nodeConnection(true);
+          }
           mySiteList = jsonData.map((json) => DashboardModel.fromJson(json)).toList();
           indicatorViewHide();
           if(mySiteList.isNotEmpty){

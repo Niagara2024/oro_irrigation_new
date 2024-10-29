@@ -248,6 +248,164 @@ class ProductInventoryState extends State<ProductInventory> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    return screenWidth > 600 ? buildWideLayout(screenWidth, screenHeight):
+    buildNarrowLayout(screenWidth,screenHeight);
+  }
+
+  Widget buildNarrowLayout(screenWidth, screenHeight) {
+    return Scaffold(
+      backgroundColor: myTheme.primaryColor.withOpacity(0.02),
+      appBar: widget.userType != 3 ? AppBar(
+        automaticallyImplyLeading: false,
+        actions: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              totalProduct > 25 ?Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 250,
+                    height: 40,
+                    decoration: BoxDecoration(
+                        color: Colors.white, borderRadius: BorderRadius.circular(5)),
+                    child: Center(
+                      child: TextField(
+                          controller: txtFldSearch,
+                          decoration: InputDecoration(
+                              prefixIcon: const Icon(Icons.search),
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  setState(() {
+                                    searchedChipName = '';
+                                    filterActive = false;
+                                    searched = false;
+                                    filterProductInventoryList.clear();
+                                    txtFldSearch.clear();
+                                  });
+                                },
+                              ),
+                              hintText: 'Search by device id',
+                              border: InputBorder.none),
+                          onChanged: (value) {
+                            if(value.isEmpty){
+                              setState(() {
+                                searchedChipName = '';
+                                filterActive = false;
+                                searched = false;
+                                filterProductInventoryList.clear();
+                                txtFldSearch.clear();
+                              });
+                            }
+                          },
+                          onSubmitted: (value) {
+                            setState(() {
+                              filterActive = true;
+                              searchedChipName = value;
+                              fetchFilterData(null, null, value);
+                            });
+                          }
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8,),
+                  PopupMenuButton<dynamic>(
+                    icon: const Icon(Icons.filter_alt_outlined),
+                    tooltip: 'filter by category or model',
+                    itemBuilder: (BuildContext context) {
+                      List<PopupMenuEntry<dynamic>> menuItems = [];
+                      menuItems.add(
+                        const PopupMenuItem<dynamic>(
+                          enabled: false,
+                          child: Text("Category"),
+                        ),
+                      );
+
+                      List<dynamic> categoryItems = jsonDataMap['data']['category'];
+                      menuItems.addAll(
+                        categoryItems.map((dynamic item) {
+                          return PopupMenuItem<dynamic>(
+                            value: item,
+                            child: Text(item['categoryName']),
+                          );
+                        }),
+                      );
+                      menuItems.add(
+                        const PopupMenuItem<dynamic>(
+                          enabled: false,
+                          child: Text("Model"),
+                        ),
+                      );
+                      List<dynamic> modelItems = jsonDataMap['data']['model'];
+                      menuItems.addAll(
+                        modelItems.map((dynamic item) {
+                          return PopupMenuItem<dynamic>(
+                            value: item,
+                            child: Text('${item['categoryName']} - ${item['modelName']}'),
+                          );
+                        }),
+                      );
+
+                      return menuItems;
+                    },
+                    onSelected: (dynamic selectedItem) {
+                      if (selectedItem is Map<String, dynamic>) {
+                        filterActive = true;
+                        if (selectedItem.containsKey('categoryName') && selectedItem.containsKey('modelName')) {
+                          setState(() {
+                            searchedChipName = '${selectedItem['categoryName']} - ${selectedItem['modelName']}';
+                            fetchFilterData(null, selectedItem['modelId'], null);
+                          });
+                        } else {
+                          setState(() {
+                            searchedChipName = '${selectedItem['categoryName']}';
+                            fetchFilterData(selectedItem['categoryId'], null, null);
+                          });
+                        }
+                      }
+                    },
+                  ),
+                ],
+              ) :
+              Container(),
+            ],),
+          const SizedBox(width: 10)
+        ],
+      ) : null,
+      body: visibleLoading? Visibility(
+        visible: visibleLoading,
+        child: Container(
+          height: screenHeight,
+          color: Colors.transparent,
+          padding: EdgeInsets.fromLTRB(screenWidth/2 - 60, 0, screenWidth/2 - 60, 0),
+          child: const LoadingIndicator(
+            indicatorType: Indicator.ballPulse,
+          ),
+        ),
+      ):
+      widget.userType == 3? buildCustomerDataTable(screenWidth) :
+      Padding(
+        padding: const EdgeInsets.only(left: 2),
+        child: Column(
+          children: [
+            buildAdminOrDealerHeader(),
+            Expanded(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
+                ),
+                child: buildAdminOrDealerDataTable(screenWidth),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildWideLayout(screenWidth, screenHeight) {
     return Scaffold(
       backgroundColor: myTheme.primaryColor.withOpacity(0.02),
       appBar: widget.userType != 3 ? AppBar(
@@ -267,7 +425,7 @@ class ProductInventoryState extends State<ProductInventory> {
                         color: Colors.white, borderRadius: BorderRadius.circular(5)),
                     child: Center(
                       child: TextField(
-                        controller: txtFldSearch,
+                          controller: txtFldSearch,
                           decoration: InputDecoration(
                               prefixIcon: const Icon(Icons.search),
                               suffixIcon: IconButton(

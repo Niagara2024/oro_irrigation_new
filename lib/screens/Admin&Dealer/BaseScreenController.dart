@@ -44,6 +44,73 @@ class _BaseScreenControllerState extends State<BaseScreenController> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    return screenWidth > 600 ? buildWideLayout():
+    buildNarrowLayout();
+  }
+
+  Widget buildNarrowLayout() {
+    return DefaultTabController(
+      length: 2, // Number of tabs
+      child: Scaffold(
+        appBar: AppBar(
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(widget.userName, style: const TextStyle(fontSize: 17),),
+              Text('+${widget.countryCode} ${widget.mobileNo}', style: const TextStyle(fontSize: 12),),
+            ],
+          ),
+          actions: [
+            IconButton(
+            tooltip: 'Logout',
+            icon: const Icon(Icons.logout, color: Colors.redAccent),
+            autofocus: true,
+            focusColor: Colors.white,
+            onPressed: _logout,
+          ),
+            const SizedBox(width: 16,),
+          ],
+          bottom: const TabBar(
+            indicatorColor: Colors.white,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.grey,
+            tabs: [
+              Tab(text: 'Dashboard'),
+              Tab(text: 'Product Inventory'),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            widget.userType == 1?
+            AdminDashboard(
+              userName: widget.userName,
+              countryCode: widget.countryCode,
+              mobileNo: widget.mobileNo,
+              userId: widget.userId,
+            ) :
+            DealerDashboard(
+              userName: widget.userName,
+              countryCode: widget.countryCode,
+              mobileNo: widget.mobileNo,
+              userId: widget.userId,
+              emailId: widget.emailId ?? '',
+              fromLogin: widget.fromLogin,
+              userType: widget.userType,
+            ),
+            ProductInventory(
+              userName: widget.userName,
+              userId: widget.userId,
+              userType: widget.userType,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildWideLayout() {
     return Scaffold(
       backgroundColor: myTheme.primaryColor.withOpacity(0.01),
       body: Row(

@@ -147,6 +147,274 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   Widget build(BuildContext context)
   {
+    var screenWidth = MediaQuery.of(context).size.width;
+    return screenWidth>600?buildWideLayout():
+    buildNarrowLayout();
+  }
+
+  Widget buildNarrowLayout() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(3.0),
+        child: Column(
+          children: [
+            SizedBox(
+              width: MediaQuery.sizeOf(context).width,
+              height: 250,
+              child: Card(
+                elevation: 5,
+                surfaceTintColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5.0), // Adjust the radius as needed
+                ),
+                child: gettingCL?
+                const Center(child: SizedBox(width:40,child: LoadingIndicator(indicatorType: Indicator.ballPulse))):
+                Column(
+                  children: [
+                    ListTile(
+                      title: const Text('My Dealer', style: TextStyle(fontSize: 17)),
+                      trailing: IconButton(tooltip: 'Create Dealer account', icon: const Icon(Icons.person_add_outlined), color: myTheme.primaryColor, onPressed: () async
+                      {
+                        await showDialog<void>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              content: CreateAccount(callback: callbackFunction, subUsrAccount: false, customerId: widget.userId, from: 'Admin',),
+                            ));
+                      }),
+                    ),
+                    const Divider(height: 0),
+                    Expanded(
+                      child : myCustomerList.isNotEmpty? ListView.builder(
+                        itemCount: myCustomerList.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return ListTile(
+                            leading: const CircleAvatar(
+                              backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
+                              backgroundColor: Colors.transparent,
+                            ),
+                            title: Text(myCustomerList[index].userName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
+                            subtitle: Text('+${myCustomerList[index].countryCode} ${myCustomerList[index].mobileNumber}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal)),
+                            onTap:() {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: myCustomerList[index].userId, userName: myCustomerList[index].userName, userID: widget.userId, userType: 1, productStockList: productStockList, callback: callbackFunction, customerType: 'Dealer',)),);
+                            },
+                            trailing: IconButton(tooltip: 'View Dashboard', onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => BaseScreenController(
+                                    userName: myCustomerList[index].userName,
+                                    countryCode: myCustomerList[index].countryCode,
+                                    mobileNo: myCustomerList[index].mobileNumber,
+                                    fromLogin: false,
+                                    userId: myCustomerList[index].userId,
+                                    emailId: myCustomerList[index].emailId, userType: 2,
+                                  ),
+                                ),
+                              );
+                            }, icon: const Icon(Icons.space_dashboard_outlined),),
+                          );
+                        },
+                      ):
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(25.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('Customers not found.', style: TextStyle(fontSize: 17, fontWeight: FontWeight.normal)),
+                              SizedBox(height: 5),
+                              Text('Add your customer using top of the customer adding button.', style: TextStyle(fontWeight: FontWeight.normal)),
+                              Icon(Icons.person_add_outlined),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(
+              height : 450,
+              width: MediaQuery.sizeOf(context).width,
+              child: Card(
+                elevation: 5,
+                surfaceTintColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5.0), // Adjust the radius as needed
+                ),
+                child: Column(
+                  children: [
+                    ListTile(
+                      title: const Text(
+                        "Analytics Overview",
+                        style: TextStyle(fontSize: 20, color: Colors.black),
+                      ),
+                      trailing: Text.rich(
+                        TextSpan(
+                          text: 'Total Sales: ', // Regular text
+                          style: const TextStyle(fontSize: 12),
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: '$totalSales',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: gettingSR?const Center(child: SizedBox(width:40,child: LoadingIndicator(indicatorType: Indicator.ballPulse))):
+                      MySalesChart(graph: dataResponse.graph,),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Wrap(
+                        spacing: 5,
+                        runSpacing: 5,
+                        alignment: WrapAlignment.start,
+                        runAlignment: WrapAlignment.spaceBetween,
+                        children: List.generate(
+                          dataResponse.total!.length, (index) => Chip(
+                          avatar: CircleAvatar(backgroundColor: dataResponse.total![index].color),
+                          elevation: 3,
+                          shape: const LinearBorder(),
+                          label: Text('${index+1} - ${dataResponse.total![index].categoryName}',
+                            style: const TextStyle(fontSize: 10),
+                          ),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(
+              width: MediaQuery.sizeOf(context).width,
+              height: (productStockList.length*40)+120,
+              child: Card(
+                elevation: 5,
+                surfaceTintColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5.0), // Adjust the radius as needed
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      height: 44,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(10),
+                          topLeft: Radius.circular(10),
+                        ),
+                      ),
+                      child: ListTile(
+                        title: Text('Product Stock(${productStockList.length})', style: const TextStyle(fontSize: 20, color: Colors.black),),
+                        trailing : TextButton.icon(
+                          onPressed: () {
+                            {
+                              AlertDialog alert = AlertDialog(
+                                title: const Text("Add new stock"),
+                                content: SizedBox(
+                                    width: 640,
+                                    height: 300,
+                                    child: AddProduct(callback: callbackFunction)
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text("Cancel"),
+                                  ),
+                                ],
+                              );
+
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return alert;
+                                },
+                              );
+                            }
+                          },
+                          icon: const Icon(Icons.add),
+                          label: const Text("New stock"),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(10),
+                            bottomRight: Radius.circular(10),
+                          ),
+                        ),
+                        child: productStockList.isNotEmpty ? Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: DataTable2(
+                              columnSpacing: 12,
+                              horizontalMargin: 12,
+                              minWidth: 600,
+                              border: TableBorder.all(color: Colors.teal.shade100),
+                              headingRowHeight: 40,
+                              dataRowHeight: 40,
+                              headingRowColor: WidgetStateProperty.all<Color>(primaryColorDark.withOpacity(0.1)),
+                              columns: const [
+                                DataColumn2(
+                                    label: Center(child: Text('S.No', style: TextStyle(fontWeight: FontWeight.bold),)),
+                                    fixedWidth: 35,
+                                ),
+                                DataColumn(
+                                  label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold),),
+                                ),
+                                DataColumn(
+                                  label: Text('Model', style: TextStyle(fontWeight: FontWeight.bold),),
+                                ),
+                                DataColumn2(
+                                  label: Center(child: Text('IMEI', style: TextStyle(fontWeight: FontWeight.bold),)),
+                                  fixedWidth: 130,
+                                ),
+                                DataColumn2(
+                                  label: Center(child: Text('M.Date', style: TextStyle(fontWeight: FontWeight.bold),)),
+                                  fixedWidth: 90,
+                                ),
+                                DataColumn2(
+                                  label: Center(child: Text('Wty', style: TextStyle(fontWeight: FontWeight.bold),)),
+                                  fixedWidth: 30,
+                                ),
+                              ],
+                              rows: List<DataRow>.generate(productStockList.length, (index) => DataRow(cells: [
+                                DataCell(Center(child: Text('${index+1}'))),
+                                DataCell(Text(productStockList[index].categoryName)),
+                                DataCell(Text(productStockList[index].model)),
+                                DataCell(Center(child: Text(productStockList[index].imeiNo))),
+                                DataCell(Center(child: Text(productStockList[index].dtOfMnf))),
+                                DataCell(Center(child: Text('${productStockList[index].warranty}'))),
+                              ]))),
+                        ) :
+                        const Center(child: Text('SOLD OUT', style: TextStyle(fontSize: 20),)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildWideLayout() {
     return Scaffold(
       backgroundColor: myTheme.primaryColor.withOpacity(0.01),
       appBar: AppBar(

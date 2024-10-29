@@ -151,6 +151,207 @@ class _DealerDashboardState extends State<DealerDashboard> {
   @override
   Widget build(BuildContext context)
   {
+    var screenWidth = MediaQuery.of(context).size.width;
+    return screenWidth>600?buildWideLayout():
+    buildNarrowLayout();
+  }
+
+  Widget buildNarrowLayout() {
+    return Padding(
+      padding: const EdgeInsets.all(3.0),
+      child: SizedBox(
+        width: MediaQuery.sizeOf(context).width,
+        height: MediaQuery.sizeOf(context).height,
+        child: Card(
+          elevation: 5,
+          surfaceTintColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5.0), // Adjust the radius as needed
+          ),
+          child: gettingCL?
+          const Center(child: SizedBox(width:40,child: LoadingIndicator(indicatorType: Indicator.ballPulse))):
+          Column(
+            children: [
+              searched?ListTile(
+                title: TextField(
+                  controller: txtFldSearch,
+                  decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.clear, color: Colors.red,),
+                        onPressed: () {
+                          searched = false;
+                          filteredCustomerList = myCustomerList;
+                          txtFldSearch.clear();
+                          setState(() {
+                          });
+                        },
+                      ),
+                      hintText: 'Search by name',
+                      border: InputBorder.none),
+                  onChanged: (value) {
+                    setState(() {
+                      filteredCustomerList = myCustomerList.where((customer) {
+                        return customer.userName.toLowerCase().startsWith(value.toLowerCase());
+                      }).toList();
+                    });
+                  },
+                ),
+              ):
+              ListTile(
+                title: RichText(
+                  text: TextSpan(
+                    text: 'My Customers : ', // Regular text
+                    style: const TextStyle(fontSize: 17, color: Colors.black), // Default style
+                    children: [
+                      TextSpan(
+                        text: '(${myCustomerList.length})',
+                        style: const TextStyle(fontSize: 15, color: Colors.black54),
+                      ),
+                    ],
+                  ),
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    myCustomerList.length>15?IconButton(tooltip: 'Search Customer', icon: const Icon(Icons.search), color: myTheme.primaryColor, onPressed: () async
+                    {
+                      setState(() {
+                        searched=true;
+                      });
+                    }):
+                    const SizedBox(),
+                    IconButton(tooltip: 'Create Customer account', icon: const Icon(Icons.person_add_outlined), color: myTheme.primaryColor, onPressed: () async
+                    {
+                      await showDialog<void>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            content: CreateAccount(callback: callbackFunction, subUsrAccount: false, customerId: widget.userId, from: 'Dealer',),
+                          ));
+                    }),
+                  ],
+                ),
+              ),
+              const Divider(height: 0),
+              Expanded(
+                child: filteredCustomerList.isNotEmpty? ListView.separated(
+                  itemCount: filteredCustomerList.length,
+                  itemBuilder: (context, index) {
+                    final customer = filteredCustomerList[index];
+                    return ListTile(
+                      leading: const CircleAvatar(
+                        backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
+                        backgroundColor: Colors.transparent,
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            tooltip: 'chart',
+                            onPressed: (){
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => UserChatScreen(userId: customer.userId, dealerId: customer.userId, userName: customer.userName,),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.question_answer_rounded),
+                          ),
+                          (customer.criticalAlarmCount + customer.serviceRequestCount)>0? BadgeButton(
+                            onPressed: () {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return  Column(
+                                    children: [
+                                      Container(
+                                        width: MediaQuery.sizeOf(context).width,
+                                        color: Colors.teal.shade100,
+                                        height: 30,
+                                        child: Center(child: Text(customer.userName)),
+                                      ),
+                                      customer.serviceRequestCount>0?SizedBox(
+                                        width: MediaQuery.sizeOf(context).width,
+                                        height: (customer.serviceRequestCount*45)+45,
+                                        child: ServiceRequestsTable(userId: customer.userId),
+                                      ):
+                                      const SizedBox(),
+                                      customer.criticalAlarmCount>0?SizedBox(
+                                        width: MediaQuery.sizeOf(context).width,
+                                        height: customer.criticalAlarmCount*45+40,
+                                        child: DisplayCriticalAlarm(userId: customer.userId,),
+                                      ):
+                                      const SizedBox(),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            icon: Icons.hail,
+                            badgeNumber: customer.criticalAlarmCount + customer.serviceRequestCount,
+                          ):
+                          const SizedBox(),
+                          IconButton(
+                            tooltip: 'View dashboard',
+                            onPressed: (){
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CustomerScreenController(
+                                    customerId: customer.userId,
+                                    customerName: customer.userName,
+                                    mobileNo: '+${customer.countryCode}-${customer.mobileNumber}',
+                                    comingFrom: 'AdminORDealer',
+                                    emailId: customer.emailId, userId: widget.userId,),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.view_quilt_rounded),
+                          ),
+                        ],
+                      ),
+                      title: Text(customer.userName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
+                      subtitle: Text('+${customer.countryCode} ${customer.mobileNumber}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal)),
+                      onTap:() {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: customer.userId, userName: customer.userName, userID: widget.userId, userType: widget.fromLogin?2:1, productStockList: productStockList, callback: callbackFunction, customerType: 'Customer',)),);
+                      },
+                    );
+                  },
+                  separatorBuilder: (context, index) {
+                    return const Divider(
+                      color: Colors.black26,
+                      thickness: 0.3,
+                      indent: 16,
+                      endIndent: 0,
+                      height: 0,
+                    );
+                  },
+                ):
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(25.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text('Customers not found.', style: TextStyle(fontSize: 17, fontWeight: FontWeight.normal)),
+                        const SizedBox(height: 5),
+                        !searched? const Text('Add your customer using top of the customer adding button.', style: TextStyle(fontWeight: FontWeight.normal)):
+                        const SizedBox(),
+                        !searched?const Icon(Icons.person_add_outlined):const SizedBox(),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildWideLayout() {
     return Scaffold(
       backgroundColor: myTheme.primaryColor.withOpacity(0.01),
       appBar: AppBar(
@@ -492,115 +693,115 @@ class _DealerDashboardState extends State<DealerDashboard> {
                     ),
                     const Divider(height: 0),
                     Expanded(
-                        child: filteredCustomerList.isNotEmpty? ListView.separated(
-                          itemCount: filteredCustomerList.length,
-                          itemBuilder: (context, index) {
-                            final customer = filteredCustomerList[index];
-                            return ListTile(
-                              leading: const CircleAvatar(
-                                backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
-                                backgroundColor: Colors.transparent,
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    tooltip: 'chart',
-                                    onPressed: (){
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => UserChatScreen(userId: customer.userId, dealerId: customer.userId, userName: customer.userName,),
-                                        ),
-                                      );
-                                    },
-                                    icon: const Icon(Icons.question_answer_rounded),
-                                  ),
-                                  (customer.criticalAlarmCount + customer.serviceRequestCount)>0? BadgeButton(
-                                    onPressed: () {
-                                      showModalBottomSheet(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return  Column(
-                                            children: [
-                                              Container(
-                                                width: MediaQuery.sizeOf(context).width,
-                                                color: Colors.teal.shade100,
-                                                height: 30,
-                                                child: Center(child: Text(customer.userName)),
-                                              ),
-                                              customer.serviceRequestCount>0?SizedBox(
-                                                width: MediaQuery.sizeOf(context).width,
-                                                height: (customer.serviceRequestCount*45)+45,
-                                                child: ServiceRequestsTable(userId: customer.userId),
-                                              ):
-                                              const SizedBox(),
-                                              customer.criticalAlarmCount>0?SizedBox(
-                                                width: MediaQuery.sizeOf(context).width,
-                                                height: customer.criticalAlarmCount*45+40,
-                                                child: DisplayCriticalAlarm(userId: customer.userId,),
-                                              ):
-                                              const SizedBox(),
-                                            ],
-                                          );
-                                        },
-                                      );
-                                    },
-                                    icon: Icons.hail,
-                                    badgeNumber: customer.criticalAlarmCount + customer.serviceRequestCount,
-                                  ):
-                                  const SizedBox(),
-                                  IconButton(
-                                    tooltip: 'View dashboard',
-                                    onPressed: (){
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => CustomerScreenController(
-                                            customerId: customer.userId,
-                                            customerName: customer.userName,
-                                            mobileNo: '+${customer.countryCode}-${customer.mobileNumber}',
-                                            comingFrom: 'AdminORDealer',
-                                            emailId: customer.emailId, userId: widget.userId,),
-                                        ),
-                                      );
-                                    },
-                                    icon: const Icon(Icons.view_quilt_rounded),
-                                  ),
-                                ],
-                              ),
-                              title: Text(customer.userName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
-                              subtitle: Text('+${customer.countryCode} ${customer.mobileNumber}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal)),
-                              onTap:() {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: customer.userId, userName: customer.userName, userID: widget.userId, userType: widget.fromLogin?2:1, productStockList: productStockList, callback: callbackFunction, customerType: 'Customer',)),);
-                              },
-                            );
-                          },
-                          separatorBuilder: (context, index) {
-                            return const Divider(
-                              color: Colors.black26,
-                              thickness: 0.3,
-                              indent: 16,
-                              endIndent: 0,
-                              height: 0,
-                            );
-                          },
-                        ):
-                        Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(25.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                      child: filteredCustomerList.isNotEmpty? ListView.separated(
+                        itemCount: filteredCustomerList.length,
+                        itemBuilder: (context, index) {
+                          final customer = filteredCustomerList[index];
+                          return ListTile(
+                            leading: const CircleAvatar(
+                              backgroundImage: AssetImage("assets/images/user_thumbnail.png"),
+                              backgroundColor: Colors.transparent,
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Text('Customers not found.', style: TextStyle(fontSize: 17, fontWeight: FontWeight.normal)),
-                                const SizedBox(height: 5),
-                                !searched? const Text('Add your customer using top of the customer adding button.', style: TextStyle(fontWeight: FontWeight.normal)):
+                                IconButton(
+                                  tooltip: 'chart',
+                                  onPressed: (){
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => UserChatScreen(userId: customer.userId, dealerId: customer.userId, userName: customer.userName,),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.question_answer_rounded),
+                                ),
+                                (customer.criticalAlarmCount + customer.serviceRequestCount)>0? BadgeButton(
+                                  onPressed: () {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return  Column(
+                                          children: [
+                                            Container(
+                                              width: MediaQuery.sizeOf(context).width,
+                                              color: Colors.teal.shade100,
+                                              height: 30,
+                                              child: Center(child: Text(customer.userName)),
+                                            ),
+                                            customer.serviceRequestCount>0?SizedBox(
+                                              width: MediaQuery.sizeOf(context).width,
+                                              height: (customer.serviceRequestCount*45)+45,
+                                              child: ServiceRequestsTable(userId: customer.userId),
+                                            ):
+                                            const SizedBox(),
+                                            customer.criticalAlarmCount>0?SizedBox(
+                                              width: MediaQuery.sizeOf(context).width,
+                                              height: customer.criticalAlarmCount*45+40,
+                                              child: DisplayCriticalAlarm(userId: customer.userId,),
+                                            ):
+                                            const SizedBox(),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                  icon: Icons.hail,
+                                  badgeNumber: customer.criticalAlarmCount + customer.serviceRequestCount,
+                                ):
                                 const SizedBox(),
-                                !searched?const Icon(Icons.person_add_outlined):const SizedBox(),
+                                IconButton(
+                                  tooltip: 'View dashboard',
+                                  onPressed: (){
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => CustomerScreenController(
+                                          customerId: customer.userId,
+                                          customerName: customer.userName,
+                                          mobileNo: '+${customer.countryCode}-${customer.mobileNumber}',
+                                          comingFrom: 'AdminORDealer',
+                                          emailId: customer.emailId, userId: widget.userId,),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.view_quilt_rounded),
+                                ),
                               ],
                             ),
+                            title: Text(customer.userName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
+                            subtitle: Text('+${customer.countryCode} ${customer.mobileNumber}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal)),
+                            onTap:() {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: customer.userId, userName: customer.userName, userID: widget.userId, userType: widget.fromLogin?2:1, productStockList: productStockList, callback: callbackFunction, customerType: 'Customer',)),);
+                            },
+                          );
+                        },
+                        separatorBuilder: (context, index) {
+                          return const Divider(
+                            color: Colors.black26,
+                            thickness: 0.3,
+                            indent: 16,
+                            endIndent: 0,
+                            height: 0,
+                          );
+                        },
+                      ):
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(25.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('Customers not found.', style: TextStyle(fontSize: 17, fontWeight: FontWeight.normal)),
+                              const SizedBox(height: 5),
+                              !searched? const Text('Add your customer using top of the customer adding button.', style: TextStyle(fontWeight: FontWeight.normal)):
+                              const SizedBox(),
+                              !searched?const Icon(Icons.person_add_outlined):const SizedBox(),
+                            ],
                           ),
                         ),
+                      ),
                     ),
                   ],
                 ),

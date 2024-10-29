@@ -873,7 +873,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           int.parse(filteredPumps[index].reason)==8 || int.parse(filteredPumps[index].reason)==9 ?
-                                          Text('Reason (Set : ${filteredPumps[index].setValue}. Actual : ${filteredPumps[index].actualValue})',style: const TextStyle(fontSize: 13,),): const Text('Reason',style: TextStyle(fontSize: 13,),),
+                                          Text('Reason (Set : ${filteredPumps[index].setValue}. Actual : ${filteredPumps[index].actualValue})',style: const TextStyle(fontSize: 12,),): const Text('Reason',style: TextStyle(fontSize: 12,),),
                                           Text(getContentByCode(int.parse(filteredPumps[index].reason)), style: const TextStyle(fontSize: 11,)),
                                         ],
                                       ),

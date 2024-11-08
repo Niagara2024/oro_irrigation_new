@@ -55,6 +55,7 @@ class MqttPayloadProvider with ChangeNotifier {
   List<CM> get pumpLiveList => _pumpLiveList;
 
   List<dynamic> unitList = [];
+  List<dynamic> userPermission = [];
 
   bool nodeAndControllerConnection = true;
 
@@ -318,6 +319,10 @@ class MqttPayloadProvider with ChangeNotifier {
 
   void saveUnits(List<dynamic> units) {
     unitList = units;
+  }
+
+  void saveUserPermission(List<dynamic> permission) {
+    userPermission = permission;
   }
 
   void setAppConnectionState(MQTTConnectionState state) {

@@ -225,6 +225,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             if(transformedData[0]['master'][0]['categoryId']==1||transformedData[0]['master'][0]['categoryId']==2){
               MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
               payloadProvider.saveUnits(transformedData[0]['master'][0]['units']);
+              payloadProvider.saveUserPermission(transformedData[0]['master'][0]['userPermission']);
               payloadProvider.nodeConnection(true);
             }
           }

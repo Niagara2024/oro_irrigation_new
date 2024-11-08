@@ -1358,6 +1358,8 @@ class Fertilizer {
 
     if(json['QtyLeft'].runtimeType==int) {
       qtyLeft = json['QtyLeft'].toString();
+    }else if(json['QtyLeft'].runtimeType==double) {
+      qtyLeft = json['QtyLeft'].toString();
     }else{
       qtyLeft = json['QtyLeft'];
     }

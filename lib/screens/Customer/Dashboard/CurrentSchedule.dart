@@ -10,9 +10,9 @@ import '../../../constants/MyFunction.dart';
 import '../../../constants/http_service.dart';
 
 class CurrentSchedule extends StatefulWidget {
-  const CurrentSchedule({Key? key, required this.siteData, required this.customerID, required this.currentSchedule}) : super(key: key);
+  const CurrentSchedule({Key? key, required this.siteData, required this.userId, required this.currentSchedule}) : super(key: key);
   final DashboardModel siteData;
-  final int customerID;
+  final int userId;
   final List<CurrentScheduleModel> currentSchedule;
 
   @override
@@ -495,7 +495,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
   Future<void>sendToServer(int sNo, String prgName, String sqName, int method, String payLoad) async {
     try {
       final body = {
-        "userId": widget.customerID,
+        "userId": widget.siteData.customerId,
         "controllerId": widget.siteData.master[0].controllerId,
         "serialNumber": sNo,
         "programName": prgName,
@@ -506,7 +506,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
         "flow": '0',
         "fromDashboard":true,
         "selection": [],
-        "createUser": widget.customerID,
+        "createUser": widget.userId,
         "hardware": jsonDecode(payLoad),
       };
 
@@ -521,7 +521,7 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
 
   void sendSkipOperationToServer(String msg, String data) async
   {
-    Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.siteData.master[0].controllerId, "messageStatus": msg, "hardware": jsonDecode(data), "createUser": widget.customerID};
+    Map<String, Object> body = {"userId": widget.siteData.customerId, "controllerId": widget.siteData.master[0].controllerId, "messageStatus": msg, "hardware": jsonDecode(data), "createUser": widget.userId};
     final response = await HttpService().postRequest("createUserSentAndReceivedMessageManually", body);
     if (response.statusCode == 200) {
       print(response.body);

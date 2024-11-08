@@ -18,8 +18,8 @@ import '../../../constants/theme.dart';
 enum SegmentWithFlow {manual, duration, flow}
 
 class RunByManual extends StatefulWidget {
-  const RunByManual({Key? key, required this.customerID, required this.siteID, required this.controllerID, required this.siteName, required this.imeiNo, required this.callbackFunction}) : super(key: key);
-  final int customerID, siteID, controllerID;
+  const RunByManual({Key? key, required this.customerID, required this.siteID, required this.controllerID, required this.siteName, required this.imeiNo, required this.callbackFunction, required this.userId}) : super(key: key);
+  final int customerID, siteID, controllerID, userId;
   final String siteName, imeiNo;
   final void Function(String msg) callbackFunction;
 
@@ -2679,7 +2679,7 @@ class _RunByManualState extends State<RunByManual>  with SingleTickerProviderSta
         "flow": flow,
         "fromDashboard":false,
         "selection": selection,
-        "createUser": widget.customerID,
+        "createUser": widget.userId,
         "hardware": jsonDecode(payLoad),
       };
       final response = await HttpService().postRequest("createUserManualOperation", body);

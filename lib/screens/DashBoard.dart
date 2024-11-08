@@ -146,7 +146,8 @@ class _BuildDashboardScreenState extends State<BuildDashboardScreen> {
           customerName: widget.userName,
           mobileNo: '+${widget.countryCode}-${widget.mobileNo}',
           comingFrom: 'Customer',
-          emailId: widget.emailId, userId: widget.userId,);
+          emailId: widget.emailId,
+          userId: widget.userId,);
       default:
         return const SizedBox();
     }

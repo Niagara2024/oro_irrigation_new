@@ -17,8 +17,8 @@ import 'Dashboard/DisplayAllLine.dart';
 import 'Dashboard/PumpLineCentral.dart';
 
 class CustomerDashboard extends StatefulWidget {
-  const CustomerDashboard({Key? key, required this.userID, required this.customerID, required this.type, required this.customerName, required this.mobileNo, required this.siteData, required this.masterInx, required this.lineIdx}) : super(key: key);
-  final int userID, customerID, type, masterInx, lineIdx;
+  const CustomerDashboard({Key? key, required this.userId, required this.type, required this.customerName, required this.mobileNo, required this.siteData, required this.masterInx, required this.lineIdx, required this.customerId}) : super(key: key);
+  final int userId, customerId, type, masterInx, lineIdx;
   final String customerName, mobileNo;
   final DashboardModel siteData;
 
@@ -79,7 +79,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 List<dynamic> sensorStatus = items['Sensor'];
                 Map<int, dynamic> sensorStatusMap = {};
                 try{
-                  sensorStatusMap = {for (var item in sensorStatus) item['S_No']:item['Status']};
+                  sensorStatusMap = {for (var item in sensorStatus) item['sNo']:item['value']};
                 }catch(e){
                   sensorStatusMap = {for (var item in sensorStatus) item.sNo:item.value};
                 }
@@ -104,33 +104,24 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
                   if(sensorStatus.isNotEmpty)
                   {
+                    // Update Water Meter
                     for (var wm in line.waterMeter) {
                       if (sensorStatusMap.containsKey(wm.sNo)) {
-                        wm.value = sensorStatusMap[wm.sNo]!;
-                      }
-                    }
-
-                    for (var ps in line.pressureSensor) {
-                      if (sensorStatusMap.containsKey(ps.sNo)) {
-                        ps.value = sensorStatusMap[ps.sNo]!;
+                        wm.value = sensorStatusMap[wm.sNo] ?? '0';
                       }
                     }
 
                     // Update Pressure Sensor
                     for (var ls in line.levelSensor) {
                       if (sensorStatusMap.containsKey(ls.sNo)) {
-                        ls.value = sensorStatusMap[ls.sNo]!;
+                        ls.value = sensorStatusMap[ls.sNo] ?? '0';
                       }
                     }
 
-                    // Update Moisture Sensor
-                    for (var ms in line.moistureSensor) {
-                      if (sensorStatusMap.containsKey(ms.sNo)) {
-                        ms.value = sensorStatusMap[ms.sNo]!;
-                      }
-                    }
+                    updateSensorValues(line.pressureSensor, sensorStatusMap);
+                    updateSensorValues(line.moistureSensor, sensorStatusMap);
+
                   }
-
                 }
 
                 Provider.of<MqttPayloadProvider>(context).nodeConnection(true);
@@ -156,19 +147,18 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
       if(widget.siteData.master[widget.masterInx].irrigationLine[widget.lineIdx].sNo==0){
         return Column(
           children: [
-
             provider.liveSync? stoppedAnimation(): const SizedBox(),
             Expanded(
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
                 child: Column(
                   children: [
-                    DisplayAllLine(currentMaster: (widget.siteData.master[widget.masterInx]), provider: provider, userId: widget.userID,),
-                    provider.currentSchedule.isNotEmpty? CurrentSchedule(siteData: widget.siteData, customerID: widget.customerID, currentSchedule: provider.currentSchedule,):
+                    DisplayAllLine(currentMaster: (widget.siteData.master[widget.masterInx]), provider: provider, userId: widget.userId, customerId: widget.siteData.customerId,),
+                    provider.currentSchedule.isNotEmpty? CurrentSchedule(siteData: widget.siteData, userId: widget.userId, currentSchedule: provider.currentSchedule,):
                     const SizedBox(),
-                    provider.programQueue.isNotEmpty? NextSchedule(siteData: widget.siteData, userID: widget.userID, customerID: widget.customerID, programQueue: provider.programQueue,):
+                    provider.programQueue.isNotEmpty? NextSchedule(siteData: widget.siteData, userID: widget.userId, customerID: widget.siteData.customerId, programQueue: provider.programQueue,):
                     const SizedBox(),
-                    provider.scheduledProgram.isNotEmpty? ScheduledProgramList(siteData: widget.siteData, customerId: widget.customerID, scheduledPrograms: provider.scheduledProgram, masterInx: widget.masterInx,):
+                    provider.scheduledProgram.isNotEmpty? ScheduledProgramList(siteData: widget.siteData, userId: widget.userId, scheduledPrograms: provider.scheduledProgram, masterInx: widget.masterInx,):
                     const SizedBox(),
                     const SizedBox(height: 8,),
                   ],
@@ -189,7 +179,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
         return Column(
           children: [
-
             irrigationFlag !=0? Padding(
               padding: const EdgeInsets.only(left: 3, right: 3),
               child: Container(
@@ -206,9 +195,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
               ),
             ):
             const SizedBox(),
-
             provider.liveSync? stoppedAnimation(): const SizedBox(),
-
             Expanded(
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
@@ -217,11 +204,11 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                   children: [
                     screenWidth > 600 ? buildWideLayout(provider, irrigationFlag!):
                     buildNarrowLayout(provider),
-                    filteredCurrentSchedule.isNotEmpty? CurrentSchedule(siteData: widget.siteData, customerID: widget.customerID, currentSchedule: filteredCurrentSchedule,):
+                    filteredCurrentSchedule.isNotEmpty? CurrentSchedule(siteData: widget.siteData, userId: widget.userId, currentSchedule: filteredCurrentSchedule,):
                     const SizedBox(),
-                    filteredProgramsQueue.isNotEmpty? NextSchedule(siteData: widget.siteData, userID: widget.userID, customerID: widget.customerID, programQueue: filteredProgramsQueue,):
+                    filteredProgramsQueue.isNotEmpty? NextSchedule(siteData: widget.siteData, userID: widget.userId, customerID: widget.siteData.customerId, programQueue: filteredProgramsQueue,):
                     const SizedBox(),
-                    filteredScheduledPrograms.isNotEmpty? ScheduledProgramList(siteData: widget.siteData, customerId: widget.customerID, scheduledPrograms: filteredScheduledPrograms, masterInx: widget.masterInx,):
+                    filteredScheduledPrograms.isNotEmpty? ScheduledProgramList(siteData: widget.siteData, userId: widget.userId, scheduledPrograms: filteredScheduledPrograms, masterInx: widget.masterInx,):
                     const SizedBox(),
                     const SizedBox(height: 8,),
                   ],
@@ -234,6 +221,15 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     }
     else{
       return const Center(child: Text('Site not configure'));
+    }
+  }
+
+  void updateSensorValues(List<SensorModel> sensors, Map<int, dynamic> sensorStatusMap) {
+    for (var sensor in sensors) {
+      if (sensorStatusMap.containsKey(sensor.sNo)) {
+        var value = sensorStatusMap[sensor.sNo];
+        sensor.value = value ?? '0';
+      }
     }
   }
 
@@ -278,7 +274,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                               //src pump
                               provider.sourcePump.isNotEmpty? Padding(
                                 padding: const EdgeInsets.only(top: 15),
-                                child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id, spList: provider.sourcePump, userId: widget.userID, controllerId: widget.siteData.master[widget.masterInx].controllerId,),
+                                child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id, spList: provider.sourcePump, userId: widget.userId, controllerId: widget.siteData.master[widget.masterInx].controllerId, customerId: widget.siteData.customerId,),
                               ):
                               const SizedBox(),
 
@@ -301,7 +297,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                               //i pump
                               provider.irrigationPump.isNotEmpty? Padding(
                                 padding: const EdgeInsets.only(top: 15),
-                                child: DisplayIrrigationPump(currentLineId: crrIrrLine.id, deviceId: widget.siteData.master[widget.masterInx].deviceId, ipList: provider.irrigationPump, userId: widget.userID, controllerId: widget.siteData.master[widget.masterInx].controllerId,),
+                                child: DisplayIrrigationPump(currentLineId: crrIrrLine.id, deviceId: widget.siteData.master[widget.masterInx].deviceId, ipList: provider.irrigationPump, userId: widget.userId, controllerId: widget.siteData.master[widget.masterInx].controllerId,),
                               ):
                               const SizedBox(),
 
@@ -518,7 +514,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
               children: [
                 provider.sourcePump.isNotEmpty? Padding(
                   padding: EdgeInsets.only(top: provider.localFertilizer.isNotEmpty || provider.localFertilizer.isNotEmpty? 38.4:0),
-                  child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id, spList: provider.sourcePump, userId: widget.userID, controllerId: widget.siteData.master[widget.masterInx].controllerId,),
+                  child: DisplaySourcePump(deviceId: widget.siteData.master[widget.masterInx].deviceId, currentLineId: crrIrrLine.id, spList: provider.sourcePump, userId: widget.userId, controllerId: widget.siteData.master[widget.masterInx].controllerId, customerId: widget.siteData.customerId,),
                 ):
                 const SizedBox(),
 
@@ -575,7 +571,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
                 provider.irrigationPump.isNotEmpty? Padding(
                   padding: EdgeInsets.only(top: provider.localFertilizer.isNotEmpty || provider.localFertilizer.isNotEmpty? 38.4:0),
-                  child: DisplayIrrigationPump(currentLineId: crrIrrLine.id, deviceId: widget.siteData.master[widget.masterInx].deviceId, ipList: provider.irrigationPump, userId: widget.userID, controllerId: widget.siteData.master[widget.masterInx].controllerId,),
+                  child: DisplayIrrigationPump(currentLineId: crrIrrLine.id, deviceId: widget.siteData.master[widget.masterInx].deviceId, ipList: provider.irrigationPump, userId: widget.userId, controllerId: widget.siteData.master[widget.masterInx].controllerId,),
                 ):
                 const SizedBox(),
 
@@ -686,7 +682,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  PumpLineCentral(currentSiteData: widget.siteData, crrIrrLine:crrIrrLine, masterIdx: widget.masterInx, provider: provider, userId: widget.userID,),
+                  PumpLineCentral(currentSiteData: widget.siteData, crrIrrLine:crrIrrLine, masterIdx: widget.masterInx, provider: provider, userId: widget.userId,),
                   Divider(height: 0, color: Colors.grey.shade300),
                   Container(height: 4, color: Colors.white24),
                   Divider(height: 0, color: Colors.grey.shade300),
@@ -732,7 +728,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
   void sentToServer(String msg, String payLoad) async
   {
-    Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.siteData.master[widget.masterInx].deviceId, "messageStatus": msg, "hardware": jsonDecode(payLoad), "createUser": widget.userID};
+    Map<String, Object> body = {"userId": widget.siteData.customerId, "controllerId": widget.siteData.master[widget.masterInx].deviceId, "messageStatus": msg, "hardware": jsonDecode(payLoad), "createUser": widget.userId};
     final response = await HttpService().postRequest("createUserSentAndReceivedMessageManually", body);
     if (response.statusCode == 200) {
       print(response.body);
@@ -765,26 +761,26 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
     if(widget.currentLineId=='all'){
       valveWidgets = [
         for (var line in widget.currentMaster.irrigationLine) ...[
-          ...line.pressureSwitch.map((psw) => PressureSwitchWidget(psw: psw)).toList(),
-          ...line.waterMeter.map((wm) => WaterMeterWidget(wm: wm)).toList(),
-          ...line.pressureSensor.map((ps) => PressureSensorWidget(ps: ps)).toList(),
-          ...line.levelSensor.map((ls) => LevelSensorWidget(ls: ls)).toList(),
+          ...line.pressureSensor.map((ps) => SensorWidget(sensor: ps, sensorType: 'Pressure Sensor', imagePath: 'assets/images/pressure_sensor.png',)).toList(),
+          ...line.waterMeter.map((wm) => SensorWidget(sensor: wm, sensorType: 'Water Meter', imagePath: 'assets/images/water_meter.png',)).toList(),
           ...line.mainValve.map((mv) => MainValveWidget(mv: mv, status: mv.status)).toList(),
           ...line.valve.map((vl) => ValveWidget(vl: vl, status: vl.status)).toList(),
           ...line.agitator.map((ag) => AgitatorWidget(ag: ag, status: ag.status)).toList(),
-          ...line.moistureSensor.map((ms) => MoistureSensorWidget(ms: ms)).toList(),
+          ...line.pressureSwitch.map((psw) => SensorWidget(sensor: psw, sensorType: 'Pressure Switch', imagePath: 'assets/images/pressure_switch.png',)).toList(),
+          ...line.levelSensor.map((ls) => SensorWidget(sensor: ls, sensorType: 'Level Sensor', imagePath: 'assets/images/level_sensor.png',)).toList(),
+          ...line.moistureSensor.map((ms) => SensorWidget(sensor: ms, sensorType: 'Moisture Sensor', imagePath: 'assets/images/moisture_sensor.png',)).toList(),
         ]
       ];
     }else{
       valveWidgets = [
-        ...widget.irrigationLine.pressureSwitch.map((psw) => PressureSwitchWidget(psw: psw)).toList(),
-        ...widget.irrigationLine.waterMeter.map((wm) => WaterMeterWidget(wm: wm)).toList(),
-        ...widget.irrigationLine.pressureSensor.map((ps) => PressureSensorWidget(ps: ps)).toList(),
-        ...widget.irrigationLine.levelSensor.map((ls) => LevelSensorWidget(ls: ls)).toList(),
+        ...widget.irrigationLine.pressureSensor.map((ps) => SensorWidget(sensor: ps, sensorType: 'Pressure Sensor', imagePath: 'assets/images/pressure_sensor.png',)).toList(),
+        ...widget.irrigationLine.waterMeter.map((wm) => SensorWidget(sensor: wm, sensorType: 'Water Meter', imagePath: 'assets/images/water_meter.png',)).toList(),
         ...widget.irrigationLine.mainValve.map((mv) => MainValveWidget(mv: mv, status: mv.status,)).toList(),
         ...widget.irrigationLine.valve.map((vl) => ValveWidget(vl: vl, status: vl.status,)).toList(),
         ...widget.irrigationLine.agitator.map((ag) => AgitatorWidget(ag: ag, status: ag.status)).toList(),
-        ...widget.irrigationLine.moistureSensor.map((ms) => MoistureSensorWidget(ms: ms)).toList(),
+        ...widget.irrigationLine.pressureSwitch.map((psw) => SensorWidget(sensor: psw, sensorType: 'Pressure Switch', imagePath: 'assets/images/pressure_switch.png',)).toList(),
+        ...widget.irrigationLine.levelSensor.map((ls) => SensorWidget(sensor: ls, sensorType: 'Level Sensor', imagePath: 'assets/images/level_sensor.png',)).toList(),
+        ...widget.irrigationLine.moistureSensor.map((ms) => SensorWidget(sensor: ms, sensorType: 'Moisture Sensor', imagePath: 'assets/images/moisture_sensor.png',)).toList(),
       ];
     }
 
@@ -831,254 +827,6 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
             return Container(child: valveWidgets[index]);
           },
         ),
-      ),
-    );
-  }
-}
-
-class PressureSwitchWidget extends StatelessWidget {
-  final PressureSwitch psw;
-  const PressureSwitchWidget({super.key, required this.psw});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 150,
-      margin: const EdgeInsets.only(left: 4, right: 4),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          const SizedBox(
-            width: 10,
-            height: 3,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                VerticalDivider(width: 0,),
-                SizedBox(width: 4,),
-                VerticalDivider(width: 0,),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 10, right: 10),
-            child: Container(
-              width: 50,
-              height: 17,
-              decoration: BoxDecoration(
-                color: Colors.yellow,
-                borderRadius: const BorderRadius.all(Radius.circular(2)),
-                border: Border.all(
-                  color: Colors.grey,
-                  width: .50,
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  psw.value==0?'High':'--',
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Image.asset(
-            width: 35,
-            height: 35,
-            'assets/images/pressure_switch.png',
-          ),
-          Text(psw.name.isNotEmpty? psw.name:psw.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10, color: Colors.black54),),
-        ],
-      ),
-    );
-  }
-}
-
-class WaterMeterWidget extends StatelessWidget {
-  final WaterMeter wm;
-  const WaterMeterWidget({super.key, required this.wm});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 150,
-      margin: const EdgeInsets.only(left: 4, right: 4),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          const SizedBox(
-            width: 10,
-            height: 3,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                VerticalDivider(width: 0,),
-                SizedBox(width: 4,),
-                VerticalDivider(width: 0,),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 10, right: 10),
-            child: Container(
-              width: 150,
-              height: 17,
-              decoration: BoxDecoration(
-                color: Colors.yellow,
-                borderRadius: const BorderRadius.all(Radius.circular(2)),
-                border: Border.all(
-                  color: Colors.grey,
-                  width: .50,
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  '${getUnitByParameter(context, 'Water Meter', wm.value.toString())}',
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Image.asset(
-            width: 35,
-            height: 35,
-            'assets/images/water_meter.png',
-          ),
-          Text(wm.name.isNotEmpty? wm.name:wm.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10, color: Colors.black54),),
-        ],
-      ),
-    );
-  }
-}
-
-class PressureSensorWidget extends StatelessWidget {
-  final PressureSensor ps;
-  const PressureSensorWidget({super.key, required this.ps});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 150,
-      margin: const EdgeInsets.only(left: 4, right: 4),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          const SizedBox(
-            width: 10,
-            height: 3,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                VerticalDivider(width: 0,),
-                SizedBox(width: 4,),
-                VerticalDivider(width: 0,),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 10, right: 10),
-            child: Container(
-              width: 150,
-              height: 17,
-              decoration: BoxDecoration(
-                color: Colors.yellow,
-                borderRadius: const BorderRadius.all(Radius.circular(2)),
-                border: Border.all(
-                  color: Colors.grey,
-                  width: .50,
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  '${getUnitByParameter(context, 'Pressure Sensor', ps.value.toString())}',
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Image.asset(
-            width: 35,
-            height: 35,
-            'assets/images/pressure_sensor.png',
-          ),
-          Text(ps.name.isNotEmpty? ps.name:ps.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10, color: Colors.black54),),
-        ],
-      ),
-    );
-  }
-}
-
-class LevelSensorWidget extends StatelessWidget {
-  final LevelSensor ls;
-  const LevelSensorWidget({super.key, required this.ls});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 150,
-      margin: const EdgeInsets.only(left: 4, right: 4),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(
-            width: 10,
-            height: 3,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                VerticalDivider(width: 0,),
-                SizedBox(width: 4,),
-                VerticalDivider(width: 0,),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 10, right: 10),
-            child: Container(
-              width: 150,
-              height: 17,
-              decoration: BoxDecoration(
-                color: Colors.yellow,
-                borderRadius: const BorderRadius.all(Radius.circular(2)),
-                border: Border.all(
-                  color: Colors.grey,
-                  width: .50,
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  '${getUnitByParameter(context, 'Level Sensor', ls.value.toString())}',
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Image.asset(
-            width: 35,
-            height: 35,
-            'assets/images/level_sensor.png',
-          ),
-          Text(ls.name.isNotEmpty? ls.name:ls.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10, color: Colors.black54),),
-        ],
       ),
     );
   }
@@ -1216,9 +964,17 @@ class AgitatorWidget extends StatelessWidget {
   }
 }
 
-class MoistureSensorWidget extends StatelessWidget {
-  final MoistureSensor ms;
-  const MoistureSensorWidget({super.key, required this.ms});
+class SensorWidget extends StatelessWidget {
+  final SensorModel sensor;
+  final String sensorType;
+  final String imagePath;
+
+  const SensorWidget({
+    super.key,
+    required this.sensor,
+    required this.sensorType,
+    required this.imagePath,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1235,9 +991,9 @@ class MoistureSensorWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                VerticalDivider(width: 0,),
-                SizedBox(width: 4,),
-                VerticalDivider(width: 0,),
+                VerticalDivider(width: 0),
+                SizedBox(width: 4),
+                VerticalDivider(width: 0),
               ],
             ),
           ),
@@ -1251,12 +1007,14 @@ class MoistureSensorWidget extends StatelessWidget {
                 borderRadius: const BorderRadius.all(Radius.circular(2)),
                 border: Border.all(
                   color: Colors.grey,
-                  width: .50,
+                  width: 0.5,
                 ),
               ),
               child: Center(
                 child: Text(
-                  '${getUnitByParameter(context, 'Moisture Sensor', ms.value.toString())}',
+                  sensorType == 'Pressure Switch'
+                      ? (sensor.value == 0 ? 'High' : '--')
+                      : getUnitByParameter(context, sensorType, sensor.value.toString()) ?? '',
                   style: const TextStyle(
                     color: Colors.black,
                     fontSize: 10,
@@ -1267,11 +1025,15 @@ class MoistureSensorWidget extends StatelessWidget {
             ),
           ),
           Image.asset(
+            imagePath,
             width: 35,
             height: 35,
-            'assets/images/moisture_sensor.png',
           ),
-          Text(ms.name.isNotEmpty? ms.name:ms.id, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10, color: Colors.black54),),
+          Text(
+            sensor.name.isNotEmpty ? sensor.name : sensor.id,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 10, color: Colors.black54),
+          ),
         ],
       ),
     );

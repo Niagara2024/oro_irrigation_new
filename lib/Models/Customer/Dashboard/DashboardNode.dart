@@ -1,12 +1,14 @@
 
 class DashboardModel {
   final int userGroupId;
+  final int customerId;
   final String groupName;
   final String active;
   List<MasterData> master;
 
   DashboardModel({
     required this.userGroupId,
+    required this.customerId,
     required this.groupName,
     required this.active,
     required this.master,
@@ -18,6 +20,7 @@ class DashboardModel {
 
     return DashboardModel(
       userGroupId: json['userGroupId'],
+      customerId: json['customerId'] ?? 0,
       groupName: json['groupName'],
       active: json['active'],
       master: master,
@@ -801,16 +804,15 @@ class IrrigationLine {
   String name;
   String location;
   String type;
-  List<WaterMeter> waterMeter;
-  List<PressureSensor> pressureSensor;
-  List<LevelSensor> levelSensor;
   List<MainValve> mainValve;
   List<Valve> valve;
   List<LineAgitator> agitator;
-  List<MoistureSensor> moistureSensor;
-  List<PressureSwitch> pressureSwitch;
 
-
+  List<SensorModel> levelSensor;
+  List<SensorModel> waterMeter;
+  List<SensorModel> pressureSensor;
+  List<SensorModel> moistureSensor;
+  List<SensorModel> pressureSwitch;
 
   IrrigationLine({
     required this.sNo,
@@ -837,13 +839,13 @@ class IrrigationLine {
     List<Valve> valveDataList = valveData.isNotEmpty? valveData.map((vl) => Valve.fromJson(vl)).toList() : [];
 
     var wmData = json['waterMeter'] as List;
-    List<WaterMeter> wmDataList = wmData.isNotEmpty? wmData.map((vl) => WaterMeter.fromJson(vl)).toList() : [];
+    List<SensorModel> wmDataList = wmData.isNotEmpty? wmData.map((vl) => SensorModel.fromJson(vl)).toList() : [];
 
     var psData = json['pressureSensor'] as List;
-    List<PressureSensor> psDataList = psData.isNotEmpty? psData.map((vl) => PressureSensor.fromJson(vl)).toList() : [];
+    List<SensorModel> psDataList = psData.isNotEmpty? psData.map((vl) => SensorModel.fromJson(vl)).toList() : [];
 
     var lsData = json['levelSensor'] as List;
-    List<LevelSensor> lsDataList = lsData.isNotEmpty? lsData.map((vl) => LevelSensor.fromJson(vl)).toList() : [];
+    List<SensorModel> lsDataList = lsData.isNotEmpty? lsData.map((vl) => SensorModel.fromJson(vl)).toList() : [];
 
     bool hasOnAgKey = json.containsKey('agitator');
     var agiData = hasOnAgKey ? json['agitator'] as List<dynamic> : [];
@@ -852,10 +854,10 @@ class IrrigationLine {
         : [];
 
     var msData = json['moistureSensor'] as List;
-    List<MoistureSensor> moistureList = msData.isNotEmpty? msData.map((msl) => MoistureSensor.fromJson(msl)).toList() : [];
+    List<SensorModel> moistureList = msData.isNotEmpty? msData.map((msl) => SensorModel.fromJson(msl)).toList() : [];
 
     var pswData = json['pressureSwitch'] as List;
-    List<PressureSwitch> pressureSwitchList = pswData.isNotEmpty? pswData.map((msl) => PressureSwitch.fromJson(msl)).toList() : [];
+    List<SensorModel> pressureSwitchList = pswData.isNotEmpty? pswData.map((msl) => SensorModel.fromJson(msl)).toList() : [];
 
     return IrrigationLine(
       sNo: json['sNo'],
@@ -875,46 +877,6 @@ class IrrigationLine {
     );
   }
 
-}
-
-class WaterMeter {
-  final int sNo;
-  final String id;
-  final String name;
-  final int status;
-  String location;
-  String value;
-
-  WaterMeter({
-    required this.sNo,
-    required this.id,
-    required this.name,
-    required this.status,
-    required this.location,
-    required this.value,
-  });
-
-  factory WaterMeter.fromJson(Map<String, dynamic> json) {
-    return WaterMeter(
-      sNo: json['sNo'],
-      id: json['id'],
-      name: json['name'],
-      status: json['status'],
-      location: json['location'],
-      value: json['value'].toString(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'sNo': sNo,
-      'id': id,
-      'name': name,
-      'status': status,
-      'location': location,
-      'value': value,
-    };
-  }
 }
 
 class LineAgitator {
@@ -1041,7 +1003,7 @@ class Valve {
   }
 }
 
-class PressureSensor {
+class SensorModel {
   int sNo;
   String id;
   String hid;
@@ -1049,9 +1011,10 @@ class PressureSensor {
   String location;
   String type;
   int status;
-  int value;
+  String value;
+  int? percentage;
 
-  PressureSensor({
+  SensorModel({
     required this.sNo,
     required this.id,
     required this.hid,
@@ -1060,10 +1023,11 @@ class PressureSensor {
     required this.type,
     required this.status,
     required this.value,
+    this.percentage,
   });
 
-  factory PressureSensor.fromJson(Map<String, dynamic> json) {
-    return PressureSensor(
+  factory SensorModel.fromJson(Map<String, dynamic> json) {
+    return SensorModel(
       sNo: json['sNo'],
       id: json['id'],
       hid: json['hid'],
@@ -1071,57 +1035,7 @@ class PressureSensor {
       location: json['location'],
       type: json['type'],
       status: json['status'],
-      value: json['value'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'sNo': sNo,
-      'id': id,
-      'hid': hid,
-      'name': name,
-      'location': location,
-      'type': type,
-      'status': status,
-      'value': value,
-    };
-  }
-}
-
-class LevelSensor {
-  int sNo;
-  String id;
-  String hid;
-  String name;
-  String location;
-  String type;
-  int status;
-  int value;
-  int percentage;
-
-  LevelSensor({
-    required this.sNo,
-    required this.id,
-    required this.hid,
-    required this.name,
-    required this.location,
-    required this.type,
-    required this.status,
-    required this.value,
-    required this.percentage,
-  });
-
-  factory LevelSensor.fromJson(Map<String, dynamic> json) {
-    return LevelSensor(
-      sNo: json['sNo'],
-      id: json['id'],
-      hid: json['hid'],
-      name: json['name'],
-      location: json['location'],
-      type: json['type'],
-      status: json['status'],
-      value: json['value'],
+      value: json['value'].toString(),
       percentage: json['percentage'],
     );
   }
@@ -1136,103 +1050,7 @@ class LevelSensor {
       'type': type,
       'status': status,
       'value': value,
-      'percentage': percentage,
-    };
-  }
-}
-
-class MoistureSensor {
-  int sNo;
-  String id;
-  String hid;
-  String name;
-  String location;
-  String type;
-  int status;
-  int value;
-
-  MoistureSensor({
-    required this.sNo,
-    required this.id,
-    required this.hid,
-    required this.name,
-    required this.location,
-    required this.type,
-    required this.status,
-    required this.value,
-  });
-
-  factory MoistureSensor.fromJson(Map<String, dynamic> json) {
-    return MoistureSensor(
-      sNo: json['sNo'],
-      id: json['id'],
-      hid: json['hid'],
-      name: json['name'],
-      location: json['location'],
-      type: json['type'],
-      status: json['status'],
-      value: json['value'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'sNo': sNo,
-      'id': id,
-      'hid': hid,
-      'name': name,
-      'location': location,
-      'type': type,
-      'status': status,
-      'value': value,
-    };
-  }
-}
-
-class PressureSwitch {
-  int sNo;
-  String id;
-  String hid;
-  String name;
-  String location;
-  String type;
-  int status;
-  int value;
-
-  PressureSwitch({
-    required this.sNo,
-    required this.id,
-    required this.hid,
-    required this.name,
-    required this.location,
-    required this.type,
-    required this.status,
-    required this.value,
-  });
-
-  factory PressureSwitch.fromJson(Map<String, dynamic> json) {
-    return PressureSwitch(
-      sNo: json['sNo'],
-      id: json['id'],
-      hid: json['hid'],
-      name: json['name'],
-      location: json['location'],
-      type: json['type'],
-      status: json['status'],
-      value: json['value'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'sNo': sNo,
-      'id': id,
-      'hid': hid,
-      'name': name,
-      'location': location,
-      'type': type,
-      'status': status,
-      'value': value,
+      if (percentage != null) 'percentage': percentage,
     };
   }
 }
@@ -1627,7 +1445,6 @@ class Agitator {
   }
 }
 
-
 class Booster {
   final String name;
   final int status;
@@ -1795,7 +1612,6 @@ class Level {
     };
   }
 }
-
 
 
 abstract class CM {

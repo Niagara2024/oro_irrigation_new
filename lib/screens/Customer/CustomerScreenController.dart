@@ -73,8 +73,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     print('coming userId: ${widget.userId}');
     print('coming customerId: ${widget.customerId}');
     indicatorViewShow();
-    getSharedSite(widget.customerId, 'null');
     getCustomerSite(widget.customerId);
+
   }
 
 
@@ -108,39 +108,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     });
   }
 
-  Future<void> getSharedSite(userId, sharedUserId) async
-  {
-    Map<String, Object> body = {"userId" : userId ?? 0, "sharedUserId" : sharedUserId};
-    final response = await HttpService().postRequest("getSharedUserDeviceList", body);
-    if (response.statusCode == 200)
-    {
-      var data = jsonDecode(response.body);
-      print(response.body);
-      if(data["code"]==200)
-      {
-        final jsonData = data["data"] as List;
-        try {
-          MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
-          payloadProvider.saveUnits(jsonData[0]['master'][0]['units']);
-          payloadProvider.nodeConnection(true);
-          mySiteList = jsonData.map((json) => DashboardModel.fromJson(json)).toList();
-          indicatorViewHide();
-          if(mySiteList.isNotEmpty){
-            fromWhere = 'init';
-            updateSite(0,0,0);
-            getProgramList();
-          }
-        } catch (e) {
-          print('Error: $e');
-          indicatorViewHide();
-        }
-      }
-    }
-    else{
-      indicatorViewHide();
-    }
-  }
-
   Future<void> getCustomerSite(userId) async
   {
     Map<String, Object> body = {"userId" : userId ?? 0};
@@ -149,7 +116,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     {
       mySiteList.clear();
       var data = jsonDecode(response.body);
-      print(response.body);
       if(data["code"]==200)
       {
         final jsonData = data["data"] as List;
@@ -159,11 +125,39 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             payloadProvider.saveUnits(jsonData[0]['master'][0]['units']);
             payloadProvider.nodeConnection(true);
           }
-          mySiteList = jsonData.map((json) => DashboardModel.fromJson(json)).toList();
+          mySiteList.addAll(jsonData.map((json) => DashboardModel.fromJson(json)).toList());
+          getSharedSite(userId ?? 0);
+        } catch (e) {
+          print('Error: $e');
           indicatorViewHide();
-          if(mySiteList.isNotEmpty){
+        }
+      }
+      else{
+        getSharedSite(widget.customerId);
+      }
+
+    }
+    else{
+      indicatorViewHide();
+    }
+  }
+
+  Future<void> getSharedSite(int userId) async {
+    Map<String, dynamic> body = {"userId": userId, "sharedUserId": null};
+    final response = await HttpService().postRequest("getSharedUserDeviceList", body);
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      if (data["code"] == 200) {
+        try {
+          final sharedUsers = data["data"]["users"] as List;
+          for (var user in sharedUsers) {
+            await fetchDevicesForUser(userId, user["userId"]);
+          }
+
+          indicatorViewHide();
+          if (mySiteList.isNotEmpty) {
             fromWhere = 'init';
-            updateSite(0,0,0);
+            updateSite(0, 0, 0);
             getProgramList();
           }
         } catch (e) {
@@ -171,9 +165,67 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           indicatorViewHide();
         }
       }
-    }
-    else{
+    } else {
       indicatorViewHide();
+    }
+  }
+
+  Future<void> fetchDevicesForUser(int userId, int sharedUserId) async
+  {
+    Map<String, dynamic> body = {"userId": userId, "sharedUserId": sharedUserId};
+    final response = await HttpService().postRequest("getSharedUserDeviceList", body);
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      if (data["code"] == 200) {
+        try {
+          var groupedDevices = <int, Map<String, dynamic>>{};
+
+          for (var device in data["data"]["devices"]) {
+            if (!groupedDevices.containsKey(device["groupId"])) {
+              groupedDevices[device["groupId"]] = {
+                "userGroupId": device["groupId"],
+                "groupName": device["groupName"],
+                "customerId": sharedUserId,
+                "active": "1",
+                "master": []
+              };
+            }
+
+            var deviceData = {
+              "2400": device["2400"],
+              "controllerId": device["controllerId"],
+              "deviceId": device["deviceId"],
+              "deviceName": device["deviceName"],
+              "categoryId": device["categoryId"],
+              "categoryName": device["categoryName"],
+              "modelId": device["modelId"],
+              "modelName": device["modelName"],
+              "liveSyncDate": device["liveSyncDate"],
+              "liveSyncTime": device["liveSyncTime"],
+              "conditionLibraryCount": device["conditionLibraryCount"] ?? 0,
+              "userPermission": device["userPermission"],
+              "irrigationLine": device["irrigationLine"],
+              "units": device["units"]
+            };
+
+            groupedDevices[device["groupId"]]?["master"].add(deviceData);
+          }
+
+          var transformedData = groupedDevices.values.toList();
+
+          if(mySiteList.isEmpty){
+            if(transformedData[0]['master'][0]['categoryId']==1||transformedData[0]['master'][0]['categoryId']==2){
+              MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
+              payloadProvider.saveUnits(transformedData[0]['master'][0]['units']);
+              payloadProvider.nodeConnection(true);
+            }
+          }
+          mySiteList.addAll(transformedData.map((json) => DashboardModel.fromJson(json)).toList());
+
+        } catch (e) {
+          print('Error: $e');
+        }
+      }
     }
   }
 
@@ -602,7 +654,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => AccountManagement(userID: widget.customerId, callback: callbackFunction),
+                                  builder: (context) => AccountManagement(userID: widget.userId, callback: callbackFunction),
                                 ),
                               );
                             },
@@ -1304,7 +1356,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                       onPressed: () {
                         Navigator.push(context,
                           MaterialPageRoute(
-                            builder: (context) => AllNodeListAndDetails(userID: widget.customerId, customerID: widget.customerId, masterInx: masterIndex, siteData: mySiteList[siteIndex],),
+                            builder: (context) => AllNodeListAndDetails(userID: widget.userId, customerID: mySiteList[siteIndex].customerId, masterInx: masterIndex, siteData: mySiteList[siteIndex],),
                           ),
                         );
                       },
@@ -1344,9 +1396,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                     return RunByManual(siteID: mySiteList[siteIndex].userGroupId,
                                         siteName: mySiteList[siteIndex].groupName,
                                         controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
-                                        customerID: widget.customerId,
+                                        customerID: mySiteList[siteIndex].customerId,
                                         imeiNo: mySiteList[siteIndex].master[masterIndex].deviceId,
-                                        callbackFunction: callbackFunction);
+                                        callbackFunction: callbackFunction, userId: widget.userId,);
                                   },
                                 ),
                               ),
@@ -1393,11 +1445,11 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                           context,
                           MaterialPageRoute(
                             builder: (context) => ProgramSchedule(
-                              customerID: widget.customerId,
+                              customerID: mySiteList[siteIndex].customerId,
                               controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
                               siteName: mySiteList[siteIndex].groupName,
                               imeiNumber: mySiteList[siteIndex].master[masterIndex].deviceId,
-                              userId: widget.customerId,
+                              userId: widget.userId,
                             ),
                           ),
                         );
@@ -1484,7 +1536,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             const EdgeInsets.all(0),
             child:
             _selectedIndex == 0 ? SizedBox(child: Column(children: [
-                Expanded(child: CustomerDashboard(customerID: widget.customerId, type: 1, customerName: widget.customerName, userID: widget.customerId, mobileNo: widget.mobileNo, siteData: mySiteList[siteIndex], masterInx: masterIndex, lineIdx: lineIndex,)),
+                Expanded(child: CustomerDashboard(customerId: mySiteList[siteIndex].customerId, type: 1, customerName: widget.customerName, userId: widget.userId, mobileNo: widget.mobileNo, siteData: mySiteList[siteIndex], masterInx: masterIndex, lineIdx: lineIndex,)),
                 screenWidth<600? Container(
                   height: 60,
                   color: Colors.teal.shade500,
@@ -1539,9 +1591,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                                 builder: (context) => RunByManual(siteID: mySiteList[siteIndex].userGroupId,
                                     siteName: mySiteList[siteIndex].groupName,
                                     controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
-                                    customerID: widget.customerId,
+                                    customerID: mySiteList[siteIndex].customerId,
                                     imeiNo: mySiteList[siteIndex].master[masterIndex].deviceId,
-                                    callbackFunction: callbackFunction),
+                                    callbackFunction: callbackFunction, userId: widget.userId,),
                               ),
                             );
                           },
@@ -1588,18 +1640,18 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                           );
                         }, icon: const Icon(Icons.grid_view, color: Colors.white)),
                       ),
-                      AlarmButton(payload: payload, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId, customerId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,),
+                      AlarmButton(payload: payload, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId, customerId: mySiteList[siteIndex].customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,),
                     ],
                   ),
                 ):
                     const SizedBox(),
               ],)):
-            _selectedIndex == 1 ? ProductInventory(userName: widget.customerName, userId: widget.customerId, userType: 3,):
-            _selectedIndex == 2 ? SentAndReceived(customerID: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId, from: 'Gem',):
-            _selectedIndex == 3 ? IrrigationAndPumpLog(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,):
-            _selectedIndex == 4 ? WeatherScreen(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId,):
-            _selectedIndex == 5 ? TicketHomePage(userId: widget.customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,):
-            ControllerSettings(customerID: widget.customerId, siteData: mySiteList[siteIndex], masterIndex: masterIndex, adDrId: widget.comingFrom=='AdminORDealer'? widget.userId:0, allSiteList: mySiteList,),
+            _selectedIndex == 1 ? ProductInventory(userName: widget.customerName, userId: mySiteList[siteIndex].customerId, userType: 3,):
+            _selectedIndex == 2 ? SentAndReceived(customerID: mySiteList[siteIndex].customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId, from: 'Gem',):
+            _selectedIndex == 3 ? IrrigationAndPumpLog(userId: mySiteList[siteIndex].customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,):
+            _selectedIndex == 4 ? WeatherScreen(userId: mySiteList[siteIndex].customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId,):
+            _selectedIndex == 5 ? TicketHomePage(userId: mySiteList[siteIndex].customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,):
+            ControllerSettings(customerID: mySiteList[siteIndex].customerId, siteData: mySiteList[siteIndex], masterIndex: masterIndex, adDrId: widget.comingFrom=='AdminORDealer'? widget.userId:0, allSiteList: mySiteList,),
           ),
         ),
       ],
@@ -1622,10 +1674,10 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
             borderRadius: BorderRadius.zero,
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter stateSetter) {
-                return SideSheetClass(customerID: widget.customerId, nodeList: mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList,
+                return SideSheetClass(customerId: mySiteList[siteIndex].customerId, nodeList: mySiteList[siteIndex].master[masterIndex].gemLive[0].nodeList,
                   deviceId: mySiteList[siteIndex].master[masterIndex].deviceId,
                   lastSyncDate: '${mySiteList[siteIndex].master[masterIndex].liveSyncDate} - ${mySiteList[siteIndex].master[masterIndex].liveSyncTime}',
-                  deviceName: mySiteList[siteIndex].master[masterIndex].categoryName, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,);
+                  deviceName: mySiteList[siteIndex].master[masterIndex].categoryName, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId, userId: widget.userId,);
               },
             ),
           ),
@@ -1912,8 +1964,8 @@ class AlarmListItems extends StatelessWidget {
 }
 
 class SideSheetClass extends StatefulWidget {
-  const SideSheetClass({Key? key, required this.customerID, required this.nodeList, required this.deviceId, required this.lastSyncDate, required this.deviceName, required this.controllerId}) : super(key: key);
-  final int customerID, controllerId;
+  const SideSheetClass({Key? key, required this.customerId, required this.nodeList, required this.deviceId, required this.lastSyncDate, required this.deviceName, required this.controllerId, required this.userId}) : super(key: key);
+  final int userId, controllerId, customerId;
   final String deviceId, deviceName, lastSyncDate;
   final List<NodeData> nodeList;
 
@@ -1960,7 +2012,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
               child: const Text('Save'),
               onPressed: () async {
                 if (formKey.currentState!.validate()) {
-                  Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.controllerId, "nodeControllerId": nodeId, "deviceName": nodeNameController.text, "createUser": widget.customerID};
+                  Map<String, Object> body = {"userId": widget.customerId, "controllerId": widget.controllerId, "nodeControllerId": nodeId, "deviceName": nodeNameController.text, "createUser": widget.userId};
                   print(body);
                   final response = await HttpService().putRequest("updateUserNodeDetails", body);
                   if (response.statusCode == 200) {
@@ -2058,14 +2110,14 @@ class _SideSheetClassState extends State<SideSheetClass> {
                 IconButton(tooltip:'Node Hourly logs',onPressed: (){
                   Navigator.push(context,
                     MaterialPageRoute(
-                      builder: (context) => NodeHrsLog(userId: widget.customerID, controllerId: widget.controllerId,),
+                      builder: (context) => NodeHrsLog(userId: widget.customerId, controllerId: widget.controllerId,),
                     ),
                   );
                 }, icon: const Icon(Icons.ssid_chart, color: primaryColorDark,)),
                 IconButton(tooltip:'Sensor Hourly logs',onPressed: (){
                   Navigator.push(context,
                     MaterialPageRoute(
-                      builder: (context) => SensorHourlyLogs(userId: widget.customerID, controllerId: widget.controllerId,),
+                      builder: (context) => SensorHourlyLogs(userId: widget.customerId, controllerId: widget.controllerId,),
                     ),
                   );
                 }, icon: const Icon(Icons.sensors, color: primaryColorDark,)),
@@ -2801,7 +2853,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
 
   void sentToServer(String msg, String payLoad) async
   {
-    Map<String, Object> body = {"userId": widget.customerID, "controllerId": widget.controllerId, "messageStatus": msg, "hardware": jsonDecode(payLoad), "createUser": widget.customerID};
+    Map<String, Object> body = {"userId": widget.customerId, "controllerId": widget.controllerId, "messageStatus": msg, "hardware": jsonDecode(payLoad), "createUser": widget.userId};
     final response = await HttpService().postRequest("createUserSentAndReceivedMessageManually", body);
     if (response.statusCode == 200) {
       print(response.body);

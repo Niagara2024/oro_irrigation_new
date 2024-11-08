@@ -16,9 +16,9 @@ import '../../../state_management/MqttPayloadProvider.dart';
 import '../ScheduleView.dart';
 
 class ScheduledProgramList extends StatelessWidget {
-  ScheduledProgramList({Key? key, required this.siteData, required this.customerId, required this.scheduledPrograms, required this.masterInx}) : super(key: key);
+  ScheduledProgramList({Key? key, required this.siteData, required this.userId, required this.scheduledPrograms, required this.masterInx}) : super(key: key);
   final DashboardModel siteData;
-  final int customerId, masterInx;
+  final int userId, masterInx;
   final AudioPlayer audioPlayer = AudioPlayer();
   final List<ScheduledProgram> scheduledPrograms;
 
@@ -263,7 +263,7 @@ class ScheduledProgramList extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ScheduleViewScreen(deviceId: siteData.master[masterInx].deviceId, userId: customerId, controllerId: siteData.master[masterInx].controllerId, customerId: customerId),
+                            builder: (context) => ScheduleViewScreen(deviceId: siteData.master[masterInx].deviceId, userId: userId, controllerId: siteData.master[masterInx].controllerId, customerId: userId),
                           ),
                         );
                       },
@@ -446,7 +446,7 @@ class ScheduledProgramList extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (context) => IrrigationProgram(
                               deviceId: siteData.master[masterInx].deviceId,
-                              userId: customerId,
+                              userId: siteData.customerId,
                               controllerId: siteData.master[masterInx].controllerId,
                               serialNumber: scheduledPrograms[index].sNo,
                               programType: prgType,
@@ -559,7 +559,7 @@ class ScheduledProgramList extends StatelessWidget {
 
   void sentUserOperationToServer(String msg, String data) async
   {
-    Map<String, Object> body = {"userId": customerId, "controllerId": siteData.master[masterInx].controllerId, "messageStatus": msg, "hardware": jsonDecode(data), "createUser": customerId};
+    Map<String, Object> body = {"userId": siteData.customerId, "controllerId": siteData.master[masterInx].controllerId, "messageStatus": msg, "hardware": jsonDecode(data), "createUser": userId};
     final response = await HttpService().postRequest("createUserSentAndReceivedMessageManually", body);
     if (response.statusCode == 200) {
       print(response.body);

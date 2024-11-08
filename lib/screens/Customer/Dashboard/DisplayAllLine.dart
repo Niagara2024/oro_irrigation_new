@@ -7,10 +7,10 @@ import '../CustomerDashboard.dart';
 import 'PumpLineCentral.dart';
 
 class DisplayAllLine extends StatefulWidget {
-  const DisplayAllLine({Key? key, required this.currentMaster, required this.provider, required this.userId}) : super(key: key);
+  const DisplayAllLine({Key? key, required this.currentMaster, required this.provider, required this.userId, required this.customerId}) : super(key: key);
   final MasterData currentMaster;
   final MqttPayloadProvider provider;
-  final int userId;
+  final int userId, customerId;
 
   @override
   State<DisplayAllLine> createState() => _DisplayAllLineState();
@@ -48,7 +48,7 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
                     children: [
                       widget.provider.sourcePump.isNotEmpty? Padding(
                         padding: EdgeInsets.only(top:  widget.provider.centralFertilizer.isNotEmpty ||  widget.provider.localFertilizer.isNotEmpty? 38.4:0),
-                        child: DisplaySourcePump(deviceId: widget.currentMaster.deviceId, currentLineId: 'all', spList: widget.provider.sourcePump, userId: widget.userId, controllerId: widget.currentMaster.controllerId,),
+                        child: DisplaySourcePump(deviceId: widget.currentMaster.deviceId, currentLineId: 'all', spList: widget.provider.sourcePump, userId: widget.userId, controllerId: widget.currentMaster.controllerId, customerId: widget.customerId,),
                       ):
                       const SizedBox(),
 
@@ -105,7 +105,7 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
 
                       widget.provider.irrigationPump.isNotEmpty? Padding(
                         padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
-                        child: DisplayIrrigationPump(currentLineId: 'all', deviceId: widget.currentMaster.deviceId, ipList: widget.provider.irrigationPump, userId: widget.userId, controllerId: widget.currentMaster.controllerId,),
+                        child: DisplayIrrigationPump(currentLineId: 'all', deviceId: widget.currentMaster.deviceId, ipList: widget.provider.irrigationPump, userId: widget.customerId, controllerId: widget.currentMaster.controllerId,),
                       ):
                       const SizedBox(),
 

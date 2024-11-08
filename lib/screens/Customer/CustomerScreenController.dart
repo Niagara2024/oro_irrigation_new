@@ -165,6 +165,14 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
           indicatorViewHide();
         }
       }
+      else{
+        indicatorViewHide();
+        if (mySiteList.isNotEmpty) {
+          fromWhere = 'init';
+          updateSite(0, 0, 0);
+          getProgramList();
+        }
+      }
     } else {
       indicatorViewHide();
     }

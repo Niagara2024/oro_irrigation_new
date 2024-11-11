@@ -57,7 +57,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
     if(widget.siteData.master[widget.masterInx].irrigationLine.isNotEmpty){
       var screenWidth = MediaQuery.of(context).size.width;
-      final provider = Provider.of<MqttPayloadProvider>(context);
+      MqttPayloadProvider provider = Provider.of<MqttPayloadProvider>(context, listen: false);
 
       try{
         for (var items in provider.nodeList) {
@@ -68,6 +68,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 
                 //output relay
                 List<dynamic> rlyStatus = items['RlyStatus'];
+
                 Map<int, int> rlyStatusMap = {};
                 try{
                   rlyStatusMap = {for (var item in rlyStatus) item['S_No']:item['Status']};
@@ -79,14 +80,10 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                 List<dynamic> sensorStatus = items['Sensor'];
                 Map<int, dynamic> sensorStatusMap = {};
                 try{
-                  sensorStatusMap = {for (var item in sensorStatus) item['sNo']:item['value']};
+                  sensorStatusMap = {for (var item in sensorStatus) item['S_No']:item['Value']};
                 }catch(e){
                   sensorStatusMap = {for (var item in sensorStatus) item.sNo:item.value};
                 }
-
-                /*List<RelayStatus> rlyList = items['RlyStatus'];
-                widget.siteData.master[widget.masterInx].gemLive[0].nodeList[0].rlyStatus = rlyList;
-                widget.siteData.master[widget.masterInx].;*/
 
                 for (var line in widget.siteData.master[widget.masterInx].irrigationLine) {
                   // Update mainValves
@@ -699,6 +696,11 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   String getCurrentDateAndTime() {
     var nowDT = DateTime.now();
     return '${DateFormat('MMMM dd, yyyy').format(nowDT)}-${DateFormat('hh:mm:ss').format(nowDT)}';
+  }
+
+  int getNodePosition(int mIndex, String decId) {
+    return widget.siteData.master[mIndex].gemLive[0].nodeList
+        .indexWhere((node) => node.deviceId == decId);
   }
 
   int getNodePositionInNodeList(int mIndex, String decId) {

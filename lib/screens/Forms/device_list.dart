@@ -204,6 +204,10 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
             print('Stack Trace: $stackTrace');
           }
         }
+
+        if(customerSiteList.isNotEmpty){
+          getNodeStockList(customerSiteList[0].master[0].categoryId);
+        }
       }
 
       indicatorViewHide();
@@ -747,7 +751,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
                   ],
                   onTap: (index) {
                     currentSiteInx = index;
-                    //print(customerSiteList[index].master[currentMstInx].controllerId);
+                    getNodeStockList(customerSiteList[currentSiteInx].master[0].categoryId);
                   },
                 ),
               ),

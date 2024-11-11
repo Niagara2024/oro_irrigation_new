@@ -28,8 +28,6 @@ class AddProduct extends StatefulWidget {
 
 class _AddProductState extends State<AddProduct> {
 
-  final _formKey = GlobalKey<FormState>();
-
   final TextEditingController ddCatList = TextEditingController();
   final TextEditingController ddModelList = TextEditingController();
   final TextEditingController ctrlIMI = TextEditingController();
@@ -66,6 +64,29 @@ class _AddProductState extends State<AddProduct> {
     selectedCategory =  <DropdownMenuEntry<PrdCateModel>>[];
     selectedModel =  <DropdownMenuEntry<PrdModel>>[];
     getCategoryByActiveList();
+
+    ctrlIMI.addListener(() {
+      String currentText = ctrlIMI.text;
+      String uppercaseText = currentText.toUpperCase();
+
+      if (currentText != uppercaseText) {
+        ctrlIMI.value = ctrlIMI.value.copyWith(
+          text: uppercaseText,
+          selection: TextSelection.collapsed(offset: uppercaseText.length),
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    ddCatList.dispose();
+    ddModelList.dispose();
+    ctrlIMI.dispose();
+    ctrlPrdDis.dispose();
+    ctrlWrM.dispose();
+    ctrlDofM.dispose();
+    super.dispose();
   }
 
   Future<void> getCategoryByActiveList() async
@@ -195,9 +216,6 @@ class _AddProductState extends State<AddProduct> {
                     fillColor: Colors.teal.shade50,
                     contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                   ),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9]')),
-                  ],
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please fill out this field';
@@ -206,6 +224,7 @@ class _AddProductState extends State<AddProduct> {
                   },
                 ),
               ),
+
             ],
           ),
         ),

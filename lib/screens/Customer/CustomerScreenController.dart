@@ -459,340 +459,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     return Consumer<MqttPayloadProvider>(
       builder: (context, payload, child){
         return visibleLoading? buildLoadingIndicator(visibleLoading, screenWidth):
-        screenWidth > 600 ? buildWideLayout(screenWidth, payload):
-        buildNarrowLayout(screenWidth, payload);
+        buildWideLayout(screenWidth, payload);
       },
-    );
-  }
-
-  Widget buildNarrowLayout(screenWidth, payload)
-  {
-    return Scaffold(
-      backgroundColor: Colors.teal.shade50,
-      appBar: AppBar(
-        elevation: 10,
-        title:  Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(_selectedIndex==0?'Dashboard': _selectedIndex==1?'My devices': _selectedIndex==2?'Sent & Received': _selectedIndex==3?'Logs & Reports': _selectedIndex==4?'Weather':_selectedIndex==5?'Service request':'Settings'),
-            Text('Last sync : ${'${mySiteList[siteIndex].master[masterIndex].liveSyncDate} - ${mySiteList[siteIndex].master[masterIndex].liveSyncTime}'}', style: const TextStyle(fontSize: 11, color: Colors.white70),),
-          ],
-        ),
-        actions: [
-          mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1 && payload.currentSchedule.isNotEmpty?
-          CircleAvatar(
-            radius: 15,
-            backgroundImage: const AssetImage('assets/GifFile/water_drop_ani.gif'),
-            backgroundColor: Colors.blue.shade100,
-          ):
-          const SizedBox(),
-          const SizedBox(width: 3,),
-          IconButton(onPressed: (){
-            setState(() {
-              appbarBottomOpen = !appbarBottomOpen;
-            });
-          }, icon: Icon(appbarBottomOpen?Icons.keyboard_double_arrow_up:Icons.keyboard_double_arrow_down)),
-          const SizedBox(width: 3,),
-          IconButton(
-            icon: const Icon(Icons.list), // Custom image icon
-            onPressed: () {
-              sideSheet();
-            },
-          ),
-          const SizedBox(width: 3,),
-        ],
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              tileMode: TileMode.clamp,
-              colors: [myTheme.primaryColorDark, myTheme.primaryColor], // Define your gradient colors
-            ),
-          ),
-        ),
-        bottom: appbarBottomOpen? Tab(
-          height: 75,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const SizedBox(width: 5,),
-                  mySiteList.length>1? DropdownButton(
-                    underline: Container(),
-                    items: (mySiteList ?? []).map((site) {
-                      return DropdownMenuItem(
-                        value: site.groupName,
-                        child: Text(site.groupName, style: const TextStyle(color: Colors.white, fontSize: 16),),
-                      );
-                    }).toList(),
-                    onChanged: (newSiteName) {
-                      int newIndex = mySiteList.indexWhere((site) => site.groupName == newSiteName);
-                      if (newIndex != -1 && mySiteList.length > 1) {
-                        siteIndex = newIndex;
-                        masterIndex = 0;
-                        lineIndex = 0;
-                        fromWhere='site';
-                        updateSite(newIndex, 0, 0);
-                        getProgramList();
-                      }
-                    },
-                    value: _myCurrentSite,
-                    dropdownColor: Colors.teal,
-                    iconEnabledColor: Colors.white,
-                    iconDisabledColor: Colors.white,
-                    focusColor: Colors.transparent,
-                  ):
-                  Text(mySiteList[siteIndex].groupName, style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.normal),),
-
-                  const SizedBox(width: 3,),
-                  Container(width: 1, height: 20, color: Colors.white54,),
-                  const SizedBox(width: 3,),
-
-                  mySiteList[siteIndex].master.length>1? DropdownButton(
-                    underline: Container(),
-                    items: (mySiteList[siteIndex].master ?? []).map((master) {
-                      return DropdownMenuItem(
-                        value: master.deviceName,
-                        child: Text(master.deviceName, style: const TextStyle(color: Colors.white, fontSize: 16),),
-                      );
-                    }).toList(),
-                    onChanged: (newDeviceName) {
-                      int masterIdx = mySiteList[siteIndex].master.indexWhere((master) => master.deviceName == newDeviceName);
-                      if (masterIdx != -1 && mySiteList[siteIndex].master.length > 1) {
-                        masterIndex = masterIdx;
-                        lineIndex = 0;
-                        fromWhere='master';
-                        updateMaster(siteIndex, masterIdx, 0);
-
-                        /*updateSite(newIndex, 0, 0);
-                        setState(() {
-                          _myCurrentMaster = newMaterName!;
-                          masterIndex = newIndex;
-                          subscribeCurrentMaster();
-                        });*/
-                      }
-                    },
-                    value: _myCurrentMaster,
-                    dropdownColor: Colors.teal,
-                    iconEnabledColor: Colors.white,
-                    iconDisabledColor: Colors.white,
-                    focusColor: Colors.transparent,
-                  ):
-                  Text(mySiteList[siteIndex].master[masterIndex].categoryName, style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.normal),),
-                  const SizedBox(width: 5,),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const SizedBox(width: 5,),
-                  (mySiteList[siteIndex].master[masterIndex].categoryId == 1 ||
-                      mySiteList[siteIndex].master[masterIndex].categoryId == 2) &&
-                      mySiteList[siteIndex].master[masterIndex].irrigationLine.length>1?
-                  DropdownButton(
-                    underline: Container(),
-                    items: (mySiteList[siteIndex].master[masterIndex].irrigationLine ?? []).map((line) {
-                      return DropdownMenuItem(
-                        value: line.name,
-                        child: Text(line.name, style: const TextStyle(color: Colors.white, fontSize: 16),),
-                      );
-                    }).toList(),
-                    onChanged: (newLineName) {
-                      int newIndex = mySiteList[siteIndex].master[masterIndex].irrigationLine.indexWhere((line)
-                      => line.name == newLineName);
-                      if (newIndex != -1 && mySiteList[siteIndex].master[masterIndex].irrigationLine.length > 1) {
-                        setState(() {
-                          _myCurrentIrrLine = newLineName!;
-                          lineIndex = newIndex;
-                        });
-                      }
-                    },
-                    value: _myCurrentIrrLine,
-                    dropdownColor: Colors.teal,
-                    iconEnabledColor: Colors.white,
-                    iconDisabledColor: Colors.white,
-                    focusColor: Colors.transparent,
-                  ):
-                  Text(mySiteList[siteIndex].master[masterIndex].irrigationLine.isNotEmpty?mySiteList[siteIndex].master[masterIndex].irrigationLine[0].name:'Line empty'),
-                  const SizedBox(width: 05,),
-                ],
-              ),
-            ],
-          ),
-        ):
-        null,
-      ),
-      drawer: Drawer(
-        shape: const RoundedRectangleBorder(),
-        backgroundColor: myTheme.primaryColor,
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: <Widget>[
-                  Container(
-                    width: screenWidth,
-                    height: 170,
-                    color: myTheme.primaryColorDark,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 15, right: 8,top: 8, bottom: 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          const SizedBox(
-                            width: 50,
-                            height: 50,
-                            child: CircleAvatar(),
-                          ),
-                          const SizedBox(height: 5,),
-                          Text('Hi!, ${widget.customerName}',style: const TextStyle(fontSize: 17, color: Colors.white)),
-                          Text(widget.mobileNo, style: const TextStyle(fontSize: 13, color: Colors.white)),
-                          const SizedBox(height: 8),
-                          MaterialButton(
-                            color: myTheme.primaryColor,
-                            textColor: Colors.white,
-                            child: const Text('Manage Your Niagara Account'),
-                            onPressed: () async {
-                              Navigator.pop(context);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => AccountManagement(userID: widget.userId, callback: callbackFunction),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  ListTile(
-                    title: const Text('Dashboard', style: TextStyle(color: Colors.white),),
-                    leading: const Icon(Icons.dashboard_outlined, color: Colors.white,),
-                    onTap: () {
-                      Navigator.pop(context);
-                      setState(() {
-                        _selectedIndex=0;
-                      });
-                    },
-                  ),
-                  ListTile(
-                    title: const Text('My Device', style: TextStyle(color: Colors.white)),
-                    leading: const Icon(Icons.devices_other, color: Colors.white,),
-                    onTap: () {
-                      Navigator.pop(context);
-                      setState(() {
-                        _selectedIndex=1;
-                      });
-                    },
-                  ),
-                  ListTile(
-                    title: const Text('Sent & Received', style: TextStyle(color: Colors.white)),
-                    leading: const Icon(Icons.question_answer_outlined, color: Colors.white,),
-                    onTap: () {
-                      Navigator.pop(context);
-                      setState(() {
-                        _selectedIndex=2;
-                      });
-                    },
-                  ),
-                  ListTile(
-                    title: const Text('Logs & Report', style: TextStyle(color: Colors.white)),
-                    leading: const Icon(Icons.receipt_outlined, color: Colors.white,),
-                    onTap: () {
-                      Navigator.pop(context);
-                      setState(() {
-                        _selectedIndex=3;
-                      });
-                    },
-                  ),
-                  ListTile(
-                    title: const Text('Weather', style: TextStyle(color: Colors.white)),
-                    leading: const Icon(CupertinoIcons.cloud_sun_bolt, color: Colors.white,),
-                    onTap: () {
-                      Navigator.pop(context);
-                      setState(() {
-                        _selectedIndex=4;
-                      });
-                    },
-                  ),
-                  ListTile(
-                    title: const Text('Service request', style: TextStyle(color: Colors.white)),
-                    leading: const Icon(Icons.support_agent, color: Colors.white,),
-                    onTap: () {
-                      Navigator.pop(context);
-                      setState(() {
-                        _selectedIndex=5;
-                      });
-                    },
-                  ),
-                  ListTile(
-                    title: const Text('Controller setting', style: TextStyle(color: Colors.white)),
-                    leading: const Icon(Icons.settings_outlined, color: Colors.white,),
-                    onTap: () {
-                      Navigator.pop(context);
-                      setState(() {
-                        _selectedIndex=6;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              width: MediaQuery.sizeOf(context).width,
-              height: 50,
-              color: Colors.teal,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextButton(
-                    onPressed: () async {
-                      final prefs = await SharedPreferences.getInstance();
-                      await prefs.remove('userId');
-                      await prefs.remove('userName');
-                      await prefs.remove('userType');
-                      await prefs.remove('countryCode');
-                      await prefs.remove('mobileNumber');
-                      await prefs.remove('subscribeTopic');
-                      await prefs.remove('password');
-                      await prefs.remove('email');
-
-                      MyFunction().clearMQTTPayload(context);
-                      MQTTManager().onDisconnected();
-                      if (context.mounted){
-                        Navigator.pushReplacementNamed(context, '/login');
-                      }
-                    },
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
-                      shape: MaterialStateProperty.all<OutlinedBorder>(
-                        RoundedRectangleBorder(borderRadius: BorderRadius.circular(5),),
-                      ),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.exit_to_app, color: Colors.white),
-                        SizedBox(width: 5),
-                        Text('Logout', style: TextStyle(color: Colors.white)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-      body: buildScreen(screenWidth, payload),
     );
   }
 
@@ -1279,7 +947,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                   color: Colors.teal.shade50,
                   borderRadius: const BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
                 ),
-                child: buildScreen(screenWidth, payload),
+                child: buildScreen(payload),
               ),
             ),
             mySiteList[siteIndex].master[masterIndex].categoryId==1 ||
@@ -1482,7 +1150,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     );
   }
 
-  Widget buildScreen(screenWidth, MqttPayloadProvider payload)
+  Widget buildScreen(MqttPayloadProvider payload)
   {
     Duration lastCommunication = payload.lastCommunication;
 
@@ -1541,120 +1209,9 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
 
         Expanded(
           child: Padding(
-            padding: screenWidth>600? const EdgeInsets.all(8.0):
-            const EdgeInsets.all(0),
+            padding: const EdgeInsets.all(8.0),
             child:
-            _selectedIndex == 0 ? SizedBox(child: Column(children: [
-                Expanded(child: CustomerDashboard(customerId: mySiteList[siteIndex].customerId, type: 1, customerName: widget.customerName, userId: widget.userId, mobileNo: widget.mobileNo, siteData: mySiteList[siteIndex], masterInx: masterIndex, lineIdx: lineIndex,)),
-                screenWidth<600? Container(
-                  height: 60,
-                  color: Colors.teal.shade500,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            color: Colors.transparent
-                        ),
-                        width: 45,
-                        height: 45,
-                        child: IconButton(
-                          tooltip: 'refresh',
-                          icon: const Icon(Icons.refresh, color: Colors.white,),
-                          onPressed: onRefreshClicked,
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            color: Colors.transparent
-                        ),
-                        width: 45,
-                        height: 45,
-                        child: IconButton(
-                          tooltip: '${payload.wifiStrength} %',
-                          icon: Icon(payload.wifiStrength == 0? Icons.wifi_off:
-                          payload.wifiStrength >= 1 && payload.wifiStrength <= 20 ? Icons.network_wifi_1_bar_outlined:
-                          payload.wifiStrength >= 21 && payload.wifiStrength <= 40 ? Icons.network_wifi_2_bar_outlined:
-                          payload.wifiStrength >= 41 && payload.wifiStrength <= 60 ? Icons.network_wifi_3_bar_outlined:
-                          payload.wifiStrength >= 61 && payload.wifiStrength <= 80 ? Icons.network_wifi_3_bar_outlined:
-                          Icons.wifi, color: Colors.white,),
-                          onPressed: null,
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            color: Colors.transparent
-                        ),
-                        width: 45,
-                        height: 45,
-                        child: IconButton(
-                          tooltip: 'Manual Mode',
-                          icon: const Icon(Icons.touch_app_outlined, color: Colors.white),
-                          onPressed: () async {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => RunByManual(siteID: mySiteList[siteIndex].userGroupId,
-                                    siteName: mySiteList[siteIndex].groupName,
-                                    controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
-                                    customerID: mySiteList[siteIndex].customerId,
-                                    imeiNo: mySiteList[siteIndex].master[masterIndex].deviceId,
-                                    callbackFunction: callbackFunction, userId: widget.userId,),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            color: Colors.transparent
-                        ),
-                        width: 45,
-                        height: 45,
-                        child: IconButton(
-                          tooltip: 'Planning',
-                          icon: const Icon(Icons.list_alt, color: Colors.white),
-                          onPressed: () async {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ProgramSchedule(
-                                  customerID: widget.customerId,
-                                  controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
-                                  siteName: mySiteList[siteIndex].groupName,
-                                  imeiNumber: mySiteList[siteIndex].master[masterIndex].deviceId,
-                                  userId: widget.customerId,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            color: Colors.transparent
-                        ),
-                        width: 45,
-                        height: 45,
-                        child: IconButton(tooltip:'View all Node details', onPressed: (){
-                          Navigator.push(context,
-                            MaterialPageRoute(
-                              builder: (context) => AllNodeListAndDetails(userID: widget.customerId, customerID: widget.customerId, masterInx: masterIndex, siteData: mySiteList[siteIndex],),
-                            ),
-                          );
-                        }, icon: const Icon(Icons.grid_view, color: Colors.white)),
-                      ),
-                      AlarmButton(payload: payload, deviceID: mySiteList[siteIndex].master[masterIndex].deviceId, customerId: mySiteList[siteIndex].customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,),
-                    ],
-                  ),
-                ):
-                    const SizedBox(),
-              ],)):
+            _selectedIndex == 0 ? CustomerDashboard(customerId: mySiteList[siteIndex].customerId, type: 1, customerName: widget.customerName, userId: widget.userId, mobileNo: widget.mobileNo, siteData: mySiteList[siteIndex], masterInx: masterIndex, lineIdx: lineIndex,):
             _selectedIndex == 1 ? ProductInventory(userName: widget.customerName, userId: mySiteList[siteIndex].customerId, userType: 3,):
             _selectedIndex == 2 ? SentAndReceived(customerID: mySiteList[siteIndex].customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId, from: 'Gem',):
             _selectedIndex == 3 ? IrrigationAndPumpLog(userId: mySiteList[siteIndex].customerId, controllerId: mySiteList[siteIndex].master[masterIndex].controllerId,):
@@ -2052,7 +1609,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
       for (var item in nodeList) {
         if (item is Map<String, dynamic>) {
           try {
-            int position = getNodeListPosition(item['serialNumber']);
+            int position = getNodeListPosition(item['SNo']);
             if (position != -1) {
               widget.nodeList[position].status = item['Status'];
               widget.nodeList[position].batVolt = item['BatVolt'];
@@ -2061,8 +1618,17 @@ class _SideSheetClassState extends State<SideSheetClass> {
 
               widget.nodeList[position].rlyStatus = [];
 
-              List<RelayStatus> rlyList = item['RlyStatus'];
-              widget.nodeList[position].rlyStatus = rlyList;
+              List<dynamic> dynamicList = item['RlyStatus'];
+
+              if (dynamicList is List<Map<String, dynamic>>) {
+                //List<RelayStatus> rlyList = dynamicList.map((item) => RelayStatus.fromJson(item)).toList();
+               // widget.nodeList[position].rlyStatus = rlyList;
+              } else {
+                List<RelayStatus> rlyList = dynamicList.map((item) => RelayStatus.fromJson(item)).toList();
+                widget.nodeList[position].rlyStatus = rlyList;
+              }
+
+             // widget.nodeList[position].rlyStatus = rlyList;
 
               /*List<dynamic> snrList = item['Sensor'];
               List<SensorStatus> snrStatusList = snrList.isNotEmpty? snrList.map((rl) => SensorStatus.fromJson(rl)).toList() : [];

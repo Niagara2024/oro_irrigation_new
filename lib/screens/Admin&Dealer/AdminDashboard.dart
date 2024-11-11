@@ -464,8 +464,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                       content: SizedBox(
                                           width: 640,
                                           height: 300,
-                                          child: AddProduct(
-                                              callback: callbackFunction)
+                                          child: AddProduct(callback: callbackFunction)
                                       ),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(15),

@@ -481,7 +481,6 @@ class _DealerDashboardState extends State<DealerDashboard> {
                           const SizedBox(),
                           IconButton(tooltip: 'Create Customer account', icon: const Icon(Icons.person_add_outlined), color: myTheme.primaryColor, onPressed: () async
                           {
-
                             showModalBottomSheet(
                               context: context,
                               elevation: 10,
@@ -490,12 +489,6 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                 return CreateAccount(callback: callbackFunction, subUsrAccount: false, customerId: widget.userId, from: 'Dealer',);
                               },
                             );
-
-                            /*await showDialog<void>(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  content: CreateAccount(callback: callbackFunction, subUsrAccount: false, customerId: widget.userId, from: 'Dealer',),
-                                ));*/
                           }),
                         ],
                       ),

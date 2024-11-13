@@ -634,15 +634,14 @@ class _ControllerSettingsState extends State<ControllerSettings> {
                         ? IconButton(
                             tooltip: 'Add new sub user',
                             onPressed: () async {
-                              showDialog<void>(
+
+                              showModalBottomSheet(
                                 context: context,
-                                builder: (context) => AlertDialog(
-                                  content: CreateAccount(
-                                    callback: callbackFunction,
-                                    subUsrAccount: true,
-                                    customerId: widget.customerID, from: 'Sub User',
-                                  ),
-                                ),
+                                elevation: 10,
+                                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(5), topRight: Radius.circular(5))),
+                                builder: (BuildContext context) {
+                                  return CreateAccount(callback: callbackFunction, subUsrAccount: true, customerId: widget.customerID, from: 'Sub User',);
+                                },
                               );
                             },
                             icon: const Icon(Icons.add))
@@ -1370,5 +1369,3 @@ class MasterItem {
     );
   }
 }
-
-

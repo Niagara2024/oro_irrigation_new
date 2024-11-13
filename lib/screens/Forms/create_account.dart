@@ -54,9 +54,6 @@ class _CreateAccountState extends State<CreateAccount> {
   List<String> _countries = [];
   List<String> _states = [];
 
-
-
-
   String message = "No message yet";
   void updateMessage(String newMessage) {
     setState(() {
@@ -162,7 +159,7 @@ class _CreateAccountState extends State<CreateAccount> {
     return Padding(
       padding: const EdgeInsets.only(left: 2,right: 2, top: 2),
       child: ListTile(
-        title: Text(widget.from=='Admin'? "Dealer Account Form" : widget.from=='Dealer'? "Customer Account Form": "Sub User Account Form", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        title: Text(widget.from=='Admin'? "Dealer Account Form" : widget.from=='Dealer'? "Customer Account Form": "Sub User Account Form", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         subtitle: const Text("Please fill out all the details correctly.", style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal)),
       ),
     );

@@ -327,16 +327,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                     color: myTheme.primaryColor,
                                     onPressed: () async
                                     {
-                                      await showDialog<void>(
-                                          context: context,
-                                          builder: (context) =>
-                                              AlertDialog(
-                                                content: CreateAccount(
-                                                  callback: callbackFunction,
-                                                  subUsrAccount: false,
-                                                  customerId: widget.userId,
-                                                  from: 'Admin',),
-                                              ));
+                                      showModalBottomSheet(
+                                        context: context,
+                                        elevation: 10,
+                                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(5), topRight: Radius.circular(5))),
+                                        builder: (BuildContext context) {
+                                          return CreateAccount(callback: callbackFunction, subUsrAccount: false, customerId: widget.userId, from: 'Admin',);
+                                        },
+                                      );
                                     }),
                               ),
                               const Divider(height: 0),

@@ -316,26 +316,26 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
       child: DataTable2(
         columnSpacing: 12,
         horizontalMargin: 12,
-        minWidth: 1200,
+        minWidth: 1100,
         dataRowHeight: 45.0,
         headingRowHeight: 40.0,
         headingRowColor: WidgetStateProperty.all<Color>(Colors.green.shade50),
         columns: const [
           DataColumn2(
               label: Text('Name', style: TextStyle(fontSize: 13),),
-              size: ColumnSize.L
+              size: ColumnSize.M
           ),
           DataColumn2(
               label: Text('Location', style: TextStyle(fontSize: 13)),
-              size: ColumnSize.S
+              fixedWidth: 75,
           ),
           DataColumn2(
               label: Text('Zone', style: TextStyle(fontSize: 13),),
-              size: ColumnSize.S
+              fixedWidth: 75,
           ),
           DataColumn2(
               label: Text('Zone Name', style: TextStyle(fontSize: 13)),
-              size: ColumnSize.M
+              size: ColumnSize.S
           ),
           DataColumn2(
             label: Center(child: Text('RTC', style: TextStyle(fontSize: 13),)),

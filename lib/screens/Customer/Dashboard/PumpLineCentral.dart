@@ -121,14 +121,6 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                     ):
                     const SizedBox(),
 
-                    /*if(widget.provider.centralFilter.isEmpty || widget.provider.localFertilizer.isNotEmpty)
-                      for(int i=0; i<widget.provider.payload2408.length; i++)
-                        widget.provider.payload2408.isNotEmpty?  Padding(
-                          padding: EdgeInsets.only(top: widget.provider.centralFertilizer.isNotEmpty || widget.provider.localFertilizer.isNotEmpty? 38.4:0),
-                          child: widget.provider.payload2408[i]['Line'].contains(widget.crrIrrLine.id)? DisplaySensor(payload2408: widget.provider.payload2408, index: i,):null,
-                        ) :
-                        const SizedBox(),*/
-
                     widget.provider.centralFilter.isEmpty && widget.provider.centralFertilizer.isEmpty &&
                         widget.provider.localFilter.isEmpty && widget.provider.localFertilizer.isEmpty ? SizedBox(
                       width: 4.5,
@@ -563,14 +555,19 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                                 color: Colors.green,
                                                 textColor: Colors.white,
                                                 onPressed: () {
-                                                  String payload = '${filteredPumps[index].sNo},1,1';
-                                                  String payLoadFinal = jsonEncode({
-                                                    "6200": [{"6201": payload}]
-                                                  });
-                                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                                  sentUserOperationToServer('${pump.swName?? pump.name} Start Manually', payLoadFinal);
-                                                  showSnakeBar('Pump of comment sent successfully');
-                                                  Navigator.pop(context);
+                                                  if(getPermissionStatusBySNo(context, 4)){
+                                                    String payload = '${filteredPumps[index].sNo},1,1';
+                                                    String payLoadFinal = jsonEncode({
+                                                      "6200": [{"6201": payload}]
+                                                    });
+                                                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                                    sentUserOperationToServer('${pump.swName?? pump.name} Start Manually', payLoadFinal);
+                                                    showSnakeBar('Pump of comment sent successfully');
+                                                    Navigator.pop(context);
+                                                  }else{
+                                                    Navigator.pop(context);
+                                                    GlobalSnackBar.show(context, 'Permission denied', 400);
+                                                  }
                                                 },
                                                 child: const Text('Start Manually',
                                                   style: TextStyle(color: Colors.white),
@@ -581,14 +578,19 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                                 color: Colors.redAccent,
                                                 textColor: Colors.white,
                                                 onPressed: () {
-                                                  String payload = '${filteredPumps[index].sNo},0,1';
-                                                  String payLoadFinal = jsonEncode({
-                                                    "6200": [{"6201": payload}]
-                                                  });
-                                                  MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                                  sentUserOperationToServer('${pump.swName ?? pump.name} Stop Manually', payLoadFinal);
-                                                  showSnakeBar('Pump of comment sent successfully');
-                                                  Navigator.pop(context);
+                                                  if(getPermissionStatusBySNo(context, 4)){
+                                                    String payload = '${filteredPumps[index].sNo},0,1';
+                                                    String payLoadFinal = jsonEncode({
+                                                      "6200": [{"6201": payload}]
+                                                    });
+                                                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                                    sentUserOperationToServer('${pump.swName ?? pump.name} Stop Manually', payLoadFinal);
+                                                    showSnakeBar('Pump of comment sent successfully');
+                                                    Navigator.pop(context);
+                                                  }else{
+                                                    Navigator.pop(context);
+                                                    GlobalSnackBar.show(context, 'Permission denied', 400);
+                                                  }
                                                 },
                                                 child: const Text('Stop Manually',
                                                   style: TextStyle(color: Colors.white),
@@ -625,14 +627,19 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                                   color: Colors.orange,
                                                   textColor: Colors.white,
                                                   onPressed: () {
-                                                    String payload = '${filteredPumps[index].sNo},1';
-                                                    String payLoadFinal = jsonEncode({
-                                                      "6300": [{"6301": payload}]
-                                                    });
-                                                    MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                                    sentUserOperationToServer('${pump.swName ?? pump.name} Start Manually', payLoadFinal);
-                                                    showSnakeBar('Pump of comment sent successfully');
-                                                    Navigator.pop(context);
+                                                    if(getPermissionStatusBySNo(context, 4)){
+                                                      String payload = '${filteredPumps[index].sNo},1';
+                                                      String payLoadFinal = jsonEncode({
+                                                        "6300": [{"6301": payload}]
+                                                      });
+                                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                                      sentUserOperationToServer('${pump.swName ?? pump.name} Start Manually', payLoadFinal);
+                                                      showSnakeBar('Pump of comment sent successfully');
+                                                      Navigator.pop(context);
+                                                    }else{
+                                                      Navigator.pop(context);
+                                                      GlobalSnackBar.show(context, 'Permission denied', 400);
+                                                    }
                                                   },
                                                   child: const Text('Reset',
                                                     style: TextStyle(color: Colors.white),
@@ -833,14 +840,19 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                     color: Colors.green,
                                     textColor: Colors.white,
                                     onPressed: () {
-                                      String payload = '${filteredPumps[index].sNo},1,1';
-                                      String payLoadFinal = jsonEncode({
-                                        "6200": [{"6201": payload}]
-                                      });
-                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                      sentUserOperationToServer('${pump.swName?? pump.name} Start Manually', payLoadFinal);
-                                      showSnakeBar('Pump of comment sent successfully');
-                                      Navigator.pop(context);
+                                      if(getPermissionStatusBySNo(context, 4)){
+                                        String payload = '${filteredPumps[index].sNo},1,1';
+                                        String payLoadFinal = jsonEncode({
+                                          "6200": [{"6201": payload}]
+                                        });
+                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                        sentUserOperationToServer('${pump.swName?? pump.name} Start Manually', payLoadFinal);
+                                        showSnakeBar('Pump of comment sent successfully');
+                                        Navigator.pop(context);
+                                      }else{
+                                        Navigator.pop(context);
+                                        GlobalSnackBar.show(context, 'Permission denied', 400);
+                                      }
                                     },
                                     child: const Text('Start Manually',
                                       style: TextStyle(color: Colors.white),
@@ -851,14 +863,19 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                     color: Colors.redAccent,
                                     textColor: Colors.white,
                                     onPressed: () {
-                                      String payload = '${filteredPumps[index].sNo},0,1';
-                                      String payLoadFinal = jsonEncode({
-                                        "6200": [{"6201": payload}]
-                                      });
-                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                      sentUserOperationToServer('${pump.swName ?? pump.name} Stop Manually', payLoadFinal);
-                                      showSnakeBar('Pump of comment sent successfully');
-                                      Navigator.pop(context);
+                                      if(getPermissionStatusBySNo(context, 4)){
+                                        String payload = '${filteredPumps[index].sNo},0,1';
+                                        String payLoadFinal = jsonEncode({
+                                          "6200": [{"6201": payload}]
+                                        });
+                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                        sentUserOperationToServer('${pump.swName ?? pump.name} Stop Manually', payLoadFinal);
+                                        showSnakeBar('Pump of comment sent successfully');
+                                        Navigator.pop(context);
+                                      }else{
+                                        Navigator.pop(context);
+                                        GlobalSnackBar.show(context, 'Permission denied', 400);
+                                      }
                                     },
                                     child: const Text('Stop Manually',
                                       style: TextStyle(color: Colors.white),
@@ -894,14 +911,19 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                       color: Colors.orange,
                                       textColor: Colors.white,
                                       onPressed: () {
-                                        String payload = '${filteredPumps[index].sNo},1';
-                                        String payLoadFinal = jsonEncode({
-                                          "6300": [{"6301": payload}]
-                                        });
-                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                        sentUserOperationToServer('${pump.swName ?? pump.name} Start Manually', payLoadFinal);
-                                        showSnakeBar('Pump of comment sent successfully');
-                                        Navigator.pop(context);
+                                        if(getPermissionStatusBySNo(context, 4)){
+                                          String payload = '${filteredPumps[index].sNo},1';
+                                          String payLoadFinal = jsonEncode({
+                                            "6300": [{"6301": payload}]
+                                          });
+                                          MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                          sentUserOperationToServer('${pump.swName ?? pump.name} Start Manually', payLoadFinal);
+                                          showSnakeBar('Pump of comment sent successfully');
+                                          Navigator.pop(context);
+                                        }else{
+                                          Navigator.pop(context);
+                                          GlobalSnackBar.show(context, 'Permission denied', 400);
+                                        }
                                       },
                                       child: const Text('Reset',
                                         style: TextStyle(color: Colors.white),
@@ -924,14 +946,19 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                     color: Colors.green,
                                     textColor: Colors.white,
                                     onPressed: () {
-                                      String payload = '${filteredPumps[index].sNo},1,1';
-                                      String payLoadFinal = jsonEncode({
-                                        "6200": [{"6201": payload}]
-                                      });
-                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                      sentUserOperationToServer('${pump.swName ?? pump.name} Start Manually', payLoadFinal);
-                                      showSnakeBar('Pump of comment sent successfully');
-                                      Navigator.pop(context);
+                                      if(getPermissionStatusBySNo(context, 4)){
+                                        String payload = '${filteredPumps[index].sNo},1,1';
+                                        String payLoadFinal = jsonEncode({
+                                          "6200": [{"6201": payload}]
+                                        });
+                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                        sentUserOperationToServer('${pump.swName ?? pump.name} Start Manually', payLoadFinal);
+                                        showSnakeBar('Pump of comment sent successfully');
+                                        Navigator.pop(context);
+                                      }else{
+                                        Navigator.pop(context);
+                                        GlobalSnackBar.show(context, 'Permission denied', 400);
+                                      }
                                     },
                                     child: const Text('Start Manually',
                                       style: TextStyle(color: Colors.white),
@@ -942,14 +969,20 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
                                     color: Colors.redAccent,
                                     textColor: Colors.white,
                                     onPressed: () {
-                                      String payload = '${filteredPumps[index].sNo},0,1';
-                                      String payLoadFinal = jsonEncode({
-                                        "6200": [{"6201": payload}]
-                                      });
-                                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
-                                      sentUserOperationToServer('${pump.swName ?? pump.name} Stop Manually', payLoadFinal);
-                                      showSnakeBar('Pump of comment sent successfully');
-                                      Navigator.pop(context);
+                                      if(getPermissionStatusBySNo(context, 4)){
+                                        String payload = '${filteredPumps[index].sNo},0,1';
+                                        String payLoadFinal = jsonEncode({
+                                          "6200": [{"6201": payload}]
+                                        });
+                                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
+                                        sentUserOperationToServer('${pump.swName ?? pump.name} Stop Manually', payLoadFinal);
+                                        showSnakeBar('Pump of comment sent successfully');
+                                        Navigator.pop(context);
+                                      }else{
+                                        Navigator.pop(context);
+                                        GlobalSnackBar.show(context, 'Permission denied', 400);
+                                      }
+
                                     },
                                     child: const Text('Stop Manually',
                                       style: TextStyle(color: Colors.white),
@@ -1861,9 +1894,11 @@ class _DisplayFilterState extends State<DisplayFilter> {
                       color: Colors.green.shade50,
                       borderRadius: BorderRadius.circular(3),
                     ),
-                    width: filteredCentralFilter[i]['FilterStatus'].length * 60,
+                    width: filteredCentralFilter[i]['PrsIn']!='-'? filteredCentralFilter[i]['FilterStatus'].length * 70+70:
+                    filteredCentralFilter[i]['FilterStatus'].length * 70,
+                    height: 20,
                     child: Center(
-                      child: Text(filteredCentralFilter[i]['SW_Name'] ?? filteredCentralFilter[i]['FilterSite'], style: const TextStyle(color: primaryColorDark),),
+                      child: Text(filteredCentralFilter[i]['SW_Name'] ?? filteredCentralFilter[i]['FilterSite'], style: const TextStyle(color: primaryColorDark, fontSize: 11),),
                     ),
                   ),
                 ],
@@ -2025,9 +2060,11 @@ class _DisplayFilterState extends State<DisplayFilter> {
                   color: Colors.green.shade50,
                   borderRadius: BorderRadius.circular(3),
                 ),
-                width: filteredCentralFilter[i]['FilterStatus'].length * 60,
+                width: filteredCentralFilter[i]['PrsIn']!='-'? filteredCentralFilter[i]['FilterStatus'].length * 70+70:
+                filteredCentralFilter[i]['FilterStatus'].length * 70,
+                height: 20,
                 child: Center(
-                  child: Text(filteredCentralFilter[0]['SW_Name'] ?? filteredCentralFilter[0]['FilterSite'], style: const TextStyle(color: primaryColorDark),),
+                  child: Text(filteredCentralFilter[0]['SW_Name'] ?? filteredCentralFilter[0]['FilterSite'], style: const TextStyle(color: primaryColorDark, fontSize: 11),),
                 ),
               ),
             ],
@@ -2349,7 +2386,7 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                 ),
                 SizedBox(
                   height: 30,
-                  width: fertilizerCentral[fIndex]['Fertilizer'].length * 70,
+                  width: fertilizerCentral[fIndex]['Fertilizer'].length * 75,
                   child: Row(
                     children: [
                       if(fIndex!=0)
@@ -2430,9 +2467,9 @@ class _DisplayCentralFertilizerState extends State<DisplayCentralFertilizer> {
                               color: Colors.green.shade50,
                               borderRadius: BorderRadius.circular(3),
                             ),
-                            width: (fertilizerCentral[fIndex]['Fertilizer'].length * 65) - (fertilizerCentral[fIndex]['Ec'].length * 70),
+                            width: (fertilizerCentral[fIndex]['Fertilizer'].length * 67) - (fertilizerCentral[fIndex]['Ec'].length * 70),
                             child: Center(
-                              child: Text(fertilizerCentral[fIndex]['SW_Name'] ?? fertilizerCentral[fIndex]['FertilizerSite'], style: const TextStyle(color: primaryColorDark),),
+                              child: Text(fertilizerCentral[fIndex]['SW_Name'] ?? fertilizerCentral[fIndex]['FertilizerSite'], style: const TextStyle(color: primaryColorDark, fontSize: 11),),
                             ),
                           ),
                         ],
@@ -2862,7 +2899,7 @@ class _LocalFilterState extends State<LocalFilter> {
                     ),
                     width: filteredLocalFilter[i]['FilterStatus'].length * 60,
                     child: Center(
-                      child: Text(filteredLocalFilter[i]['SW_Name'] ?? filteredLocalFilter[i]['FilterSite'], style: const TextStyle(color: primaryColorDark),),
+                      child: Text(filteredLocalFilter[i]['SW_Name'] ?? filteredLocalFilter[i]['FilterSite'], style: const TextStyle(color: primaryColorDark, fontSize: 11),),
                     ),
                   ),
                 ],
@@ -3024,7 +3061,7 @@ class _LocalFilterState extends State<LocalFilter> {
                 ),
                 width: filteredLocalFilter[i]['FilterStatus'].length * 60,
                 child: Center(
-                  child: Text(filteredLocalFilter[i]['SW_Name'] ?? filteredLocalFilter[i]['FilterSite'], style: const TextStyle(color: primaryColorDark),),
+                  child: Text(filteredLocalFilter[i]['SW_Name'] ?? filteredLocalFilter[i]['FilterSite'], style: const TextStyle(color: primaryColorDark, fontSize: 11),),
                 ),
               ),
             ],
@@ -3340,7 +3377,7 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                 ),
                 SizedBox(
                   height: 30,
-                  width: fertilizerLocal[fIndex]['Fertilizer'].length * 70,
+                  width: fertilizerLocal[fIndex]['Fertilizer'].length * 75,
                   child: Row(
                     children: [
                       if(fIndex!=0)
@@ -3420,9 +3457,9 @@ class _DisplayLocalFertilizerState extends State<DisplayLocalFertilizer> {
                               color: Colors.green.shade50,
                               borderRadius: BorderRadius.circular(3),
                             ),
-                            width: (fertilizerLocal[fIndex]['Fertilizer'].length * 63) - (fertilizerLocal[fIndex]['Ec'].length * 70),
+                            width: (fertilizerLocal[fIndex]['Fertilizer'].length * 67) - (fertilizerLocal[fIndex]['Ec'].length * 70),
                             child: Center(
-                              child: Text(fertilizerLocal[0]['SW_Name']?? fertilizerLocal[0]['FertilizerSite'], style: const TextStyle(color: primaryColorDark),),
+                              child: Text(fertilizerLocal[0]['SW_Name']?? fertilizerLocal[0]['FertilizerSite'], style: const TextStyle(color: primaryColorDark, fontSize: 11),),
                             ),
                           ),
                         ],

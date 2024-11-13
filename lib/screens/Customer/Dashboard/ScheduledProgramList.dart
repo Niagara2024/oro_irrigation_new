@@ -259,14 +259,14 @@ class ScheduledProgramList extends StatelessWidget {
                 children: [
                   IconButton(
                       tooltip: 'Scheduled Program details',
-                      onPressed: () {
+                      onPressed: getPermissionStatusBySNo(context, 3) ? () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ScheduleViewScreen(deviceId: siteData.master[masterInx].deviceId, userId: userId, controllerId: siteData.master[masterInx].controllerId, customerId: userId),
+                            builder: (context) => ScheduleViewScreen(deviceId: siteData.master[masterInx].deviceId, userId: userId, controllerId: siteData.master[masterInx].controllerId, customerId: siteData.customerId),
                           ),
                         );
-                      },
+                      }:null,
                       icon: const Icon(Icons.view_list_outlined)),
                 ],
               ),
@@ -385,20 +385,25 @@ class ScheduledProgramList extends StatelessWidget {
                       color: int.parse(scheduledPrograms[index].progOnOff) >= 0? isStop?Colors.red: isBypass?Colors.orange :Colors.green : Colors.grey.shade300,
                       textColor: Colors.white,
                       onPressed: () {
-                        if (int.parse(scheduledPrograms[index].progOnOff) >= 0) {
-                          String localFilePath = 'assets/audios/button_click_sound.mp3';
-                          audioPlayer.play(UrlSource(localFilePath));
-                          String payload = '${scheduledPrograms[index].sNo},${scheduledPrograms[index].progOnOff}';
-                          String payLoadFinal = jsonEncode({
-                            "2900": [
-                              {"2901": payload}
-                            ]
-                          });
-                          MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
-                          sentUserOperationToServer(
-                            '${scheduledPrograms[index].progName} ${getDescription(int.parse(scheduledPrograms[index].progOnOff))}',
-                            payLoadFinal,
-                          );
+
+                        if(getPermissionStatusBySNo(context, 3)){
+                          if (int.parse(scheduledPrograms[index].progOnOff) >= 0) {
+                            String localFilePath = 'assets/audios/button_click_sound.mp3';
+                            audioPlayer.play(UrlSource(localFilePath));
+                            String payload = '${scheduledPrograms[index].sNo},${scheduledPrograms[index].progOnOff}';
+                            String payLoadFinal = jsonEncode({
+                              "2900": [
+                                {"2901": payload}
+                              ]
+                            });
+                            MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
+                            sentUserOperationToServer(
+                              '${scheduledPrograms[index].progName} ${getDescription(int.parse(scheduledPrograms[index].progOnOff))}',
+                              payLoadFinal,
+                            );
+                          }
+                        }else{
+                          GlobalSnackBar.show(context, 'Permission denied', 400);
                         }
                       },
                       child: Text(
@@ -412,22 +417,27 @@ class ScheduledProgramList extends StatelessWidget {
                     color: getButtonName(int.parse(scheduledPrograms[index].progPauseResume)) == 'Pause' ? Colors.orange : Colors.yellow,
                     textColor: getButtonName(int.parse(scheduledPrograms[index].progPauseResume)) == 'Pause' ? Colors.white : Colors.black,
                     onPressed: () {
-                      String payload = '${scheduledPrograms[index].sNo},${scheduledPrograms[index].progPauseResume}';
-                      String payLoadFinal = jsonEncode({
-                        "2900": [
-                          {"2901": payload}
-                        ]
-                      });
-                      MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
-                      sentUserOperationToServer(
-                        '${scheduledPrograms[index].progName} ${getDescription(int.parse(scheduledPrograms[index].progPauseResume))}',
-                        payLoadFinal,
-                      );
+                      if(getPermissionStatusBySNo(context, 3)){
+                        String payload = '${scheduledPrograms[index].sNo},${scheduledPrograms[index].progPauseResume}';
+                        String payLoadFinal = jsonEncode({
+                          "2900": [
+                            {"2901": payload}
+                          ]
+                        });
+                        MQTTManager().publish(payLoadFinal, 'AppToFirmware/${siteData.master[masterInx].deviceId}');
+                        sentUserOperationToServer(
+                          '${scheduledPrograms[index].progName} ${getDescription(int.parse(scheduledPrograms[index].progPauseResume))}',
+                          payLoadFinal,
+                        );
+                      }else{
+                        GlobalSnackBar.show(context, 'Permission denied', 400);
+                      }
+
                     },
                     child: Text(getButtonName(int.parse(scheduledPrograms[index].progPauseResume))),
                   ),
                   const Spacer(),
-                  PopupMenuButton<String>(
+                  getPermissionStatusBySNo(context, 3) ?PopupMenuButton<String>(
                     icon: const Icon(Icons.more_vert),
                     onSelected: (String result) {
                       if(result=='Edit program'){
@@ -483,7 +493,8 @@ class ScheduledProgramList extends StatelessWidget {
                         ),
                       ),
                     ],
-                  ),
+                  ):
+                  const IconButton(onPressed: null, icon: Icon(Icons.more_vert, color: Colors.grey,)),
                 ],
               )),
             ]);

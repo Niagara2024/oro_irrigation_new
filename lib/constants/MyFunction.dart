@@ -1,10 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../state_management/MqttPayloadProvider.dart';
 
 class MyFunction {
+
+  Future<void> saveParameter(String key, String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, value);
+  }
+
+  Future<String?> getParameter(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(key);
+  }
 
   void clearMQTTPayload(context){
     MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
@@ -449,6 +460,17 @@ String? getUnitByParameter(BuildContext context, String parameter, String value)
     return 'Error: $e';
   }
 }
+
+bool getPermissionStatusBySNo(BuildContext context, int sNo) {
+  MqttPayloadProvider payloadProvider = Provider.of<MqttPayloadProvider>(context, listen: false);
+  print(payloadProvider.userPermission);
+  final permission = payloadProvider.userPermission.firstWhere(
+        (element) => element['sNo'] == sNo,
+    orElse: () => null,
+  );
+  return permission?['status'] as bool? ?? true;
+}
+
 
 String changeDateFormat(String dateString) {
   if(dateString!='-'){

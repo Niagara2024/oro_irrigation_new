@@ -74,9 +74,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     print('coming customerId: ${widget.customerId}');
     indicatorViewShow();
     getCustomerSite(widget.customerId);
-
   }
-
 
   void callbackFunction(message)
   {
@@ -1053,8 +1051,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     height: 45,
                     child: IconButton(
                       tooltip: 'Manual Mode',
-                      onPressed: () {
-
+                      onPressed: getPermissionStatusBySNo(context, 2) ? () {
                         showGeneralDialog(
                           barrierLabel: "Side sheet",
                           barrierDismissible: true,
@@ -1088,19 +1085,8 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                             );
                           },
                         );
-
-                        /*Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => RunByManual(siteID: mySiteList[siteIndex].userGroupId,
-                                  siteName: mySiteList[siteIndex].groupName,
-                                  controllerID: mySiteList[siteIndex].master[masterIndex].controllerId,
-                                  customerID: widget.customerId,
-                                  imeiNo: mySiteList[siteIndex].master[masterIndex].deviceId,
-                                  callbackFunction: callbackFunction),
-                            ),
-                          );*/
-                      },
+                      }:
+                      null,
                       icon: const Icon(Icons.touch_app_outlined),
                       color: Colors.white,
                       iconSize: 24.0,
@@ -1117,7 +1103,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                     height: 45,
                     child: IconButton(
                       tooltip: 'Planning',
-                      onPressed: () {
+                      onPressed: getPermissionStatusBySNo(context, 10) ? () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -1130,7 +1116,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
                             ),
                           ),
                         );
-                      },
+                      }:null,
                       icon: const Icon(Icons.list_alt),
                       color: Colors.white,
                       iconSize: 24.0,
@@ -1502,14 +1488,15 @@ class AlarmListItems extends StatelessWidget {
         DataCell(Center(child: MaterialButton(
           color: Colors.redAccent,
           textColor: Colors.white,
-          onPressed: (){
+          onPressed: getPermissionStatusBySNo(context, 6) ?(){
             String finalPayload =  '${payload.alarmList[index].sNo}';
             String payLoadFinal = jsonEncode({
               "4100": [{"4101": finalPayload}]
             });
             MQTTManager().publish(payLoadFinal, 'AppToFirmware/$deviceID');
             sentToServer('Rested the ${getAlarmMessage(payload.alarmList[index].alarmType)} alarm', payLoadFinal);
-          },
+          }:
+          null,
           child: const Text('Reset'),
         ))),
       ])),
@@ -1757,8 +1744,8 @@ class _SideSheetClassState extends State<SideSheetClass> {
                       width: 40,
                       child: IconButton(
                         tooltip: 'Set serial for all Nodes',
-                        icon: const Icon(Icons.format_list_numbered, color: primaryColorDark),
-                        onPressed: () async {
+                        icon: Icon(Icons.format_list_numbered, color: getPermissionStatusBySNo(context, 7)? primaryColorDark:Colors.black26),
+                        onPressed: getPermissionStatusBySNo(context, 7)?() async {
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
@@ -1794,15 +1781,15 @@ class _SideSheetClassState extends State<SideSheetClass> {
                               );
                             },
                           );
-                        },
+                        }:null,
                       ),
                     ),
                     SizedBox(
                       width: 40,
                       child: IconButton(
                         tooltip: 'Test Communication',
-                        icon: const Icon(Icons.network_check, color: primaryColorDark),
-                        onPressed: () async {
+                        icon: Icon(Icons.network_check, color: getPermissionStatusBySNo(context, 8)? primaryColorDark:Colors.black26),
+                        onPressed: getPermissionStatusBySNo(context, 8)? () async {
                           String payLoadFinal = jsonEncode({
                             "4500": [{"4501": ""},]
                           });
@@ -1810,7 +1797,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                           sentToServer('Test Communication comment sent successfully', payLoadFinal);
                           GlobalSnackBar.show(context, 'Sent your comment successfully', 200);
                           //Navigator.of(context).pop();
-                        },
+                        }:null,
                       ),
                     ),
                   ],
@@ -1942,7 +1929,7 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                       const SizedBox(width: 5),
                                       IconButton(
                                         tooltip: 'Serial set for all Relay',
-                                        onPressed: () {
+                                        onPressed: getPermissionStatusBySNo(context, 7) ? () {
                                           String payLoadFinal = jsonEncode({
                                             "2300": [
                                               {"2301": "${widget.nodeList[index].serialNumber}"},
@@ -1951,8 +1938,8 @@ class _SideSheetClassState extends State<SideSheetClass> {
                                           MQTTManager().publish(payLoadFinal, 'AppToFirmware/${widget.deviceId}');
                                           sentToServer('Serial set for the ${widget.nodeList[index].deviceName} all Relay', payLoadFinal);
                                           GlobalSnackBar.show(context, 'Your comment sent successfully', 200);
-                                        },
-                                        icon: const Icon(Icons.fact_check_outlined, color: Colors.teal),
+                                        }:null,
+                                        icon: Icon(Icons.fact_check_outlined, color: getPermissionStatusBySNo(context, 7) ? Colors.teal:Colors.black26),
                                       )
                                     ],
                                   ),

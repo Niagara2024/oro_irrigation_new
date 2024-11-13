@@ -481,11 +481,21 @@ class _DealerDashboardState extends State<DealerDashboard> {
                           const SizedBox(),
                           IconButton(tooltip: 'Create Customer account', icon: const Icon(Icons.person_add_outlined), color: myTheme.primaryColor, onPressed: () async
                           {
-                            await showDialog<void>(
+
+                            showModalBottomSheet(
+                              context: context,
+                              elevation: 10,
+                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(5), topRight: Radius.circular(5))),
+                              builder: (BuildContext context) {
+                                return CreateAccount(callback: callbackFunction, subUsrAccount: false, customerId: widget.userId, from: 'Dealer',);
+                              },
+                            );
+
+                            /*await showDialog<void>(
                                 context: context,
                                 builder: (context) => AlertDialog(
                                   content: CreateAccount(callback: callbackFunction, subUsrAccount: false, customerId: widget.userId, from: 'Dealer',),
-                                ));
+                                ));*/
                           }),
                         ],
                       ),
@@ -686,7 +696,6 @@ class _MySalesChartState extends State<MySalesChart> {
 
   }
 }
-
 
 class BadgeButton extends StatelessWidget {
   final VoidCallback onPressed;

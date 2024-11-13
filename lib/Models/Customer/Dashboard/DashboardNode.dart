@@ -490,8 +490,8 @@ class ScheduledProgram {
       stopCondition: json['StopCondition'] != null && (json['StopCondition'] as Map).isNotEmpty
           ? Condition.fromJson(json['StopCondition'])
           : Condition.empty(),
-      pauseResumeReason: json['PauseResumeReason'],
-      zoneList: json['ZoneList'],
+      pauseResumeReason: json['PauseResumeReason'] ?? 0,
+      zoneList: json['ZoneList'] ?? '',
     );
   }
 

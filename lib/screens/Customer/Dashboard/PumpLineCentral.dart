@@ -166,7 +166,8 @@ class _PumpLineCentralState extends State<PumpLineCentral> {
                     ):
                     const SizedBox(),
 
-                    widget.provider.centralFertilizer.isNotEmpty? DisplayCentralFertilizer(currentLineId: widget.crrIrrLine.id,): const SizedBox(),
+                    widget.provider.centralFertilizer.isNotEmpty? DisplayCentralFertilizer(currentLineId: widget.crrIrrLine.id,):
+                    const SizedBox(),
 
                     //local
                     widget.provider.irrigationPump.isNotEmpty? Column(
@@ -1122,7 +1123,7 @@ class _DisplaySourcePumpState extends State<DisplaySourcePump> {
 
   void sentUserOperationToServer(String msg, String data) async
   {
-    Map<String, Object> body = {"userId": widget.customerId, "controllerId": widget.controllerId, "messageStatus": msg, "data": data, "hardware": data, "createUser": widget.userId};
+    Map<String, Object> body = {"userId": widget.customerId, "controllerId": widget.controllerId, "messageStatus": msg, "hardware": jsonDecode(data), "createUser": widget.userId};
     final response = await HttpService().postRequest("createUserSentAndReceivedMessageManually", body);
     if (response.statusCode == 200) {
       print(response.body);

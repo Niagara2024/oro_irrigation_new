@@ -1,6 +1,6 @@
-class CustomerListMDL
+class UserModel
 {
-  CustomerListMDL({
+  UserModel({
     this.userId = 0,
     this.userName = '',
     this.countryCode = '',
@@ -13,7 +13,7 @@ class CustomerListMDL
   int userId,serviceRequestCount,criticalAlarmCount;
   String userName, countryCode, mobileNumber, emailId;
 
-  factory CustomerListMDL.fromJson(Map<String, dynamic> json) => CustomerListMDL(
+  factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
     userId: json['userId'],
     userName: json['userName'],
     countryCode: json['countryCode'],

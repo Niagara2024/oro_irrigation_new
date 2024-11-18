@@ -1,9 +1,9 @@
-class ProductStockModel
+class StockModel
 {
   int productId, warranty;
   String categoryName, model, dtOfMnf, imeiNo;
 
-  ProductStockModel({
+  StockModel({
     this.productId = 0,
     this.categoryName = '',
     this.model = '',
@@ -12,7 +12,7 @@ class ProductStockModel
     this.warranty = 0,
   });
 
-  factory ProductStockModel.fromJson(Map<String, dynamic> json) => ProductStockModel(
+  factory StockModel.fromJson(Map<String, dynamic> json) => StockModel(
     productId: json['productId'],
     categoryName: json['categoryName'],
     model: json['model'],

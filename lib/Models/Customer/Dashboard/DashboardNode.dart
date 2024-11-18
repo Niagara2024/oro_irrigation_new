@@ -1013,6 +1013,7 @@ class SensorModel {
   int status;
   String value;
   int? percentage;
+  String? valve;
 
   SensorModel({
     required this.sNo,
@@ -1024,6 +1025,7 @@ class SensorModel {
     required this.status,
     required this.value,
     this.percentage,
+    this.valve,
   });
 
   factory SensorModel.fromJson(Map<String, dynamic> json) {
@@ -1037,6 +1039,7 @@ class SensorModel {
       status: json['status'],
       value: json['value'].toString(),
       percentage: json['percentage'],
+      valve: json['valve'] ?? '',
     );
   }
 
@@ -1051,6 +1054,7 @@ class SensorModel {
       'status': status,
       'value': value,
       if (percentage != null) 'percentage': percentage,
+      'valve': valve,
     };
   }
 }

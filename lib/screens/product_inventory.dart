@@ -3,15 +3,13 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:http/src/response.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import 'package:search_page/search_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../Models/StockModel.dart';
 import '../Models/customer_product.dart';
 import '../Models/product_inventrory_model.dart';
 import '../Models/product_model.dart';
-import '../Models/product_stock.dart';
 import '../constants/http_service.dart';
 import '../constants/theme.dart';
 
@@ -58,8 +56,8 @@ class ProductInventoryState extends State<ProductInventory> {
   PrdModel? initialSelectedModel;
   int indexOfInitialSelection = 0;
 
-  late List<DropdownMenuEntry<ProductStockModel>> ddCategoryList;
-  List<ProductStockModel> productStockList = <ProductStockModel>[];
+  late List<DropdownMenuEntry<StockModel>> ddCategoryList;
+  List<StockModel> productStockList = <StockModel>[];
   String rplMdl = '-', rplImeiNo = '-';
 
   final ScrollController _scrollController = ScrollController();
@@ -82,7 +80,7 @@ class ProductInventoryState extends State<ProductInventory> {
         }
       }
     });
-    ddCategoryList =  <DropdownMenuEntry<ProductStockModel>>[];
+    ddCategoryList =  <DropdownMenuEntry<StockModel>>[];
     selectedModel =  <DropdownMenuEntry<PrdModel>>[];
     getUserInfo();
   }
@@ -1111,7 +1109,7 @@ class ProductInventoryState extends State<ProductInventory> {
                       const Divider(),
                       const Text('TO'),
                       const SizedBox(height: 5,),
-                      DropdownMenu<ProductStockModel>(
+                      DropdownMenu<StockModel>(
                         controller: dropdownCatList,
                         hintText: 'IMEi Number',
                         width: 270,
@@ -1122,7 +1120,7 @@ class ProductInventoryState extends State<ProductInventory> {
                           contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                           border: OutlineInputBorder(),
                         ),
-                        onSelected: (ProductStockModel? item) {
+                        onSelected: (StockModel? item) {
                           setState(() {
                             txtEdControllerMdlName.text = item!.categoryName;
                             txtEdControllerIMEi.text = item.model;

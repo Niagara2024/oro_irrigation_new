@@ -1,12 +1,12 @@
 import 'dart:ui';
 
-class DataResponse {
+class SalesDataModel {
   Map<String, List<Category>>? graph;
   List<Category>? total;
 
-  DataResponse({this.graph, this.total});
+  SalesDataModel({this.graph, this.total});
 
-  factory DataResponse.fromJson(Map<String, dynamic> json) {
+  factory SalesDataModel.fromJson(Map<String, dynamic> json) {
     Map<String, List<Category>>? graphMap;
     if (json['data'] != null && json['data']['graph'] != null) {
       graphMap = {};
@@ -23,7 +23,7 @@ class DataResponse {
           .map((entry) => Category.fromJson(entry.value, entry.key))
           .toList();
     }
-    return DataResponse(graph: graphMap, total: totalList);
+    return SalesDataModel(graph: graphMap, total: totalList);
   }
 }
 

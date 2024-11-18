@@ -3,17 +3,18 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../../Models/DataResponse.dart';
-import '../../Models/customer_list.dart';
-import '../../Models/product_stock.dart';
+import '../../Models/StockModel.dart';
+import '../../Models/UserModel.dart';
 import '../../constants/http_service.dart';
 import '../../constants/theme.dart';
 import '../Forms/add_product.dart';
 import '../Forms/create_account.dart';
 import '../Forms/device_list.dart';
 import 'BaseScreenController.dart';
+import 'DealerPurchasedProducts.dart';
+import 'MySalesBarChart.dart';
 
 enum Calendar {all, year}
 typedef CallbackFunction = void Function(String result);
@@ -30,13 +31,11 @@ class AdminDashboard extends StatefulWidget {
 class _AdminDashboardState extends State<AdminDashboard> {
 
   Calendar calendarView = Calendar.all;
-  List<ProductStockModel> productStockList = <ProductStockModel>[];
-  List<CustomerListMDL> myCustomerList = <CustomerListMDL>[];
-  late DataResponse dataResponse;
-
+  List<StockModel> myStockList = <StockModel>[];
+  List<UserModel> myDealerList = <UserModel>[];
+  late SalesDataModel mySalesData;
 
   int totalSales = 0;
-
   bool gettingSR = false;
   bool gettingCL = false;
 
@@ -45,10 +44,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
     super.initState();
     gettingSR = true;
     gettingCL = true;
-    dataResponse = DataResponse(graph: {}, total: []);
-    getProductSalesReport("All");
-    getProductStock();
-    getCustomerList();
+    mySalesData = SalesDataModel(graph: {}, total: []);
+    getMySalesData("All");
+    getMyStock();
+    getMyDealer();
   }
 
   void callbackFunction(String message)
@@ -56,91 +55,125 @@ class _AdminDashboardState extends State<AdminDashboard> {
     if(message=='reloadStock'){
       Navigator.pop(context);
       Future.delayed(const Duration(milliseconds: 500), () {
-        getProductStock();
+        getMyStock();
       });
     }else{
       Future.delayed(const Duration(milliseconds: 500), () {
-        getCustomerList();
+        getMyDealer();
       });
     }
   }
 
+  Future<void> getMySalesData(filterBy) async {
+    Map<String, Object> body = {
+      "userId": widget.userId,
+      "userType": 1,
+      "type": filterBy,
+      "year": 2024,
+    };
 
-  Future<void> getProductSalesReport(String type) async {
-    Map<String, Object> body = {"userId": widget.userId, "userType": 1, "type": type, "year": 2024};
-    final response = await HttpService().postRequest("getProductSalesReport", body);
-    if (response.statusCode == 200) {
-      var data = jsonDecode(response.body);
-      if (data is Map<String, dynamic> && data["code"] == 200) {
-        try {
-          totalSales=0;
-          dataResponse = DataResponse.fromJson(data);
-          for (int i = 0; i < dataResponse.total!.length; i++) {
-            totalSales += dataResponse.total![i].totalProduct;
+    try {
+      final response = await HttpService().postRequest("getProductSalesReport", body);
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+
+        if (data is Map<String, dynamic> && data["code"] == 200) {
+          try {
+            mySalesData = SalesDataModel.fromJson(data);
+            totalSales = mySalesData.total?.fold<int>(0, (sum, item) => sum + item.totalProduct) ?? 0;
+
+            if (mounted) {
+              setState(() => gettingSR = false);
+            }
+          } catch (e) {
+            print('Error parsing data response: $e');
           }
-          setState(() {
-            gettingSR = false;
-          });
-        }catch (e) {
-          print('Error parsing data response: $e');
+        } else {
+          print('Unexpected response code: ${data["code"]}');
+          if (mounted) {
+            setState(() => gettingSR = false);
+          }
         }
-      }else{
-        setState(() {
-          gettingSR = false;
-        });
+      } else {
+        print('Error: ${response.statusCode} - ${response.body}');
+        if (mounted) {
+          setState(() => gettingSR = false);
+        }
       }
-    }else{
-      //_showSnackBar(response.body);
+    } catch (e) {
+      print('Network or parsing error: $e');
+      if (mounted) {
+        setState(() => gettingSR = false);
+      }
     }
   }
 
-  Future<void> getProductStock() async
-  {
-    Map<String, dynamic> body = {"fromUserId" : null, "toUserId" : widget.userId};
-    final response = await HttpService().postRequest("getProductStock", body);
-    if (response.statusCode == 200)
-    {
-      productStockList.clear();
-      var data = jsonDecode(response.body);
-      if(data["code"]==200)
-      {
-        final cntList = data["data"] as List;
-        setState(() {
-          for (int i=0; i < cntList.length; i++) {
-            productStockList.add(ProductStockModel.fromJson(cntList[i]));
+  Future<void> getMyStock() async {
+    Map<String, dynamic> body = {
+      "fromUserId": null,
+      "toUserId": widget.userId,
+    };
+
+    try {
+      final response = await HttpService().postRequest("getProductStock", body);
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+
+        if (data["code"] == 200) {
+          final cntList = data["data"];
+          if (cntList is List) {
+            myStockList = cntList.map((item) => StockModel.fromJson(item)).toList();
+            if (mounted) {
+              setState(() {});
+            }
+          } else {
+            print("Unexpected data format: 'data' is not a List");
           }
-        });
+        } else {
+          print("Unexpected response code: ${data["code"]}");
+        }
+      } else {
+        print('Failed response: ${response.statusCode} - ${response.body}');
       }
-    }
-    else{
-      //_showSnackBar(response.body);
+    } catch (e) {
+      print('Network or parsing error: $e');
     }
   }
 
-  Future<void> getCustomerList() async {
-    Map<String, Object> body = {"userType" : 1, "userId" : widget.userId};
-    final response = await HttpService().postRequest("getUserList", body);
-    if (response.statusCode == 200) {
-      myCustomerList.clear();
-      var data = jsonDecode(response.body);
-      if (data["code"] == 200) {
-        final cntList = data["data"] as List;
-        List<CustomerListMDL> tempList = [];
-        for (int i = 0; i < cntList.length; i++) {
-          tempList.add(CustomerListMDL.fromJson(cntList[i]));
+  Future<void> getMyDealer() async {
+    Map<String, Object> body = {
+      "userType": 1,
+      "userId": widget.userId,
+    };
+
+    try {
+      final response = await HttpService().postRequest("getUserList", body);
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+
+        if (data["code"] == 200) {
+          final cntList = data["data"];
+
+          if (cntList is List) {
+            myDealerList = cntList.map((item) => UserModel.fromJson(item)).toList();
+          } else {
+            print("Unexpected data format: 'data' is not a List");
+          }
+        } else {
+          print("Unexpected response code: ${data["code"]}");
         }
-        myCustomerList.addAll(tempList);
-        tempList=[];
-        setState(() {
-          gettingCL = false;
-        });
-      }else{
-        setState(() {
-          gettingCL = false;
-        });
+      } else {
+        print("Failed response: ${response.statusCode} - ${response.body}");
       }
-    } else {
-      //_showSnackBar(response.body);
+    } catch (e) {
+      print("Network or parsing error: $e");
+    } finally {
+      if (mounted) {
+        setState(() => gettingCL = false);
+      }
     }
   }
 
@@ -195,7 +228,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           surfaceTintColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(
-                                5.0), // Adjust the radius as needed
+                                5.0),
                           ),
                           child: Column(
                             children: [
@@ -245,7 +278,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                           String sldName = calendarView.name[0]
                                               .toUpperCase() +
                                               calendarView.name.substring(1);
-                                          getProductSalesReport(sldName);
+                                          getMySalesData(sldName);
                                         });
                                       },
                                     ),
@@ -271,7 +304,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                     width: 40,
                                     child: LoadingIndicator(
                                         indicatorType: Indicator.ballPulse))) :
-                                MySalesChart(graph: dataResponse.graph,),
+                                MySalesBarChart(graph: mySalesData.graph,),
                               ),
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 8.0),
@@ -281,15 +314,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                   alignment: WrapAlignment.start,
                                   runAlignment: WrapAlignment.spaceBetween,
                                   children: List.generate(
-                                    dataResponse.total!.length, (index) =>
+                                    mySalesData.total!.length, (index) =>
                                       Chip(
                                         avatar: CircleAvatar(
-                                            backgroundColor: dataResponse
+                                            backgroundColor: mySalesData
                                                 .total![index].color),
                                         elevation: 3,
                                         shape: const LinearBorder(),
                                         label: Text(
-                                          '${index + 1} - ${dataResponse
+                                          '${index + 1} - ${mySalesData
                                               .total![index].categoryName}',
                                           style: const TextStyle(fontSize: 11),
                                         ),
@@ -339,9 +372,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                               ),
                               const Divider(height: 0),
                               Expanded(
-                                child: myCustomerList.isNotEmpty ? ListView
+                                child: myDealerList.isNotEmpty ? ListView
                                     .builder(
-                                  itemCount: myCustomerList.length,
+                                  itemCount: myDealerList.length,
                                   itemBuilder: (BuildContext context,
                                       int index) {
                                     return ListTile(
@@ -351,11 +384,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                         backgroundColor: Colors.transparent,
                                       ),
                                       title: Text(
-                                          myCustomerList[index].userName,
+                                          myDealerList[index].userName,
                                           style: const TextStyle(fontSize: 13,
                                               fontWeight: FontWeight.bold)),
-                                      subtitle: Text('+${myCustomerList[index]
-                                          .countryCode} ${myCustomerList[index]
+                                      subtitle: Text('+${myDealerList[index]
+                                          .countryCode} ${myDealerList[index]
                                           .mobileNumber}',
                                           style: const TextStyle(fontSize: 12,
                                               fontWeight: FontWeight.normal)),
@@ -364,15 +397,20 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                           MaterialPageRoute(
                                               builder: (context) =>
                                                   DeviceList(
-                                                    customerID: myCustomerList[index]
+                                                    customerID: myDealerList[index]
                                                         .userId,
-                                                    userName: myCustomerList[index]
+                                                    userName: myDealerList[index]
                                                         .userName,
                                                     userID: widget.userId,
                                                     userType: 1,
-                                                    productStockList: productStockList,
+                                                    productStockList: myStockList,
                                                     callback: callbackFunction,
                                                     customerType: 'Dealer',)),);
+                                       /* Navigator.push(context,
+                                          MaterialPageRoute(builder: (context) =>
+                                              DealerPurchasedProducts(userId: widget.userId, dealerId: myDealerList[index].userId, dealerName: myDealerList[index].userName,),
+                                          ),
+                                        );*/
                                       },
                                       trailing: IconButton(
                                         tooltip: 'View Dashboard',
@@ -382,16 +420,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                             MaterialPageRoute(
                                               builder: (context) =>
                                                   BaseScreenController(
-                                                    userName: myCustomerList[index]
+                                                    userName: myDealerList[index]
                                                         .userName,
-                                                    countryCode: myCustomerList[index]
+                                                    countryCode: myDealerList[index]
                                                         .countryCode,
-                                                    mobileNo: myCustomerList[index]
+                                                    mobileNo: myDealerList[index]
                                                         .mobileNumber,
                                                     fromLogin: false,
-                                                    userId: myCustomerList[index]
+                                                    userId: myDealerList[index]
                                                         .userId,
-                                                    emailId: myCustomerList[index]
+                                                    emailId: myDealerList[index]
                                                         .emailId,
                                                     userType: 2,
                                                   ),
@@ -451,7 +489,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                             ),
                             child: ListTile(
                               title: Text(
-                                'Product Stock(${productStockList.length})',
+                                'Product Stock(${myStockList.length})',
                                 style: const TextStyle(
                                     fontSize: 20, color: Colors.black),),
                               trailing: TextButton.icon(
@@ -499,7 +537,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                   bottomRight: Radius.circular(10),
                                 ),
                               ),
-                              child: productStockList.isNotEmpty ? Padding(
+                              child: myStockList.isNotEmpty ? Padding(
                                 padding: const EdgeInsets.all(5.0),
                                 child: DataTable2(
                                     columnSpacing: 12,
@@ -548,21 +586,21 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                       ),
                                     ],
                                     rows: List<DataRow>.generate(
-                                        productStockList.length, (index) =>
+                                        myStockList.length, (index) =>
                                         DataRow(cells: [
                                           DataCell(Center(
                                               child: Text('${index + 1}'))),
-                                          DataCell(Text(productStockList[index]
+                                          DataCell(Text(myStockList[index]
                                               .categoryName)),
                                           DataCell(Text(
-                                              productStockList[index].model)),
+                                              myStockList[index].model)),
                                           DataCell(Center(child: Text(
-                                              productStockList[index].imeiNo))),
+                                              myStockList[index].imeiNo))),
                                           DataCell(Center(child: Text(
-                                              productStockList[index]
+                                              myStockList[index]
                                                   .dtOfMnf))),
                                           DataCell(Center(child: Text(
-                                              '${productStockList[index]
+                                              '${myStockList[index]
                                                   .warranty}'))),
                                         ]))),
                               ) :
@@ -581,77 +619,5 @@ class _AdminDashboardState extends State<AdminDashboard> {
         ),
       ),
     );
-  }
-
-}
-
-class MySalesChart extends StatefulWidget {
-  const MySalesChart({Key? key, required this.graph}) : super(key: key);
-  final Map<String, List<Category>>? graph;
-
-  @override
-  _MySalesChartState createState() => _MySalesChartState();
-}
-
-class _MySalesChartState extends State<MySalesChart> {
-  List<BarSeries<Category, String>> seriesList = [];
-  int? selectedSeriesIndex = 0;
-
-  @override
-  void didUpdateWidget(MySalesChart oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.graph != widget.graph) {
-      selectedSeriesIndex = 0;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-
-    List<BarSeries<Category, String>> seriesList = [];
-
-    for (var entry in widget.graph!.entries) {
-      String month = entry.key;
-      List<Category> categories = entry.value;
-
-      seriesList.add(
-        BarSeries<Category, String>(
-          dataSource: categories,
-          xValueMapper: (Category category, int index) => (index + 1).toString(),
-          yValueMapper: (Category category, _) => category.totalProduct,
-          pointColorMapper: (Category category, _) => category.color,
-          name: month,
-          dataLabelSettings: const DataLabelSettings(isVisible: true,),
-          isVisible: selectedSeriesIndex == null || selectedSeriesIndex == seriesList.length,
-        ),
-      );
-    }
-
-    return SfCartesianChart(
-      primaryYAxis: NumericAxis(),
-      primaryXAxis: CategoryAxis(
-        labelStyle: const TextStyle(
-          color: Colors.black45,
-        ),
-      ),
-      enableAxisAnimation: true,
-      legend: const Legend(
-        isVisible: true,
-        toggleSeriesVisibility: false,
-      ),
-      series: seriesList,
-      tooltipBehavior: TooltipBehavior(enable: false),
-      isTransposed: true,
-      onLegendTapped: (LegendTapArgs args) {
-        setState(() {
-          if (selectedSeriesIndex == args.seriesIndex) {
-            selectedSeriesIndex = null;
-          } else {
-            selectedSeriesIndex = args.seriesIndex;
-          }
-        });
-      },
-    );
-
   }
 }

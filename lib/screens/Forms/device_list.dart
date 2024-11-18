@@ -2,21 +2,15 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:data_table_2/data_table_2.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Models/ProductListWithNode.dart';
-import '../../Models/customer_list.dart';
+import '../../Models/StockModel.dart';
 import '../../Models/customer_product.dart';
 import '../../Models/interface_model.dart';
-import '../../Models/node_model.dart';
-import '../../Models/product_stock.dart';
 import '../../constants/MQTTManager.dart';
 import '../../constants/http_service.dart';
 import '../Config/product_limit.dart';
@@ -27,7 +21,7 @@ enum MasterController {gem1, gem2, gem3, gem4, gem5, gem6, gem7, gem8, gem9, gem
 class DeviceList extends StatefulWidget {
   final int customerID, userID, userType;
   final String userName, customerType;
-  final List<ProductStockModel> productStockList;
+  final List<StockModel> productStockList;
   final void Function(String) callback;
   const DeviceList({super.key, required this.customerID, required this.userName, required this.userID, required this.userType, required this.productStockList, required this.callback, required this.customerType});
 
@@ -43,10 +37,10 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
   bool checkboxValue = false;
 
   List<CustomerProductModel> customerProductList = <CustomerProductModel>[];
-  List<ProductStockModel> myMasterControllerList = <ProductStockModel>[];
+  List<StockModel> myMasterControllerList = <StockModel>[];
 
   List<ProductListWithNode> customerSiteList = <ProductListWithNode>[];
-  List<ProductStockModel> nodeStockList = <ProductStockModel>[];
+  List<StockModel> nodeStockList = <StockModel>[];
 
   late  List<Object> _configTabs = [];
   late TabController _tabCont;
@@ -61,7 +55,6 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
 
   bool checkboxValueNode = false;
   final List<String> _interfaceInterval = ['0 sec', '5 sec', '10 sec', '20 sec', '30 sec', '45 sec','1 min','5 min','10 min','30 min','1 hr']; // Option 2
-  List<CustomerListMDL> myCustomerChildList = <CustomerListMDL>[];
   List<int> nodeStockSelection = [];
   int currentSiteInx = 0;
   int currentMstInx = 0;
@@ -133,6 +126,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
     {
       customerProductList.clear();
       var data = jsonDecode(response.body);
+      print(response.body);
       if(data["code"]==200) {
         final cntList = data["data"]['product'] as List;
         for (int i=0; i < cntList.length; i++) {
@@ -172,7 +166,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
       {
         final cntList = data["data"] as List;
         for (int i=0; i < cntList.length; i++) {
-          myMasterControllerList.add(ProductStockModel.fromJson(cntList[i]));
+          myMasterControllerList.add(StockModel.fromJson(cntList[i]));
         }
       }
       indicatorViewHide();
@@ -231,7 +225,7 @@ class _DeviceListState extends State<DeviceList> with SingleTickerProviderStateM
         final cntList = data["data"] as List;
         setState(() {
           for (int i=0; i < cntList.length; i++) {
-            nodeStockList.add(ProductStockModel.fromJson(cntList[i]));
+            nodeStockList.add(StockModel.fromJson(cntList[i]));
             nodeStockSelection.add(0);
           }
         });

@@ -3,12 +3,11 @@ import 'dart:convert';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../../Models/DataResponse.dart';
 import '../../Models/Dealer/CustomerAlarmList.dart';
-import '../../Models/customer_list.dart';
-import '../../Models/product_stock.dart';
+import '../../Models/StockModel.dart';
+import '../../Models/UserModel.dart';
 import '../../constants/MyFunction.dart';
 import '../../constants/http_service.dart';
 import '../../constants/theme.dart';
@@ -16,6 +15,7 @@ import '../Customer/CustomerScreenController.dart';
 import '../Customer/Dashboard/UserChatScreen.dart';
 import '../Forms/create_account.dart';
 import '../Forms/device_list.dart';
+import 'MySalesBarChart.dart';
 import 'ServiceRequestsTable.dart';
 
 enum Calendar {all, year}
@@ -34,14 +34,13 @@ class DealerDashboard extends StatefulWidget {
 class _DealerDashboardState extends State<DealerDashboard> {
 
   Calendar calendarView = Calendar.all;
-  List<ProductStockModel> productStockList = <ProductStockModel>[];
-  List<CustomerListMDL> myCustomerList = <CustomerListMDL>[];
-  List<CustomerListMDL> filteredCustomerList = [];
-  late DataResponse dataResponse;
+  List<StockModel> myStockList = <StockModel>[];
+  List<UserModel> myCustomerList = <UserModel>[];
+  List<UserModel> filteredCustomerList = [];
+  late SalesDataModel mySalesData;
 
   bool gettingSR = false;
   bool gettingCL = false;
-
   int totalSales = 0;
   bool searched = false;
   TextEditingController txtFldSearch = TextEditingController();
@@ -53,98 +52,132 @@ class _DealerDashboardState extends State<DealerDashboard> {
     searched=false;
     gettingSR = true;
     gettingCL = true;
-    dataResponse = DataResponse(graph: {}, total: []);
-    getProductSalesReport('All');
-    getProductStock();
-    getCustomerList();
+    mySalesData = SalesDataModel(graph: {}, total: []);
+    getMySalesData('All');
+    getMyStock();
+    getMyCustomer();
 
   }
 
   void callbackFunction(String message)
   {
     Future.delayed(const Duration(milliseconds: 500), () {
-      getCustomerList();
+      getMyCustomer();
     });
   }
 
-  Future<void> getProductSalesReport(String type) async {
-    Map<String, Object> body = {"userId": widget.userId, "userType": 2, "type": type, "year": 2024};
-    final response = await HttpService().postRequest("getProductSalesReport", body);
-    if (response.statusCode == 200) {
-      var data = jsonDecode(response.body);
-      if (data is Map<String, dynamic> && data["code"] == 200) {
-        try {
-          totalSales=0;
-          dataResponse = DataResponse.fromJson(data);
-          for (int i = 0; i < dataResponse.total!.length; i++) {
-            totalSales += dataResponse.total![i].totalProduct;
+  Future<void> getMySalesData(filterBy) async {
+    Map<String, Object> body = {
+      "userId": widget.userId,
+      "userType": 2,
+      "type": filterBy,
+      "year": 2024,
+    };
+
+    try {
+      final response = await HttpService().postRequest("getProductSalesReport", body);
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+
+        if (data is Map<String, dynamic> && data["code"] == 200) {
+          try {
+            mySalesData = SalesDataModel.fromJson(data);
+            totalSales = mySalesData.total?.fold<int>(0, (sum, item) => sum + item.totalProduct) ?? 0;
+
+            if (mounted) {
+              setState(() => gettingSR = false);
+            }
+          } catch (e) {
+            print('Error parsing data response: $e');
           }
+        } else {
+          print('Unexpected response code: ${data["code"]}');
+          if (mounted) {
+            setState(() => gettingSR = false);
+          }
+        }
+      } else {
+        print('Error: ${response.statusCode} - ${response.body}');
+        if (mounted) {
+          setState(() => gettingSR = false);
+        }
+      }
+    } catch (e) {
+      print('Network or parsing error: $e');
+      if (mounted) {
+        setState(() => gettingSR = false);
+      }
+    }
+  }
+
+  Future<void> getMyStock() async {
+    Map<String, dynamic> body = {
+      "fromUserId": null,
+      "toUserId": widget.userId,
+    };
+
+    try {
+      final response = await HttpService().postRequest("getProductStock", body);
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+
+        if (data["code"] == 200) {
+          final cntList = data["data"];
+          if (cntList is List) {
+            myStockList = cntList.map((item) => StockModel.fromJson(item)).toList();
+            if (mounted) {
+              setState(() {});
+            }
+          } else {
+            print("Unexpected data format: 'data' is not a List");
+          }
+        } else {
+          print("Unexpected response code: ${data["code"]}");
+        }
+      } else {
+        print('Failed response: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('Network or parsing error: $e');
+    }
+  }
+
+  Future<void> getMyCustomer() async {
+    Map<String, Object> body = {"userType": 2, "userId": widget.userId};
+    try {
+      final response = await HttpService().postRequest("getUserList", body);
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+
+        if (data["code"] == 200) {
+          final cntList = data["data"] as List;
+          myCustomerList = cntList.map((item) => UserModel.fromJson(item)).toList();
+          filteredCustomerList = List.from(myCustomerList);
           setState(() {
-            gettingSR = false;
+            gettingCL = false;
           });
-        }catch (e) {
-          print('Error parsing data response: $e');
+        } else {
+          // Handle the case where the code is not 200
+          setState(() {
+            gettingCL = false;
+          });
         }
-      }else{
-        setState(() {
-          gettingSR = false;
-        });
-      }
-    }else{
-      //_showSnackBar(response.body);
-    }
-  }
-
-  Future<void> getProductStock() async
-  {
-    Map<String, dynamic> body = {"fromUserId": null, "toUserId": widget.userId,};
-    final response = await HttpService().postRequest("getProductStock", body);
-    if (response.statusCode == 200)
-    {
-      productStockList.clear();
-      var data = jsonDecode(response.body);
-      if(data["code"]==200)
-      {
-        final cntList = data["data"] as List;
-        setState(() {
-          for (int i=0; i < cntList.length; i++) {
-            productStockList.add(ProductStockModel.fromJson(cntList[i]));
-          }
-        });
-      }
-    }
-    else{
-      //_showSnackBar(response.body);
-    }
-  }
-
-  Future<void> getCustomerList() async {
-    Map<String, Object> body = {"userType" : 2, "userId" : widget.userId};
-    final response = await HttpService().postRequest("getUserList", body);
-    if (response.statusCode == 200) {
-      myCustomerList.clear();
-      var data = jsonDecode(response.body);
-      if (data["code"] == 200) {
-        final cntList = data["data"] as List;
-        List<CustomerListMDL> tempList = [];
-        for (int i = 0; i < cntList.length; i++) {
-          tempList.add(CustomerListMDL.fromJson(cntList[i]));
-        }
-
-        myCustomerList.addAll(tempList);
-        filteredCustomerList = myCustomerList;
-        tempList=[];
-
-        setState(() {
-          gettingCL = false;
-        });
-      }else{
+      } else {
+        // Handle non-200 response status (e.g., show a Snackbar or error message)
+        //_showSnackBar(response.body);
         setState(() {
           gettingCL = false;
         });
       }
-    } else {
-      //_showSnackBar(response.body);
+    } catch (e) {
+      // Catch any errors (network, decoding, etc.)
+      print('Error fetching customer data: $e');
+      setState(() {
+        gettingCL = false;
+      });
     }
   }
 
@@ -230,7 +263,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                     setState(() {
                                       calendarView = newSelection.first;
                                       String sldName = calendarView.name[0].toUpperCase() + calendarView.name.substring(1);
-                                      getProductSalesReport(sldName);
+                                      getMySalesData(sldName);
                                     });
                                   },
                                 ),
@@ -252,7 +285,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
                           ),
                           Expanded(
                             child: gettingSR?const Center(child: SizedBox(width:40,child: LoadingIndicator(indicatorType: Indicator.ballPulse))):
-                            MySalesChart(graph: dataResponse.graph,),
+                            MySalesBarChart(graph: mySalesData.graph,),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(bottom: 8.0),
@@ -262,11 +295,11 @@ class _DealerDashboardState extends State<DealerDashboard> {
                               alignment: WrapAlignment.start,
                               runAlignment: WrapAlignment.spaceBetween,
                               children: List.generate(
-                                dataResponse.total!.length, (index) => Chip(
-                                avatar: CircleAvatar(backgroundColor: dataResponse.total![index].color),
+                                mySalesData.total!.length, (index) => Chip(
+                                avatar: CircleAvatar(backgroundColor: mySalesData.total![index].color),
                                 elevation: 3,
                                 shape: const LinearBorder(),
-                                label: Text('${index+1} - ${dataResponse.total![index].categoryName}',
+                                label: Text('${index+1} - ${mySalesData.total![index].categoryName}',
                                   style: const TextStyle(fontSize: 11),
                                 ),
                                 visualDensity: VisualDensity.compact,
@@ -279,9 +312,9 @@ class _DealerDashboardState extends State<DealerDashboard> {
                     ),
                   ),
                   SizedBox(
-                    height: productStockList.isEmpty
+                    height: myStockList.isEmpty
                         ? 200
-                        : (150 + productStockList.length * 40.0).clamp(150.0, 325.0), // Minimum 100, maximum 325
+                        : (150 + myStockList.length * 40.0).clamp(150.0, 325.0), // Minimum 100, maximum 325
                     child: Card(
                       elevation: 5,
                       surfaceTintColor: Colors.white,
@@ -307,9 +340,9 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                   style: const TextStyle(fontSize: 20, color: Colors.black), // Default style
                                   children: [
                                     TextSpan(
-                                      text: productStockList.length < 10
-                                          ? '(${productStockList.length.toString().padLeft(2, '0')})'
-                                          : '(${productStockList.length.toString()})',
+                                      text: myStockList.length < 10
+                                          ? '(${myStockList.length.toString().padLeft(2, '0')})'
+                                          : '(${myStockList.length.toString()})',
                                       style: const TextStyle(fontSize: 17, color: Colors.black54),
                                     ),
                                   ],
@@ -326,7 +359,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                   bottomRight: Radius.circular(10),
                                 ),
                               ),
-                              child: productStockList.isNotEmpty
+                              child: myStockList.isNotEmpty
                                   ? Padding(
                                 padding: const EdgeInsets.all(5.0),
                                 child: DataTable2(
@@ -384,19 +417,19 @@ class _DealerDashboardState extends State<DealerDashboard> {
                                     ),
                                   ],
                                   rows: List<DataRow>.generate(
-                                    productStockList.length,
+                                    myStockList.length,
                                         (index) => DataRow(
                                       cells: [
                                         DataCell(Text('${index + 1}')),
                                         DataCell(
                                           Row(
-                                            children: [Text(productStockList[index].categoryName)],
+                                            children: [Text(myStockList[index].categoryName)],
                                           ),
                                         ),
-                                        DataCell(Text(productStockList[index].model)),
-                                        DataCell(Text(productStockList[index].imeiNo)),
-                                        DataCell(Center(child: Text(productStockList[index].dtOfMnf))),
-                                        DataCell(Center(child: Text('${productStockList[index].warranty}'))),
+                                        DataCell(Text(myStockList[index].model)),
+                                        DataCell(Text(myStockList[index].imeiNo)),
+                                        DataCell(Center(child: Text(myStockList[index].dtOfMnf))),
+                                        DataCell(Center(child: Text('${myStockList[index].warranty}'))),
                                       ],
                                     ),
                                   ),
@@ -576,7 +609,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
                             title: Text(customer.userName, style: const TextStyle(fontSize: 13,fontWeight: FontWeight.bold)),
                             subtitle: Text('+${customer.countryCode} ${customer.mobileNumber}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal)),
                             onTap:() {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: customer.userId, userName: customer.userName, userID: widget.userId, userType: widget.fromLogin?2:1, productStockList: productStockList, callback: callbackFunction, customerType: 'Customer',)),);
+                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  DeviceList(customerID: customer.userId, userName: customer.userName, userID: widget.userId, userType: widget.fromLogin?2:1, productStockList: myStockList, callback: callbackFunction, customerType: 'Customer',)),);
                             },
                           );
                         },
@@ -614,79 +647,6 @@ class _DealerDashboardState extends State<DealerDashboard> {
         ),
       ),
     );
-  }
-}
-
-class MySalesChart extends StatefulWidget {
-  const MySalesChart({Key? key, required this.graph}) : super(key: key);
-  final Map<String, List<Category>>? graph;
-
-  @override
-  _MySalesChartState createState() => _MySalesChartState();
-}
-
-class _MySalesChartState extends State<MySalesChart> {
-  List<BarSeries<Category, String>> seriesList = [];
-  int? selectedSeriesIndex = 0;
-
-  @override
-  void didUpdateWidget(MySalesChart oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.graph != widget.graph) {
-      selectedSeriesIndex = 0;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-
-    List<BarSeries<Category, String>> seriesList = [];
-
-    for (var entry in widget.graph!.entries) {
-      String month = entry.key;
-      List<Category> categories = entry.value;
-
-      seriesList.add(
-        BarSeries<Category, String>(
-          dataSource: categories,
-          xValueMapper: (Category category, int index) => (index + 1).toString(),
-          //xValueMapper: (Category category, _) => category.categoryName,
-          yValueMapper: (Category category, _) => category.totalProduct,
-          pointColorMapper: (Category category, _) => category.color,
-          name: month,
-          dataLabelSettings: const DataLabelSettings(isVisible: true,),
-          isVisible: selectedSeriesIndex == null || selectedSeriesIndex == seriesList.length,
-
-        ),
-      );
-    }
-
-    return SfCartesianChart(
-      primaryYAxis: NumericAxis(),
-      primaryXAxis: CategoryAxis(
-        labelStyle: const TextStyle(
-          color: Colors.black45,
-        ),
-      ),
-      enableAxisAnimation: true,
-      legend: const Legend(
-        isVisible: true,
-        toggleSeriesVisibility: false,
-      ),
-      series: seriesList,
-      tooltipBehavior: TooltipBehavior(enable: false),
-      isTransposed: true,
-      onLegendTapped: (LegendTapArgs args) {
-        setState(() {
-          if (selectedSeriesIndex == args.seriesIndex) {
-            selectedSeriesIndex = null;
-          } else {
-            selectedSeriesIndex = args.seriesIndex;
-          }
-        });
-      },
-    );
-
   }
 }
 
@@ -760,23 +720,30 @@ class _DisplayCriticalAlarmState extends State<DisplayCriticalAlarm> {
 
 
   Future<void> getCriticalAlarmList() async {
-    Map<String, Object> body = {"userId" : widget.userId};
+    Map<String, Object> body = {"userId": widget.userId};
     final response = await HttpService().postRequest("getUserCriticalAlarmForDealer", body);
+
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
       if (data["code"] == 200) {
-        Map<String, dynamic> jsonMap = jsonDecode(response.body);
-        List<AlarmGroupData> alarmGroupDataList = List<AlarmGroupData>.from(jsonMap['data'].map((item) => AlarmGroupData.fromJson(item)));
+        List<AlarmGroupData> alarmGroupDataList = List<AlarmGroupData>.from(data['data'].map((item) => AlarmGroupData.fromJson(item)));
         alarms.clear();
-        for(int i=0; i<alarmGroupDataList.length; i++){
-          for(int j=0; j<alarmGroupDataList[i].master.length; j++){
-            for(int k=0; k<alarmGroupDataList[i].master[j].criticalAlarm.length; k++){
-              String msg = getAlarmMessage(alarmGroupDataList[i].master[j].criticalAlarm[k].alarmType);
-              alarms.add(CriticalAlarmFinal(fmName: alarmGroupDataList[i].groupName, dvcName: alarmGroupDataList[i].master[j].deviceName, location: alarmGroupDataList[i].master[j].criticalAlarm[k].location, message: msg));
+        for (var group in alarmGroupDataList) {
+          for (var master in group.master) {
+            for (var alarm in master.criticalAlarm) {
+              String msg = getAlarmMessage(alarm.alarmType);
+              alarms.add(CriticalAlarmFinal(
+                fmName: group.groupName,
+                dvcName: master.deviceName,
+                location: alarm.location,
+                message: msg,
+              ));
             }
           }
         }
-        setState((){
+
+        setState(() {
+          // Trigger UI update after data processing
         });
       }
     } else {

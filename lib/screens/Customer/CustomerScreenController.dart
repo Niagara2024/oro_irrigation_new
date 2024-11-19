@@ -1350,7 +1350,6 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
     Map<String, Object> body = {"userId": widget.customerId, "controllerId": mySiteList[siteIndex].master[masterIndex].controllerId, "messageStatus": msg, "hardware": jsonDecode(payLoad), "createUser": widget.userId};
     final response = await HttpService().postRequest("createUserSentAndReceivedMessageManually", body);
     if (response.statusCode == 200) {
-      print(response.body);
     } else {
       throw Exception('Failed to load data');
     }
@@ -1509,7 +1508,6 @@ class AlarmListItems extends StatelessWidget {
     Map<String, Object> body = {"userId": customerId, "controllerId": controllerId, "messageStatus": msg, "data": payLoad, "hardware": jsonDecode(payLoad), "createUser": customerId};
     final response = await HttpService().postRequest("createUserSentAndReceivedMessageManually", body);
     if (response.statusCode == 200) {
-      print(response.body);
     } else {
       throw Exception('Failed to load data');
     }
@@ -1566,10 +1564,8 @@ class _SideSheetClassState extends State<SideSheetClass> {
               onPressed: () async {
                 if (formKey.currentState!.validate()) {
                   Map<String, Object> body = {"userId": widget.customerId, "controllerId": widget.controllerId, "nodeControllerId": nodeId, "deviceName": nodeNameController.text, "createUser": widget.userId};
-                  print(body);
                   final response = await HttpService().putRequest("updateUserNodeDetails", body);
                   if (response.statusCode == 200) {
-                    print(response.body);
                     setState(() {
                       widget.nodeList[index].deviceName = nodeNameController.text;
                     });
@@ -2418,7 +2414,6 @@ class _SideSheetClassState extends State<SideSheetClass> {
     Map<String, Object> body = {"userId": widget.customerId, "controllerId": widget.controllerId, "messageStatus": msg, "hardware": jsonDecode(payLoad), "createUser": widget.userId};
     final response = await HttpService().postRequest("createUserSentAndReceivedMessageManually", body);
     if (response.statusCode == 200) {
-      print(response.body);
     } else {
       throw Exception('Failed to load data');
     }

@@ -22,13 +22,6 @@ class CurrentSchedule extends StatefulWidget {
 class _CurrentScheduleState extends State<CurrentSchedule> {
   Timer? _timer;
 
-  @override
-  void initState() {
-    super.initState();
-    //_startTimer();
-    print(widget.currentSchedule);
-    Text('');
-  }
 
   @override
   void dispose() {
@@ -524,7 +517,6 @@ class _CurrentScheduleState extends State<CurrentSchedule> {
     Map<String, Object> body = {"userId": widget.siteData.customerId, "controllerId": widget.siteData.master[0].controllerId, "messageStatus": msg, "hardware": jsonDecode(data), "createUser": widget.userId};
     final response = await HttpService().postRequest("createUserSentAndReceivedMessageManually", body);
     if (response.statusCode == 200) {
-      print(response.body);
     } else {
       throw Exception('Failed to load data');
     }

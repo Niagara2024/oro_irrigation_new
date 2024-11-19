@@ -253,7 +253,7 @@ class _DisplayAllLineState extends State<DisplayAllLine> {
             Container(height: 4, color: Colors.white24),
             Divider(height: 0, color: Colors.grey.shade300),
 
-            DisplayIrrigationLine(irrigationLine: widget.currentMaster.irrigationLine[0], currentLineId: 'all', currentMaster: widget.currentMaster, rWidth: 0, userId: widget.userId,)
+            DisplayIrrigationLine(irrigationLine: widget.currentMaster.irrigationLine[0], currentLineId: 'all', currentMaster: widget.currentMaster, rWidth: 0, customerId: widget.customerId,)
           ],
         ),
       ),

@@ -1,14 +1,11 @@
 import 'dart:convert';
 
-import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../../../../Models/Customer/SensorHourlyData.dart';
 import '../../../../constants/MyFunction.dart';
 import '../../../../constants/http_service.dart';
-import '../../../../state_management/MqttPayloadProvider.dart';
 
 class SensorHourlyLogs extends StatefulWidget {
   const SensorHourlyLogs({Key? key, required this.userId, required this.controllerId}) : super(key: key);

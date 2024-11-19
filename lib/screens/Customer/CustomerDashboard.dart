@@ -372,7 +372,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(child: DisplayIrrigationLine(irrigationLine: crrIrrLine, currentLineId: crrIrrLine.id, currentMaster: widget.siteData.master[widget.masterInx],
-                            rWidth: rdWidth, userId: widget.userId,),),
+                            rWidth: rdWidth, customerId: widget.customerId,),),
                           irrigationFlag !=2 ? Padding(
                             padding: const EdgeInsets.all(8),
                             child: TextButton(
@@ -462,7 +462,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
             Divider(height: 0, color: Colors.grey.shade300),
             Container(height: 4, color: Colors.white24),
             Divider(height: 0, color: Colors.grey.shade300),
-            DisplayIrrigationLine(irrigationLine: crrIrrLine, currentLineId: crrIrrLine.id, currentMaster: widget.siteData.master[widget.masterInx], rWidth: 0, userId: widget.userId,),
+            DisplayIrrigationLine(irrigationLine: crrIrrLine, currentLineId: crrIrrLine.id, currentMaster: widget.siteData.master[widget.masterInx], rWidth: 0, customerId: widget.customerId,),
           ],
         ),
       ),
@@ -509,7 +509,6 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     Map<String, Object> body = {"userId": widget.siteData.customerId, "controllerId": widget.siteData.master[widget.masterInx].deviceId, "messageStatus": msg, "hardware": jsonDecode(payLoad), "createUser": widget.userId};
     final response = await HttpService().postRequest("createUserSentAndReceivedMessageManually", body);
     if (response.statusCode == 200) {
-      print(response.body);
     } else {
       throw Exception('Failed to load data');
     }
@@ -517,11 +516,11 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
 }
 
 class DisplayIrrigationLine extends StatefulWidget {
-  const DisplayIrrigationLine({Key? key, required this.irrigationLine, required this.currentLineId, required this.currentMaster, required this.rWidth, required this.userId}) : super(key: key);
+  const DisplayIrrigationLine({Key? key, required this.irrigationLine, required this.currentLineId, required this.currentMaster, required this.rWidth, required this.customerId}) : super(key: key);
   final MasterData currentMaster;
   final IrrigationLine irrigationLine;
   final String currentLineId;
-  final int rWidth, userId;
+  final int rWidth, customerId;
 
   @override
   State<DisplayIrrigationLine> createState() => _DisplayIrrigationLineState();
@@ -536,14 +535,14 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getSensorHourlyLogs(widget.userId, widget.currentMaster.controllerId, selectedDate);
+    getSensorHourlyLogs(widget.customerId, widget.currentMaster.controllerId, selectedDate);
   }
 
-  Future<void> getSensorHourlyLogs(userId, controllerId, selectedDate) async
+  Future<void> getSensorHourlyLogs(customerId, controllerId, selectedDate) async
   {
     String date = DateFormat('yyyy-MM-dd').format(selectedDate);
     Map<String, Object> body = {
-      "userId": userId,
+      "userId": customerId,
       "controllerId": controllerId,
       "fromDate": date,
       "toDate": date
@@ -606,7 +605,7 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
             moistureSensor: line.moistureSensor.where((ms) {
               return (ms.valve as String).split('_').contains(vl.id);
             }).toList(),
-            userId: widget.userId,
+            userId: widget.customerId,
             controllerId: widget.currentMaster.controllerId,
             sensorData: sensors.isNotEmpty? sensors.firstWhere(
                   (sensor) => sensor.name == 'Moisture Sensor',
@@ -651,7 +650,7 @@ class _DisplayIrrigationLineState extends State<DisplayIrrigationLine> {
         ...widget.irrigationLine.valve.map((vl) => ValveWidget(vl: vl, status: vl.status,
           moistureSensor: widget.irrigationLine.moistureSensor.where((ms) {
             return (ms.valve as String).split('_').contains(vl.id);
-          }).toList(), userId: widget.userId, controllerId: widget.currentMaster.controllerId,
+          }).toList(), userId: widget.customerId, controllerId: widget.currentMaster.controllerId,
           sensorData: sensors.isNotEmpty? sensors.firstWhere(
                 (sensor) => sensor.name == 'Moisture Sensor',
             orElse: () => AllMySensor(name: '', data: {}),
@@ -1114,16 +1113,16 @@ class SensorWidget extends StatelessWidget {
                           axes: <RadialAxis>[
                             RadialAxis(
                               minimum: 0,
-                              maximum: 200,
+                              maximum: sensorType=='Moisture Sensor'?200:100,
                               pointers: <GaugePointer>[
                                 NeedlePointer(
                                   value: double.parse(numericValue),
                                     needleEndWidth: 3, needleColor: Colors.black54),
                                 RangePointer(
-                                  value: 200.0,
+                                  value: sensorType=='Moisture Sensor'?200.0:100.0,
                                   width: 0.30,
                                   sizeUnit: GaugeSizeUnit.factor,
-                                  color: Color(0xFF494CA2),
+                                  color: const Color(0xFF494CA2),
                                   animationDuration: 1000,
                                   animationType: AnimationType.easeOutBack,
                                   gradient: SweepGradient(

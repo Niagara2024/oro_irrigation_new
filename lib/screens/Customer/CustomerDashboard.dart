@@ -867,7 +867,7 @@ class ValveWidget extends StatelessWidget {
                             SizedBox(
                               width: 450,
                               height: 175,
-                              child: buildLineChart(context, filteredData, ms.name),
+                              child: buildLineChart(context, filteredData, 'Moisture Sensor', ms.name,),
                             ),
                             SizedBox(
                               width: 100,
@@ -1090,19 +1090,22 @@ class SensorWidget extends StatelessWidget {
 
                   jsonData.forEach((key, value) {
                     var filteredList = (value as List)
-                        .where((item) => item['Name'].contains(sensor.name))
+                        .where((item) => item['Id'].contains(sensor.hid))
                         .toList();
                     if (filteredList.isNotEmpty) {
                       filteredData[key] = List<Map<String, dynamic>>.from(filteredList);
                     }
                   });
 
+                  String input = getUnitByParameter(context, sensorType, sensor.value.toString()) ?? '';
+                  String numericValue = extractNumber(input);
+
                   return Row(
                     children: [
                       SizedBox(
                         width: 450,
                         height: 175,
-                        child: buildLineChart(context, filteredData, sensor.name),
+                        child: buildLineChart(context, filteredData, sensorType, sensor.name),
                       ),
                       SizedBox(
                         width: 100,
@@ -1112,8 +1115,9 @@ class SensorWidget extends StatelessWidget {
                             RadialAxis(
                               minimum: 0,
                               maximum: 200,
-                              pointers: const <GaugePointer>[
+                              pointers: <GaugePointer>[
                                 NeedlePointer(
+                                  value: double.parse(numericValue),
                                     needleEndWidth: 3, needleColor: Colors.black54),
                                 RangePointer(
                                   value: 200.0,
@@ -1123,13 +1127,19 @@ class SensorWidget extends StatelessWidget {
                                   animationDuration: 1000,
                                   animationType: AnimationType.easeOutBack,
                                   gradient: SweepGradient(
-                                    colors: <Color>[
-                                      Colors.greenAccent,
+                                    colors: sensorType == "Water Meter" ? <Color>[
+                                      Colors.teal.shade300,
+                                      Colors.teal.shade400,
+                                      Colors.teal.shade500,
+                                      Colors.teal.shade600
+                                    ]:
+                                    <Color>[
+                                      Colors.tealAccent,
                                       Colors.orangeAccent,
                                       Colors.redAccent,
                                       Colors.redAccent
                                     ],
-                                    stops: <double>[0.15, 0.50, 0.70, 1.00],
+                                    stops: const <double>[0.15, 0.50, 0.70, 1.00],
                                   ),
                                   enableAnimation: true,
                                 ),
@@ -1138,7 +1148,7 @@ class SensorWidget extends StatelessWidget {
                               annotations: <GaugeAnnotation>[
                                 GaugeAnnotation(
                                   widget: Text(
-                                    '${sensor.value} CB',
+                                    numericValue,
                                     style: const TextStyle(
                                         fontSize: 10, fontWeight: FontWeight.bold),
                                   ),
@@ -1184,11 +1194,16 @@ class SensorWidget extends StatelessWidget {
       ),
     );
   }
+
+  String extractNumber(String input) {
+    RegExp regex = RegExp(r'\d+\.?\d*');
+    Match? match = regex.firstMatch(input);
+    return match?.group(0) ?? '';
+  }
 }
 
-Row buildLineChart(BuildContext context, Map<String, List<Map<String, dynamic>>> sensorData, String msName) {
+Row buildLineChart(BuildContext context, Map<String, List<Map<String, dynamic>>> sensorData, String sensorType, String sensorName) {
 
-  String sensorId = '';
   // Collect all hours
   final Set<String> allHours = {};
   sensorData.values.expand((hourlyData) => hourlyData).forEach((data) {
@@ -1199,8 +1214,6 @@ Row buildLineChart(BuildContext context, Map<String, List<Map<String, dynamic>>>
   // Group data by sensor name
   final Map<String, List<SensorHourlyData>> groupedByName = {};
   sensorData.values.expand((hourlyData) => hourlyData).forEach((data) {
-    final sensorName = data['Name'] ?? "Unnamed Sensor";
-    sensorId = data['Id'];
     groupedByName.putIfAbsent(sensorName, () => []).add(SensorHourlyData(
       id: data['Id'],
       value: data['Value'].toDouble(),
@@ -1208,6 +1221,8 @@ Row buildLineChart(BuildContext context, Map<String, List<Map<String, dynamic>>>
       name: sensorName,
     ));
   });
+
+
   // Build series
   final List<LineSeries<SensorHourlyData, String>> series = [];
   groupedByName.forEach((sensorName, sensorValues) {
@@ -1230,10 +1245,10 @@ Row buildLineChart(BuildContext context, Map<String, List<Map<String, dynamic>>>
       dataSource: dataPoints,
       xValueMapper: (SensorHourlyData data, _) => data.hour,
       yValueMapper: (SensorHourlyData data, _) {
-        if(msName=='EC Sensor' || msName=='PH Sensor'){
+        if(sensorType=='EC Sensor' || sensorType=='PH Sensor'){
           return data.value;
         }else{
-          String? result = getUnitByParameter(context, msName, data.value.toString());
+          String? result = getUnitByParameter(context, sensorType, data.value.toString());
           String? numericString = result?.replaceAll(RegExp(r'[^\d.]+'), '');
           double? value = double.tryParse(numericString!);
           return value ?? 0.0;
@@ -1241,7 +1256,18 @@ Row buildLineChart(BuildContext context, Map<String, List<Map<String, dynamic>>>
       },
       color: Colors.teal,
       dataLabelSettings: const DataLabelSettings(isVisible: true),
-      dataLabelMapper: (SensorHourlyData data, _) => data.value.toStringAsFixed(1),
+      dataLabelMapper: (SensorHourlyData data, _) {
+
+        if(sensorType=='EC Sensor' || sensorType=='PH Sensor'){
+          return data.value.toString();
+        }else{
+          String? result = getUnitByParameter(context, sensorType, data.value.toString());
+          String? numericString = result?.replaceAll(RegExp(r'[^\d.]+'), '');
+          return '$numericString';
+        }
+
+      },
+      //dataLabelMapper: (SensorHourlyData data, _) => data.value.toStringAsFixed(1),
       markerSettings: const MarkerSettings(isVisible: true),
       dashArray: [4, 4],
       width: 1.5,
@@ -1251,29 +1277,19 @@ Row buildLineChart(BuildContext context, Map<String, List<Map<String, dynamic>>>
     ));
   });
 
-  String sensorName = 'Moisture Sensor';
-  print(sensorId);
-  if(sensorId.contains('LW')){
-    sensorName = 'Water Meter';
-  }else if(sensorId.contains('LV')){
-    sensorName = 'Level Sensor';
-  }else if(sensorId.contains('LI')||sensorId.contains('LO')){
-    sensorName = 'Pressure Sensor';
-  }else{
-    sensorName = 'Moisture Sensor';
-  }
+
 
   return Row(
     children: [
       Expanded(
         child: SfCartesianChart(
           primaryXAxis: CategoryAxis(
-            title: AxisTitle(text: '$msName - Hours', textStyle: const TextStyle(fontSize: 13)),
+            title: AxisTitle(text: '$sensorName - Hours', textStyle: const TextStyle(fontSize: 13)),
             majorGridLines: const MajorGridLines(width: 0),
             axisLine: const AxisLine(width: 0),
           ),
           primaryYAxis: NumericAxis(
-            title: AxisTitle(text: getSensorUnit(sensorName, context),  textStyle: const TextStyle(fontSize: 12)),
+            title: AxisTitle(text: getSensorUnit(sensorType, context),  textStyle: const TextStyle(fontSize: 12)),
           ),
 
           tooltipBehavior: TooltipBehavior(enable: true),

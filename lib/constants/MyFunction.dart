@@ -450,8 +450,10 @@ String? getUnitByParameter(BuildContext context, String parameter, String value)
           return '$value l/s';
         case 'l/h':
           return '${(lps * 3600).toStringAsFixed(2)} l/h';
+        case 'm3/h':
+          return '${(lps *3.6).toStringAsFixed(2)} m³/h';
         default:
-          return '${(lps * 0.001).toStringAsFixed(2)} m³/s';
+          return '$value l/s';
       }
     }
     return '$parsedValue ${unitMap['value']}';

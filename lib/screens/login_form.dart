@@ -262,9 +262,6 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
-
-
-
   Widget buildNarrowLayout(double screenWidth) {
     final PageController pageController = PageController(initialPage: 0);
     return Scaffold(

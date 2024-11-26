@@ -378,7 +378,7 @@ class _CreateAccountState extends State<CreateAccount> {
                       String cusType = widget.from=='Admin'? '2':'3';
                       Map<String, Object> body = {
                         'userName': name.toString(),
-                        'countryCode': dialCode,
+                        'countryCode': dialCode.contains('+')?dialCode.replaceAll('+', ''):dialCode,
                         'mobileNumber': _cusMobileNoController.text,
                         'userType': cusType,
                         'macAddress': '1234567890',

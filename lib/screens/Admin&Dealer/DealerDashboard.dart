@@ -483,7 +483,7 @@ class _DealerDashboardState extends State<DealerDashboard> {
                         onChanged: (value) {
                           setState(() {
                             filteredCustomerList = myCustomerList.where((customer) {
-                              return customer.userName.toLowerCase().startsWith(value.toLowerCase());
+                              return customer.userName.toLowerCase().contains(value.toLowerCase());
                             }).toList();
                           });
                         },

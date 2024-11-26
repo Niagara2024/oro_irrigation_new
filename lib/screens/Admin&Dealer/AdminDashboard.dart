@@ -584,6 +584,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                               fontWeight: FontWeight.bold),)),
                                         fixedWidth: 100,
                                       ),
+                                      DataColumn2(
+                                        label: Center(child: Text('Action',
+                                          style: TextStyle(fontWeight: FontWeight.bold),)),
+                                        fixedWidth: 75,
+                                      ),
                                     ],
                                     rows: List<DataRow>.generate(
                                         myStockList.length, (index) =>
@@ -602,6 +607,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                           DataCell(Center(child: Text(
                                               '${myStockList[index]
                                                   .warranty}'))),
+                                          DataCell(Center(child: IconButton(icon:const Icon(Icons.remove_circle_outline, color: Colors.redAccent,),tooltip: 'remove', onPressed: (){
+
+                                          },))),
                                         ]))),
                               ) :
                               const Center(child: Text(

@@ -835,8 +835,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
       Container(
         width: double.infinity,
         height: double.infinity,
-        //color: myTheme.primaryColorLight.withOpacity(0.1),
-        color: Colors.teal.shade50,
+        color: myTheme.scaffoldBackgroundColor,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -942,7 +941,7 @@ class _CustomerScreenControllerState extends State<CustomerScreenController> wit
               ),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.teal.shade50,
+                  color: myTheme.scaffoldBackgroundColor,
                   borderRadius: const BorderRadius.only(topLeft: Radius.circular(5),topRight: Radius.circular(5)),
                 ),
                 child: buildScreen(payload),

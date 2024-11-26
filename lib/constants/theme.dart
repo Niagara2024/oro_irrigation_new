@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 const primaryColorDark = Color(0xFF036673);
 const primaryColorMedium = Color(0xFF1D808E);
 const primaryColorLight = Color(0x6438D3E8);
+const backgroundColor = Color(0xFFE0F2F1);
 
 const textColorWhite = Colors.white;
 const textColorBlack = Colors.black;
@@ -15,6 +16,7 @@ final ThemeData myTheme = ThemeData(
   primaryColorDark: primaryColorDark,
   primaryColor: primaryColorMedium,
   primaryColorLight: primaryColorLight,
+  scaffoldBackgroundColor: backgroundColor,
 
   fontFamily: GoogleFonts.poppins().fontFamily,
 

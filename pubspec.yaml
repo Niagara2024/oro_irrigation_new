@@ -35,7 +35,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   google_fonts: ^5.1.0
   http: ^1.1.0
-  mqtt_client: ^10.0.0
+  mqtt_client: ^10.2.0
   shared_preferences: ^2.1.0
   intl_phone_number_input: ^0.7.3+1
   table_calendar: ^3.0.9
@@ -57,6 +57,17 @@ dependencies:
   search_page: ^2.3.0
   uuid: ^4.2.2
   chat_bubbles: ^1.5.0
+  sleek_circular_slider: ^2.0.1
+  audioplayers: ^5.2.1
+  flutter_svg: ^0.22.0
+  snapping_sheet: ^3.1.0
+  syncfusion_flutter_calendar: ^22.2.12
+  timezone: ^0.9.2
+  calendar_view: ^1.2.0
+  device_info_plus: ^10.1.0
+  universal_html: ^2.2.4
+  syncfusion_flutter_gauges: ^22.2.12
+
 
 dev_dependencies:
   flutter_test:
@@ -83,13 +94,11 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
      - assets/images/otp_illustrator.png
-     - assets/images/login_illustrator.png
      - assets/images/user_thumbnail.png
      - assets/images/no_data.jpg
      - assets/images/irrigation_pump.png
      - assets/images/source_pump.png
      - assets/images/main_valve.png
-     - assets/images/valve.png
      - assets/images/central_filtration.png
      - assets/images/central_dosing.png
      - assets/images/moisture_sensor.png
@@ -124,8 +133,17 @@ flutter:
      - assets/images/filter.png
      - assets/images/downstream_valve.png
      - assets/images/fan.png
+     - assets/images/fan_green.png
+     - assets/images/fan_orange.png
+     - assets/images/fan_red.png
      - assets/images/fogger.png
+     - assets/images/fogger_green.png
+     - assets/images/fogger_orange.png
+     - assets/images/fogger_red.png
      - assets/images/selector.png
+     - assets/images/selector_g.png
+     - assets/images/selector_y.png
+     - assets/images/selector_r.png
      - assets/images/water_meter.png
      - assets/images/fertilizer_meter.png
      - assets/images/pressure_switch.png
@@ -153,26 +171,168 @@ flutter:
      - assets/images/fertilization_sets.png
      - assets/images/filter_sets.png
      - assets/images/water_source.png
-     - assets/GiffFile/c2.gif
-     - assets\images\w04.png
-     - assets\images\w19.gif
-     - assets\images\w51.gif
-     - assets\images\w52.gif
+     - assets/GifFile/dp_irr_pump_g.gif
+     - assets/GifFile/c2.gif
+     - assets/images/w04.png
+     - assets/images/w19.gif
+     - assets/images/w51.gif
+     - assets/images/w52.gif
      - assets/images/db_valve.png
-     - assets/images/dp_filter.png
      - assets/images/dp_prs_sensor.png
-     - assets/images/dp_irr_pump.png
-     - assets/images/dp_irr_pump_1.png
-     - assets/images/dp_irr_pump_2.png
-     - assets/images/dp_irr_pump_3.png
      - assets/images/weather_view.jpg
      - assets/images/irrigation_image.jpg
-     - assets/GiffFile/water_drop_animation.gif
+     - assets/GifFile/water_drop_animation.gif
      - assets/images/relief_valve.png
      - assets/images/channel.png
      - assets/images/company_logo.png
-
-
+     - assets/images/niagara_logo.png
+     - assets/images/w08.png
+     - assets/images/w09.png
+     - assets/images/w10.png
+     - assets/images/w12.png
+     - assets/images/w13.png
+     - assets/images/w14.png
+     - assets/images/sunset.png
+     - assets/images/sunrise.png
+     - assets/images/dew-point.png
+     - assets/images/downpour-rain.png
+     - assets/images/RainRate.png
+     - assets/images/Rel.Press.png
+     - assets/images/bgcolor.png
+     - assets/images/windy.png
+     - assets/images/uv.png
+     - assets/images/hoursClock.png
+     - assets/images/24hoursClock.png
+     - assets/images/minsClock.png
+     - assets/audios/button_click_sound.mp3
+     - assets/audios/audio_off.mp3
+     - assets/SVGPicture/login_left_picture.svg
+     - assets/SVGPicture/oro_logo.svg
+     - assets/SVGPicture/top_corner.svg
+     - assets/images/login_top_corner.png
+     - assets/images/oro_logo_white.png
+     - assets/images/dp_filter.png
+     - assets/images/dp_filter_g.png
+     - assets/images/dp_filter_y.png
+     - assets/images/dp_filter_r.png
+     - assets/GifFile/dp_irr_pump_g.gif
+     - assets/images/dp_irr_pump.png
+     - assets/images/valve_off.png
+     - assets/images/line_horizontal_blue.png
+     - assets/images/line_horizontal_gray.png
+     - assets/images/line_vertical_blue.png
+     - assets/images/line_vertical_gray.png
+     - assets/images/dp_main_valve.png
+     - assets/images/dp_source_pump.png
+     - assets/images/no_signal.jpg
+     - assets/images/dp_agitator.png
+     - assets/images/dp_fert_first_tank.png
+     - assets/images/dp_fert_center_tank.png
+     - assets/images/dp_fert_channel_center.png
+     - assets/images/dp_fert_channel_center_g.png
+     - assets/images/dp_fert_channel_center_y.png
+     - assets/images/dp_fert_channel_center_r.png
+     - assets/images/dp_fert_channel_center_aj.png
+     - assets/images/dp_fert_channel_center_aj_g.png
+     - assets/images/dp_fert_channel_center_aj_y.png
+     - assets/images/dp_fert_channel_center_aj_r.png
+     - assets/images/dp_agitator_right.png
+     - assets/GifFile/dp_agitator_right_g.gif
+     - assets/images/dp_agitator_right_r.png
+     - assets/images/dp_agitator_right_y.png
+     - assets/images/dp_fert_channel_first_aj.png
+     - assets/images/dp_fert_channel_first_aj_g.png
+     - assets/images/dp_fert_channel_first_aj_y.png
+     - assets/images/dp_fert_channel_first_aj_r.png
+     - assets/images/dp_fert_last_tank.png
+     - assets/images/dp_fert_channel_last.png
+     - assets/images/dp_fert_channel_last_g.png
+     - assets/images/dp_fert_channel_last_y.png
+     - assets/images/dp_fert_channel_last_r.png
+     - assets/images/dp_fert_channel_last_aj.png
+     - assets/images/dp_fert_channel_last_aj_g.png
+     - assets/images/dp_fert_channel_last_aj_y.png
+     - assets/images/dp_fert_channel_last_aj_r.png
+     - assets/images/dp_fert_nrv.png
+     - assets/images/dp_fert_booster_pump.png
+     - assets/GifFile/dp_fert_booster_pump_g.gif
+     - assets/images/dp_fert_booster_pump_y.png
+     - assets/images/dp_fert_booster_pump_r.png
+     - assets/images/dp_flowmeter.png
+     - assets/images/valve_gray.png
+     - assets/images/valve_green.png
+     - assets/images/valve_red.png
+     - assets/images/valve_orange.png
+     - assets/images/dp_main_valve_closed.png
+     - assets/images/dp_main_valve_open.png
+     - assets/images/dp_main_valve_wait.png
+     - assets/images/dp_main_valve_not_open.png
+     - assets/images/dp_fert_last_tank1.png
+     - assets/images/dp_fert_first_tank1.png
+     - assets/images/dp_irr_pump_g.png
+     - assets/images/dp_irr_pump_y.png
+     - assets/images/dp_irr_pump_r.png
+     - assets/images/joining_line.png
+     - assets/images/dp_sump.png
+     - assets/images/dp_agitator_gray.png
+     - assets/images/dp_agitator_green.png
+     - assets/images/dp_agitator_red.png
+     - assets/images/dp_agitator_yellow.png
+     - assets/images/dp_sump_src.png
+     - assets/GifFile/motor_off_new.gif
+     - assets/GifFile/motor_on_new.gif
+     - assets/GifFile/motor_ondelay_new.gif
+     - assets/images/dp_fert_vertical_pipe.png
+     - assets/images/dl_valve.png
+     - assets/images/dl_main_valve.png
+     - assets/images/dl_source_pump.png
+     - assets/images/dl_irrigation_pump.png
+     - assets/images/dl_analog_sensor.png
+     - assets/images/dl_level_sensor.png
+     - assets/images/dl_booster_pump.png
+     - assets/images/dl_central_fertilizer_site.png
+     - assets/images/dl_central_filtration_site.png
+     - assets/images/dl_agitator.png
+     - assets/images/dl_filter.png
+     - assets/images/dl_co2.png
+     - assets/images/dl_condition.png
+     - assets/images/dl_contact.png
+     - assets/images/dl_differential_pressure_sensor.png
+     - assets/images/dl_downstream_valve.png
+     - assets/images/dl_ec_sensor.png
+     - assets/images/dl_fan.png
+     - assets/images/dl_fertilizer_meter.png
+     - assets/images/dl_filter_sets.png
+     - assets/images/dl_fogger.png
+     - assets/images/dl_injector.png
+     - assets/images/dl_irrigation_pump.png
+     - assets/images/dl_ph_sensor.png
+     - assets/images/dl_pressure_sensor.png
+     - assets/images/dl_pressure_switch.png
+     - assets/images/dl_programs.png
+     - assets/images/dl_rain_gauge_sensor.png
+     - assets/images/dl_selector.png
+     - assets/images/dl_soil_temperature_sensor.png
+     - assets/images/dl_valve_group.png
+     - assets/images/dl_virtual_water_meter.png
+     - assets/images/dl_water_meter.png
+     - assets/images/dl_water_source.png
+     - assets/images/dl_irrigation_line.png
+     - assets/images/dl_moisture_sensor.png
+     - assets/images/dl_temperature_sensor.png
+     - assets/images/dl_fertilization_sets.png
+     - assets/images/dl_float.png
+     - assets/images/dl_tank_float.png
+     - assets/images/dl_moisture_condition.png
+     - assets/images/dl_power_supply.png
+     - assets/images/dl_power_supply.png
+     - assets/images/dl_level_condition.png
+     - assets/images/dl_common_pressure_sensor.png
+     - assets/images/dl_common_pressure_switch.png
+     - assets/images/dl_humidity_sensor.png
+     - assets/GifFile/water_drop_ani.gif
+     - assets/SVGPicture/login_top_pic.svg
+     - assets/images/no_internet_connection.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

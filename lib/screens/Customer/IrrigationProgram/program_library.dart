@@ -87,7 +87,7 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
               ? mainProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty).serialNumber : 0,
           conditionsLibraryIsNotEmpty: mainProvider.conditionsLibraryIsNotEmpty,
           programType: mainProvider.programLibrary!.program.any((element) => element.programName.isEmpty)
-              ? mainProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty).programType : null, deviceId: widget.deviceId,
+              ? mainProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty).programType : '', deviceId: widget.deviceId,
         ),
       ),
     );
@@ -746,7 +746,7 @@ class _ProgramLibraryScreenState extends State<ProgramLibraryScreen> {
                                   conditionsLibraryIsNotEmpty: programProvider.conditionsLibraryIsNotEmpty,
                                   programType: programProvider.programLibrary!.program.any((element) => element.programName.isEmpty && element.programType == "Agitator Program")
                                       ? programProvider.programLibrary!.program.firstWhere((element) => element.programName.isEmpty
-                                      && element.programType == "Agitator Program").programType : null, deviceId: widget.deviceId,
+                                      && element.programType == "Agitator Program").programType : '', deviceId: widget.deviceId,
                                 ),
                               ),
                             );

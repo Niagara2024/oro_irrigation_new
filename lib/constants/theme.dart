@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-const primaryColorDark = Color(0xFF0D5D9A);
-const primaryColorMedium = Color(0xFF9EBED7);
-const primaryColorLight = Color(0xFFDAE7F3);
-
-const secondaryColorDark = Color(0xFFFFB402);
-const secondaryColorMedium = Color(0xFFFFD44C);
-const secondaryColorLight = Color(0xFFEEDFB1);
+const primaryColorDark = Color(0xFF036673);
+const primaryColorMedium = Color(0xFF1D808E);
+const primaryColorLight = Color(0x6438D3E8);
+const backgroundColor = Color(0xFFE0F2F1);
 
 const textColorWhite = Colors.white;
 const textColorBlack = Colors.black;
@@ -17,8 +13,20 @@ const textColorGray = Colors.grey;
 final ThemeData myTheme = ThemeData(
   useMaterial3: true,
   brightness: Brightness.light,
-  primaryColor: primaryColorDark,
+  primaryColorDark: primaryColorDark,
+  primaryColor: primaryColorMedium,
+  primaryColorLight: primaryColorLight,
+  scaffoldBackgroundColor: backgroundColor,
+
   fontFamily: GoogleFonts.poppins().fontFamily,
+
+  navigationRailTheme: const NavigationRailThemeData(
+    backgroundColor: primaryColorDark,
+    elevation: 0,
+    labelType: NavigationRailLabelType.all,
+    indicatorColor: primaryColorLight,
+    unselectedIconTheme: IconThemeData(color: Colors.white),
+  ),
 
   appBarTheme: const AppBarTheme(
     backgroundColor: primaryColorDark,
@@ -27,6 +35,7 @@ final ThemeData myTheme = ThemeData(
       color: Colors.white, // Set your desired color here
     ),
   ),
+
 
   textTheme: const TextTheme(
     titleLarge: TextStyle(fontSize: 22, color: textColorBlack),
@@ -41,8 +50,6 @@ final ThemeData myTheme = ThemeData(
       foregroundColor: textColorWhite, backgroundColor: primaryColorDark
     ),
   ),
-
-
 );
 
 

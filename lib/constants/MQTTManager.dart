@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:developer';
 import 'package:mqtt_client/mqtt_browser_client.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:uuid/uuid.dart';
@@ -7,6 +9,7 @@ class MQTTManager {
   static MQTTManager? _instance;
   MqttPayloadProvider? providerState;
   MqttBrowserClient? _client;
+  String? currentTopic;
 
   factory MQTTManager() {
     _instance ??= MQTTManager._internal();
@@ -20,18 +23,25 @@ class MQTTManager {
   void initializeMQTTClient({MqttPayloadProvider? state}) {
 
     String uniqueId = const Uuid().v4();
-    print('Unique ID: $uniqueId');
+
+    // development
+    //   String baseURL = 'ws://192.168.68.141';
+    //   int port = 9001;
+
+    // cloud
+    String baseURL = 'ws://13.235.254.21:8083/mqtt';
+    int port = 8083;
 
     if (_client == null) {
       providerState = state;
-      _client = MqttBrowserClient('ws://192.168.1.141', uniqueId);
-      _client!.port = 9001;
+      _client = MqttBrowserClient(baseURL, uniqueId);
+      _client!.port = port;
       _client!.keepAlivePeriod = 60;
       _client!.onDisconnected = onDisconnected;
       _client!.logging(on: false);
-
       _client!.onConnected = onConnected;
       _client!.onSubscribed = onSubscribed;
+      _client!.websocketProtocols = MqttClientConstants.protocolsSingleDefault;
 
       final MqttConnectMessage connMess = MqttConnectMessage()
           .withClientIdentifier(uniqueId)
@@ -54,35 +64,31 @@ class MQTTManager {
       } on Exception catch (e, stackTrace) {
         print('Client exception - $e');
         print('StackTrace: $stackTrace');
-        disconnect();
+        //disconnect();
       }
     }
   }
 
-  void disconnect() {
-    print('Disconnected');
-    _client!.disconnect();
-  }
-
   void subscribeToTopic(String topic) {
 
-    _client!.subscribe(topic, MqttQos.atLeastOnce);
+    if (currentTopic != null) {
+      _client!.unsubscribe(currentTopic!);
+    }
+
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      _client!.subscribe(topic, MqttQos.atLeastOnce);
+      currentTopic = topic;
+    });
 
     _client!.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
       final MqttPublishMessage recMess = c![0].payload as MqttPublishMessage;
-
       final String pt = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-      providerState?.setReceivedText(pt);
-
-     // print('Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
-      //print('');
+      providerState?.updateReceivedPayload(pt);
 
     });
-
   }
 
-
-  void publish(String message, String topic) {
+  publish(String message, String topic) {
     final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
     builder.addString(message);
     _client!.publishMessage(topic, MqttQos.exactlyOnce, builder.payload!);

@@ -1,5 +1,4 @@
 import 'dart:convert' as convert;
-import 'dart:html' as html;
 
 import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
@@ -36,6 +35,31 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
             print('controllerId : ${widget.controllerId}');
             showDialog(context: context, builder: (context){
               return Consumer<ConfigMakerProvider>(builder: (context,configPvd,child){
+                for(var i in configPvd.sourcePumpUpdated){
+                  if(i['waterSource'] == '-'){
+                    return AlertDialog(
+                      title: Text('Please assign water source',style: TextStyle(color: Colors.red,fontSize: 15,fontWeight: FontWeight.w900),),
+                      content: Text('Click ok to go source pump tab',style: TextStyle(fontSize: 14)),
+                      actions: [
+                        InkWell(
+                          onTap: (){
+                            configPvd.editSelectedTab(1);
+                            Navigator.pop(context);
+                          },
+                          child: Container(
+                            child: Center(
+                              child: Text('Ok',style: TextStyle(color: Colors.white,fontSize: 16),
+                              ),
+                            ),
+                            width: 80,
+                            height: 30,
+                            color: myTheme.primaryColor,
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                }
                 return AlertDialog(
                   title: Text(configPvd.wantToSendData == 0 ? 'Send to server' : configPvd.wantToSendData == 1 ?  'Sending.....' : configPvd.wantToSendData == 2 ? 'Success...' : 'Oopss!!!',style: TextStyle(color: configPvd.wantToSendData == 3 ? Colors.red : Colors.green),),
                   content: configPvd.wantToSendData == 0 ? Text('Are you sure want to send data ? ') : SizedBox(
@@ -87,6 +111,7 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
                                 'totalWaterMeter' : configPvd.totalWaterMeter,
                                 'totalPressureSwitch' : configPvd.totalPressureSwitch,
                                 'totalDiffPressureSensor' : configPvd.totalDiffPressureSensor,
+                                'totalWaterMeter' : configPvd.totalWaterMeter,
                                 'totalSourcePump' : configPvd.totalSourcePump,
                                 'totalIrrigationPump' : configPvd.totalIrrigationPump,
                                 'totalInjector' : configPvd.totalInjector,
@@ -163,15 +188,16 @@ class _FinishPageConfigMakerState extends State<FinishPageConfigMaker> {
                               'names' : configPvd.configFinish(),
                               'isNewConfig' : configPvd.isNew == true ? '1' : '0',
                             };
-                           // print('response body : $body');
+                            print('response body : $body');
                             HttpService service = HttpService();
+                            print('body : ${convert.jsonEncode(body)}');
                             var response = await service.postRequest('createUserConfigMaker', body);
                             // print(configPvd.sendData());
                             var jsonData = convert.jsonDecode(response.body);
-                            //print('response code : ${jsonData['code']}');
-                            //print('response data : $jsonData');
-                            //print('AppToFirmware/${widget.controllerId}');
-                            //print('AppToFirmware/${widget.imeiNo}');
+                            print('response code : ${jsonData['code']}');
+                            print('response data : $jsonData');
+                            print('AppToFirmware/${widget.controllerId}');
+                            print('AppToFirmware/${widget.imeiNo}');
                             MQTTManager().publish(convert.jsonEncode(configPvd.sendData()),'AppToFirmware/${widget.imeiNo}');
                             // MqttWebClient().publishMessage('AppToFirmware/${widget.imeiNo}', convert.jsonEncode(configPvd.sendData()));
                             if(jsonData['code']  == 200){

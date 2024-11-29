@@ -24,8 +24,8 @@ import 'mapping_of_inputs.dart';
 import 'mapping_of_outputs.dart';
 
 class ConfigMakerScreen extends StatefulWidget {
-  const ConfigMakerScreen({super.key, required this.userID, required this.customerID, required this.siteID, required this.imeiNumber});
-  final int userID, customerID, siteID;
+  const ConfigMakerScreen({super.key, required this.userID, required this.customerID, required this.controllerId, required this.imeiNumber});
+  final int userID, customerID, controllerId;
   final String imeiNumber;
 
   @override
@@ -50,15 +50,10 @@ class _ConfigMakerScreenState extends State<ConfigMakerScreen> with SingleTicker
     var configPvd = Provider.of<ConfigMakerProvider>(context, listen: false);
     HttpService service = HttpService();
     try{
-      print('here    customerID : ${widget.customerID}');
-      print('here    siteID : ${widget.siteID}');
-      print('here    userID : ${widget.userID}');
-      var response = await service.postRequest('getUserConfigMaker', {'userId' : widget.customerID, 'controllerId' : widget.siteID});
+      print('getting from config maker.......................................');
+      var response = await service.postRequest('getUserConfigMaker', {'userId' : widget.customerID, 'controllerId' : widget.controllerId});
       var jsonData = jsonDecode(response.body);
-      print('jsonData : ${jsonData['data']}');
       configPvd.fetchAll(jsonData['data']);
-      print('userId  ${widget.customerID}');
-      print('userId  ${widget.siteID}');
     }catch(e){
       print(e.toString());
     }
@@ -91,6 +86,7 @@ class _ConfigMakerScreenState extends State<ConfigMakerScreen> with SingleTicker
           appBar: AppBar(
             toolbarHeight: (MediaQuery.of(context).orientation == Orientation.portrait || kIsWeb) ? null : 30,
             title: const Text('Config Maker'),
+
           ),
           body: DefaultTabController(
               length: configPvd.tabs.length,
@@ -137,7 +133,7 @@ class _ConfigMakerScreenState extends State<ConfigMakerScreen> with SingleTicker
           ),
         );
       }else{
-        return  ConfigMakerForWeb(userID: widget.userID, customerID: widget.customerID, siteId: widget.siteID, imeiNo: widget.imeiNumber,);
+        return  ConfigMakerForWeb(userID: widget.userID, customerID: widget.customerID, siteId: widget.controllerId, imeiNo: widget.imeiNumber,);
       }
     },);
   }

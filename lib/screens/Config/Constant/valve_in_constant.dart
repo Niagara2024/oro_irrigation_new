@@ -1,10 +1,13 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:oro_irrigation_new/constants/theme.dart';
 import 'package:oro_irrigation_new/widgets/drop_down_button.dart';
 import 'package:provider/provider.dart';
+import '../../../main.dart';
 import '../../../state_management/constant_provider.dart';
 import '../../../state_management/overall_use.dart';
+import '../../../widgets/HoursMinutesSeconds.dart';
 import '../../../widgets/my_number_picker.dart';
 import '../../../widgets/table_needs.dart';
 import '../../../widgets/text_form_field_constant.dart';
@@ -97,6 +100,29 @@ class _ValveConstantState extends State<ValveConstant> {
   }
 }
 
+Widget fillUpDelay(BuildContext context,constantPvd,overAllPvd,line,valve){
+  return TextButton(
+      style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all(Colors.transparent)
+      ),
+      onPressed: ()async{
+        showDialog(context: context, builder: (context){
+          return AlertDialog(
+            content: HoursMinutesSeconds(
+              initialTime: '${constantPvd.valveUpdated[line]['valve'][valve]['fillUpDelay']}',
+              onPressed: (){
+                constantPvd.valveFunctionality(['fillUpDelay',line,valve,'${overAllPvd.hrs < 10 ? '0' :''}${overAllPvd.hrs}:${overAllPvd.min < 10 ? '0' :''}${overAllPvd.min}:${overAllPvd.sec < 10 ? '0' :''}${overAllPvd.sec}']);
+                Navigator.pop(context);
+              },
+            ),
+          );
+        });
+      },
+      child: Text('${constantPvd.valveUpdated[line]['valve'][valve]['fillUpDelay']}',style: TextStyle(color: Colors.black87),)
+  );
+}
+
+
 class ValveConstant_M extends StatefulWidget {
   const ValveConstant_M({super.key});
 
@@ -112,187 +138,270 @@ class _ValveConstant_MState extends State<ValveConstant_M> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    // if (mounted) {
-    //   WidgetsBinding.instance.addPostFrameCallback((_) {
-    //     var constantPvd = Provider.of<ConstantProvider>(context,listen: false);
-    //     for(var i in constantPvd.valve[selected_Line].entries){
-    //       valvesInSelectedLine = i.value;
-    //     }
-    //     print(valvesInSelectedLine);
-    //   });
-    // }
-  }
-  void _showTimePicker(BuildContext context,ConstantProvider constantPvd, OverAllUse overAllPvd) async {
-    overAllPvd.editTimeAll();
-    final result = await showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Column(
-            children: [
-              Text(
-                'Select line',style: TextStyle(color: Colors.black),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-          content: MyTimePicker(displayHours: false, displayMins: false, displaySecs: false, displayCustom: true, CustomString: '', CustomList: [1,constantPvd.valve.length], displayAM_PM: false,),
-          actionsAlignment: MainAxisAlignment.end,
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel',style: TextStyle(color: Colors.red,fontWeight: FontWeight.bold),),
-            ),
-            TextButton(
-              onPressed: (){
-                setState(() {
-                  selected_Line = overAllPvd.other - 1;
-                });
-                Navigator.pop(context);
-              },
-              child: Text('OK',style: TextStyle(color: myTheme.primaryColor,fontWeight: FontWeight.bold)),
-            ),
-          ],
-        );
-      },
-    );
   }
   @override
   Widget build(BuildContext context) {
     var constantPvd = Provider.of<ConstantProvider>(context,listen: true);
     var overAllPvd = Provider.of<OverAllUse>(context,listen: true);
-    print('constantPvd.valve[selected_Line].keys : ${constantPvd.valve[selected_Line].keys}');
-    setState(() {
-      for(var i in constantPvd.valve[selected_Line].entries){
-        valvesInSelectedLine = i.value;
-      }
-    });
-    return LayoutBuilder(builder: (context,constraints){
-      return Column(
+
+    return Container(
+      padding: EdgeInsets.all(10),
+      color: Color(0xfff3f3f3),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           SizedBox(height: 5,),
-          ElevatedButton(
-            style: ButtonStyle(
-                minimumSize: MaterialStateProperty.all(Size(300, 40)),
-                backgroundColor: MaterialStateProperty.all(myTheme.primaryColor)
-            ),
-            onPressed: (){
-              _showTimePicker(context,constantPvd,overAllPvd);
-            },
-            child: Text('Click to select line',style: TextStyle(color: Colors.yellow, fontSize: 16),),
-          ),
-          SizedBox(height: 10,),
-          Container(
-            margin: EdgeInsets.only(bottom: 8),
-            height: 30,
-            color: myTheme.primaryColor,
-            width: double.infinity,
-            child: Center(
-              child: Text('Select valve in line ${selected_Line + 1}', style: TextStyle(color: Colors.white)),
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.only(left: 10),
-            width: double.infinity,
-            height: 50,
-            child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: valvesInSelectedLine.length,
-                itemBuilder: (BuildContext context,int index){
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Container(
-                        width: 60,
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              width: 60,
-                              height: 40,
-                              child: GestureDetector(
-                                onTap: (){
-                                  setState(() {
-                                    selected_valve = index;
-                                  });
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: index == 0 ? BorderRadius.only(topLeft: Radius.circular(20)) : valvesInSelectedLine.length -1 == index ? BorderRadius.only(topRight: Radius.circular(20)) : BorderRadius.circular(5),
-                                    color: selected_valve == index ? myTheme.primaryColor : Colors.blue.shade100,
-                                  ),
-                                  child: Center(child: Text('${index + 1}',style: TextStyle(color: selected_valve == index ? Colors.white : null),)),
-                                ),
-                              ),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(width: 3,),
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      color: Colors.black
-                                  ),
-                                ),
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      color: Colors.black
-                                  ),
-                                ),
-                                SizedBox(width: 3,),
-                              ],
-                            )
-                          ],
-                        ),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.white
+                  ),
+                  width: double.infinity,
+                  height: 60,
+                  child: Center(
+                    child: ListTile(
+                      title: Text('Irrigation Line'),
+                      leading: SizedBox(
+                        width: 30,
+                        height: 30,
+                        child: Image.asset('assets/images/irrigation_line1.png'),
                       ),
-                      if(valvesInSelectedLine.length - 1 != index)
-                        Text('-')
-                    ],
-                  );
-                }),
-          ),
-          Container(
-            margin: EdgeInsets.only(bottom: 8),
-            height: 30,
-            color: myTheme.primaryColor,
-            width: double.infinity,
-            child: Center(
-              child: Text('Valve ${selected_valve + 1} in line ${selected_Line + 1}', style: TextStyle(color: Colors.white)),
-            ),
-          ),
-          Expanded(
-            child: Container(
-              child: SingleChildScrollView(
-                child: Column(
-                  // mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    for(var i in constantPvd.valve[selected_Line].entries)
-                      Column(
-                        children: [
-                          returnMyListTile('Default dosage', CustomTimePickerSiva(purpose: 'valve_defaultDosage/${selected_Line}/${i.key}/${selected_valve}', index: selected_valve, value: '${valvesInSelectedLine[selected_valve][3]}', displayHours: true, displayMins: true, displaySecs: true, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,additional: 'split',)),
-                          returnMyListTile('Nominal flow(l/h)',  TextFieldForConstant(index: -1, initialValue: valvesInSelectedLine[selected_valve][4], constantPvd: constantPvd, purpose: 'valve_nominal_flow/${selected_Line}/${i.key}/${selected_valve}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
-                          returnMyListTile('Minimum flow(l/h)', TextFieldForConstant(index: -1, initialValue: valvesInSelectedLine[selected_valve][5], constantPvd: constantPvd, purpose: 'valve_minimum_flow/${selected_Line}/${i.key}/${selected_valve}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],),),
-                          returnMyListTile('Maximum flow(l/h)', TextFieldForConstant(index: -1, initialValue: valvesInSelectedLine[selected_valve][6], constantPvd: constantPvd, purpose: 'valve_maximum_flow/${selected_Line}/${i.key}/${selected_valve}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
-                          returnMyListTile('Fill-up delay(min)', CustomTimePickerSiva(purpose: 'valve_fillUpDelay/${selected_Line}/${i.key}/${selected_valve}', index: selected_valve, value: '${valvesInSelectedLine[selected_valve][7]}', displayHours: false, displayMins: true, displaySecs: false, displayCustom: false, CustomString: '', CustomList: [1,10], displayAM_PM: false,additional: 'split',)),
-                          returnMyListTile('Area (Dunam)', TextFieldForConstant(index: -1, initialValue: valvesInSelectedLine[selected_valve][8], constantPvd: constantPvd, purpose: 'valve_area/${selected_Line}/${i.key}/${selected_valve}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),],)),
-                          returnMyListTile('Crop factor(%)', TextFieldForConstant(index: -1, initialValue: valvesInSelectedLine[selected_valve][9], constantPvd: constantPvd, purpose: 'valve_crop_factor/${selected_Line}/${i.key}/${selected_valve}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],)),
+                      trailing:  PopupMenuButton<int>(
+                        child: Text('${selected_Line + 1}',style: TextStyle(fontSize: 20),),
+                        itemBuilder: (context) => [
+                          for(var i = 0;i < constantPvd.valveUpdated.length;i++)
+                            PopupMenuItem(
+                                value: i,
+                                child: Text('${i+1}')
+                            ),
                         ],
-                      )
-
-                  ],
+                        offset: Offset(0, 50),
+                        color: Colors.white,
+                        elevation: 2,
+                        // on selected we show the dialog box
+                        onSelected: (value) {
+                          print('selected value  : $value');
+                          setState(() {
+                            selected_Line = value;
+                            selected_valve = 0;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
                 ),
               ),
+              SizedBox(width: 10,),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.white
+                  ),
+                  width: double.infinity,
+                  height: 60,
+                  child: Center(
+                    child: ListTile(
+                      title: Text('Valve'),
+                      leading: SizedBox(
+                        width: 30,
+                        height: 30,
+                        child: Image.asset('assets/images/valve1.png'),
+                      ),
+                      trailing:  PopupMenuButton<int>(
+                        child: Text('${selected_valve + 1}',style: TextStyle(fontSize: 20),),
+                        itemBuilder: (context) => [
+                          for(var i = 0;i < constantPvd.valveUpdated[selected_Line]['valve'].length;i++)
+                            PopupMenuItem(
+                                value: i,
+                                child: Text('${i+1}')
+                            ),
+                        ],
+                        offset: Offset(0, 50),
+                        color: Colors.white,
+                        elevation: 2,
+                        // on selected we show the dialog box
+                        onSelected: (value) {
+                          print('selected value  : $value');
+                          setState(() {
+                            selected_valve = value;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 5,),
+          Expanded(
+            child: GridView.count(
+              crossAxisCount: 2,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              childAspectRatio: MediaQuery.sizeOf(context).width/210,
+              children: <Widget>[
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.ev_station,color: myTheme.primaryColor,),
+                          Text('Default dosage'),
+                        ],
+                      ),
+                      DropdownButton(
+                        focusColor: Colors.transparent,
+                        // style: ioText,
+                        value: constantPvd.valveUpdated[selected_Line]['valve'][selected_valve]['defaultDosage'],
+                        underline: Container(),
+                        items: ['Time','Quantity'].map((dynamic items) {
+                          return DropdownMenuItem(
+                            value: items,
+                            child: Container(
+                                child: Text(items,style: TextStyle(fontSize: 11,color: Colors.black),)
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          constantPvd.valveFunctionality(['valve_defaultDosage',selected_valve,selected_valve,value!]);
+                        },
+                        // After selecting the desired option,it will
+                        // change button value to selected value
+
+                      ),
+
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.ev_station,color: myTheme.primaryColor,),
+                          Text('Nominal flow'),
+                        ],
+                      ),
+                      SizedBox(width:60,height:55,child: TextFieldForConstant(index: -1, initialValue: constantPvd.valveUpdated[selected_Line]['valve'][selected_valve]['nominalFlow'], constantPvd: constantPvd, purpose: 'valve_nominal_flow/${selected_Line}/${selected_valve}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],))
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.perm_identity,color: myTheme.primaryColor,),
+                          Text('Minimum flow'),
+                        ],
+                      ),
+                      SizedBox(width:60,height:55,child: TextFieldForConstant(index: -1, initialValue: constantPvd.valveUpdated[selected_Line]['valve'][selected_valve]['minimumFlow'], constantPvd: constantPvd, purpose: 'valve_minimum_flow/${selected_Line}/${selected_valve}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],))                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.local_activity_outlined,color: myTheme.primaryColor,),
+                          Text('maximum flow'),
+                        ],
+                      ),
+                      SizedBox(width:60,height:55,child: TextFieldForConstant(index: -1, initialValue: constantPvd.valveUpdated[selected_Line]['valve'][selected_valve]['maximumFlow'], constantPvd: constantPvd, purpose: 'valve_maximum_flow/${selected_Line}/${selected_valve}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],))
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.local_activity_outlined,color: myTheme.primaryColor,),
+                          Text('Fill up delay'),
+                        ],
+                      ),
+                      fillUpDelay(context, constantPvd, overAllPvd, selected_Line, selected_valve),
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.local_activity_outlined,color: myTheme.primaryColor,),
+                          Text('Area'),
+                        ],
+                      ),
+                      SizedBox(width:60,height:55,child: TextFieldForConstant(index: -1, initialValue: constantPvd.valveUpdated[selected_Line]['valve'][selected_valve]['area'], constantPvd: constantPvd, purpose: 'valve_area/$selected_Line/$selected_valve', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),],))
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.local_activity_outlined,color: myTheme.primaryColor,),
+                          Text('Crop factor'),
+                        ],
+                      ),
+                      SizedBox(width:60,height:55,child: TextFieldForConstant(index: -1, initialValue: constantPvd.valveUpdated[selected_Line]['valve'][selected_valve]['cropFactor'], constantPvd: constantPvd, purpose: 'valve_crop_factor/${selected_Line}/${selected_valve}', inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],))
+                    ],
+                  ),
+                ),
+              ],
             ),
-          )
+          ),
         ],
-      );
-    });
+      ),
+    );
   }
 }

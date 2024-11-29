@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:oro_irrigation_new/screens/Config/config_maker/source_pump.dart';
 import 'package:provider/provider.dart';
 
+import '../../../constants/theme.dart';
 import '../../../state_management/config_maker_provider.dart';
 import '../../../widgets/drop_down_button.dart';
 
@@ -36,15 +38,15 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                 children: [
                   Expanded(
                     child: Container(
-                      height: 60,
+                      height: 40,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Obj',style: TextStyle(color: Colors.white),),
+                          Text('Obj',),
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: Colors.blueGrey,
+                          color: Colors.indigo.shade50,
                           border: Border(
                             top: BorderSide(width: 1),
                             bottom: BorderSide(width: 1),
@@ -57,15 +59,15 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                   Expanded(
                     child: Container(
                       width: double.infinity,
-                      height: 60,
+                      height: 40,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('RTU',style: TextStyle(color: Colors.white),),
+                          Text('RTU',),
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: Colors.blueGrey,
+                          color: Colors.indigo.shade50,
                           border: Border(
                             top: BorderSide(width: 1),
                             bottom: BorderSide(width: 1),
@@ -76,15 +78,15 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                   ),
                   Expanded(
                     child: Container(
-                      height: 60,
+                      height: 40,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('R.no',style: TextStyle(color: Colors.white),),
+                          Text('Ref.no',),
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: Colors.blueGrey,
+                          color: Colors.indigo.shade50,
                           border: Border(
                             top: BorderSide(width: 1),
                             bottom: BorderSide(width: 1),
@@ -95,21 +97,40 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                   ),
                   Expanded(
                     child: Container(
-                      height: 60,
+                      height: 40,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('O/P',style: TextStyle(color: Colors.white),),
+                          Text('O/P',),
+                          Text('relays',),
                         ],
                       ),
                       decoration: BoxDecoration(
-                          color: Colors.blueGrey,
+                          color: Colors.indigo.shade50,
                           border: Border(
                             top: BorderSide(width: 1),
                             bottom: BorderSide(width: 1),
                             right: BorderSide(width: 1),
                           )
                       ),
+                    ),
+                  ),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.more_vert)
+                      ],
+                    ),
+                    decoration: BoxDecoration(
+                        color: Colors.indigo.shade50,
+                        border: Border(
+                          top: BorderSide(width: 1),
+                          bottom: BorderSide(width: 1),
+                          right: BorderSide(width: 1),
+                        )
                     ),
                   ),
                 ],
@@ -158,6 +179,30 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
 
   }
 
+  void myDialog(title){
+    showDialog(context: context, builder: (context){
+      return AlertDialog(
+        title: Text(title,style: TextStyle(color: Colors.red,fontSize: 15,fontWeight: FontWeight.w900),),
+        actions: [
+          InkWell(
+            onTap: (){
+              Navigator.pop(context);
+            },
+            child: Container(
+              child: Center(
+                child: Text('Ok',style: TextStyle(color: Colors.white,fontSize: 16),
+                ),
+              ),
+              width: 80,
+              height: 30,
+              color: myTheme.primaryColor,
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
   List<Widget> getIrrigationLine(List<Map<String,dynamic>> myList,ConfigMakerProvider configPvd){
     List<Widget> widgetList = [];
     for(var i = 0;i < myList.length;i++){
@@ -198,7 +243,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                           ),
                           height: 40,
                           child: Center(
-                              child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                              child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd,myList[i]['map'][j]['connection']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
                           ),
                         )
                     ),
@@ -224,6 +269,55 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                           ),
                         )
                     ),
+                    if(['injector','boosterConnection','valveConnection','main_valveConnection','foggerConnection','fanConnection','filterConnection'].contains(myList[i]['map'][j]['connection']))
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                            color: Colors.indigo.shade50,
+                            border: Border(
+                              top:  BorderSide(width: j == 0 ? 1 : 0),
+                              right: BorderSide(width: 1),
+                            )
+                        ),
+                        child: IconButton(
+                            onPressed: (){
+                              for(var ld in configPvd.localDosingUpdated){
+                                if(ld['sNo'] == configPvd.irrigationLines[i]['sNo']){
+                                  if(ld['injector'].length == 1){
+                                    myDialog('Irrigation Line contains atleast single injector');
+                                  }
+                                }
+                              }
+                              for(var lf in configPvd.localFiltrationUpdated){
+                                if(lf['sNo'] == configPvd.irrigationLines[i]['sNo']){
+                                  if(lf['filterConnection'].length == 1){
+                                    myDialog('Irrigation Line contains atleast single filter');
+                                  }
+                                }
+                              }
+                              if(configPvd.irrigationLines[i]['valveConnection'].length == 1){
+                                myDialog('Irrigation Line contains atleast single valve');
+                              }else{
+                                configPvd.irrigationLinesFunctionality(['deleteFromMapio',i,myList[i]['map'][j]['connection'],myList[i]['map'][j]['sNo']]);
+                              }
+                            },
+                            icon: Icon(Icons.delete)
+                        ),
+                      )
+                    else
+                      Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                              color: Colors.indigo.shade50,
+                              border: Border(
+                                top:  BorderSide(width: j == 0 ? 1 : 0),
+                                right: BorderSide(width: 1),
+                              )
+                          ),
+                          child: notAvailable
+                      )
                   ],
                 ),
               )
@@ -273,7 +367,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                           ),
                           height: 40,
                           child: Center(
-                              child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                              child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd,myList[i]['map'][j]['connection']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
                           ),
                         )
                     ),
@@ -299,6 +393,41 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                           ),
                         )
                     ),
+                    if(['injector','boosterConnection'].contains(myList[i]['map'][j]['connection']))
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                            color: Colors.indigo.shade50,
+                            border: Border(
+                              top:  BorderSide(width: j == 0 ? 1 : 0),
+                              right: BorderSide(width: 1),
+                            )
+                        ),
+                        child: IconButton(
+                            onPressed: (){
+                              if(configPvd.centralDosingUpdated[i]['injector'].length == 1){
+                                myDialog('Central dosing site contains atleast single injector');
+                              }else{
+                                configPvd.centralDosingFunctionality(['deleteFromMapio',i,myList[i]['map'][j]['connection'],myList[i]['map'][j]['sNo']]);
+                              }
+                            },
+                            icon: Icon(Icons.delete)
+                        ),
+                      )
+                    else
+                      Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                              color: Colors.indigo.shade50,
+                              border: Border(
+                                top:  BorderSide(width: j == 0 ? 1 : 0),
+                                right: BorderSide(width: 1),
+                              )
+                          ),
+                          child: notAvailable
+                      )
                   ],
                 ),
               )
@@ -349,7 +478,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                           ),
                           height: 40,
                           child: Center(
-                              child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                              child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd,myList[i]['map'][j]['connection']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
                           ),
                         )
                     ),
@@ -375,6 +504,40 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                           ),
                         )
                     ),
+                    if(['filterConnection'].contains(myList[i]['map'][j]['connection']))
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                            color: Colors.indigo.shade50,
+                            border: Border(
+                              top:  BorderSide(width: j == 0 ? 1 : 0),
+                              right: BorderSide(width: 1),
+                            )
+                        ),
+                        child: IconButton(
+                            onPressed: (){
+                              if(configPvd.centralFiltrationUpdated[i]['filterConnection'].length == 1){
+                                myDialog('Central Filtration site contains atleast single filter');
+                              }
+                              configPvd.centralFiltrationFunctionality(['deleteFromMapio',i,myList[i]['map'][j]['connection'],myList[i]['map'][j]['sNo']]);
+                            },
+                            icon: Icon(Icons.delete)
+                        ),
+                      )
+                    else
+                      Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                              color: Colors.indigo.shade50,
+                              border: Border(
+                                top:  BorderSide(width: j == 0 ? 1 : 0),
+                                right: BorderSide(width: 1),
+                              )
+                          ),
+                          child: notAvailable
+                      )
 
                   ],
                 ),
@@ -439,7 +602,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                             ),
                             height: 40,
                             child: Center(
-                                child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: myList[i]['map'][j]['oroPump'] == false ? getRtuName(configPvd) : ['-','ORO Pump'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                                child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: myList[i]['map'][j]['oroPump'] == false ? getRtuName(configPvd,myList[i]['map'][j]['connection']) : ['-','ORO Pump'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
                             ),
                           )
                       ),
@@ -465,6 +628,18 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                           ),
                         )
                     ),
+                    Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                            color: Colors.indigo.shade50,
+                            border: Border(
+                              top:  BorderSide(width: j == 0 ? 1 : 0),
+                              right: BorderSide(width: 1),
+                            )
+                        ),
+                        child: notAvailable
+                    )
 
                   ],
                 ),
@@ -529,7 +704,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                             ),
                             height: 40,
                             child: Center(
-                                child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: myList[i]['map'][j]['oroPump'] == false ? getRtuName(configPvd) : ['-','ORO Pump'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                                child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: myList[i]['map'][j]['oroPump'] == false ? getRtuName(configPvd,myList[i]['map'][j]['connection']) : ['-','ORO Pump'], pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
                             ),
                           )
                       ),
@@ -555,6 +730,18 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                           ),
                         )
                     ),
+                    Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                            color: Colors.indigo.shade50,
+                            border: Border(
+                              top:  BorderSide(width: j == 0 ? 1 : 0),
+                              right: BorderSide(width: 1),
+                            )
+                        ),
+                        child: notAvailable
+                    )
 
                   ],
                 ),
@@ -607,7 +794,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                         ),
                         height: 40,
                         child: Center(
-                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd,myList[i]['map'][j]['connection']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
                         ),
                       )
                   ),
@@ -633,6 +820,23 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                         ),
                       )
                   ),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                        color: Colors.indigo.shade50,
+                        border: Border(
+                          top:  BorderSide(width: j == 0 ? 1 : 0),
+                          right: BorderSide(width: 1),
+                        )
+                    ),
+                    child: IconButton(
+                        onPressed: (){
+                          configPvd.mappingOfOutputsFunctionality(['agitatorDelete',j,]);
+                        },
+                        icon: Icon(Icons.delete)
+                    ),
+                  )
                 ],
               ),
             )
@@ -682,7 +886,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                         ),
                         height: 40,
                         child: Center(
-                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
+                            child: MyDropDown(initialValue: '${myList[i]['map'][j]['rtu']}', itemList: getRtuName(configPvd,myList[i]['map'][j]['connection']), pvdName: '${myList[i]['map'][j]['type']}/${i}/${myList[i]['map'][j]['connection']}/${myList[i]['map'][j]['count']}/rtu', index: -1)
                         ),
                       )
                   ),
@@ -708,6 +912,23 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
                         ),
                       )
                   ),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                        color: Colors.indigo.shade50,
+                        border: Border(
+                          top:  BorderSide(width: j == 0 ? 1 : 0),
+                          right: BorderSide(width: 1),
+                        )
+                    ),
+                    child: IconButton(
+                        onPressed: (){
+                          configPvd.mappingOfOutputsFunctionality(['selectorDelete',j,]);
+                        },
+                        icon: Icon(Icons.delete)
+                    ),
+                  )
                 ],
               ),
             )
@@ -716,7 +937,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
     }
     return widgetList;
   }
-  List<String> getRtuName(ConfigMakerProvider configPvd){
+  List<String> getRtuName(ConfigMakerProvider configPvd,name){
     var list = ['-'];
     if(configPvd.totalRTU != 0){
       list.add('ORO RTU');
@@ -745,6 +966,30 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
 
     if(configPvd.totalOroSense != 0){
       list.add('ORO Sense');
+    }
+    if(['valveConnection','main_valveConnection','foggerConnection','fanConnection','water_meter','pressureIn','pressureOut','injector','dosingMeter','boosterConnection','ecConnection','phConnection','pressureSwitch','filterConnection','dv','diffPressureSensor','pumpConnection'].contains(name)){
+      list.remove('ORO Sense');
+      list.remove('ORO Level');
+      list.remove('ORO Pump');
+      list.remove('O-Pump-Plus');
+      list.remove('ORO Switch');
+
+    }else if(['levelSensorConnection','levelSensor'].contains(name)){
+      list.remove('ORO Sense');
+      list.remove('ORO Pump');
+      list.remove('O-Pump-Plus');
+      list.remove('ORO RTU');
+      list.remove('ORO Smart');
+      list.remove('O-RTU-Plus');
+      list.remove('ORO Switch');
+    }else if(['moistureSensorConnection'].contains(name)){
+      list.remove('ORO Level');
+      list.remove('ORO Pump');
+      list.remove('O-Pump-Plus');
+      list.remove('ORO Switch');
+      list.remove('ORO RTU');
+      list.remove('ORO Smart');
+      list.remove('O-Smart-Plus');
     }
     return list;
   }
@@ -847,48 +1092,44 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
   }
 
   List<String> getOutPut(ConfigMakerProvider configPvd,String rtu, String rf, String output,int index) {
-    print('getOutPut function');
-    print('rtu : $rtu');
-    print('rf : $rf');
-    print('output : $output');
     List<String> myList = [];
     List<String> filterList = [];
     if(rtu == 'ORO RTU'){
       for(var i = 0;i < 8;i++){
-        myList.add('${i+1}');
+        myList.add('R${i+1}');
       }
     }else if(rtu == 'O-RTU-Plus'){
       for(var i = 0;i < 8;i++){
-        myList.add('${i+1}');
+        myList.add('R${i+1}');
       }
     }else if(rtu == 'ORO Pump'){
       for(var i = 0;i < 4;i++){
-        myList.add('${i+1}');
+        myList.add('R${i+1}');
       }
     }else if(rtu == 'O-Pump-Plus'){
       for(var i = 0;i < 4;i++){
-        myList.add('${i+1}');
+        myList.add('R${i+1}');
       }
     }else if(rtu == 'ORO Smart'){
       for(var i = 0;i < 8;i++){
-        myList.add('${i+1}');
+        myList.add('R${i+1}');
       }
     }else if(rtu == 'O-Smart-Plus'){
       for(var i = 0;i < 16;i++){
-        myList.add('${i+1}');
+        myList.add('R${i+1}');
       }
     }else if(rtu == 'ORO Switch'){
       for(var i = 0;i < 4;i++){
-        myList.add('${i+1}');
+        myList.add('R${i+1}');
       }
     }else if(rtu == 'ORO Sense'){
       for(var i = 0;i < 4;i++){
-        myList.add('${i+1}');
+        myList.add('R${i+1}');
       }
     }
     if(rtu != '-' && rf != '-'){
       for(var i in configPvd.sourcePumpUpdated){
-        if(i['oro_pump'] == true){
+        if(i['oro_pump'] == true || i['oro_pump_plus'] == true){
           if(i['on'] != null){
             filterList.addAll(filterOutPut([i['on']],rtu,rf,output));
           }
@@ -908,7 +1149,7 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
         }
       }
       for(var i in configPvd.irrigationPumpUpdated){
-        if(i['oro_pump'] == true){
+        if(i['oro_pump'] == true || i['oro_pump_plus'] == true ){
           if(i['on'] != null){
             filterList.addAll(filterOutPut([i['on']],rtu,rf,output));
           }
@@ -958,7 +1199,6 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
       }
     }
     myList.insert(0, '-');
-    print('getOutPut finished');
     return rf == '-' ? ['-'] : myList;
   }
   List<Map<String,dynamic>> irrigationLine(ConfigMakerProvider configPvd){
@@ -1434,7 +1674,6 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
           }
       );
     }
-    print('myLIST : $myList');
     return myList;
   }
   List<Map<String,dynamic>> selector(ConfigMakerProvider configPvd){
@@ -1460,7 +1699,6 @@ class _MappingOfOutputsTableState extends State<MappingOfOutputsTable> {
           }
       );
     }
-    print('myLIST : $myList');
     return myList;
   }
 
